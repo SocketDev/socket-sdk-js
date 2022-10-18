@@ -1,0 +1,25 @@
+name: Build
+
+on:
+  # schedule:
+  #   # At 06:37 on every day-of-week from Monday through Friday.
+  #   - cron: '37 6 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch_and_update:
+    name: Fetch and update
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          curl "https://api.socket.dev/v0/openapi" > openapi.json
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git checkout -b automated/open-api
+          git add .
+          git commit -m "updated openapi"
+          git push origin automated/open-api -f
