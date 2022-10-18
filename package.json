@@ -1,5 +1,5 @@
 {
-  "name": "socket-api-ts",
+  "name": "@socketsecurity/sdk",
   "main": "./index.ts",
   "types": "./index.d.ts",
   "dependencies": {
