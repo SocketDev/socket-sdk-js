@@ -1,0 +1,81 @@
+name: Sync file
+
+on:
+  workflow_call:
+    inputs:
+      url:
+        description: 'The URL to sync'
+        required: true
+        type: string
+      path:
+        description: 'The path to sync it to'
+        required: true
+        type: string
+      branch-name:
+        description: 'The name of the branch to create'
+        required: false
+        default: automated/sync
+        type: string
+      pr-title:
+        description: 'The title of the PR.'
+        required: false
+        default: 'Syncing of file'
+        type: string
+      pr-body:
+        description: 'The body of the PR.'
+        required: false
+        default: 'This PR syncs a specified file'
+        type: string
+      commit-message:
+        description: 'The title of the PR.'
+        required: false
+        default: "fix: sync file"
+        type: string
+      npm-post-sync-script:
+        description: 'The name of a script to run post sync.'
+        required: false
+        type: string
+
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  fetch_and_update:
+    name: Fetch and sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Fetch ${{ inputs.url }}
+        run: curl --fail "${{ inputs.url }}" > ${{ inputs.path }}
+      - name: Set up Node.js
+        if: ${{ inputs.npm-post-sync-script }}
+        uses: actions/setup-node@v3
+        with:
+          node-version:  lts/*
+          cache: 'npm'
+      - name: Install npm dependencies
+        if: ${{ inputs.npm-post-sync-script }}
+        run: npm ci --no-audit --no-fund
+      - name: Regenerate the SDK
+        if: ${{ inputs.npm-post-sync-script }}
+        run: npm run ${{ inputs.npm-post-sync-script }}
+      - name: Add all changes
+        id: add-changes
+        continue-on-error: true
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git checkout -b ${{ inputs.branch-name }}
+          git add .
+          git commit -m "${{ inputs.commit-message }}"
+      - name: Push the changes to the dedicated branch
+        if: ${{ steps.add-changes.outcome == 'success' }}
+        run: git push origin ${{ inputs.branch-name }} -f
+      - name: Open a PR for the sync
+        if: ${{ steps.add-changes.outcome == 'success' }}
+        continue-on-error: true
+        run: gh pr create --head ${{ inputs.branch-name }} --title " ${{ inputs.pr-title }}" --body "${{ inputs.pr-body }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
