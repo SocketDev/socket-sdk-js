@@ -1,17 +1,27 @@
 import Oas from 'oas';
 import APICore from 'api/dist/core';
-declare class SDK {
+import definition from './openapi.json';
+
+class SDK {
   spec: Oas;
   core: APICore;
-  authKeys: (number | string)[][];
-  constructor();
+  authKeys: (number | string)[][] = [];
+
+  constructor() {
+    this.spec = Oas.init(definition);
+    this.core = new APICore(this.spec, 'socket-sdk/0.0.1 (api/5.0.0-beta.3)');
+  }
+
   /**
    * Optionally configure various options, such as response parsing, that the SDK allows.
    *
    * @param config Object of supported SDK options and toggles.
    * @param config.parseResponse If responses are parsed according to its `Content-Type` header.
    */
-  config(config: ConfigOptions): void;
+  config(config: ConfigOptions) {
+    this.core.setConfig(config);
+  }
+
   /**
    * If the API you're using requires authentication you can supply the required credentials
    * through this method and the library will magically determine how they should be used
@@ -33,7 +43,11 @@ declare class SDK {
    * @see {@link https://spec.openapis.org/oas/v3.1.0#fixed-fields-22}
    * @param values Your auth credentials for the API; can specify up to two strings or numbers.
    */
-  auth(...values: string[] | number[]): this;
+  auth(...values: string[] | number[]) {
+    this.core.setAuth(...values);
+    return this;
+  }
+
   /**
    * If the API you're using offers alternate server URLs, and server variables, you can tell
    * the SDK which one to use with this method. To use it you can supply either one of the
@@ -53,7 +67,10 @@ declare class SDK {
    * @param url Server URL
    * @param variables An object of variables to replace into the server URL.
    */
-  server(url: string, variables?: {}): void;
+  server(url: string, variables = {}) {
+    this.core.setServer(url, variables);
+  }
+
   /**
    * Get all the issues related with a particular npm package version.
    * This endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.
@@ -66,7 +83,12 @@ declare class SDK {
     path: '/npm/{package}/{version}/issues',
     metadata: GetIssuesByNPMPackageMetadataParam
   ): Promise<
-    GetIssuesByNPMPackage_Response_200 | GetIssuesByNPMPackage_Response_404 | GetIssuesByNPMPackage_Response_429
+    | GetIssuesByNPMPackage_Response_200
+    | GetIssuesByNPMPackage_Response_400
+    | GetIssuesByNPMPackage_Response_401
+    | GetIssuesByNPMPackage_Response_403
+    | GetIssuesByNPMPackage_Response_404
+    | GetIssuesByNPMPackage_Response_429
   >;
   /**
    * Get all the scores and metrics by category that are used to evaluate the package version.
@@ -76,7 +98,14 @@ declare class SDK {
   get(
     path: '/npm/{package}/{version}/score',
     metadata: GetScoreByNPMPackageMetadataParam
-  ): Promise<GetScoreByNPMPackage_Response_200 | GetScoreByNPMPackage_Response_404 | GetScoreByNPMPackage_Response_429>;
+  ): Promise<
+    | GetScoreByNPMPackage_Response_200
+    | GetScoreByNPMPackage_Response_400
+    | GetScoreByNPMPackage_Response_401
+    | GetScoreByNPMPackage_Response_403
+    | GetScoreByNPMPackage_Response_404
+    | GetScoreByNPMPackage_Response_429
+  >;
   /**
    * Get all the issues, packages, and scores related to an specific project report.
    *
@@ -85,13 +114,36 @@ declare class SDK {
   get(
     path: '/report/view/{id}',
     metadata: GetReportMetadataParam
-  ): Promise<GetReport_Response_200 | GetReport_Response_404 | GetReport_Response_429>;
+  ): Promise<
+    | GetReport_Response_200
+    | GetReport_Response_400
+    | GetReport_Response_401
+    | GetReport_Response_403
+    | GetReport_Response_404
+    | GetReport_Response_429
+  >;
+  /**
+   * Retrieve the API specification in an Openapi JSON format.
+   *
+   * @summary Returns the OpenAPI definition
+   */
+  get(path: '/openapi'): Promise<GetOpenAPI_Response_200 | GetOpenAPI_Response_429>;
   /**
    * Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
    *
    * @summary Get quota
    */
-  get(path: '/quota'): Promise<GetQuota_Response_200>;
+  get(path: '/quota'): Promise<GetQuota_Response_200 | GetQuota_Response_401 | GetQuota_Response_429>;
+  /**
+   * Access any GET endpoint on your API.
+   *
+   * @param path API path to make a request against.
+   * @param metadata Object containing all path, query, header, and cookie parameters to supply.
+   */
+  get<T = unknown>(path: string, metadata?: Record<string, unknown>): Promise<T> {
+    return this.core.fetch(path, 'get', metadata);
+  }
+
   /**
    * Upload a lockfile to get your project analyzed by Socket.
    * You can upload multiple lockfiles in the same request, but each filename must be unique.
@@ -106,7 +158,25 @@ declare class SDK {
   put(
     path: '/report/upload',
     body?: CreateReportBodyParam
-  ): Promise<CreateReport_Response_200 | CreateReport_Response_429>;
+  ): Promise<
+    | CreateReport_Response_200
+    | CreateReport_Response_400
+    | CreateReport_Response_401
+    | CreateReport_Response_403
+    | CreateReport_Response_404
+    | CreateReport_Response_429
+  >;
+  /**
+   * Access any PUT endpoint on your API.
+   *
+   * @param path API path to make a request against.
+   * @param body Request body payload data.
+   * @param metadata Object containing all path, query, header, and cookie parameters to supply.
+   */
+  put<T = unknown>(path: string, body?: unknown, metadata?: Record<string, unknown>): Promise<T> {
+    return this.core.fetch(path, 'put', body, metadata);
+  }
+
   /**
    * Get all the issues related with a particular npm package version.
    * This endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.
@@ -118,8 +188,16 @@ declare class SDK {
   getIssuesByNPMPackage(
     metadata: GetIssuesByNPMPackageMetadataParam
   ): Promise<
-    GetIssuesByNPMPackage_Response_200 | GetIssuesByNPMPackage_Response_404 | GetIssuesByNPMPackage_Response_429
-  >;
+    | GetIssuesByNPMPackage_Response_200
+    | GetIssuesByNPMPackage_Response_400
+    | GetIssuesByNPMPackage_Response_401
+    | GetIssuesByNPMPackage_Response_403
+    | GetIssuesByNPMPackage_Response_404
+    | GetIssuesByNPMPackage_Response_429
+  > {
+    return this.core.fetch('/npm/{package}/{version}/issues', 'get', metadata);
+  }
+
   /**
    * Get all the scores and metrics by category that are used to evaluate the package version.
    *
@@ -127,7 +205,17 @@ declare class SDK {
    */
   getScoreByNPMPackage(
     metadata: GetScoreByNPMPackageMetadataParam
-  ): Promise<GetScoreByNPMPackage_Response_200 | GetScoreByNPMPackage_Response_404 | GetScoreByNPMPackage_Response_429>;
+  ): Promise<
+    | GetScoreByNPMPackage_Response_200
+    | GetScoreByNPMPackage_Response_400
+    | GetScoreByNPMPackage_Response_401
+    | GetScoreByNPMPackage_Response_403
+    | GetScoreByNPMPackage_Response_404
+    | GetScoreByNPMPackage_Response_429
+  > {
+    return this.core.fetch('/npm/{package}/{version}/score', 'get', metadata);
+  }
+
   /**
    * Upload a lockfile to get your project analyzed by Socket.
    * You can upload multiple lockfiles in the same request, but each filename must be unique.
@@ -139,7 +227,19 @@ declare class SDK {
    *
    * @summary Create a report
    */
-  createReport(body?: CreateReportBodyParam): Promise<CreateReport_Response_200 | CreateReport_Response_429>;
+  createReport(
+    body?: CreateReportBodyParam
+  ): Promise<
+    | CreateReport_Response_200
+    | CreateReport_Response_400
+    | CreateReport_Response_401
+    | CreateReport_Response_403
+    | CreateReport_Response_404
+    | CreateReport_Response_429
+  > {
+    return this.core.fetch('/report/upload', 'put', body);
+  }
+
   /**
    * Get all the issues, packages, and scores related to an specific project report.
    *
@@ -147,16 +247,41 @@ declare class SDK {
    */
   getReport(
     metadata: GetReportMetadataParam
-  ): Promise<GetReport_Response_200 | GetReport_Response_404 | GetReport_Response_429>;
+  ): Promise<
+    | GetReport_Response_200
+    | GetReport_Response_400
+    | GetReport_Response_401
+    | GetReport_Response_403
+    | GetReport_Response_404
+    | GetReport_Response_429
+  > {
+    return this.core.fetch('/report/view/{id}', 'get', metadata);
+  }
+
+  /**
+   * Retrieve the API specification in an Openapi JSON format.
+   *
+   * @summary Returns the OpenAPI definition
+   */
+  getOpenAPI(): Promise<GetOpenAPI_Response_200 | GetOpenAPI_Response_429> {
+    return this.core.fetch('/openapi', 'get');
+  }
+
   /**
    * Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
    *
    * @summary Get quota
    */
-  getQuota(): Promise<GetQuota_Response_200>;
+  getQuota(): Promise<GetQuota_Response_200 | GetQuota_Response_401 | GetQuota_Response_429> {
+    return this.core.fetch('/quota', 'get');
+  }
 }
-declare const createSDK: SDK;
+
+const createSDK = (() => {
+  return new SDK();
+})();
 export default createSDK;
+
 interface ConfigOptions {
   /**
    * By default we parse the response based on the `Content-Type` header of the request. You
@@ -164,12 +289,12 @@ interface ConfigOptions {
    */
   parseResponse: boolean;
 }
-declare type GetIssuesByNPMPackageMetadataParam = {
+type GetIssuesByNPMPackageMetadataParam = {
   package: string;
   version: string;
   [k: string]: unknown;
 };
-declare type GetIssuesByNPMPackage_Response_200 = (
+type GetIssuesByNPMPackage_Response_200 = (
   | {
       /**
        * `criticalCVE`
@@ -17499,13 +17624,42 @@ declare type GetIssuesByNPMPackage_Response_200 = (
       [k: string]: unknown;
     }
 )[];
+interface GetIssuesByNPMPackage_Response_400 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
+interface GetIssuesByNPMPackage_Response_401 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
+interface GetIssuesByNPMPackage_Response_403 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
 interface GetIssuesByNPMPackage_Response_404 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
   [k: string]: unknown;
 }
 interface GetIssuesByNPMPackage_Response_429 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
   [k: string]: unknown;
 }
-declare type GetScoreByNPMPackageMetadataParam = {
+type GetScoreByNPMPackageMetadataParam = {
   package: string;
   version: string;
   [k: string]: unknown;
@@ -17963,10 +18117,39 @@ interface GetScoreByNPMPackage_Response_200 {
   depscore: number;
   [k: string]: unknown;
 }
+interface GetScoreByNPMPackage_Response_400 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
+interface GetScoreByNPMPackage_Response_401 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
+interface GetScoreByNPMPackage_Response_403 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
 interface GetScoreByNPMPackage_Response_404 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
   [k: string]: unknown;
 }
 interface GetScoreByNPMPackage_Response_429 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
   [k: string]: unknown;
 }
 interface CreateReportBodyParam {
@@ -17977,10 +18160,42 @@ interface CreateReport_Response_200 {
   url: string;
   [k: string]: unknown;
 }
-interface CreateReport_Response_429 {
+interface CreateReport_Response_400 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
   [k: string]: unknown;
 }
-declare type GetReportMetadataParam = {
+interface CreateReport_Response_401 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
+interface CreateReport_Response_403 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
+interface CreateReport_Response_404 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
+interface CreateReport_Response_429 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
+type GetReportMetadataParam = {
   id: string;
   [k: string]: unknown;
 };
@@ -35325,13 +35540,66 @@ interface GetReport_Response_200 {
   };
   [k: string]: unknown;
 }
+interface GetReport_Response_400 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
+interface GetReport_Response_401 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
+interface GetReport_Response_403 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
 interface GetReport_Response_404 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
   [k: string]: unknown;
 }
 interface GetReport_Response_429 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
+interface GetOpenAPI_Response_200 {
+  [k: string]: unknown;
+}
+interface GetOpenAPI_Response_429 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
   [k: string]: unknown;
 }
 interface GetQuota_Response_200 {
   quota: number;
+  [k: string]: unknown;
+}
+interface GetQuota_Response_401 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
+  [k: string]: unknown;
+}
+interface GetQuota_Response_429 {
+  error: {
+    message: string;
+    [k: string]: unknown;
+  };
   [k: string]: unknown;
 }

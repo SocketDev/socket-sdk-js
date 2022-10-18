@@ -2,6 +2,11 @@ import t from 'tap'
 import api from '../'
 
 const apiKey = process.env.SOCKET_API_KEY
+
+if (!apiKey) {
+  throw new Error('Expected to find a SOCKET_API_KEY environment key')
+}
+
 const client = api.auth(apiKey)
 
 const goodPackageJsonTestFile = '{ "dependencies": { "react": "18.0.0" } }'
