@@ -20,7 +20,7 @@ jobs:
     secrets: inherit
     with:
       url: 'https://api.socket.dev/v0/openapi'
-      path: 'src/openapi.json'
+      path: 'openapi.json'
       branch-name: 'automated/open-api'
       commit-message: 'fix(openapi): sync with openapi definition'
       pr-title: 'Sync with OpenAPI definition'
