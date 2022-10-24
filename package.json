@@ -46,11 +46,13 @@
   "scripts": {
     "build:0-clean": "run-s clean",
     "build:1-typescript": "tsc -p tsconfig.json",
-    "build:2-minify-json": "node build/minify-openapi-json.js",
+    "build:2-minify-json": "node build/minify-dist-json.js",
     "build": "run-s build:*",
     "lint": "eslint .",
     "clean": "rm -rf dist",
-    "generate-sdk": "node build/generate-sdk.js",
+    "generate-sdk:0-prettify": "node build/prettify-base-json.js",
+    "generate-sdk:1-generate": "node build/generate-sdk.js",
+    "generate-sdk": "run-s generate-sdk:*",
     "prepublishOnly": "run-s build",
     "test": "run-s lint"
   }
