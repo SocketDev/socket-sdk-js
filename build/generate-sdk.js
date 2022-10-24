@@ -8,12 +8,13 @@ const { default: codegen } = require('api/dist/cli/codegen')
 const { default: Oas } = require('oas')
 
 const OUTPUT_FOLDER = path.join(__dirname, '../src')
-const OPEN_API_FILE = path.join(OUTPUT_FOLDER, 'openapi.json')
+const OPEN_API_INPUT = path.join(__dirname, '../openapi.json')
+const OPEN_API_OUTPUT = path.join(OUTPUT_FOLDER, 'openapi.json')
 
 Promise.resolve().then(async () => {
   console.log('Reading OpenAPI file...')
 
-  const openApiData = await readFile(OPEN_API_FILE, 'utf8')
+  const openApiData = await readFile(OPEN_API_INPUT, 'utf8')
   const parsedOpenApi = JSON.parse(openApiData)
 
   console.log('Resolving OpenAPI references...')
@@ -33,9 +34,9 @@ Promise.resolve().then(async () => {
 
   const sdkSource = await generator.generator()
 
-  console.log(`Writing ${OPEN_API_FILE} to disk...`)
+  console.log(`Writing ${OPEN_API_OUTPUT} to disk...`)
   await Promise.all([
-    await writeFile(OPEN_API_FILE, JSON.stringify(resolvedOpenAPISpec, undefined, 2)),
+    await writeFile(OPEN_API_OUTPUT, JSON.stringify(resolvedOpenAPISpec, undefined, 2)),
     ...Object.entries(sdkSource)
       .map(async ([fileName, contents]) => {
         const sourceFilePath = path.join(OUTPUT_FOLDER, fileName)
