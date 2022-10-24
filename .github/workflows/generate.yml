@@ -1,0 +1,28 @@
+name: Sync SDK
+
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    # At 06:37 on every day-of-week from Monday through Friday.
+    - cron: '37 6 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  fetch_and_update:
+    name: Sync OpenAPI definition
+    uses: SocketDev/workflows/.github/workflows/reusable-sync.yml@master
+    secrets: inherit
+    with:
+      url: 'https://api.socket.dev/v0/openapi'
+      path: 'src/openapi.json'
+      branch-name: 'automated/open-api'
+      commit-message: 'fix(openapi): sync with openapi definition'
+      pr-title: 'Sync with OpenAPI definition'
+      pr-body: 'The OpenAPI definition in the API has been updated. This PR downloads the latest one and regenerates the SDK.'
+      npm-post-sync-script: 'generate-sdk'
