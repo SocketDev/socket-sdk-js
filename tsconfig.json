@@ -1,0 +1,15 @@
+{
+  "extends": "@tsconfig/node14/tsconfig.json",
+  "exclude": [
+    "dist",
+  ],
+  "include": [
+    "src"
+  ],
+  "compilerOptions": {
+    "declaration": true,
+    "outDir": "dist",
+    "resolveJsonModule": true,
+    "rootDir": "src"
+  }
+}
