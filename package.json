@@ -39,6 +39,7 @@
     "eslint-plugin-promise": "^6.0.1",
     "eslint-plugin-react": "^7.31.9",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "nock": "^13.2.9",
     "npm-run-all2": "^6.0.2",
     "tap": "^16.3.0",
     "typescript": "^4.8.4"
@@ -48,12 +49,16 @@
     "build:1-typescript": "tsc -p tsconfig.json",
     "build:2-minify-json": "node build/minify-dist-json.js",
     "build": "run-s build:*",
-    "lint": "eslint .",
+    "ci-test-old": "run-s build test-old:*",
+    "ci-test": "run-s build test:*",
     "clean": "rm -rf dist",
     "generate-sdk:0-prettify": "node build/prettify-base-json.js",
     "generate-sdk:1-generate": "node build/generate-sdk.js",
     "generate-sdk": "run-s generate-sdk:*",
+    "lint": "eslint .",
     "prepublishOnly": "run-s build",
-    "test": "run-s lint"
+    "test-old:tap": "tap --no-check-coverage",
+    "test:tap": "tap --no-check-coverage --node-arg=--no-experimental-fetch",
+    "test": "run-s lint build test:*"
   }
 }
