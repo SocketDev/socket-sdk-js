@@ -90,6 +90,21 @@ declare class SDK {
     | GetScoreByNPMPackage_Response_429
   >;
   /**
+   * Get all your project reports.
+   *
+   * @summary Get list of reports
+   */
+  get(
+    path: '/report/list'
+  ): Promise<
+    | GetReportList_Response_200
+    | GetReportList_Response_400
+    | GetReportList_Response_401
+    | GetReportList_Response_403
+    | GetReportList_Response_404
+    | GetReportList_Response_429
+  >;
+  /**
    * Get all the issues, packages, and scores related to an specific project report.
    *
    * @summary View a report
@@ -171,6 +186,19 @@ declare class SDK {
     | GetScoreByNPMPackage_Response_403
     | GetScoreByNPMPackage_Response_404
     | GetScoreByNPMPackage_Response_429
+  >;
+  /**
+   * Get all your project reports.
+   *
+   * @summary Get list of reports
+   */
+  getReportList(): Promise<
+    | GetReportList_Response_200
+    | GetReportList_Response_400
+    | GetReportList_Response_401
+    | GetReportList_Response_403
+    | GetReportList_Response_404
+    | GetReportList_Response_429
   >;
   /**
    * Upload a lockfile to get your project analyzed by Socket.
@@ -256,10 +284,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -276,18 +301,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -305,18 +325,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -332,18 +347,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
@@ -352,7 +362,6 @@ declare type GetIssuesByNPMPackage_Response_200 = (
           title: string;
           severity: string;
           url: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -362,14 +371,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -377,10 +383,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -397,18 +400,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -426,18 +424,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -453,25 +446,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -493,10 +478,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -513,18 +495,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -542,18 +519,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -569,18 +541,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
@@ -589,7 +556,6 @@ declare type GetIssuesByNPMPackage_Response_200 = (
           title: string;
           severity: string;
           url: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -599,14 +565,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -614,10 +577,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -634,18 +594,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -663,18 +618,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -690,25 +640,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -730,10 +672,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -750,18 +689,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -779,18 +713,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -806,18 +735,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
@@ -826,7 +750,6 @@ declare type GetIssuesByNPMPackage_Response_200 = (
           title: string;
           severity: string;
           url: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -836,14 +759,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -851,10 +771,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -871,18 +788,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -900,18 +812,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -927,25 +834,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -967,10 +866,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -987,18 +883,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -1016,18 +907,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -1043,25 +929,19 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           script: string;
           source: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -1071,14 +951,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -1086,10 +963,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -1106,18 +980,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -1135,18 +1004,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -1162,25 +1026,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -1202,10 +1058,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -1222,18 +1075,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -1251,18 +1099,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -1278,24 +1121,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -1304,14 +1140,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -1319,10 +1152,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -1339,18 +1169,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -1368,18 +1193,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -1395,25 +1215,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -1435,10 +1247,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -1455,18 +1264,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -1484,18 +1288,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -1511,24 +1310,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           binScript: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -1538,14 +1331,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -1553,10 +1343,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -1573,18 +1360,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -1602,18 +1384,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -1629,25 +1406,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -1669,10 +1438,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -1689,18 +1455,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -1718,18 +1479,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -1745,24 +1501,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           binScript: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -1772,14 +1522,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -1787,10 +1534,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -1807,18 +1551,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -1836,18 +1575,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -1863,25 +1597,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -1903,10 +1629,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -1923,18 +1646,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -1952,18 +1670,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -1979,24 +1692,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           module: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -2006,14 +1713,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -2021,10 +1725,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -2041,18 +1742,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -2070,18 +1766,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -2097,25 +1788,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -2137,10 +1820,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -2157,18 +1837,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -2186,18 +1861,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -2213,24 +1883,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           module: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -2240,14 +1904,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -2255,10 +1916,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -2275,18 +1933,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -2304,18 +1957,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -2331,25 +1979,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -2371,10 +2011,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -2391,18 +2028,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -2420,18 +2052,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -2447,24 +2074,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           module: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -2474,14 +2095,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -2489,10 +2107,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -2509,18 +2124,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -2538,18 +2148,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -2565,25 +2170,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -2605,10 +2202,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -2625,18 +2219,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -2654,18 +2243,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -2681,24 +2265,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           module: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -2708,14 +2286,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -2723,10 +2298,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -2743,18 +2315,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -2772,18 +2339,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -2799,25 +2361,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -2839,10 +2393,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -2859,18 +2410,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -2888,18 +2434,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -2915,24 +2456,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -2941,14 +2475,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -2956,10 +2487,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -2976,18 +2504,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -3005,18 +2528,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -3032,25 +2550,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -3072,10 +2582,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -3092,18 +2599,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -3121,18 +2623,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -3148,24 +2645,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -3174,14 +2664,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -3189,10 +2676,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -3209,18 +2693,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -3238,18 +2717,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -3265,25 +2739,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -3305,10 +2771,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -3325,18 +2788,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -3354,18 +2812,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -3381,24 +2834,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           urlFragment: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -3408,14 +2855,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -3423,10 +2867,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -3443,18 +2884,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -3472,18 +2908,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -3499,25 +2930,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -3539,10 +2962,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -3559,18 +2979,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -3588,18 +3003,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -3615,24 +3025,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           evalType: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -3642,14 +3046,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -3657,10 +3058,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -3677,18 +3075,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -3706,18 +3099,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -3733,25 +3121,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -3773,10 +3153,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -3793,18 +3170,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -3822,18 +3194,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -3849,24 +3216,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -3875,14 +3235,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -3890,10 +3247,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -3910,18 +3264,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -3939,18 +3288,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -3966,25 +3310,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -4006,10 +3342,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -4026,18 +3359,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -4055,18 +3383,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -4082,24 +3405,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           envVars: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -4109,14 +3426,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -4124,10 +3438,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -4144,18 +3455,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -4173,18 +3479,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -4200,25 +3501,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -4240,10 +3533,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -4260,18 +3550,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -4289,18 +3574,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -4316,24 +3596,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           name: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -4343,14 +3617,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -4358,10 +3629,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -4378,18 +3646,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -4407,18 +3670,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -4434,25 +3692,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -4474,10 +3724,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -4494,18 +3741,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -4523,18 +3765,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -4550,25 +3787,19 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           name: string;
           version: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -4578,14 +3809,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -4593,10 +3821,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -4613,18 +3838,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -4642,18 +3862,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -4669,25 +3884,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -4709,10 +3916,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -4729,18 +3933,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -4758,18 +3957,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -4785,24 +3979,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           name: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -4812,14 +4000,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -4827,10 +4012,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -4847,18 +4029,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -4876,18 +4053,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -4903,25 +4075,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -4943,10 +4107,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -4963,18 +4124,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -4992,18 +4148,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -5019,24 +4170,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           name: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -5046,14 +4191,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -5061,10 +4203,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -5081,18 +4220,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -5110,18 +4244,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -5137,25 +4266,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -5177,10 +4298,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -5197,18 +4315,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -5226,18 +4339,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -5253,24 +4361,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -5279,14 +4380,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -5294,10 +4392,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -5314,18 +4409,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -5343,18 +4433,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -5370,25 +4455,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -5410,10 +4487,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -5430,18 +4504,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -5459,18 +4528,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -5486,24 +4550,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -5512,14 +4569,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -5527,10 +4581,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -5547,18 +4598,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -5576,18 +4622,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -5603,25 +4644,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -5643,10 +4676,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -5663,18 +4693,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -5692,18 +4717,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -5719,24 +4739,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -5745,14 +4758,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -5760,10 +4770,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -5780,18 +4787,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -5809,18 +4811,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -5836,25 +4833,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -5876,10 +4865,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -5896,18 +4882,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -5925,18 +4906,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -5952,24 +4928,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           confidence: number;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -5979,14 +4949,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -5994,10 +4961,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -6014,18 +4978,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -6043,18 +5002,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -6070,25 +5024,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -6110,10 +5056,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -6130,18 +5073,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -6159,18 +5097,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -6186,24 +5119,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           confidence: number;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -6213,14 +5140,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -6228,10 +5152,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -6248,18 +5169,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -6277,18 +5193,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -6304,25 +5215,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -6344,10 +5247,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -6364,18 +5264,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -6393,18 +5288,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -6420,18 +5310,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
@@ -6440,7 +5325,6 @@ declare type GetIssuesByNPMPackage_Response_200 = (
           editDistance: number;
           downloads: number;
           downloadsRatio: number;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -6450,14 +5334,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -6465,10 +5346,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -6485,18 +5363,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -6514,18 +5387,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -6541,25 +5409,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -6581,10 +5441,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -6601,18 +5458,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -6630,18 +5482,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -6657,24 +5504,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -6683,14 +5523,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -6698,10 +5535,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -6718,18 +5552,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -6747,18 +5576,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -6774,25 +5598,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -6814,10 +5630,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -6834,18 +5647,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -6863,18 +5671,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -6890,24 +5693,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -6916,14 +5712,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -6931,10 +5724,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -6951,18 +5741,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -6980,18 +5765,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -7007,25 +5787,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -7047,10 +5819,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -7067,18 +5836,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -7096,18 +5860,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -7123,24 +5882,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           encoding: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -7150,14 +5903,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -7165,10 +5915,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -7185,18 +5932,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -7214,18 +5956,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -7241,25 +5978,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -7281,10 +6010,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -7301,18 +6027,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -7330,18 +6051,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -7357,24 +6073,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -7383,14 +6092,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -7398,10 +6104,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -7418,18 +6121,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -7447,18 +6145,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -7474,25 +6167,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -7514,10 +6199,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -7534,18 +6216,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -7563,18 +6240,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -7590,24 +6262,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -7616,14 +6281,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -7631,10 +6293,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -7651,18 +6310,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -7680,18 +6334,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -7707,25 +6356,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -7747,10 +6388,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -7767,18 +6405,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -7796,18 +6429,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -7823,25 +6451,19 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           pattern: string;
           explanation: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -7851,14 +6473,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -7866,10 +6485,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -7886,18 +6502,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -7915,18 +6526,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -7942,25 +6548,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -7982,10 +6580,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -8002,18 +6597,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -8031,18 +6621,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -8058,24 +6643,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -8084,14 +6662,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -8099,10 +6674,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -8119,18 +6691,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -8148,18 +6715,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -8175,25 +6737,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -8215,10 +6769,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -8235,18 +6786,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -8264,18 +6810,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -8291,25 +6832,19 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           packageName: string;
           url: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -8319,14 +6854,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -8334,10 +6866,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -8354,18 +6883,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -8383,18 +6907,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -8410,25 +6929,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -8450,10 +6961,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -8470,18 +6978,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -8499,18 +7002,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -8526,25 +7024,19 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           packageName: string;
           url: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -8554,14 +7046,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -8569,10 +7058,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -8589,18 +7075,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -8618,18 +7099,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -8645,25 +7121,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -8685,10 +7153,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -8705,18 +7170,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -8734,18 +7194,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -8761,18 +7216,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
@@ -8781,7 +7231,6 @@ declare type GetIssuesByNPMPackage_Response_200 = (
           githubUser: string;
           githubRepo: string;
           commitsh: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -8791,14 +7240,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -8806,10 +7252,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -8826,18 +7269,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -8855,18 +7293,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -8882,25 +7315,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -8922,10 +7347,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -8942,18 +7364,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -8971,18 +7388,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -8998,25 +7410,19 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           packageName: string;
           filePath: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -9026,14 +7432,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -9041,10 +7444,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -9061,18 +7461,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -9090,18 +7485,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -9117,25 +7507,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -9157,10 +7539,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -9177,18 +7556,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -9206,18 +7580,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -9233,24 +7602,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -9259,14 +7621,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -9274,10 +7633,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -9294,18 +7650,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -9323,18 +7674,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -9350,25 +7696,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -9390,10 +7728,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -9410,18 +7745,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -9439,18 +7769,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -9466,24 +7791,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -9492,14 +7810,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -9507,10 +7822,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -9527,18 +7839,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -9556,18 +7863,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -9583,25 +7885,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -9623,10 +7917,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -9643,18 +7934,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -9672,18 +7958,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -9699,24 +7980,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -9725,14 +7999,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -9740,10 +8011,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -9760,18 +8028,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -9789,18 +8052,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -9816,25 +8074,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -9856,10 +8106,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -9876,18 +8123,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -9905,18 +8147,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -9932,25 +8169,19 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           packageName: string;
           packageVersion: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -9960,14 +8191,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -9975,10 +8203,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -9995,18 +8220,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -10024,18 +8244,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -10051,25 +8266,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -10091,10 +8298,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -10111,18 +8315,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -10140,18 +8339,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -10167,24 +8361,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -10193,14 +8380,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -10208,10 +8392,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -10228,18 +8409,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -10257,18 +8433,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -10284,25 +8455,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -10324,10 +8487,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -10344,18 +8504,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -10373,18 +8528,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -10400,24 +8550,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -10426,14 +8569,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -10441,10 +8581,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -10461,18 +8598,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -10490,18 +8622,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -10517,25 +8644,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -10557,10 +8676,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -10577,18 +8693,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -10606,18 +8717,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -10633,24 +8739,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -10659,14 +8758,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -10674,10 +8770,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -10694,18 +8787,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -10723,18 +8811,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -10750,25 +8833,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -10790,10 +8865,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -10810,18 +8882,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -10839,18 +8906,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -10866,24 +8928,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -10892,14 +8947,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -10907,10 +8959,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -10927,18 +8976,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -10956,18 +9000,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -10983,25 +9022,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -11023,10 +9054,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -11043,18 +9071,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -11072,18 +9095,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -11099,24 +9117,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -11125,14 +9136,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -11140,10 +9148,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -11160,18 +9165,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -11189,18 +9189,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -11216,25 +9211,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -11256,10 +9243,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -11276,18 +9260,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -11305,18 +9284,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -11332,24 +9306,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -11358,14 +9325,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -11373,10 +9337,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -11393,18 +9354,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -11422,18 +9378,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -11449,25 +9400,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -11489,10 +9432,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -11509,18 +9449,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -11538,18 +9473,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -11565,24 +9495,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           linesOfCode: number;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -11592,14 +9516,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -11607,10 +9528,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -11627,18 +9545,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -11656,18 +9569,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -11683,25 +9591,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -11723,10 +9623,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -11743,18 +9640,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -11772,18 +9664,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -11799,24 +9686,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -11825,14 +9705,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -11840,10 +9717,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -11860,18 +9734,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -11889,18 +9758,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -11916,25 +9780,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -11956,10 +9812,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -11976,18 +9829,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -12005,18 +9853,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -12032,24 +9875,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           reason: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -12059,14 +9896,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -12074,10 +9908,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -12094,18 +9925,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -12123,18 +9949,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -12150,25 +9971,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -12190,10 +10003,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -12210,18 +10020,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -12239,18 +10044,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -12266,18 +10066,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
@@ -12286,7 +10081,6 @@ declare type GetIssuesByNPMPackage_Response_200 = (
           prevChronoVersion: string;
           prevSemverDate: string;
           prevSemverVersion: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -12296,14 +10090,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -12311,10 +10102,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -12331,18 +10119,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -12360,18 +10143,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -12387,25 +10165,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -12427,10 +10197,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -12447,18 +10214,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -12476,18 +10238,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -12503,25 +10260,19 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           prevVersion: string;
           newVersion: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -12531,14 +10282,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -12546,10 +10294,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -12566,18 +10311,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -12595,18 +10335,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -12622,25 +10357,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -12662,10 +10389,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -12682,18 +10406,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -12711,18 +10430,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -12738,25 +10452,19 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           prevAuthor: string;
           newAuthor: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -12766,14 +10474,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -12781,10 +10486,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -12801,18 +10503,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -12830,18 +10527,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -12857,25 +10549,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -12897,10 +10581,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -12917,18 +10598,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -12946,18 +10622,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -12973,24 +10644,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           author: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -13000,14 +10665,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -13015,10 +10677,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -13035,18 +10694,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -13064,18 +10718,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -13091,25 +10740,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -13131,10 +10772,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -13151,18 +10789,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -13180,18 +10813,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -13207,24 +10835,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -13233,14 +10854,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -13248,10 +10866,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -13268,18 +10883,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -13297,18 +10907,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -13324,25 +10929,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -13364,10 +10961,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -13384,18 +10978,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -13413,18 +11002,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -13440,24 +11024,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           lastPublish: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -13467,14 +11045,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -13482,10 +11057,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -13502,18 +11074,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -13531,18 +11098,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -13558,25 +11120,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -13598,10 +11152,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -13618,18 +11169,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -13647,18 +11193,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -13674,18 +11215,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
@@ -13694,7 +11230,6 @@ declare type GetIssuesByNPMPackage_Response_200 = (
           prevSize: number;
           curSize: number;
           changedPercent: number;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -13704,14 +11239,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -13719,10 +11251,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -13739,18 +11268,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -13768,18 +11292,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -13795,25 +11314,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -13835,10 +11346,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -13855,18 +11363,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -13884,18 +11387,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -13911,24 +11409,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -13937,14 +11428,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -13952,10 +11440,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -13972,18 +11457,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -14001,18 +11481,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -14028,25 +11503,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -14068,10 +11535,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -14088,18 +11552,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -14117,18 +11576,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -14144,25 +11598,19 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           prevLicenseId: string;
           newLicenseId: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -14172,14 +11620,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -14187,10 +11632,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -14207,18 +11649,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -14236,18 +11673,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -14263,25 +11695,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -14303,10 +11727,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -14323,18 +11744,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -14352,18 +11768,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -14379,24 +11790,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           licenseId: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -14406,14 +11811,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -14421,10 +11823,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -14441,18 +11840,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -14470,18 +11864,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -14497,25 +11886,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -14537,10 +11918,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -14557,18 +11935,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -14586,18 +11959,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -14613,24 +11981,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           licenseId: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -14640,14 +12002,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -14655,10 +12014,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -14675,18 +12031,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -14704,18 +12055,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -14731,25 +12077,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -14771,10 +12109,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -14791,18 +12126,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -14820,18 +12150,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -14847,24 +12172,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -14873,14 +12191,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -14888,10 +12203,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -14908,18 +12220,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -14937,18 +12244,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -14964,25 +12266,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -15004,10 +12298,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -15024,18 +12315,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -15053,18 +12339,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -15080,24 +12361,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -15106,14 +12380,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -15121,10 +12392,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -15141,18 +12409,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -15170,18 +12433,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -15197,25 +12455,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -15237,10 +12487,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -15257,18 +12504,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -15286,18 +12528,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -15313,24 +12550,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           possibleLicenseId: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -15340,14 +12571,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -15355,10 +12583,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -15375,18 +12600,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -15404,18 +12624,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -15431,25 +12646,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -15471,10 +12678,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -15491,18 +12695,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -15520,18 +12719,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -15547,24 +12741,18 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           licenseId: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -15574,14 +12762,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -15589,10 +12774,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -15609,18 +12791,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -15638,18 +12815,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -15665,25 +12837,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -15705,10 +12869,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -15725,18 +12886,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -15754,18 +12910,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -15781,24 +12932,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
-        props: {
-          [k: string]: unknown;
-        };
+        props: {};
         usage?: {
           file: {
             path: string;
@@ -15807,14 +12951,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -15822,10 +12963,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -15842,18 +12980,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -15871,18 +13004,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -15898,25 +13026,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -15938,10 +13058,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -15958,18 +13075,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -15987,18 +13099,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -16014,25 +13121,19 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           licenseId: string;
           similarity: number;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -16042,14 +13143,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -16057,10 +13155,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -16077,18 +13172,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -16106,18 +13196,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -16133,25 +13218,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -16173,10 +13250,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -16193,18 +13267,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -16222,18 +13291,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -16249,18 +13313,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
@@ -16268,7 +13327,6 @@ declare type GetIssuesByNPMPackage_Response_200 = (
           exceptionId: string;
           similarity: number;
           comments: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -16278,14 +13336,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -16293,10 +13348,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -16313,18 +13365,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -16342,18 +13389,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -16369,25 +13411,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -16409,10 +13443,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -16429,18 +13460,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -16458,18 +13484,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -16485,25 +13506,19 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           exceptionId: string;
           comments: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -16513,14 +13528,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -16528,10 +13540,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -16548,18 +13557,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -16577,18 +13581,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -16604,25 +13603,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -16644,10 +13635,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -16664,18 +13652,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -16693,18 +13676,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -16720,25 +13698,19 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           exceptionId: string;
           comments: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -16748,14 +13720,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -16763,10 +13732,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -16783,18 +13749,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -16812,18 +13773,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -16839,25 +13795,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -16879,10 +13827,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -16899,18 +13844,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -16928,18 +13868,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -16955,25 +13890,19 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           id: number;
           note: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -16983,14 +13912,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -16998,10 +13924,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -17018,18 +13941,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -17047,18 +13965,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -17074,25 +13987,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -17114,10 +14019,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -17134,18 +14036,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -17163,18 +14060,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -17190,25 +14082,19 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           id: number;
           note: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -17218,14 +14104,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -17233,10 +14116,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -17253,18 +14133,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -17282,18 +14157,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -17309,25 +14179,17 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
   | {
       /**
@@ -17349,10 +14211,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                * `unknown`
                */
               type?: 'unknown';
-              value?: {
-                [k: string]: unknown;
-              };
-              [k: string]: unknown;
+              value?: {};
             }
           | {
               /**
@@ -17369,18 +14228,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -17398,18 +14252,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
           | {
               /**
@@ -17425,25 +14274,19 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                     startColumn: number;
                     endLine: number;
                     endColumn: number;
-                    [k: string]: unknown;
                   };
                   bytes?: {
                     start: number;
                     end: number;
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             }
         )[];
         description: string;
         props: {
           id: number;
           note: string;
-          [k: string]: unknown;
         };
         usage?: {
           file: {
@@ -17453,14 +14296,11 @@ declare type GetIssuesByNPMPackage_Response_200 = (
               startColumn: number;
               endLine: number;
               endColumn: number;
-              [k: string]: unknown;
             };
             bytes?: {
               start: number;
               end: number;
-              [k: string]: unknown;
             };
-            [k: string]: unknown;
           };
           dependencies: (
             | {
@@ -17468,10 +14308,7 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -17488,18 +14325,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -17517,18 +14349,13 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -17544,61 +14371,43 @@ declare type GetIssuesByNPMPackage_Response_200 = (
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     }
 )[];
 interface GetIssuesByNPMPackage_Response_400 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface GetIssuesByNPMPackage_Response_401 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface GetIssuesByNPMPackage_Response_403 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface GetIssuesByNPMPackage_Response_404 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface GetIssuesByNPMPackage_Response_429 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 declare type GetScoreByNPMPackageMetadataParam = {
   package: string;
@@ -17614,79 +14423,67 @@ interface GetScoreByNPMPackage_Response_200 {
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       supplyChainRiskIssueMid: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       supplyChainRiskIssueHigh: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       supplyChainRiskIssueCritical: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       dependencyCount: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       devDependencyCount: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       unusedDependencyCount: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       transitiveDependencyCount: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       totalDependencyCount: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       downloadCount: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     };
     limit?: number;
     /**
      * `0` `1` `2` `3` `4` `5` `6` `7` `8` `9`
      */
     limitingMetric?: '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
-    [k: string]: unknown;
   };
   quality: {
     score: number;
@@ -17696,79 +14493,67 @@ interface GetScoreByNPMPackage_Response_200 {
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       qualityIssueMid: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       qualityIssueHigh: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       qualityIssueCritical: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       linesOfCode: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       readmeLength: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       bundlesize?: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       stargazers?: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       forks?: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       watchers?: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     };
     limit?: number;
     /**
      * `0` `1` `2` `3` `4` `5` `6` `7` `8` `9`
      */
     limitingMetric?: '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
-    [k: string]: unknown;
   };
   maintenance: {
     score: number;
@@ -17778,121 +14563,103 @@ interface GetScoreByNPMPackage_Response_200 {
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       maintenanceIssueMid: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       maintenanceIssueHigh: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       maintenanceIssueCritical: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       maintainerCount: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       versionsLastWeek: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       versionsLastMonth: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       versionsLastTwoMonths: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       versionsLastYear: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       versionCount: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       openIssues?: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       closedIssues?: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       commitsLastWeek?: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       commitsLastMonth?: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       commitsLastTwoMonths?: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       commitsLastYear?: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       commits?: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     };
     limit?: number;
     /**
@@ -17916,7 +14683,6 @@ interface GetScoreByNPMPackage_Response_200 {
       | '14'
       | '15'
       | '16';
-    [k: string]: unknown;
   };
   vulnerability: {
     score: number;
@@ -17926,51 +14692,43 @@ interface GetScoreByNPMPackage_Response_200 {
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       vulnerabilityIssueMid: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       vulnerabilityIssueHigh: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       vulnerabilityIssueCritical: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       dependencyVulnerabilityCount: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       vulnerabilityCount: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     };
     limit?: number;
     /**
      * `0` `1` `2` `3` `4` `5`
      */
     limitingMetric?: '0' | '1' | '2' | '3' | '4' | '5';
-    [k: string]: unknown;
   };
   license: {
     score: number;
@@ -17980,28 +14738,24 @@ interface GetScoreByNPMPackage_Response_200 {
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       licenseIssueMid: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       licenseIssueHigh: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       licenseIssueCritical: {
         score: number;
         maxScore: number;
         limit: number;
         value: number;
-        [k: string]: unknown;
       };
       licenseQuality: {
         score: number;
@@ -18011,16 +14765,13 @@ interface GetScoreByNPMPackage_Response_200 {
          * `model` `gold` `silver` `bronze` `lead` `nonfree` `unknown` `unlicensed`
          */
         value: 'model' | 'gold' | 'silver' | 'bronze' | 'lead' | 'nonfree' | 'unknown' | 'unlicensed';
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     };
     limit?: number;
     /**
      * `0` `1` `2` `3` `4`
      */
     limitingMetric?: '0' | '1' | '2' | '3' | '4';
-    [k: string]: unknown;
   };
   miscellaneous: {
     score: number;
@@ -18030,68 +14781,81 @@ interface GetScoreByNPMPackage_Response_200 {
         maxScore: number;
         limit: number;
         value: boolean;
-        [k: string]: unknown;
       };
       defaultBranch?: {
         score: number;
         maxScore: number;
         limit: number;
         value: string;
-        [k: string]: unknown;
       };
       repoCreatedAt?: {
         score: number;
         maxScore: number;
         limit: number;
         value: string;
-        [k: string]: unknown;
       };
-      [k: string]: unknown;
     };
     limit?: number;
     /**
      * `0` `1` `2`
      */
     limitingMetric?: '0' | '1' | '2';
-    [k: string]: unknown;
   };
   depscore: number;
-  [k: string]: unknown;
 }
 interface GetScoreByNPMPackage_Response_400 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface GetScoreByNPMPackage_Response_401 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface GetScoreByNPMPackage_Response_403 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface GetScoreByNPMPackage_Response_404 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface GetScoreByNPMPackage_Response_429 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
+}
+declare type GetReportList_Response_200 = {
+  id: string;
+  url: string;
+}[];
+interface GetReportList_Response_400 {
+  error: {
+    message: string;
+  };
+}
+interface GetReportList_Response_401 {
+  error: {
+    message: string;
+  };
+}
+interface GetReportList_Response_403 {
+  error: {
+    message: string;
+  };
+}
+interface GetReportList_Response_404 {
+  error: {
+    message: string;
+  };
+}
+interface GetReportList_Response_429 {
+  error: {
+    message: string;
+  };
 }
 interface CreateReportBodyParam {
   [k: string]: string;
@@ -18099,42 +14863,31 @@ interface CreateReportBodyParam {
 interface CreateReport_Response_200 {
   id: string;
   url: string;
-  [k: string]: unknown;
 }
 interface CreateReport_Response_400 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface CreateReport_Response_401 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface CreateReport_Response_403 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface CreateReport_Response_404 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface CreateReport_Response_429 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 declare type GetReportMetadataParam = {
   id: string;
@@ -18162,10 +14915,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -18182,18 +14932,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -18211,18 +14956,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -18238,18 +14978,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
@@ -18258,7 +14993,6 @@ interface GetReport_Response_200 {
             title: string;
             severity: string;
             url: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -18268,14 +15002,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -18283,10 +15014,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -18303,18 +15031,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -18332,18 +15055,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -18359,25 +15077,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -18399,10 +15109,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -18419,18 +15126,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -18448,18 +15150,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -18475,18 +15172,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
@@ -18495,7 +15187,6 @@ interface GetReport_Response_200 {
             title: string;
             severity: string;
             url: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -18505,14 +15196,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -18520,10 +15208,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -18540,18 +15225,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -18569,18 +15249,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -18596,25 +15271,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -18636,10 +15303,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -18656,18 +15320,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -18685,18 +15344,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -18712,18 +15366,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
@@ -18732,7 +15381,6 @@ interface GetReport_Response_200 {
             title: string;
             severity: string;
             url: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -18742,14 +15390,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -18757,10 +15402,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -18777,18 +15419,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -18806,18 +15443,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -18833,25 +15465,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -18873,10 +15497,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -18893,18 +15514,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -18922,18 +15538,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -18949,25 +15560,19 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             script: string;
             source: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -18977,14 +15582,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -18992,10 +15594,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -19012,18 +15611,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -19041,18 +15635,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -19068,25 +15657,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -19108,10 +15689,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -19128,18 +15706,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -19157,18 +15730,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -19184,24 +15752,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -19210,14 +15771,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -19225,10 +15783,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -19245,18 +15800,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -19274,18 +15824,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -19301,25 +15846,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -19341,10 +15878,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -19361,18 +15895,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -19390,18 +15919,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -19417,24 +15941,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             binScript: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -19444,14 +15962,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -19459,10 +15974,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -19479,18 +15991,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -19508,18 +16015,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -19535,25 +16037,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -19575,10 +16069,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -19595,18 +16086,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -19624,18 +16110,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -19651,24 +16132,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             binScript: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -19678,14 +16153,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -19693,10 +16165,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -19713,18 +16182,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -19742,18 +16206,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -19769,25 +16228,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -19809,10 +16260,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -19829,18 +16277,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -19858,18 +16301,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -19885,24 +16323,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             module: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -19912,14 +16344,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -19927,10 +16356,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -19947,18 +16373,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -19976,18 +16397,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -20003,25 +16419,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -20043,10 +16451,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -20063,18 +16468,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -20092,18 +16492,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -20119,24 +16514,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             module: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -20146,14 +16535,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -20161,10 +16547,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -20181,18 +16564,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -20210,18 +16588,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -20237,25 +16610,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -20277,10 +16642,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -20297,18 +16659,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -20326,18 +16683,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -20353,24 +16705,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             module: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -20380,14 +16726,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -20395,10 +16738,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -20415,18 +16755,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -20444,18 +16779,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -20471,25 +16801,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -20511,10 +16833,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -20531,18 +16850,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -20560,18 +16874,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -20587,24 +16896,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             module: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -20614,14 +16917,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -20629,10 +16929,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -20649,18 +16946,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -20678,18 +16970,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -20705,25 +16992,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -20745,10 +17024,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -20765,18 +17041,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -20794,18 +17065,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -20821,24 +17087,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -20847,14 +17106,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -20862,10 +17118,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -20882,18 +17135,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -20911,18 +17159,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -20938,25 +17181,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -20978,10 +17213,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -20998,18 +17230,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -21027,18 +17254,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -21054,24 +17276,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -21080,14 +17295,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -21095,10 +17307,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -21115,18 +17324,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -21144,18 +17348,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -21171,25 +17370,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -21211,10 +17402,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -21231,18 +17419,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -21260,18 +17443,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -21287,24 +17465,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             urlFragment: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -21314,14 +17486,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -21329,10 +17498,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -21349,18 +17515,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -21378,18 +17539,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -21405,25 +17561,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -21445,10 +17593,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -21465,18 +17610,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -21494,18 +17634,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -21521,24 +17656,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             evalType: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -21548,14 +17677,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -21563,10 +17689,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -21583,18 +17706,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -21612,18 +17730,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -21639,25 +17752,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -21679,10 +17784,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -21699,18 +17801,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -21728,18 +17825,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -21755,24 +17847,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -21781,14 +17866,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -21796,10 +17878,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -21816,18 +17895,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -21845,18 +17919,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -21872,25 +17941,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -21912,10 +17973,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -21932,18 +17990,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -21961,18 +18014,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -21988,24 +18036,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             envVars: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -22015,14 +18057,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -22030,10 +18069,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -22050,18 +18086,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -22079,18 +18110,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -22106,25 +18132,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -22146,10 +18164,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -22166,18 +18181,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -22195,18 +18205,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -22222,24 +18227,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             name: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -22249,14 +18248,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -22264,10 +18260,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -22284,18 +18277,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -22313,18 +18301,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -22340,25 +18323,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -22380,10 +18355,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -22400,18 +18372,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -22429,18 +18396,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -22456,25 +18418,19 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             name: string;
             version: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -22484,14 +18440,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -22499,10 +18452,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -22519,18 +18469,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -22548,18 +18493,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -22575,25 +18515,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -22615,10 +18547,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -22635,18 +18564,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -22664,18 +18588,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -22691,24 +18610,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             name: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -22718,14 +18631,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -22733,10 +18643,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -22753,18 +18660,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -22782,18 +18684,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -22809,25 +18706,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -22849,10 +18738,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -22869,18 +18755,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -22898,18 +18779,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -22925,24 +18801,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             name: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -22952,14 +18822,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -22967,10 +18834,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -22987,18 +18851,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -23016,18 +18875,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -23043,25 +18897,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -23083,10 +18929,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -23103,18 +18946,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -23132,18 +18970,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -23159,24 +18992,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -23185,14 +19011,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -23200,10 +19023,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -23220,18 +19040,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -23249,18 +19064,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -23276,25 +19086,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -23316,10 +19118,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -23336,18 +19135,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -23365,18 +19159,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -23392,24 +19181,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -23418,14 +19200,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -23433,10 +19212,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -23453,18 +19229,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -23482,18 +19253,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -23509,25 +19275,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -23549,10 +19307,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -23569,18 +19324,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -23598,18 +19348,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -23625,24 +19370,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -23651,14 +19389,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -23666,10 +19401,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -23686,18 +19418,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -23715,18 +19442,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -23742,25 +19464,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -23782,10 +19496,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -23802,18 +19513,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -23831,18 +19537,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -23858,24 +19559,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             confidence: number;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -23885,14 +19580,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -23900,10 +19592,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -23920,18 +19609,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -23949,18 +19633,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -23976,25 +19655,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -24016,10 +19687,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -24036,18 +19704,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -24065,18 +19728,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -24092,24 +19750,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             confidence: number;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -24119,14 +19771,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -24134,10 +19783,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -24154,18 +19800,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -24183,18 +19824,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -24210,25 +19846,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -24250,10 +19878,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -24270,18 +19895,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -24299,18 +19919,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -24326,18 +19941,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
@@ -24346,7 +19956,6 @@ interface GetReport_Response_200 {
             editDistance: number;
             downloads: number;
             downloadsRatio: number;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -24356,14 +19965,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -24371,10 +19977,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -24391,18 +19994,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -24420,18 +20018,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -24447,25 +20040,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -24487,10 +20072,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -24507,18 +20089,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -24536,18 +20113,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -24563,24 +20135,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -24589,14 +20154,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -24604,10 +20166,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -24624,18 +20183,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -24653,18 +20207,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -24680,25 +20229,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -24720,10 +20261,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -24740,18 +20278,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -24769,18 +20302,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -24796,24 +20324,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -24822,14 +20343,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -24837,10 +20355,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -24857,18 +20372,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -24886,18 +20396,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -24913,25 +20418,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -24953,10 +20450,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -24973,18 +20467,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -25002,18 +20491,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -25029,24 +20513,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             encoding: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -25056,14 +20534,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -25071,10 +20546,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -25091,18 +20563,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -25120,18 +20587,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -25147,25 +20609,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -25187,10 +20641,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -25207,18 +20658,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -25236,18 +20682,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -25263,24 +20704,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -25289,14 +20723,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -25304,10 +20735,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -25324,18 +20752,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -25353,18 +20776,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -25380,25 +20798,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -25420,10 +20830,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -25440,18 +20847,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -25469,18 +20871,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -25496,24 +20893,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -25522,14 +20912,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -25537,10 +20924,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -25557,18 +20941,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -25586,18 +20965,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -25613,25 +20987,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -25653,10 +21019,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -25673,18 +21036,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -25702,18 +21060,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -25729,25 +21082,19 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             pattern: string;
             explanation: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -25757,14 +21104,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -25772,10 +21116,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -25792,18 +21133,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -25821,18 +21157,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -25848,25 +21179,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -25888,10 +21211,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -25908,18 +21228,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -25937,18 +21252,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -25964,24 +21274,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -25990,14 +21293,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -26005,10 +21305,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -26025,18 +21322,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -26054,18 +21346,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -26081,25 +21368,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -26121,10 +21400,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -26141,18 +21417,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -26170,18 +21441,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -26197,25 +21463,19 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             packageName: string;
             url: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -26225,14 +21485,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -26240,10 +21497,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -26260,18 +21514,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -26289,18 +21538,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -26316,25 +21560,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -26356,10 +21592,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -26376,18 +21609,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -26405,18 +21633,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -26432,25 +21655,19 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             packageName: string;
             url: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -26460,14 +21677,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -26475,10 +21689,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -26495,18 +21706,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -26524,18 +21730,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -26551,25 +21752,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -26591,10 +21784,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -26611,18 +21801,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -26640,18 +21825,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -26667,18 +21847,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
@@ -26687,7 +21862,6 @@ interface GetReport_Response_200 {
             githubUser: string;
             githubRepo: string;
             commitsh: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -26697,14 +21871,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -26712,10 +21883,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -26732,18 +21900,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -26761,18 +21924,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -26788,25 +21946,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -26828,10 +21978,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -26848,18 +21995,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -26877,18 +22019,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -26904,25 +22041,19 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             packageName: string;
             filePath: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -26932,14 +22063,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -26947,10 +22075,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -26967,18 +22092,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -26996,18 +22116,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -27023,25 +22138,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -27063,10 +22170,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -27083,18 +22187,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -27112,18 +22211,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -27139,24 +22233,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -27165,14 +22252,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -27180,10 +22264,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -27200,18 +22281,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -27229,18 +22305,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -27256,25 +22327,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -27296,10 +22359,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -27316,18 +22376,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -27345,18 +22400,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -27372,24 +22422,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -27398,14 +22441,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -27413,10 +22453,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -27433,18 +22470,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -27462,18 +22494,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -27489,25 +22516,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -27529,10 +22548,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -27549,18 +22565,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -27578,18 +22589,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -27605,24 +22611,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -27631,14 +22630,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -27646,10 +22642,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -27666,18 +22659,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -27695,18 +22683,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -27722,25 +22705,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -27762,10 +22737,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -27782,18 +22754,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -27811,18 +22778,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -27838,25 +22800,19 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             packageName: string;
             packageVersion: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -27866,14 +22822,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -27881,10 +22834,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -27901,18 +22851,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -27930,18 +22875,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -27957,25 +22897,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -27997,10 +22929,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -28017,18 +22946,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -28046,18 +22970,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -28073,24 +22992,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -28099,14 +23011,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -28114,10 +23023,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -28134,18 +23040,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -28163,18 +23064,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -28190,25 +23086,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -28230,10 +23118,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -28250,18 +23135,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -28279,18 +23159,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -28306,24 +23181,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -28332,14 +23200,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -28347,10 +23212,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -28367,18 +23229,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -28396,18 +23253,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -28423,25 +23275,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -28463,10 +23307,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -28483,18 +23324,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -28512,18 +23348,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -28539,24 +23370,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -28565,14 +23389,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -28580,10 +23401,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -28600,18 +23418,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -28629,18 +23442,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -28656,25 +23464,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -28696,10 +23496,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -28716,18 +23513,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -28745,18 +23537,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -28772,24 +23559,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -28798,14 +23578,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -28813,10 +23590,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -28833,18 +23607,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -28862,18 +23631,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -28889,25 +23653,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -28929,10 +23685,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -28949,18 +23702,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -28978,18 +23726,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -29005,24 +23748,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -29031,14 +23767,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -29046,10 +23779,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -29066,18 +23796,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -29095,18 +23820,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -29122,25 +23842,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -29162,10 +23874,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -29182,18 +23891,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -29211,18 +23915,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -29238,24 +23937,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -29264,14 +23956,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -29279,10 +23968,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -29299,18 +23985,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -29328,18 +24009,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -29355,25 +24031,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -29395,10 +24063,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -29415,18 +24080,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -29444,18 +24104,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -29471,24 +24126,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             linesOfCode: number;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -29498,14 +24147,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -29513,10 +24159,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -29533,18 +24176,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -29562,18 +24200,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -29589,25 +24222,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -29629,10 +24254,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -29649,18 +24271,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -29678,18 +24295,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -29705,24 +24317,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -29731,14 +24336,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -29746,10 +24348,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -29766,18 +24365,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -29795,18 +24389,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -29822,25 +24411,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -29862,10 +24443,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -29882,18 +24460,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -29911,18 +24484,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -29938,24 +24506,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             reason: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -29965,14 +24527,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -29980,10 +24539,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -30000,18 +24556,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -30029,18 +24580,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -30056,25 +24602,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -30096,10 +24634,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -30116,18 +24651,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -30145,18 +24675,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -30172,18 +24697,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
@@ -30192,7 +24712,6 @@ interface GetReport_Response_200 {
             prevChronoVersion: string;
             prevSemverDate: string;
             prevSemverVersion: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -30202,14 +24721,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -30217,10 +24733,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -30237,18 +24750,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -30266,18 +24774,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -30293,25 +24796,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -30333,10 +24828,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -30353,18 +24845,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -30382,18 +24869,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -30409,25 +24891,19 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             prevVersion: string;
             newVersion: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -30437,14 +24913,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -30452,10 +24925,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -30472,18 +24942,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -30501,18 +24966,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -30528,25 +24988,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -30568,10 +25020,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -30588,18 +25037,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -30617,18 +25061,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -30644,25 +25083,19 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             prevAuthor: string;
             newAuthor: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -30672,14 +25105,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -30687,10 +25117,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -30707,18 +25134,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -30736,18 +25158,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -30763,25 +25180,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -30803,10 +25212,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -30823,18 +25229,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -30852,18 +25253,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -30879,24 +25275,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             author: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -30906,14 +25296,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -30921,10 +25308,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -30941,18 +25325,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -30970,18 +25349,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -30997,25 +25371,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -31037,10 +25403,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -31057,18 +25420,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -31086,18 +25444,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -31113,24 +25466,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -31139,14 +25485,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -31154,10 +25497,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -31174,18 +25514,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -31203,18 +25538,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -31230,25 +25560,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -31270,10 +25592,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -31290,18 +25609,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -31319,18 +25633,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -31346,24 +25655,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             lastPublish: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -31373,14 +25676,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -31388,10 +25688,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -31408,18 +25705,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -31437,18 +25729,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -31464,25 +25751,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -31504,10 +25783,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -31524,18 +25800,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -31553,18 +25824,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -31580,18 +25846,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
@@ -31600,7 +25861,6 @@ interface GetReport_Response_200 {
             prevSize: number;
             curSize: number;
             changedPercent: number;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -31610,14 +25870,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -31625,10 +25882,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -31645,18 +25899,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -31674,18 +25923,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -31701,25 +25945,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -31741,10 +25977,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -31761,18 +25994,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -31790,18 +26018,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -31817,24 +26040,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -31843,14 +26059,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -31858,10 +26071,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -31878,18 +26088,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -31907,18 +26112,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -31934,25 +26134,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -31974,10 +26166,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -31994,18 +26183,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -32023,18 +26207,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -32050,25 +26229,19 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             prevLicenseId: string;
             newLicenseId: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -32078,14 +26251,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -32093,10 +26263,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -32113,18 +26280,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -32142,18 +26304,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -32169,25 +26326,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -32209,10 +26358,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -32229,18 +26375,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -32258,18 +26399,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -32285,24 +26421,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             licenseId: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -32312,14 +26442,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -32327,10 +26454,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -32347,18 +26471,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -32376,18 +26495,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -32403,25 +26517,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -32443,10 +26549,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -32463,18 +26566,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -32492,18 +26590,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -32519,24 +26612,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             licenseId: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -32546,14 +26633,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -32561,10 +26645,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -32581,18 +26662,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -32610,18 +26686,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -32637,25 +26708,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -32677,10 +26740,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -32697,18 +26757,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -32726,18 +26781,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -32753,24 +26803,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -32779,14 +26822,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -32794,10 +26834,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -32814,18 +26851,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -32843,18 +26875,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -32870,25 +26897,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -32910,10 +26929,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -32930,18 +26946,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -32959,18 +26970,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -32986,24 +26992,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -33012,14 +27011,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -33027,10 +27023,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -33047,18 +27040,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -33076,18 +27064,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -33103,25 +27086,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -33143,10 +27118,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -33163,18 +27135,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -33192,18 +27159,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -33219,24 +27181,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             possibleLicenseId: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -33246,14 +27202,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -33261,10 +27214,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -33281,18 +27231,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -33310,18 +27255,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -33337,25 +27277,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -33377,10 +27309,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -33397,18 +27326,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -33426,18 +27350,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -33453,24 +27372,18 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             licenseId: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -33480,14 +27393,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -33495,10 +27405,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -33515,18 +27422,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -33544,18 +27446,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -33571,25 +27468,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -33611,10 +27500,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -33631,18 +27517,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -33660,18 +27541,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -33687,24 +27563,17 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
-          props: {
-            [k: string]: unknown;
-          };
+          props: {};
           usage?: {
             file: {
               path: string;
@@ -33713,14 +27582,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -33728,10 +27594,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -33748,18 +27611,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -33777,18 +27635,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -33804,25 +27657,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -33844,10 +27689,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -33864,18 +27706,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -33893,18 +27730,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -33920,25 +27752,19 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             licenseId: string;
             similarity: number;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -33948,14 +27774,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -33963,10 +27786,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -33983,18 +27803,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -34012,18 +27827,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -34039,25 +27849,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -34079,10 +27881,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -34099,18 +27898,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -34128,18 +27922,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -34155,18 +27944,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
@@ -34174,7 +27958,6 @@ interface GetReport_Response_200 {
             exceptionId: string;
             similarity: number;
             comments: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -34184,14 +27967,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -34199,10 +27979,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -34219,18 +27996,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -34248,18 +28020,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -34275,25 +28042,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -34315,10 +28074,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -34335,18 +28091,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -34364,18 +28115,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -34391,25 +28137,19 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             exceptionId: string;
             comments: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -34419,14 +28159,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -34434,10 +28171,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -34454,18 +28188,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -34483,18 +28212,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -34510,25 +28234,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -34550,10 +28266,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -34570,18 +28283,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -34599,18 +28307,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -34626,25 +28329,19 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             exceptionId: string;
             comments: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -34654,14 +28351,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -34669,10 +28363,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -34689,18 +28380,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -34718,18 +28404,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -34745,25 +28426,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -34785,10 +28458,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -34805,18 +28475,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -34834,18 +28499,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -34861,25 +28521,19 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             id: number;
             note: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -34889,14 +28543,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -34904,10 +28555,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -34924,18 +28572,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -34953,18 +28596,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -34980,25 +28618,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -35020,10 +28650,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -35040,18 +28667,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -35069,18 +28691,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -35096,25 +28713,19 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             id: number;
             note: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -35124,14 +28735,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -35139,10 +28747,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -35159,18 +28764,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -35188,18 +28788,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -35215,25 +28810,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
     | {
         /**
@@ -35255,10 +28842,7 @@ interface GetReport_Response_200 {
                  * `unknown`
                  */
                 type?: 'unknown';
-                value?: {
-                  [k: string]: unknown;
-                };
-                [k: string]: unknown;
+                value?: {};
               }
             | {
                 /**
@@ -35275,18 +28859,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -35304,18 +28883,13 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
             | {
                 /**
@@ -35331,25 +28905,19 @@ interface GetReport_Response_200 {
                       startColumn: number;
                       endLine: number;
                       endColumn: number;
-                      [k: string]: unknown;
                     };
                     bytes?: {
                       start: number;
                       end: number;
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 };
-                [k: string]: unknown;
               }
           )[];
           description: string;
           props: {
             id: number;
             note: string;
-            [k: string]: unknown;
           };
           usage?: {
             file: {
@@ -35359,14 +28927,11 @@ interface GetReport_Response_200 {
                 startColumn: number;
                 endLine: number;
                 endColumn: number;
-                [k: string]: unknown;
               };
               bytes?: {
                 start: number;
                 end: number;
-                [k: string]: unknown;
               };
-              [k: string]: unknown;
             };
             dependencies: (
               | {
@@ -35374,10 +28939,7 @@ interface GetReport_Response_200 {
                    * `unknown`
                    */
                   type?: 'unknown';
-                  value?: {
-                    [k: string]: unknown;
-                  };
-                  [k: string]: unknown;
+                  value?: {};
                 }
               | {
                   /**
@@ -35394,18 +28956,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -35423,18 +28980,13 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
               | {
                   /**
@@ -35450,25 +29002,17 @@ interface GetReport_Response_200 {
                         startColumn: number;
                         endLine: number;
                         endColumn: number;
-                        [k: string]: unknown;
                       };
                       bytes?: {
                         start: number;
                         end: number;
-                        [k: string]: unknown;
                       };
-                      [k: string]: unknown;
                     };
-                    [k: string]: unknown;
                   };
-                  [k: string]: unknown;
                 }
             )[];
-            [k: string]: unknown;
           };
-          [k: string]: unknown;
         };
-        [k: string]: unknown;
       }
   )[];
   score: {
@@ -35477,44 +29021,32 @@ interface GetReport_Response_200 {
     avgMaintenance: number;
     avgVulnerability: number;
     avgLicense: number;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface GetReport_Response_400 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface GetReport_Response_401 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface GetReport_Response_403 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface GetReport_Response_404 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface GetReport_Response_429 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface GetOpenAPI_Response_200 {
   [k: string]: unknown;
@@ -35522,25 +29054,18 @@ interface GetOpenAPI_Response_200 {
 interface GetOpenAPI_Response_429 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface GetQuota_Response_200 {
   quota: number;
-  [k: string]: unknown;
 }
 interface GetQuota_Response_401 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
 interface GetQuota_Response_429 {
   error: {
     message: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
