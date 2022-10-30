@@ -6,5 +6,8 @@
       "./build/tsconfig.json",
       "./tests/tsconfig.json"
     ]
+  },
+  "rules": {
+    "no-console": "warn"
   }
 }

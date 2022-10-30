@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // @ts-check
 
 const { readFile, writeFile } = require('node:fs/promises')
