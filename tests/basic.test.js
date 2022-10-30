@@ -7,13 +7,11 @@ const client = api.auth('yetAnotherApiKey')
 
 t.test('Endpoints', async t => {
   t.beforeEach(() => {
-    console.log('hi')
     nock.cleanAll()
     nock.disableNetConnect()
   })
 
   t.afterEach(() => {
-    console.log('hi2')
     if (!nock.isDone()) {
       throw new Error('pending nock mocks: ' + nock.pendingMocks())
     }
