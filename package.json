@@ -24,7 +24,7 @@
   ],
   "dependencies": {
     "api": "^5.0.0-beta.3",
-    "oas": "^18.4.4"
+    "oas": "^20.0.0"
   },
   "devDependencies": {
     "@socketsecurity/eslint-config": "^1.0.0",
