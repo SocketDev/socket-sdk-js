@@ -1,4 +1,16 @@
+# Basic ones
+/coverage
+/coverage-ts
+/node_modules
+/.env
+/.nyc_output
+/yarn.lock
+
+# Generated types
+*.d.ts
+*.d.ts.map
+!api*.d.ts
+
+# Library specific ones
 /.api
-dist
-node_modules
-.nyc_output
+/dist

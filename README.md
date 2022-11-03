@@ -16,21 +16,47 @@ npm install @socketsecurity/sdk
 ### ESM / TypeScript
 
 ```javascript
-import { socketSdk } from '@socketsecurity/sdk'
+import { SocketSdk } from '@socketsecurity/sdk'
 
-const client = socketSdk.auth('yourApiKeyHere')
+const client = new SocketSdk('yourApiKeyHere')
 
-const res = await client.getIssuesByNPMPackage({
-  package: '@socketsecurity/eslint-config',
-  version: '1.0.0'
-})
+const res = await client.getQuota()
+
+if (res.success) {
+  // Will output { quota: 123 } if the quota you have left is 123
+  console.log(res.data)
+}
 ```
 
 ### CommonJS
 
 ```javascript
-const { socketSdk } = require('@socketsecurity/sdk')
+const { SocketSdk } = require('@socketsecurity/sdk')
 ```
+
+## SocketSdk Methods
+
+### Package methods
+
+* `getIssuesByNPMPackage(packageName, version)`
+  * `packageName`: A `string` representing the name of the npm package you want the issues for
+  * `version`:  A `string` representing the version of the npm package to return the issues for
+* `getScoreByNPMPackage(packageName, version)`
+  * `packageName`: A `string` representing the name of the npm package you want the score for
+  * `version`:  A `string` representing the version of the npm package to return the score for
+
+### Report methods
+
+* `createReportFromFilePaths(filePaths, pathsRelativeTo=.)`
+  * `filePaths`: An `array` of absolute or relative `string` paths to `package.json` and any corresponding `package-lock.json` files
+  * `pathsRelativeTo`: A `string` path that the absolute paths `filePaths` are relative to. This to calculate where in your project the `package.json`/`package-lock.json` files lives
+* `getReportList()`
+* `getReport(id)`
+  * `id`: A `string` representing the id of a created report
+
+### Utility methods
+
+* `getQuota()`
 
 ## See also
 
