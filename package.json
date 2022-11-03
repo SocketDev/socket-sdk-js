@@ -13,25 +13,39 @@
     "type": "git",
     "url": "git://github.com/SocketDev/socket-sdk-js.git"
   },
+  "type": "module",
   "main": "index.js",
   "types": "index.d.ts",
   "files": [
-    "dist/**/*.d.ts",
-    "dist/**/*.js",
-    "dist/**/*.json",
+    "index.d.ts.map",
     "index.d.ts",
-    "index.js"
+    "index.js",
+    "lib/**/*.d.ts.map",
+    "lib/**/*.d.ts",
+    "lib/**/*.js",
+    "types/**/*.d.ts"
   ],
+  "engines": {
+    "node": "^14.18.0 || >=16.0.0"
+  },
   "dependencies": {
-    "api": "^5.0.0-beta.3",
-    "oas": "^18.4.4"
+    "formdata-node": "^5.0.0",
+    "got": "^12.5.2",
+    "pony-cause": "^2.1.4"
   },
   "devDependencies": {
     "@socketsecurity/eslint-config": "^1.0.0",
     "@tsconfig/node14": "^1.0.3",
+    "@types/chai": "^4.3.3",
+    "@types/chai-as-promised": "^7.1.5",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "^14.18.31",
     "@types/tap": "^15.0.7",
     "@typescript-eslint/eslint-plugin": "^5.36.2",
     "@typescript-eslint/parser": "^5.36.2",
+    "c8": "^7.12.0",
+    "chai": "^4.3.6",
+    "chai-as-promised": "^7.1.1",
     "eslint": "^8.23.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-config-standard-jsx": "^11.0.0",
@@ -41,26 +55,33 @@
     "eslint-plugin-promise": "^6.0.1",
     "eslint-plugin-react": "^7.31.9",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^8.0.1",
+    "installed-check": "^6.0.4",
+    "mocha": "^10.1.0",
     "nock": "^13.2.9",
     "npm-run-all2": "^6.0.2",
-    "tap": "^16.3.0",
+    "openapi-typescript": "^5.4.1",
+    "type-coverage": "^2.22.0",
     "typescript": "^4.8.4"
   },
   "scripts": {
-    "build:0-clean": "run-s clean",
-    "build:1-typescript": "tsc -p tsconfig.json",
-    "build:2-minify-json": "node build/minify-dist-json.js",
+    "build:0": "run-s clean",
+    "build:1-declaration": "tsc -p declaration.tsconfig.json",
     "build": "run-s build:*",
-    "ci-test-old": "run-s build test-old:*",
+    "check:installed-check": "installed-check -i eslint-plugin-jsdoc",
+    "check:lint": "eslint --report-unused-disable-directives .",
+    "check:tsc": "tsc",
+    "check:type-coverage": "type-coverage --detail --strict --at-least 95 --ignore-files 'test/*'",
+    "check": "run-s clean && run-p check:*",
     "ci-test": "run-s build test:*",
-    "clean": "rm -rf dist",
+    "clean:declarations": "rm -rf $(find . -maxdepth 2 -type f -name '*.d.ts*' ! -name 'api*.d.ts')",
+    "clean": "run-p clean:*",
     "generate-sdk:0-prettify": "node build/prettify-base-json.js",
-    "generate-sdk:1-generate": "node build/generate-sdk.js",
+    "generate-sdk:1-generate": "node build/generate-types.js > types/api.d.ts",
     "generate-sdk": "run-s generate-sdk:*",
-    "lint": "eslint .",
+    "prepare": "husky install",
     "prepublishOnly": "run-s build",
-    "test-old:tap": "tap --no-check-coverage",
-    "test:tap": "tap --no-check-coverage --node-arg=--no-experimental-fetch",
-    "test": "run-s lint build test:*"
+    "test:mocha": "c8 --reporter=lcov --reporter text mocha 'test/**/*.spec.js'",
+    "test": "run-s check test:*"
   }
 }

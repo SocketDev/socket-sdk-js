@@ -1,14 +1,6 @@
-/* eslint-disable no-console */
-// @ts-check
+import { readFile, writeFile } from 'node:fs/promises'
+import path from 'node:path'
 
-const { readFile, writeFile } = require('node:fs/promises')
-const path = require('node:path')
+const openApiData = await readFile(path.join(__dirname, '../openapi.json'), 'utf8')
 
-Promise.resolve().then(async () => {
-  const openApiData = await readFile(path.join(__dirname, '../openapi.json'), 'utf8')
-
-  await writeFile(path.join(__dirname, '../openapi.json'), JSON.stringify(JSON.parse(openApiData), undefined, 2))
-}).catch(err => {
-  console.error('Failed with error:', err.stack)
-  process.exit(1)
-})
+await writeFile(path.join(__dirname, '../openapi.json'), JSON.stringify(JSON.parse(openApiData), undefined, 2))
