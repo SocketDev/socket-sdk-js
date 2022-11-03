@@ -90,7 +90,7 @@ export class SocketSdk {
     const versionParam = encodeURIComponent(version)
 
     try {
-      const data = await this.#client.get(`/npm/${pkgParam}/${versionParam}/score`).json()
+      const data = await this.#client.get(`npm/${pkgParam}/${versionParam}/score`).json()
       return { success: true, status: 200, data }
     } catch (err) {
       return /** @type {SocketSdkErrorType<'getScoreByNPMPackage'>} */ (handleApiError(err))
@@ -107,7 +107,7 @@ export class SocketSdk {
     const versionParam = encodeURIComponent(version)
 
     try {
-      const data = await this.#client.get(`/npm/${pkgParam}/${versionParam}/issues`).json()
+      const data = await this.#client.get(`npm/${pkgParam}/${versionParam}/issues`).json()
       return { success: true, status: 200, data }
     } catch (err) {
       return /** @type {SocketSdkErrorType<'getIssuesByNPMPackage'>} */ (handleApiError(err))
@@ -117,7 +117,7 @@ export class SocketSdk {
   /** @returns {Promise<SocketSdkResultType<'getReportList'>>} */
   async getReportList () {
     try {
-      const data = await this.#client.get('/report/list').json()
+      const data = await this.#client.get('report/list').json()
       return { success: true, status: 200, data }
     } catch (err) {
       return /** @type {SocketSdkErrorType<'getReportList'>} */ (handleApiError(err))
@@ -132,7 +132,7 @@ export class SocketSdk {
     const idParam = encodeURIComponent(id)
 
     try {
-      const data = await this.#client.get(`/report/view/${idParam}`).json()
+      const data = await this.#client.get(`report/view/${idParam}`).json()
       return { success: true, status: 200, data }
     } catch (err) {
       return /** @type {SocketSdkErrorType<'getReport'>} */ (handleApiError(err))
@@ -142,7 +142,7 @@ export class SocketSdk {
   /** @returns {Promise<SocketSdkResultType<'getQuota'>>} */
   async getQuota () {
     try {
-      const data = await this.#client.get('/quota').json()
+      const data = await this.#client.get('quota').json()
       return { success: true, status: 200, data }
     } catch (err) {
       return /** @type {SocketSdkErrorType<'getQuota'>} */ (handleApiError(err))

@@ -1,2 +1,3 @@
+/coverage/**/*
 /dist
 /types/api.d.ts
