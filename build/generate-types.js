@@ -1,6 +1,6 @@
 import openapiTS from 'openapi-typescript'
 
-const localPath = new URL('../../../socket-api-ts/openapi.json', import.meta.url)
+const localPath = new URL('../openapi.json', import.meta.url)
 
 const output = await openapiTS(localPath, {
   formatter (node) {
