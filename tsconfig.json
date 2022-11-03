@@ -1,15 +1,19 @@
 {
   "extends": "@tsconfig/node14/tsconfig.json",
-  "exclude": [
-    "dist",
+  "files": [
+    "index.js"
   ],
   "include": [
-    "src"
+    "build/**/*",
+    "lib/**/*",
+    "test/**/*",
   ],
   "compilerOptions": {
-    "declaration": true,
-    "outDir": "dist",
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
     "resolveJsonModule": true,
-    "rootDir": "src"
+    "module": "es2022",
+    "moduleResolution": "node"
   }
 }

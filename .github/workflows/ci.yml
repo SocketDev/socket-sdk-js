@@ -21,15 +21,9 @@ jobs:
     uses: SocketDev/workflows/.github/workflows/reusable-base.yml@master
     with:
       npm-test-script: 'lint'
-  test-old:
-    name: "Tests"
-    uses: SocketDev/workflows/.github/workflows/reusable-base.yml@master
-    with:
-      npm-test-script: 'ci-test-old'
-      node-versions: '14,16'
   test:
     name: "Tests"
     uses: SocketDev/workflows/.github/workflows/reusable-base.yml@master
     with:
       npm-test-script: 'ci-test'
-      node-versions: '18,19'
+      node-versions: '14,16,18,19'

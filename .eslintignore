@@ -1,4 +1,2 @@
 /dist
-/index.d.ts
-/index.js
-/src
+/types/api.d.ts
