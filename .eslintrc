@@ -2,10 +2,7 @@
   "extends": "@socketsecurity",
   "root": true,
   "parserOptions": {
-    "project": [
-      "./build/tsconfig.json",
-      "./tests/tsconfig.json"
-    ]
+    "project": "./tsconfig.json"
   },
   "rules": {
     "no-console": "warn"
