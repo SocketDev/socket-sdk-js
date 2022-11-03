@@ -20,7 +20,7 @@ jobs:
     name: "Linting"
     uses: SocketDev/workflows/.github/workflows/reusable-base.yml@master
     with:
-      npm-test-script: 'lint'
+      npm-test-script: 'check'
   test:
     name: "Tests"
     uses: SocketDev/workflows/.github/workflows/reusable-base.yml@master
