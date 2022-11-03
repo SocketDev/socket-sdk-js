@@ -46,6 +46,7 @@
     "eslint-plugin-promise": "^6.0.1",
     "eslint-plugin-react": "^7.31.9",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^8.0.1",
     "nock": "^13.2.9",
     "npm-run-all2": "^6.0.2",
     "openapi-typescript": "^5.4.1",
@@ -62,6 +63,7 @@
     "generate-sdk:types": "node build/generate-types.js > types/api.d.ts",
     "generate-sdk": "run-s generate-sdk:*",
     "lint": "eslint .",
+    "prepare": "husky install",
     "prepublishOnly": "run-s build",
     "test:tap": "tap --no-check-coverage",
     "test": "run-s lint build test:*"
