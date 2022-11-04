@@ -416,25 +416,6 @@ export interface components {
       }> &
       Partial<{
         /** @enum {string} */
-        type?: "didYouMean";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            alternatePackage: string;
-            /** @default 0 */
-            editDistance: number;
-            /** @default 0 */
-            downloads: number;
-            /** @default 1 */
-            downloadsRatio: number;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
         type?: "bidi";
         value?: components["schemas"]["SocketIssueBasics"] & {
           /** @default */
@@ -985,6 +966,25 @@ export interface components {
             exceptionId: string;
             /** @default */
             comments: string;
+          };
+          usage?: components["schemas"]["SocketUsageRef"];
+        };
+      }> &
+      Partial<{
+        /** @enum {string} */
+        type?: "didYouMean";
+        value?: components["schemas"]["SocketIssueBasics"] & {
+          /** @default */
+          description: string;
+          props: {
+            /** @default */
+            alternatePackage: string;
+            /** @default 0 */
+            editDistance: number;
+            /** @default 0 */
+            downloads: number;
+            /** @default 1 */
+            downloadsRatio: number;
           };
           usage?: components["schemas"]["SocketUsageRef"];
         };
