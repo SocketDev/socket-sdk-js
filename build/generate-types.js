@@ -1,9 +1,11 @@
 'use strict'
 
+const path = require('node:path')
+
 Promise.resolve().then(async () => {
   const { default: openapiTS } = await import('openapi-typescript')
 
-  const localPath = new URL('../openapi.json', import.meta.url)
+  const localPath = path.resolve(__dirname, '../openapi.json')
     const output = await openapiTS(localPath, {
     formatter (node) {
       if (node.format === 'binary') {
