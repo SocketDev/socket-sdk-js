@@ -1,9 +1,11 @@
-import chai from 'chai'
-import chaiAsPromised from 'chai-as-promised'
-import nock from 'nock'
-import { ErrorWithCause } from 'pony-cause'
+'use strict'
 
-import { SocketSdk } from '../index.js'
+const chai = require('chai')
+const chaiAsPromised = require('chai-as-promised')
+const nock = require('nock')
+const { ErrorWithCause } = require('pony-cause')
+
+const { SocketSdk } = require('../index.js')
 
 chai.use(chaiAsPromised)
 chai.should()

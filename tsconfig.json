@@ -5,7 +5,6 @@
   ],
   "include": [
     "build/**/*",
-    "lib/**/*",
     "test/**/*",
   ],
   "compilerOptions": {
