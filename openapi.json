@@ -1540,70 +1540,6 @@
               "type": {
                 "type": "string",
                 "enum": [
-                  "didYouMean"
-                ]
-              },
-              "value": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/SocketIssueBasics"
-                  },
-                  {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "description": {
-                        "type": "string",
-                        "default": ""
-                      },
-                      "props": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "alternatePackage": {
-                            "type": "string",
-                            "default": ""
-                          },
-                          "editDistance": {
-                            "type": "integer",
-                            "default": 0
-                          },
-                          "downloads": {
-                            "type": "integer",
-                            "default": 0
-                          },
-                          "downloadsRatio": {
-                            "type": "number",
-                            "default": 1
-                          }
-                        },
-                        "required": [
-                          "alternatePackage",
-                          "downloads",
-                          "downloadsRatio",
-                          "editDistance"
-                        ]
-                      },
-                      "usage": {
-                        "$ref": "#/components/schemas/SocketUsageRef"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "props"
-                    ]
-                  }
-                ]
-              }
-            }
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
                   "bidi"
                 ]
               },
@@ -3688,6 +3624,70 @@
                         "required": [
                           "comments",
                           "exceptionId"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "didYouMean"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "alternatePackage": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "editDistance": {
+                            "type": "integer",
+                            "default": 0
+                          },
+                          "downloads": {
+                            "type": "integer",
+                            "default": 0
+                          },
+                          "downloadsRatio": {
+                            "type": "number",
+                            "default": 1
+                          }
+                        },
+                        "required": [
+                          "alternatePackage",
+                          "downloads",
+                          "downloadsRatio",
+                          "editDistance"
                         ]
                       },
                       "usage": {
