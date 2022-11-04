@@ -13,16 +13,12 @@
     "type": "git",
     "url": "git://github.com/SocketDev/socket-sdk-js.git"
   },
-  "type": "module",
   "main": "index.js",
   "types": "index.d.ts",
   "files": [
     "index.d.ts.map",
     "index.d.ts",
     "index.js",
-    "lib/**/*.d.ts.map",
-    "lib/**/*.d.ts",
-    "lib/**/*.js",
     "types/**/*.d.ts"
   ],
   "engines": {

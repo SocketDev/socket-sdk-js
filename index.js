@@ -1,10 +1,8 @@
-import path from 'node:path'
+'use strict'
 
-import { FormData } from 'formdata-node'
-import { fileFromPath } from 'formdata-node/file-from-path'
-import got from 'got'
+const path = require('node:path')
 
-import { handleApiError } from './lib/helpers.js'
+const { ErrorWithCause } = require('pony-cause')
 
 /**
  * @template {keyof import('./types/api').operations} T
@@ -27,9 +25,15 @@ import { handleApiError } from './lib/helpers.js'
  * @property {string} [baseUrl]
  */
 
-export class SocketSdk {
-   /** @type {import('got').Got} */
+class SocketSdk {
+   /** @type {import('got').Got|undefined} */
   #client
+
+  /** @type {typeof import('got').HTTPError|undefined} */
+  #HTTPError
+
+  /** @type {import('got').ExtendOptions} */
+  #gotOptions
 
   /**
    * @param {string} apiKey
@@ -42,12 +46,29 @@ export class SocketSdk {
       baseUrl = 'https://api.socket.dev/v0/',
     } = options
 
-    this.#client = got.extend({
+    this.#gotOptions = {
       prefixUrl: baseUrl,
       retry: { limit: 0 },
       username: apiKey,
       ...(agent ? { agent } : {}),
-    })
+    }
+  }
+
+  /**
+   * @returns {Promise<import('got').Got>}
+   */
+  async #getClient () {
+    if (!this.#client) {
+      const {
+        default: got,
+        HTTPError,
+      } = await import('got')
+
+      this.#HTTPError = HTTPError
+      this.#client = got.extend(this.#gotOptions)
+    }
+
+    return this.#client
   }
 
   /**
@@ -58,6 +79,16 @@ export class SocketSdk {
    async createReportFromFilePaths (filePaths, pathsRelativeTo = '.') {
     const basePath = path.resolve(process.cwd(), pathsRelativeTo)
     const absoluteFilePaths = filePaths.map(filePath => path.resolve(basePath, filePath))
+
+    const [
+      { FormData },
+      { fileFromPath },
+      client
+    ] = await Promise.all([
+      import('formdata-node'),
+      import('formdata-node/file-from-path'),
+      this.#getClient(),
+    ])
 
     const body = new FormData()
 
@@ -72,11 +103,11 @@ export class SocketSdk {
     }
 
     try {
-      const data = await this.#client.put('report/upload', { body }).json()
+      const data = await client.put('report/upload', { body }).json()
 
       return { success: true, status: 200, data }
     } catch (err) {
-      return /** @type {SocketSdkErrorType<'createReport'>} */ (handleApiError(err))
+      return /** @type {SocketSdkErrorType<'createReport'>} */ (this.#handleApiError(err))
     }
   }
 
@@ -90,10 +121,11 @@ export class SocketSdk {
     const versionParam = encodeURIComponent(version)
 
     try {
-      const data = await this.#client.get(`npm/${pkgParam}/${versionParam}/score`).json()
+      const client = await this.#getClient()
+      const data = await client.get(`npm/${pkgParam}/${versionParam}/score`).json()
       return { success: true, status: 200, data }
     } catch (err) {
-      return /** @type {SocketSdkErrorType<'getScoreByNPMPackage'>} */ (handleApiError(err))
+      return /** @type {SocketSdkErrorType<'getScoreByNPMPackage'>} */ (this.#handleApiError(err))
     }
   }
 
@@ -107,20 +139,22 @@ export class SocketSdk {
     const versionParam = encodeURIComponent(version)
 
     try {
-      const data = await this.#client.get(`npm/${pkgParam}/${versionParam}/issues`).json()
+      const client = await this.#getClient()
+      const data = await client.get(`npm/${pkgParam}/${versionParam}/issues`).json()
       return { success: true, status: 200, data }
     } catch (err) {
-      return /** @type {SocketSdkErrorType<'getIssuesByNPMPackage'>} */ (handleApiError(err))
+      return /** @type {SocketSdkErrorType<'getIssuesByNPMPackage'>} */ (this.#handleApiError(err))
     }
   }
 
   /** @returns {Promise<SocketSdkResultType<'getReportList'>>} */
   async getReportList () {
     try {
-      const data = await this.#client.get('report/list').json()
+      const client = await this.#getClient()
+      const data = await client.get('report/list').json()
       return { success: true, status: 200, data }
     } catch (err) {
-      return /** @type {SocketSdkErrorType<'getReportList'>} */ (handleApiError(err))
+      return /** @type {SocketSdkErrorType<'getReportList'>} */ (this.#handleApiError(err))
     }
   }
 
@@ -132,20 +166,75 @@ export class SocketSdk {
     const idParam = encodeURIComponent(id)
 
     try {
-      const data = await this.#client.get(`report/view/${idParam}`).json()
+      const client = await this.#getClient()
+      const data = await client.get(`report/view/${idParam}`).json()
       return { success: true, status: 200, data }
     } catch (err) {
-      return /** @type {SocketSdkErrorType<'getReport'>} */ (handleApiError(err))
+      return /** @type {SocketSdkErrorType<'getReport'>} */ (this.#handleApiError(err))
     }
   }
 
   /** @returns {Promise<SocketSdkResultType<'getQuota'>>} */
   async getQuota () {
     try {
-      const data = await this.#client.get('quota').json()
+      const client = await this.#getClient()
+      const data = await client.get('quota').json()
       return { success: true, status: 200, data }
     } catch (err) {
-      return /** @type {SocketSdkErrorType<'getQuota'>} */ (handleApiError(err))
+      return /** @type {SocketSdkErrorType<'getQuota'>} */ (this.#handleApiError(err))
     }
   }
+
+  /**
+   * @param {unknown} err
+   * @returns {{ success: false, status: number, error: Record<string,unknown> }}
+   */
+  #handleApiError (err) {
+    if (this.#HTTPError && err instanceof this.#HTTPError) {
+      if (err.response.statusCode >= 500) {
+        throw new ErrorWithCause('API returned an error', { cause: err })
+      }
+
+      return {
+        success: false,
+        status: err.response.statusCode,
+        error: this.#getApiErrorDescription(err)
+      }
+    }
+
+    throw new ErrorWithCause('Unexpected error when calling API', { cause: err })
+  }
+
+  /**
+   * @param {import('got').HTTPError} err
+   * @returns {Record<string,unknown>}
+   */
+  #getApiErrorDescription (err) {
+    /** @type {unknown} */
+    let rawBody
+
+    try {
+      rawBody = JSON.parse(/** @type {string} */ (err.response.body))
+    } catch (cause) {
+      throw new ErrorWithCause('Could not parse API error response', { cause })
+    }
+
+    const errorDescription = ensureObject(rawBody) ? rawBody['error'] : undefined
+
+    if (!ensureObject(errorDescription)) {
+      throw new Error('Invalid body on API error response')
+    }
+
+    return errorDescription
+  }
 }
+
+/**
+ * @param {unknown} value
+ * @returns {value is { [key: string]: unknown }}
+ */
+function ensureObject (value) {
+  return !!(value && typeof value === 'object' && !Array.isArray(value))
+}
+
+module.exports = { SocketSdk }
