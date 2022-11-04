@@ -1,14 +1,21 @@
-import openapiTS from 'openapi-typescript'
+'use strict'
 
-const localPath = new URL('../openapi.json', import.meta.url)
+Promise.resolve().then(async () => {
+  const { default: openapiTS } = await import('openapi-typescript')
 
-const output = await openapiTS(localPath, {
-  formatter (node) {
-    if (node.format === 'binary') {
-      return 'never'
+  const localPath = new URL('../openapi.json', import.meta.url)
+    const output = await openapiTS(localPath, {
+    formatter (node) {
+      if (node.format === 'binary') {
+        return 'never'
+      }
     }
-  }
-})
+  })
 
-// eslint-disable-next-line no-console
-console.log(output)
+  // eslint-disable-next-line no-console
+  console.log(output)
+}).catch(err => {
+  // eslint-disable-next-line no-console
+  console.error('Failed with error:', err.stack)
+  process.exit(1)
+})
