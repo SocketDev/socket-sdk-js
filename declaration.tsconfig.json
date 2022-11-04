@@ -2,6 +2,7 @@
 {
   "extends": "./tsconfig",
   "exclude": [
+    "build/**/*.js",
     "test/**/*.js"
   ],
   "compilerOptions": {
