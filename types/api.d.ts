@@ -25,6 +25,7 @@ export interface paths {
     /**
      * Upload a lockfile to get your project analyzed by Socket.
      * You can upload multiple lockfiles in the same request, but each filename must be unique.
+     *
      * The name of the file must be in the supported list.
      *
      * The supported lockfiles (and filenames) are: `package.json` and `package-lock.json`.
@@ -1902,6 +1903,7 @@ export interface operations {
   /**
    * Upload a lockfile to get your project analyzed by Socket.
    * You can upload multiple lockfiles in the same request, but each filename must be unique.
+   *
    * The name of the file must be in the supported list.
    *
    * The supported lockfiles (and filenames) are: `package.json` and `package-lock.json`.
@@ -1924,7 +1926,6 @@ export interface operations {
       400: components["responses"]["SocketBadRequest"];
       401: components["responses"]["SocketUnauthorized"];
       403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
       429: components["responses"]["SocketTooManyRequestsResponse"];
     };
     requestBody: {
