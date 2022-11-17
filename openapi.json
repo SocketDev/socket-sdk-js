@@ -6034,7 +6034,7 @@
           "Project report"
         ],
         "summary": "Create a report",
-        "description": "Upload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\nThe name of the file must be in the supported list.\n\nThe supported lockfiles (and filenames) are: `package.json` and `package-lock.json`.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.",
+        "description": "Upload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nThe supported lockfiles (and filenames) are: `package.json` and `package-lock.json`.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.",
         "operationId": "createReport",
         "requestBody": {
           "content": {
@@ -6084,9 +6084,6 @@
           },
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
