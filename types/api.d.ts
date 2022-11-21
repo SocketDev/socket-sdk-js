@@ -17,6 +17,10 @@ export interface paths {
     /** Get all the scores and metrics by category that are used to evaluate the package version. */
     get: operations["getScoreByNPMPackage"];
   };
+  "/report/delete/{id}": {
+    /** Delete a specific project report. */
+    delete: operations["deleteReport"];
+  };
   "/report/list": {
     /** Get all your project reports. */
     get: operations["getReportList"];
@@ -1870,6 +1874,30 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["SocketPackageScore"];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /** Delete a specific project report. */
+  deleteReport: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** Success */
+      200: {
+        content: {
+          "application/json": {
+            /** @default ok */
+            status: string;
+          };
         };
       };
       400: components["responses"]["SocketBadRequest"];
