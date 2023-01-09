@@ -789,6 +789,19 @@ export interface components {
       }> &
       Partial<{
         /** @enum {string} */
+        type?: "unpublished";
+        value?: components["schemas"]["SocketIssueBasics"] & {
+          /** @default */
+          description: string;
+          props: {
+            /** @default */
+            version: string;
+          };
+          usage?: components["schemas"]["SocketUsageRef"];
+        };
+      }> &
+      Partial<{
+        /** @enum {string} */
         type?: "majorRefactor";
         value?: components["schemas"]["SocketIssueBasics"] & {
           /** @default */
@@ -1035,6 +1048,19 @@ export interface components {
             id: number;
             /** @default */
             note: string;
+          };
+          usage?: components["schemas"]["SocketUsageRef"];
+        };
+      }> &
+      Partial<{
+        /** @enum {string} */
+        type?: "gptMalware";
+        value?: components["schemas"]["SocketIssueBasics"] & {
+          /** @default */
+          description: string;
+          props: {
+            /** @default */
+            notes: string;
           };
           usage?: components["schemas"]["SocketUsageRef"];
         };
