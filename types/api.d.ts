@@ -66,6 +66,10 @@ export interface components {
       depscore: number;
     };
     SocketReport: {
+      /** @default */
+      id: string;
+      /** @default false */
+      healthy: boolean;
       issues: components["schemas"]["SocketIssueList"];
       score: {
         /** @default 0 */
@@ -1984,7 +1988,9 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "multipart/form-data": { [key: string]: never };
+        "multipart/form-data": {
+          issueRules?: { [key: string]: boolean };
+        } & { [key: string]: never };
       };
     };
   };
