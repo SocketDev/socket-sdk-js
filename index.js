@@ -74,14 +74,15 @@ class SocketSdk {
   /**
    * @param {string[]} filePaths
    * @param {string} pathsRelativeTo
+   * @param {{ [key: string]: boolean }} [issueRules]
    * @returns {Promise<SocketSdkResultType<'createReport'>>}
    */
-   async createReportFromFilePaths (filePaths, pathsRelativeTo = '.') {
+   async createReportFromFilePaths (filePaths, pathsRelativeTo = '.', issueRules) {
     const basePath = path.resolve(process.cwd(), pathsRelativeTo)
     const absoluteFilePaths = filePaths.map(filePath => path.resolve(basePath, filePath))
 
     const [
-      { FormData },
+      { FormData, Blob },
       { fileFromPath },
       client
     ] = await Promise.all([
@@ -91,6 +92,11 @@ class SocketSdk {
     ])
 
     const body = new FormData()
+
+    if (issueRules) {
+      const issueRulesBlob = new Blob([JSON.stringify(issueRules)], { type: 'application/json' })
+      body.set('issueRules', issueRulesBlob, 'issueRules')
+    }
 
     const files = await Promise.all(absoluteFilePaths.map(absoluteFilePath => fileFromPath(absoluteFilePath)))
 
