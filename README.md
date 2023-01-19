@@ -48,9 +48,10 @@ const { SocketSdk } = require('@socketsecurity/sdk')
 
 ### Report methods
 
-* `createReportFromFilePaths(filePaths, pathsRelativeTo=.)`
+* `createReportFromFilePaths(filePaths, pathsRelativeTo=., [issueRules])`
   * `filePaths`: An `array` of absolute or relative `string` paths to `package.json` and any corresponding `package-lock.json` files
   * `pathsRelativeTo`: A `string` path that the absolute paths `filePaths` are relative to. This to calculate where in your project the `package.json`/`package-lock.json` files lives
+  * `issueRules`: An object that follows the format of the [`socket.yml`](https://docs.socket.dev/docs/socket-yml) issue rules. Keys being issue names, values being a boolean that activates or deactivates it. Is applied on top of default config and organization config.
 * `getReportList()`
 * `getReport(id)`
   * `id`: A `string` representing the id of a created report
