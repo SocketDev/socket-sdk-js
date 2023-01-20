@@ -4,6 +4,8 @@ const path = require('node:path')
 
 const { ErrorWithCause } = require('pony-cause')
 
+const pkg = require('./package.json')
+
 /**
  * @template {keyof import('./types/api').operations} T
  * @typedef {import('./types/api-helpers').OpReturnType<import('./types/api').operations[T]>} SocketSdkReturnType
@@ -23,6 +25,7 @@ const { ErrorWithCause } = require('pony-cause')
  * @typedef SocketSdkOptions
  * @property {import('got').Agents} [agent]
  * @property {string} [baseUrl]
+ * @property {string} [userAgent]
  */
 
 class SocketSdk {
@@ -44,12 +47,16 @@ class SocketSdk {
     const {
       agent,
       baseUrl = 'https://api.socket.dev/v0/',
+      userAgent,
     } = options
 
     this.#gotOptions = {
       prefixUrl: baseUrl,
       retry: { limit: 0 },
       username: apiKey,
+      headers: {
+        'user-agent': (userAgent ? userAgent + ' ' : '') + createUserAgentFromPkgJson(pkg),
+      },
       ...(agent ? { agent } : {}),
     }
   }
@@ -243,4 +250,15 @@ function ensureObject (value) {
   return !!(value && typeof value === 'object' && !Array.isArray(value))
 }
 
-module.exports = { SocketSdk }
+/**
+ * @param {{ name: string, version: string, homepage?: string }} pkgData Package.json data to base the User-Agent on
+ * @returns {string}
+ */
+function createUserAgentFromPkgJson (pkgData) {
+  return `${pkgData.name.replace('@', '').replace('/', '-')}/${pkgData.version}` + (pkgData.homepage ? ` (${pkgData.homepage})` : '')
+}
+
+module.exports = {
+  createUserAgentFromPkgJson,
+  SocketSdk,
+}
