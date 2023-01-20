@@ -60,8 +60,42 @@ const { SocketSdk } = require('@socketsecurity/sdk')
 
 * `getQuota()`
 
+## Additional exports
+
+* `createUserAgentFromPkgJson(pkgJson)`
+  * `pkgJson`: The content of the `package.json` you want to create a `User-Agent` string for
+
+## Advanced
+
+### Specifying custom user agent
+
+The `SocketSdk` constructor accepts an `options` object as its second argument and there a `userAgent` key with a string value can be specified. If specified then that user agent will be prepended to the SDK user agent. See this example:
+
+```js
+const client = new SocketSdk('yourApiKeyHere', {
+  userAgent: 'example/1.2.3 (http://example.com/)'
+})
+```
+
+Which results in the [HTTP `User-Agent` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent):
+
+```
+User-Agent: example/1.2.3 (http://example.com/) socketsecurity-sdk/0.5.2 (https://github.com/SocketDev/socket-sdk-js)
+```
+
+To easily create a user agent for your code you can use the additional export `createUserAgentFromPkgJson()` like this, assuming `pkgJson` contains your parsed `package.json`:
+
+```js
+const client = new SocketSdk('yourApiKeyHere', {
+  userAgent: createUserAgentFromPkgJson(pkgJson)
+})
+```
+
+Specifying a custom user agent is good practice when shipping a piece of code that others can use to make requests. Eg. [our CLI](https://github.com/SocketDev/socket-cli-js) uses this option to identify requests coming from it + mentioning which version of it that is used.
+
 ## See also
 
 * [Socket API Reference](https://docs.socket.dev/reference)
 * [Socket.dev](https://socket.dev/)
 * [Socket GitHub App](https://github.com/apps/socket-security)
+* [Socket CLI](https://github.com/SocketDev/socket-cli-js)
