@@ -54,6 +54,7 @@ class SocketSdk {
       prefixUrl: baseUrl,
       retry: { limit: 0 },
       username: apiKey,
+      enableUnixSockets: false, // See https://github.com/sindresorhus/got/blob/main/documentation/2-options.md#enableunixsockets
       headers: {
         'user-agent': (userAgent ? userAgent + ' ' : '') + createUserAgentFromPkgJson(pkg),
       },
