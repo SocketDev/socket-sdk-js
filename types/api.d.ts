@@ -10,19 +10,33 @@ export interface paths {
      * This endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.
      *
      * You can [see here](https://socket.dev/npm/issue) the full list of issues.
+     *
+     * This endpoint consumes 1 unit of your quota.
      */
     get: operations["getIssuesByNPMPackage"];
   };
   "/npm/{package}/{version}/score": {
-    /** Get all the scores and metrics by category that are used to evaluate the package version. */
+    /**
+     * Get all the scores and metrics by category that are used to evaluate the package version.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     */
     get: operations["getScoreByNPMPackage"];
   };
   "/report/delete/{id}": {
-    /** Delete a specific project report. */
+    /**
+     * Delete a specific project report.
+     *
+     * This endpoint consumes 10 units of your quota.
+     */
     delete: operations["deleteReport"];
   };
   "/report/list": {
-    /** Get all your project reports. */
+    /**
+     * Get all your project reports.
+     *
+     * This endpoint consumes 10 units of your quota.
+     */
     get: operations["getReportList"];
   };
   "/report/upload": {
@@ -35,19 +49,33 @@ export interface paths {
      * The supported lockfiles (and filenames) are: `package.json` and `package-lock.json`.
      *
      * For example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.
+     *
+     * This endpoint consumes 100 units of your quota.
      */
     put: operations["createReport"];
   };
   "/report/view/{id}": {
-    /** Get all the issues, packages, and scores related to an specific project report. */
+    /**
+     * Get all the issues, packages, and scores related to an specific project report.
+     *
+     * This endpoint consumes 10 units of your quota.
+     */
     get: operations["getReport"];
   };
   "/openapi": {
-    /** Retrieve the API specification in an Openapi JSON format. */
+    /**
+     * Retrieve the API specification in an Openapi JSON format.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
     get: operations["getOpenAPI"];
   };
   "/quota": {
-    /** Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota. */
+    /**
+     * Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
     get: operations["getQuota"];
   };
 }
@@ -825,6 +853,16 @@ export interface components {
       }> &
       Partial<{
         /** @enum {string} */
+        type?: "missingTarball";
+        value?: components["schemas"]["SocketIssueBasics"] & {
+          /** @default */
+          description: string;
+          props: { [key: string]: unknown };
+          usage?: components["schemas"]["SocketUsageRef"];
+        };
+      }> &
+      Partial<{
+        /** @enum {string} */
         type?: "unsafeCopyright";
         value?: components["schemas"]["SocketIssueBasics"] & {
           /** @default */
@@ -1073,6 +1111,16 @@ export interface components {
       /** @default 0 */
       score: number;
       components: {
+        downloadCount: {
+          /** @default 0 */
+          score: number;
+          /** @default 0 */
+          maxScore: number;
+          /** @default 0 */
+          limit: number;
+          /** @default 0 */
+          value: number;
+        };
         supplyChainRiskIssueLow: {
           /** @default 0 */
           score: number;
@@ -1133,16 +1181,6 @@ export interface components {
           /** @default 0 */
           value: number;
         };
-        unusedDependencyCount: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
         transitiveDependencyCount: {
           /** @default 0 */
           score: number;
@@ -1163,16 +1201,6 @@ export interface components {
           /** @default 0 */
           value: number;
         };
-        downloadCount: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
       };
       /** @default 0 */
       limit?: number;
@@ -1180,17 +1208,7 @@ export interface components {
        * @default 0
        * @enum {string}
        */
-      limitingMetric?:
-        | "0"
-        | "1"
-        | "2"
-        | "3"
-        | "4"
-        | "5"
-        | "6"
-        | "7"
-        | "8"
-        | "9";
+      limitingMetric?: "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
     };
     SocketQualityScore: {
       /** @default 0 */
@@ -1319,46 +1337,6 @@ export interface components {
       /** @default 0 */
       score: number;
       components: {
-        maintenanceIssueLow: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        maintenanceIssueMid: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        maintenanceIssueHigh: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        maintenanceIssueCritical: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
         maintainerCount: {
           /** @default 0 */
           score: number;
@@ -1410,6 +1388,46 @@ export interface components {
           value: number;
         };
         versionCount: {
+          /** @default 0 */
+          score: number;
+          /** @default 0 */
+          maxScore: number;
+          /** @default 0 */
+          limit: number;
+          /** @default 0 */
+          value: number;
+        };
+        maintenanceIssueLow: {
+          /** @default 0 */
+          score: number;
+          /** @default 0 */
+          maxScore: number;
+          /** @default 0 */
+          limit: number;
+          /** @default 0 */
+          value: number;
+        };
+        maintenanceIssueMid: {
+          /** @default 0 */
+          score: number;
+          /** @default 0 */
+          maxScore: number;
+          /** @default 0 */
+          limit: number;
+          /** @default 0 */
+          value: number;
+        };
+        maintenanceIssueHigh: {
+          /** @default 0 */
+          score: number;
+          /** @default 0 */
+          maxScore: number;
+          /** @default 0 */
+          limit: number;
+          /** @default 0 */
+          value: number;
+        };
+        maintenanceIssueCritical: {
           /** @default 0 */
           score: number;
           /** @default 0 */
@@ -1869,6 +1887,8 @@ export interface operations {
    * This endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.
    *
    * You can [see here](https://socket.dev/npm/issue) the full list of issues.
+   *
+   * This endpoint consumes 1 unit of your quota.
    */
   getIssuesByNPMPackage: {
     parameters: {
@@ -1891,7 +1911,11 @@ export interface operations {
       429: components["responses"]["SocketTooManyRequestsResponse"];
     };
   };
-  /** Get all the scores and metrics by category that are used to evaluate the package version. */
+  /**
+   * Get all the scores and metrics by category that are used to evaluate the package version.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   */
   getScoreByNPMPackage: {
     parameters: {
       path: {
@@ -1913,7 +1937,11 @@ export interface operations {
       429: components["responses"]["SocketTooManyRequestsResponse"];
     };
   };
-  /** Delete a specific project report. */
+  /**
+   * Delete a specific project report.
+   *
+   * This endpoint consumes 10 units of your quota.
+   */
   deleteReport: {
     parameters: {
       path: {
@@ -1937,7 +1965,11 @@ export interface operations {
       429: components["responses"]["SocketTooManyRequestsResponse"];
     };
   };
-  /** Get all your project reports. */
+  /**
+   * Get all your project reports.
+   *
+   * This endpoint consumes 10 units of your quota.
+   */
   getReportList: {
     responses: {
       /** List of project reports */
@@ -1967,6 +1999,8 @@ export interface operations {
    * The supported lockfiles (and filenames) are: `package.json` and `package-lock.json`.
    *
    * For example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.
+   *
+   * This endpoint consumes 100 units of your quota.
    */
   createReport: {
     responses: {
@@ -1994,7 +2028,11 @@ export interface operations {
       };
     };
   };
-  /** Get all the issues, packages, and scores related to an specific project report. */
+  /**
+   * Get all the issues, packages, and scores related to an specific project report.
+   *
+   * This endpoint consumes 10 units of your quota.
+   */
   getReport: {
     parameters: {
       path: {
@@ -2015,7 +2053,11 @@ export interface operations {
       429: components["responses"]["SocketTooManyRequestsResponse"];
     };
   };
-  /** Retrieve the API specification in an Openapi JSON format. */
+  /**
+   * Retrieve the API specification in an Openapi JSON format.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
   getOpenAPI: {
     responses: {
       /** OpenAPI specification */
@@ -2027,7 +2069,11 @@ export interface operations {
       429: components["responses"]["SocketTooManyRequestsResponse"];
     };
   };
-  /** Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota. */
+  /**
+   * Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
   getQuota: {
     responses: {
       /** Quota amount */
