@@ -5821,7 +5821,7 @@
                 ]
               },
               "value": {
-                "$ref": "#/components/schemas/SocketRefNPM"
+                "$ref": "#/components/schemas/SocketRefPyPI"
               }
             }
           },
@@ -5852,6 +5852,21 @@
               },
               "value": {
                 "$ref": "#/components/schemas/SocketRefWeb"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "pypi"
+                ]
+              },
+              "value": {
+                "$ref": "#/components/schemas/SocketRefPyPI"
               }
             }
           }
@@ -5903,7 +5918,7 @@
           "start"
         ]
       },
-      "SocketRefNPM": {
+      "SocketRefPyPI": {
         "type": "object",
         "additionalProperties": false,
         "properties": {

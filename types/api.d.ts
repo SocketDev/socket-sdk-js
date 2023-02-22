@@ -1764,7 +1764,7 @@ export interface components {
       Partial<{
         /** @enum {string} */
         type?: "npm";
-        value?: components["schemas"]["SocketRefNPM"];
+        value?: components["schemas"]["SocketRefPyPI"];
       }> &
       Partial<{
         /** @enum {string} */
@@ -1775,6 +1775,11 @@ export interface components {
         /** @enum {string} */
         type?: "web";
         value?: components["schemas"]["SocketRefWeb"];
+      }> &
+      Partial<{
+        /** @enum {string} */
+        type?: "pypi";
+        value?: components["schemas"]["SocketRefPyPI"];
       }>;
     SocketRefTextRange: {
       /** @default 0 */
@@ -1792,7 +1797,7 @@ export interface components {
       /** @default 0 */
       end: number;
     };
-    SocketRefNPM: {
+    SocketRefPyPI: {
       /** @default */
       package: string;
       /** @default */
