@@ -3,12 +3,12 @@ name: Type Checks
 on:
   push:
     branches:
-      - main
+      - master
     tags:
       - '*'
   pull_request:
     branches:
-      - main
+      - master
   schedule:
     - cron: '14 5 * * 1,3,5'
 
