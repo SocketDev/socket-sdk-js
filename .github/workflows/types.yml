@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   type-check:
-    uses: SocketDev/workflows/.github/workflows/type-check.yml@main
+    uses: SocketDev/workflows/.github/workflows/type-check.yml@master
     with:
       ts-versions: ${{ github.event.schedule && 'next' || '4.9,next' }}
       ts-libs: 'es2020;esnext'
