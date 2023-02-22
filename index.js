@@ -6,18 +6,20 @@ const { ErrorWithCause } = require('pony-cause')
 
 const pkg = require('./package.json')
 
+/** @typedef {keyof import('./types/api').operations} SocketSdkOperations */
+
 /**
- * @template {keyof import('./types/api').operations} T
+ * @template {SocketSdkOperations} T
  * @typedef {import('./types/api-helpers').OpReturnType<import('./types/api').operations[T]>} SocketSdkReturnType
  */
 
 /**
- * @template {keyof import('./types/api').operations} T
+ * @template {SocketSdkOperations} T
  * @typedef {import('./types/api-helpers').OpErrorType<import('./types/api').operations[T]>} SocketSdkErrorType
  */
 
 /**
- * @template {keyof import('./types/api').operations} T
+ * @template {SocketSdkOperations} T
  * @typedef {SocketSdkReturnType<T> | SocketSdkErrorType<T>} SocketSdkResultType
  */
 
