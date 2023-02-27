@@ -1775,6 +1775,11 @@ export interface components {
         /** @enum {string} */
         type?: "web";
         value?: components["schemas"]["SocketRefWeb"];
+      }> &
+      Partial<{
+        /** @enum {string} */
+        type?: "pypi";
+        value?: components["schemas"]["SocketRefPyPI"];
       }>;
     SocketRefTextRange: {
       /** @default 0 */
@@ -1811,6 +1816,13 @@ export interface components {
     SocketRefWeb: {
       /** @default */
       url: string;
+      file?: components["schemas"]["SocketRefFile"];
+    };
+    SocketRefPyPI: {
+      /** @default */
+      package: string;
+      /** @default */
+      version?: string;
       file?: components["schemas"]["SocketRefFile"];
     };
   };
