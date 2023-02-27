@@ -14,7 +14,6 @@
     "requestBodies": {},
     "responses": {
       "SocketBadRequest": {
-        "description": "Bad request",
         "content": {
           "application/json": {
             "schema": {
@@ -40,10 +39,10 @@
               ]
             }
           }
-        }
+        },
+        "description": "Bad request"
       },
       "SocketUnauthorized": {
-        "description": "Unauthorized",
         "content": {
           "application/json": {
             "schema": {
@@ -69,10 +68,10 @@
               ]
             }
           }
-        }
+        },
+        "description": "Unauthorized"
       },
       "SocketForbidden": {
-        "description": "Insufficient max_quota for API method",
         "content": {
           "application/json": {
             "schema": {
@@ -98,10 +97,10 @@
               ]
             }
           }
-        }
+        },
+        "description": "Insufficient max_quota for API method"
       },
       "SocketNotFoundResponse": {
-        "description": "Resource not found",
         "content": {
           "application/json": {
             "schema": {
@@ -127,7 +126,8 @@
               ]
             }
           }
-        }
+        },
+        "description": "Resource not found"
       },
       "SocketTooManyRequestsResponse": {
         "description": "Insufficient quota for API route",
@@ -5854,6 +5854,21 @@
                 "$ref": "#/components/schemas/SocketRefWeb"
               }
             }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "pypi"
+                ]
+              },
+              "value": {
+                "$ref": "#/components/schemas/SocketRefPyPI"
+              }
+            }
           }
         ]
       },
@@ -5962,6 +5977,26 @@
         "required": [
           "url"
         ]
+      },
+      "SocketRefPyPI": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "package": {
+            "type": "string",
+            "default": ""
+          },
+          "version": {
+            "type": "string",
+            "default": ""
+          },
+          "file": {
+            "$ref": "#/components/schemas/SocketRefFile"
+          }
+        },
+        "required": [
+          "package"
+        ]
       }
     },
     "securitySchemes": {
@@ -5983,7 +6018,6 @@
           "NPM"
         ],
         "summary": "Get issues by package",
-        "description": "Get all the issues related with a particular npm package version.\nThis endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.\n\nYou can [see here](https://socket.dev/npm/issue) the full list of issues.\n\nThis endpoint consumes 1 unit of your quota.",
         "operationId": "getIssuesByNPMPackage",
         "parameters": [
           {
@@ -6004,16 +6038,17 @@
             }
           }
         ],
+        "description": "Get all the issues related with a particular npm package version.\nThis endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.\n\nYou can [see here](https://socket.dev/npm/issue) the full list of issues.\n\nThis endpoint consumes 1 unit of your quota.",
         "responses": {
           "200": {
-            "description": "Socket issue lists",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SocketIssueList"
                 }
               }
-            }
+            },
+            "description": "Socket issue lists"
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -6040,7 +6075,6 @@
           "NPM"
         ],
         "summary": "Get score by package",
-        "description": "Get all the scores and metrics by category that are used to evaluate the package version.\n\nThis endpoint consumes 1 unit of your quota.",
         "operationId": "getScoreByNPMPackage",
         "parameters": [
           {
@@ -6061,16 +6095,17 @@
             }
           }
         ],
+        "description": "Get all the scores and metrics by category that are used to evaluate the package version.\n\nThis endpoint consumes 1 unit of your quota.",
         "responses": {
           "200": {
-            "description": "Socket package scores",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SocketPackageScore"
                 }
               }
-            }
+            },
+            "description": "Socket package scores"
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -6097,7 +6132,6 @@
           "Project report"
         ],
         "summary": "Delete a report",
-        "description": "Delete a specific project report.\n\nThis endpoint consumes 10 units of your quota.",
         "operationId": "deleteReport",
         "parameters": [
           {
@@ -6109,9 +6143,9 @@
             }
           }
         ],
+        "description": "Delete a specific project report.\n\nThis endpoint consumes 10 units of your quota.",
         "responses": {
           "200": {
-            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -6128,7 +6162,8 @@
                   ]
                 }
               }
-            }
+            },
+            "description": "Success"
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -6155,11 +6190,10 @@
           "Project report"
         ],
         "summary": "Get list of reports",
-        "description": "Get all your project reports.\n\nThis endpoint consumes 10 units of your quota.",
         "operationId": "getReportList",
+        "description": "Get all your project reports.\n\nThis endpoint consumes 10 units of your quota.",
         "responses": {
           "200": {
-            "description": "List of project reports",
             "content": {
               "application/json": {
                 "schema": {
@@ -6184,7 +6218,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "List of project reports"
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -6211,7 +6246,6 @@
           "Project report"
         ],
         "summary": "Create a report",
-        "description": "Upload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nThe supported lockfiles (and filenames) are: `package.json` and `package-lock.json`.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.\n\nThis endpoint consumes 100 units of your quota.",
         "operationId": "createReport",
         "requestBody": {
           "content": {
@@ -6234,11 +6268,12 @@
                 }
               }
             }
-          }
+          },
+          "required": false
         },
+        "description": "Upload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nThe supported lockfiles (and filenames) are: `package.json` and `package-lock.json`.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.\n\nThis endpoint consumes 100 units of your quota.",
         "responses": {
           "200": {
-            "description": "ID and URL of the project report",
             "content": {
               "application/json": {
                 "schema": {
@@ -6260,7 +6295,8 @@
                   ]
                 }
               }
-            }
+            },
+            "description": "ID and URL of the project report"
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -6284,7 +6320,6 @@
           "Project report"
         ],
         "summary": "View a report",
-        "description": "Get all the issues, packages, and scores related to an specific project report.\n\nThis endpoint consumes 10 units of your quota.",
         "operationId": "getReport",
         "parameters": [
           {
@@ -6296,16 +6331,17 @@
             }
           }
         ],
+        "description": "Get all the issues, packages, and scores related to an specific project report.\n\nThis endpoint consumes 10 units of your quota.",
         "responses": {
           "200": {
-            "description": "Socket report",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SocketReport"
                 }
               }
-            }
+            },
+            "description": "Socket report"
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -6332,14 +6368,14 @@
           "Openapi"
         ],
         "summary": "Returns the OpenAPI definition",
-        "description": "Retrieve the API specification in an Openapi JSON format.\n\nThis endpoint consumes 0 units of your quota.",
         "operationId": "getOpenAPI",
+        "description": "Retrieve the API specification in an Openapi JSON format.\n\nThis endpoint consumes 0 units of your quota.",
         "responses": {
           "200": {
-            "description": "OpenAPI specification",
             "content": {
               "application/json": {}
-            }
+            },
+            "description": "OpenAPI specification"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -6354,11 +6390,10 @@
           "Quota"
         ],
         "summary": "Get quota",
-        "description": "Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.\n\nThis endpoint consumes 0 units of your quota.",
         "operationId": "getQuota",
+        "description": "Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.\n\nThis endpoint consumes 0 units of your quota.",
         "responses": {
           "200": {
-            "description": "Quota amount",
             "content": {
               "application/json": {
                 "schema": {
@@ -6376,7 +6411,8 @@
                   ]
                 }
               }
-            }
+            },
+            "description": "Quota amount"
           },
           "401": {
             "$ref": "#/components/responses/SocketUnauthorized"
