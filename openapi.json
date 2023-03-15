@@ -3,7 +3,7 @@
   "info": {
     "description": "Specification of the Socket API endpoints",
     "title": "API Endpoints",
-    "version": "0.0.1"
+    "version": "0.1.0"
   },
   "servers": [
     {
@@ -6254,6 +6254,10 @@
                 "type": "object",
                 "additionalProperties": {
                   "type": "string",
+                  "default": {
+                    "type": "Buffer",
+                    "data": []
+                  },
                   "format": "binary"
                 },
                 "properties": {
