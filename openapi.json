@@ -259,13 +259,18 @@
               "avgSupplyChainRisk",
               "avgVulnerability"
             ]
+          },
+          "url": {
+            "type": "string",
+            "default": ""
           }
         },
         "required": [
           "healthy",
           "id",
           "issues",
-          "score"
+          "score",
+          "url"
         ]
       },
       "SocketIssue": {
@@ -3992,13 +3997,104 @@
                         "type": "object",
                         "additionalProperties": false,
                         "properties": {
-                          "notes": {
-                            "type": "string",
-                            "default": ""
+                          "issues": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "default": ""
+                            }
+                          },
+                          "analysis": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "default": ""
+                            }
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "default": 0
+                          },
+                          "severity": {
+                            "type": "number",
+                            "default": 0
                           }
                         },
                         "required": [
-                          "notes"
+                          "analysis",
+                          "confidence",
+                          "issues",
+                          "severity"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "gptSecurity"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "issues": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "default": ""
+                            }
+                          },
+                          "analysis": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "default": ""
+                            }
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "default": 0
+                          },
+                          "severity": {
+                            "type": "number",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "analysis",
+                          "confidence",
+                          "issues",
+                          "severity"
                         ]
                       },
                       "usage": {
