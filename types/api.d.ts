@@ -111,6 +111,8 @@ export interface components {
         /** @default 0 */
         avgLicense: number;
       };
+      /** @default */
+      url: string;
     };
     SocketIssue: Partial<{
       /** @enum {string} */
@@ -1101,8 +1103,29 @@ export interface components {
           /** @default */
           description: string;
           props: {
-            /** @default */
-            notes: string;
+            issues: string[];
+            analysis: string[];
+            /** @default 0 */
+            confidence: number;
+            /** @default 0 */
+            severity: number;
+          };
+          usage?: components["schemas"]["SocketUsageRef"];
+        };
+      }> &
+      Partial<{
+        /** @enum {string} */
+        type?: "gptSecurity";
+        value?: components["schemas"]["SocketIssueBasics"] & {
+          /** @default */
+          description: string;
+          props: {
+            issues: string[];
+            analysis: string[];
+            /** @default 0 */
+            confidence: number;
+            /** @default 0 */
+            severity: number;
           };
           usage?: components["schemas"]["SocketUsageRef"];
         };
