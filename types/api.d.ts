@@ -1098,13 +1098,13 @@ export interface components {
       }> &
       Partial<{
         /** @enum {string} */
-        type?: "gptMalware";
+        type?: "gptSecurity";
         value?: components["schemas"]["SocketIssueBasics"] & {
           /** @default */
           description: string;
           props: {
-            issues: string[];
-            analysis: string[];
+            /** @default */
+            notes: string;
             /** @default 0 */
             confidence: number;
             /** @default 0 */
@@ -1115,13 +1115,13 @@ export interface components {
       }> &
       Partial<{
         /** @enum {string} */
-        type?: "gptSecurity";
+        type?: "gptAnomaly";
         value?: components["schemas"]["SocketIssueBasics"] & {
           /** @default */
           description: string;
           props: {
-            issues: string[];
-            analysis: string[];
+            /** @default */
+            notes: string;
             /** @default 0 */
             confidence: number;
             /** @default 0 */
@@ -1695,6 +1695,26 @@ export interface components {
       /** @default 0 */
       score: number;
       components: {
+        byteCount: {
+          /** @default 0 */
+          score: number;
+          /** @default 0 */
+          maxScore: number;
+          /** @default 0 */
+          limit: number;
+          /** @default 0 */
+          value: number;
+        };
+        fileCount: {
+          /** @default 0 */
+          score: number;
+          /** @default 0 */
+          maxScore: number;
+          /** @default 0 */
+          limit: number;
+          /** @default 0 */
+          value: number;
+        };
         typeModule: {
           /** @default 0 */
           score: number;
@@ -1704,6 +1724,26 @@ export interface components {
           limit: number;
           /** @default false */
           value: boolean;
+        };
+        versionAuthorEmail: {
+          /** @default 0 */
+          score: number;
+          /** @default 0 */
+          maxScore: number;
+          /** @default 0 */
+          limit: number;
+          /** @default */
+          value: string;
+        };
+        versionAuthorName: {
+          /** @default 0 */
+          score: number;
+          /** @default 0 */
+          maxScore: number;
+          /** @default 0 */
+          limit: number;
+          /** @default */
+          value: string;
         };
         defaultBranch?: {
           /** @default 0 */
@@ -1732,7 +1772,7 @@ export interface components {
        * @default 0
        * @enum {string}
        */
-      limitingMetric?: "0" | "1" | "2";
+      limitingMetric?: "0" | "1" | "2" | "3" | "4" | "5" | "6";
     };
     SocketIssueBasics: {
       severity: components["schemas"]["SocketIssueSeverity"];
@@ -1846,6 +1886,8 @@ export interface components {
       package: string;
       /** @default */
       version?: string;
+      /** @default */
+      artifact?: string;
       file?: components["schemas"]["SocketRefFile"];
     };
   };
