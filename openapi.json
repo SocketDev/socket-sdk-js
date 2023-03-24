@@ -3977,7 +3977,7 @@
               "type": {
                 "type": "string",
                 "enum": [
-                  "gptMalware"
+                  "gptSecurity"
                 ]
               },
               "value": {
@@ -3997,19 +3997,9 @@
                         "type": "object",
                         "additionalProperties": false,
                         "properties": {
-                          "issues": {
-                            "type": "array",
-                            "items": {
-                              "type": "string",
-                              "default": ""
-                            }
-                          },
-                          "analysis": {
-                            "type": "array",
-                            "items": {
-                              "type": "string",
-                              "default": ""
-                            }
+                          "notes": {
+                            "type": "string",
+                            "default": ""
                           },
                           "confidence": {
                             "type": "number",
@@ -4021,9 +4011,8 @@
                           }
                         },
                         "required": [
-                          "analysis",
                           "confidence",
-                          "issues",
+                          "notes",
                           "severity"
                         ]
                       },
@@ -4047,7 +4036,7 @@
               "type": {
                 "type": "string",
                 "enum": [
-                  "gptSecurity"
+                  "gptAnomaly"
                 ]
               },
               "value": {
@@ -4067,19 +4056,9 @@
                         "type": "object",
                         "additionalProperties": false,
                         "properties": {
-                          "issues": {
-                            "type": "array",
-                            "items": {
-                              "type": "string",
-                              "default": ""
-                            }
-                          },
-                          "analysis": {
-                            "type": "array",
-                            "items": {
-                              "type": "string",
-                              "default": ""
-                            }
+                          "notes": {
+                            "type": "string",
+                            "default": ""
                           },
                           "confidence": {
                             "type": "number",
@@ -4091,9 +4070,8 @@
                           }
                         },
                         "required": [
-                          "analysis",
                           "confidence",
-                          "issues",
+                          "notes",
                           "severity"
                         ]
                       },
@@ -5682,6 +5660,62 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
+              "byteCount": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "score": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "maxScore": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "limit": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "value": {
+                    "type": "integer",
+                    "default": 0
+                  }
+                },
+                "required": [
+                  "limit",
+                  "maxScore",
+                  "score",
+                  "value"
+                ]
+              },
+              "fileCount": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "score": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "maxScore": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "limit": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "value": {
+                    "type": "integer",
+                    "default": 0
+                  }
+                },
+                "required": [
+                  "limit",
+                  "maxScore",
+                  "score",
+                  "value"
+                ]
+              },
               "typeModule": {
                 "type": "object",
                 "additionalProperties": false,
@@ -5701,6 +5735,62 @@
                   "value": {
                     "type": "boolean",
                     "default": false
+                  }
+                },
+                "required": [
+                  "limit",
+                  "maxScore",
+                  "score",
+                  "value"
+                ]
+              },
+              "versionAuthorEmail": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "score": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "maxScore": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "limit": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "value": {
+                    "type": "string",
+                    "default": ""
+                  }
+                },
+                "required": [
+                  "limit",
+                  "maxScore",
+                  "score",
+                  "value"
+                ]
+              },
+              "versionAuthorName": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "score": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "maxScore": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "limit": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "value": {
+                    "type": "string",
+                    "default": ""
                   }
                 },
                 "required": [
@@ -5768,7 +5858,11 @@
               }
             },
             "required": [
-              "typeModule"
+              "byteCount",
+              "fileCount",
+              "typeModule",
+              "versionAuthorEmail",
+              "versionAuthorName"
             ]
           },
           "limit": {
@@ -5780,7 +5874,11 @@
             "enum": [
               "0",
               "1",
-              "2"
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
             ],
             "default": "0"
           }
@@ -6083,6 +6181,10 @@
             "default": ""
           },
           "version": {
+            "type": "string",
+            "default": ""
+          },
+          "artifact": {
             "type": "string",
             "default": ""
           },
