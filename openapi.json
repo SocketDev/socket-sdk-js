@@ -180,22 +180,22 @@
         "additionalProperties": false,
         "properties": {
           "supplyChainRisk": {
-            "$ref": "#/components/schemas/SocketSupplyChainScore"
+            "$ref": "#/components/schemas/SocketMetricSchema"
           },
           "quality": {
-            "$ref": "#/components/schemas/SocketQualityScore"
+            "$ref": "#/components/schemas/SocketMetricSchema"
           },
           "maintenance": {
-            "$ref": "#/components/schemas/SocketMaintenanceScore"
+            "$ref": "#/components/schemas/SocketMetricSchema"
           },
           "vulnerability": {
-            "$ref": "#/components/schemas/SocketVulnerabilityScore"
+            "$ref": "#/components/schemas/SocketMetricSchema"
           },
           "license": {
-            "$ref": "#/components/schemas/SocketLicenseScore"
+            "$ref": "#/components/schemas/SocketMetricSchema"
           },
           "miscellaneous": {
-            "$ref": "#/components/schemas/SocketMiscellaneousScore"
+            "$ref": "#/components/schemas/SocketMetricSchema"
           },
           "depscore": {
             "type": "number",
@@ -303,16 +303,20 @@
                         "additionalProperties": false,
                         "properties": {
                           "id": {
-                            "type": "integer",
-                            "default": 0
+                            "type": "string",
+                            "default": ""
                           },
                           "title": {
                             "type": "string",
                             "default": ""
                           },
+                          "description": {
+                            "type": "string",
+                            "default": ""
+                          },
                           "severity": {
                             "type": "string",
-                            "default": "critical"
+                            "default": "low"
                           },
                           "url": {
                             "type": "string",
@@ -320,6 +324,7 @@
                           }
                         },
                         "required": [
+                          "description",
                           "id",
                           "severity",
                           "title",
@@ -367,10 +372,14 @@
                         "additionalProperties": false,
                         "properties": {
                           "id": {
-                            "type": "integer",
-                            "default": 0
+                            "type": "string",
+                            "default": ""
                           },
                           "title": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "description": {
                             "type": "string",
                             "default": ""
                           },
@@ -384,6 +393,7 @@
                           }
                         },
                         "required": [
+                          "description",
                           "id",
                           "severity",
                           "title",
@@ -431,10 +441,14 @@
                         "additionalProperties": false,
                         "properties": {
                           "id": {
-                            "type": "integer",
-                            "default": 0
+                            "type": "string",
+                            "default": ""
                           },
                           "title": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "description": {
                             "type": "string",
                             "default": ""
                           },
@@ -448,6 +462,7 @@
                           }
                         },
                         "required": [
+                          "description",
                           "id",
                           "severity",
                           "title",
@@ -4090,7 +4105,7 @@
           }
         ]
       },
-      "SocketSupplyChainScore": {
+      "SocketMetricSchema": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
@@ -4100,272 +4115,10 @@
           },
           "components": {
             "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "dependencyCount": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "devDependencyCount": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "downloadCount": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "supplyChainRiskIssueCritical": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "supplyChainRiskIssueHigh": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "supplyChainRiskIssueLow": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "supplyChainRiskIssueMid": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "totalDependencyCount": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "transitiveDependencyCount": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              }
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SocketMetricComponent"
             },
-            "required": [
-              "dependencyCount",
-              "devDependencyCount",
-              "downloadCount",
-              "supplyChainRiskIssueCritical",
-              "supplyChainRiskIssueHigh",
-              "supplyChainRiskIssueLow",
-              "supplyChainRiskIssueMid",
-              "totalDependencyCount",
-              "transitiveDependencyCount"
-            ]
+            "properties": {}
           },
           "limit": {
             "type": "number",
@@ -4373,1514 +4126,7 @@
           },
           "limitingMetric": {
             "type": "string",
-            "enum": [
-              "0",
-              "1",
-              "2",
-              "3",
-              "4",
-              "5",
-              "6",
-              "7",
-              "8"
-            ],
-            "default": "0"
-          }
-        },
-        "required": [
-          "components",
-          "score"
-        ]
-      },
-      "SocketQualityScore": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "score": {
-            "type": "number",
-            "default": 0
-          },
-          "components": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "linesOfCode": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "qualityIssueCritical": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "qualityIssueHigh": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "qualityIssueLow": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "qualityIssueMid": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "readmeLength": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "bundlesize": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "forks": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "stargazers": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "watchers": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              }
-            },
-            "required": [
-              "linesOfCode",
-              "qualityIssueCritical",
-              "qualityIssueHigh",
-              "qualityIssueLow",
-              "qualityIssueMid",
-              "readmeLength"
-            ]
-          },
-          "limit": {
-            "type": "number",
-            "default": 0
-          },
-          "limitingMetric": {
-            "type": "string",
-            "enum": [
-              "0",
-              "1",
-              "2",
-              "3",
-              "4",
-              "5",
-              "6",
-              "7",
-              "8",
-              "9"
-            ],
-            "default": "0"
-          }
-        },
-        "required": [
-          "components",
-          "score"
-        ]
-      },
-      "SocketMaintenanceScore": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "score": {
-            "type": "number",
-            "default": 0
-          },
-          "components": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "maintainerCount": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "maintenanceIssueCritical": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "maintenanceIssueHigh": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "maintenanceIssueLow": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "maintenanceIssueMid": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "versionCount": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "versionsLastMonth": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "versionsLastTwoMonths": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "versionsLastWeek": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "versionsLastYear": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "closedIssues": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "commits": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "commitsLastMonth": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "commitsLastTwoMonths": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "commitsLastWeek": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "commitsLastYear": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "openIssues": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              }
-            },
-            "required": [
-              "maintainerCount",
-              "maintenanceIssueCritical",
-              "maintenanceIssueHigh",
-              "maintenanceIssueLow",
-              "maintenanceIssueMid",
-              "versionCount",
-              "versionsLastMonth",
-              "versionsLastTwoMonths",
-              "versionsLastWeek",
-              "versionsLastYear"
-            ]
-          },
-          "limit": {
-            "type": "number",
-            "default": 0
-          },
-          "limitingMetric": {
-            "type": "string",
-            "enum": [
-              "0",
-              "1",
-              "2",
-              "3",
-              "4",
-              "5",
-              "6",
-              "7",
-              "8",
-              "9",
-              "10",
-              "11",
-              "12",
-              "13",
-              "14",
-              "15",
-              "16"
-            ],
-            "default": "0"
-          }
-        },
-        "required": [
-          "components",
-          "score"
-        ]
-      },
-      "SocketVulnerabilityScore": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "score": {
-            "type": "number",
-            "default": 0
-          },
-          "components": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "dependencyVulnerabilityCount": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "vulnerabilityCount": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "vulnerabilityIssueCritical": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "vulnerabilityIssueHigh": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "vulnerabilityIssueLow": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "vulnerabilityIssueMid": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              }
-            },
-            "required": [
-              "dependencyVulnerabilityCount",
-              "vulnerabilityCount",
-              "vulnerabilityIssueCritical",
-              "vulnerabilityIssueHigh",
-              "vulnerabilityIssueLow",
-              "vulnerabilityIssueMid"
-            ]
-          },
-          "limit": {
-            "type": "number",
-            "default": 0
-          },
-          "limitingMetric": {
-            "type": "string",
-            "enum": [
-              "0",
-              "1",
-              "2",
-              "3",
-              "4",
-              "5"
-            ],
-            "default": "0"
-          }
-        },
-        "required": [
-          "components",
-          "score"
-        ]
-      },
-      "SocketLicenseScore": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "score": {
-            "type": "number",
-            "default": 0
-          },
-          "components": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "licenseIssueCritical": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "licenseIssueHigh": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "licenseIssueLow": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "licenseIssueMid": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "licenseQuality": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "$ref": "#/components/schemas/SocketLicenseQuality"
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              }
-            },
-            "required": [
-              "licenseIssueCritical",
-              "licenseIssueHigh",
-              "licenseIssueLow",
-              "licenseIssueMid",
-              "licenseQuality"
-            ]
-          },
-          "limit": {
-            "type": "number",
-            "default": 0
-          },
-          "limitingMetric": {
-            "type": "string",
-            "enum": [
-              "0",
-              "1",
-              "2",
-              "3",
-              "4"
-            ],
-            "default": "0"
-          }
-        },
-        "required": [
-          "components",
-          "score"
-        ]
-      },
-      "SocketMiscellaneousScore": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "score": {
-            "type": "number",
-            "default": 0
-          },
-          "components": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "byteCount": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "fileCount": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "integer",
-                    "default": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "typeModule": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "boolean",
-                    "default": false
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "versionAuthorEmail": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "string",
-                    "default": ""
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "versionAuthorName": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "string",
-                    "default": ""
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "defaultBranch": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "string",
-                    "default": "main"
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              },
-              "repoCreatedAt": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "score": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "maxScore": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "limit": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "value": {
-                    "type": "string",
-                    "default": ""
-                  }
-                },
-                "required": [
-                  "limit",
-                  "maxScore",
-                  "score",
-                  "value"
-                ]
-              }
-            },
-            "required": [
-              "byteCount",
-              "fileCount",
-              "typeModule",
-              "versionAuthorEmail",
-              "versionAuthorName"
-            ]
-          },
-          "limit": {
-            "type": "number",
-            "default": 0
-          },
-          "limitingMetric": {
-            "type": "string",
-            "enum": [
-              "0",
-              "1",
-              "2",
-              "3",
-              "4",
-              "5",
-              "6"
-            ],
-            "default": "0"
+            "default": ""
           }
         },
         "required": [
@@ -5924,19 +4170,33 @@
           "file"
         ]
       },
-      "SocketLicenseQuality": {
-        "type": "string",
-        "enum": [
-          "model",
-          "gold",
-          "silver",
-          "bronze",
-          "lead",
-          "nonfree",
-          "unknown",
-          "unlicensed"
-        ],
-        "default": "unknown"
+      "SocketMetricComponent": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "score": {
+            "type": "number",
+            "default": 0
+          },
+          "maxScore": {
+            "type": "number",
+            "default": 0
+          },
+          "limit": {
+            "type": "number",
+            "default": 0
+          },
+          "value": {
+            "type": "object",
+            "default": null
+          }
+        },
+        "required": [
+          "limit",
+          "maxScore",
+          "score",
+          "value"
+        ]
       },
       "SocketIssueSeverity": {
         "type": "string",
@@ -6198,17 +4458,12 @@
       }
     },
     "securitySchemes": {
-      "ApiKey": {
+      "basicAuth": {
         "type": "http",
         "scheme": "basic"
       }
     }
   },
-  "security": [
-    {
-      "ApiKey": []
-    }
-  ],
   "paths": {
     "/npm/{package}/{version}/issues": {
       "get": {
@@ -6234,6 +4489,11 @@
               "type": "string",
               "pattern": "^([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+[0-9A-Za-z-]+)?$"
             }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": []
           }
         ],
         "description": "Get all the issues related with a particular npm package version.\nThis endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.\n\nYou can [see here](https://socket.dev/npm/issue) the full list of issues.\n\nThis endpoint consumes 1 unit of your quota.",
@@ -6293,6 +4553,11 @@
             }
           }
         ],
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
         "description": "Get all the scores and metrics by category that are used to evaluate the package version.\n\nThis endpoint consumes 1 unit of your quota.",
         "responses": {
           "200": {
@@ -6339,6 +4604,13 @@
             "schema": {
               "type": "string"
             }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "report:write"
+            ]
           }
         ],
         "description": "Delete a specific project report.\n\nThis endpoint consumes 10 units of your quota.",
@@ -6389,6 +4661,13 @@
         ],
         "summary": "Get list of reports",
         "operationId": "getReportList",
+        "security": [
+          {
+            "basicAuth": [
+              "report:list"
+            ]
+          }
+        ],
         "description": "Get all your project reports.\n\nThis endpoint consumes 10 units of your quota.",
         "responses": {
           "200": {
@@ -6473,6 +4752,13 @@
           },
           "required": false
         },
+        "security": [
+          {
+            "basicAuth": [
+              "report:write"
+            ]
+          }
+        ],
         "description": "Upload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nThe supported lockfiles (and filenames) are: `package.json` and `package-lock.json`.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.\n\nThis endpoint consumes 100 units of your quota.",
         "responses": {
           "200": {
@@ -6533,6 +4819,13 @@
             }
           }
         ],
+        "security": [
+          {
+            "basicAuth": [
+              "report:read"
+            ]
+          }
+        ],
         "description": "Get all the issues, packages, and scores related to an specific project report.\n\nThis endpoint consumes 10 units of your quota.",
         "responses": {
           "200": {
@@ -6571,6 +4864,9 @@
         ],
         "summary": "Returns the OpenAPI definition",
         "operationId": "getOpenAPI",
+        "security": [
+          {}
+        ],
         "description": "Retrieve the API specification in an Openapi JSON format.\n\nThis endpoint consumes 0 units of your quota.",
         "responses": {
           "200": {
@@ -6593,6 +4889,11 @@
         ],
         "summary": "Get quota",
         "operationId": "getQuota",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
         "description": "Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.\n\nThis endpoint consumes 0 units of your quota.",
         "responses": {
           "200": {
