@@ -84,12 +84,12 @@ export interface components {
   schemas: {
     SocketIssueList: components["schemas"]["SocketIssue"][];
     SocketPackageScore: {
-      supplyChainRisk: components["schemas"]["SocketSupplyChainScore"];
-      quality: components["schemas"]["SocketQualityScore"];
-      maintenance: components["schemas"]["SocketMaintenanceScore"];
-      vulnerability: components["schemas"]["SocketVulnerabilityScore"];
-      license: components["schemas"]["SocketLicenseScore"];
-      miscellaneous: components["schemas"]["SocketMiscellaneousScore"];
+      supplyChainRisk: components["schemas"]["SocketMetricSchema"];
+      quality: components["schemas"]["SocketMetricSchema"];
+      maintenance: components["schemas"]["SocketMetricSchema"];
+      vulnerability: components["schemas"]["SocketMetricSchema"];
+      license: components["schemas"]["SocketMetricSchema"];
+      miscellaneous: components["schemas"]["SocketMetricSchema"];
       /** @default 0 */
       depscore: number;
     };
@@ -121,11 +121,13 @@ export interface components {
         /** @default */
         description: string;
         props: {
-          /** @default 0 */
-          id: number;
+          /** @default */
+          id: string;
           /** @default */
           title: string;
-          /** @default critical */
+          /** @default */
+          description: string;
+          /** @default low */
           severity: string;
           /** @default */
           url: string;
@@ -140,10 +142,12 @@ export interface components {
           /** @default */
           description: string;
           props: {
-            /** @default 0 */
-            id: number;
+            /** @default */
+            id: string;
             /** @default */
             title: string;
+            /** @default */
+            description: string;
             /** @default high */
             severity: string;
             /** @default */
@@ -159,10 +163,12 @@ export interface components {
           /** @default */
           description: string;
           props: {
-            /** @default 0 */
-            id: number;
+            /** @default */
+            id: string;
             /** @default */
             title: string;
+            /** @default */
+            description: string;
             /** @default low */
             severity: string;
             /** @default */
@@ -1130,649 +1136,16 @@ export interface components {
           usage?: components["schemas"]["SocketUsageRef"];
         };
       }>;
-    SocketSupplyChainScore: {
+    SocketMetricSchema: {
       /** @default 0 */
       score: number;
       components: {
-        dependencyCount: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        devDependencyCount: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        downloadCount: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        supplyChainRiskIssueCritical: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        supplyChainRiskIssueHigh: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        supplyChainRiskIssueLow: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        supplyChainRiskIssueMid: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        totalDependencyCount: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        transitiveDependencyCount: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
+        [key: string]: components["schemas"]["SocketMetricComponent"];
       };
       /** @default 0 */
       limit?: number;
-      /**
-       * @default 0
-       * @enum {string}
-       */
-      limitingMetric?: "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
-    };
-    SocketQualityScore: {
-      /** @default 0 */
-      score: number;
-      components: {
-        linesOfCode: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        qualityIssueCritical: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        qualityIssueHigh: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        qualityIssueLow: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        qualityIssueMid: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        readmeLength: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        bundlesize?: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        forks?: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        stargazers?: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        watchers?: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-      };
-      /** @default 0 */
-      limit?: number;
-      /**
-       * @default 0
-       * @enum {string}
-       */
-      limitingMetric?:
-        | "0"
-        | "1"
-        | "2"
-        | "3"
-        | "4"
-        | "5"
-        | "6"
-        | "7"
-        | "8"
-        | "9";
-    };
-    SocketMaintenanceScore: {
-      /** @default 0 */
-      score: number;
-      components: {
-        maintainerCount: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        maintenanceIssueCritical: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        maintenanceIssueHigh: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        maintenanceIssueLow: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        maintenanceIssueMid: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        versionCount: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        versionsLastMonth: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        versionsLastTwoMonths: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        versionsLastWeek: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        versionsLastYear: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        closedIssues?: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        commits?: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        commitsLastMonth?: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        commitsLastTwoMonths?: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        commitsLastWeek?: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        commitsLastYear?: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        openIssues?: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-      };
-      /** @default 0 */
-      limit?: number;
-      /**
-       * @default 0
-       * @enum {string}
-       */
-      limitingMetric?:
-        | "0"
-        | "1"
-        | "2"
-        | "3"
-        | "4"
-        | "5"
-        | "6"
-        | "7"
-        | "8"
-        | "9"
-        | "10"
-        | "11"
-        | "12"
-        | "13"
-        | "14"
-        | "15"
-        | "16";
-    };
-    SocketVulnerabilityScore: {
-      /** @default 0 */
-      score: number;
-      components: {
-        dependencyVulnerabilityCount: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        vulnerabilityCount: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        vulnerabilityIssueCritical: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        vulnerabilityIssueHigh: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        vulnerabilityIssueLow: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        vulnerabilityIssueMid: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-      };
-      /** @default 0 */
-      limit?: number;
-      /**
-       * @default 0
-       * @enum {string}
-       */
-      limitingMetric?: "0" | "1" | "2" | "3" | "4" | "5";
-    };
-    SocketLicenseScore: {
-      /** @default 0 */
-      score: number;
-      components: {
-        licenseIssueCritical: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        licenseIssueHigh: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        licenseIssueLow: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        licenseIssueMid: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        licenseQuality: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          value: components["schemas"]["SocketLicenseQuality"];
-        };
-      };
-      /** @default 0 */
-      limit?: number;
-      /**
-       * @default 0
-       * @enum {string}
-       */
-      limitingMetric?: "0" | "1" | "2" | "3" | "4";
-    };
-    SocketMiscellaneousScore: {
-      /** @default 0 */
-      score: number;
-      components: {
-        byteCount: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        fileCount: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default 0 */
-          value: number;
-        };
-        typeModule: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default false */
-          value: boolean;
-        };
-        versionAuthorEmail: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default */
-          value: string;
-        };
-        versionAuthorName: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default */
-          value: string;
-        };
-        defaultBranch?: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default main */
-          value: string;
-        };
-        repoCreatedAt?: {
-          /** @default 0 */
-          score: number;
-          /** @default 0 */
-          maxScore: number;
-          /** @default 0 */
-          limit: number;
-          /** @default */
-          value: string;
-        };
-      };
-      /** @default 0 */
-      limit?: number;
-      /**
-       * @default 0
-       * @enum {string}
-       */
-      limitingMetric?: "0" | "1" | "2" | "3" | "4" | "5" | "6";
+      /** @default */
+      limitingMetric?: string;
     };
     SocketIssueBasics: {
       severity: components["schemas"]["SocketIssueSeverity"];
@@ -1783,19 +1156,16 @@ export interface components {
       file: components["schemas"]["SocketRefFile"];
       dependencies: components["schemas"]["SocketRefList"];
     };
-    /**
-     * @default unknown
-     * @enum {string}
-     */
-    SocketLicenseQuality:
-      | "model"
-      | "gold"
-      | "silver"
-      | "bronze"
-      | "lead"
-      | "nonfree"
-      | "unknown"
-      | "unlicensed";
+    SocketMetricComponent: {
+      /** @default 0 */
+      score: number;
+      /** @default 0 */
+      maxScore: number;
+      /** @default 0 */
+      limit: number;
+      /** @default null */
+      value: { [key: string]: unknown };
+    };
     /**
      * @default low
      * @enum {string}
