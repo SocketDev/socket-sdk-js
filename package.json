@@ -54,7 +54,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-unicorn": "^45.0.2",
     "husky": "^8.0.3",
-    "installed-check": "^6.0.5",
+    "installed-check": "^7.1.1",
     "mocha": "^10.1.0",
     "nock": "^13.2.9",
     "npm-run-all2": "^6.0.4",
