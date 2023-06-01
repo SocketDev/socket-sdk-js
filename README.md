@@ -59,6 +59,7 @@ const { SocketSdk } = require('@socketsecurity/sdk')
 ### Utility methods
 
 * `getQuota()`
+* `getSettings()`
 
 ## Additional exports
 
