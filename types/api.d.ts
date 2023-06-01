@@ -46,8 +46,6 @@ export interface paths {
      *
      * The name of the file must be in the supported list.
      *
-     * The supported lockfiles (and filenames) are: `package.json` and `package-lock.json`.
-     *
      * For example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.
      *
      * This endpoint consumes 100 units of your quota.
@@ -61,6 +59,18 @@ export interface paths {
      * This endpoint consumes 10 units of your quota.
      */
     get: operations["getReport"];
+  };
+  "/report/supported": {
+    /**
+     * Get a list of supported files for project report generation.
+     * Files are categorized first by environment (e.g. NPM or PyPI), then by name.
+     *
+     * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
+     * Examples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getReportSupportedFiles"];
   };
   "/openapi": {
     /**
@@ -1443,8 +1453,6 @@ export interface operations {
    *
    * The name of the file must be in the supported list.
    *
-   * The supported lockfiles (and filenames) are: `package.json` and `package-lock.json`.
-   *
    * For example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.
    *
    * This endpoint consumes 100 units of your quota.
@@ -1497,6 +1505,34 @@ export interface operations {
       401: components["responses"]["SocketUnauthorized"];
       403: components["responses"]["SocketForbidden"];
       404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get a list of supported files for project report generation.
+   * Files are categorized first by environment (e.g. NPM or PyPI), then by name.
+   *
+   * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
+   * Examples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getReportSupportedFiles: {
+    responses: {
+      /** Glob patterns used to match supported files */
+      200: {
+        content: {
+          "application/json": {
+            [key: string]: {
+              [key: string]: {
+                /** @default */
+                pattern: string;
+              };
+            };
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
       429: components["responses"]["SocketTooManyRequestsResponse"];
     };
   };
