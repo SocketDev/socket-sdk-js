@@ -4759,7 +4759,7 @@
             ]
           }
         ],
-        "description": "Upload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nThe supported lockfiles (and filenames) are: `package.json` and `package-lock.json`.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.\n\nThis endpoint consumes 100 units of your quota.",
+        "description": "Upload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.\n\nThis endpoint consumes 100 units of your quota.",
         "responses": {
           "200": {
             "content": {
@@ -4849,6 +4849,56 @@
           },
           "404": {
             "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/report/supported": {
+      "get": {
+        "tags": [
+          "Project report"
+        ],
+        "summary": "Get supported files for report",
+        "operationId": "getReportSupportedFiles",
+        "security": [
+          {}
+        ],
+        "description": "Get a list of supported files for project report generation.\nFiles are categorized first by environment (e.g. NPM or PyPI), then by name.\n\nFiles whose names match the patterns returned by this endpoint can be uploaded for report generation.\nExamples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "pattern": {
+                          "type": "string",
+                          "default": ""
+                        }
+                      },
+                      "required": [
+                        "pattern"
+                      ]
+                    },
+                    "properties": {}
+                  },
+                  "properties": {}
+                }
+              }
+            },
+            "description": "Glob patterns used to match supported files"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
