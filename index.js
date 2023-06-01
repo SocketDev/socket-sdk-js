@@ -201,6 +201,17 @@ class SocketSdk {
     }
   }
 
+  /** @returns {Promise<SocketSdkResultType<'getSettings'>>} */
+  async getSettings () {
+    try {
+      const client = await this.#getClient()
+      const data = await client.get('settings').json()
+      return { success: true, status: 200, data }
+    } catch (err) {
+      return /** @type {SocketSdkErrorType<'getSettings'>} */ (this.#handleApiError(err))
+    }
+  }
+
   /**
    * @param {unknown} err
    * @returns {{ success: false, status: number, error: Record<string,unknown> }}
