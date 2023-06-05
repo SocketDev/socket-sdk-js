@@ -190,6 +190,19 @@ class SocketSdk {
     }
   }
 
+  /**
+   * @returns {Promise<SocketSdkResultType<'getReportSupportedFiles'>>}
+   */
+  async getReportSupportedFiles () {
+    try {
+      const client = await this.#getClient()
+      const data = await client.get('report/supported').json()
+      return { success: true, status: 200, data }
+    } catch (err) {
+      return /** @type {SocketSdkErrorType<'getReportSupportedFiles'>} */ (this.#handleApiError(err))
+    }
+  }
+
   /** @returns {Promise<SocketSdkResultType<'getQuota'>>} */
   async getQuota () {
     try {
