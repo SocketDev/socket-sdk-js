@@ -88,6 +88,30 @@ export interface paths {
      */
     get: operations["getQuota"];
   };
+  "/organizations": {
+    /**
+     * Get information on the current organizations associated with the API key.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getOrganizations"];
+  };
+  "/settings": {
+    /**
+     * Get your current settings the requested organizations and default settings to allow deferals.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    post: operations["postSettings"];
+  };
+  "/repo/list": {
+    /**
+     * Get all repositories in an org including their latest project report.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getRepoList"];
+  };
 }
 
 export interface components {
@@ -708,6 +732,29 @@ export interface components {
       }> &
       Partial<{
         /** @enum {string} */
+        type?: "floatingDependency";
+        value?: components["schemas"]["SocketIssueBasics"] & {
+          /** @default */
+          description: string;
+          props: {
+            /** @default */
+            dependency: string;
+          };
+          usage?: components["schemas"]["SocketUsageRef"];
+        };
+      }> &
+      Partial<{
+        /** @enum {string} */
+        type?: "manifestConfusion";
+        value?: components["schemas"]["SocketIssueBasics"] & {
+          /** @default */
+          description: string;
+          props: { [key: string]: unknown };
+          usage?: components["schemas"]["SocketUsageRef"];
+        };
+      }> &
+      Partial<{
+        /** @enum {string} */
         type?: "emptyPackage";
         value?: components["schemas"]["SocketIssueBasics"] & {
           /** @default */
@@ -732,6 +779,16 @@ export interface components {
       Partial<{
         /** @enum {string} */
         type?: "noREADME";
+        value?: components["schemas"]["SocketIssueBasics"] & {
+          /** @default */
+          description: string;
+          props: { [key: string]: unknown };
+          usage?: components["schemas"]["SocketUsageRef"];
+        };
+      }> &
+      Partial<{
+        /** @enum {string} */
+        type?: "shrinkwrap";
         value?: components["schemas"]["SocketIssueBasics"] & {
           /** @default */
           description: string;
@@ -872,6 +929,16 @@ export interface components {
       Partial<{
         /** @enum {string} */
         type?: "missingTarball";
+        value?: components["schemas"]["SocketIssueBasics"] & {
+          /** @default */
+          description: string;
+          props: { [key: string]: unknown };
+          usage?: components["schemas"]["SocketUsageRef"];
+        };
+      }> &
+      Partial<{
+        /** @enum {string} */
+        type?: "unpopularPackage";
         value?: components["schemas"]["SocketIssueBasics"] & {
           /** @default */
           description: string;
@@ -1569,6 +1636,129 @@ export interface operations {
         };
       };
       401: components["responses"]["SocketUnauthorized"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get information on the current organizations associated with the API key.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getOrganizations: {
+    responses: {
+      /** Organizations information */
+      200: {
+        content: {
+          "application/json": {
+            organizations: {
+              [key: string]: {
+                /** @default */
+                id: string;
+                /** @default */
+                name: string;
+                /** @default */
+                image: string;
+                /** @default */
+                plan: string;
+              };
+            };
+          };
+        };
+      };
+      401: components["responses"]["SocketUnauthorized"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get your current settings the requested organizations and default settings to allow deferals.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  postSettings: {
+    responses: {
+      /** Organization settings */
+      200: {
+        content: {
+          "application/json": {
+            defaults: {
+              issueRules: {
+                [key: string]: {
+                  /** @enum {string} */
+                  action?: "error" | "ignore" | "warn";
+                };
+              };
+            };
+            entries: {
+              /** @default */
+              start: string | null;
+              settings: {
+                deferTo?: string | null;
+                issueRules?: {
+                  [key: string]: {
+                    /** @enum {string} */
+                    action?: "defer" | "error" | "ignore" | "warn";
+                  };
+                };
+              };
+            }[];
+          };
+        };
+      };
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @default */
+          organization?: string;
+        }[];
+      };
+    };
+  };
+  /**
+   * Get all repositories in an org including their latest project report.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getRepoList: {
+    responses: {
+      /** List of repos and their latest project report for the organization associated with the token used */
+      200: {
+        content: {
+          "application/json": {
+            results: {
+              /** @default */
+              id?: string;
+              /** @default */
+              created_at?: string;
+              /** @default */
+              updated_at?: string;
+              /** @default */
+              github_install_id?: string;
+              /** @default */
+              github_repo_id?: string;
+              /** @default */
+              name?: string;
+              /** @default */
+              github_full_name?: string;
+              /** @default */
+              organization_id?: string;
+              latest_project_report?: {
+                /** @default */
+                id: string;
+                /** @default */
+                created_at: string;
+              };
+            }[];
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
       429: components["responses"]["SocketTooManyRequestsResponse"];
     };
   };
