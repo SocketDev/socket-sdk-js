@@ -22,7 +22,7 @@
     "types/**/*.d.ts"
   ],
   "engines": {
-    "node": "^14.18.0 || >=16.0.0"
+    "node": ">=16.10.0"
   },
   "dependencies": {
     "formdata-node": "^5.0.0",
@@ -58,7 +58,7 @@
     "mocha": "^10.1.0",
     "nock": "^13.2.9",
     "npm-run-all2": "^6.0.4",
-    "openapi-typescript": "^5.4.1",
+    "openapi-typescript": "^6.3.2",
     "type-coverage": "^2.24.1",
     "typescript": "~5.0.4"
   },
