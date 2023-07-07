@@ -3,120 +3,135 @@
  * Do not make direct changes to the file.
  */
 
+
 export interface paths {
   "/npm/{package}/{version}/issues": {
     /**
-     * Get all the issues related with a particular npm package version.
+     * Get issues by package 
+     * @description Get all the issues related with a particular npm package version.
      * This endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.
-     *
+     * 
      * You can [see here](https://socket.dev/npm/issue) the full list of issues.
-     *
+     * 
      * This endpoint consumes 1 unit of your quota.
      */
     get: operations["getIssuesByNPMPackage"];
   };
   "/npm/{package}/{version}/score": {
     /**
-     * Get all the scores and metrics by category that are used to evaluate the package version.
-     *
+     * Get score by package 
+     * @description Get all the scores and metrics by category that are used to evaluate the package version.
+     * 
      * This endpoint consumes 1 unit of your quota.
      */
     get: operations["getScoreByNPMPackage"];
   };
   "/report/delete/{id}": {
     /**
-     * Delete a specific project report.
-     *
+     * Delete a report 
+     * @description Delete a specific project report.
+     * 
      * This endpoint consumes 10 units of your quota.
      */
     delete: operations["deleteReport"];
   };
   "/report/list": {
     /**
-     * Get all your project reports.
-     *
+     * Get list of reports 
+     * @description Get all your project reports.
+     * 
      * This endpoint consumes 10 units of your quota.
      */
     get: operations["getReportList"];
   };
   "/report/upload": {
     /**
-     * Upload a lockfile to get your project analyzed by Socket.
+     * Create a report 
+     * @description Upload a lockfile to get your project analyzed by Socket.
      * You can upload multiple lockfiles in the same request, but each filename must be unique.
-     *
+     * 
      * The name of the file must be in the supported list.
-     *
+     * 
      * For example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.
-     *
+     * 
      * This endpoint consumes 100 units of your quota.
      */
     put: operations["createReport"];
   };
   "/report/view/{id}": {
     /**
-     * Get all the issues, packages, and scores related to an specific project report.
-     *
+     * View a report 
+     * @description Get all the issues, packages, and scores related to an specific project report.
+     * 
      * This endpoint consumes 10 units of your quota.
      */
     get: operations["getReport"];
   };
   "/report/supported": {
     /**
-     * Get a list of supported files for project report generation.
+     * Get supported files for report 
+     * @description Get a list of supported files for project report generation.
      * Files are categorized first by environment (e.g. NPM or PyPI), then by name.
-     *
+     * 
      * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
      * Examples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.
-     *
+     * 
      * This endpoint consumes 0 units of your quota.
      */
     get: operations["getReportSupportedFiles"];
   };
   "/openapi": {
     /**
-     * Retrieve the API specification in an Openapi JSON format.
-     *
+     * Returns the OpenAPI definition 
+     * @description Retrieve the API specification in an Openapi JSON format.
+     * 
      * This endpoint consumes 0 units of your quota.
      */
     get: operations["getOpenAPI"];
   };
   "/quota": {
     /**
-     * Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
-     *
+     * Get quota 
+     * @description Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
+     * 
      * This endpoint consumes 0 units of your quota.
      */
     get: operations["getQuota"];
   };
   "/organizations": {
     /**
-     * Get information on the current organizations associated with the API key.
-     *
+     * List organizations 
+     * @description Get information on the current organizations associated with the API key.
+     * 
      * This endpoint consumes 0 units of your quota.
      */
     get: operations["getOrganizations"];
   };
   "/settings": {
     /**
-     * Get your current settings the requested organizations and default settings to allow deferals.
-     *
+     * Calculate settings 
+     * @description Get your current settings the requested organizations and default settings to allow deferals.
+     * 
      * This endpoint consumes 0 units of your quota.
      */
     post: operations["postSettings"];
   };
   "/repo/list": {
     /**
-     * Get all repositories in an org including their latest project report.
-     *
+     * Get list of repos and their latest project report 
+     * @description Get all repositories in an org including their latest project report.
+     * 
      * This endpoint consumes 0 units of your quota.
      */
     get: operations["getRepoList"];
   };
 }
 
+export type webhooks = Record<string, never>;
+
 export interface components {
   schemas: {
-    SocketIssueList: components["schemas"]["SocketIssue"][];
+    SocketIssueList: (components["schemas"]["SocketIssue"])[];
     SocketPackageScore: {
       supplyChainRisk: components["schemas"]["SocketMetricSchema"];
       quality: components["schemas"]["SocketMetricSchema"];
@@ -148,7 +163,7 @@ export interface components {
       /** @default */
       url: string;
     };
-    SocketIssue: Partial<{
+    SocketIssue: ({
       /** @enum {string} */
       type?: "criticalCVE";
       value?: components["schemas"]["SocketIssueBasics"] & {
@@ -168,1056 +183,975 @@ export interface components {
         };
         usage?: components["schemas"]["SocketUsageRef"];
       };
-    }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "cve";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            id: string;
-            /** @default */
-            title: string;
-            /** @default */
-            description: string;
-            /** @default high */
-            severity: string;
-            /** @default */
-            url: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "mildCVE";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            id: string;
-            /** @default */
-            title: string;
-            /** @default */
-            description: string;
-            /** @default low */
-            severity: string;
-            /** @default */
-            url: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "installScripts";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            script: string;
-            /** @default */
-            source: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "hasNativeCode";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "binScriptConfusion";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            binScript: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "shellScriptOverride";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            binScript: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "filesystemAccess";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default fs */
-            module: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "networkAccess";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default net */
-            module: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "shellAccess";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default child_process */
-            module: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "debugAccess";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default vm */
-            module: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "longStrings";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "highEntropyStrings";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "urlStrings";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            urlFragment: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "usesEval";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default eval */
-            evalType: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "dynamicRequire";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "envVars";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            envVars: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "missingDependency";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            name: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "unusedDependency";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            name: string;
-            /** @default */
-            version: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "peerDependency";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            name: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "uncaughtOptionalDependency";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            name: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "unresolvedRequire";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "extraneousDependency";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "obfuscatedRequire";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "obfuscatedFile";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default 0 */
-            confidence: number;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "minifiedFile";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default 0 */
-            confidence: number;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "bidi";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "zeroWidth";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "badEncoding";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default utf8 */
-            encoding: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "homoglyphs";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "invisibleChars";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "suspiciousString";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            pattern: string;
-            /** @default */
-            explanation: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "invalidPackageJSON";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "httpDependency";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            packageName: string;
-            /** @default */
-            url: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "gitDependency";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            packageName: string;
-            /** @default */
-            url: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "gitHubDependency";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            packageName: string;
-            /** @default */
-            githubUser: string;
-            /** @default */
-            githubRepo: string;
-            /** @default */
-            commitsh: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "fileDependency";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            packageName: string;
-            /** @default */
-            filePath: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "noTests";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "noRepository";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "badSemver";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "badSemverDependency";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            packageName: string;
-            /** @default */
-            packageVersion: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "noV1";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "noWebsite";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "noBugTracker";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "noAuthorData";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "typeModuleCompatibility";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "floatingDependency";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            dependency: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "manifestConfusion";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "emptyPackage";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "trivialPackage";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default 0 */
-            linesOfCode: number;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "noREADME";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "shrinkwrap";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "deprecated";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default This package is deprecated */
-            reason: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "chronoAnomaly";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            prevChronoDate: string;
-            /** @default */
-            prevChronoVersion: string;
-            /** @default */
-            prevSemverDate: string;
-            /** @default */
-            prevSemverVersion: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "semverAnomaly";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            prevVersion: string;
-            /** @default */
-            newVersion: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "newAuthor";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            prevAuthor: string;
-            /** @default */
-            newAuthor: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "unstableOwnership";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            author: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "missingAuthor";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "unmaintained";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            lastPublish: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "unpublished";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            version: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "majorRefactor";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default 0 */
-            linesChanged: number;
-            /** @default 0 */
-            prevSize: number;
-            /** @default 0 */
-            curSize: number;
-            /** @default 0 */
-            changedPercent: number;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "missingTarball";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "unpopularPackage";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "unsafeCopyright";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "licenseChange";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            prevLicenseId: string;
-            /** @default */
-            newLicenseId: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "nonOSILicense";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            licenseId: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "deprecatedLicense";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            licenseId: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "missingLicense";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "nonSPDXLicense";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "unclearLicense";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            possibleLicenseId: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "mixedLicense";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            licenseId: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "notice";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: { [key: string]: unknown };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "modifiedLicense";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            licenseId: string;
-            /** @default 0 */
-            similarity: number;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "modifiedException";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            exceptionId: string;
-            /** @default 0 */
-            similarity: number;
-            /** @default */
-            comments: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "licenseException";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            exceptionId: string;
-            /** @default */
-            comments: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "deprecatedException";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            exceptionId: string;
-            /** @default */
-            comments: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "didYouMean";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            alternatePackage: string;
-            /** @default 0 */
-            editDistance: number;
-            /** @default 0 */
-            downloads: number;
-            /** @default 1 */
-            downloadsRatio: number;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "malware";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default 0 */
-            id: number;
-            /** @default */
-            note: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "telemetry";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default 0 */
-            id: number;
-            /** @default */
-            note: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "troll";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default 0 */
-            id: number;
-            /** @default */
-            note: string;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "gptSecurity";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            notes: string;
-            /** @default 0 */
-            confidence: number;
-            /** @default 0 */
-            severity: number;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "gptAnomaly";
-        value?: components["schemas"]["SocketIssueBasics"] & {
-          /** @default */
-          description: string;
-          props: {
-            /** @default */
-            notes: string;
-            /** @default 0 */
-            confidence: number;
-            /** @default 0 */
-            severity: number;
-          };
-          usage?: components["schemas"]["SocketUsageRef"];
-        };
-      }>;
+    }) | ({
+      /** @enum {string} */
+      type?: "cve";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          id: string;
+          /** @default */
+          title: string;
+          /** @default */
+          description: string;
+          /** @default high */
+          severity: string;
+          /** @default */
+          url: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "mildCVE";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          id: string;
+          /** @default */
+          title: string;
+          /** @default */
+          description: string;
+          /** @default low */
+          severity: string;
+          /** @default */
+          url: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "installScripts";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          script: string;
+          /** @default */
+          source: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "hasNativeCode";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "binScriptConfusion";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          binScript: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "shellScriptOverride";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          binScript: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "filesystemAccess";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default fs */
+          module: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "networkAccess";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default net */
+          module: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "shellAccess";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default child_process */
+          module: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "debugAccess";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default vm */
+          module: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "longStrings";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "highEntropyStrings";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "urlStrings";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          urlFragment: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "usesEval";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default eval */
+          evalType: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "dynamicRequire";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "envVars";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          envVars: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "missingDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          name: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "unusedDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          name: string;
+          /** @default */
+          version: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "peerDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          name: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "uncaughtOptionalDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          name: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "unresolvedRequire";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "extraneousDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "obfuscatedRequire";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "obfuscatedFile";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default 0 */
+          confidence: number;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "minifiedFile";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default 0 */
+          confidence: number;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "bidi";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "zeroWidth";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "badEncoding";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default utf8 */
+          encoding: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "homoglyphs";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "invisibleChars";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "suspiciousString";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          pattern: string;
+          /** @default */
+          explanation: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "invalidPackageJSON";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "httpDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          packageName: string;
+          /** @default */
+          url: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "gitDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          packageName: string;
+          /** @default */
+          url: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "gitHubDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          packageName: string;
+          /** @default */
+          githubUser: string;
+          /** @default */
+          githubRepo: string;
+          /** @default */
+          commitsh: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "fileDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          packageName: string;
+          /** @default */
+          filePath: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "noTests";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "noRepository";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "badSemver";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "badSemverDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          packageName: string;
+          /** @default */
+          packageVersion: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "noV1";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "noWebsite";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "noBugTracker";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "noAuthorData";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "typeModuleCompatibility";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "floatingDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          dependency: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "manifestConfusion";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "emptyPackage";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "trivialPackage";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default 0 */
+          linesOfCode: number;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "noREADME";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "shrinkwrap";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "deprecated";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default This package is deprecated */
+          reason: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "chronoAnomaly";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          prevChronoDate: string;
+          /** @default */
+          prevChronoVersion: string;
+          /** @default */
+          prevSemverDate: string;
+          /** @default */
+          prevSemverVersion: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "semverAnomaly";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          prevVersion: string;
+          /** @default */
+          newVersion: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "newAuthor";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          prevAuthor: string;
+          /** @default */
+          newAuthor: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "unstableOwnership";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          author: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "missingAuthor";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "unmaintained";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          lastPublish: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "unpublished";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          version: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "majorRefactor";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default 0 */
+          linesChanged: number;
+          /** @default 0 */
+          prevSize: number;
+          /** @default 0 */
+          curSize: number;
+          /** @default 0 */
+          changedPercent: number;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "missingTarball";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "unpopularPackage";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "unsafeCopyright";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "licenseChange";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          prevLicenseId: string;
+          /** @default */
+          newLicenseId: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "nonOSILicense";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          licenseId: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "deprecatedLicense";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          licenseId: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "missingLicense";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "nonSPDXLicense";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "unclearLicense";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          possibleLicenseId: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "mixedLicense";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          licenseId: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "notice";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "modifiedLicense";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          licenseId: string;
+          /** @default 0 */
+          similarity: number;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "modifiedException";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          exceptionId: string;
+          /** @default 0 */
+          similarity: number;
+          /** @default */
+          comments: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "licenseException";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          exceptionId: string;
+          /** @default */
+          comments: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "deprecatedException";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          exceptionId: string;
+          /** @default */
+          comments: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "didYouMean";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          alternatePackage: string;
+          /** @default 0 */
+          editDistance: number;
+          /** @default 0 */
+          downloads: number;
+          /** @default 1 */
+          downloadsRatio: number;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "malware";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default 0 */
+          id: number;
+          /** @default */
+          note: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "telemetry";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default 0 */
+          id: number;
+          /** @default */
+          note: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "troll";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default 0 */
+          id: number;
+          /** @default */
+          note: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "gptSecurity";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          notes: string;
+          /** @default 0 */
+          confidence: number;
+          /** @default 0 */
+          severity: number;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "gptAnomaly";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          notes: string;
+          /** @default 0 */
+          confidence: number;
+          /** @default 0 */
+          severity: number;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    });
     SocketMetricSchema: {
       /** @default 0 */
       score: number;
       components: {
-        [key: string]: components["schemas"]["SocketMetricComponent"];
+        [key: string]: components["schemas"]["SocketMetricComponent"] | undefined;
       };
       /** @default 0 */
       limit?: number;
@@ -1241,56 +1175,46 @@ export interface components {
       /** @default 0 */
       limit: number;
       /** @default null */
-      value: { [key: string]: unknown };
+      value: Record<string, never>;
     };
     /**
-     * @default low
+     * @default low 
      * @enum {string}
      */
     SocketIssueSeverity: "low" | "middle" | "high" | "critical";
     /**
-     * @default miscellaneous
+     * @default miscellaneous 
      * @enum {string}
      */
-    SocketCategory:
-      | "supplyChainRisk"
-      | "quality"
-      | "maintenance"
-      | "vulnerability"
-      | "license"
-      | "miscellaneous";
-    SocketRefList: components["schemas"]["SocketRef"][];
+    SocketCategory: "supplyChainRisk" | "quality" | "maintenance" | "vulnerability" | "license" | "miscellaneous";
+    SocketRefList: (components["schemas"]["SocketRef"])[];
     SocketRefFile: {
       /** @default */
       path: string;
       range?: components["schemas"]["SocketRefTextRange"];
       bytes?: components["schemas"]["SocketRefByteRange"];
     };
-    SocketRef: Partial<{
+    SocketRef: {
       /** @enum {string} */
       type?: "unknown";
-      value?: { [key: string]: unknown };
-    }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "npm";
-        value?: components["schemas"]["SocketRefNPM"];
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "git";
-        value?: components["schemas"]["SocketRefGit"];
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "web";
-        value?: components["schemas"]["SocketRefWeb"];
-      }> &
-      Partial<{
-        /** @enum {string} */
-        type?: "pypi";
-        value?: components["schemas"]["SocketRefPyPI"];
-      }>;
+      value?: Record<string, never>;
+    } | {
+      /** @enum {string} */
+      type?: "npm";
+      value?: components["schemas"]["SocketRefNPM"];
+    } | {
+      /** @enum {string} */
+      type?: "git";
+      value?: components["schemas"]["SocketRefGit"];
+    } | {
+      /** @enum {string} */
+      type?: "web";
+      value?: components["schemas"]["SocketRefWeb"];
+    } | {
+      /** @enum {string} */
+      type?: "pypi";
+      value?: components["schemas"]["SocketRefPyPI"];
+    };
     SocketRefTextRange: {
       /** @default 0 */
       startLine: number;
@@ -1339,7 +1263,7 @@ export interface components {
     };
   };
   responses: {
-    /** Bad request */
+    /** @description Bad request */
     SocketBadRequest: {
       content: {
         "application/json": {
@@ -1350,7 +1274,7 @@ export interface components {
         };
       };
     };
-    /** Unauthorized */
+    /** @description Unauthorized */
     SocketUnauthorized: {
       content: {
         "application/json": {
@@ -1361,7 +1285,7 @@ export interface components {
         };
       };
     };
-    /** Insufficient max_quota for API method */
+    /** @description Insufficient max_quota for API method */
     SocketForbidden: {
       content: {
         "application/json": {
@@ -1372,7 +1296,7 @@ export interface components {
         };
       };
     };
-    /** Resource not found */
+    /** @description Resource not found */
     SocketNotFoundResponse: {
       content: {
         "application/json": {
@@ -1383,11 +1307,11 @@ export interface components {
         };
       };
     };
-    /** Insufficient quota for API route */
+    /** @description Insufficient quota for API route */
     SocketTooManyRequestsResponse: {
       headers: {
         /**
-         * Retry contacting the endpoint *at least* after seconds.
+         * @description Retry contacting the endpoint *at least* after seconds.
          * See https://tools.ietf.org/html/rfc7231#section-7.1.3
          */
         "Retry-After"?: number;
@@ -1402,16 +1326,24 @@ export interface components {
       };
     };
   };
-  requestBodies: {};
+  parameters: never;
+  requestBodies: {
+  };
+  headers: never;
+  pathItems: never;
 }
 
+export type external = Record<string, never>;
+
 export interface operations {
+
   /**
-   * Get all the issues related with a particular npm package version.
+   * Get issues by package 
+   * @description Get all the issues related with a particular npm package version.
    * This endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.
-   *
+   * 
    * You can [see here](https://socket.dev/npm/issue) the full list of issues.
-   *
+   * 
    * This endpoint consumes 1 unit of your quota.
    */
   getIssuesByNPMPackage: {
@@ -1422,7 +1354,7 @@ export interface operations {
       };
     };
     responses: {
-      /** Socket issue lists */
+      /** @description Socket issue lists */
       200: {
         content: {
           "application/json": components["schemas"]["SocketIssueList"];
@@ -1436,8 +1368,9 @@ export interface operations {
     };
   };
   /**
-   * Get all the scores and metrics by category that are used to evaluate the package version.
-   *
+   * Get score by package 
+   * @description Get all the scores and metrics by category that are used to evaluate the package version.
+   * 
    * This endpoint consumes 1 unit of your quota.
    */
   getScoreByNPMPackage: {
@@ -1448,7 +1381,7 @@ export interface operations {
       };
     };
     responses: {
-      /** Socket package scores */
+      /** @description Socket package scores */
       200: {
         content: {
           "application/json": components["schemas"]["SocketPackageScore"];
@@ -1462,8 +1395,9 @@ export interface operations {
     };
   };
   /**
-   * Delete a specific project report.
-   *
+   * Delete a report 
+   * @description Delete a specific project report.
+   * 
    * This endpoint consumes 10 units of your quota.
    */
   deleteReport: {
@@ -1473,7 +1407,7 @@ export interface operations {
       };
     };
     responses: {
-      /** Success */
+      /** @description Success */
       200: {
         content: {
           "application/json": {
@@ -1490,21 +1424,22 @@ export interface operations {
     };
   };
   /**
-   * Get all your project reports.
-   *
+   * Get list of reports 
+   * @description Get all your project reports.
+   * 
    * This endpoint consumes 10 units of your quota.
    */
   getReportList: {
     responses: {
-      /** List of project reports */
+      /** @description List of project reports */
       200: {
         content: {
-          "application/json": {
-            /** @default */
-            id: string;
-            /** @default */
-            url: string;
-          }[];
+          "application/json": ({
+              /** @default */
+              id: string;
+              /** @default */
+              url: string;
+            })[];
         };
       };
       400: components["responses"]["SocketBadRequest"];
@@ -1515,18 +1450,29 @@ export interface operations {
     };
   };
   /**
-   * Upload a lockfile to get your project analyzed by Socket.
+   * Create a report 
+   * @description Upload a lockfile to get your project analyzed by Socket.
    * You can upload multiple lockfiles in the same request, but each filename must be unique.
-   *
+   * 
    * The name of the file must be in the supported list.
-   *
+   * 
    * For example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.
-   *
+   * 
    * This endpoint consumes 100 units of your quota.
    */
   createReport: {
+    requestBody?: {
+      content: {
+        "multipart/form-data": {
+          issueRules?: {
+            [key: string]: boolean | undefined;
+          };
+          [key: string]: undefined;
+        };
+      };
+    };
     responses: {
-      /** ID and URL of the project report */
+      /** @description ID and URL of the project report */
       200: {
         content: {
           "application/json": {
@@ -1542,17 +1488,11 @@ export interface operations {
       403: components["responses"]["SocketForbidden"];
       429: components["responses"]["SocketTooManyRequestsResponse"];
     };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          issueRules?: { [key: string]: boolean };
-        } & { [key: string]: never };
-      };
-    };
   };
   /**
-   * Get all the issues, packages, and scores related to an specific project report.
-   *
+   * View a report 
+   * @description Get all the issues, packages, and scores related to an specific project report.
+   * 
    * This endpoint consumes 10 units of your quota.
    */
   getReport: {
@@ -1562,7 +1502,7 @@ export interface operations {
       };
     };
     responses: {
-      /** Socket report */
+      /** @description Socket report */
       200: {
         content: {
           "application/json": components["schemas"]["SocketReport"];
@@ -1576,26 +1516,27 @@ export interface operations {
     };
   };
   /**
-   * Get a list of supported files for project report generation.
+   * Get supported files for report 
+   * @description Get a list of supported files for project report generation.
    * Files are categorized first by environment (e.g. NPM or PyPI), then by name.
-   *
+   * 
    * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
    * Examples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.
-   *
+   * 
    * This endpoint consumes 0 units of your quota.
    */
   getReportSupportedFiles: {
     responses: {
-      /** Glob patterns used to match supported files */
+      /** @description Glob patterns used to match supported files */
       200: {
         content: {
           "application/json": {
-            [key: string]: {
+            [key: string]: ({
               [key: string]: {
                 /** @default */
                 pattern: string;
-              };
-            };
+              } | undefined;
+            }) | undefined;
           };
         };
       };
@@ -1604,13 +1545,14 @@ export interface operations {
     };
   };
   /**
-   * Retrieve the API specification in an Openapi JSON format.
-   *
+   * Returns the OpenAPI definition 
+   * @description Retrieve the API specification in an Openapi JSON format.
+   * 
    * This endpoint consumes 0 units of your quota.
    */
   getOpenAPI: {
     responses: {
-      /** OpenAPI specification */
+      /** @description OpenAPI specification */
       200: {
         content: {
           "application/json": unknown;
@@ -1620,13 +1562,14 @@ export interface operations {
     };
   };
   /**
-   * Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
-   *
+   * Get quota 
+   * @description Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
+   * 
    * This endpoint consumes 0 units of your quota.
    */
   getQuota: {
     responses: {
-      /** Quota amount */
+      /** @description Quota amount */
       200: {
         content: {
           "application/json": {
@@ -1640,13 +1583,14 @@ export interface operations {
     };
   };
   /**
-   * Get information on the current organizations associated with the API key.
-   *
+   * List organizations 
+   * @description Get information on the current organizations associated with the API key.
+   * 
    * This endpoint consumes 0 units of your quota.
    */
   getOrganizations: {
     responses: {
-      /** Organizations information */
+      /** @description Organizations information */
       200: {
         content: {
           "application/json": {
@@ -1660,7 +1604,7 @@ export interface operations {
                 image: string;
                 /** @default */
                 plan: string;
-              };
+              } | undefined;
             };
           };
         };
@@ -1670,37 +1614,46 @@ export interface operations {
     };
   };
   /**
-   * Get your current settings the requested organizations and default settings to allow deferals.
-   *
+   * Calculate settings 
+   * @description Get your current settings the requested organizations and default settings to allow deferals.
+   * 
    * This endpoint consumes 0 units of your quota.
    */
   postSettings: {
+    requestBody?: {
+      content: {
+        "application/json": ({
+            /** @default */
+            organization?: string;
+          })[];
+      };
+    };
     responses: {
-      /** Organization settings */
+      /** @description Organization settings */
       200: {
         content: {
           "application/json": {
             defaults: {
               issueRules: {
-                [key: string]: {
+                [key: string]: ({
                   /** @enum {string} */
                   action?: "error" | "ignore" | "warn";
-                };
+                }) | undefined;
               };
             };
-            entries: {
-              /** @default */
-              start: string | null;
-              settings: {
-                deferTo?: string | null;
-                issueRules?: {
-                  [key: string]: {
-                    /** @enum {string} */
-                    action?: "defer" | "error" | "ignore" | "warn";
+            entries: ({
+                /** @default */
+                start: string | null;
+                settings: {
+                  deferTo?: string | null;
+                  issueRules?: {
+                    [key: string]: ({
+                      /** @enum {string} */
+                      action?: "defer" | "error" | "ignore" | "warn";
+                    }) | undefined;
                   };
                 };
-              };
-            }[];
+              })[];
           };
         };
       };
@@ -1708,50 +1661,43 @@ export interface operations {
       403: components["responses"]["SocketForbidden"];
       429: components["responses"]["SocketTooManyRequestsResponse"];
     };
-    requestBody: {
-      content: {
-        "application/json": {
-          /** @default */
-          organization?: string;
-        }[];
-      };
-    };
   };
   /**
-   * Get all repositories in an org including their latest project report.
-   *
+   * Get list of repos and their latest project report 
+   * @description Get all repositories in an org including their latest project report.
+   * 
    * This endpoint consumes 0 units of your quota.
    */
   getRepoList: {
     responses: {
-      /** List of repos and their latest project report for the organization associated with the token used */
+      /** @description List of repos and their latest project report for the organization associated with the token used */
       200: {
         content: {
           "application/json": {
-            results: {
-              /** @default */
-              id?: string;
-              /** @default */
-              created_at?: string;
-              /** @default */
-              updated_at?: string;
-              /** @default */
-              github_install_id?: string;
-              /** @default */
-              github_repo_id?: string;
-              /** @default */
-              name?: string;
-              /** @default */
-              github_full_name?: string;
-              /** @default */
-              organization_id?: string;
-              latest_project_report?: {
+            results: ({
                 /** @default */
-                id: string;
+                id?: string;
                 /** @default */
-                created_at: string;
-              };
-            }[];
+                created_at?: string;
+                /** @default */
+                updated_at?: string;
+                /** @default */
+                github_install_id?: string;
+                /** @default */
+                github_repo_id?: string;
+                /** @default */
+                name?: string;
+                /** @default */
+                github_full_name?: string;
+                /** @default */
+                organization_id?: string;
+                latest_project_report?: {
+                  /** @default */
+                  id: string;
+                  /** @default */
+                  created_at: string;
+                };
+              })[];
           };
         };
       };
@@ -1763,6 +1709,4 @@ export interface operations {
     };
   };
 }
-
-export interface external {}
 
