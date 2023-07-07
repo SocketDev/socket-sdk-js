@@ -6,9 +6,9 @@ Promise.resolve().then(async () => {
   const { default: openapiTS } = await import('openapi-typescript')
 
   const localPath = path.resolve(__dirname, '../openapi.json')
-    const output = await openapiTS(localPath, {
-    formatter (node) {
-      if (node.format === 'binary') {
+  const output = await openapiTS(localPath, {
+    transform (schemaObject) {
+      if ('format' in schemaObject && schemaObject.format === 'binary') {
         return 'never'
       }
     }
