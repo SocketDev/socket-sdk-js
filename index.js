@@ -214,14 +214,30 @@ class SocketSdk {
     }
   }
 
-  /** @returns {Promise<SocketSdkResultType<'getSettings'>>} */
-  async getSettings () {
+  /** @returns {Promise<SocketSdkResultType<'getOrganizations'>>} */
+  async getOrganizations () {
     try {
       const client = await this.#getClient()
-      const data = await client.get('settings').json()
+      const data = await client.get('organizations').json()
       return { success: true, status: 200, data }
     } catch (err) {
-      return /** @type {SocketSdkErrorType<'getSettings'>} */ (this.#handleApiError(err))
+      return /** @type {SocketSdkErrorType<'getQuota'>} */ (this.#handleApiError(err))
+    }
+  }
+
+  /**
+   * @param {Array<{ organization?: string }>} selectors
+   * @returns {Promise<SocketSdkResultType<'postSettings'>>}
+   */
+  async postSettings (selectors) {
+    try {
+      const client = await this.#getClient()
+      const data = await client.post('settings', {
+        json: selectors
+      }).json()
+      return { success: true, status: 200, data }
+    } catch (err) {
+      return /** @type {SocketSdkErrorType<'postSettings'>} */ (this.#handleApiError(err))
     }
   }
 
