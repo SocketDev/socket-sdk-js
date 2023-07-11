@@ -2486,6 +2486,96 @@
               "type": {
                 "type": "string",
                 "enum": [
+                  "floatingDependency"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "dependency": {
+                            "type": "string",
+                            "default": ""
+                          }
+                        },
+                        "required": [
+                          "dependency"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "manifestConfusion"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {}
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
                   "emptyPackage"
                 ]
               },
@@ -2577,6 +2667,47 @@
                 "type": "string",
                 "enum": [
                   "noREADME"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {}
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "shrinkwrap"
                 ]
               },
               "value": {
@@ -3091,6 +3222,47 @@
                 "type": "string",
                 "enum": [
                   "missingTarball"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {}
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "unpopularPackage"
                 ]
               },
               "value": {
@@ -4759,7 +4931,7 @@
             ]
           }
         ],
-        "description": "Upload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nThe supported lockfiles (and filenames) are: `package.json` and `package-lock.json`.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.\n\nThis endpoint consumes 100 units of your quota.",
+        "description": "Upload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.\n\nThis endpoint consumes 100 units of your quota.",
         "responses": {
           "200": {
             "content": {
@@ -4857,6 +5029,56 @@
         "x-readme": {}
       }
     },
+    "/report/supported": {
+      "get": {
+        "tags": [
+          "Project report"
+        ],
+        "summary": "Get supported files for report",
+        "operationId": "getReportSupportedFiles",
+        "security": [
+          {}
+        ],
+        "description": "Get a list of supported files for project report generation.\nFiles are categorized first by environment (e.g. NPM or PyPI), then by name.\n\nFiles whose names match the patterns returned by this endpoint can be uploaded for report generation.\nExamples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "pattern": {
+                          "type": "string",
+                          "default": ""
+                        }
+                      },
+                      "required": [
+                        "pattern"
+                      ]
+                    },
+                    "properties": {}
+                  },
+                  "properties": {}
+                }
+              }
+            },
+            "description": "Glob patterns used to match supported files"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
     "/openapi": {
       "get": {
         "tags": [
@@ -4919,6 +5141,321 @@
           },
           "401": {
             "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/organizations": {
+      "get": {
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "List organizations",
+        "operationId": "getOrganizations",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "description": "Get information on the current organizations associated with the API key.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "organizations": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "name": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "image": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "plan": {
+                            "type": "string",
+                            "default": ""
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "image",
+                          "name",
+                          "plan"
+                        ]
+                      },
+                      "properties": {}
+                    }
+                  },
+                  "required": [
+                    "organizations"
+                  ]
+                }
+              }
+            },
+            "description": "Organizations information"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/settings": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Calculate settings",
+        "operationId": "postSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "organization": {
+                      "type": "string",
+                      "default": ""
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "description": "Get your current settings the requested organizations and default settings to allow deferals.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "defaults": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "issueRules": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "object",
+                            "properties": {
+                              "action": {
+                                "type": "string",
+                                "enum": [
+                                  "error",
+                                  "ignore",
+                                  "warn"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "issueRules"
+                      ]
+                    },
+                    "entries": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "start": {
+                            "type": "string",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "settings": {
+                            "type": "object",
+                            "properties": {
+                              "deferTo": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "issueRules": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "object",
+                                  "properties": {
+                                    "action": {
+                                      "type": "string",
+                                      "enum": [
+                                        "defer",
+                                        "error",
+                                        "ignore",
+                                        "warn"
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "required": [
+                          "settings",
+                          "start"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "defaults",
+                    "entries"
+                  ]
+                }
+              }
+            },
+            "description": "Organization settings"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/repo/list": {
+      "get": {
+        "tags": [
+          "Repositories"
+        ],
+        "summary": "Get list of repos and their latest project report",
+        "operationId": "getRepoList",
+        "security": [
+          {
+            "basicAuth": [
+              "repo:list"
+            ]
+          }
+        ],
+        "description": "Get all repositories in an org including their latest project report.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "github_install_id": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "github_repo_id": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "name": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "github_full_name": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "organization_id": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "latest_project_report": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "default": ""
+                              },
+                              "created_at": {
+                                "type": "string",
+                                "default": ""
+                              }
+                            },
+                            "required": [
+                              "created_at",
+                              "id"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "results"
+                  ]
+                }
+              }
+            },
+            "description": "List of repos and their latest project report for the organization associated with the token used"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
