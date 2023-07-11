@@ -60,6 +60,9 @@ const { SocketSdk } = require('@socketsecurity/sdk')
 ### Utility methods
 
 * `getQuota()`
+* `getOrganizations()`
+* `postSettings(selectors)`
+  * `selectors`: An array of settings selectors, e.g. `[{ organization: 'id' }]`
 
 ## Additional exports
 

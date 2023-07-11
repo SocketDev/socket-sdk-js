@@ -214,6 +214,33 @@ class SocketSdk {
     }
   }
 
+  /** @returns {Promise<SocketSdkResultType<'getOrganizations'>>} */
+  async getOrganizations () {
+    try {
+      const client = await this.#getClient()
+      const data = await client.get('organizations').json()
+      return { success: true, status: 200, data }
+    } catch (err) {
+      return /** @type {SocketSdkErrorType<'getQuota'>} */ (this.#handleApiError(err))
+    }
+  }
+
+  /**
+   * @param {Array<{ organization?: string }>} selectors
+   * @returns {Promise<SocketSdkResultType<'postSettings'>>}
+   */
+  async postSettings (selectors) {
+    try {
+      const client = await this.#getClient()
+      const data = await client.post('settings', {
+        json: selectors
+      }).json()
+      return { success: true, status: 200, data }
+    } catch (err) {
+      return /** @type {SocketSdkErrorType<'postSettings'>} */ (this.#handleApiError(err))
+    }
+  }
+
   /**
    * @param {unknown} err
    * @returns {{ success: false, status: number, error: Record<string,unknown> }}
