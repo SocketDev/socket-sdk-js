@@ -2554,7 +2554,20 @@
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
-                        "properties": {}
+                        "properties": {
+                          "key": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "description": {
+                            "type": "string",
+                            "default": ""
+                          }
+                        },
+                        "required": [
+                          "description",
+                          "key"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
@@ -4495,6 +4508,21 @@
                 "$ref": "#/components/schemas/SocketRefPyPI"
               }
             }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "go"
+                ]
+              },
+              "value": {
+                "$ref": "#/components/schemas/SocketRefGo"
+              }
+            }
           }
         ]
       },
@@ -4617,6 +4645,26 @@
             "default": ""
           },
           "artifact": {
+            "type": "string",
+            "default": ""
+          },
+          "file": {
+            "$ref": "#/components/schemas/SocketRefFile"
+          }
+        },
+        "required": [
+          "package"
+        ]
+      },
+      "SocketRefGo": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "package": {
+            "type": "string",
+            "default": ""
+          },
+          "version": {
             "type": "string",
             "default": ""
           },
@@ -5300,28 +5348,40 @@
                           },
                           "settings": {
                             "type": "object",
-                            "properties": {
-                              "deferTo": {
-                                "type": "string",
-                                "nullable": true
-                              },
-                              "issueRules": {
-                                "type": "object",
-                                "additionalProperties": {
+                            "additionalProperties": {
+                              "type": "object",
+                              "properties": {
+                                "deferTo": {
+                                  "type": "string",
+                                  "nullable": true
+                                },
+                                "issueRules": {
                                   "type": "object",
-                                  "properties": {
-                                    "action": {
-                                      "type": "string",
-                                      "enum": [
-                                        "defer",
-                                        "error",
-                                        "ignore",
-                                        "warn"
-                                      ]
-                                    }
+                                  "nullable": false,
+                                  "additionalProperties": {
+                                    "type": "object",
+                                    "nullable": false,
+                                    "properties": {
+                                      "action": {
+                                        "type": "string",
+                                        "enum": [
+                                          "defer",
+                                          "error",
+                                          "ignore",
+                                          "warn"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "action"
+                                    ]
                                   }
                                 }
-                              }
+                              },
+                              "required": [
+                                "deferTo",
+                                "issueRules"
+                              ]
                             }
                           }
                         },

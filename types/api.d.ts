@@ -717,7 +717,12 @@ export interface components {
       value?: components["schemas"]["SocketIssueBasics"] & {
         /** @default */
         description: string;
-        props: Record<string, never>;
+        props: {
+          /** @default */
+          key: string;
+          /** @default */
+          description: string;
+        };
         usage?: components["schemas"]["SocketUsageRef"];
       };
     }) | ({
@@ -1214,6 +1219,10 @@ export interface components {
       /** @enum {string} */
       type?: "pypi";
       value?: components["schemas"]["SocketRefPyPI"];
+    } | {
+      /** @enum {string} */
+      type?: "go";
+      value?: components["schemas"]["SocketRefGo"];
     };
     SocketRefTextRange: {
       /** @default 0 */
@@ -1259,6 +1268,13 @@ export interface components {
       version?: string;
       /** @default */
       artifact?: string;
+      file?: components["schemas"]["SocketRefFile"];
+    };
+    SocketRefGo: {
+      /** @default */
+      package: string;
+      /** @default */
+      version?: string;
       file?: components["schemas"]["SocketRefFile"];
     };
   };
@@ -1645,13 +1661,15 @@ export interface operations {
                 /** @default */
                 start: string | null;
                 settings: {
-                  deferTo?: string | null;
-                  issueRules?: {
-                    [key: string]: ({
-                      /** @enum {string} */
-                      action?: "defer" | "error" | "ignore" | "warn";
-                    }) | undefined;
-                  };
+                  [key: string]: ({
+                    deferTo: string | null;
+                    issueRules: {
+                      [key: string]: ({
+                        /** @enum {string} */
+                        action: "defer" | "error" | "ignore" | "warn";
+                      }) | undefined;
+                    };
+                  }) | undefined;
                 };
               })[];
           };
