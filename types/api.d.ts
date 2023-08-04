@@ -125,6 +125,28 @@ export interface paths {
      */
     get: operations["getRepoList"];
   };
+  "/dependencies/search": {
+    /**
+     * @description .
+     * 
+     * This endpoint consumes 0 units of your quota.
+     */
+    post: operations["searchDependencies"];
+  };
+  "/dependencies/upload": {
+    /**
+     * Create a snapshot of all dependencies from manifest information 
+     * @description Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.
+     * You can upload multiple lockfiles in the same request, but each filename must be unique.
+     * 
+     * The name of the file must be in the supported list.
+     * 
+     * For example, these are valid filenames: "requirements.txt", "package.json", "folder/package.json", and "deep/nested/folder/package.json".
+     * 
+     * This endpoint consumes 100 units of your quota.
+     */
+    post: operations["createDependenciesSnapshot"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -1341,6 +1363,17 @@ export interface components {
         };
       };
     };
+    /** @description Internal server error */
+    SocketInternalServerError: {
+      content: {
+        "application/json": {
+          error: {
+            /** @default */
+            message: string;
+          };
+        };
+      };
+    };
   };
   parameters: never;
   requestBodies: {
@@ -1724,6 +1757,71 @@ export interface operations {
       403: components["responses"]["SocketForbidden"];
       404: components["responses"]["SocketNotFoundResponse"];
       429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * @description .
+   * 
+   * This endpoint consumes 0 units of your quota.
+   */
+  searchDependencies: {
+    requestBody?: {
+      content: {
+        "application/json": Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description List of repos and their latest project report for the organization associated with the token used */
+      200: {
+        content: {
+          "application/json": unknown;
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Create a snapshot of all dependencies from manifest information 
+   * @description Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.
+   * You can upload multiple lockfiles in the same request, but each filename must be unique.
+   * 
+   * The name of the file must be in the supported list.
+   * 
+   * For example, these are valid filenames: "requirements.txt", "package.json", "folder/package.json", and "deep/nested/folder/package.json".
+   * 
+   * This endpoint consumes 100 units of your quota.
+   */
+  createDependenciesSnapshot: {
+    requestBody?: {
+      content: {
+        "multipart/form-data": {
+          /** @default */
+          repository?: string;
+          /** @default */
+          branch?: string;
+          [key: string]: undefined;
+        };
+      };
+    };
+    responses: {
+      /** @description ID of the dependencies snapshot */
+      200: {
+        content: {
+          "application/json": {
+            /** @default */
+            id: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+      500: components["responses"]["SocketInternalServerError"];
     };
   };
 }

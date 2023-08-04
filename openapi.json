@@ -166,6 +166,35 @@
             }
           }
         }
+      },
+      "SocketInternalServerError": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "error": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              },
+              "required": [
+                "error"
+              ]
+            }
+          }
+        },
+        "description": "Internal server error"
       }
     },
     "schemas": {
@@ -5519,6 +5548,142 @@
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/dependencies/search": {
+      "post": {
+        "tags": [
+          "Dependencies"
+        ],
+        "operationId": "searchDependencies",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {}
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "description": ".\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "List of repos and their latest project report for the organization associated with the token used"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/dependencies/upload": {
+      "post": {
+        "tags": [
+          "Upload",
+          "Dependencies"
+        ],
+        "summary": "Create a snapshot of all dependencies from manifest information",
+        "operationId": "createDependenciesSnapshot",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string",
+                  "default": {
+                    "type": "Buffer",
+                    "data": []
+                  },
+                  "format": "binary"
+                },
+                "properties": {
+                  "repository": {
+                    "type": "string",
+                    "default": ""
+                  },
+                  "branch": {
+                    "type": "string",
+                    "default": ""
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "basicAuth": [
+              "report:write"
+            ]
+          }
+        ],
+        "description": "Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: \"requirements.txt\", \"package.json\", \"folder/package.json\", and \"deep/nested/folder/package.json\".\n\nThis endpoint consumes 100 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            },
+            "description": "ID of the dependencies snapshot"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/SocketInternalServerError"
           }
         },
         "x-readme": {}
