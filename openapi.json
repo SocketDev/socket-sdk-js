@@ -331,33 +331,75 @@
                         "type": "object",
                         "additionalProperties": false,
                         "properties": {
-                          "id": {
+                          "cveId": {
                             "type": "string",
                             "default": ""
                           },
-                          "title": {
-                            "type": "string",
-                            "default": ""
+                          "cwes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "description": {
+                                  "type": "string",
+                                  "default": ""
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "default": ""
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "default": ""
+                                }
+                              },
+                              "required": [
+                                "description",
+                                "id",
+                                "name"
+                              ]
+                            }
                           },
                           "description": {
                             "type": "string",
                             "default": ""
                           },
+                          "firstPatchedVersionIdentifier": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "ghsaId": {
+                            "type": "string",
+                            "default": ""
+                          },
                           "severity": {
                             "type": "string",
-                            "default": "low"
+                            "default": "critical"
+                          },
+                          "title": {
+                            "type": "string",
+                            "default": ""
                           },
                           "url": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "vulnerableVersionRange": {
                             "type": "string",
                             "default": ""
                           }
                         },
                         "required": [
+                          "cveId",
+                          "cwes",
                           "description",
-                          "id",
+                          "firstPatchedVersionIdentifier",
+                          "ghsaId",
                           "severity",
                           "title",
-                          "url"
+                          "url",
+                          "vulnerableVersionRange"
                         ]
                       },
                       "usage": {
@@ -400,15 +442,45 @@
                         "type": "object",
                         "additionalProperties": false,
                         "properties": {
-                          "id": {
+                          "cveId": {
                             "type": "string",
                             "default": ""
                           },
-                          "title": {
-                            "type": "string",
-                            "default": ""
+                          "cwes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "description": {
+                                  "type": "string",
+                                  "default": ""
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "default": ""
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "default": ""
+                                }
+                              },
+                              "required": [
+                                "description",
+                                "id",
+                                "name"
+                              ]
+                            }
                           },
                           "description": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "firstPatchedVersionIdentifier": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "ghsaId": {
                             "type": "string",
                             "default": ""
                           },
@@ -416,17 +488,29 @@
                             "type": "string",
                             "default": "high"
                           },
+                          "title": {
+                            "type": "string",
+                            "default": ""
+                          },
                           "url": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "vulnerableVersionRange": {
                             "type": "string",
                             "default": ""
                           }
                         },
                         "required": [
+                          "cveId",
+                          "cwes",
                           "description",
-                          "id",
+                          "firstPatchedVersionIdentifier",
+                          "ghsaId",
                           "severity",
                           "title",
-                          "url"
+                          "url",
+                          "vulnerableVersionRange"
                         ]
                       },
                       "usage": {
@@ -469,15 +553,45 @@
                         "type": "object",
                         "additionalProperties": false,
                         "properties": {
-                          "id": {
+                          "cveId": {
                             "type": "string",
                             "default": ""
                           },
-                          "title": {
-                            "type": "string",
-                            "default": ""
+                          "cwes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "description": {
+                                  "type": "string",
+                                  "default": ""
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "default": ""
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "default": ""
+                                }
+                              },
+                              "required": [
+                                "description",
+                                "id",
+                                "name"
+                              ]
+                            }
                           },
                           "description": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "firstPatchedVersionIdentifier": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "ghsaId": {
                             "type": "string",
                             "default": ""
                           },
@@ -485,17 +599,29 @@
                             "type": "string",
                             "default": "low"
                           },
+                          "title": {
+                            "type": "string",
+                            "default": ""
+                          },
                           "url": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "vulnerableVersionRange": {
                             "type": "string",
                             "default": ""
                           }
                         },
                         "required": [
+                          "cveId",
+                          "cwes",
                           "description",
-                          "id",
+                          "firstPatchedVersionIdentifier",
+                          "ghsaId",
                           "severity",
                           "title",
-                          "url"
+                          "url",
+                          "vulnerableVersionRange"
                         ]
                       },
                       "usage": {
@@ -5330,7 +5456,7 @@
             "basicAuth": []
           }
         ],
-        "description": "Get your current settings the requested organizations and default settings to allow deferals.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Get your current settings the requested organizations and default settings to allow deferrals.\n\nThis endpoint consumes 0 units of your quota.",
         "responses": {
           "200": {
             "content": {
