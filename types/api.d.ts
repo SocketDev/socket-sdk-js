@@ -110,7 +110,7 @@ export interface paths {
   "/settings": {
     /**
      * Calculate settings 
-     * @description Get your current settings the requested organizations and default settings to allow deferals.
+     * @description Get your current settings the requested organizations and default settings to allow deferrals.
      * 
      * This endpoint consumes 0 units of your quota.
      */
@@ -193,15 +193,29 @@ export interface components {
         description: string;
         props: {
           /** @default */
-          id: string;
+          cveId: string;
+          cwes: ({
+              /** @default */
+              description: string;
+              /** @default */
+              id: string;
+              /** @default */
+              name: string;
+            })[];
+          /** @default */
+          description: string;
+          /** @default */
+          firstPatchedVersionIdentifier: string;
+          /** @default */
+          ghsaId: string;
+          /** @default critical */
+          severity: string;
           /** @default */
           title: string;
           /** @default */
-          description: string;
-          /** @default low */
-          severity: string;
-          /** @default */
           url: string;
+          /** @default */
+          vulnerableVersionRange: string;
         };
         usage?: components["schemas"]["SocketUsageRef"];
       };
@@ -213,15 +227,29 @@ export interface components {
         description: string;
         props: {
           /** @default */
-          id: string;
-          /** @default */
-          title: string;
+          cveId: string;
+          cwes: ({
+              /** @default */
+              description: string;
+              /** @default */
+              id: string;
+              /** @default */
+              name: string;
+            })[];
           /** @default */
           description: string;
+          /** @default */
+          firstPatchedVersionIdentifier: string;
+          /** @default */
+          ghsaId: string;
           /** @default high */
           severity: string;
           /** @default */
+          title: string;
+          /** @default */
           url: string;
+          /** @default */
+          vulnerableVersionRange: string;
         };
         usage?: components["schemas"]["SocketUsageRef"];
       };
@@ -233,15 +261,29 @@ export interface components {
         description: string;
         props: {
           /** @default */
-          id: string;
-          /** @default */
-          title: string;
+          cveId: string;
+          cwes: ({
+              /** @default */
+              description: string;
+              /** @default */
+              id: string;
+              /** @default */
+              name: string;
+            })[];
           /** @default */
           description: string;
+          /** @default */
+          firstPatchedVersionIdentifier: string;
+          /** @default */
+          ghsaId: string;
           /** @default low */
           severity: string;
           /** @default */
+          title: string;
+          /** @default */
           url: string;
+          /** @default */
+          vulnerableVersionRange: string;
         };
         usage?: components["schemas"]["SocketUsageRef"];
       };
@@ -1664,7 +1706,7 @@ export interface operations {
   };
   /**
    * Calculate settings 
-   * @description Get your current settings the requested organizations and default settings to allow deferals.
+   * @description Get your current settings the requested organizations and default settings to allow deferrals.
    * 
    * This endpoint consumes 0 units of your quota.
    */
