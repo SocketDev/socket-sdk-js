@@ -5684,6 +5684,7 @@
         "tags": [
           "Dependencies"
         ],
+        "summary": "Search dependencies",
         "operationId": "searchDependencies",
         "requestBody": {
           "content": {
@@ -5691,7 +5692,23 @@
               "schema": {
                 "type": "object",
                 "additionalProperties": false,
-                "properties": {}
+                "properties": {
+                  "limit": {
+                    "type": "integer",
+                    "default": 50,
+                    "minimum": 1,
+                    "maximum": 1000
+                  },
+                  "offset": {
+                    "type": "integer",
+                    "default": 0,
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "limit",
+                  "offset"
+                ]
               }
             }
           },
@@ -5702,12 +5719,81 @@
             "basicAuth": []
           }
         ],
-        "description": ".\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Search for any dependency that is being used in your organization.\n\nThis endpoint consumes 0 units of your quota.",
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "end": {
+                      "type": "boolean",
+                      "default": false
+                    },
+                    "limit": {
+                      "type": "integer",
+                      "default": 1000
+                    },
+                    "offset": {
+                      "type": "integer",
+                      "default": 0
+                    },
+                    "rows": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "branch": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "id": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "name": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "namespace": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "repository": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "type": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "version": {
+                            "type": "string",
+                            "default": ""
+                          }
+                        },
+                        "required": [
+                          "branch",
+                          "id",
+                          "name",
+                          "namespace",
+                          "repository",
+                          "type",
+                          "version"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "end",
+                    "limit",
+                    "offset",
+                    "rows"
+                  ]
+                }
               }
             },
             "description": "List of repos and their latest project report for the organization associated with the token used"

@@ -127,7 +127,8 @@ export interface paths {
   };
   "/dependencies/search": {
     /**
-     * @description .
+     * Search dependencies 
+     * @description Search for any dependency that is being used in your organization.
      * 
      * This endpoint consumes 0 units of your quota.
      */
@@ -1802,21 +1803,50 @@ export interface operations {
     };
   };
   /**
-   * @description .
+   * Search dependencies 
+   * @description Search for any dependency that is being used in your organization.
    * 
    * This endpoint consumes 0 units of your quota.
    */
   searchDependencies: {
     requestBody?: {
       content: {
-        "application/json": Record<string, never>;
+        "application/json": {
+          /** @default 50 */
+          limit: number;
+          /** @default 0 */
+          offset: number;
+        };
       };
     };
     responses: {
       /** @description List of repos and their latest project report for the organization associated with the token used */
       200: {
         content: {
-          "application/json": unknown;
+          "application/json": {
+            /** @default false */
+            end: boolean;
+            /** @default 1000 */
+            limit: number;
+            /** @default 0 */
+            offset: number;
+            rows: ({
+                /** @default */
+                branch: string;
+                /** @default */
+                id: string;
+                /** @default */
+                name: string;
+                /** @default */
+                namespace: string;
+                /** @default */
+                repository: string;
+                /** @default */
+                type: string;
+                /** @default */
+                version: string;
+              })[];
+          };
         };
       };
       400: components["responses"]["SocketBadRequest"];
