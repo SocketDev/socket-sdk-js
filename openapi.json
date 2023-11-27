@@ -29,10 +29,14 @@
                       "default": ""
                     }
                   },
-                  "required": ["message"]
+                  "required": [
+                    "message"
+                  ]
                 }
               },
-              "required": ["error"]
+              "required": [
+                "error"
+              ]
             }
           }
         },
@@ -54,10 +58,14 @@
                       "default": ""
                     }
                   },
-                  "required": ["message"]
+                  "required": [
+                    "message"
+                  ]
                 }
               },
-              "required": ["error"]
+              "required": [
+                "error"
+              ]
             }
           }
         },
@@ -79,10 +87,14 @@
                       "default": ""
                     }
                   },
-                  "required": ["message"]
+                  "required": [
+                    "message"
+                  ]
                 }
               },
-              "required": ["error"]
+              "required": [
+                "error"
+              ]
             }
           }
         },
@@ -104,10 +116,14 @@
                       "default": ""
                     }
                   },
-                  "required": ["message"]
+                  "required": [
+                    "message"
+                  ]
                 }
               },
-              "required": ["error"]
+              "required": [
+                "error"
+              ]
             }
           }
         },
@@ -139,10 +155,14 @@
                       "default": ""
                     }
                   },
-                  "required": ["message"]
+                  "required": [
+                    "message"
+                  ]
                 }
               },
-              "required": ["error"]
+              "required": [
+                "error"
+              ]
             }
           }
         }
@@ -163,10 +183,14 @@
                       "default": ""
                     }
                   },
-                  "required": ["message"]
+                  "required": [
+                    "message"
+                  ]
                 }
               },
-              "required": ["error"]
+              "required": [
+                "error"
+              ]
             }
           }
         },
@@ -270,7 +294,13 @@
             "default": ""
           }
         },
-        "required": ["healthy", "id", "issues", "score", "url"]
+        "required": [
+          "healthy",
+          "id",
+          "issues",
+          "score",
+          "url"
+        ]
       },
       "SocketIssue": {
         "anyOf": [
@@ -280,7 +310,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["criticalCVE"]
+                "enum": [
+                  "criticalCVE"
+                ]
               },
               "value": {
                 "allOf": [
@@ -322,7 +354,11 @@
                                   "default": ""
                                 }
                               },
-                              "required": ["description", "id", "name"]
+                              "required": [
+                                "description",
+                                "id",
+                                "name"
+                              ]
                             }
                           },
                           "description": {
@@ -370,7 +406,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -382,7 +421,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["cve"]
+                "enum": [
+                  "cve"
+                ]
               },
               "value": {
                 "allOf": [
@@ -424,7 +465,11 @@
                                   "default": ""
                                 }
                               },
-                              "required": ["description", "id", "name"]
+                              "required": [
+                                "description",
+                                "id",
+                                "name"
+                              ]
                             }
                           },
                           "description": {
@@ -472,7 +517,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -484,7 +532,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["mildCVE"]
+                "enum": [
+                  "mildCVE"
+                ]
               },
               "value": {
                 "allOf": [
@@ -526,7 +576,11 @@
                                   "default": ""
                                 }
                               },
-                              "required": ["description", "id", "name"]
+                              "required": [
+                                "description",
+                                "id",
+                                "name"
+                              ]
                             }
                           },
                           "description": {
@@ -574,7 +628,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -586,7 +643,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["installScripts"]
+                "enum": [
+                  "installScripts"
+                ]
               },
               "value": {
                 "allOf": [
@@ -614,13 +673,19 @@
                             "default": ""
                           }
                         },
-                        "required": ["script", "source"]
+                        "required": [
+                          "script",
+                          "source"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -632,7 +697,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["hasNativeCode"]
+                "enum": [
+                  "hasNativeCode"
+                ]
               },
               "value": {
                 "allOf": [
@@ -656,7 +723,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -668,7 +738,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["binScriptConfusion"]
+                "enum": [
+                  "binScriptConfusion"
+                ]
               },
               "value": {
                 "allOf": [
@@ -692,13 +764,18 @@
                             "default": ""
                           }
                         },
-                        "required": ["binScript"]
+                        "required": [
+                          "binScript"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -710,7 +787,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["shellScriptOverride"]
+                "enum": [
+                  "shellScriptOverride"
+                ]
               },
               "value": {
                 "allOf": [
@@ -734,13 +813,18 @@
                             "default": ""
                           }
                         },
-                        "required": ["binScript"]
+                        "required": [
+                          "binScript"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -752,7 +836,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["filesystemAccess"]
+                "enum": [
+                  "filesystemAccess"
+                ]
               },
               "value": {
                 "allOf": [
@@ -776,13 +862,18 @@
                             "default": "fs"
                           }
                         },
-                        "required": ["module"]
+                        "required": [
+                          "module"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -794,7 +885,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["networkAccess"]
+                "enum": [
+                  "networkAccess"
+                ]
               },
               "value": {
                 "allOf": [
@@ -818,13 +911,18 @@
                             "default": "net"
                           }
                         },
-                        "required": ["module"]
+                        "required": [
+                          "module"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -836,7 +934,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["shellAccess"]
+                "enum": [
+                  "shellAccess"
+                ]
               },
               "value": {
                 "allOf": [
@@ -860,13 +960,18 @@
                             "default": "child_process"
                           }
                         },
-                        "required": ["module"]
+                        "required": [
+                          "module"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -878,7 +983,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["debugAccess"]
+                "enum": [
+                  "debugAccess"
+                ]
               },
               "value": {
                 "allOf": [
@@ -902,13 +1009,18 @@
                             "default": "vm"
                           }
                         },
-                        "required": ["module"]
+                        "required": [
+                          "module"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -920,7 +1032,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["longStrings"]
+                "enum": [
+                  "longStrings"
+                ]
               },
               "value": {
                 "allOf": [
@@ -944,7 +1058,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -956,7 +1073,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["highEntropyStrings"]
+                "enum": [
+                  "highEntropyStrings"
+                ]
               },
               "value": {
                 "allOf": [
@@ -980,7 +1099,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -992,7 +1114,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["urlStrings"]
+                "enum": [
+                  "urlStrings"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1016,13 +1140,18 @@
                             "default": ""
                           }
                         },
-                        "required": ["urlFragment"]
+                        "required": [
+                          "urlFragment"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1034,7 +1163,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["usesEval"]
+                "enum": [
+                  "usesEval"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1058,13 +1189,18 @@
                             "default": "eval"
                           }
                         },
-                        "required": ["evalType"]
+                        "required": [
+                          "evalType"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1076,7 +1212,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["dynamicRequire"]
+                "enum": [
+                  "dynamicRequire"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1100,7 +1238,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1112,7 +1253,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["envVars"]
+                "enum": [
+                  "envVars"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1136,13 +1279,18 @@
                             "default": ""
                           }
                         },
-                        "required": ["envVars"]
+                        "required": [
+                          "envVars"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1154,7 +1302,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["missingDependency"]
+                "enum": [
+                  "missingDependency"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1178,13 +1328,18 @@
                             "default": ""
                           }
                         },
-                        "required": ["name"]
+                        "required": [
+                          "name"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1196,7 +1351,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["unusedDependency"]
+                "enum": [
+                  "unusedDependency"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1224,13 +1381,19 @@
                             "default": ""
                           }
                         },
-                        "required": ["name", "version"]
+                        "required": [
+                          "name",
+                          "version"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1242,7 +1405,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["peerDependency"]
+                "enum": [
+                  "peerDependency"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1266,13 +1431,18 @@
                             "default": ""
                           }
                         },
-                        "required": ["name"]
+                        "required": [
+                          "name"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1284,7 +1454,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["uncaughtOptionalDependency"]
+                "enum": [
+                  "uncaughtOptionalDependency"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1308,13 +1480,18 @@
                             "default": ""
                           }
                         },
-                        "required": ["name"]
+                        "required": [
+                          "name"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1326,7 +1503,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["unresolvedRequire"]
+                "enum": [
+                  "unresolvedRequire"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1350,7 +1529,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1362,7 +1544,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["extraneousDependency"]
+                "enum": [
+                  "extraneousDependency"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1386,7 +1570,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1398,7 +1585,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["obfuscatedRequire"]
+                "enum": [
+                  "obfuscatedRequire"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1422,7 +1611,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1434,7 +1626,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["obfuscatedFile"]
+                "enum": [
+                  "obfuscatedFile"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1458,13 +1652,18 @@
                             "default": 0
                           }
                         },
-                        "required": ["confidence"]
+                        "required": [
+                          "confidence"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1476,7 +1675,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["minifiedFile"]
+                "enum": [
+                  "minifiedFile"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1500,13 +1701,18 @@
                             "default": 0
                           }
                         },
-                        "required": ["confidence"]
+                        "required": [
+                          "confidence"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1518,7 +1724,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["bidi"]
+                "enum": [
+                  "bidi"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1542,7 +1750,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1554,7 +1765,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["zeroWidth"]
+                "enum": [
+                  "zeroWidth"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1578,7 +1791,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1590,7 +1806,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["badEncoding"]
+                "enum": [
+                  "badEncoding"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1614,13 +1832,18 @@
                             "default": "utf8"
                           }
                         },
-                        "required": ["encoding"]
+                        "required": [
+                          "encoding"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1632,7 +1855,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["homoglyphs"]
+                "enum": [
+                  "homoglyphs"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1656,7 +1881,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1668,7 +1896,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["invisibleChars"]
+                "enum": [
+                  "invisibleChars"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1692,7 +1922,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1704,7 +1937,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["suspiciousString"]
+                "enum": [
+                  "suspiciousString"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1732,13 +1967,19 @@
                             "default": ""
                           }
                         },
-                        "required": ["explanation", "pattern"]
+                        "required": [
+                          "explanation",
+                          "pattern"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1750,7 +1991,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["invalidPackageJSON"]
+                "enum": [
+                  "invalidPackageJSON"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1774,7 +2017,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1786,7 +2032,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["httpDependency"]
+                "enum": [
+                  "httpDependency"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1814,13 +2062,19 @@
                             "default": ""
                           }
                         },
-                        "required": ["packageName", "url"]
+                        "required": [
+                          "packageName",
+                          "url"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1832,7 +2086,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["gitDependency"]
+                "enum": [
+                  "gitDependency"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1860,13 +2116,19 @@
                             "default": ""
                           }
                         },
-                        "required": ["packageName", "url"]
+                        "required": [
+                          "packageName",
+                          "url"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1878,7 +2140,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["gitHubDependency"]
+                "enum": [
+                  "gitHubDependency"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1925,7 +2189,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1937,7 +2204,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["fileDependency"]
+                "enum": [
+                  "fileDependency"
+                ]
               },
               "value": {
                 "allOf": [
@@ -1965,13 +2234,19 @@
                             "default": ""
                           }
                         },
-                        "required": ["filePath", "packageName"]
+                        "required": [
+                          "filePath",
+                          "packageName"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -1983,7 +2258,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["noTests"]
+                "enum": [
+                  "noTests"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2007,7 +2284,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2019,7 +2299,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["noRepository"]
+                "enum": [
+                  "noRepository"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2043,7 +2325,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2055,7 +2340,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["badSemver"]
+                "enum": [
+                  "badSemver"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2079,7 +2366,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2091,7 +2381,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["badSemverDependency"]
+                "enum": [
+                  "badSemverDependency"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2119,13 +2411,19 @@
                             "default": ""
                           }
                         },
-                        "required": ["packageName", "packageVersion"]
+                        "required": [
+                          "packageName",
+                          "packageVersion"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2137,7 +2435,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["noV1"]
+                "enum": [
+                  "noV1"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2161,7 +2461,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2173,7 +2476,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["noWebsite"]
+                "enum": [
+                  "noWebsite"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2197,7 +2502,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2209,7 +2517,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["noBugTracker"]
+                "enum": [
+                  "noBugTracker"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2233,7 +2543,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2245,7 +2558,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["noAuthorData"]
+                "enum": [
+                  "noAuthorData"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2269,7 +2584,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2281,7 +2599,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["typeModuleCompatibility"]
+                "enum": [
+                  "typeModuleCompatibility"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2305,7 +2625,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2317,7 +2640,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["floatingDependency"]
+                "enum": [
+                  "floatingDependency"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2341,13 +2666,18 @@
                             "default": ""
                           }
                         },
-                        "required": ["dependency"]
+                        "required": [
+                          "dependency"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2359,7 +2689,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["manifestConfusion"]
+                "enum": [
+                  "manifestConfusion"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2387,13 +2719,19 @@
                             "default": ""
                           }
                         },
-                        "required": ["description", "key"]
+                        "required": [
+                          "description",
+                          "key"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2405,7 +2743,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["emptyPackage"]
+                "enum": [
+                  "emptyPackage"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2429,7 +2769,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2441,7 +2784,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["trivialPackage"]
+                "enum": [
+                  "trivialPackage"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2465,13 +2810,18 @@
                             "default": 0
                           }
                         },
-                        "required": ["linesOfCode"]
+                        "required": [
+                          "linesOfCode"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2483,7 +2833,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["noREADME"]
+                "enum": [
+                  "noREADME"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2507,7 +2859,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2519,7 +2874,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["shrinkwrap"]
+                "enum": [
+                  "shrinkwrap"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2543,7 +2900,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2555,7 +2915,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["deprecated"]
+                "enum": [
+                  "deprecated"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2579,13 +2941,18 @@
                             "default": "This package is deprecated"
                           }
                         },
-                        "required": ["reason"]
+                        "required": [
+                          "reason"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2597,7 +2964,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["chronoAnomaly"]
+                "enum": [
+                  "chronoAnomaly"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2644,7 +3013,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2656,7 +3028,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["semverAnomaly"]
+                "enum": [
+                  "semverAnomaly"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2684,13 +3058,19 @@
                             "default": ""
                           }
                         },
-                        "required": ["newVersion", "prevVersion"]
+                        "required": [
+                          "newVersion",
+                          "prevVersion"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2702,7 +3082,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["newAuthor"]
+                "enum": [
+                  "newAuthor"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2730,13 +3112,19 @@
                             "default": ""
                           }
                         },
-                        "required": ["newAuthor", "prevAuthor"]
+                        "required": [
+                          "newAuthor",
+                          "prevAuthor"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2748,7 +3136,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["unstableOwnership"]
+                "enum": [
+                  "unstableOwnership"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2772,13 +3162,18 @@
                             "default": ""
                           }
                         },
-                        "required": ["author"]
+                        "required": [
+                          "author"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2790,7 +3185,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["missingAuthor"]
+                "enum": [
+                  "missingAuthor"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2814,7 +3211,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2826,7 +3226,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["unmaintained"]
+                "enum": [
+                  "unmaintained"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2850,13 +3252,18 @@
                             "default": ""
                           }
                         },
-                        "required": ["lastPublish"]
+                        "required": [
+                          "lastPublish"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2868,7 +3275,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["unpublished"]
+                "enum": [
+                  "unpublished"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2892,13 +3301,18 @@
                             "default": ""
                           }
                         },
-                        "required": ["version"]
+                        "required": [
+                          "version"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2910,7 +3324,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["majorRefactor"]
+                "enum": [
+                  "majorRefactor"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2957,7 +3373,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -2969,7 +3388,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["missingTarball"]
+                "enum": [
+                  "missingTarball"
+                ]
               },
               "value": {
                 "allOf": [
@@ -2993,7 +3414,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3005,7 +3429,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["unpopularPackage"]
+                "enum": [
+                  "unpopularPackage"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3029,7 +3455,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3041,7 +3470,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["unsafeCopyright"]
+                "enum": [
+                  "unsafeCopyright"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3065,7 +3496,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3077,7 +3511,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["licenseChange"]
+                "enum": [
+                  "licenseChange"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3105,13 +3541,19 @@
                             "default": ""
                           }
                         },
-                        "required": ["newLicenseId", "prevLicenseId"]
+                        "required": [
+                          "newLicenseId",
+                          "prevLicenseId"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3123,7 +3565,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["nonOSILicense"]
+                "enum": [
+                  "nonOSILicense"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3147,13 +3591,18 @@
                             "default": ""
                           }
                         },
-                        "required": ["licenseId"]
+                        "required": [
+                          "licenseId"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3165,7 +3614,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["deprecatedLicense"]
+                "enum": [
+                  "deprecatedLicense"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3189,13 +3640,18 @@
                             "default": ""
                           }
                         },
-                        "required": ["licenseId"]
+                        "required": [
+                          "licenseId"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3207,7 +3663,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["missingLicense"]
+                "enum": [
+                  "missingLicense"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3231,7 +3689,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3243,7 +3704,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["nonSPDXLicense"]
+                "enum": [
+                  "nonSPDXLicense"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3267,7 +3730,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3279,7 +3745,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["unclearLicense"]
+                "enum": [
+                  "unclearLicense"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3303,13 +3771,18 @@
                             "default": ""
                           }
                         },
-                        "required": ["possibleLicenseId"]
+                        "required": [
+                          "possibleLicenseId"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3321,7 +3794,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["mixedLicense"]
+                "enum": [
+                  "mixedLicense"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3345,13 +3820,18 @@
                             "default": ""
                           }
                         },
-                        "required": ["licenseId"]
+                        "required": [
+                          "licenseId"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3363,7 +3843,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["notice"]
+                "enum": [
+                  "notice"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3387,7 +3869,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3399,7 +3884,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["modifiedLicense"]
+                "enum": [
+                  "modifiedLicense"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3427,13 +3914,19 @@
                             "default": 0
                           }
                         },
-                        "required": ["licenseId", "similarity"]
+                        "required": [
+                          "licenseId",
+                          "similarity"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3445,7 +3938,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["modifiedException"]
+                "enum": [
+                  "modifiedException"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3477,13 +3972,20 @@
                             "default": ""
                           }
                         },
-                        "required": ["comments", "exceptionId", "similarity"]
+                        "required": [
+                          "comments",
+                          "exceptionId",
+                          "similarity"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3495,7 +3997,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["licenseException"]
+                "enum": [
+                  "licenseException"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3523,13 +4027,19 @@
                             "default": ""
                           }
                         },
-                        "required": ["comments", "exceptionId"]
+                        "required": [
+                          "comments",
+                          "exceptionId"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3541,7 +4051,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["deprecatedException"]
+                "enum": [
+                  "deprecatedException"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3569,13 +4081,19 @@
                             "default": ""
                           }
                         },
-                        "required": ["comments", "exceptionId"]
+                        "required": [
+                          "comments",
+                          "exceptionId"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3587,7 +4105,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["didYouMean"]
+                "enum": [
+                  "didYouMean"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3634,7 +4154,10 @@
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3646,7 +4169,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["malware"]
+                "enum": [
+                  "malware"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3674,13 +4199,19 @@
                             "default": ""
                           }
                         },
-                        "required": ["id", "note"]
+                        "required": [
+                          "id",
+                          "note"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3692,7 +4223,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["telemetry"]
+                "enum": [
+                  "telemetry"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3720,13 +4253,19 @@
                             "default": ""
                           }
                         },
-                        "required": ["id", "note"]
+                        "required": [
+                          "id",
+                          "note"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3738,7 +4277,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["troll"]
+                "enum": [
+                  "troll"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3766,13 +4307,19 @@
                             "default": ""
                           }
                         },
-                        "required": ["id", "note"]
+                        "required": [
+                          "id",
+                          "note"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3784,7 +4331,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["gptSecurity"]
+                "enum": [
+                  "gptSecurity"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3816,13 +4365,20 @@
                             "default": 0
                           }
                         },
-                        "required": ["confidence", "notes", "severity"]
+                        "required": [
+                          "confidence",
+                          "notes",
+                          "severity"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3834,7 +4390,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["gptAnomaly"]
+                "enum": [
+                  "gptAnomaly"
+                ]
               },
               "value": {
                 "allOf": [
@@ -3866,13 +4424,20 @@
                             "default": 0
                           }
                         },
-                        "required": ["confidence", "notes", "severity"]
+                        "required": [
+                          "confidence",
+                          "notes",
+                          "severity"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
                       }
                     },
-                    "required": ["description", "props"]
+                    "required": [
+                      "description",
+                      "props"
+                    ]
                   }
                 ]
               }
@@ -3904,7 +4469,10 @@
             "default": ""
           }
         },
-        "required": ["components", "score"]
+        "required": [
+          "components",
+          "score"
+        ]
       },
       "SocketIssueBasics": {
         "type": "object",
@@ -3923,7 +4491,12 @@
             "type": "string"
           }
         },
-        "required": ["category", "locations", "severity", "label"]
+        "required": [
+          "category",
+          "locations",
+          "severity",
+          "label"
+        ]
       },
       "SocketUsageRef": {
         "type": "object",
@@ -3936,7 +4509,10 @@
             "$ref": "#/components/schemas/SocketRefList"
           }
         },
-        "required": ["dependencies", "file"]
+        "required": [
+          "dependencies",
+          "file"
+        ]
       },
       "SocketMetricComponent": {
         "type": "object",
@@ -3959,11 +4535,21 @@
             "default": null
           }
         },
-        "required": ["limit", "maxScore", "score", "value"]
+        "required": [
+          "limit",
+          "maxScore",
+          "score",
+          "value"
+        ]
       },
       "SocketIssueSeverity": {
         "type": "string",
-        "enum": ["low", "middle", "high", "critical"],
+        "enum": [
+          "low",
+          "middle",
+          "high",
+          "critical"
+        ],
         "default": "low"
       },
       "SocketCategory": {
@@ -3999,7 +4585,9 @@
             "$ref": "#/components/schemas/SocketRefByteRange"
           }
         },
-        "required": ["path"]
+        "required": [
+          "path"
+        ]
       },
       "SocketRef": {
         "anyOf": [
@@ -4009,7 +4597,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["unknown"]
+                "enum": [
+                  "unknown"
+                ]
               },
               "value": {
                 "type": "object",
@@ -4024,7 +4614,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["npm"]
+                "enum": [
+                  "npm"
+                ]
               },
               "value": {
                 "$ref": "#/components/schemas/SocketRefNPM"
@@ -4037,7 +4629,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["git"]
+                "enum": [
+                  "git"
+                ]
               },
               "value": {
                 "$ref": "#/components/schemas/SocketRefGit"
@@ -4050,7 +4644,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["web"]
+                "enum": [
+                  "web"
+                ]
               },
               "value": {
                 "$ref": "#/components/schemas/SocketRefWeb"
@@ -4063,7 +4659,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["pypi"]
+                "enum": [
+                  "pypi"
+                ]
               },
               "value": {
                 "$ref": "#/components/schemas/SocketRefPyPI"
@@ -4076,7 +4674,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["go"]
+                "enum": [
+                  "go"
+                ]
               },
               "value": {
                 "$ref": "#/components/schemas/SocketRefGo"
@@ -4106,7 +4706,12 @@
             "default": 0
           }
         },
-        "required": ["endColumn", "endLine", "startColumn", "startLine"]
+        "required": [
+          "endColumn",
+          "endLine",
+          "startColumn",
+          "startLine"
+        ]
       },
       "SocketRefByteRange": {
         "type": "object",
@@ -4121,7 +4726,10 @@
             "default": 0
           }
         },
-        "required": ["end", "start"]
+        "required": [
+          "end",
+          "start"
+        ]
       },
       "SocketRefNPM": {
         "type": "object",
@@ -4139,7 +4747,9 @@
             "$ref": "#/components/schemas/SocketRefFile"
           }
         },
-        "required": ["package"]
+        "required": [
+          "package"
+        ]
       },
       "SocketRefGit": {
         "type": "object",
@@ -4161,7 +4771,9 @@
             "$ref": "#/components/schemas/SocketRefFile"
           }
         },
-        "required": ["url"]
+        "required": [
+          "url"
+        ]
       },
       "SocketRefWeb": {
         "type": "object",
@@ -4175,7 +4787,9 @@
             "$ref": "#/components/schemas/SocketRefFile"
           }
         },
-        "required": ["url"]
+        "required": [
+          "url"
+        ]
       },
       "SocketRefPyPI": {
         "type": "object",
@@ -4197,7 +4811,9 @@
             "$ref": "#/components/schemas/SocketRefFile"
           }
         },
-        "required": ["package"]
+        "required": [
+          "package"
+        ]
       },
       "SocketRefGo": {
         "type": "object",
@@ -4215,7 +4831,9 @@
             "$ref": "#/components/schemas/SocketRefFile"
           }
         },
-        "required": ["package"]
+        "required": [
+          "package"
+        ]
       }
     },
     "securitySchemes": {
@@ -4228,7 +4846,9 @@
   "paths": {
     "/npm/{package}/{version}/issues": {
       "get": {
-        "tags": ["NPM"],
+        "tags": [
+          "NPM"
+        ],
         "summary": "Get issues by package",
         "operationId": "getIssuesByNPMPackage",
         "parameters": [
@@ -4288,7 +4908,9 @@
     },
     "/npm/{package}/{version}/score": {
       "get": {
-        "tags": ["NPM"],
+        "tags": [
+          "NPM"
+        ],
         "summary": "Get score by package",
         "operationId": "getScoreByNPMPackage",
         "parameters": [
@@ -4348,7 +4970,9 @@
     },
     "/report/delete/{id}": {
       "delete": {
-        "tags": ["Project report"],
+        "tags": [
+          "Project report"
+        ],
         "summary": "Delete a report",
         "operationId": "deleteReport",
         "parameters": [
@@ -4363,7 +4987,9 @@
         ],
         "security": [
           {
-            "basicAuth": ["report:write"]
+            "basicAuth": [
+              "report:write"
+            ]
           }
         ],
         "description": "Delete a specific project report.\n\nThis endpoint consumes 10 units of your quota.",
@@ -4380,7 +5006,9 @@
                       "default": "ok"
                     }
                   },
-                  "required": ["status"]
+                  "required": [
+                    "status"
+                  ]
                 }
               }
             },
@@ -4407,12 +5035,16 @@
     },
     "/report/list": {
       "get": {
-        "tags": ["Project report"],
+        "tags": [
+          "Project report"
+        ],
         "summary": "Get list of reports",
         "operationId": "getReportList",
         "security": [
           {
-            "basicAuth": ["report:list"]
+            "basicAuth": [
+              "report:list"
+            ]
           }
         ],
         "description": "Get all your project reports.\n\nThis endpoint consumes 10 units of your quota.",
@@ -4435,7 +5067,10 @@
                         "default": ""
                       }
                     },
-                    "required": ["id", "url"]
+                    "required": [
+                      "id",
+                      "url"
+                    ]
                   }
                 }
               }
@@ -4463,7 +5098,9 @@
     },
     "/report/upload": {
       "put": {
-        "tags": ["Project report"],
+        "tags": [
+          "Project report"
+        ],
         "summary": "Create a report",
         "operationId": "createReport",
         "requestBody": {
@@ -4496,7 +5133,9 @@
         },
         "security": [
           {
-            "basicAuth": ["report:write"]
+            "basicAuth": [
+              "report:write"
+            ]
           }
         ],
         "description": "Upload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.\n\nThis endpoint consumes 100 units of your quota.",
@@ -4517,7 +5156,10 @@
                       "default": ""
                     }
                   },
-                  "required": ["id", "url"]
+                  "required": [
+                    "id",
+                    "url"
+                  ]
                 }
               }
             },
@@ -4541,7 +5183,9 @@
     },
     "/report/view/{id}": {
       "get": {
-        "tags": ["Project report"],
+        "tags": [
+          "Project report"
+        ],
         "summary": "View a report",
         "operationId": "getReport",
         "parameters": [
@@ -4556,7 +5200,9 @@
         ],
         "security": [
           {
-            "basicAuth": ["report:read"]
+            "basicAuth": [
+              "report:read"
+            ]
           }
         ],
         "description": "Get all the issues, packages, and scores related to an specific project report.\n\nThis endpoint consumes 10 units of your quota.",
@@ -4592,10 +5238,14 @@
     },
     "/report/supported": {
       "get": {
-        "tags": ["Project report"],
+        "tags": [
+          "Project report"
+        ],
         "summary": "Get supported files for report",
         "operationId": "getReportSupportedFiles",
-        "security": [{}],
+        "security": [
+          {}
+        ],
         "description": "Get a list of supported files for project report generation.\nFiles are categorized first by environment (e.g. NPM or PyPI), then by name.\n\nFiles whose names match the patterns returned by this endpoint can be uploaded for report generation.\nExamples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.\n\nThis endpoint consumes 0 units of your quota.",
         "responses": {
           "200": {
@@ -4614,7 +5264,9 @@
                           "default": ""
                         }
                       },
-                      "required": ["pattern"]
+                      "required": [
+                        "pattern"
+                      ]
                     },
                     "properties": {}
                   },
@@ -4636,10 +5288,14 @@
     },
     "/openapi": {
       "get": {
-        "tags": ["Openapi"],
+        "tags": [
+          "Openapi"
+        ],
         "summary": "Returns the OpenAPI definition",
         "operationId": "getOpenAPI",
-        "security": [{}],
+        "security": [
+          {}
+        ],
         "description": "Retrieve the API specification in an Openapi JSON format.\n\nThis endpoint consumes 0 units of your quota.",
         "responses": {
           "200": {
@@ -4657,7 +5313,9 @@
     },
     "/quota": {
       "get": {
-        "tags": ["Quota"],
+        "tags": [
+          "Quota"
+        ],
         "summary": "Get quota",
         "operationId": "getQuota",
         "security": [
@@ -4680,7 +5338,9 @@
                       "minimum": 0
                     }
                   },
-                  "required": ["quota"]
+                  "required": [
+                    "quota"
+                  ]
                 }
               }
             },
@@ -4698,7 +5358,9 @@
     },
     "/organizations": {
       "get": {
-        "tags": ["Organizations"],
+        "tags": [
+          "Organizations"
+        ],
         "summary": "List organizations",
         "operationId": "getOrganizations",
         "security": [
@@ -4738,12 +5400,19 @@
                             "default": ""
                           }
                         },
-                        "required": ["id", "image", "name", "plan"]
+                        "required": [
+                          "id",
+                          "image",
+                          "name",
+                          "plan"
+                        ]
                       },
                       "properties": {}
                     }
                   },
-                  "required": ["organizations"]
+                  "required": [
+                    "organizations"
+                  ]
                 }
               }
             },
@@ -4761,7 +5430,9 @@
     },
     "/settings": {
       "post": {
-        "tags": ["Settings"],
+        "tags": [
+          "Settings"
+        ],
         "summary": "Calculate settings",
         "operationId": "postSettings",
         "requestBody": {
@@ -4809,13 +5480,19 @@
                             "properties": {
                               "action": {
                                 "type": "string",
-                                "enum": ["error", "ignore", "warn"]
+                                "enum": [
+                                  "error",
+                                  "ignore",
+                                  "warn"
+                                ]
                               }
                             }
                           }
                         }
                       },
-                      "required": ["issueRules"]
+                      "required": [
+                        "issueRules"
+                      ]
                     },
                     "entries": {
                       "type": "array",
@@ -4854,19 +5531,30 @@
                                         ]
                                       }
                                     },
-                                    "required": ["action"]
+                                    "required": [
+                                      "action"
+                                    ]
                                   }
                                 }
                               },
-                              "required": ["deferTo", "issueRules"]
+                              "required": [
+                                "deferTo",
+                                "issueRules"
+                              ]
                             }
                           }
                         },
-                        "required": ["settings", "start"]
+                        "required": [
+                          "settings",
+                          "start"
+                        ]
                       }
                     }
                   },
-                  "required": ["defaults", "entries"]
+                  "required": [
+                    "defaults",
+                    "entries"
+                  ]
                 }
               }
             },
@@ -4887,12 +5575,16 @@
     },
     "/repo/list": {
       "get": {
-        "tags": ["Repositories"],
+        "tags": [
+          "Repositories"
+        ],
         "summary": "Get list of repos and their latest project report",
         "operationId": "getRepoList",
         "security": [
           {
-            "basicAuth": ["repo:list"]
+            "basicAuth": [
+              "repo:list"
+            ]
           }
         ],
         "description": "Get all repositories in an org including their latest project report.\n\nThis endpoint consumes 0 units of your quota.",
@@ -4955,13 +5647,18 @@
                                 "default": ""
                               }
                             },
-                            "required": ["created_at", "id"]
+                            "required": [
+                              "created_at",
+                              "id"
+                            ]
                           }
                         }
                       }
                     }
                   },
-                  "required": ["results"]
+                  "required": [
+                    "results"
+                  ]
                 }
               }
             },
@@ -4988,7 +5685,9 @@
     },
     "/dependencies/search": {
       "post": {
-        "tags": ["Dependencies"],
+        "tags": [
+          "Dependencies"
+        ],
         "summary": "Search dependencies",
         "operationId": "searchDependencies",
         "requestBody": {
@@ -5010,7 +5709,10 @@
                     "minimum": 0
                   }
                 },
-                "required": ["limit", "offset"]
+                "required": [
+                  "limit",
+                  "offset"
+                ]
               }
             }
           },
@@ -5089,7 +5791,12 @@
                       }
                     }
                   },
-                  "required": ["end", "limit", "offset", "rows"]
+                  "required": [
+                    "end",
+                    "limit",
+                    "offset",
+                    "rows"
+                  ]
                 }
               }
             },
@@ -5116,7 +5823,10 @@
     },
     "/dependencies/upload": {
       "post": {
-        "tags": ["Upload", "Dependencies"],
+        "tags": [
+          "Upload",
+          "Dependencies"
+        ],
         "summary": "Create a snapshot of all dependencies from manifest information",
         "operationId": "createDependenciesSnapshot",
         "requestBody": {
@@ -5149,7 +5859,9 @@
         },
         "security": [
           {
-            "basicAuth": ["report:write"]
+            "basicAuth": [
+              "report:write"
+            ]
           }
         ],
         "description": "Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: \"requirements.txt\", \"package.json\", \"folder/package.json\", and \"deep/nested/folder/package.json\".\n\nThis endpoint consumes 100 units of your quota.",
@@ -5166,7 +5878,9 @@
                       "default": ""
                     }
                   },
-                  "required": ["id"]
+                  "required": [
+                    "id"
+                  ]
                 }
               }
             },
