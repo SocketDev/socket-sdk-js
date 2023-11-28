@@ -1232,7 +1232,6 @@ export interface components {
       severity: components["schemas"]["SocketIssueSeverity"];
       category: components["schemas"]["SocketCategory"];
       locations: components["schemas"]["SocketRefList"];
-      label: string;
     };
     SocketUsageRef: {
       file: components["schemas"]["SocketRefFile"];

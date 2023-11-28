@@ -4486,16 +4486,12 @@
           },
           "locations": {
             "$ref": "#/components/schemas/SocketRefList"
-          },
-          "label": {
-            "type": "string"
           }
         },
         "required": [
           "category",
           "locations",
-          "severity",
-          "label"
+          "severity"
         ]
       },
       "SocketUsageRef": {
