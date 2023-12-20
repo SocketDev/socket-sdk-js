@@ -1232,6 +1232,7 @@ export interface components {
       severity: components["schemas"]["SocketIssueSeverity"];
       category: components["schemas"]["SocketCategory"];
       locations: components["schemas"]["SocketRefList"];
+      /** @default */
       label: string;
     };
     SocketUsageRef: {
@@ -1532,6 +1533,18 @@ export interface operations {
               id: string;
               /** @default */
               url: string;
+              /** @default */
+              repo: string;
+              /** @default */
+              branch: string;
+              /** @default null */
+              pull_requests: Record<string, never>;
+              /** @default */
+              commit: string;
+              /** @default */
+              owner: string;
+              /** @default */
+              created_at: string;
             })[];
         };
       };
