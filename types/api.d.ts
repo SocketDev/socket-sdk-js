@@ -7,143 +7,143 @@
 export interface paths {
   "/npm/{package}/{version}/issues": {
     /**
-     * Get issues by package 
+     * Get issues by package
      * @description Get all the issues related with a particular npm package version.
      * This endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.
-     * 
+     *
      * You can [see here](https://socket.dev/npm/issue) the full list of issues.
-     * 
+     *
      * This endpoint consumes 1 unit of your quota.
      */
     get: operations["getIssuesByNPMPackage"];
   };
   "/npm/{package}/{version}/score": {
     /**
-     * Get score by package 
+     * Get score by package
      * @description Get all the scores and metrics by category that are used to evaluate the package version.
-     * 
+     *
      * This endpoint consumes 1 unit of your quota.
      */
     get: operations["getScoreByNPMPackage"];
   };
   "/report/delete/{id}": {
     /**
-     * Delete a report 
+     * Delete a report
      * @description Delete a specific project report.
-     * 
+     *
      * This endpoint consumes 10 units of your quota.
      */
     delete: operations["deleteReport"];
   };
   "/report/list": {
     /**
-     * Get list of reports 
+     * Get list of reports
      * @description Get all your project reports.
-     * 
+     *
      * This endpoint consumes 10 units of your quota.
      */
     get: operations["getReportList"];
   };
   "/report/upload": {
     /**
-     * Create a report 
+     * Create a report
      * @description Upload a lockfile to get your project analyzed by Socket.
      * You can upload multiple lockfiles in the same request, but each filename must be unique.
-     * 
+     *
      * The name of the file must be in the supported list.
-     * 
+     *
      * For example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.
-     * 
+     *
      * This endpoint consumes 100 units of your quota.
      */
     put: operations["createReport"];
   };
   "/report/view/{id}": {
     /**
-     * View a report 
+     * View a report
      * @description Get all the issues, packages, and scores related to an specific project report.
-     * 
+     *
      * This endpoint consumes 10 units of your quota.
      */
     get: operations["getReport"];
   };
   "/report/supported": {
     /**
-     * Get supported files for report 
+     * Get supported files for report
      * @description Get a list of supported files for project report generation.
      * Files are categorized first by environment (e.g. NPM or PyPI), then by name.
-     * 
+     *
      * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
      * Examples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.
-     * 
+     *
      * This endpoint consumes 0 units of your quota.
      */
     get: operations["getReportSupportedFiles"];
   };
   "/openapi": {
     /**
-     * Returns the OpenAPI definition 
+     * Returns the OpenAPI definition
      * @description Retrieve the API specification in an Openapi JSON format.
-     * 
+     *
      * This endpoint consumes 0 units of your quota.
      */
     get: operations["getOpenAPI"];
   };
   "/quota": {
     /**
-     * Get quota 
+     * Get quota
      * @description Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
-     * 
+     *
      * This endpoint consumes 0 units of your quota.
      */
     get: operations["getQuota"];
   };
   "/organizations": {
     /**
-     * List organizations 
+     * List organizations
      * @description Get information on the current organizations associated with the API key.
-     * 
+     *
      * This endpoint consumes 0 units of your quota.
      */
     get: operations["getOrganizations"];
   };
   "/settings": {
     /**
-     * Calculate settings 
+     * Calculate settings
      * @description Get your current settings the requested organizations and default settings to allow deferrals.
-     * 
+     *
      * This endpoint consumes 0 units of your quota.
      */
     post: operations["postSettings"];
   };
   "/repo/list": {
     /**
-     * Get list of repos and their latest project report 
+     * Get list of repos and their latest project report
      * @description Get all repositories in an org including their latest project report.
-     * 
+     *
      * This endpoint consumes 0 units of your quota.
      */
     get: operations["getRepoList"];
   };
   "/dependencies/search": {
     /**
-     * Search dependencies 
+     * Search dependencies
      * @description Search for any dependency that is being used in your organization.
-     * 
+     *
      * This endpoint consumes 0 units of your quota.
      */
     post: operations["searchDependencies"];
   };
   "/dependencies/upload": {
     /**
-     * Create a snapshot of all dependencies from manifest information 
+     * Create a snapshot of all dependencies from manifest information
      * @description Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.
      * You can upload multiple lockfiles in the same request, but each filename must be unique.
-     * 
+     *
      * The name of the file must be in the supported list.
-     * 
+     *
      * For example, these are valid filenames: "requirements.txt", "package.json", "folder/package.json", and "deep/nested/folder/package.json".
-     * 
+     *
      * This endpoint consumes 100 units of your quota.
      */
     post: operations["createDependenciesSnapshot"];
@@ -154,7 +154,7 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
-    SocketIssueList: (components["schemas"]["SocketIssue"])[];
+    SocketIssueList: components["schemas"]["SocketIssue"][];
     SocketPackageScore: {
       supplyChainRisk: components["schemas"]["SocketMetricSchema"];
       quality: components["schemas"]["SocketMetricSchema"];
@@ -195,14 +195,14 @@ export interface components {
         props: {
           /** @default */
           cveId: string;
-          cwes: ({
+          cwes: {
               /** @default */
               description: string;
               /** @default */
               id: string;
               /** @default */
               name: string;
-            })[];
+            }[];
           /** @default */
           description: string;
           /** @default */
@@ -229,14 +229,14 @@ export interface components {
         props: {
           /** @default */
           cveId: string;
-          cwes: ({
+          cwes: {
               /** @default */
               description: string;
               /** @default */
               id: string;
               /** @default */
               name: string;
-            })[];
+            }[];
           /** @default */
           description: string;
           /** @default */
@@ -263,14 +263,14 @@ export interface components {
         props: {
           /** @default */
           cveId: string;
-          cwes: ({
+          cwes: {
               /** @default */
               description: string;
               /** @default */
               id: string;
               /** @default */
               name: string;
-            })[];
+            }[];
           /** @default */
           description: string;
           /** @default */
@@ -1221,7 +1221,7 @@ export interface components {
       /** @default 0 */
       score: number;
       components: {
-        [key: string]: components["schemas"]["SocketMetricComponent"] | undefined;
+        [key: string]: components["schemas"]["SocketMetricComponent"];
       };
       /** @default 0 */
       limit?: number;
@@ -1250,16 +1250,16 @@ export interface components {
       value: Record<string, never>;
     };
     /**
-     * @default low 
+     * @default low
      * @enum {string}
      */
     SocketIssueSeverity: "low" | "middle" | "high" | "critical";
     /**
-     * @default miscellaneous 
+     * @default miscellaneous
      * @enum {string}
      */
     SocketCategory: "supplyChainRisk" | "quality" | "maintenance" | "vulnerability" | "license" | "miscellaneous";
-    SocketRefList: (components["schemas"]["SocketRef"])[];
+    SocketRefList: components["schemas"]["SocketRef"][];
     SocketRefFile: {
       /** @default */
       path: string;
@@ -1427,17 +1427,19 @@ export interface components {
   pathItems: never;
 }
 
+export type $defs = Record<string, never>;
+
 export type external = Record<string, never>;
 
 export interface operations {
 
   /**
-   * Get issues by package 
+   * Get issues by package
    * @description Get all the issues related with a particular npm package version.
    * This endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.
-   * 
+   *
    * You can [see here](https://socket.dev/npm/issue) the full list of issues.
-   * 
+   *
    * This endpoint consumes 1 unit of your quota.
    */
   getIssuesByNPMPackage: {
@@ -1462,9 +1464,9 @@ export interface operations {
     };
   };
   /**
-   * Get score by package 
+   * Get score by package
    * @description Get all the scores and metrics by category that are used to evaluate the package version.
-   * 
+   *
    * This endpoint consumes 1 unit of your quota.
    */
   getScoreByNPMPackage: {
@@ -1489,9 +1491,9 @@ export interface operations {
     };
   };
   /**
-   * Delete a report 
+   * Delete a report
    * @description Delete a specific project report.
-   * 
+   *
    * This endpoint consumes 10 units of your quota.
    */
   deleteReport: {
@@ -1518,9 +1520,9 @@ export interface operations {
     };
   };
   /**
-   * Get list of reports 
+   * Get list of reports
    * @description Get all your project reports.
-   * 
+   *
    * This endpoint consumes 10 units of your quota.
    */
   getReportList: {
@@ -1528,7 +1530,7 @@ export interface operations {
       /** @description List of project reports */
       200: {
         content: {
-          "application/json": ({
+          "application/json": {
               /** @default */
               id: string;
               /** @default */
@@ -1545,7 +1547,7 @@ export interface operations {
               owner: string;
               /** @default */
               created_at: string;
-            })[];
+            }[];
         };
       };
       400: components["responses"]["SocketBadRequest"];
@@ -1556,14 +1558,14 @@ export interface operations {
     };
   };
   /**
-   * Create a report 
+   * Create a report
    * @description Upload a lockfile to get your project analyzed by Socket.
    * You can upload multiple lockfiles in the same request, but each filename must be unique.
-   * 
+   *
    * The name of the file must be in the supported list.
-   * 
+   *
    * For example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.
-   * 
+   *
    * This endpoint consumes 100 units of your quota.
    */
   createReport: {
@@ -1571,7 +1573,7 @@ export interface operations {
       content: {
         "multipart/form-data": {
           issueRules?: {
-            [key: string]: boolean | undefined;
+            [key: string]: boolean;
           };
           [key: string]: undefined;
         };
@@ -1596,9 +1598,9 @@ export interface operations {
     };
   };
   /**
-   * View a report 
+   * View a report
    * @description Get all the issues, packages, and scores related to an specific project report.
-   * 
+   *
    * This endpoint consumes 10 units of your quota.
    */
   getReport: {
@@ -1622,13 +1624,13 @@ export interface operations {
     };
   };
   /**
-   * Get supported files for report 
+   * Get supported files for report
    * @description Get a list of supported files for project report generation.
    * Files are categorized first by environment (e.g. NPM or PyPI), then by name.
-   * 
+   *
    * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
    * Examples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.
-   * 
+   *
    * This endpoint consumes 0 units of your quota.
    */
   getReportSupportedFiles: {
@@ -1637,12 +1639,12 @@ export interface operations {
       200: {
         content: {
           "application/json": {
-            [key: string]: ({
+            [key: string]: {
               [key: string]: {
                 /** @default */
                 pattern: string;
-              } | undefined;
-            }) | undefined;
+              };
+            };
           };
         };
       };
@@ -1651,9 +1653,9 @@ export interface operations {
     };
   };
   /**
-   * Returns the OpenAPI definition 
+   * Returns the OpenAPI definition
    * @description Retrieve the API specification in an Openapi JSON format.
-   * 
+   *
    * This endpoint consumes 0 units of your quota.
    */
   getOpenAPI: {
@@ -1668,9 +1670,9 @@ export interface operations {
     };
   };
   /**
-   * Get quota 
+   * Get quota
    * @description Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
-   * 
+   *
    * This endpoint consumes 0 units of your quota.
    */
   getQuota: {
@@ -1689,9 +1691,9 @@ export interface operations {
     };
   };
   /**
-   * List organizations 
+   * List organizations
    * @description Get information on the current organizations associated with the API key.
-   * 
+   *
    * This endpoint consumes 0 units of your quota.
    */
   getOrganizations: {
@@ -1710,7 +1712,7 @@ export interface operations {
                 image: string;
                 /** @default */
                 plan: string;
-              } | undefined;
+              };
             };
           };
         };
@@ -1720,18 +1722,18 @@ export interface operations {
     };
   };
   /**
-   * Calculate settings 
+   * Calculate settings
    * @description Get your current settings the requested organizations and default settings to allow deferrals.
-   * 
+   *
    * This endpoint consumes 0 units of your quota.
    */
   postSettings: {
     requestBody?: {
       content: {
-        "application/json": ({
+        "application/json": {
             /** @default */
             organization?: string;
-          })[];
+          }[];
       };
     };
     responses: {
@@ -1741,25 +1743,25 @@ export interface operations {
           "application/json": {
             defaults: {
               issueRules: {
-                [key: string]: ({
+                [key: string]: {
                   /** @enum {string} */
                   action?: "error" | "ignore" | "warn";
-                }) | undefined;
+                };
               };
             };
             entries: ({
                 /** @default */
                 start: string | null;
                 settings: {
-                  [key: string]: ({
+                  [key: string]: {
                     deferTo: string | null;
                     issueRules: {
-                      [key: string]: ({
+                      [key: string]: {
                         /** @enum {string} */
                         action: "defer" | "error" | "ignore" | "warn";
-                      }) | undefined;
+                      };
                     };
-                  }) | undefined;
+                  };
                 };
               })[];
           };
@@ -1771,9 +1773,9 @@ export interface operations {
     };
   };
   /**
-   * Get list of repos and their latest project report 
+   * Get list of repos and their latest project report
    * @description Get all repositories in an org including their latest project report.
-   * 
+   *
    * This endpoint consumes 0 units of your quota.
    */
   getRepoList: {
@@ -1782,7 +1784,7 @@ export interface operations {
       200: {
         content: {
           "application/json": {
-            results: ({
+            results: {
                 /** @default */
                 id?: string;
                 /** @default */
@@ -1805,7 +1807,7 @@ export interface operations {
                   /** @default */
                   created_at: string;
                 };
-              })[];
+              }[];
           };
         };
       };
@@ -1817,9 +1819,9 @@ export interface operations {
     };
   };
   /**
-   * Search dependencies 
+   * Search dependencies
    * @description Search for any dependency that is being used in your organization.
-   * 
+   *
    * This endpoint consumes 0 units of your quota.
    */
   searchDependencies: {
@@ -1844,7 +1846,7 @@ export interface operations {
             limit: number;
             /** @default 0 */
             offset: number;
-            rows: ({
+            rows: {
                 /** @default */
                 branch: string;
                 /** @default */
@@ -1859,7 +1861,7 @@ export interface operations {
                 type: string;
                 /** @default */
                 version: string;
-              })[];
+              }[];
           };
         };
       };
@@ -1871,14 +1873,14 @@ export interface operations {
     };
   };
   /**
-   * Create a snapshot of all dependencies from manifest information 
+   * Create a snapshot of all dependencies from manifest information
    * @description Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.
    * You can upload multiple lockfiles in the same request, but each filename must be unique.
-   * 
+   *
    * The name of the file must be in the supported list.
-   * 
+   *
    * For example, these are valid filenames: "requirements.txt", "package.json", "folder/package.json", and "deep/nested/folder/package.json".
-   * 
+   *
    * This endpoint consumes 100 units of your quota.
    */
   createDependenciesSnapshot: {
