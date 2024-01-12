@@ -203,6 +203,12 @@ export interface components {
               /** @default */
               name: string;
             }[];
+          cvss: {
+            /** @default 0 */
+            score: number;
+            /** @default */
+            vectorString: string;
+          };
           /** @default */
           description: string;
           /** @default */
@@ -237,13 +243,19 @@ export interface components {
               /** @default */
               name: string;
             }[];
+          cvss: {
+            /** @default 0 */
+            score: number;
+            /** @default */
+            vectorString: string;
+          };
           /** @default */
           description: string;
           /** @default */
           firstPatchedVersionIdentifier: string;
           /** @default */
           ghsaId: string;
-          /** @default high */
+          /** @default critical */
           severity: string;
           /** @default */
           title: string;
@@ -271,13 +283,19 @@ export interface components {
               /** @default */
               name: string;
             }[];
+          cvss: {
+            /** @default 0 */
+            score: number;
+            /** @default */
+            vectorString: string;
+          };
           /** @default */
           description: string;
           /** @default */
           firstPatchedVersionIdentifier: string;
           /** @default */
           ghsaId: string;
-          /** @default low */
+          /** @default critical */
           severity: string;
           /** @default */
           title: string;
@@ -1887,11 +1905,7 @@ export interface operations {
     requestBody?: {
       content: {
         "multipart/form-data": {
-          /** @default */
-          repository?: string;
-          /** @default */
-          branch?: string;
-          [key: string]: undefined;
+          [key: string]: never;
         };
       };
     };

@@ -361,6 +361,24 @@
                               ]
                             }
                           },
+                          "cvss": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "score": {
+                                "type": "number",
+                                "default": 0
+                              },
+                              "vectorString": {
+                                "type": "string",
+                                "default": ""
+                              }
+                            },
+                            "required": [
+                              "score",
+                              "vectorString"
+                            ]
+                          },
                           "description": {
                             "type": "string",
                             "default": ""
@@ -392,6 +410,7 @@
                         },
                         "required": [
                           "cveId",
+                          "cvss",
                           "cwes",
                           "description",
                           "firstPatchedVersionIdentifier",
@@ -472,6 +491,24 @@
                               ]
                             }
                           },
+                          "cvss": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "score": {
+                                "type": "number",
+                                "default": 0
+                              },
+                              "vectorString": {
+                                "type": "string",
+                                "default": ""
+                              }
+                            },
+                            "required": [
+                              "score",
+                              "vectorString"
+                            ]
+                          },
                           "description": {
                             "type": "string",
                             "default": ""
@@ -486,7 +523,7 @@
                           },
                           "severity": {
                             "type": "string",
-                            "default": "high"
+                            "default": "critical"
                           },
                           "title": {
                             "type": "string",
@@ -503,6 +540,7 @@
                         },
                         "required": [
                           "cveId",
+                          "cvss",
                           "cwes",
                           "description",
                           "firstPatchedVersionIdentifier",
@@ -583,6 +621,24 @@
                               ]
                             }
                           },
+                          "cvss": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "score": {
+                                "type": "number",
+                                "default": 0
+                              },
+                              "vectorString": {
+                                "type": "string",
+                                "default": ""
+                              }
+                            },
+                            "required": [
+                              "score",
+                              "vectorString"
+                            ]
+                          },
                           "description": {
                             "type": "string",
                             "default": ""
@@ -597,7 +653,7 @@
                           },
                           "severity": {
                             "type": "string",
-                            "default": "low"
+                            "default": "critical"
                           },
                           "title": {
                             "type": "string",
@@ -614,6 +670,7 @@
                         },
                         "required": [
                           "cveId",
+                          "cvss",
                           "cwes",
                           "description",
                           "firstPatchedVersionIdentifier",
@@ -5871,16 +5928,7 @@
                   },
                   "format": "binary"
                 },
-                "properties": {
-                  "repository": {
-                    "type": "string",
-                    "default": ""
-                  },
-                  "branch": {
-                    "type": "string",
-                    "default": ""
-                  }
-                }
+                "properties": {}
               }
             }
           },
