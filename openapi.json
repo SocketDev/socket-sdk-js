@@ -4499,6 +4499,65 @@
                 ]
               }
             }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "gptMalware"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "notes": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "default": 0
+                          },
+                          "severity": {
+                            "type": "number",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "confidence",
+                          "notes",
+                          "severity"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
           }
         ]
       },
@@ -5928,7 +5987,16 @@
                   },
                   "format": "binary"
                 },
-                "properties": {}
+                "properties": {
+                  "repository": {
+                    "type": "string",
+                    "default": ""
+                  },
+                  "branch": {
+                    "type": "string",
+                    "default": ""
+                  }
+                }
               }
             }
           },
