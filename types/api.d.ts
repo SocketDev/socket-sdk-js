@@ -1234,6 +1234,22 @@ export interface components {
         };
         usage?: components["schemas"]["SocketUsageRef"];
       };
+    }) | ({
+      /** @enum {string} */
+      type?: "gptMalware";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          notes: string;
+          /** @default 0 */
+          confidence: number;
+          /** @default 0 */
+          severity: number;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
     });
     SocketMetricSchema: {
       /** @default 0 */
@@ -1905,7 +1921,11 @@ export interface operations {
     requestBody?: {
       content: {
         "multipart/form-data": {
-          [key: string]: never;
+          /** @default */
+          repository?: string;
+          /** @default */
+          branch?: string;
+          [key: string]: undefined;
         };
       };
     };
