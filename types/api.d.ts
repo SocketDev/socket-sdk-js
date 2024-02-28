@@ -1221,7 +1221,7 @@ export interface components {
     }) | ({
       /** @enum {string} */
       type?: "gptAnomaly";
-      value?: components["schemas"]["SocketIssueBasics"] & {
+      value?: components["schemas"]["SocketIssueBasics"] & ({
         /** @default */
         description: string;
         props: {
@@ -1231,9 +1231,14 @@ export interface components {
           confidence: number;
           /** @default 0 */
           severity: number;
+          /**
+           * @default medium
+           * @enum {string}
+           */
+          risk: "low" | "medium" | "high";
         };
         usage?: components["schemas"]["SocketUsageRef"];
-      };
+      });
     }) | ({
       /** @enum {string} */
       type?: "gptMalware";
@@ -1250,6 +1255,23 @@ export interface components {
         };
         usage?: components["schemas"]["SocketUsageRef"];
       };
+    }) | ({
+      /** @enum {string} */
+      type?: "potentialVulnerability";
+      value?: components["schemas"]["SocketIssueBasics"] & ({
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          note: string;
+          /**
+           * @default medium
+           * @enum {string}
+           */
+          risk: "low" | "medium" | "high";
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      });
     });
     SocketMetricSchema: {
       /** @default 0 */
