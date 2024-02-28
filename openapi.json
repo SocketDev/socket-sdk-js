@@ -4479,11 +4479,21 @@
                           "severity": {
                             "type": "number",
                             "default": 0
+                          },
+                          "risk": {
+                            "type": "string",
+                            "enum": [
+                              "low",
+                              "medium",
+                              "high"
+                            ],
+                            "default": "medium"
                           }
                         },
                         "required": [
                           "confidence",
                           "notes",
+                          "risk",
                           "severity"
                         ]
                       },
@@ -4544,6 +4554,65 @@
                           "confidence",
                           "notes",
                           "severity"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "potentialVulnerability"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "note": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "risk": {
+                            "type": "string",
+                            "enum": [
+                              "low",
+                              "medium",
+                              "high"
+                            ],
+                            "default": "medium"
+                          }
+                        },
+                        "required": [
+                          "note",
+                          "risk"
                         ]
                       },
                       "usage": {
