@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@socketsecurity/eslint-config": "^2.0.0",
-    "@tsconfig/node14": "^1.0.3",
+    "@tsconfig/node14": "^14.1.0",
     "@types/chai": "^4.3.4",
     "@types/chai-as-promised": "^7.1.5",
     "@types/mocha": "^10.0.1",
