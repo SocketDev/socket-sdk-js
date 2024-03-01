@@ -1955,10 +1955,7 @@ export interface operations {
       /** @description ID of the dependencies snapshot */
       200: {
         content: {
-          "application/json": {
-            /** @default */
-            id: string;
-          };
+          "application/json": Record<string, never>;
         };
       };
       400: components["responses"]["SocketBadRequest"];
