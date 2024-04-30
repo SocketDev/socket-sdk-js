@@ -148,6 +148,102 @@ export interface paths {
      */
     post: operations["createDependenciesSnapshot"];
   };
+  "/orgs/{org_slug}/repos": {
+    /**
+     * List repositories (unstable)
+     * @description Lists repositories for the specified organization.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getOrgRepoList"];
+    /**
+     * Create repository (unstable)
+     * @description Create a repository.
+     *
+     * Repos collect Full scans and Diff scans and are typically associated with a git repo.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    post: operations["createOrgRepo"];
+  };
+  "/orgs/{org_slug}/repos/{repo_slug}": {
+    /**
+     * Get repository (unstable)
+     * @description Retrieve a repository associated with an organization.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getOrgRepo"];
+    /**
+     * Update repository (unstable)
+     * @description Update details of an existing repository.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    post: operations["updateOrgRepo"];
+    /**
+     * Delete repository (unstable)
+     * @description Delete a single repository and all of its associated Full scans and Diff scans.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    delete: operations["deleteOrgRepo"];
+  };
+  "/orgs/{org_slug}/full-scans": {
+    /**
+     * List full scans (unstable)
+     * @description Returns a paginated list of all full scans in an org, excluding SBOM artifacts.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getOrgFullScanList"];
+    /**
+     * Create full scan (unstable)
+     * @description Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    post: operations["CreateOrgFullScan"];
+  };
+  "/orgs/{org_slug}/full-scans/{full_scan_id}": {
+    /**
+     * Stream full scan (unstable)
+     * @description Stream all SBOM artifacts for a full scan.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getOrgFullScan"];
+    /**
+     * Delete full scan (unstable)
+     * @description Delete an existing full scan.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    delete: operations["deleteOrgFullScan"];
+  };
+  "/orgs/{org_slug}/full-scans/{full_scan_id}/metadata": {
+    /**
+     * Get full scan metadata (unstable)
+     * @description Get metadata for a single full scan
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getOrgFullScanMetadata"];
+  };
+  "/analytics/org/{filter}": {
+    /**
+     * Fetch the organization's analytics
+     * @description This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getOrgAnalytics"];
+  };
+  "/analytics/repo/{name}/{filter}": {
+    /**
+     * Fetch repository analytics
+     * @description This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getRepoAnalytics"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -186,6 +282,16 @@ export interface components {
       /** @default */
       url: string;
     };
+    /**
+     * @default low
+     * @enum {string}
+     */
+    SocketIssueSeverity: "low" | "middle" | "high" | "critical";
+    /**
+     * @default miscellaneous
+     * @enum {string}
+     */
+    SocketCategory: "supplyChainRisk" | "quality" | "maintenance" | "vulnerability" | "license" | "miscellaneous";
     SocketIssue: ({
       /** @enum {string} */
       type?: "criticalCVE";
@@ -229,6 +335,46 @@ export interface components {
     }) | ({
       /** @enum {string} */
       type?: "cve";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          cveId: string;
+          cwes: {
+              /** @default */
+              description: string;
+              /** @default */
+              id: string;
+              /** @default */
+              name: string;
+            }[];
+          cvss: {
+            /** @default 0 */
+            score: number;
+            /** @default */
+            vectorString: string;
+          };
+          /** @default */
+          description: string;
+          /** @default */
+          firstPatchedVersionIdentifier: string;
+          /** @default */
+          ghsaId: string;
+          /** @default critical */
+          severity: string;
+          /** @default */
+          title: string;
+          /** @default */
+          url: string;
+          /** @default */
+          vulnerableVersionRange: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "mediumCVE";
       value?: components["schemas"]["SocketIssueBasics"] & {
         /** @default */
         description: string;
@@ -1144,6 +1290,77 @@ export interface components {
       };
     }) | ({
       /** @enum {string} */
+      type?: "miscLicenseIssues";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          description: string;
+          /** @default */
+          location: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "unidentifiedLicense";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          location: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "noLicenseFound";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "explicitlyUnlicensedItem";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          location: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "copyleftLicense";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          licenseId: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "nonpermissiveLicense";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          licenseId: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
       type?: "didYouMean";
       value?: components["schemas"]["SocketIssueBasics"] & {
         /** @default */
@@ -1305,16 +1522,6 @@ export interface components {
       /** @default null */
       value: Record<string, never>;
     };
-    /**
-     * @default low
-     * @enum {string}
-     */
-    SocketIssueSeverity: "low" | "middle" | "high" | "critical";
-    /**
-     * @default miscellaneous
-     * @enum {string}
-     */
-    SocketCategory: "supplyChainRisk" | "quality" | "maintenance" | "vulnerability" | "license" | "miscellaneous";
     SocketRefList: components["schemas"]["SocketRef"][];
     SocketRefFile: {
       /** @default */
@@ -1768,6 +1975,8 @@ export interface operations {
                 image: string;
                 /** @default */
                 plan: string;
+                /** @default */
+                slug: string;
               };
             };
           };
@@ -1905,6 +2114,8 @@ export interface operations {
             rows: {
                 /** @default */
                 branch: string;
+                /** @default false */
+                direct: boolean;
                 /** @default */
                 id: string;
                 /** @default */
@@ -1955,10 +2166,7 @@ export interface operations {
       /** @description ID of the dependencies snapshot */
       200: {
         content: {
-          "application/json": {
-            /** @default */
-            id: string;
-          };
+          "application/json": Record<string, never>;
         };
       };
       400: components["responses"]["SocketBadRequest"];
@@ -1966,6 +2174,699 @@ export interface operations {
       403: components["responses"]["SocketForbidden"];
       429: components["responses"]["SocketTooManyRequestsResponse"];
       500: components["responses"]["SocketInternalServerError"];
+    };
+  };
+  /**
+   * List repositories (unstable)
+   * @description Lists repositories for the specified organization.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getOrgRepoList: {
+    parameters: {
+      path: {
+        org_slug: string;
+      };
+    };
+    responses: {
+      /** @description Lists repositories for the specified organization. The authenticated user must be a member of the organization. */
+      200: {
+        content: {
+          "application/json": {
+            results: {
+                /** @default */
+                id?: string;
+                /** @default */
+                created_at?: string;
+                /** @default */
+                updated_at?: string;
+                /** @default */
+                slug?: string;
+                /** @default */
+                head_full_scan_id?: string;
+                /** @default */
+                name?: string;
+                /** @default */
+                description?: string;
+                /** @default */
+                homepage?: string;
+                /** @default */
+                visibility?: string;
+                /** @default false */
+                archived?: boolean;
+                /** @default */
+                default_branch?: string;
+              }[];
+            /** @default 0 */
+            nextPage: number;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Create repository (unstable)
+   * @description Create a repository.
+   *
+   * Repos collect Full scans and Diff scans and are typically associated with a git repo.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  createOrgRepo: {
+    parameters: {
+      path: {
+        org_slug: string;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          /** @default */
+          name?: string;
+          /** @default */
+          description?: string;
+          /** @default */
+          homepage?: string;
+          /** @default */
+          visibility?: string;
+          /** @default false */
+          archived?: boolean;
+          /** @default */
+          default_branch?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Lists repositories for the specified organization. The authenticated user must be a member of the organization. */
+      201: {
+        content: {
+          "application/json": {
+            /** @default */
+            id?: string;
+            /** @default */
+            created_at?: string;
+            /** @default */
+            updated_at?: string;
+            /** @default */
+            slug?: string;
+            /** @default */
+            head_full_scan_id?: string;
+            /** @default */
+            name?: string;
+            /** @default */
+            description?: string;
+            /** @default */
+            homepage?: string;
+            /** @default */
+            visibility?: string;
+            /** @default false */
+            archived?: boolean;
+            /** @default */
+            default_branch?: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get repository (unstable)
+   * @description Retrieve a repository associated with an organization.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getOrgRepo: {
+    parameters: {
+      path: {
+        org_slug: string;
+        repo_slug: string;
+      };
+    };
+    responses: {
+      /** @description Lists repositories for the specified organization. The authenticated user must be a member of the organization. */
+      200: {
+        content: {
+          "application/json": {
+            /** @default */
+            id?: string;
+            /** @default */
+            created_at?: string;
+            /** @default */
+            updated_at?: string;
+            /** @default */
+            slug?: string;
+            /** @default */
+            head_full_scan_id?: string;
+            /** @default */
+            name?: string;
+            /** @default */
+            description?: string;
+            /** @default */
+            homepage?: string;
+            /** @default */
+            visibility?: string;
+            /** @default false */
+            archived?: boolean;
+            /** @default */
+            default_branch?: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Update repository (unstable)
+   * @description Update details of an existing repository.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  updateOrgRepo: {
+    parameters: {
+      path: {
+        org_slug: string;
+        repo_slug: string;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          /** @default */
+          name?: string;
+          /** @default */
+          description?: string;
+          /** @default */
+          homepage?: string;
+          /** @default */
+          visibility?: string;
+          /** @default false */
+          archived?: boolean;
+          /** @default */
+          default_branch?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Update a repositories details */
+      200: {
+        content: {
+          "application/json": {
+            /** @default */
+            id?: string;
+            /** @default */
+            created_at?: string;
+            /** @default */
+            updated_at?: string;
+            /** @default */
+            slug?: string;
+            /** @default */
+            head_full_scan_id?: string;
+            /** @default */
+            name?: string;
+            /** @default */
+            description?: string;
+            /** @default */
+            homepage?: string;
+            /** @default */
+            visibility?: string;
+            /** @default false */
+            archived?: boolean;
+            /** @default */
+            default_branch?: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Delete repository (unstable)
+   * @description Delete a single repository and all of its associated Full scans and Diff scans.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  deleteOrgRepo: {
+    parameters: {
+      path: {
+        org_slug: string;
+        repo_slug: string;
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        content: {
+          "application/json": {
+            /** @default ok */
+            status: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * List full scans (unstable)
+   * @description Returns a paginated list of all full scans in an org, excluding SBOM artifacts.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getOrgFullScanList: {
+    parameters: {
+      path: {
+        org_slug: string;
+      };
+    };
+    responses: {
+      /** @description Lists repositories for the specified organization. The authenticated user must be a member of the organization. */
+      200: {
+        content: {
+          "application/json": {
+            results: {
+                /** @default */
+                id?: string;
+                /** @default */
+                created_at?: string;
+                /** @default */
+                updated_at?: string;
+                /** @default */
+                organization_id?: string;
+                /** @default */
+                repository_id?: string;
+                committers?: string[];
+                /** @default */
+                repo?: string;
+                /** @default */
+                branch?: string;
+                /** @default */
+                commit_message?: string;
+                /** @default */
+                commit_hash?: string;
+                /** @default 0 */
+                pull_request?: number;
+                /** @default */
+                html_report_url?: string;
+              }[];
+            /** @default 0 */
+            nextPage: number;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Create full scan (unstable)
+   * @description Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  CreateOrgFullScan: {
+    parameters: {
+      path: {
+        org_slug: string;
+      };
+    };
+    requestBody?: {
+      content: {
+        "multipart/form-data": {
+          [key: string]: never;
+        };
+      };
+    };
+    responses: {
+      /** @description Upload manifest files to create a full scan in an org's repo */
+      201: {
+        content: {
+          "application/json": {
+            /** @default */
+            id?: string;
+            /** @default */
+            created_at?: string;
+            /** @default */
+            updated_at?: string;
+            /** @default */
+            organization_id?: string;
+            /** @default */
+            repository_id?: string;
+            committers?: string[];
+            /** @default */
+            repo?: string;
+            /** @default */
+            branch?: string;
+            /** @default */
+            commit_message?: string;
+            /** @default */
+            commit_hash?: string;
+            /** @default 0 */
+            pull_request?: number;
+            /** @default */
+            html_report_url?: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Stream full scan (unstable)
+   * @description Stream all SBOM artifacts for a full scan.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getOrgFullScan: {
+    parameters: {
+      path: {
+        org_slug: string;
+        full_scan_id: string;
+      };
+    };
+    responses: {
+      /** @description Socket issue lists and scores for all packages */
+      200: {
+        content: {
+          "application/x-ndjson": {
+            /**
+             * @default unknown
+             * @enum {string}
+             */
+            type: "unknown" | "npm" | "pypi" | "golang";
+            /** @default */
+            namespace?: string;
+            /** @default */
+            name?: string;
+            /** @default */
+            version?: string;
+            /** @default */
+            subpath?: string;
+            /** @default */
+            release?: string;
+            /** @default */
+            id: string;
+            /** @default false */
+            direct?: boolean;
+            manifestFiles?: {
+                /** @default */
+                file: string;
+                /** @default 0 */
+                start?: number;
+                /** @default 0 */
+                end?: number;
+              }[];
+            topLevelAncestors?: string[];
+            dependencies?: string[];
+            artifact?: {
+              /**
+               * @default unknown
+               * @enum {string}
+               */
+              type: "unknown" | "npm" | "pypi" | "golang";
+              /** @default */
+              namespace?: string;
+              /** @default */
+              name?: string;
+              /** @default */
+              version?: string;
+              /** @default */
+              subpath?: string;
+              /** @default */
+              release?: string;
+              /** @default */
+              id: string;
+            };
+            /** @default */
+            license?: string;
+            author?: string[];
+            /** @default 0 */
+            size?: number;
+            score?: {
+              /** @default 0 */
+              supplyChain: number;
+              /** @default 0 */
+              quality: number;
+              /** @default 0 */
+              maintenance: number;
+              /** @default 0 */
+              vulnerability: number;
+              /** @default 0 */
+              license: number;
+              /** @default 0 */
+              overall: number;
+            };
+            alerts?: {
+                /** @default */
+                key: string;
+                /** @default */
+                type: string;
+                severity: components["schemas"]["SocketIssueSeverity"];
+                category: components["schemas"]["SocketCategory"];
+                /** @default */
+                file?: string;
+                /** @default 0 */
+                start?: number;
+                /** @default 0 */
+                end?: number;
+                /** @default null */
+                props?: Record<string, never>;
+              }[];
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Delete full scan (unstable)
+   * @description Delete an existing full scan.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  deleteOrgFullScan: {
+    parameters: {
+      path: {
+        org_slug: string;
+        full_scan_id: string;
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        content: {
+          "application/json": {
+            /** @default ok */
+            status: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get full scan metadata (unstable)
+   * @description Get metadata for a single full scan
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getOrgFullScanMetadata: {
+    parameters: {
+      path: {
+        org_slug: string;
+        full_scan_id: string;
+      };
+    };
+    responses: {
+      /** @description The data from the full scan */
+      200: {
+        content: {
+          "application/json": {
+            /** @default */
+            id?: string;
+            /** @default */
+            created_at?: string;
+            /** @default */
+            updated_at?: string;
+            /** @default */
+            organization_id?: string;
+            /** @default */
+            repository_id?: string;
+            committers?: string[];
+            /** @default */
+            repo?: string;
+            /** @default */
+            branch?: string;
+            /** @default */
+            commit_message?: string;
+            /** @default */
+            commit_hash?: string;
+            /** @default 0 */
+            pull_request?: number;
+            /** @default */
+            html_report_url?: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Fetch the organization's analytics
+   * @description This endpoint consumes 0 units of your quota.
+   */
+  getOrgAnalytics: {
+    parameters: {
+      path: {
+        filter: string;
+      };
+    };
+    responses: {
+      /** @description Socket analytics - organization-level data */
+      200: {
+        content: {
+          "application/json": {
+              /** @default 0 */
+              id: number;
+              /** @default */
+              created_at: string;
+              /** @default */
+              repository_id: string;
+              /** @default 0 */
+              organization_id: number;
+              /** @default */
+              repository_name: string;
+              /** @default 0 */
+              total_critical_alerts: number;
+              /** @default 0 */
+              total_high_alerts: number;
+              /** @default 0 */
+              total_medium_alerts: number;
+              /** @default 0 */
+              total_low_alerts: number;
+              /** @default 0 */
+              total_critical_added: number;
+              /** @default 0 */
+              total_high_added: number;
+              /** @default 0 */
+              total_medium_added: number;
+              /** @default 0 */
+              total_low_added: number;
+              /** @default 0 */
+              total_critical_prevented: number;
+              /** @default 0 */
+              total_high_prevented: number;
+              /** @default 0 */
+              total_medium_prevented: number;
+              /** @default 0 */
+              total_low_prevented: number;
+              top_five_alert_types: Record<string, never>;
+            }[];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Fetch repository analytics
+   * @description This endpoint consumes 0 units of your quota.
+   */
+  getRepoAnalytics: {
+    parameters: {
+      path: {
+        name: string;
+        filter: string;
+      };
+    };
+    responses: {
+      /** @description Socket analytics - repo-level data */
+      200: {
+        content: {
+          "application/json": {
+              /** @default 0 */
+              id: number;
+              /** @default */
+              repository_id: string;
+              /** @default */
+              created_at: string;
+              /** @default 0 */
+              organization_id: number;
+              /** @default */
+              repository_name: string;
+              /** @default 0 */
+              total_critical_alerts: number;
+              /** @default 0 */
+              total_high_alerts: number;
+              /** @default 0 */
+              total_medium_alerts: number;
+              /** @default 0 */
+              total_low_alerts: number;
+              /** @default 0 */
+              total_critical_added: number;
+              /** @default 0 */
+              total_high_added: number;
+              /** @default 0 */
+              total_medium_added: number;
+              /** @default 0 */
+              total_low_added: number;
+              /** @default 0 */
+              total_critical_prevented: number;
+              /** @default 0 */
+              total_high_prevented: number;
+              /** @default 0 */
+              total_medium_prevented: number;
+              /** @default 0 */
+              total_low_prevented: number;
+              top_five_alert_types: Record<string, never>;
+            }[];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
     };
   };
 }
