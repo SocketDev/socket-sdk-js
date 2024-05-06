@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/sdk",
-  "version": "0.7.3",
+  "version": "0.8.0",
   "license": "MIT",
   "description": "SDK for the Socket API client",
   "author": {
@@ -22,7 +22,7 @@
     "types/**/*.d.ts"
   ],
   "engines": {
-    "node": ">=16.10.0"
+    "node": "^16.10.0 || >=18.0.0"
   },
   "dependencies": {
     "formdata-node": "^5.0.0",
@@ -30,15 +30,15 @@
     "pony-cause": "^2.1.8"
   },
   "devDependencies": {
-    "@socketsecurity/eslint-config": "^3.0.1",
+    "@socketsecurity/eslint-config": "^4.0.1",
     "@tsconfig/node14": "^14.1.2",
     "@types/chai": "^4.3.4",
     "@types/chai-as-promised": "^7.1.5",
     "@types/mocha": "^10.0.1",
     "@types/node": "^14.18.36",
     "@types/tap": "^15.0.7",
-    "@typescript-eslint/eslint-plugin": "^5.51.0",
-    "@typescript-eslint/parser": "^5.51.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.3",
+    "@typescript-eslint/parser": "^6.7.3",
     "c8": "^8.0.0",
     "chai": "^4.3.7",
     "chai-as-promised": "^7.1.1",
@@ -48,11 +48,11 @@
     "eslint-import-resolver-typescript": "^3.5.3",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jsdoc": "^40.0.0",
-    "eslint-plugin-n": "^15.6.1",
+    "eslint-plugin-n": "^16.1.0",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-unicorn": "^45.0.2",
+    "eslint-plugin-unicorn": "^48.0.1",
     "husky": "^8.0.3",
     "installed-check": "^8.0.0",
     "mocha": "^10.1.0",
