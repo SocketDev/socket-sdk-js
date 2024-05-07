@@ -226,6 +226,40 @@ class SocketSdk {
   }
 
   /**
+   * @param {string} time
+   * @returns {Promise<SocketSdkResultType<'getOrgAnalytics'>>}
+   */
+  async getOrgAnalytics (time) {
+    const timeParam = encodeURIComponent(time)
+
+    try {
+      const client = await this.#getClient()
+      const data = await client.get(`analytics/org/${timeParam}`).json()
+      return { success: true, status: 200, data }
+    } catch (err) {
+      return /** @type {SocketSdkErrorType<'getOrgAnalytics'>} */ (this.#handleApiError(err))
+    }
+  }
+
+  /**
+   * @param {string} repo
+   * @param {string} time
+   * @returns {Promise<SocketSdkResultType<'getRepoAnalytics'>>}
+   */
+  async getRepoAnalytics (repo, time) {
+    const timeParam = encodeURIComponent(time)
+    const repoParam = encodeURIComponent(repo)
+
+    try {
+      const client = await this.#getClient()
+      const data = await client.get(`analytics/repo/${repoParam}/${timeParam}`).json()
+      return { success: true, status: 200, data }
+    } catch (err) {
+      return /** @type {SocketSdkErrorType<'getRepoAnalytics'>} */ (this.#handleApiError(err))
+    }
+  }
+
+  /**
    * @param {Array<{ organization?: string }>} selectors
    * @returns {Promise<SocketSdkResultType<'postSettings'>>}
    */
