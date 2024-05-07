@@ -4606,6 +4606,55 @@
               "type": {
                 "type": "string",
                 "enum": [
+                  "ambiguousClassifier"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "classifier": {
+                            "type": "string",
+                            "default": ""
+                          }
+                        },
+                        "required": [
+                          "classifier"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
                   "didYouMean"
                 ]
               },
@@ -6469,7 +6518,6 @@
     "/dependencies/upload": {
       "post": {
         "tags": [
-          "Upload",
           "Dependencies"
         ],
         "summary": "Create a snapshot of all dependencies from manifest information",
@@ -6801,7 +6849,7 @@
     "/orgs/{org_slug}/repos/{repo_slug}": {
       "get": {
         "tags": [
-          "Repositories)"
+          "Repositories"
         ],
         "summary": "Get repository (unstable)",
         "operationId": "getOrgRepo",

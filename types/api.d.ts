@@ -1361,6 +1361,18 @@ export interface components {
       };
     }) | ({
       /** @enum {string} */
+      type?: "ambiguousClassifier";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          classifier: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
       type?: "didYouMean";
       value?: components["schemas"]["SocketIssueBasics"] & {
         /** @default */
