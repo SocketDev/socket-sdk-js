@@ -22,6 +22,36 @@ export interface paths {
      * Get score by package
      * @description Get all the scores and metrics by category that are used to evaluate the package version.
      *
+     * - depscore: The average of all score factors. (0-1)
+     * - supplyChainRisk: Score factors relating to supply chain security (0-1)
+     * - downloadCount: The number of downloads for the package. Higher downloads contribute to a higher score.
+     * - supplyChainRiskIssueLow/Mid/High/Critical: The number of supply chain risk issues of varying severity. Lower numbers contribute to a higher score.
+     * - dependencyCount: The number of production dependencies. Lower count contributes to a higher score.
+     * - devDependencyCount: The number of development dependencies. Lower count contributes to a higher score.
+     * - transitiveDependencyCount: The number of transitive dependencies. Lower count contributes to a higher score.
+     * - totalDependencyCount: The total number of dependencies (production + development + transitive). Lower count contributes to a higher score.
+     * - quality: Score factors relating to code quality (0-1)
+     * - qualityIssueLow/Mid/High/Critical: The number of code quality issues of varying severity. Lower numbers contribute to a higher score.
+     * - linesOfCode: The number of lines of code in the package. Lower count contributes to a higher score.
+     * - readmeLength: The length of the package's README file. Longer READMEs contribute to a higher score.
+     * - maintenance: Score factors relating to package maintenance (0-1)
+     * - maintainerCount: The number of maintainers for the package. More maintainers contribute to a higher score.
+     * - versionsLastWeek/Month/TwoMonths/Year: The number of versions released in different time periods. More recent releases contribute to a higher score.
+     * - versionCount: The total number of versions released. Higher count contributes to a higher score.
+     * - maintenanceIssueLow/Mid/High/Critical: The number of maintenance issues of varying severity. Lower numbers contribute to a higher score.
+     * - vulnerability: Score factors relating to package vulnerabilities (0-1)
+     * - vulnerabilityIssueLow/Mid/High/Critical: The number of vulnerability issues of varying severity. Lower numbers contribute to a higher score.
+     * - dependencyVulnerabilityCount: The number of vulnerabilities in the package's dependencies. Lower count contributes to a higher score.
+     * - vulnerabilityCount: The number of vulnerabilities in the package itself. Lower count contributes to a higher score.
+     * - license: Score factors relating to package licensing (0-1)
+     * - licenseIssueLow/Mid/High/Critical: The number of license issues of varying severity. Lower numbers contribute to a higher score.
+     * - licenseQuality: A score indicating the quality/permissiveness of the package's license. Higher quality contributes to a higher score.
+     * - miscellaneous: Miscellaneous metadata about the package version.
+     * - versionAuthorName/Email: The name and email of the version author.
+     * - fileCount: The number of files in the package.
+     * - byteCount: The total size in bytes of the package.
+     * - typeModule: Whether the package declares a "type": "module" field.
+     *
      * This endpoint consumes 1 unit of your quota.
      */
     get: operations["getScoreByNPMPackage"];
@@ -1742,6 +1772,36 @@ export interface operations {
    * Get score by package
    * @description Get all the scores and metrics by category that are used to evaluate the package version.
    *
+   * - depscore: The average of all score factors. (0-1)
+   * - supplyChainRisk: Score factors relating to supply chain security (0-1)
+   * - downloadCount: The number of downloads for the package. Higher downloads contribute to a higher score.
+   * - supplyChainRiskIssueLow/Mid/High/Critical: The number of supply chain risk issues of varying severity. Lower numbers contribute to a higher score.
+   * - dependencyCount: The number of production dependencies. Lower count contributes to a higher score.
+   * - devDependencyCount: The number of development dependencies. Lower count contributes to a higher score.
+   * - transitiveDependencyCount: The number of transitive dependencies. Lower count contributes to a higher score.
+   * - totalDependencyCount: The total number of dependencies (production + development + transitive). Lower count contributes to a higher score.
+   * - quality: Score factors relating to code quality (0-1)
+   * - qualityIssueLow/Mid/High/Critical: The number of code quality issues of varying severity. Lower numbers contribute to a higher score.
+   * - linesOfCode: The number of lines of code in the package. Lower count contributes to a higher score.
+   * - readmeLength: The length of the package's README file. Longer READMEs contribute to a higher score.
+   * - maintenance: Score factors relating to package maintenance (0-1)
+   * - maintainerCount: The number of maintainers for the package. More maintainers contribute to a higher score.
+   * - versionsLastWeek/Month/TwoMonths/Year: The number of versions released in different time periods. More recent releases contribute to a higher score.
+   * - versionCount: The total number of versions released. Higher count contributes to a higher score.
+   * - maintenanceIssueLow/Mid/High/Critical: The number of maintenance issues of varying severity. Lower numbers contribute to a higher score.
+   * - vulnerability: Score factors relating to package vulnerabilities (0-1)
+   * - vulnerabilityIssueLow/Mid/High/Critical: The number of vulnerability issues of varying severity. Lower numbers contribute to a higher score.
+   * - dependencyVulnerabilityCount: The number of vulnerabilities in the package's dependencies. Lower count contributes to a higher score.
+   * - vulnerabilityCount: The number of vulnerabilities in the package itself. Lower count contributes to a higher score.
+   * - license: Score factors relating to package licensing (0-1)
+   * - licenseIssueLow/Mid/High/Critical: The number of license issues of varying severity. Lower numbers contribute to a higher score.
+   * - licenseQuality: A score indicating the quality/permissiveness of the package's license. Higher quality contributes to a higher score.
+   * - miscellaneous: Miscellaneous metadata about the package version.
+   * - versionAuthorName/Email: The name and email of the version author.
+   * - fileCount: The number of files in the package.
+   * - byteCount: The total size in bytes of the package.
+   * - typeModule: Whether the package declares a "type": "module" field.
+   *
    * This endpoint consumes 1 unit of your quota.
    */
   getScoreByNPMPackage: {
@@ -2810,6 +2870,7 @@ export interface operations {
               total_medium_prevented: number;
               /** @default 0 */
               total_low_prevented: number;
+              /** @default {} */
               top_five_alert_types: Record<string, never>;
             }[];
         };
@@ -2870,6 +2931,7 @@ export interface operations {
               total_medium_prevented: number;
               /** @default 0 */
               total_low_prevented: number;
+              /** @default {} */
               top_five_alert_types: Record<string, never>;
             }[];
         };
