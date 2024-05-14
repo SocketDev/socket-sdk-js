@@ -5591,7 +5591,7 @@
             "basicAuth": []
           }
         ],
-        "description": "Get all the scores and metrics by category that are used to evaluate the package version.\n\nThis endpoint consumes 1 unit of your quota.",
+        "description": "Get all the scores and metrics by category that are used to evaluate the package version.\n\n- depscore: The average of all score factors. (0-1)\n- supplyChainRisk: Score factors relating to supply chain security (0-1)\n- downloadCount: The number of downloads for the package. Higher downloads contribute to a higher score.\n- supplyChainRiskIssueLow/Mid/High/Critical: The number of supply chain risk issues of varying severity. Lower numbers contribute to a higher score.\n- dependencyCount: The number of production dependencies. Lower count contributes to a higher score.\n- devDependencyCount: The number of development dependencies. Lower count contributes to a higher score.\n- transitiveDependencyCount: The number of transitive dependencies. Lower count contributes to a higher score.\n- totalDependencyCount: The total number of dependencies (production + development + transitive). Lower count contributes to a higher score.\n- quality: Score factors relating to code quality (0-1)\n- qualityIssueLow/Mid/High/Critical: The number of code quality issues of varying severity. Lower numbers contribute to a higher score.\n- linesOfCode: The number of lines of code in the package. Lower count contributes to a higher score.\n- readmeLength: The length of the package's README file. Longer READMEs contribute to a higher score.\n- maintenance: Score factors relating to package maintenance (0-1)\n- maintainerCount: The number of maintainers for the package. More maintainers contribute to a higher score.\n- versionsLastWeek/Month/TwoMonths/Year: The number of versions released in different time periods. More recent releases contribute to a higher score.\n- versionCount: The total number of versions released. Higher count contributes to a higher score.\n- maintenanceIssueLow/Mid/High/Critical: The number of maintenance issues of varying severity. Lower numbers contribute to a higher score.\n- vulnerability: Score factors relating to package vulnerabilities (0-1)\n- vulnerabilityIssueLow/Mid/High/Critical: The number of vulnerability issues of varying severity. Lower numbers contribute to a higher score.\n- dependencyVulnerabilityCount: The number of vulnerabilities in the package's dependencies. Lower count contributes to a higher score.\n- vulnerabilityCount: The number of vulnerabilities in the package itself. Lower count contributes to a higher score.\n- license: Score factors relating to package licensing (0-1)\n- licenseIssueLow/Mid/High/Critical: The number of license issues of varying severity. Lower numbers contribute to a higher score.\n- licenseQuality: A score indicating the quality/permissiveness of the package's license. Higher quality contributes to a higher score.\n- miscellaneous: Miscellaneous metadata about the package version.\n- versionAuthorName/Email: The name and email of the version author.\n- fileCount: The number of files in the package.\n- byteCount: The total size in bytes of the package.\n- typeModule: Whether the package declares a \"type\": \"module\" field.\n\nThis endpoint consumes 1 unit of your quota.",
         "responses": {
           "200": {
             "content": {
@@ -8005,8 +8005,8 @@
                       },
                       "top_five_alert_types": {
                         "type": "object",
-                        "additionalProperties": false,
-                        "properties": {}
+                        "default": {},
+                        "additionalProperties": false
                       }
                     },
                     "required": [
@@ -8164,8 +8164,8 @@
                       },
                       "top_five_alert_types": {
                         "type": "object",
-                        "additionalProperties": false,
-                        "properties": {}
+                        "default": {},
+                        "additionalProperties": false
                       }
                     },
                     "required": [
