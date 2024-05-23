@@ -1055,6 +1055,22 @@ export interface components {
       };
     }) | ({
       /** @enum {string} */
+      type?: "compromisedSSHKey";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          fingerprint: string;
+          /** @default */
+          sshKey: string;
+          /** @default */
+          username: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
       type?: "semverAnomaly";
       value?: components["schemas"]["SocketIssueBasics"] & {
         /** @default */
