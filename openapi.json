@@ -3238,6 +3238,65 @@
               "type": {
                 "type": "string",
                 "enum": [
+                  "compromisedSSHKey"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "fingerprint": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "sshKey": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "username": {
+                            "type": "string",
+                            "default": ""
+                          }
+                        },
+                        "required": [
+                          "fingerprint",
+                          "sshKey",
+                          "username"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
                   "semverAnomaly"
                 ]
               },
