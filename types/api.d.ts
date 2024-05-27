@@ -1729,6 +1729,17 @@ export interface components {
         };
       };
     };
+    /** @description Gone */
+    SocketGone: {
+      content: {
+        "application/json": {
+          error: {
+            /** @default */
+            message: string;
+          };
+        };
+      };
+    };
     /** @description Internal server error */
     SocketInternalServerError: {
       content: {
@@ -1971,6 +1982,7 @@ export interface operations {
       401: components["responses"]["SocketUnauthorized"];
       403: components["responses"]["SocketForbidden"];
       404: components["responses"]["SocketNotFoundResponse"];
+      410: components["responses"]["SocketGone"];
       429: components["responses"]["SocketTooManyRequestsResponse"];
     };
   };
@@ -2746,6 +2758,8 @@ export interface operations {
                 /** @default null */
                 props?: Record<string, never>;
               }[];
+            /** @default 0 */
+            batchIndex?: number;
           };
         };
       };
