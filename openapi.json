@@ -167,6 +167,35 @@
           }
         }
       },
+      "SocketGone": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "error": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              },
+              "required": [
+                "error"
+              ]
+            }
+          }
+        },
+        "description": "Gone"
+      },
       "SocketInternalServerError": {
         "content": {
           "application/json": {
@@ -5972,6 +6001,9 @@
           "404": {
             "$ref": "#/components/responses/SocketNotFoundResponse"
           },
+          "410": {
+            "$ref": "#/components/responses/SocketGone"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
@@ -7741,6 +7773,10 @@
                           "type"
                         ]
                       }
+                    },
+                    "batchIndex": {
+                      "type": "integer",
+                      "default": 0
                     }
                   },
                   "required": [
