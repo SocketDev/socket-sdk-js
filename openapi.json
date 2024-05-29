@@ -353,6 +353,21 @@
         ],
         "default": "miscellaneous"
       },
+      "SocketBatchPURLFetch": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SocketBatchPURLRequest"
+            }
+          }
+        },
+        "required": [
+          "components"
+        ]
+      },
       "SocketIssue": {
         "anyOf": [
           {
@@ -5239,6 +5254,19 @@
           "score"
         ]
       },
+      "SocketBatchPURLRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "purl": {
+            "type": "string",
+            "default": ""
+          }
+        },
+        "required": [
+          "purl"
+        ]
+      },
       "SocketIssueBasics": {
         "type": "object",
         "additionalProperties": false,
@@ -8288,6 +8316,290 @@
               }
             },
             "description": "Socket analytics - repo-level data"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/purl": {
+      "post": {
+        "tags": [
+          "Artifacts"
+        ],
+        "summary": "Get Packages (unstable)",
+        "operationId": "batchArtifactFetch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SocketBatchPURLFetch"
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "basicAuth": [
+              "artifacts:list"
+            ]
+          }
+        ],
+        "description": "Batch retrieval of package metadata and alerts by PURL strings\n\nThis endpoint consumes 100 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "unknown",
+                        "npm",
+                        "pypi",
+                        "golang"
+                      ],
+                      "default": "unknown"
+                    },
+                    "namespace": {
+                      "type": "string",
+                      "default": ""
+                    },
+                    "name": {
+                      "type": "string",
+                      "default": ""
+                    },
+                    "version": {
+                      "type": "string",
+                      "default": ""
+                    },
+                    "subpath": {
+                      "type": "string",
+                      "default": ""
+                    },
+                    "release": {
+                      "type": "string",
+                      "default": ""
+                    },
+                    "id": {
+                      "type": "string",
+                      "default": ""
+                    },
+                    "direct": {
+                      "type": "boolean",
+                      "default": false
+                    },
+                    "manifestFiles": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "file": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "start": {
+                            "type": "integer",
+                            "default": 0
+                          },
+                          "end": {
+                            "type": "integer",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "file"
+                        ]
+                      }
+                    },
+                    "topLevelAncestors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "default": ""
+                      }
+                    },
+                    "dependencies": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "default": ""
+                      }
+                    },
+                    "artifact": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "unknown",
+                            "npm",
+                            "pypi",
+                            "golang"
+                          ],
+                          "default": "unknown"
+                        },
+                        "namespace": {
+                          "type": "string",
+                          "default": ""
+                        },
+                        "name": {
+                          "type": "string",
+                          "default": ""
+                        },
+                        "version": {
+                          "type": "string",
+                          "default": ""
+                        },
+                        "subpath": {
+                          "type": "string",
+                          "default": ""
+                        },
+                        "release": {
+                          "type": "string",
+                          "default": ""
+                        },
+                        "id": {
+                          "type": "string",
+                          "default": ""
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type"
+                      ]
+                    },
+                    "license": {
+                      "type": "string",
+                      "default": ""
+                    },
+                    "author": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "default": ""
+                      }
+                    },
+                    "size": {
+                      "type": "number",
+                      "default": 0
+                    },
+                    "score": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "supplyChain": {
+                          "type": "number",
+                          "default": 0
+                        },
+                        "quality": {
+                          "type": "number",
+                          "default": 0
+                        },
+                        "maintenance": {
+                          "type": "number",
+                          "default": 0
+                        },
+                        "vulnerability": {
+                          "type": "number",
+                          "default": 0
+                        },
+                        "license": {
+                          "type": "number",
+                          "default": 0
+                        },
+                        "overall": {
+                          "type": "number",
+                          "default": 0
+                        }
+                      },
+                      "required": [
+                        "license",
+                        "maintenance",
+                        "overall",
+                        "quality",
+                        "supplyChain",
+                        "vulnerability"
+                      ]
+                    },
+                    "alerts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "key": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "type": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "severity": {
+                            "$ref": "#/components/schemas/SocketIssueSeverity"
+                          },
+                          "category": {
+                            "$ref": "#/components/schemas/SocketCategory"
+                          },
+                          "file": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "start": {
+                            "type": "integer",
+                            "default": 0
+                          },
+                          "end": {
+                            "type": "integer",
+                            "default": 0
+                          },
+                          "props": {
+                            "type": "object",
+                            "default": null
+                          }
+                        },
+                        "required": [
+                          "category",
+                          "key",
+                          "severity",
+                          "type"
+                        ]
+                      }
+                    },
+                    "batchIndex": {
+                      "type": "integer",
+                      "default": 0
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "type"
+                  ]
+                }
+              }
+            },
+            "description": "Socket issue lists and scores for all packages"
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
