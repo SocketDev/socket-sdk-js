@@ -274,6 +274,15 @@ export interface paths {
      */
     get: operations["getRepoAnalytics"];
   };
+  "/purl": {
+    /**
+     * Get Packages (unstable)
+     * @description Batch retrieval of package metadata and alerts by PURL strings
+     *
+     * This endpoint consumes 100 units of your quota.
+     */
+    post: operations["batchArtifactFetch"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -322,6 +331,9 @@ export interface components {
      * @enum {string}
      */
     SocketCategory: "supplyChainRisk" | "quality" | "maintenance" | "vulnerability" | "license" | "miscellaneous";
+    SocketBatchPURLFetch: {
+      components: components["schemas"]["SocketBatchPURLRequest"][];
+    };
     SocketIssue: ({
       /** @enum {string} */
       type?: "criticalCVE";
@@ -1558,6 +1570,10 @@ export interface components {
       limit?: number;
       /** @default */
       limitingMetric?: string;
+    };
+    SocketBatchPURLRequest: {
+      /** @default */
+      purl: string;
     };
     SocketIssueBasics: {
       severity: components["schemas"]["SocketIssueSeverity"];
@@ -2964,6 +2980,118 @@ export interface operations {
               /** @default {} */
               top_five_alert_types: Record<string, never>;
             }[];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get Packages (unstable)
+   * @description Batch retrieval of package metadata and alerts by PURL strings
+   *
+   * This endpoint consumes 100 units of your quota.
+   */
+  batchArtifactFetch: {
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["SocketBatchPURLFetch"];
+      };
+    };
+    responses: {
+      /** @description Socket issue lists and scores for all packages */
+      200: {
+        content: {
+          "application/x-ndjson": {
+            /**
+             * @default unknown
+             * @enum {string}
+             */
+            type: "unknown" | "npm" | "pypi" | "golang";
+            /** @default */
+            namespace?: string;
+            /** @default */
+            name?: string;
+            /** @default */
+            version?: string;
+            /** @default */
+            subpath?: string;
+            /** @default */
+            release?: string;
+            /** @default */
+            id: string;
+            /** @default false */
+            direct?: boolean;
+            manifestFiles?: {
+                /** @default */
+                file: string;
+                /** @default 0 */
+                start?: number;
+                /** @default 0 */
+                end?: number;
+              }[];
+            topLevelAncestors?: string[];
+            dependencies?: string[];
+            artifact?: {
+              /**
+               * @default unknown
+               * @enum {string}
+               */
+              type: "unknown" | "npm" | "pypi" | "golang";
+              /** @default */
+              namespace?: string;
+              /** @default */
+              name?: string;
+              /** @default */
+              version?: string;
+              /** @default */
+              subpath?: string;
+              /** @default */
+              release?: string;
+              /** @default */
+              id: string;
+            };
+            /** @default */
+            license?: string;
+            author?: string[];
+            /** @default 0 */
+            size?: number;
+            score?: {
+              /** @default 0 */
+              supplyChain: number;
+              /** @default 0 */
+              quality: number;
+              /** @default 0 */
+              maintenance: number;
+              /** @default 0 */
+              vulnerability: number;
+              /** @default 0 */
+              license: number;
+              /** @default 0 */
+              overall: number;
+            };
+            alerts?: {
+                /** @default */
+                key: string;
+                /** @default */
+                type: string;
+                severity: components["schemas"]["SocketIssueSeverity"];
+                category: components["schemas"]["SocketCategory"];
+                /** @default */
+                file?: string;
+                /** @default 0 */
+                start?: number;
+                /** @default 0 */
+                end?: number;
+                /** @default null */
+                props?: Record<string, never>;
+              }[];
+            /** @default 0 */
+            batchIndex?: number;
+          };
         };
       };
       400: components["responses"]["SocketBadRequest"];
