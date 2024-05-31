@@ -2139,7 +2139,7 @@ export interface operations {
                     issueRules: {
                       [key: string]: {
                         /** @enum {string} */
-                        action: "defer" | "error" | "ignore" | "warn";
+                        action: "defer" | "error" | "ignore" | "warn" | "monitor";
                       };
                     };
                   };
