@@ -260,6 +260,22 @@ class SocketSdk {
   }
 
   /**
+   * @param {string} orgSlug
+   * @returns {Promise<SocketSdkResultType<'getOrgFullScanList'>>}
+   */
+    async getOrgFullScanList (orgSlug) {
+      const orgSlugParam = encodeURIComponent(orgSlug)
+
+      try {
+        const client = await this.#getClient()
+        const data = await client.get(`orgs/${orgSlugParam}/full-scans`).json()
+        return { success: true, status: 200, data }
+      } catch (err) {
+        return /** @type {SocketSdkErrorType<'getOrgFullScanList'>} */ (this.#handleApiError(err))
+      }
+    }
+
+  /**
    * @param {Array<{ organization?: string }>} selectors
    * @returns {Promise<SocketSdkResultType<'postSettings'>>}
    */
