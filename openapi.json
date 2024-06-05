@@ -3783,6 +3783,55 @@
               "type": {
                 "type": "string",
                 "enum": [
+                  "licenseSpdxDisj"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "spdxDisj": {
+                            "type": "string",
+                            "default": ""
+                          }
+                        },
+                        "required": [
+                          "spdxDisj"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
                   "unsafeCopyright"
                 ]
               },
@@ -8340,10 +8389,10 @@
     "/purl": {
       "post": {
         "tags": [
-          "Artifacts"
+          "Packages"
         ],
         "summary": "Get Packages (unstable)",
-        "operationId": "batchArtifactFetch",
+        "operationId": "batchPackageFetch",
         "requestBody": {
           "content": {
             "application/json": {
@@ -8357,7 +8406,7 @@
         "security": [
           {
             "basicAuth": [
-              "artifacts:list"
+              "packages:list"
             ]
           }
         ],
