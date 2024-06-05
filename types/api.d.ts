@@ -281,7 +281,7 @@ export interface paths {
      *
      * This endpoint consumes 100 units of your quota.
      */
-    post: operations["batchArtifactFetch"];
+    post: operations["batchPackageFetch"];
   };
 }
 
@@ -1188,6 +1188,18 @@ export interface components {
         /** @default */
         description: string;
         props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "licenseSpdxDisj";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          spdxDisj: string;
+        };
         usage?: components["schemas"]["SocketUsageRef"];
       };
     }) | ({
@@ -2995,7 +3007,7 @@ export interface operations {
    *
    * This endpoint consumes 100 units of your quota.
    */
-  batchArtifactFetch: {
+  batchPackageFetch: {
     requestBody?: {
       content: {
         "application/json": components["schemas"]["SocketBatchPURLFetch"];
