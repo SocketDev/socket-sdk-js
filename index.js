@@ -330,6 +330,57 @@ class SocketSdk {
     }
 
   /**
+   * @param {string} orgSlug
+   * @param {{[key: string]: any }} queryParams
+   * @param {{}} bodyContent
+   * @param {string[]} filePaths
+   * @param {string} pathsRelativeTo
+   * @param {{ [key: string]: boolean }} [issueRules]
+   * @returns {Promise<SocketSdkResultType<'CreateOrgFullScan'>>}
+   */
+   async createOrgFullScan (orgSlug, queryParams, bodyContent, filePaths, pathsRelativeTo = '.', issueRules) {
+    const basePath = path.resolve(process.cwd(), pathsRelativeTo)
+    const absoluteFilePaths = filePaths.map(filePath => path.resolve(basePath, filePath))
+    const orgSlugParam = encodeURIComponent(orgSlug)
+    const formattedQueryParams = new URLSearchParams(queryParams)
+
+    const [
+      { FormData, Blob },
+      { fileFromPath },
+      client
+    ] = await Promise.all([
+      import('formdata-node'),
+      import('formdata-node/file-from-path'),
+      this.#getClient(),
+    ])
+
+    const body = new FormData()
+
+    if (issueRules) {
+      const issueRulesBlob = new Blob([JSON.stringify(issueRules)], { type: 'application/json' })
+      body.set('issueRules', issueRulesBlob, 'issueRules')
+    }
+
+    const files = await Promise.all(absoluteFilePaths.map(absoluteFilePath => fileFromPath(absoluteFilePath)))
+
+    for (let i = 0, length = files.length; i < length; i++) {
+      const absoluteFilePath = absoluteFilePaths[i]
+      if (absoluteFilePath) {
+        const relativeFilePath = path.relative(basePath, absoluteFilePath)
+        body.set(relativeFilePath, files[i])
+      }
+    }
+
+    try {
+      const data = await client.post(`orgs/${orgSlugParam}/full-scans?${formattedQueryParams}`, { body }).json()
+
+      return { success: true, status: 200, data }
+    } catch (err) {
+      return /** @type {SocketSdkErrorType<'CreateOrgFullScan'>} */ (this.#handleApiError(err))
+    }
+  }
+
+  /**
    * @param {Array<{ organization?: string }>} selectors
    * @returns {Promise<SocketSdkResultType<'postSettings'>>}
    */
