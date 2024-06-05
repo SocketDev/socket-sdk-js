@@ -276,6 +276,60 @@ class SocketSdk {
     }
 
   /**
+   * @param {string} orgSlug
+   * @param {string} fullScanId
+   * @returns {Promise<SocketSdkResultType<'getOrgFullScan'>>}
+   */
+    async getOrgFullScan (orgSlug, fullScanId) {
+      const orgSlugParam = encodeURIComponent(orgSlug)
+      const fullScanIdParam = encodeURIComponent(fullScanId)
+
+      try {
+        const client = await this.#getClient()
+        const data = await client.get(`orgs/${orgSlugParam}/full-scans/${fullScanIdParam}`).json()
+        return { success: true, status: 200, data }
+      } catch (err) {
+        return /** @type {SocketSdkErrorType<'getOrgFullScan'>} */ (this.#handleApiError(err))
+      }
+    }
+
+  /**
+   * @param {string} orgSlug
+   * @param {string} fullScanId
+   * @returns {Promise<SocketSdkResultType<'getOrgFullScanMetadata'>>}
+   */
+    async getOrgFullScanMetadata (orgSlug, fullScanId) {
+      const orgSlugParam = encodeURIComponent(orgSlug)
+      const fullScanIdParam = encodeURIComponent(fullScanId)
+
+      try {
+        const client = await this.#getClient()
+        const data = await client.get(`orgs/${orgSlugParam}/full-scans/${fullScanIdParam}/metadata`).json()
+        return { success: true, status: 200, data }
+      } catch (err) {
+        return /** @type {SocketSdkErrorType<'getOrgFullScanMetadata'>} */ (this.#handleApiError(err))
+      }
+    }
+
+  /**
+   * @param {string} orgSlug
+   * @param {string} fullScanId
+   * @returns {Promise<SocketSdkResultType<'deleteOrgFullScan'>>}
+   */
+    async deleteOrgFullScan (orgSlug, fullScanId) {
+      const orgSlugParam = encodeURIComponent(orgSlug)
+      const fullScanIdParam = encodeURIComponent(fullScanId)
+
+      try {
+        const client = await this.#getClient()
+        const data = await client.delete(`orgs/${orgSlugParam}/full-scans/${fullScanIdParam}`).json()
+        return { success: true, status: 200, data }
+      } catch (err) {
+        return /** @type {SocketSdkErrorType<'deleteOrgFullScan'>} */ (this.#handleApiError(err))
+      }
+    }
+
+  /**
    * @param {Array<{ organization?: string }>} selectors
    * @returns {Promise<SocketSdkResultType<'postSettings'>>}
    */
