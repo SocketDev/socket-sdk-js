@@ -8076,9 +8076,9 @@
     "/analytics/org/{filter}": {
       "get": {
         "tags": [
-          ""
+          "Analytics"
         ],
-        "summary": "Fetch the organization's analytics",
+        "summary": "Get organization analytics (unstable)",
         "operationId": "getOrgAnalytics",
         "parameters": [
           {
@@ -8097,7 +8097,7 @@
             ]
           }
         ],
-        "description": "This endpoint consumes 0 units of your quota.",
+        "description": "Get analytics data regarding the number of alerts found across all active repositories.\n\nThis endpoint consumes 0 units of your quota.",
         "responses": {
           "200": {
             "content": {
@@ -8227,9 +8227,9 @@
     "/analytics/repo/{name}/{filter}": {
       "get": {
         "tags": [
-          ""
+          "Analytics"
         ],
-        "summary": "Fetch repository analytics",
+        "summary": "Get repository analytics",
         "operationId": "getRepoAnalytics",
         "parameters": [
           {
@@ -8256,7 +8256,7 @@
             ]
           }
         ],
-        "description": "This endpoint consumes 0 units of your quota.",
+        "description": "Get analytics data regarding the number of alerts found in a single repository.\n\nThis endpoint consumes 0 units of your quota.",
         "responses": {
           "200": {
             "content": {
