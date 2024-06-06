@@ -286,8 +286,9 @@ class SocketSdk {
 
       try {
         const client = await this.#getClient()
-        const data = await client.get(`orgs/${orgSlugParam}/full-scans/${fullScanIdParam}`).json()
-        return { success: true, status: 200, data }
+        const readStream = await client.stream(`orgs/${orgSlugParam}/full-scans/${fullScanIdParam}`).pipe(process.stdout)
+
+        return { success: true, status: 200, data: readStream }
       } catch (err) {
         return /** @type {SocketSdkErrorType<'getOrgFullScan'>} */ (this.#handleApiError(err))
       }
