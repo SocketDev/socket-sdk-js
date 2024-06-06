@@ -262,15 +262,19 @@ export interface paths {
   };
   "/analytics/org/{filter}": {
     /**
-     * Fetch the organization's analytics
-     * @description This endpoint consumes 0 units of your quota.
+     * Get organization analytics (unstable)
+     * @description Get analytics data regarding the number of alerts found across all active repositories.
+     *
+     * This endpoint consumes 0 units of your quota.
      */
     get: operations["getOrgAnalytics"];
   };
   "/analytics/repo/{name}/{filter}": {
     /**
-     * Fetch repository analytics
-     * @description This endpoint consumes 0 units of your quota.
+     * Get repository analytics
+     * @description Get analytics data regarding the number of alerts found in a single repository.
+     *
+     * This endpoint consumes 0 units of your quota.
      */
     get: operations["getRepoAnalytics"];
   };
@@ -2880,8 +2884,10 @@ export interface operations {
     };
   };
   /**
-   * Fetch the organization's analytics
-   * @description This endpoint consumes 0 units of your quota.
+   * Get organization analytics (unstable)
+   * @description Get analytics data regarding the number of alerts found across all active repositories.
+   *
+   * This endpoint consumes 0 units of your quota.
    */
   getOrgAnalytics: {
     parameters: {
@@ -2940,8 +2946,10 @@ export interface operations {
     };
   };
   /**
-   * Fetch repository analytics
-   * @description This endpoint consumes 0 units of your quota.
+   * Get repository analytics
+   * @description Get analytics data regarding the number of alerts found in a single repository.
+   *
+   * This endpoint consumes 0 units of your quota.
    */
   getRepoAnalytics: {
     parameters: {
