@@ -260,6 +260,121 @@ class SocketSdk {
   }
 
   /**
+   * @param {string} orgSlug
+   * @returns {Promise<SocketSdkResultType<'getOrgFullScanList'>>}
+   */
+    async getOrgFullScanList (orgSlug) {
+      const orgSlugParam = encodeURIComponent(orgSlug)
+
+      try {
+        const client = await this.#getClient()
+        const data = await client.get(`orgs/${orgSlugParam}/full-scans`).json()
+        return { success: true, status: 200, data }
+      } catch (err) {
+        return /** @type {SocketSdkErrorType<'getOrgFullScanList'>} */ (this.#handleApiError(err))
+      }
+    }
+
+  /**
+   * @param {string} orgSlug
+   * @param {string} fullScanId
+   * @returns {Promise<SocketSdkResultType<'getOrgFullScan'>>}
+   */
+    async getOrgFullScan (orgSlug, fullScanId) {
+      const orgSlugParam = encodeURIComponent(orgSlug)
+      const fullScanIdParam = encodeURIComponent(fullScanId)
+
+      try {
+        const client = await this.#getClient()
+        const readStream = await client.stream(`orgs/${orgSlugParam}/full-scans/${fullScanIdParam}`).pipe(process.stdout)
+
+        return { success: true, status: 200, data: readStream }
+      } catch (err) {
+        return /** @type {SocketSdkErrorType<'getOrgFullScan'>} */ (this.#handleApiError(err))
+      }
+    }
+
+  /**
+   * @param {string} orgSlug
+   * @param {string} fullScanId
+   * @returns {Promise<SocketSdkResultType<'getOrgFullScanMetadata'>>}
+   */
+    async getOrgFullScanMetadata (orgSlug, fullScanId) {
+      const orgSlugParam = encodeURIComponent(orgSlug)
+      const fullScanIdParam = encodeURIComponent(fullScanId)
+
+      try {
+        const client = await this.#getClient()
+        const data = await client.get(`orgs/${orgSlugParam}/full-scans/${fullScanIdParam}/metadata`).json()
+        return { success: true, status: 200, data }
+      } catch (err) {
+        return /** @type {SocketSdkErrorType<'getOrgFullScanMetadata'>} */ (this.#handleApiError(err))
+      }
+    }
+
+  /**
+   * @param {string} orgSlug
+   * @param {string} fullScanId
+   * @returns {Promise<SocketSdkResultType<'deleteOrgFullScan'>>}
+   */
+    async deleteOrgFullScan (orgSlug, fullScanId) {
+      const orgSlugParam = encodeURIComponent(orgSlug)
+      const fullScanIdParam = encodeURIComponent(fullScanId)
+
+      try {
+        const client = await this.#getClient()
+        const data = await client.delete(`orgs/${orgSlugParam}/full-scans/${fullScanIdParam}`).json()
+        return { success: true, status: 200, data }
+      } catch (err) {
+        return /** @type {SocketSdkErrorType<'deleteOrgFullScan'>} */ (this.#handleApiError(err))
+      }
+    }
+
+  /**
+   * @param {string} orgSlug
+   * @param {{[key: string]: any }} queryParams
+   * @param {string[]} filePaths
+   * @param {string} pathsRelativeTo
+   * @returns {Promise<SocketSdkResultType<'CreateOrgFullScan'>>}
+   */
+   async createOrgFullScan (orgSlug, queryParams, filePaths, pathsRelativeTo = '.') {
+    const basePath = path.resolve(process.cwd(), pathsRelativeTo)
+    const absoluteFilePaths = filePaths.map(filePath => path.resolve(basePath, filePath))
+    const orgSlugParam = encodeURIComponent(orgSlug)
+    const formattedQueryParams = new URLSearchParams(queryParams)
+
+    const [
+      { FormData },
+      { fileFromPath },
+      client
+    ] = await Promise.all([
+      import('formdata-node'),
+      import('formdata-node/file-from-path'),
+      this.#getClient(),
+    ])
+
+    const body = new FormData()
+
+    const files = await Promise.all(absoluteFilePaths.map(absoluteFilePath => fileFromPath(absoluteFilePath)))
+
+    for (let i = 0, length = files.length; i < length; i++) {
+      const absoluteFilePath = absoluteFilePaths[i]
+      if (absoluteFilePath) {
+        const relativeFilePath = path.relative(basePath, absoluteFilePath)
+        body.set(relativeFilePath, files[i])
+      }
+    }
+
+    try {
+      const data = await client.post(`orgs/${orgSlugParam}/full-scans?${formattedQueryParams}`, { body }).json()
+
+      return { success: true, status: 200, data }
+    } catch (err) {
+      return /** @type {SocketSdkErrorType<'CreateOrgFullScan'>} */ (this.#handleApiError(err))
+    }
+  }
+
+  /**
    * @param {Array<{ organization?: string }>} selectors
    * @returns {Promise<SocketSdkResultType<'postSettings'>>}
    */
