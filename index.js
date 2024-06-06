@@ -333,20 +333,18 @@ class SocketSdk {
   /**
    * @param {string} orgSlug
    * @param {{[key: string]: any }} queryParams
-   * @param {{}} bodyContent
    * @param {string[]} filePaths
    * @param {string} pathsRelativeTo
-   * @param {{ [key: string]: boolean }} [issueRules]
    * @returns {Promise<SocketSdkResultType<'CreateOrgFullScan'>>}
    */
-   async createOrgFullScan (orgSlug, queryParams, bodyContent, filePaths, pathsRelativeTo = '.', issueRules) {
+   async createOrgFullScan (orgSlug, queryParams, filePaths, pathsRelativeTo = '.') {
     const basePath = path.resolve(process.cwd(), pathsRelativeTo)
     const absoluteFilePaths = filePaths.map(filePath => path.resolve(basePath, filePath))
     const orgSlugParam = encodeURIComponent(orgSlug)
     const formattedQueryParams = new URLSearchParams(queryParams)
 
     const [
-      { FormData, Blob },
+      { FormData },
       { fileFromPath },
       client
     ] = await Promise.all([
@@ -356,11 +354,6 @@ class SocketSdk {
     ])
 
     const body = new FormData()
-
-    if (issueRules) {
-      const issueRulesBlob = new Blob([JSON.stringify(issueRules)], { type: 'application/json' })
-      body.set('issueRules', issueRulesBlob, 'issueRules')
-    }
 
     const files = await Promise.all(absoluteFilePaths.map(absoluteFilePath => fileFromPath(absoluteFilePath)))
 
