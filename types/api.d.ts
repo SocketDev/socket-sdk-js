@@ -260,6 +260,45 @@ export interface paths {
      */
     get: operations["getOrgFullScanMetadata"];
   };
+  "/orgs/{org_slug}/audit-log": {
+    /**
+     * Get Audit Log Events
+     * @description Paginated list of audit log events.
+     *
+     * The `type` queryParam must be omitted or one of:
+     *
+     * - BookDemo
+     * - CancelInvitation
+     * - ChangeMemberRole
+     * - ChangePlanSubscriptionSeats
+     * - ContactForm
+     * - CreateApiToken
+     * - CreateUser
+     * - GithubAppInstallation
+     * - JoinOrganizationByVcs
+     * - LinkAccount
+     * - RemoveMember
+     * - ResetInvitationLink
+     * - ResetOrganizationSettingToDefault
+     * - RotateApiToken
+     * - SendInvitation
+     * - SignIn
+     * - SignOut
+     * - Subscribe
+     * - SyncOrganization
+     * - TransferOwnership
+     * - UpdateAlertTriage
+     * - UpdateApiTokenName
+     * - UpdateApiTokenScopes
+     * - UpdateApiTokenVisibility
+     * - UpdateOrganizationSetting
+     * - UpgradeOrganizationPlan
+     * - VerifiedEmail
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getAuditLogEvents"];
+  };
   "/analytics/org/{filter}": {
     /**
      * Get organization analytics (unstable)
@@ -2873,6 +2912,95 @@ export interface operations {
             pull_request?: number;
             /** @default */
             html_report_url?: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get Audit Log Events
+   * @description Paginated list of audit log events.
+   *
+   * The `type` queryParam must be omitted or one of:
+   *
+   * - BookDemo
+   * - CancelInvitation
+   * - ChangeMemberRole
+   * - ChangePlanSubscriptionSeats
+   * - ContactForm
+   * - CreateApiToken
+   * - CreateUser
+   * - GithubAppInstallation
+   * - JoinOrganizationByVcs
+   * - LinkAccount
+   * - RemoveMember
+   * - ResetInvitationLink
+   * - ResetOrganizationSettingToDefault
+   * - RotateApiToken
+   * - SendInvitation
+   * - SignIn
+   * - SignOut
+   * - Subscribe
+   * - SyncOrganization
+   * - TransferOwnership
+   * - UpdateAlertTriage
+   * - UpdateApiTokenName
+   * - UpdateApiTokenScopes
+   * - UpdateApiTokenVisibility
+   * - UpdateOrganizationSetting
+   * - UpgradeOrganizationPlan
+   * - VerifiedEmail
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getAuditLogEvents: {
+    parameters: {
+      path: {
+        org_slug: string;
+      };
+    };
+    responses: {
+      /** @description The paginated list of events in an organizations audit log and the next page querystring token. */
+      200: {
+        content: {
+          "application/json": {
+            results: {
+                /** @default */
+                event_id?: string;
+                /** @default */
+                created_at?: string;
+                /** @default */
+                updated_at?: string;
+                /** @default */
+                country_code?: string;
+                /** @default */
+                organization_id?: string;
+                /** @default */
+                ip_address?: string;
+                /** @default null */
+                payload?: Record<string, never>;
+                /** @default 0 */
+                status_code?: number;
+                /** @default */
+                type?: string;
+                /** @default */
+                user_agent?: string;
+                /** @default */
+                user_id?: string;
+                /** @default */
+                user_email?: string;
+                /** @default */
+                user_image?: string;
+                /** @default */
+                organization_name?: string;
+              }[];
+            /** @default 0 */
+            nextPage: number;
           };
         };
       };
