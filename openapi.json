@@ -8073,6 +8073,137 @@
         "x-readme": {}
       }
     },
+    "/orgs/{org_slug}/audit-log": {
+      "get": {
+        "tags": [
+          "Audit Log"
+        ],
+        "summary": "Get Audit Log Events",
+        "operationId": "getAuditLogEvents",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "audit-log:list"
+            ]
+          }
+        ],
+        "description": "Paginated list of audit log events.\n\nThe `type` queryParam must be omitted or one of:\n\n- BookDemo\n- CancelInvitation\n- ChangeMemberRole\n- ChangePlanSubscriptionSeats\n- ContactForm\n- CreateApiToken\n- CreateUser\n- GithubAppInstallation\n- JoinOrganizationByVcs\n- LinkAccount\n- RemoveMember\n- ResetInvitationLink\n- ResetOrganizationSettingToDefault\n- RotateApiToken\n- SendInvitation\n- SignIn\n- SignOut\n- Subscribe\n- SyncOrganization\n- TransferOwnership\n- UpdateAlertTriage\n- UpdateApiTokenName\n- UpdateApiTokenScopes\n- UpdateApiTokenVisibility\n- UpdateOrganizationSetting\n- UpgradeOrganizationPlan\n- VerifiedEmail\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "event_id": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "country_code": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "organization_id": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "ip_address": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "payload": {
+                            "type": "object",
+                            "default": null
+                          },
+                          "status_code": {
+                            "type": "integer",
+                            "default": 0
+                          },
+                          "type": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "user_agent": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "user_id": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "user_email": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "user_image": {
+                            "type": "string",
+                            "default": ""
+                          },
+                          "organization_name": {
+                            "type": "string",
+                            "default": ""
+                          }
+                        }
+                      }
+                    },
+                    "nextPage": {
+                      "type": "integer",
+                      "default": 0
+                    }
+                  },
+                  "required": [
+                    "nextPage",
+                    "results"
+                  ]
+                }
+              }
+            },
+            "description": "The paginated list of events in an organizations audit log and the next page querystring token."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
     "/analytics/org/{filter}": {
       "get": {
         "tags": [
