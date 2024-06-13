@@ -1,6 +1,8 @@
 'use strict'
 
+const fs = require('node:fs')
 const path = require('node:path')
+const { pipeline } = require('node:stream/promises')
 
 const { ErrorWithCause } = require('pony-cause')
 
@@ -261,14 +263,16 @@ class SocketSdk {
 
   /**
    * @param {string} orgSlug
+   * @param {{[key: string]: any }} queryParams
    * @returns {Promise<SocketSdkResultType<'getOrgFullScanList'>>}
    */
-    async getOrgFullScanList (orgSlug) {
+    async getOrgFullScanList (orgSlug, queryParams) {
       const orgSlugParam = encodeURIComponent(orgSlug)
+      const formattedQueryParams = new URLSearchParams(queryParams)
 
       try {
         const client = await this.#getClient()
-        const data = await client.get(`orgs/${orgSlugParam}/full-scans`).json()
+        const data = await client.get(`orgs/${orgSlugParam}/full-scans?${formattedQueryParams}`).json()
         return { success: true, status: 200, data }
       } catch (err) {
         return /** @type {SocketSdkErrorType<'getOrgFullScanList'>} */ (this.#handleApiError(err))
@@ -278,16 +282,23 @@ class SocketSdk {
   /**
    * @param {string} orgSlug
    * @param {string} fullScanId
+   * @param {string} file
    * @returns {Promise<SocketSdkResultType<'getOrgFullScan'>>}
    */
-    async getOrgFullScan (orgSlug, fullScanId) {
+    async getOrgFullScan (orgSlug, fullScanId, file) {
       const orgSlugParam = encodeURIComponent(orgSlug)
       const fullScanIdParam = encodeURIComponent(fullScanId)
-
       try {
         const client = await this.#getClient()
-        const readStream = await client.stream(`orgs/${orgSlugParam}/full-scans/${fullScanIdParam}`).pipe(process.stdout)
-
+        let readStream
+        if (file) {
+          readStream = await pipeline(
+            client.stream(`orgs/${orgSlugParam}/full-scans/${fullScanIdParam}`),
+            fs.createWriteStream(file)
+          )
+        } else {
+          readStream = await client.stream(`orgs/${orgSlugParam}/full-scans/${fullScanIdParam}`).pipe(process.stdout)
+        }
         return { success: true, status: 200, data: readStream }
       } catch (err) {
         return /** @type {SocketSdkErrorType<'getOrgFullScan'>} */ (this.#handleApiError(err))
