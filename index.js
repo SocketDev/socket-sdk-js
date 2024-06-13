@@ -2,7 +2,7 @@
 
 const fs = require('node:fs')
 const path = require('node:path')
-const { pipeline } = require('stream/promises')
+const { pipeline } = require('node:stream/promises')
 
 const { ErrorWithCause } = require('pony-cause')
 
