@@ -282,7 +282,7 @@ class SocketSdk {
   /**
    * @param {string} orgSlug
    * @param {string} fullScanId
-   * @param {string} file
+   * @param {string | undefined} file
    * @returns {Promise<SocketSdkResultType<'getOrgFullScan'>>}
    */
     async getOrgFullScan (orgSlug, fullScanId, file) {
