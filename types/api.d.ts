@@ -2215,6 +2215,11 @@ export interface operations {
    * This endpoint consumes 0 units of your quota.
    */
   getRepoList: {
+    parameters: {
+      query?: {
+        pageToken?: string;
+      };
+    };
     responses: {
       /** @description List of repos and their latest project report for the organization associated with the token used */
       200: {
@@ -2322,6 +2327,12 @@ export interface operations {
    * This endpoint consumes 100 units of your quota.
    */
   createDependenciesSnapshot: {
+    parameters: {
+      query?: {
+        repository?: string;
+        branch?: string;
+      };
+    };
     requestBody?: {
       content: {
         "multipart/form-data": {
@@ -2355,6 +2366,12 @@ export interface operations {
    */
   getOrgRepoList: {
     parameters: {
+      query?: {
+        sort?: string;
+        direction?: string;
+        per_page?: number;
+        page?: number;
+      };
       path: {
         org_slug: string;
       };
@@ -2625,6 +2642,12 @@ export interface operations {
    */
   getOrgFullScanList: {
     parameters: {
+      query?: {
+        sort?: string;
+        direction?: string;
+        per_page?: number;
+        page?: number;
+      };
       path: {
         org_slug: string;
       };
@@ -2679,6 +2702,17 @@ export interface operations {
    */
   CreateOrgFullScan: {
     parameters: {
+      query: {
+        repo: string;
+        branch?: string;
+        commit_message?: string;
+        commit_hash?: string;
+        pull_request?: number;
+        committers?: string;
+        make_default_branch?: boolean;
+        set_as_pending_head?: boolean;
+        tmp?: boolean;
+      };
       path: {
         org_slug: string;
       };
@@ -2960,6 +2994,11 @@ export interface operations {
    */
   getAuditLogEvents: {
     parameters: {
+      query?: {
+        type?: string;
+        per_page?: number;
+        page?: number;
+      };
       path: {
         org_slug: string;
       };
@@ -3144,6 +3183,11 @@ export interface operations {
    * This endpoint consumes 100 units of your quota.
    */
   batchPackageFetch: {
+    parameters: {
+      query?: {
+        license?: boolean;
+      };
+    };
     requestBody?: {
       content: {
         "application/json": components["schemas"]["SocketBatchPURLFetch"];
