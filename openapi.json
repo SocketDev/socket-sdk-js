@@ -5685,6 +5685,7 @@
             "name": "version",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -5746,6 +5747,7 @@
             "name": "version",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -5799,6 +5801,7 @@
             "name": "id",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -6042,6 +6045,7 @@
             "name": "id",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -6438,6 +6442,17 @@
         ],
         "summary": "Get list of repos and their latest project report",
         "operationId": "getRepoList",
+        "parameters": [
+          {
+            "name": "pageToken",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "security": [
           {
             "basicAuth": [
@@ -6691,6 +6706,26 @@
         ],
         "summary": "Create a snapshot of all dependencies from manifest information",
         "operationId": "createDependenciesSnapshot",
+        "parameters": [
+          {
+            "name": "repository",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "branch",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -6771,8 +6806,50 @@
             "name": "org_slug",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 30
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
             }
           }
         ],
@@ -6888,6 +6965,7 @@
             "name": "org_slug",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -7027,6 +7105,7 @@
             "name": "org_slug",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -7035,6 +7114,7 @@
             "name": "repo_slug",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -7135,6 +7215,7 @@
             "name": "org_slug",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -7143,6 +7224,7 @@
             "name": "repo_slug",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -7280,6 +7362,7 @@
             "name": "org_slug",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -7288,6 +7371,7 @@
             "name": "repo_slug",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -7353,8 +7437,50 @@
             "name": "org_slug",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 30
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
             }
           }
         ],
@@ -7477,8 +7603,91 @@
             "name": "org_slug",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "repo",
+            "in": "query",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "branch",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "commit_message",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "commit_hash",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pull_request",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "committers",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "make_default_branch",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "set_as_pending_head",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "tmp",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -7605,6 +7814,7 @@
             "name": "org_slug",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -7613,6 +7823,7 @@
             "name": "full_scan_id",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -7895,6 +8106,7 @@
             "name": "org_slug",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -7903,6 +8115,7 @@
             "name": "full_scan_id",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -7968,6 +8181,7 @@
             "name": "org_slug",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -7976,6 +8190,7 @@
             "name": "full_scan_id",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -8085,8 +8300,41 @@
             "name": "org_slug",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 30
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
             }
           }
         ],
@@ -8216,6 +8464,7 @@
             "name": "filter",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -8367,6 +8616,7 @@
             "name": "name",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -8375,6 +8625,7 @@
             "name": "filter",
             "in": "path",
             "required": true,
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -8524,6 +8775,17 @@
         ],
         "summary": "Get Packages (unstable)",
         "operationId": "batchPackageFetch",
+        "parameters": [
+          {
+            "name": "license",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
