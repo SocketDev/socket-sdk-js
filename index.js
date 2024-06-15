@@ -386,6 +386,112 @@ class SocketSdk {
   }
 
   /**
+   * @param {string} orgSlug
+   * @param {{[key: string]: any }} queryParams
+   * @returns {Promise<SocketSdkResultType<'getAuditLogEvents'>>}
+   */
+    async getAuditLogEvents (orgSlug, queryParams) {
+      const orgSlugParam = encodeURIComponent(orgSlug)
+      const formattedQueryParam = new URLSearchParams(queryParams)
+
+      try {
+        const client = await this.#getClient()
+        const data = await client.get(`orgs/${orgSlugParam}/audit-log?${formattedQueryParam}`).json()
+        return { success: true, status: 200, data }
+      } catch (err) {
+        return /** @type {SocketSdkErrorType<'getAuditLogEvents'>} */ (this.#handleApiError(err))
+      }
+    }
+
+  /**
+   * @param {string} orgSlug
+   * @param {string} repoSlug
+   * @returns {Promise<SocketSdkResultType<'getAuditLogEvents'>>}
+   */
+  async getOrgRepo (orgSlug, repoSlug) {
+    const orgSlugParam = encodeURIComponent(orgSlug)
+    const repoSlugParam = encodeURIComponent(repoSlug)
+
+    try {
+      const client = await this.#getClient()
+      const data = await client.get(`orgs/${orgSlugParam}/repos/${repoSlugParam}`).json()
+      return { success: true, status: 200, data }
+    } catch (err) {
+      return /** @type {SocketSdkErrorType<'getAuditLogEvents'>} */ (this.#handleApiError(err))
+    }
+  }
+
+  /**
+   * @param {string} orgSlug
+   * @param {string} repoSlug
+   * @returns {Promise<SocketSdkResultType<'getAuditLogEvents'>>}
+   */
+    async deleteOrgRepo (orgSlug, repoSlug) {
+      const orgSlugParam = encodeURIComponent(orgSlug)
+      const repoSlugParam = encodeURIComponent(repoSlug)
+
+      try {
+        const client = await this.#getClient()
+        const data = await client.delete(`orgs/${orgSlugParam}/repos/${repoSlugParam}`).json()
+        return { success: true, status: 200, data }
+      } catch (err) {
+        return /** @type {SocketSdkErrorType<'getAuditLogEvents'>} */ (this.#handleApiError(err))
+      }
+    }
+
+  /**
+   * @param {string} orgSlug
+   * @param {{[key: string]: any }} queryParams
+   * @returns {Promise<SocketSdkResultType<'getAuditLogEvents'>>}
+   */
+  async getOrgRepoList (orgSlug, queryParams) {
+    const orgSlugParam = encodeURIComponent(orgSlug)
+    const formattedQueryParam = new URLSearchParams(queryParams)
+
+    try {
+      const client = await this.#getClient()
+      const data = await client.get(`orgs/${orgSlugParam}/repos?${formattedQueryParam}`).json()
+      return { success: true, status: 200, data }
+    } catch (err) {
+      return /** @type {SocketSdkErrorType<'getAuditLogEvents'>} */ (this.#handleApiError(err))
+    }
+  }
+
+  /**
+   * @param {string} orgSlug
+   * @param {string} params
+   * @returns {Promise<SocketSdkResultType<'getAuditLogEvents'>>}
+   */
+  async createOrgRepo (orgSlug, params) {
+    const orgSlugParam = encodeURIComponent(orgSlug)
+
+    try {
+      const client = await this.#getClient()
+      const data = await client.post(`orgs/${orgSlugParam}/repos`, { body: params }).json()
+      return { success: true, status: 200, data }
+    } catch (err) {
+      return /** @type {SocketSdkErrorType<'getAuditLogEvents'>} */ (this.#handleApiError(err))
+    }
+  }
+
+  /**
+   * @param {string} orgSlug
+   * @param {string} repoSlug
+   * @returns {Promise<SocketSdkResultType<'getAuditLogEvents'>>}
+   */
+  async updateOrgRepo (orgSlug, repoSlug) {
+    const orgSlugParam = encodeURIComponent(orgSlug)
+
+    try {
+      const client = await this.#getClient()
+      const data = await client.post(`orgs/${orgSlugParam}/repos/${repoSlug}`).json()
+      return { success: true, status: 200, data }
+    } catch (err) {
+      return /** @type {SocketSdkErrorType<'getAuditLogEvents'>} */ (this.#handleApiError(err))
+    }
+  }
+
+  /**
    * @param {Array<{ organization?: string }>} selectors
    * @returns {Promise<SocketSdkResultType<'postSettings'>>}
    */
