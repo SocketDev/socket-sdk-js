@@ -221,14 +221,14 @@ export interface paths {
   };
   "/orgs/{org_slug}/full-scans": {
     /**
-     * List full scans (unstable)
+     * List full scans
      * @description Returns a paginated list of all full scans in an org, excluding SBOM artifacts.
      *
      * This endpoint consumes 0 units of your quota.
      */
     get: operations["getOrgFullScanList"];
     /**
-     * Create full scan (unstable)
+     * Create full scan
      * @description Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.
      *
      * This endpoint consumes 0 units of your quota.
@@ -237,14 +237,14 @@ export interface paths {
   };
   "/orgs/{org_slug}/full-scans/{full_scan_id}": {
     /**
-     * Stream full scan (unstable)
+     * Stream full scan
      * @description Stream all SBOM artifacts for a full scan.
      *
      * This endpoint consumes 0 units of your quota.
      */
     get: operations["getOrgFullScan"];
     /**
-     * Delete full scan (unstable)
+     * Delete full scan
      * @description Delete an existing full scan.
      *
      * This endpoint consumes 0 units of your quota.
@@ -253,7 +253,7 @@ export interface paths {
   };
   "/orgs/{org_slug}/full-scans/{full_scan_id}/metadata": {
     /**
-     * Get full scan metadata (unstable)
+     * Get full scan metadata
      * @description Get metadata for a single full scan
      *
      * This endpoint consumes 0 units of your quota.
@@ -264,36 +264,6 @@ export interface paths {
     /**
      * Get Audit Log Events
      * @description Paginated list of audit log events.
-     *
-     * The `type` queryParam must be omitted or one of:
-     *
-     * - BookDemo
-     * - CancelInvitation
-     * - ChangeMemberRole
-     * - ChangePlanSubscriptionSeats
-     * - ContactForm
-     * - CreateApiToken
-     * - CreateUser
-     * - GithubAppInstallation
-     * - JoinOrganizationByVcs
-     * - LinkAccount
-     * - RemoveMember
-     * - ResetInvitationLink
-     * - ResetOrganizationSettingToDefault
-     * - RotateApiToken
-     * - SendInvitation
-     * - SignIn
-     * - SignOut
-     * - Subscribe
-     * - SyncOrganization
-     * - TransferOwnership
-     * - UpdateAlertTriage
-     * - UpdateApiTokenName
-     * - UpdateApiTokenScopes
-     * - UpdateApiTokenVisibility
-     * - UpdateOrganizationSetting
-     * - UpgradeOrganizationPlan
-     * - VerifiedEmail
      *
      * This endpoint consumes 0 units of your quota.
      */
@@ -2373,6 +2343,7 @@ export interface operations {
         page?: number;
       };
       path: {
+        /** @description The slug of the organization */
         org_slug: string;
       };
     };
@@ -2381,30 +2352,64 @@ export interface operations {
       200: {
         content: {
           "application/json": {
-            results: {
-                /** @default */
+            results: ({
+                /**
+                 * @description The ID of the repository
+                 * @default
+                 */
                 id?: string;
-                /** @default */
+                /**
+                 * @description The creation date of the repository
+                 * @default
+                 */
                 created_at?: string;
-                /** @default */
+                /**
+                 * @description The last update date of the repository
+                 * @default
+                 */
                 updated_at?: string;
-                /** @default */
+                /**
+                 * @description The slug of the repository
+                 * @default
+                 */
                 slug?: string;
-                /** @default */
+                /**
+                 * @description The ID of the head full scan of the repository
+                 * @default
+                 */
                 head_full_scan_id?: string;
-                /** @default */
+                /**
+                 * @description The name of the repository
+                 * @default
+                 */
                 name?: string;
-                /** @default */
+                /**
+                 * @description The description of the repository
+                 * @default
+                 */
                 description?: string;
-                /** @default */
+                /**
+                 * @description The homepage URL of the repository
+                 * @default
+                 */
                 homepage?: string;
-                /** @default */
-                visibility?: string;
-                /** @default false */
+                /**
+                 * @description The visibility of the repository
+                 * @default private
+                 * @enum {string}
+                 */
+                visibility?: "public" | "private";
+                /**
+                 * @description Whether the repository is archived or not
+                 * @default false
+                 */
                 archived?: boolean;
-                /** @default */
+                /**
+                 * @description The default branch of the repository
+                 * @default main
+                 */
                 default_branch?: string;
-              }[];
+              })[];
             /** @default 0 */
             nextPage: number;
           };
@@ -2428,23 +2433,43 @@ export interface operations {
   createOrgRepo: {
     parameters: {
       path: {
+        /** @description The slug of the organization */
         org_slug: string;
       };
     };
     requestBody?: {
       content: {
         "application/json": {
-          /** @default */
+          /**
+           * @description The name of the repository
+           * @default
+           */
           name?: string;
-          /** @default */
+          /**
+           * @description The description of the repository
+           * @default
+           */
           description?: string;
-          /** @default */
+          /**
+           * @description The homepage URL of the repository
+           * @default
+           */
           homepage?: string;
-          /** @default */
-          visibility?: string;
-          /** @default false */
+          /**
+           * @description The visibility of the repository
+           * @default private
+           * @enum {string}
+           */
+          visibility?: "public" | "private";
+          /**
+           * @description Whether the repository is archived or not
+           * @default false
+           */
           archived?: boolean;
-          /** @default */
+          /**
+           * @description The default branch of the repository
+           * @default main
+           */
           default_branch?: string;
         };
       };
@@ -2454,27 +2479,61 @@ export interface operations {
       201: {
         content: {
           "application/json": {
-            /** @default */
+            /**
+             * @description The ID of the repository
+             * @default
+             */
             id?: string;
-            /** @default */
+            /**
+             * @description The creation date of the repository
+             * @default
+             */
             created_at?: string;
-            /** @default */
+            /**
+             * @description The last update date of the repository
+             * @default
+             */
             updated_at?: string;
-            /** @default */
+            /**
+             * @description The slug of the repository
+             * @default
+             */
             slug?: string;
-            /** @default */
+            /**
+             * @description The ID of the head full scan of the repository
+             * @default
+             */
             head_full_scan_id?: string;
-            /** @default */
+            /**
+             * @description The name of the repository
+             * @default
+             */
             name?: string;
-            /** @default */
+            /**
+             * @description The description of the repository
+             * @default
+             */
             description?: string;
-            /** @default */
+            /**
+             * @description The homepage URL of the repository
+             * @default
+             */
             homepage?: string;
-            /** @default */
-            visibility?: string;
-            /** @default false */
+            /**
+             * @description The visibility of the repository
+             * @default private
+             * @enum {string}
+             */
+            visibility?: "public" | "private";
+            /**
+             * @description Whether the repository is archived or not
+             * @default false
+             */
             archived?: boolean;
-            /** @default */
+            /**
+             * @description The default branch of the repository
+             * @default main
+             */
             default_branch?: string;
           };
         };
@@ -2495,7 +2554,9 @@ export interface operations {
   getOrgRepo: {
     parameters: {
       path: {
+        /** @description The slug of the organization */
         org_slug: string;
+        /** @description The slug of the repository */
         repo_slug: string;
       };
     };
@@ -2504,27 +2565,61 @@ export interface operations {
       200: {
         content: {
           "application/json": {
-            /** @default */
+            /**
+             * @description The ID of the repository
+             * @default
+             */
             id?: string;
-            /** @default */
+            /**
+             * @description The creation date of the repository
+             * @default
+             */
             created_at?: string;
-            /** @default */
+            /**
+             * @description The last update date of the repository
+             * @default
+             */
             updated_at?: string;
-            /** @default */
+            /**
+             * @description The slug of the repository
+             * @default
+             */
             slug?: string;
-            /** @default */
+            /**
+             * @description The ID of the head full scan of the repository
+             * @default
+             */
             head_full_scan_id?: string;
-            /** @default */
+            /**
+             * @description The name of the repository
+             * @default
+             */
             name?: string;
-            /** @default */
+            /**
+             * @description The description of the repository
+             * @default
+             */
             description?: string;
-            /** @default */
+            /**
+             * @description The homepage URL of the repository
+             * @default
+             */
             homepage?: string;
-            /** @default */
-            visibility?: string;
-            /** @default false */
+            /**
+             * @description The visibility of the repository
+             * @default private
+             * @enum {string}
+             */
+            visibility?: "public" | "private";
+            /**
+             * @description Whether the repository is archived or not
+             * @default false
+             */
             archived?: boolean;
-            /** @default */
+            /**
+             * @description The default branch of the repository
+             * @default main
+             */
             default_branch?: string;
           };
         };
@@ -2545,24 +2640,45 @@ export interface operations {
   updateOrgRepo: {
     parameters: {
       path: {
+        /** @description The slug of the organization */
         org_slug: string;
+        /** @description The slug of the repository */
         repo_slug: string;
       };
     };
     requestBody?: {
       content: {
         "application/json": {
-          /** @default */
+          /**
+           * @description The name of the repository
+           * @default
+           */
           name?: string;
-          /** @default */
+          /**
+           * @description The description of the repository
+           * @default
+           */
           description?: string;
-          /** @default */
+          /**
+           * @description The homepage URL of the repository
+           * @default
+           */
           homepage?: string;
-          /** @default */
-          visibility?: string;
-          /** @default false */
+          /**
+           * @description The visibility of the repository
+           * @default private
+           * @enum {string}
+           */
+          visibility?: "public" | "private";
+          /**
+           * @description Whether the repository is archived or not
+           * @default false
+           */
           archived?: boolean;
-          /** @default */
+          /**
+           * @description The default branch of the repository
+           * @default main
+           */
           default_branch?: string;
         };
       };
@@ -2572,27 +2688,61 @@ export interface operations {
       200: {
         content: {
           "application/json": {
-            /** @default */
+            /**
+             * @description The ID of the repository
+             * @default
+             */
             id?: string;
-            /** @default */
+            /**
+             * @description The creation date of the repository
+             * @default
+             */
             created_at?: string;
-            /** @default */
+            /**
+             * @description The last update date of the repository
+             * @default
+             */
             updated_at?: string;
-            /** @default */
+            /**
+             * @description The slug of the repository
+             * @default
+             */
             slug?: string;
-            /** @default */
+            /**
+             * @description The ID of the head full scan of the repository
+             * @default
+             */
             head_full_scan_id?: string;
-            /** @default */
+            /**
+             * @description The name of the repository
+             * @default
+             */
             name?: string;
-            /** @default */
+            /**
+             * @description The description of the repository
+             * @default
+             */
             description?: string;
-            /** @default */
+            /**
+             * @description The homepage URL of the repository
+             * @default
+             */
             homepage?: string;
-            /** @default */
-            visibility?: string;
-            /** @default false */
+            /**
+             * @description The visibility of the repository
+             * @default private
+             * @enum {string}
+             */
+            visibility?: "public" | "private";
+            /**
+             * @description Whether the repository is archived or not
+             * @default false
+             */
             archived?: boolean;
-            /** @default */
+            /**
+             * @description The default branch of the repository
+             * @default main
+             */
             default_branch?: string;
           };
         };
@@ -2613,7 +2763,9 @@ export interface operations {
   deleteOrgRepo: {
     parameters: {
       path: {
+        /** @description The slug of the organization */
         org_slug: string;
+        /** @description The slug of the repository */
         repo_slug: string;
       };
     };
@@ -2635,7 +2787,7 @@ export interface operations {
     };
   };
   /**
-   * List full scans (unstable)
+   * List full scans
    * @description Returns a paginated list of all full scans in an org, excluding SBOM artifacts.
    *
    * This endpoint consumes 0 units of your quota.
@@ -2649,6 +2801,7 @@ export interface operations {
         page?: number;
       };
       path: {
+        /** @description The slug of the organization */
         org_slug: string;
       };
     };
@@ -2695,7 +2848,7 @@ export interface operations {
     };
   };
   /**
-   * Create full scan (unstable)
+   * Create full scan
    * @description Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.
    *
    * This endpoint consumes 0 units of your quota.
@@ -2703,17 +2856,24 @@ export interface operations {
   CreateOrgFullScan: {
     parameters: {
       query: {
+        /** @description The slug of the repository to associate the full-scan with. */
         repo: string;
+        /** @description The branch name to associate the full-scan with. */
         branch?: string;
+        /** @description The commit message to associate the full-scan with. */
         commit_message?: string;
+        /** @description The commit hash to associate the full-scan with. */
         commit_hash?: string;
+        /** @description The pull request number to associate the full-scan with. */
         pull_request?: number;
+        /** @description The committers to associate the full-scan with. Set query more than once to set multiple. */
         committers?: string;
         make_default_branch?: boolean;
         set_as_pending_head?: boolean;
         tmp?: boolean;
       };
       path: {
+        /** @description The slug of the organization */
         org_slug: string;
       };
     };
@@ -2763,7 +2923,7 @@ export interface operations {
     };
   };
   /**
-   * Stream full scan (unstable)
+   * Stream full scan
    * @description Stream all SBOM artifacts for a full scan.
    *
    * This endpoint consumes 0 units of your quota.
@@ -2771,7 +2931,9 @@ export interface operations {
   getOrgFullScan: {
     parameters: {
       path: {
+        /** @description The slug of the organization */
         org_slug: string;
+        /** @description The ID of the full scan */
         full_scan_id: string;
       };
     };
@@ -2876,7 +3038,7 @@ export interface operations {
     };
   };
   /**
-   * Delete full scan (unstable)
+   * Delete full scan
    * @description Delete an existing full scan.
    *
    * This endpoint consumes 0 units of your quota.
@@ -2884,7 +3046,9 @@ export interface operations {
   deleteOrgFullScan: {
     parameters: {
       path: {
+        /** @description The slug of the organization */
         org_slug: string;
+        /** @description The ID of the full scan */
         full_scan_id: string;
       };
     };
@@ -2906,7 +3070,7 @@ export interface operations {
     };
   };
   /**
-   * Get full scan metadata (unstable)
+   * Get full scan metadata
    * @description Get metadata for a single full scan
    *
    * This endpoint consumes 0 units of your quota.
@@ -2914,7 +3078,9 @@ export interface operations {
   getOrgFullScanMetadata: {
     parameters: {
       path: {
+        /** @description The slug of the organization */
         org_slug: string;
+        /** @description The ID of the full scan */
         full_scan_id: string;
       };
     };
@@ -2960,46 +3126,20 @@ export interface operations {
    * Get Audit Log Events
    * @description Paginated list of audit log events.
    *
-   * The `type` queryParam must be omitted or one of:
-   *
-   * - BookDemo
-   * - CancelInvitation
-   * - ChangeMemberRole
-   * - ChangePlanSubscriptionSeats
-   * - ContactForm
-   * - CreateApiToken
-   * - CreateUser
-   * - GithubAppInstallation
-   * - JoinOrganizationByVcs
-   * - LinkAccount
-   * - RemoveMember
-   * - ResetInvitationLink
-   * - ResetOrganizationSettingToDefault
-   * - RotateApiToken
-   * - SendInvitation
-   * - SignIn
-   * - SignOut
-   * - Subscribe
-   * - SyncOrganization
-   * - TransferOwnership
-   * - UpdateAlertTriage
-   * - UpdateApiTokenName
-   * - UpdateApiTokenScopes
-   * - UpdateApiTokenVisibility
-   * - UpdateOrganizationSetting
-   * - UpgradeOrganizationPlan
-   * - VerifiedEmail
-   *
    * This endpoint consumes 0 units of your quota.
    */
   getAuditLogEvents: {
     parameters: {
       query?: {
-        type?: string;
+        /** @description Filter audit log events by type */
+        type?: "BookDemo" | "CancelInvitation" | "ChangeMemberRole" | "ChangePlanSubscriptionSeats" | "ContactForm" | "CreateApiToken" | "CreateUser" | "GithubAppInstallation" | "JoinOrganizationByVcs" | "LinkAccount" | "RemoveMember" | "ResetInvitationLink" | "ResetOrganizationSettingToDefault" | "RotateApiToken" | "SendInvitation" | "SignIn" | "SignOut" | "Subscribe" | "SyncOrganization" | "TransferOwnership" | "UpdateAlertTriage" | "UpdateApiTokenName" | "UpdateApiTokenScopes" | "UpdateApiTokenVisibility" | "UpdateOrganizationSetting" | "UpgradeOrganizationPlan" | "VerifiedEmail";
+        /** @description Number of events per page */
         per_page?: number;
-        page?: number;
+        /** @description Page token */
+        page?: string;
       };
       path: {
+        /** @description The slug of the organization */
         org_slug: string;
       };
     };
@@ -3038,8 +3178,8 @@ export interface operations {
                 /** @default */
                 organization_name?: string;
               }[];
-            /** @default 0 */
-            nextPage: number;
+            /** @default */
+            nextPage: string;
           };
         };
       };
