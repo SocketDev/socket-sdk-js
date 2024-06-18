@@ -19,13 +19,16 @@
             "schema": {
               "type": "object",
               "additionalProperties": false,
+              "description": "",
               "properties": {
                 "error": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "message": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     }
                   },
@@ -48,13 +51,16 @@
             "schema": {
               "type": "object",
               "additionalProperties": false,
+              "description": "",
               "properties": {
                 "error": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "message": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     }
                   },
@@ -77,13 +83,16 @@
             "schema": {
               "type": "object",
               "additionalProperties": false,
+              "description": "",
               "properties": {
                 "error": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "message": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     }
                   },
@@ -106,13 +115,16 @@
             "schema": {
               "type": "object",
               "additionalProperties": false,
+              "description": "",
               "properties": {
                 "error": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "message": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     }
                   },
@@ -145,13 +157,16 @@
             "schema": {
               "type": "object",
               "additionalProperties": false,
+              "description": "",
               "properties": {
                 "error": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "message": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     }
                   },
@@ -173,13 +188,16 @@
             "schema": {
               "type": "object",
               "additionalProperties": false,
+              "description": "",
               "properties": {
                 "error": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "message": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     }
                   },
@@ -202,13 +220,16 @@
             "schema": {
               "type": "object",
               "additionalProperties": false,
+              "description": "",
               "properties": {
                 "error": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "message": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     }
                   },
@@ -236,6 +257,7 @@
       "SocketPackageScore": {
         "type": "object",
         "additionalProperties": false,
+        "description": "",
         "properties": {
           "supplyChainRisk": {
             "$ref": "#/components/schemas/SocketMetricSchema"
@@ -257,6 +279,7 @@
           },
           "depscore": {
             "type": "number",
+            "description": "",
             "default": 0
           }
         },
@@ -273,14 +296,17 @@
       "SocketReport": {
         "type": "object",
         "additionalProperties": false,
+        "description": "",
         "properties": {
           "id": {
             "type": "string",
+            "description": "",
             "default": ""
           },
           "healthy": {
             "type": "boolean",
-            "default": false
+            "default": false,
+            "description": ""
           },
           "issues": {
             "$ref": "#/components/schemas/SocketIssueList"
@@ -288,25 +314,31 @@
           "score": {
             "type": "object",
             "additionalProperties": false,
+            "description": "",
             "properties": {
               "avgSupplyChainRisk": {
                 "type": "number",
+                "description": "",
                 "default": 0
               },
               "avgQuality": {
                 "type": "number",
+                "description": "",
                 "default": 0
               },
               "avgMaintenance": {
                 "type": "number",
+                "description": "",
                 "default": 0
               },
               "avgVulnerability": {
                 "type": "number",
+                "description": "",
                 "default": 0
               },
               "avgLicense": {
                 "type": "number",
+                "description": "",
                 "default": 0
               }
             },
@@ -320,6 +352,7 @@
           },
           "url": {
             "type": "string",
+            "description": "",
             "default": ""
           }
         },
@@ -339,6 +372,7 @@
           "high",
           "critical"
         ],
+        "description": "",
         "default": "low"
       },
       "SocketCategory": {
@@ -351,6 +385,7 @@
           "license",
           "miscellaneous"
         ],
+        "description": "",
         "default": "miscellaneous"
       },
       "SocketBatchPURLFetch": {
@@ -391,14 +426,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "cveId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "cwes": {
@@ -406,17 +444,21 @@
                             "items": {
                               "type": "object",
                               "additionalProperties": false,
+                              "description": "",
                               "properties": {
                                 "description": {
                                   "type": "string",
+                                  "description": "",
                                   "default": ""
                                 },
                                 "id": {
                                   "type": "string",
+                                  "description": "",
                                   "default": ""
                                 },
                                 "name": {
                                   "type": "string",
+                                  "description": "",
                                   "default": ""
                                 }
                               },
@@ -430,13 +472,16 @@
                           "cvss": {
                             "type": "object",
                             "additionalProperties": false,
+                            "description": "",
                             "properties": {
                               "score": {
                                 "type": "number",
+                                "description": "",
                                 "default": 0
                               },
                               "vectorString": {
                                 "type": "string",
+                                "description": "",
                                 "default": ""
                               }
                             },
@@ -447,30 +492,37 @@
                           },
                           "description": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "firstPatchedVersionIdentifier": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "ghsaId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "severity": {
                             "type": "string",
+                            "description": "",
                             "default": "critical"
                           },
                           "title": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "url": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "vulnerableVersionRange": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -521,14 +573,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "cveId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "cwes": {
@@ -536,17 +591,21 @@
                             "items": {
                               "type": "object",
                               "additionalProperties": false,
+                              "description": "",
                               "properties": {
                                 "description": {
                                   "type": "string",
+                                  "description": "",
                                   "default": ""
                                 },
                                 "id": {
                                   "type": "string",
+                                  "description": "",
                                   "default": ""
                                 },
                                 "name": {
                                   "type": "string",
+                                  "description": "",
                                   "default": ""
                                 }
                               },
@@ -560,13 +619,16 @@
                           "cvss": {
                             "type": "object",
                             "additionalProperties": false,
+                            "description": "",
                             "properties": {
                               "score": {
                                 "type": "number",
+                                "description": "",
                                 "default": 0
                               },
                               "vectorString": {
                                 "type": "string",
+                                "description": "",
                                 "default": ""
                               }
                             },
@@ -577,30 +639,37 @@
                           },
                           "description": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "firstPatchedVersionIdentifier": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "ghsaId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "severity": {
                             "type": "string",
+                            "description": "",
                             "default": "critical"
                           },
                           "title": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "url": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "vulnerableVersionRange": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -651,14 +720,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "cveId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "cwes": {
@@ -666,17 +738,21 @@
                             "items": {
                               "type": "object",
                               "additionalProperties": false,
+                              "description": "",
                               "properties": {
                                 "description": {
                                   "type": "string",
+                                  "description": "",
                                   "default": ""
                                 },
                                 "id": {
                                   "type": "string",
+                                  "description": "",
                                   "default": ""
                                 },
                                 "name": {
                                   "type": "string",
+                                  "description": "",
                                   "default": ""
                                 }
                               },
@@ -690,13 +766,16 @@
                           "cvss": {
                             "type": "object",
                             "additionalProperties": false,
+                            "description": "",
                             "properties": {
                               "score": {
                                 "type": "number",
+                                "description": "",
                                 "default": 0
                               },
                               "vectorString": {
                                 "type": "string",
+                                "description": "",
                                 "default": ""
                               }
                             },
@@ -707,30 +786,37 @@
                           },
                           "description": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "firstPatchedVersionIdentifier": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "ghsaId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "severity": {
                             "type": "string",
+                            "description": "",
                             "default": "critical"
                           },
                           "title": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "url": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "vulnerableVersionRange": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -781,14 +867,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "cveId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "cwes": {
@@ -796,17 +885,21 @@
                             "items": {
                               "type": "object",
                               "additionalProperties": false,
+                              "description": "",
                               "properties": {
                                 "description": {
                                   "type": "string",
+                                  "description": "",
                                   "default": ""
                                 },
                                 "id": {
                                   "type": "string",
+                                  "description": "",
                                   "default": ""
                                 },
                                 "name": {
                                   "type": "string",
+                                  "description": "",
                                   "default": ""
                                 }
                               },
@@ -820,13 +913,16 @@
                           "cvss": {
                             "type": "object",
                             "additionalProperties": false,
+                            "description": "",
                             "properties": {
                               "score": {
                                 "type": "number",
+                                "description": "",
                                 "default": 0
                               },
                               "vectorString": {
                                 "type": "string",
+                                "description": "",
                                 "default": ""
                               }
                             },
@@ -837,30 +933,37 @@
                           },
                           "description": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "firstPatchedVersionIdentifier": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "ghsaId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "severity": {
                             "type": "string",
+                            "description": "",
                             "default": "critical"
                           },
                           "title": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "url": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "vulnerableVersionRange": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -911,18 +1014,22 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "script": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "source": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -965,11 +1072,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -1006,14 +1115,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "binScript": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -1055,14 +1167,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "binScript": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -1104,14 +1219,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "module": {
                             "type": "string",
+                            "description": "",
                             "default": "fs"
                           }
                         },
@@ -1153,14 +1271,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "module": {
                             "type": "string",
+                            "description": "",
                             "default": "net"
                           }
                         },
@@ -1202,14 +1323,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "module": {
                             "type": "string",
+                            "description": "",
                             "default": "child_process"
                           }
                         },
@@ -1251,14 +1375,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "module": {
                             "type": "string",
+                            "description": "",
                             "default": "vm"
                           }
                         },
@@ -1300,11 +1427,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -1341,11 +1470,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -1382,14 +1513,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "urlFragment": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -1431,14 +1565,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "evalType": {
                             "type": "string",
+                            "description": "",
                             "default": "eval"
                           }
                         },
@@ -1480,11 +1617,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -1521,14 +1660,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "envVars": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -1570,14 +1712,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "name": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -1619,18 +1764,22 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "name": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "version": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -1673,14 +1822,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "name": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -1722,14 +1874,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "name": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -1771,11 +1926,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -1812,11 +1969,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -1853,11 +2012,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -1894,14 +2055,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "confidence": {
                             "type": "number",
+                            "description": "",
                             "default": 0
                           }
                         },
@@ -1943,14 +2107,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "confidence": {
                             "type": "number",
+                            "description": "",
                             "default": 0
                           }
                         },
@@ -1992,11 +2159,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -2033,11 +2202,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -2074,14 +2245,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "encoding": {
                             "type": "string",
+                            "description": "",
                             "default": "utf8"
                           }
                         },
@@ -2123,11 +2297,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -2164,11 +2340,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -2205,18 +2383,22 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "pattern": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "explanation": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -2259,11 +2441,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -2300,18 +2484,22 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "packageName": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "url": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -2354,18 +2542,22 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "packageName": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "url": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -2408,26 +2600,32 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "packageName": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "githubUser": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "githubRepo": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "commitsh": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -2472,18 +2670,22 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "packageName": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "filePath": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -2526,11 +2728,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -2567,11 +2771,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -2608,11 +2814,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -2649,18 +2857,22 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "packageName": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "packageVersion": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -2703,11 +2915,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -2744,11 +2958,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -2785,11 +3001,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -2826,11 +3044,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -2867,11 +3087,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -2908,14 +3130,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "dependency": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -2957,18 +3182,22 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "key": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "description": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -3011,11 +3240,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -3052,14 +3283,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "linesOfCode": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           }
                         },
@@ -3101,11 +3335,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -3142,11 +3378,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -3183,14 +3421,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "reason": {
                             "type": "string",
+                            "description": "",
                             "default": "This package is deprecated"
                           }
                         },
@@ -3232,26 +3473,32 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "prevChronoDate": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "prevChronoVersion": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "prevSemverDate": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "prevSemverVersion": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -3296,22 +3543,27 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "fingerprint": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "sshKey": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "username": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -3355,18 +3607,22 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "prevVersion": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "newVersion": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -3409,18 +3665,22 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "prevAuthor": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "newAuthor": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -3463,14 +3723,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "author": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -3512,11 +3775,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -3553,14 +3818,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "lastPublish": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -3602,14 +3870,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "version": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -3651,26 +3922,32 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "linesChanged": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           },
                           "prevSize": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           },
                           "curSize": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           },
                           "changedPercent": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           }
                         },
@@ -3715,11 +3992,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -3756,11 +4035,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -3797,14 +4078,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "spdxDisj": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -3846,11 +4130,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -3887,18 +4173,22 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "prevLicenseId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "newLicenseId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -3941,14 +4231,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "licenseId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -3990,14 +4283,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "licenseId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -4039,11 +4335,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -4080,11 +4378,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -4121,14 +4421,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "possibleLicenseId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -4170,14 +4473,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "licenseId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -4219,11 +4525,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -4260,18 +4568,22 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "licenseId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "similarity": {
                             "type": "number",
+                            "description": "",
                             "default": 0
                           }
                         },
@@ -4314,22 +4626,27 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "exceptionId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "similarity": {
                             "type": "number",
+                            "description": "",
                             "default": 0
                           },
                           "comments": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -4373,18 +4690,22 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "exceptionId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "comments": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -4427,18 +4748,22 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "exceptionId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "comments": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -4481,18 +4806,22 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "description": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "location": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -4535,14 +4864,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "location": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -4584,11 +4916,13 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {}
                       },
                       "usage": {
@@ -4625,14 +4959,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "location": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -4674,14 +5011,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "licenseId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -4723,14 +5063,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "licenseId": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -4772,14 +5115,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "classifier": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -4821,26 +5167,32 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "alternatePackage": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "editDistance": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           },
                           "downloads": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           },
                           "downloadsRatio": {
                             "type": "number",
+                            "description": "",
                             "default": 1
                           }
                         },
@@ -4885,18 +5237,22 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "id": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           },
                           "note": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -4939,18 +5295,22 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "id": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           },
                           "note": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -4993,18 +5353,22 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "id": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           },
                           "note": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -5047,22 +5411,27 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "notes": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "confidence": {
                             "type": "number",
+                            "description": "",
                             "default": 0
                           },
                           "severity": {
                             "type": "number",
+                            "description": "",
                             "default": 0
                           }
                         },
@@ -5106,22 +5475,27 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "notes": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "confidence": {
                             "type": "number",
+                            "description": "",
                             "default": 0
                           },
                           "severity": {
                             "type": "number",
+                            "description": "",
                             "default": 0
                           },
                           "risk": {
@@ -5131,6 +5505,7 @@
                               "medium",
                               "high"
                             ],
+                            "description": "",
                             "default": "medium"
                           }
                         },
@@ -5175,22 +5550,27 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "notes": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "confidence": {
                             "type": "number",
+                            "description": "",
                             "default": 0
                           },
                           "severity": {
                             "type": "number",
+                            "description": "",
                             "default": 0
                           }
                         },
@@ -5234,14 +5614,17 @@
                     "properties": {
                       "description": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "props": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "note": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "risk": {
@@ -5251,6 +5634,7 @@
                               "medium",
                               "high"
                             ],
+                            "description": "",
                             "default": "medium"
                           }
                         },
@@ -5280,6 +5664,7 @@
         "properties": {
           "score": {
             "type": "number",
+            "description": "",
             "default": 0
           },
           "components": {
@@ -5291,10 +5676,12 @@
           },
           "limit": {
             "type": "number",
+            "description": "",
             "default": 0
           },
           "limitingMetric": {
             "type": "string",
+            "description": "",
             "default": ""
           }
         },
@@ -5306,9 +5693,11 @@
       "SocketBatchPURLRequest": {
         "type": "object",
         "additionalProperties": false,
+        "description": "",
         "properties": {
           "purl": {
             "type": "string",
+            "description": "",
             "default": ""
           }
         },
@@ -5319,6 +5708,7 @@
       "SocketIssueBasics": {
         "type": "object",
         "additionalProperties": false,
+        "description": "",
         "properties": {
           "severity": {
             "$ref": "#/components/schemas/SocketIssueSeverity"
@@ -5331,6 +5721,7 @@
           },
           "label": {
             "type": "string",
+            "description": "",
             "default": ""
           }
         },
@@ -5344,6 +5735,7 @@
       "SocketUsageRef": {
         "type": "object",
         "additionalProperties": false,
+        "description": "",
         "properties": {
           "file": {
             "$ref": "#/components/schemas/SocketRefFile"
@@ -5360,21 +5752,26 @@
       "SocketMetricComponent": {
         "type": "object",
         "additionalProperties": false,
+        "description": "",
         "properties": {
           "score": {
             "type": "number",
+            "description": "",
             "default": 0
           },
           "maxScore": {
             "type": "number",
+            "description": "",
             "default": 0
           },
           "limit": {
             "type": "number",
+            "description": "",
             "default": 0
           },
           "value": {
             "type": "object",
+            "description": "",
             "default": null
           }
         },
@@ -5397,6 +5794,7 @@
         "properties": {
           "path": {
             "type": "string",
+            "description": "",
             "default": ""
           },
           "range": {
@@ -5425,6 +5823,7 @@
               "value": {
                 "type": "object",
                 "additionalProperties": false,
+                "description": "",
                 "properties": {}
               }
             }
@@ -5509,21 +5908,26 @@
       "SocketRefTextRange": {
         "type": "object",
         "additionalProperties": false,
+        "description": "",
         "properties": {
           "startLine": {
             "type": "integer",
+            "description": "",
             "default": 0
           },
           "startColumn": {
             "type": "integer",
+            "description": "",
             "default": 0
           },
           "endLine": {
             "type": "integer",
+            "description": "",
             "default": 0
           },
           "endColumn": {
             "type": "integer",
+            "description": "",
             "default": 0
           }
         },
@@ -5537,13 +5941,16 @@
       "SocketRefByteRange": {
         "type": "object",
         "additionalProperties": false,
+        "description": "",
         "properties": {
           "start": {
             "type": "integer",
+            "description": "",
             "default": 0
           },
           "end": {
             "type": "integer",
+            "description": "",
             "default": 0
           }
         },
@@ -5558,10 +5965,12 @@
         "properties": {
           "package": {
             "type": "string",
+            "description": "",
             "default": ""
           },
           "version": {
             "type": "string",
+            "description": "",
             "default": ""
           },
           "file": {
@@ -5578,14 +5987,17 @@
         "properties": {
           "url": {
             "type": "string",
+            "description": "",
             "default": ""
           },
           "commit": {
             "type": "string",
+            "description": "",
             "default": ""
           },
           "tag": {
             "type": "string",
+            "description": "",
             "default": ""
           },
           "file": {
@@ -5602,6 +6014,7 @@
         "properties": {
           "url": {
             "type": "string",
+            "description": "",
             "default": ""
           },
           "file": {
@@ -5618,14 +6031,17 @@
         "properties": {
           "package": {
             "type": "string",
+            "description": "",
             "default": ""
           },
           "version": {
             "type": "string",
+            "description": "",
             "default": ""
           },
           "artifact": {
             "type": "string",
+            "description": "",
             "default": ""
           },
           "file": {
@@ -5642,10 +6058,12 @@
         "properties": {
           "package": {
             "type": "string",
+            "description": "",
             "default": ""
           },
           "version": {
             "type": "string",
+            "description": "",
             "default": ""
           },
           "file": {
@@ -5822,9 +6240,11 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "status": {
                       "type": "string",
+                      "description": "",
                       "default": "ok"
                     }
                   },
@@ -5879,37 +6299,46 @@
                   "items": {
                     "type": "object",
                     "additionalProperties": false,
+                    "description": "",
                     "properties": {
                       "id": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "url": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "repo": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "branch": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "pull_requests": {
                         "type": "object",
+                        "description": "",
                         "default": null
                       },
                       "commit": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "owner": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "created_at": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       }
                     },
@@ -5966,14 +6395,16 @@
                     "type": "Buffer",
                     "data": []
                   },
-                  "format": "binary"
+                  "format": "binary",
+                  "description": ""
                 },
                 "properties": {
                   "issueRules": {
                     "type": "object",
                     "additionalProperties": {
                       "type": "boolean",
-                      "default": false
+                      "default": false,
+                      "description": ""
                     },
                     "properties": {}
                   }
@@ -5998,13 +6429,16 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "id": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "url": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     }
                   },
@@ -6114,9 +6548,11 @@
                     "additionalProperties": {
                       "type": "object",
                       "additionalProperties": false,
+                      "description": "",
                       "properties": {
                         "pattern": {
                           "type": "string",
+                          "description": "",
                           "default": ""
                         }
                       },
@@ -6187,9 +6623,11 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "quota": {
                       "type": "integer",
+                      "description": "",
                       "default": 0,
                       "minimum": 0
                     }
@@ -6232,31 +6670,38 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "organizations": {
                       "type": "object",
                       "additionalProperties": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "id": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "name": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "image": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "plan": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "slug": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -6307,6 +6752,7 @@
                   "properties": {
                     "organization": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     }
                   }
@@ -6329,10 +6775,12 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "defaults": {
                       "type": "object",
                       "additionalProperties": false,
+                      "description": "",
                       "properties": {
                         "issueRules": {
                           "type": "object",
@@ -6360,9 +6808,11 @@
                       "items": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "start": {
                             "type": "string",
+                            "description": "",
                             "default": "",
                             "nullable": true
                           },
@@ -6449,7 +6899,8 @@
             "required": false,
             "description": "",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "default": ""
             }
           }
         ],
@@ -6468,6 +6919,7 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "results": {
                       "type": "array",
@@ -6477,46 +6929,57 @@
                         "properties": {
                           "id": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "created_at": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "updated_at": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "github_install_id": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "github_repo_id": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "name": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "github_full_name": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "organization_id": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "latest_project_report": {
                             "type": "object",
                             "additionalProperties": false,
+                            "description": "",
                             "properties": {
                               "id": {
                                 "type": "string",
+                                "description": "",
                                 "default": ""
                               },
                               "created_at": {
                                 "type": "string",
+                                "description": "",
                                 "default": ""
                               }
                             },
@@ -6569,15 +7032,18 @@
               "schema": {
                 "type": "object",
                 "additionalProperties": false,
+                "description": "",
                 "properties": {
                   "limit": {
                     "type": "integer",
+                    "description": "",
                     "default": 50,
                     "minimum": 1,
                     "maximum": 1000
                   },
                   "offset": {
                     "type": "integer",
+                    "description": "",
                     "default": 0,
                     "minimum": 0
                   }
@@ -6604,17 +7070,21 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "end": {
                       "type": "boolean",
-                      "default": false
+                      "default": false,
+                      "description": ""
                     },
                     "limit": {
                       "type": "integer",
+                      "description": "",
                       "default": 1000
                     },
                     "offset": {
                       "type": "integer",
+                      "description": "",
                       "default": 0
                     },
                     "rows": {
@@ -6622,37 +7092,46 @@
                       "items": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
                           "branch": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "direct": {
                             "type": "boolean",
-                            "default": false
+                            "default": false,
+                            "description": ""
                           },
                           "id": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "name": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "namespace": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "repository": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "type": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "version": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         },
@@ -6713,7 +7192,8 @@
             "required": false,
             "description": "",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "default": ""
             }
           },
           {
@@ -6722,7 +7202,8 @@
             "required": false,
             "description": "",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "default": ""
             }
           }
         ],
@@ -6737,15 +7218,18 @@
                     "type": "Buffer",
                     "data": []
                   },
-                  "format": "binary"
+                  "format": "binary",
+                  "description": ""
                 },
                 "properties": {
                   "repository": {
                     "type": "string",
+                    "description": "",
                     "default": ""
                   },
                   "branch": {
                     "type": "string",
+                    "description": "",
                     "default": ""
                   }
                 }
@@ -6769,6 +7253,7 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {}
                 }
               }
@@ -6806,7 +7291,7 @@
             "name": "org_slug",
             "in": "path",
             "required": true,
-            "description": "",
+            "description": "The slug of the organization",
             "schema": {
               "type": "string"
             }
@@ -6817,7 +7302,8 @@
             "required": false,
             "description": "",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "default": "created_at"
             }
           },
           {
@@ -6826,7 +7312,8 @@
             "required": false,
             "description": "",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "default": "desc"
             }
           },
           {
@@ -6868,6 +7355,7 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "results": {
                       "type": "array",
@@ -6877,53 +7365,69 @@
                         "properties": {
                           "id": {
                             "type": "string",
+                            "description": "The ID of the repository",
                             "default": ""
                           },
                           "created_at": {
                             "type": "string",
+                            "description": "The creation date of the repository",
                             "default": ""
                           },
                           "updated_at": {
                             "type": "string",
+                            "description": "The last update date of the repository",
                             "default": ""
                           },
                           "slug": {
                             "type": "string",
+                            "description": "The slug of the repository",
                             "default": ""
                           },
                           "head_full_scan_id": {
                             "type": "string",
+                            "description": "The ID of the head full scan of the repository",
                             "default": ""
                           },
                           "name": {
                             "type": "string",
+                            "description": "The name of the repository",
                             "default": ""
                           },
                           "description": {
                             "type": "string",
+                            "description": "The description of the repository",
                             "default": ""
                           },
                           "homepage": {
                             "type": "string",
+                            "description": "The homepage URL of the repository",
                             "default": ""
                           },
                           "visibility": {
                             "type": "string",
-                            "default": ""
+                            "enum": [
+                              "public",
+                              "private"
+                            ],
+                            "description": "The visibility of the repository",
+                            "default": "private"
                           },
                           "archived": {
                             "type": "boolean",
-                            "default": false
+                            "default": false,
+                            "description": "Whether the repository is archived or not"
                           },
                           "default_branch": {
                             "type": "string",
-                            "default": ""
+                            "description": "The default branch of the repository",
+                            "default": "main"
                           }
                         }
                       }
                     },
                     "nextPage": {
                       "type": "integer",
+                      "description": "",
                       "default": 0
                     }
                   },
@@ -6965,7 +7469,7 @@
             "name": "org_slug",
             "in": "path",
             "required": true,
-            "description": "",
+            "description": "The slug of the organization",
             "schema": {
               "type": "string"
             }
@@ -6980,27 +7484,37 @@
                 "properties": {
                   "name": {
                     "type": "string",
+                    "description": "The name of the repository",
                     "default": ""
                   },
                   "description": {
                     "type": "string",
+                    "description": "The description of the repository",
                     "default": ""
                   },
                   "homepage": {
                     "type": "string",
+                    "description": "The homepage URL of the repository",
                     "default": ""
                   },
                   "visibility": {
                     "type": "string",
-                    "default": ""
+                    "enum": [
+                      "public",
+                      "private"
+                    ],
+                    "description": "The visibility of the repository",
+                    "default": "private"
                   },
                   "archived": {
                     "type": "boolean",
-                    "default": false
+                    "default": false,
+                    "description": "Whether the repository is archived or not"
                   },
                   "default_branch": {
                     "type": "string",
-                    "default": ""
+                    "description": "The default branch of the repository",
+                    "default": "main"
                   }
                 }
               }
@@ -7026,47 +7540,62 @@
                   "properties": {
                     "id": {
                       "type": "string",
+                      "description": "The ID of the repository",
                       "default": ""
                     },
                     "created_at": {
                       "type": "string",
+                      "description": "The creation date of the repository",
                       "default": ""
                     },
                     "updated_at": {
                       "type": "string",
+                      "description": "The last update date of the repository",
                       "default": ""
                     },
                     "slug": {
                       "type": "string",
+                      "description": "The slug of the repository",
                       "default": ""
                     },
                     "head_full_scan_id": {
                       "type": "string",
+                      "description": "The ID of the head full scan of the repository",
                       "default": ""
                     },
                     "name": {
                       "type": "string",
+                      "description": "The name of the repository",
                       "default": ""
                     },
                     "description": {
                       "type": "string",
+                      "description": "The description of the repository",
                       "default": ""
                     },
                     "homepage": {
                       "type": "string",
+                      "description": "The homepage URL of the repository",
                       "default": ""
                     },
                     "visibility": {
                       "type": "string",
-                      "default": ""
+                      "enum": [
+                        "public",
+                        "private"
+                      ],
+                      "description": "The visibility of the repository",
+                      "default": "private"
                     },
                     "archived": {
                       "type": "boolean",
-                      "default": false
+                      "default": false,
+                      "description": "Whether the repository is archived or not"
                     },
                     "default_branch": {
                       "type": "string",
-                      "default": ""
+                      "description": "The default branch of the repository",
+                      "default": "main"
                     }
                   }
                 }
@@ -7105,7 +7634,7 @@
             "name": "org_slug",
             "in": "path",
             "required": true,
-            "description": "",
+            "description": "The slug of the organization",
             "schema": {
               "type": "string"
             }
@@ -7114,7 +7643,7 @@
             "name": "repo_slug",
             "in": "path",
             "required": true,
-            "description": "",
+            "description": "The slug of the repository",
             "schema": {
               "type": "string"
             }
@@ -7138,47 +7667,62 @@
                   "properties": {
                     "id": {
                       "type": "string",
+                      "description": "The ID of the repository",
                       "default": ""
                     },
                     "created_at": {
                       "type": "string",
+                      "description": "The creation date of the repository",
                       "default": ""
                     },
                     "updated_at": {
                       "type": "string",
+                      "description": "The last update date of the repository",
                       "default": ""
                     },
                     "slug": {
                       "type": "string",
+                      "description": "The slug of the repository",
                       "default": ""
                     },
                     "head_full_scan_id": {
                       "type": "string",
+                      "description": "The ID of the head full scan of the repository",
                       "default": ""
                     },
                     "name": {
                       "type": "string",
+                      "description": "The name of the repository",
                       "default": ""
                     },
                     "description": {
                       "type": "string",
+                      "description": "The description of the repository",
                       "default": ""
                     },
                     "homepage": {
                       "type": "string",
+                      "description": "The homepage URL of the repository",
                       "default": ""
                     },
                     "visibility": {
                       "type": "string",
-                      "default": ""
+                      "enum": [
+                        "public",
+                        "private"
+                      ],
+                      "description": "The visibility of the repository",
+                      "default": "private"
                     },
                     "archived": {
                       "type": "boolean",
-                      "default": false
+                      "default": false,
+                      "description": "Whether the repository is archived or not"
                     },
                     "default_branch": {
                       "type": "string",
-                      "default": ""
+                      "description": "The default branch of the repository",
+                      "default": "main"
                     }
                   }
                 }
@@ -7215,7 +7759,7 @@
             "name": "org_slug",
             "in": "path",
             "required": true,
-            "description": "",
+            "description": "The slug of the organization",
             "schema": {
               "type": "string"
             }
@@ -7224,7 +7768,7 @@
             "name": "repo_slug",
             "in": "path",
             "required": true,
-            "description": "",
+            "description": "The slug of the repository",
             "schema": {
               "type": "string"
             }
@@ -7239,27 +7783,37 @@
                 "properties": {
                   "name": {
                     "type": "string",
+                    "description": "The name of the repository",
                     "default": ""
                   },
                   "description": {
                     "type": "string",
+                    "description": "The description of the repository",
                     "default": ""
                   },
                   "homepage": {
                     "type": "string",
+                    "description": "The homepage URL of the repository",
                     "default": ""
                   },
                   "visibility": {
                     "type": "string",
-                    "default": ""
+                    "enum": [
+                      "public",
+                      "private"
+                    ],
+                    "description": "The visibility of the repository",
+                    "default": "private"
                   },
                   "archived": {
                     "type": "boolean",
-                    "default": false
+                    "default": false,
+                    "description": "Whether the repository is archived or not"
                   },
                   "default_branch": {
                     "type": "string",
-                    "default": ""
+                    "description": "The default branch of the repository",
+                    "default": "main"
                   }
                 }
               }
@@ -7285,47 +7839,62 @@
                   "properties": {
                     "id": {
                       "type": "string",
+                      "description": "The ID of the repository",
                       "default": ""
                     },
                     "created_at": {
                       "type": "string",
+                      "description": "The creation date of the repository",
                       "default": ""
                     },
                     "updated_at": {
                       "type": "string",
+                      "description": "The last update date of the repository",
                       "default": ""
                     },
                     "slug": {
                       "type": "string",
+                      "description": "The slug of the repository",
                       "default": ""
                     },
                     "head_full_scan_id": {
                       "type": "string",
+                      "description": "The ID of the head full scan of the repository",
                       "default": ""
                     },
                     "name": {
                       "type": "string",
+                      "description": "The name of the repository",
                       "default": ""
                     },
                     "description": {
                       "type": "string",
+                      "description": "The description of the repository",
                       "default": ""
                     },
                     "homepage": {
                       "type": "string",
+                      "description": "The homepage URL of the repository",
                       "default": ""
                     },
                     "visibility": {
                       "type": "string",
-                      "default": ""
+                      "enum": [
+                        "public",
+                        "private"
+                      ],
+                      "description": "The visibility of the repository",
+                      "default": "private"
                     },
                     "archived": {
                       "type": "boolean",
-                      "default": false
+                      "default": false,
+                      "description": "Whether the repository is archived or not"
                     },
                     "default_branch": {
                       "type": "string",
-                      "default": ""
+                      "description": "The default branch of the repository",
+                      "default": "main"
                     }
                   }
                 }
@@ -7362,7 +7931,7 @@
             "name": "org_slug",
             "in": "path",
             "required": true,
-            "description": "",
+            "description": "The slug of the organization",
             "schema": {
               "type": "string"
             }
@@ -7371,7 +7940,7 @@
             "name": "repo_slug",
             "in": "path",
             "required": true,
-            "description": "",
+            "description": "The slug of the repository",
             "schema": {
               "type": "string"
             }
@@ -7392,9 +7961,11 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "status": {
                       "type": "string",
+                      "description": "",
                       "default": "ok"
                     }
                   },
@@ -7430,14 +8001,14 @@
         "tags": [
           "Full scans"
         ],
-        "summary": "List full scans (unstable)",
+        "summary": "List full scans",
         "operationId": "getOrgFullScanList",
         "parameters": [
           {
             "name": "org_slug",
             "in": "path",
             "required": true,
-            "description": "",
+            "description": "The slug of the organization",
             "schema": {
               "type": "string"
             }
@@ -7448,7 +8019,8 @@
             "required": false,
             "description": "",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "default": "created"
             }
           },
           {
@@ -7457,7 +8029,8 @@
             "required": false,
             "description": "",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "default": "desc"
             }
           },
           {
@@ -7499,6 +8072,7 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "results": {
                       "type": "array",
@@ -7508,53 +8082,65 @@
                         "properties": {
                           "id": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "created_at": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "updated_at": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "organization_id": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "repository_id": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "committers": {
                             "type": "array",
                             "items": {
                               "type": "string",
+                              "description": "",
                               "default": ""
                             }
                           },
                           "repo": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "branch": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "commit_message": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "commit_hash": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "pull_request": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           },
                           "html_report_url": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         }
@@ -7562,6 +8148,7 @@
                     },
                     "nextPage": {
                       "type": "integer",
+                      "description": "",
                       "default": 0
                     }
                   },
@@ -7596,14 +8183,14 @@
         "tags": [
           "Full scans"
         ],
-        "summary": "Create full scan (unstable)",
+        "summary": "Create full scan",
         "operationId": "CreateOrgFullScan",
         "parameters": [
           {
             "name": "org_slug",
             "in": "path",
             "required": true,
-            "description": "",
+            "description": "The slug of the organization",
             "schema": {
               "type": "string"
             }
@@ -7612,7 +8199,7 @@
             "name": "repo",
             "in": "query",
             "required": true,
-            "description": "",
+            "description": "The slug of the repository to associate the full-scan with.",
             "schema": {
               "type": "string"
             }
@@ -7621,7 +8208,7 @@
             "name": "branch",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "The branch name to associate the full-scan with.",
             "schema": {
               "type": "string"
             }
@@ -7630,7 +8217,7 @@
             "name": "commit_message",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "The commit message to associate the full-scan with.",
             "schema": {
               "type": "string"
             }
@@ -7639,7 +8226,7 @@
             "name": "commit_hash",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "The commit hash to associate the full-scan with.",
             "schema": {
               "type": "string"
             }
@@ -7648,7 +8235,7 @@
             "name": "pull_request",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "The pull request number to associate the full-scan with.",
             "schema": {
               "type": "integer",
               "minimum": 1
@@ -7658,7 +8245,7 @@
             "name": "committers",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "The committers to associate the full-scan with. Set query more than once to set multiple.",
             "schema": {
               "type": "string"
             }
@@ -7702,7 +8289,8 @@
                     "type": "Buffer",
                     "data": []
                   },
-                  "format": "binary"
+                  "format": "binary",
+                  "description": ""
                 },
                 "properties": {}
               }
@@ -7728,53 +8316,65 @@
                   "properties": {
                     "id": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "created_at": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "updated_at": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "organization_id": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "repository_id": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "committers": {
                       "type": "array",
                       "items": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       }
                     },
                     "repo": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "branch": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "commit_message": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "commit_hash": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "pull_request": {
                       "type": "integer",
+                      "description": "",
                       "default": 0
                     },
                     "html_report_url": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     }
                   }
@@ -7807,14 +8407,14 @@
         "tags": [
           "Full scans"
         ],
-        "summary": "Stream full scan (unstable)",
+        "summary": "Stream full scan",
         "operationId": "getOrgFullScan",
         "parameters": [
           {
             "name": "org_slug",
             "in": "path",
             "required": true,
-            "description": "",
+            "description": "The slug of the organization",
             "schema": {
               "type": "string"
             }
@@ -7823,7 +8423,7 @@
             "name": "full_scan_id",
             "in": "path",
             "required": true,
-            "description": "",
+            "description": "The ID of the full scan",
             "schema": {
               "type": "string"
             }
@@ -7853,35 +8453,43 @@
                         "pypi",
                         "golang"
                       ],
+                      "description": "",
                       "default": "unknown"
                     },
                     "namespace": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "name": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "version": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "subpath": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "release": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "id": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "direct": {
                       "type": "boolean",
-                      "default": false
+                      "default": false,
+                      "description": ""
                     },
                     "manifestFiles": {
                       "type": "array",
@@ -7891,14 +8499,17 @@
                         "properties": {
                           "file": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "start": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           },
                           "end": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           }
                         },
@@ -7911,6 +8522,7 @@
                       "type": "array",
                       "items": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       }
                     },
@@ -7918,6 +8530,7 @@
                       "type": "array",
                       "items": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       }
                     },
@@ -7933,30 +8546,37 @@
                             "pypi",
                             "golang"
                           ],
+                          "description": "",
                           "default": "unknown"
                         },
                         "namespace": {
                           "type": "string",
+                          "description": "",
                           "default": ""
                         },
                         "name": {
                           "type": "string",
+                          "description": "",
                           "default": ""
                         },
                         "version": {
                           "type": "string",
+                          "description": "",
                           "default": ""
                         },
                         "subpath": {
                           "type": "string",
+                          "description": "",
                           "default": ""
                         },
                         "release": {
                           "type": "string",
+                          "description": "",
                           "default": ""
                         },
                         "id": {
                           "type": "string",
+                          "description": "",
                           "default": ""
                         }
                       },
@@ -7967,45 +8587,55 @@
                     },
                     "license": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "author": {
                       "type": "array",
                       "items": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       }
                     },
                     "size": {
                       "type": "number",
+                      "description": "",
                       "default": 0
                     },
                     "score": {
                       "type": "object",
                       "additionalProperties": false,
+                      "description": "",
                       "properties": {
                         "supplyChain": {
                           "type": "number",
+                          "description": "",
                           "default": 0
                         },
                         "quality": {
                           "type": "number",
+                          "description": "",
                           "default": 0
                         },
                         "maintenance": {
                           "type": "number",
+                          "description": "",
                           "default": 0
                         },
                         "vulnerability": {
                           "type": "number",
+                          "description": "",
                           "default": 0
                         },
                         "license": {
                           "type": "number",
+                          "description": "",
                           "default": 0
                         },
                         "overall": {
                           "type": "number",
+                          "description": "",
                           "default": 0
                         }
                       },
@@ -8026,10 +8656,12 @@
                         "properties": {
                           "key": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "type": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "severity": {
@@ -8040,18 +8672,22 @@
                           },
                           "file": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "start": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           },
                           "end": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           },
                           "props": {
                             "type": "object",
+                            "description": "",
                             "default": null
                           }
                         },
@@ -8065,6 +8701,7 @@
                     },
                     "batchIndex": {
                       "type": "integer",
+                      "description": "",
                       "default": 0
                     }
                   },
@@ -8099,14 +8736,14 @@
         "tags": [
           "Full scans"
         ],
-        "summary": "Delete full scan (unstable)",
+        "summary": "Delete full scan",
         "operationId": "deleteOrgFullScan",
         "parameters": [
           {
             "name": "org_slug",
             "in": "path",
             "required": true,
-            "description": "",
+            "description": "The slug of the organization",
             "schema": {
               "type": "string"
             }
@@ -8115,7 +8752,7 @@
             "name": "full_scan_id",
             "in": "path",
             "required": true,
-            "description": "",
+            "description": "The ID of the full scan",
             "schema": {
               "type": "string"
             }
@@ -8136,9 +8773,11 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "status": {
                       "type": "string",
+                      "description": "",
                       "default": "ok"
                     }
                   },
@@ -8174,14 +8813,14 @@
         "tags": [
           "Full scans"
         ],
-        "summary": "Get full scan metadata (unstable)",
+        "summary": "Get full scan metadata",
         "operationId": "getOrgFullScanMetadata",
         "parameters": [
           {
             "name": "org_slug",
             "in": "path",
             "required": true,
-            "description": "",
+            "description": "The slug of the organization",
             "schema": {
               "type": "string"
             }
@@ -8190,7 +8829,7 @@
             "name": "full_scan_id",
             "in": "path",
             "required": true,
-            "description": "",
+            "description": "The ID of the full scan",
             "schema": {
               "type": "string"
             }
@@ -8214,53 +8853,65 @@
                   "properties": {
                     "id": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "created_at": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "updated_at": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "organization_id": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "repository_id": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "committers": {
                       "type": "array",
                       "items": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       }
                     },
                     "repo": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "branch": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "commit_message": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "commit_hash": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "pull_request": {
                       "type": "integer",
+                      "description": "",
                       "default": 0
                     },
                     "html_report_url": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     }
                   }
@@ -8300,7 +8951,7 @@
             "name": "org_slug",
             "in": "path",
             "required": true,
-            "description": "",
+            "description": "The slug of the organization",
             "schema": {
               "type": "string"
             }
@@ -8309,16 +8960,46 @@
             "name": "type",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "Filter audit log events by type",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "BookDemo",
+                "CancelInvitation",
+                "ChangeMemberRole",
+                "ChangePlanSubscriptionSeats",
+                "ContactForm",
+                "CreateApiToken",
+                "CreateUser",
+                "GithubAppInstallation",
+                "JoinOrganizationByVcs",
+                "LinkAccount",
+                "RemoveMember",
+                "ResetInvitationLink",
+                "ResetOrganizationSettingToDefault",
+                "RotateApiToken",
+                "SendInvitation",
+                "SignIn",
+                "SignOut",
+                "Subscribe",
+                "SyncOrganization",
+                "TransferOwnership",
+                "UpdateAlertTriage",
+                "UpdateApiTokenName",
+                "UpdateApiTokenScopes",
+                "UpdateApiTokenVisibility",
+                "UpdateOrganizationSetting",
+                "UpgradeOrganizationPlan",
+                "VerifiedEmail"
+              ],
+              "default": ""
             }
           },
           {
             "name": "per_page",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "Number of events per page",
             "schema": {
               "type": "integer",
               "minimum": 1,
@@ -8330,11 +9011,10 @@
             "name": "page",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "Page token",
             "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 1
+              "type": "string",
+              "default": "1"
             }
           }
         ],
@@ -8345,7 +9025,7 @@
             ]
           }
         ],
-        "description": "Paginated list of audit log events.\n\nThe `type` queryParam must be omitted or one of:\n\n- BookDemo\n- CancelInvitation\n- ChangeMemberRole\n- ChangePlanSubscriptionSeats\n- ContactForm\n- CreateApiToken\n- CreateUser\n- GithubAppInstallation\n- JoinOrganizationByVcs\n- LinkAccount\n- RemoveMember\n- ResetInvitationLink\n- ResetOrganizationSettingToDefault\n- RotateApiToken\n- SendInvitation\n- SignIn\n- SignOut\n- Subscribe\n- SyncOrganization\n- TransferOwnership\n- UpdateAlertTriage\n- UpdateApiTokenName\n- UpdateApiTokenScopes\n- UpdateApiTokenVisibility\n- UpdateOrganizationSetting\n- UpgradeOrganizationPlan\n- VerifiedEmail\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Paginated list of audit log events.\n\nThis endpoint consumes 0 units of your quota.",
         "responses": {
           "200": {
             "content": {
@@ -8353,6 +9033,7 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
                     "results": {
                       "type": "array",
@@ -8362,66 +9043,81 @@
                         "properties": {
                           "event_id": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "created_at": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "updated_at": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "country_code": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "organization_id": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "ip_address": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "payload": {
                             "type": "object",
+                            "description": "",
                             "default": null
                           },
                           "status_code": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           },
                           "type": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "user_agent": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "user_id": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "user_email": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "user_image": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "organization_name": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           }
                         }
                       }
                     },
                     "nextPage": {
-                      "type": "integer",
-                      "default": 0
+                      "type": "string",
+                      "description": "",
+                      "default": ""
                     }
                   },
                   "required": [
@@ -8487,73 +9183,91 @@
                   "items": {
                     "type": "object",
                     "additionalProperties": false,
+                    "description": "",
                     "properties": {
                       "id": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "created_at": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "repository_id": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "organization_id": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "repository_name": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "total_critical_alerts": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_high_alerts": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_medium_alerts": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_low_alerts": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_critical_added": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_high_added": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_medium_added": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_low_added": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_critical_prevented": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_high_prevented": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_medium_prevented": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_low_prevented": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "top_five_alert_types": {
@@ -8648,73 +9362,91 @@
                   "items": {
                     "type": "object",
                     "additionalProperties": false,
+                    "description": "",
                     "properties": {
                       "id": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "repository_id": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "created_at": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "organization_id": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "repository_name": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       },
                       "total_critical_alerts": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_high_alerts": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_medium_alerts": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_low_alerts": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_critical_added": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_high_added": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_medium_added": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_low_added": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_critical_prevented": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_high_prevented": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_medium_prevented": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "total_low_prevented": {
                         "type": "integer",
+                        "description": "",
                         "default": 0
                       },
                       "top_five_alert_types": {
@@ -8820,35 +9552,43 @@
                         "pypi",
                         "golang"
                       ],
+                      "description": "",
                       "default": "unknown"
                     },
                     "namespace": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "name": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "version": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "subpath": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "release": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "id": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "direct": {
                       "type": "boolean",
-                      "default": false
+                      "default": false,
+                      "description": ""
                     },
                     "manifestFiles": {
                       "type": "array",
@@ -8858,14 +9598,17 @@
                         "properties": {
                           "file": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "start": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           },
                           "end": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           }
                         },
@@ -8878,6 +9621,7 @@
                       "type": "array",
                       "items": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       }
                     },
@@ -8885,6 +9629,7 @@
                       "type": "array",
                       "items": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       }
                     },
@@ -8900,30 +9645,37 @@
                             "pypi",
                             "golang"
                           ],
+                          "description": "",
                           "default": "unknown"
                         },
                         "namespace": {
                           "type": "string",
+                          "description": "",
                           "default": ""
                         },
                         "name": {
                           "type": "string",
+                          "description": "",
                           "default": ""
                         },
                         "version": {
                           "type": "string",
+                          "description": "",
                           "default": ""
                         },
                         "subpath": {
                           "type": "string",
+                          "description": "",
                           "default": ""
                         },
                         "release": {
                           "type": "string",
+                          "description": "",
                           "default": ""
                         },
                         "id": {
                           "type": "string",
+                          "description": "",
                           "default": ""
                         }
                       },
@@ -8934,45 +9686,55 @@
                     },
                     "license": {
                       "type": "string",
+                      "description": "",
                       "default": ""
                     },
                     "author": {
                       "type": "array",
                       "items": {
                         "type": "string",
+                        "description": "",
                         "default": ""
                       }
                     },
                     "size": {
                       "type": "number",
+                      "description": "",
                       "default": 0
                     },
                     "score": {
                       "type": "object",
                       "additionalProperties": false,
+                      "description": "",
                       "properties": {
                         "supplyChain": {
                           "type": "number",
+                          "description": "",
                           "default": 0
                         },
                         "quality": {
                           "type": "number",
+                          "description": "",
                           "default": 0
                         },
                         "maintenance": {
                           "type": "number",
+                          "description": "",
                           "default": 0
                         },
                         "vulnerability": {
                           "type": "number",
+                          "description": "",
                           "default": 0
                         },
                         "license": {
                           "type": "number",
+                          "description": "",
                           "default": 0
                         },
                         "overall": {
                           "type": "number",
+                          "description": "",
                           "default": 0
                         }
                       },
@@ -8993,10 +9755,12 @@
                         "properties": {
                           "key": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "type": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "severity": {
@@ -9007,18 +9771,22 @@
                           },
                           "file": {
                             "type": "string",
+                            "description": "",
                             "default": ""
                           },
                           "start": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           },
                           "end": {
                             "type": "integer",
+                            "description": "",
                             "default": 0
                           },
                           "props": {
                             "type": "object",
+                            "description": "",
                             "default": null
                           }
                         },
@@ -9032,6 +9800,7 @@
                     },
                     "batchIndex": {
                       "type": "integer",
+                      "description": "",
                       "default": 0
                     }
                   },
