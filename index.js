@@ -386,6 +386,113 @@ class SocketSdk {
   }
 
   /**
+   * @param {string} orgSlug
+   * @param {{[key: string]: any }} queryParams
+   * @returns {Promise<SocketSdkResultType<'getAuditLogEvents'>>}
+   */
+    async getAuditLogEvents (orgSlug, queryParams) {
+      const orgSlugParam = encodeURIComponent(orgSlug)
+      const formattedQueryParam = new URLSearchParams(queryParams)
+
+      try {
+        const client = await this.#getClient()
+        const data = await client.get(`orgs/${orgSlugParam}/audit-log?${formattedQueryParam}`).json()
+        return { success: true, status: 200, data }
+      } catch (err) {
+        return /** @type {SocketSdkErrorType<'getAuditLogEvents'>} */ (this.#handleApiError(err))
+      }
+    }
+
+  /**
+   * @param {string} orgSlug
+   * @param {string} repoSlug
+   * @returns {Promise<SocketSdkResultType<'getOrgRepo'>>}
+   */
+  async getOrgRepo (orgSlug, repoSlug) {
+    const orgSlugParam = encodeURIComponent(orgSlug)
+    const repoSlugParam = encodeURIComponent(repoSlug)
+
+    try {
+      const client = await this.#getClient()
+      const data = await client.get(`orgs/${orgSlugParam}/repos/${repoSlugParam}`).json()
+      return { success: true, status: 200, data }
+    } catch (err) {
+      return /** @type {SocketSdkErrorType<'getOrgRepo'>} */ (this.#handleApiError(err))
+    }
+  }
+
+  /**
+   * @param {string} orgSlug
+   * @param {string} repoSlug
+   * @returns {Promise<SocketSdkResultType<'deleteOrgRepo'>>}
+   */
+    async deleteOrgRepo (orgSlug, repoSlug) {
+      const orgSlugParam = encodeURIComponent(orgSlug)
+      const repoSlugParam = encodeURIComponent(repoSlug)
+
+      try {
+        const client = await this.#getClient()
+        const data = await client.delete(`orgs/${orgSlugParam}/repos/${repoSlugParam}`).json()
+        return { success: true, status: 200, data }
+      } catch (err) {
+        return /** @type {SocketSdkErrorType<'deleteOrgRepo'>} */ (this.#handleApiError(err))
+      }
+    }
+
+  /**
+   * @param {string} orgSlug
+   * @param {{[key: string]: any }} queryParams
+   * @returns {Promise<SocketSdkResultType<'getOrgRepoList'>>}
+   */
+  async getOrgRepoList (orgSlug, queryParams) {
+    const orgSlugParam = encodeURIComponent(orgSlug)
+    const formattedQueryParam = new URLSearchParams(queryParams)
+
+    try {
+      const client = await this.#getClient()
+      const data = await client.get(`orgs/${orgSlugParam}/repos?${formattedQueryParam}`).json()
+      return { success: true, status: 200, data }
+    } catch (err) {
+      return /** @type {SocketSdkErrorType<'getOrgRepoList'>} */ (this.#handleApiError(err))
+    }
+  }
+
+  /**
+   * @param {string} orgSlug
+   * @param {string} params
+   * @returns {Promise<SocketSdkResultType<'createOrgRepo'>>}
+   */
+  async createOrgRepo (orgSlug, params) {
+    const orgSlugParam = encodeURIComponent(orgSlug)
+
+    try {
+      const client = await this.#getClient()
+      const data = await client.post(`orgs/${orgSlugParam}/repos`, { json: params }).json()
+      return { success: true, status: 200, data }
+    } catch (err) {
+      return /** @type {SocketSdkErrorType<'createOrgRepo'>} */ (this.#handleApiError(err))
+    }
+  }
+
+  /**
+   * @param {string} orgSlug
+   * @param {string} repoSlug
+   * @param {string} params
+   * @returns {Promise<SocketSdkResultType<'updateOrgRepo'>>}
+   */
+  async updateOrgRepo (orgSlug, repoSlug, params) {
+    const orgSlugParam = encodeURIComponent(orgSlug)
+
+    try {
+      const client = await this.#getClient()
+      const data = await client.post(`orgs/${orgSlugParam}/repos/${repoSlug}`, { json: params }).json()
+      return { success: true, status: 200, data }
+    } catch (err) {
+      return /** @type {SocketSdkErrorType<'updateOrgRepo'>} */ (this.#handleApiError(err))
+    }
+  }
+
+  /**
    * @param {Array<{ organization?: string }>} selectors
    * @returns {Promise<SocketSdkResultType<'postSettings'>>}
    */
