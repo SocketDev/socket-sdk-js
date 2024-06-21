@@ -182,38 +182,6 @@
           }
         }
       },
-      "SocketGone": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "additionalProperties": false,
-              "description": "",
-              "properties": {
-                "error": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    }
-                  },
-                  "required": [
-                    "message"
-                  ]
-                }
-              },
-              "required": [
-                "error"
-              ]
-            }
-          }
-        },
-        "description": "Gone"
-      },
       "SocketInternalServerError": {
         "content": {
           "application/json": {
@@ -245,52 +213,78 @@
           }
         },
         "description": "Internal server error"
+      },
+      "SocketGone": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "",
+              "properties": {
+                "error": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              },
+              "required": [
+                "error"
+              ]
+            }
+          }
+        },
+        "description": "Gone"
       }
     },
     "schemas": {
-      "SocketIssueList": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/SocketIssue"
-        }
+      "SocketIssueSeverity": {
+        "type": "string",
+        "enum": [
+          "low",
+          "middle",
+          "high",
+          "critical"
+        ],
+        "description": "",
+        "default": "low"
       },
-      "SocketPackageScore": {
+      "SocketCategory": {
+        "type": "string",
+        "enum": [
+          "supplyChainRisk",
+          "quality",
+          "maintenance",
+          "vulnerability",
+          "license",
+          "miscellaneous"
+        ],
+        "description": "",
+        "default": "miscellaneous"
+      },
+      "SocketBatchPURLFetch": {
         "type": "object",
         "additionalProperties": false,
-        "description": "",
         "properties": {
-          "supplyChainRisk": {
-            "$ref": "#/components/schemas/SocketMetricSchema"
-          },
-          "quality": {
-            "$ref": "#/components/schemas/SocketMetricSchema"
-          },
-          "maintenance": {
-            "$ref": "#/components/schemas/SocketMetricSchema"
-          },
-          "vulnerability": {
-            "$ref": "#/components/schemas/SocketMetricSchema"
-          },
-          "license": {
-            "$ref": "#/components/schemas/SocketMetricSchema"
-          },
-          "miscellaneous": {
-            "$ref": "#/components/schemas/SocketMetricSchema"
-          },
-          "depscore": {
-            "type": "number",
-            "description": "",
-            "default": 0
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SocketBatchPURLRequest"
+            }
           }
         },
         "required": [
-          "depscore",
-          "license",
-          "maintenance",
-          "miscellaneous",
-          "quality",
-          "supplyChainRisk",
-          "vulnerability"
+          "components"
         ]
       },
       "SocketReport": {
@@ -364,43 +358,64 @@
           "url"
         ]
       },
-      "SocketIssueSeverity": {
-        "type": "string",
-        "enum": [
-          "low",
-          "middle",
-          "high",
-          "critical"
-        ],
-        "description": "",
-        "default": "low"
+      "SocketIssueList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/SocketIssue"
+        }
       },
-      "SocketCategory": {
-        "type": "string",
-        "enum": [
-          "supplyChainRisk",
-          "quality",
-          "maintenance",
-          "vulnerability",
-          "license",
-          "miscellaneous"
-        ],
-        "description": "",
-        "default": "miscellaneous"
-      },
-      "SocketBatchPURLFetch": {
+      "SocketPackageScore": {
         "type": "object",
         "additionalProperties": false,
+        "description": "",
         "properties": {
-          "components": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SocketBatchPURLRequest"
-            }
+          "supplyChainRisk": {
+            "$ref": "#/components/schemas/SocketMetricSchema"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/SocketMetricSchema"
+          },
+          "maintenance": {
+            "$ref": "#/components/schemas/SocketMetricSchema"
+          },
+          "vulnerability": {
+            "$ref": "#/components/schemas/SocketMetricSchema"
+          },
+          "license": {
+            "$ref": "#/components/schemas/SocketMetricSchema"
+          },
+          "miscellaneous": {
+            "$ref": "#/components/schemas/SocketMetricSchema"
+          },
+          "depscore": {
+            "type": "number",
+            "description": "",
+            "default": 0
           }
         },
         "required": [
-          "components"
+          "depscore",
+          "license",
+          "maintenance",
+          "miscellaneous",
+          "quality",
+          "supplyChainRisk",
+          "vulnerability"
+        ]
+      },
+      "SocketBatchPURLRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "purl": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          }
+        },
+        "required": [
+          "purl"
         ]
       },
       "SocketIssue": {
@@ -5690,21 +5705,6 @@
           "score"
         ]
       },
-      "SocketBatchPURLRequest": {
-        "type": "object",
-        "additionalProperties": false,
-        "description": "",
-        "properties": {
-          "purl": {
-            "type": "string",
-            "description": "",
-            "default": ""
-          }
-        },
-        "required": [
-          "purl"
-        ]
-      },
       "SocketIssueBasics": {
         "type": "object",
         "additionalProperties": false,
@@ -6083,332 +6083,42 @@
     }
   },
   "paths": {
-    "/npm/{package}/{version}/issues": {
-      "get": {
+    "/purl": {
+      "post": {
         "tags": [
-          "NPM"
+          "Packages"
         ],
-        "summary": "Get issues by package",
-        "operationId": "getIssuesByNPMPackage",
+        "summary": "Get Packages (Beta)",
+        "externalDocs": {
+          "description": "Socket Package URLs (purl)",
+          "url": "https://docs.socket.dev/reference/socket-package-urls-purl"
+        },
+        "operationId": "batchPackageFetch",
         "parameters": [
           {
-            "name": "package",
-            "in": "path",
-            "required": true,
+            "name": "license",
+            "in": "query",
+            "required": false,
             "schema": {
-              "type": "string"
+              "type": "boolean",
+              "default": false
             }
           },
           {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "description": "",
+            "name": "alerts",
+            "in": "query",
+            "required": false,
             "schema": {
-              "type": "string"
+              "type": "boolean",
+              "default": false
             }
           }
         ],
-        "security": [
-          {
-            "basicAuth": []
-          }
-        ],
-        "description": "Get all the issues related with a particular npm package version.\nThis endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.\n\nYou can [see here](https://socket.dev/npm/issue) the full list of issues.\n\nThis endpoint consumes 1 unit of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SocketIssueList"
-                }
-              }
-            },
-            "description": "Socket issue lists"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/npm/{package}/{version}/score": {
-      "get": {
-        "tags": [
-          "NPM"
-        ],
-        "summary": "Get score by package",
-        "operationId": "getScoreByNPMPackage",
-        "parameters": [
-          {
-            "name": "package",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": []
-          }
-        ],
-        "description": "Get all the scores and metrics by category that are used to evaluate the package version.\n\n- depscore: The average of all score factors. (0-1)\n- supplyChainRisk: Score factors relating to supply chain security (0-1)\n- downloadCount: The number of downloads for the package. Higher downloads contribute to a higher score.\n- supplyChainRiskIssueLow/Mid/High/Critical: The number of supply chain risk issues of varying severity. Lower numbers contribute to a higher score.\n- dependencyCount: The number of production dependencies. Lower count contributes to a higher score.\n- devDependencyCount: The number of development dependencies. Lower count contributes to a higher score.\n- transitiveDependencyCount: The number of transitive dependencies. Lower count contributes to a higher score.\n- totalDependencyCount: The total number of dependencies (production + development + transitive). Lower count contributes to a higher score.\n- quality: Score factors relating to code quality (0-1)\n- qualityIssueLow/Mid/High/Critical: The number of code quality issues of varying severity. Lower numbers contribute to a higher score.\n- linesOfCode: The number of lines of code in the package. Lower count contributes to a higher score.\n- readmeLength: The length of the package's README file. Longer READMEs contribute to a higher score.\n- maintenance: Score factors relating to package maintenance (0-1)\n- maintainerCount: The number of maintainers for the package. More maintainers contribute to a higher score.\n- versionsLastWeek/Month/TwoMonths/Year: The number of versions released in different time periods. More recent releases contribute to a higher score.\n- versionCount: The total number of versions released. Higher count contributes to a higher score.\n- maintenanceIssueLow/Mid/High/Critical: The number of maintenance issues of varying severity. Lower numbers contribute to a higher score.\n- vulnerability: Score factors relating to package vulnerabilities (0-1)\n- vulnerabilityIssueLow/Mid/High/Critical: The number of vulnerability issues of varying severity. Lower numbers contribute to a higher score.\n- dependencyVulnerabilityCount: The number of vulnerabilities in the package's dependencies. Lower count contributes to a higher score.\n- vulnerabilityCount: The number of vulnerabilities in the package itself. Lower count contributes to a higher score.\n- license: Score factors relating to package licensing (0-1)\n- licenseIssueLow/Mid/High/Critical: The number of license issues of varying severity. Lower numbers contribute to a higher score.\n- licenseQuality: A score indicating the quality/permissiveness of the package's license. Higher quality contributes to a higher score.\n- miscellaneous: Miscellaneous metadata about the package version.\n- versionAuthorName/Email: The name and email of the version author.\n- fileCount: The number of files in the package.\n- byteCount: The total size in bytes of the package.\n- typeModule: Whether the package declares a \"type\": \"module\" field.\n\nThis endpoint consumes 1 unit of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SocketPackageScore"
-                }
-              }
-            },
-            "description": "Socket package scores"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/report/delete/{id}": {
-      "delete": {
-        "tags": [
-          "Project report"
-        ],
-        "summary": "Delete a report",
-        "operationId": "deleteReport",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": [
-              "report:write"
-            ]
-          }
-        ],
-        "description": "Delete a specific project report.\n\nThis endpoint consumes 10 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "description": "",
-                      "default": "ok"
-                    }
-                  },
-                  "required": [
-                    "status"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/report/list": {
-      "get": {
-        "tags": [
-          "Project report"
-        ],
-        "summary": "Get list of reports",
-        "operationId": "getReportList",
-        "security": [
-          {
-            "basicAuth": [
-              "report:list"
-            ]
-          }
-        ],
-        "description": "Get all your project reports.\n\nThis endpoint consumes 10 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "description": "",
-                    "properties": {
-                      "id": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "url": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "repo": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "branch": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "pull_requests": {
-                        "type": "object",
-                        "description": "",
-                        "default": null
-                      },
-                      "commit": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "owner": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "created_at": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      }
-                    },
-                    "required": [
-                      "branch",
-                      "commit",
-                      "created_at",
-                      "id",
-                      "owner",
-                      "pull_requests",
-                      "repo",
-                      "url"
-                    ]
-                  }
-                }
-              }
-            },
-            "description": "List of project reports"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/report/upload": {
-      "put": {
-        "tags": [
-          "Project report"
-        ],
-        "summary": "Create a report",
-        "operationId": "createReport",
         "requestBody": {
           "content": {
-            "multipart/form-data": {
+            "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string",
-                  "default": {
-                    "type": "Buffer",
-                    "data": []
-                  },
-                  "format": "binary",
-                  "description": ""
-                },
-                "properties": {
-                  "issueRules": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "boolean",
-                      "default": false,
-                      "description": ""
-                    },
-                    "properties": {}
-                  }
-                }
+                "$ref": "#/components/schemas/SocketBatchPURLFetch"
               }
             }
           },
@@ -6417,709 +6127,229 @@
         "security": [
           {
             "basicAuth": [
-              "report:write"
+              "packages:list"
             ]
           }
         ],
-        "description": "Upload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.\n\nThis endpoint consumes 100 units of your quota.",
+        "description": "Batch retrieval of package metadata and alerts by PURL strings. Compatible witch CycloneDX reports.\n\nPackage URLs (PURLs) are an ecosystem agnostic way to identify packages.\nCycloneDX SBOMs use the purl format to identify components.\nThis endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.\n\nMore information on purl and CycloneDX:\n\n- [`purl` Spec](https://github.com/package-url/purl-spec)\n- [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)\n\n## Examples:\n\n### Looking up an npm package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\n### Looking up an PyPi package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    }\n  ]\n}\n```\n\n### Looking up a Maven package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### Batch lookup\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    },\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    },\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\nThis endpoint consumes 100 units of your quota.",
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+              "application/x-ndjson": {
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
-                  "description": "",
                   "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "unknown",
+                        "npm",
+                        "pypi",
+                        "golang"
+                      ],
+                      "description": "",
+                      "default": "unknown"
+                    },
+                    "namespace": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "version": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "subpath": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "release": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
                     "id": {
                       "type": "string",
                       "description": "",
                       "default": ""
                     },
-                    "url": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "url"
-                  ]
-                }
-              }
-            },
-            "description": "ID and URL of the project report"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/report/view/{id}": {
-      "get": {
-        "tags": [
-          "Project report"
-        ],
-        "summary": "View a report",
-        "operationId": "getReport",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": [
-              "report:read"
-            ]
-          }
-        ],
-        "description": "Get all the issues, packages, and scores related to an specific project report.\n\nThis endpoint consumes 10 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SocketReport"
-                }
-              }
-            },
-            "description": "Socket report"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "410": {
-            "$ref": "#/components/responses/SocketGone"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/report/supported": {
-      "get": {
-        "tags": [
-          "Project report"
-        ],
-        "summary": "Get supported files for report",
-        "operationId": "getReportSupportedFiles",
-        "security": [
-          {}
-        ],
-        "description": "Get a list of supported files for project report generation.\nFiles are categorized first by environment (e.g. NPM or PyPI), then by name.\n\nFiles whose names match the patterns returned by this endpoint can be uploaded for report generation.\nExamples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.\n\nThis endpoint consumes 0 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "object",
-                    "additionalProperties": {
+                    "direct": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": ""
+                    },
+                    "manifestFiles": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "file": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "start": {
+                            "type": "integer",
+                            "description": "",
+                            "default": 0
+                          },
+                          "end": {
+                            "type": "integer",
+                            "description": "",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "file"
+                        ]
+                      }
+                    },
+                    "topLevelAncestors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      }
+                    },
+                    "dependencies": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      }
+                    },
+                    "artifact": {
                       "type": "object",
                       "additionalProperties": false,
-                      "description": "",
                       "properties": {
-                        "pattern": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "unknown",
+                            "npm",
+                            "pypi",
+                            "golang"
+                          ],
+                          "description": "",
+                          "default": "unknown"
+                        },
+                        "namespace": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "version": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "subpath": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "release": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "id": {
                           "type": "string",
                           "description": "",
                           "default": ""
                         }
                       },
                       "required": [
-                        "pattern"
+                        "id",
+                        "type"
                       ]
                     },
-                    "properties": {}
-                  },
-                  "properties": {}
-                }
-              }
-            },
-            "description": "Glob patterns used to match supported files"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/openapi": {
-      "get": {
-        "tags": [
-          "Openapi"
-        ],
-        "summary": "Returns the OpenAPI definition",
-        "operationId": "getOpenAPI",
-        "security": [
-          {}
-        ],
-        "description": "Retrieve the API specification in an Openapi JSON format.\n\nThis endpoint consumes 0 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "OpenAPI specification"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/quota": {
-      "get": {
-        "tags": [
-          "Quota"
-        ],
-        "summary": "Get quota",
-        "operationId": "getQuota",
-        "security": [
-          {
-            "basicAuth": []
-          }
-        ],
-        "description": "Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.\n\nThis endpoint consumes 0 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "quota": {
-                      "type": "integer",
-                      "description": "",
-                      "default": 0,
-                      "minimum": 0
-                    }
-                  },
-                  "required": [
-                    "quota"
-                  ]
-                }
-              }
-            },
-            "description": "Quota amount"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/organizations": {
-      "get": {
-        "tags": [
-          "Organizations"
-        ],
-        "summary": "List organizations",
-        "operationId": "getOrganizations",
-        "security": [
-          {
-            "basicAuth": []
-          }
-        ],
-        "description": "Get information on the current organizations associated with the API key.\n\nThis endpoint consumes 0 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "organizations": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "description": "",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "name": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "image": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "plan": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "slug": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "image",
-                          "name",
-                          "plan",
-                          "slug"
-                        ]
-                      },
-                      "properties": {}
-                    }
-                  },
-                  "required": [
-                    "organizations"
-                  ]
-                }
-              }
-            },
-            "description": "Organizations information"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/settings": {
-      "post": {
-        "tags": [
-          "Settings"
-        ],
-        "summary": "Calculate settings",
-        "operationId": "postSettings",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "organization": {
+                    "license": {
                       "type": "string",
                       "description": "",
                       "default": ""
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "required": false
-        },
-        "security": [
-          {
-            "basicAuth": []
-          }
-        ],
-        "description": "Get your current settings the requested organizations and default settings to allow deferrals.\n\nThis endpoint consumes 0 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "defaults": {
+                    },
+                    "author": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      }
+                    },
+                    "size": {
+                      "type": "number",
+                      "description": "",
+                      "default": 0
+                    },
+                    "score": {
                       "type": "object",
                       "additionalProperties": false,
                       "description": "",
                       "properties": {
-                        "issueRules": {
-                          "type": "object",
-                          "additionalProperties": {
-                            "type": "object",
-                            "properties": {
-                              "action": {
-                                "type": "string",
-                                "enum": [
-                                  "error",
-                                  "ignore",
-                                  "warn"
-                                ]
-                              }
-                            }
-                          }
+                        "supplyChain": {
+                          "type": "number",
+                          "description": "",
+                          "default": 0
+                        },
+                        "quality": {
+                          "type": "number",
+                          "description": "",
+                          "default": 0
+                        },
+                        "maintenance": {
+                          "type": "number",
+                          "description": "",
+                          "default": 0
+                        },
+                        "vulnerability": {
+                          "type": "number",
+                          "description": "",
+                          "default": 0
+                        },
+                        "license": {
+                          "type": "number",
+                          "description": "",
+                          "default": 0
+                        },
+                        "overall": {
+                          "type": "number",
+                          "description": "",
+                          "default": 0
                         }
                       },
                       "required": [
-                        "issueRules"
+                        "license",
+                        "maintenance",
+                        "overall",
+                        "quality",
+                        "supplyChain",
+                        "vulnerability"
                       ]
                     },
-                    "entries": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "description": "",
-                        "properties": {
-                          "start": {
-                            "type": "string",
-                            "description": "",
-                            "default": "",
-                            "nullable": true
-                          },
-                          "settings": {
-                            "type": "object",
-                            "additionalProperties": {
-                              "type": "object",
-                              "properties": {
-                                "deferTo": {
-                                  "type": "string",
-                                  "nullable": true
-                                },
-                                "issueRules": {
-                                  "type": "object",
-                                  "nullable": false,
-                                  "additionalProperties": {
-                                    "type": "object",
-                                    "nullable": false,
-                                    "properties": {
-                                      "action": {
-                                        "type": "string",
-                                        "enum": [
-                                          "defer",
-                                          "error",
-                                          "ignore",
-                                          "warn",
-                                          "monitor"
-                                        ]
-                                      }
-                                    },
-                                    "required": [
-                                      "action"
-                                    ]
-                                  }
-                                }
-                              },
-                              "required": [
-                                "deferTo",
-                                "issueRules"
-                              ]
-                            }
-                          }
-                        },
-                        "required": [
-                          "settings",
-                          "start"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "defaults",
-                    "entries"
-                  ]
-                }
-              }
-            },
-            "description": "Organization settings"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/repo/list": {
-      "get": {
-        "tags": [
-          "Repositories"
-        ],
-        "summary": "Get list of repos and their latest project report",
-        "operationId": "getRepoList",
-        "parameters": [
-          {
-            "name": "pageToken",
-            "in": "query",
-            "required": false,
-            "description": "",
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": [
-              "repo:list"
-            ]
-          }
-        ],
-        "description": "Get all repositories in an org including their latest project report.\n\nThis endpoint consumes 0 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "results": {
+                    "alerts": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "additionalProperties": false,
                         "properties": {
-                          "id": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "created_at": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "updated_at": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "github_install_id": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "github_repo_id": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "name": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "github_full_name": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "organization_id": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "latest_project_report": {
-                            "type": "object",
-                            "additionalProperties": false,
-                            "description": "",
-                            "properties": {
-                              "id": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "created_at": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              }
-                            },
-                            "required": [
-                              "created_at",
-                              "id"
-                            ]
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "required": [
-                    "results"
-                  ]
-                }
-              }
-            },
-            "description": "List of repos and their latest project report for the organization associated with the token used"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/dependencies/search": {
-      "post": {
-        "tags": [
-          "Dependencies"
-        ],
-        "summary": "Search dependencies",
-        "operationId": "searchDependencies",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": false,
-                "description": "",
-                "properties": {
-                  "limit": {
-                    "type": "integer",
-                    "description": "",
-                    "default": 50,
-                    "minimum": 1,
-                    "maximum": 1000
-                  },
-                  "offset": {
-                    "type": "integer",
-                    "description": "",
-                    "default": 0,
-                    "minimum": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "offset"
-                ]
-              }
-            }
-          },
-          "required": false
-        },
-        "security": [
-          {
-            "basicAuth": []
-          }
-        ],
-        "description": "Search for any dependency that is being used in your organization.\n\nThis endpoint consumes 0 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "end": {
-                      "type": "boolean",
-                      "default": false,
-                      "description": ""
-                    },
-                    "limit": {
-                      "type": "integer",
-                      "description": "",
-                      "default": 1000
-                    },
-                    "offset": {
-                      "type": "integer",
-                      "description": "",
-                      "default": 0
-                    },
-                    "rows": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "description": "",
-                        "properties": {
-                          "branch": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "direct": {
-                            "type": "boolean",
-                            "default": false,
-                            "description": ""
-                          },
-                          "id": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "name": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "namespace": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "repository": {
+                          "key": {
                             "type": "string",
                             "description": "",
                             "default": ""
@@ -7129,853 +6359,55 @@
                             "description": "",
                             "default": ""
                           },
-                          "version": {
+                          "severity": {
+                            "$ref": "#/components/schemas/SocketIssueSeverity"
+                          },
+                          "category": {
+                            "$ref": "#/components/schemas/SocketCategory"
+                          },
+                          "file": {
                             "type": "string",
                             "description": "",
                             "default": ""
+                          },
+                          "start": {
+                            "type": "integer",
+                            "description": "",
+                            "default": 0
+                          },
+                          "end": {
+                            "type": "integer",
+                            "description": "",
+                            "default": 0
+                          },
+                          "props": {
+                            "type": "object",
+                            "description": "",
+                            "default": null
                           }
                         },
                         "required": [
-                          "branch",
-                          "direct",
-                          "id",
-                          "name",
-                          "namespace",
-                          "repository",
-                          "type",
-                          "version"
+                          "category",
+                          "key",
+                          "severity",
+                          "type"
                         ]
                       }
-                    }
-                  },
-                  "required": [
-                    "end",
-                    "limit",
-                    "offset",
-                    "rows"
-                  ]
-                }
-              }
-            },
-            "description": "List of repos and their latest project report for the organization associated with the token used"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/dependencies/upload": {
-      "post": {
-        "tags": [
-          "Dependencies"
-        ],
-        "summary": "Create a snapshot of all dependencies from manifest information",
-        "operationId": "createDependenciesSnapshot",
-        "parameters": [
-          {
-            "name": "repository",
-            "in": "query",
-            "required": false,
-            "description": "",
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "branch",
-            "in": "query",
-            "required": false,
-            "description": "",
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string",
-                  "default": {
-                    "type": "Buffer",
-                    "data": []
-                  },
-                  "format": "binary",
-                  "description": ""
-                },
-                "properties": {
-                  "repository": {
-                    "type": "string",
-                    "description": "",
-                    "default": ""
-                  },
-                  "branch": {
-                    "type": "string",
-                    "description": "",
-                    "default": ""
-                  }
-                }
-              }
-            }
-          },
-          "required": false
-        },
-        "security": [
-          {
-            "basicAuth": [
-              "report:write"
-            ]
-          }
-        ],
-        "description": "Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: \"requirements.txt\", \"package.json\", \"folder/package.json\", and \"deep/nested/folder/package.json\".\n\nThis endpoint consumes 100 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {}
-                }
-              }
-            },
-            "description": "ID of the dependencies snapshot"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          },
-          "500": {
-            "$ref": "#/components/responses/SocketInternalServerError"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/orgs/{org_slug}/repos": {
-      "get": {
-        "tags": [
-          "Repositories"
-        ],
-        "summary": "List repositories (unstable)",
-        "operationId": "getOrgRepoList",
-        "parameters": [
-          {
-            "name": "org_slug",
-            "in": "path",
-            "required": true,
-            "description": "The slug of the organization",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "description": "",
-            "schema": {
-              "type": "string",
-              "default": "created_at"
-            }
-          },
-          {
-            "name": "direction",
-            "in": "query",
-            "required": false,
-            "description": "",
-            "schema": {
-              "type": "string",
-              "default": "desc"
-            }
-          },
-          {
-            "name": "per_page",
-            "in": "query",
-            "required": false,
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 30
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 1
-            }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": [
-              "repo:list"
-            ]
-          }
-        ],
-        "description": "Lists repositories for the specified organization.\n\nThis endpoint consumes 0 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "description": "The ID of the repository",
-                            "default": ""
-                          },
-                          "created_at": {
-                            "type": "string",
-                            "description": "The creation date of the repository",
-                            "default": ""
-                          },
-                          "updated_at": {
-                            "type": "string",
-                            "description": "The last update date of the repository",
-                            "default": ""
-                          },
-                          "slug": {
-                            "type": "string",
-                            "description": "The slug of the repository",
-                            "default": ""
-                          },
-                          "head_full_scan_id": {
-                            "type": "string",
-                            "description": "The ID of the head full scan of the repository",
-                            "default": ""
-                          },
-                          "name": {
-                            "type": "string",
-                            "description": "The name of the repository",
-                            "default": ""
-                          },
-                          "description": {
-                            "type": "string",
-                            "description": "The description of the repository",
-                            "default": ""
-                          },
-                          "homepage": {
-                            "type": "string",
-                            "description": "The homepage URL of the repository",
-                            "default": ""
-                          },
-                          "visibility": {
-                            "type": "string",
-                            "enum": [
-                              "public",
-                              "private"
-                            ],
-                            "description": "The visibility of the repository",
-                            "default": "private"
-                          },
-                          "archived": {
-                            "type": "boolean",
-                            "default": false,
-                            "description": "Whether the repository is archived or not"
-                          },
-                          "default_branch": {
-                            "type": "string",
-                            "description": "The default branch of the repository",
-                            "default": "main"
-                          }
-                        }
-                      }
                     },
-                    "nextPage": {
+                    "batchIndex": {
                       "type": "integer",
                       "description": "",
                       "default": 0
                     }
                   },
                   "required": [
-                    "nextPage",
-                    "results"
+                    "id",
+                    "type"
                   ]
                 }
               }
             },
-            "description": "Lists repositories for the specified organization. The authenticated user must be a member of the organization."
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      },
-      "post": {
-        "tags": [
-          "Repositories"
-        ],
-        "summary": "Create repository (unstable)",
-        "operationId": "createOrgRepo",
-        "parameters": [
-          {
-            "name": "org_slug",
-            "in": "path",
-            "required": true,
-            "description": "The slug of the organization",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "description": "The name of the repository",
-                    "default": ""
-                  },
-                  "description": {
-                    "type": "string",
-                    "description": "The description of the repository",
-                    "default": ""
-                  },
-                  "homepage": {
-                    "type": "string",
-                    "description": "The homepage URL of the repository",
-                    "default": ""
-                  },
-                  "visibility": {
-                    "type": "string",
-                    "enum": [
-                      "public",
-                      "private"
-                    ],
-                    "description": "The visibility of the repository",
-                    "default": "private"
-                  },
-                  "archived": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Whether the repository is archived or not"
-                  },
-                  "default_branch": {
-                    "type": "string",
-                    "description": "The default branch of the repository",
-                    "default": "main"
-                  }
-                }
-              }
-            }
-          },
-          "required": false
-        },
-        "security": [
-          {
-            "basicAuth": [
-              "repo:create"
-            ]
-          }
-        ],
-        "description": "Create a repository.\n\nRepos collect Full scans and Diff scans and are typically associated with a git repo.\n\nThis endpoint consumes 0 units of your quota.",
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "description": "The ID of the repository",
-                      "default": ""
-                    },
-                    "created_at": {
-                      "type": "string",
-                      "description": "The creation date of the repository",
-                      "default": ""
-                    },
-                    "updated_at": {
-                      "type": "string",
-                      "description": "The last update date of the repository",
-                      "default": ""
-                    },
-                    "slug": {
-                      "type": "string",
-                      "description": "The slug of the repository",
-                      "default": ""
-                    },
-                    "head_full_scan_id": {
-                      "type": "string",
-                      "description": "The ID of the head full scan of the repository",
-                      "default": ""
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "The name of the repository",
-                      "default": ""
-                    },
-                    "description": {
-                      "type": "string",
-                      "description": "The description of the repository",
-                      "default": ""
-                    },
-                    "homepage": {
-                      "type": "string",
-                      "description": "The homepage URL of the repository",
-                      "default": ""
-                    },
-                    "visibility": {
-                      "type": "string",
-                      "enum": [
-                        "public",
-                        "private"
-                      ],
-                      "description": "The visibility of the repository",
-                      "default": "private"
-                    },
-                    "archived": {
-                      "type": "boolean",
-                      "default": false,
-                      "description": "Whether the repository is archived or not"
-                    },
-                    "default_branch": {
-                      "type": "string",
-                      "description": "The default branch of the repository",
-                      "default": "main"
-                    }
-                  }
-                }
-              }
-            },
-            "description": "Lists repositories for the specified organization. The authenticated user must be a member of the organization."
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/orgs/{org_slug}/repos/{repo_slug}": {
-      "get": {
-        "tags": [
-          "Repositories"
-        ],
-        "summary": "Get repository (unstable)",
-        "operationId": "getOrgRepo",
-        "parameters": [
-          {
-            "name": "org_slug",
-            "in": "path",
-            "required": true,
-            "description": "The slug of the organization",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "repo_slug",
-            "in": "path",
-            "required": true,
-            "description": "The slug of the repository",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": [
-              "repo:list"
-            ]
-          }
-        ],
-        "description": "Retrieve a repository associated with an organization.\n\nThis endpoint consumes 0 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "description": "The ID of the repository",
-                      "default": ""
-                    },
-                    "created_at": {
-                      "type": "string",
-                      "description": "The creation date of the repository",
-                      "default": ""
-                    },
-                    "updated_at": {
-                      "type": "string",
-                      "description": "The last update date of the repository",
-                      "default": ""
-                    },
-                    "slug": {
-                      "type": "string",
-                      "description": "The slug of the repository",
-                      "default": ""
-                    },
-                    "head_full_scan_id": {
-                      "type": "string",
-                      "description": "The ID of the head full scan of the repository",
-                      "default": ""
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "The name of the repository",
-                      "default": ""
-                    },
-                    "description": {
-                      "type": "string",
-                      "description": "The description of the repository",
-                      "default": ""
-                    },
-                    "homepage": {
-                      "type": "string",
-                      "description": "The homepage URL of the repository",
-                      "default": ""
-                    },
-                    "visibility": {
-                      "type": "string",
-                      "enum": [
-                        "public",
-                        "private"
-                      ],
-                      "description": "The visibility of the repository",
-                      "default": "private"
-                    },
-                    "archived": {
-                      "type": "boolean",
-                      "default": false,
-                      "description": "Whether the repository is archived or not"
-                    },
-                    "default_branch": {
-                      "type": "string",
-                      "description": "The default branch of the repository",
-                      "default": "main"
-                    }
-                  }
-                }
-              }
-            },
-            "description": "Lists repositories for the specified organization. The authenticated user must be a member of the organization."
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      },
-      "post": {
-        "tags": [
-          "Repositories"
-        ],
-        "summary": "Update repository (unstable)",
-        "operationId": "updateOrgRepo",
-        "parameters": [
-          {
-            "name": "org_slug",
-            "in": "path",
-            "required": true,
-            "description": "The slug of the organization",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "repo_slug",
-            "in": "path",
-            "required": true,
-            "description": "The slug of the repository",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "description": "The name of the repository",
-                    "default": ""
-                  },
-                  "description": {
-                    "type": "string",
-                    "description": "The description of the repository",
-                    "default": ""
-                  },
-                  "homepage": {
-                    "type": "string",
-                    "description": "The homepage URL of the repository",
-                    "default": ""
-                  },
-                  "visibility": {
-                    "type": "string",
-                    "enum": [
-                      "public",
-                      "private"
-                    ],
-                    "description": "The visibility of the repository",
-                    "default": "private"
-                  },
-                  "archived": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Whether the repository is archived or not"
-                  },
-                  "default_branch": {
-                    "type": "string",
-                    "description": "The default branch of the repository",
-                    "default": "main"
-                  }
-                }
-              }
-            }
-          },
-          "required": false
-        },
-        "security": [
-          {
-            "basicAuth": [
-              "repo:update"
-            ]
-          }
-        ],
-        "description": "Update details of an existing repository.\n\nThis endpoint consumes 0 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "description": "The ID of the repository",
-                      "default": ""
-                    },
-                    "created_at": {
-                      "type": "string",
-                      "description": "The creation date of the repository",
-                      "default": ""
-                    },
-                    "updated_at": {
-                      "type": "string",
-                      "description": "The last update date of the repository",
-                      "default": ""
-                    },
-                    "slug": {
-                      "type": "string",
-                      "description": "The slug of the repository",
-                      "default": ""
-                    },
-                    "head_full_scan_id": {
-                      "type": "string",
-                      "description": "The ID of the head full scan of the repository",
-                      "default": ""
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "The name of the repository",
-                      "default": ""
-                    },
-                    "description": {
-                      "type": "string",
-                      "description": "The description of the repository",
-                      "default": ""
-                    },
-                    "homepage": {
-                      "type": "string",
-                      "description": "The homepage URL of the repository",
-                      "default": ""
-                    },
-                    "visibility": {
-                      "type": "string",
-                      "enum": [
-                        "public",
-                        "private"
-                      ],
-                      "description": "The visibility of the repository",
-                      "default": "private"
-                    },
-                    "archived": {
-                      "type": "boolean",
-                      "default": false,
-                      "description": "Whether the repository is archived or not"
-                    },
-                    "default_branch": {
-                      "type": "string",
-                      "description": "The default branch of the repository",
-                      "default": "main"
-                    }
-                  }
-                }
-              }
-            },
-            "description": "Update a repositories details"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      },
-      "delete": {
-        "tags": [
-          "Repositories"
-        ],
-        "summary": "Delete repository (unstable)",
-        "operationId": "deleteOrgRepo",
-        "parameters": [
-          {
-            "name": "org_slug",
-            "in": "path",
-            "required": true,
-            "description": "The slug of the organization",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "repo_slug",
-            "in": "path",
-            "required": true,
-            "description": "The slug of the repository",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": [
-              "repo:delete"
-            ]
-          }
-        ],
-        "description": "Delete a single repository and all of its associated Full scans and Diff scans.\n\nThis endpoint consumes 0 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "description": "",
-                      "default": "ok"
-                    }
-                  },
-                  "required": [
-                    "status"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
+            "description": "Socket issue lists and scores for all packages"
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -7999,7 +6431,7 @@
     "/orgs/{org_slug}/full-scans": {
       "get": {
         "tags": [
-          "Full scans"
+          "Full Scans"
         ],
         "summary": "List full scans",
         "operationId": "getOrgFullScanList",
@@ -8181,7 +6613,7 @@
       },
       "post": {
         "tags": [
-          "Full scans"
+          "Full Scans"
         ],
         "summary": "Create full scan",
         "operationId": "CreateOrgFullScan",
@@ -8405,7 +6837,7 @@
     "/orgs/{org_slug}/full-scans/{full_scan_id}": {
       "get": {
         "tags": [
-          "Full scans"
+          "Full Scans"
         ],
         "summary": "Stream full scan",
         "operationId": "getOrgFullScan",
@@ -8734,7 +7166,7 @@
       },
       "delete": {
         "tags": [
-          "Full scans"
+          "Full Scans"
         ],
         "summary": "Delete full scan",
         "operationId": "deleteOrgFullScan",
@@ -8811,7 +7243,7 @@
     "/orgs/{org_slug}/full-scans/{full_scan_id}/metadata": {
       "get": {
         "tags": [
-          "Full scans"
+          "Full Scans"
         ],
         "summary": "Get full scan metadata",
         "operationId": "getOrgFullScanMetadata",
@@ -8939,6 +7371,723 @@
         "x-readme": {}
       }
     },
+    "/orgs/{org_slug}/repos": {
+      "get": {
+        "tags": [
+          "Repositories"
+        ],
+        "summary": "List repositories",
+        "operationId": "getOrgRepoList",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": "created_at"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": "desc"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 30
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "repo:list"
+            ]
+          }
+        ],
+        "description": "Lists repositories for the specified organization.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "The ID of the repository",
+                            "default": ""
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "description": "The creation date of the repository",
+                            "default": ""
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "description": "The last update date of the repository",
+                            "default": ""
+                          },
+                          "slug": {
+                            "type": "string",
+                            "description": "The slug of the repository",
+                            "default": ""
+                          },
+                          "head_full_scan_id": {
+                            "type": "string",
+                            "description": "The ID of the head full scan of the repository",
+                            "default": ""
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "The name of the repository",
+                            "default": ""
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "The description of the repository",
+                            "default": ""
+                          },
+                          "homepage": {
+                            "type": "string",
+                            "description": "The homepage URL of the repository",
+                            "default": ""
+                          },
+                          "visibility": {
+                            "type": "string",
+                            "enum": [
+                              "public",
+                              "private"
+                            ],
+                            "description": "The visibility of the repository",
+                            "default": "private"
+                          },
+                          "archived": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "Whether the repository is archived or not"
+                          },
+                          "default_branch": {
+                            "type": "string",
+                            "description": "The default branch of the repository",
+                            "default": "main"
+                          }
+                        }
+                      }
+                    },
+                    "nextPage": {
+                      "type": "integer",
+                      "description": "",
+                      "default": 0
+                    }
+                  },
+                  "required": [
+                    "nextPage",
+                    "results"
+                  ]
+                }
+              }
+            },
+            "description": "Lists repositories for the specified organization. The authenticated user must be a member of the organization."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      },
+      "post": {
+        "tags": [
+          "Repositories"
+        ],
+        "summary": "Create repository",
+        "operationId": "createOrgRepo",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the repository",
+                    "default": ""
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "The description of the repository",
+                    "default": ""
+                  },
+                  "homepage": {
+                    "type": "string",
+                    "description": "The homepage URL of the repository",
+                    "default": ""
+                  },
+                  "visibility": {
+                    "type": "string",
+                    "enum": [
+                      "public",
+                      "private"
+                    ],
+                    "description": "The visibility of the repository",
+                    "default": "private"
+                  },
+                  "archived": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether the repository is archived or not"
+                  },
+                  "default_branch": {
+                    "type": "string",
+                    "description": "The default branch of the repository",
+                    "default": "main"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "basicAuth": [
+              "repo:create"
+            ]
+          }
+        ],
+        "description": "Create a repository.\n\nRepos collect Full scans and Diff scans and are typically associated with a git repo.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The ID of the repository",
+                      "default": ""
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "description": "The creation date of the repository",
+                      "default": ""
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "description": "The last update date of the repository",
+                      "default": ""
+                    },
+                    "slug": {
+                      "type": "string",
+                      "description": "The slug of the repository",
+                      "default": ""
+                    },
+                    "head_full_scan_id": {
+                      "type": "string",
+                      "description": "The ID of the head full scan of the repository",
+                      "default": ""
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the repository",
+                      "default": ""
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "The description of the repository",
+                      "default": ""
+                    },
+                    "homepage": {
+                      "type": "string",
+                      "description": "The homepage URL of the repository",
+                      "default": ""
+                    },
+                    "visibility": {
+                      "type": "string",
+                      "enum": [
+                        "public",
+                        "private"
+                      ],
+                      "description": "The visibility of the repository",
+                      "default": "private"
+                    },
+                    "archived": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Whether the repository is archived or not"
+                    },
+                    "default_branch": {
+                      "type": "string",
+                      "description": "The default branch of the repository",
+                      "default": "main"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Lists repositories for the specified organization. The authenticated user must be a member of the organization."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/repos/{repo_slug}": {
+      "get": {
+        "tags": [
+          "Repositories"
+        ],
+        "summary": "Get repository",
+        "operationId": "getOrgRepo",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repo_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the repository",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "repo:list"
+            ]
+          }
+        ],
+        "description": "Retrieve a repository associated with an organization.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The ID of the repository",
+                      "default": ""
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "description": "The creation date of the repository",
+                      "default": ""
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "description": "The last update date of the repository",
+                      "default": ""
+                    },
+                    "slug": {
+                      "type": "string",
+                      "description": "The slug of the repository",
+                      "default": ""
+                    },
+                    "head_full_scan_id": {
+                      "type": "string",
+                      "description": "The ID of the head full scan of the repository",
+                      "default": ""
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the repository",
+                      "default": ""
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "The description of the repository",
+                      "default": ""
+                    },
+                    "homepage": {
+                      "type": "string",
+                      "description": "The homepage URL of the repository",
+                      "default": ""
+                    },
+                    "visibility": {
+                      "type": "string",
+                      "enum": [
+                        "public",
+                        "private"
+                      ],
+                      "description": "The visibility of the repository",
+                      "default": "private"
+                    },
+                    "archived": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Whether the repository is archived or not"
+                    },
+                    "default_branch": {
+                      "type": "string",
+                      "description": "The default branch of the repository",
+                      "default": "main"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Lists repositories for the specified organization. The authenticated user must be a member of the organization."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      },
+      "post": {
+        "tags": [
+          "Repositories"
+        ],
+        "summary": "Update repository",
+        "operationId": "updateOrgRepo",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repo_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the repository",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the repository",
+                    "default": ""
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "The description of the repository",
+                    "default": ""
+                  },
+                  "homepage": {
+                    "type": "string",
+                    "description": "The homepage URL of the repository",
+                    "default": ""
+                  },
+                  "visibility": {
+                    "type": "string",
+                    "enum": [
+                      "public",
+                      "private"
+                    ],
+                    "description": "The visibility of the repository",
+                    "default": "private"
+                  },
+                  "archived": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether the repository is archived or not"
+                  },
+                  "default_branch": {
+                    "type": "string",
+                    "description": "The default branch of the repository",
+                    "default": "main"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "basicAuth": [
+              "repo:update"
+            ]
+          }
+        ],
+        "description": "Update details of an existing repository.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The ID of the repository",
+                      "default": ""
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "description": "The creation date of the repository",
+                      "default": ""
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "description": "The last update date of the repository",
+                      "default": ""
+                    },
+                    "slug": {
+                      "type": "string",
+                      "description": "The slug of the repository",
+                      "default": ""
+                    },
+                    "head_full_scan_id": {
+                      "type": "string",
+                      "description": "The ID of the head full scan of the repository",
+                      "default": ""
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the repository",
+                      "default": ""
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "The description of the repository",
+                      "default": ""
+                    },
+                    "homepage": {
+                      "type": "string",
+                      "description": "The homepage URL of the repository",
+                      "default": ""
+                    },
+                    "visibility": {
+                      "type": "string",
+                      "enum": [
+                        "public",
+                        "private"
+                      ],
+                      "description": "The visibility of the repository",
+                      "default": "private"
+                    },
+                    "archived": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Whether the repository is archived or not"
+                    },
+                    "default_branch": {
+                      "type": "string",
+                      "description": "The default branch of the repository",
+                      "default": "main"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Update a repositories details"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      },
+      "delete": {
+        "tags": [
+          "Repositories"
+        ],
+        "summary": "Delete repository",
+        "operationId": "deleteOrgRepo",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repo_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the repository",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "repo:delete"
+            ]
+          }
+        ],
+        "description": "Delete a single repository and all of its associated Full scans and Diff scans.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "",
+                      "default": "ok"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
     "/orgs/{org_slug}/audit-log": {
       "get": {
         "tags": [
@@ -8960,7 +8109,7 @@
             "name": "type",
             "in": "query",
             "required": false,
-            "description": "Filter audit log events by type",
+            "description": "Filter audit log events by type. Omit for all types.",
             "schema": {
               "type": "string",
               "enum": [
@@ -8991,8 +8140,7 @@
                 "UpdateOrganizationSetting",
                 "UpgradeOrganizationPlan",
                 "VerifiedEmail"
-              ],
-              "default": ""
+              ]
             }
           },
           {
@@ -9500,29 +8648,39 @@
         "x-readme": {}
       }
     },
-    "/purl": {
+    "/dependencies/search": {
       "post": {
         "tags": [
-          "Packages"
+          "Dependencies"
         ],
-        "summary": "Get Packages (unstable)",
-        "operationId": "batchPackageFetch",
-        "parameters": [
-          {
-            "name": "license",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          }
-        ],
+        "summary": "Search dependencies",
+        "operationId": "searchDependencies",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SocketBatchPURLFetch"
+                "type": "object",
+                "additionalProperties": false,
+                "description": "",
+                "properties": {
+                  "limit": {
+                    "type": "integer",
+                    "description": "",
+                    "default": 50,
+                    "minimum": 1,
+                    "maximum": 1000
+                  },
+                  "offset": {
+                    "type": "integer",
+                    "description": "",
+                    "default": 0,
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "limit",
+                  "offset"
+                ]
               }
             }
           },
@@ -9530,230 +8688,67 @@
         },
         "security": [
           {
-            "basicAuth": [
-              "packages:list"
-            ]
+            "basicAuth": []
           }
         ],
-        "description": "Batch retrieval of package metadata and alerts by PURL strings\n\nThis endpoint consumes 100 units of your quota.",
+        "description": "Search for any dependency that is being used in your organization.\n\nThis endpoint consumes 0 units of your quota.",
         "responses": {
           "200": {
             "content": {
-              "application/x-ndjson": {
+              "application/json": {
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "unknown",
-                        "npm",
-                        "pypi",
-                        "golang"
-                      ],
-                      "description": "",
-                      "default": "unknown"
-                    },
-                    "namespace": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "version": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "subpath": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "release": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "id": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "direct": {
+                    "end": {
                       "type": "boolean",
                       "default": false,
                       "description": ""
                     },
-                    "manifestFiles": {
+                    "limit": {
+                      "type": "integer",
+                      "description": "",
+                      "default": 1000
+                    },
+                    "offset": {
+                      "type": "integer",
+                      "description": "",
+                      "default": 0
+                    },
+                    "rows": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
-                          "file": {
+                          "branch": {
                             "type": "string",
                             "description": "",
                             "default": ""
                           },
-                          "start": {
-                            "type": "integer",
-                            "description": "",
-                            "default": 0
+                          "direct": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": ""
                           },
-                          "end": {
-                            "type": "integer",
+                          "id": {
+                            "type": "string",
                             "description": "",
-                            "default": 0
-                          }
-                        },
-                        "required": [
-                          "file"
-                        ]
-                      }
-                    },
-                    "topLevelAncestors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      }
-                    },
-                    "dependencies": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      }
-                    },
-                    "artifact": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "unknown",
-                            "npm",
-                            "pypi",
-                            "golang"
-                          ],
-                          "description": "",
-                          "default": "unknown"
-                        },
-                        "namespace": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "name": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "version": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "subpath": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "release": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "id": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "type"
-                      ]
-                    },
-                    "license": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "author": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      }
-                    },
-                    "size": {
-                      "type": "number",
-                      "description": "",
-                      "default": 0
-                    },
-                    "score": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "description": "",
-                      "properties": {
-                        "supplyChain": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "quality": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "maintenance": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "vulnerability": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "license": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "overall": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        }
-                      },
-                      "required": [
-                        "license",
-                        "maintenance",
-                        "overall",
-                        "quality",
-                        "supplyChain",
-                        "vulnerability"
-                      ]
-                    },
-                    "alerts": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "key": {
+                            "default": ""
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "namespace": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "repository": {
                             "type": "string",
                             "description": "",
                             "default": ""
@@ -9763,55 +8758,1078 @@
                             "description": "",
                             "default": ""
                           },
-                          "severity": {
-                            "$ref": "#/components/schemas/SocketIssueSeverity"
-                          },
-                          "category": {
-                            "$ref": "#/components/schemas/SocketCategory"
-                          },
-                          "file": {
+                          "version": {
                             "type": "string",
                             "description": "",
                             "default": ""
-                          },
-                          "start": {
-                            "type": "integer",
-                            "description": "",
-                            "default": 0
-                          },
-                          "end": {
-                            "type": "integer",
-                            "description": "",
-                            "default": 0
-                          },
-                          "props": {
-                            "type": "object",
-                            "description": "",
-                            "default": null
                           }
                         },
                         "required": [
-                          "category",
-                          "key",
-                          "severity",
-                          "type"
+                          "branch",
+                          "direct",
+                          "id",
+                          "name",
+                          "namespace",
+                          "repository",
+                          "type",
+                          "version"
                         ]
                       }
-                    },
-                    "batchIndex": {
-                      "type": "integer",
-                      "description": "",
-                      "default": 0
                     }
                   },
                   "required": [
-                    "id",
-                    "type"
+                    "end",
+                    "limit",
+                    "offset",
+                    "rows"
                   ]
                 }
               }
             },
-            "description": "Socket issue lists and scores for all packages"
+            "description": "List of repos and their latest project report for the organization associated with the token used"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/dependencies/upload": {
+      "post": {
+        "tags": [
+          "Dependencies"
+        ],
+        "summary": "Create a snapshot of all dependencies from manifest information",
+        "operationId": "createDependenciesSnapshot",
+        "parameters": [
+          {
+            "name": "repository",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "branch",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string",
+                  "default": {
+                    "type": "Buffer",
+                    "data": []
+                  },
+                  "format": "binary",
+                  "description": ""
+                },
+                "properties": {
+                  "repository": {
+                    "type": "string",
+                    "description": "",
+                    "default": ""
+                  },
+                  "branch": {
+                    "type": "string",
+                    "description": "",
+                    "default": ""
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "basicAuth": [
+              "report:write"
+            ]
+          }
+        ],
+        "description": "Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: \"requirements.txt\", \"package.json\", \"folder/package.json\", and \"deep/nested/folder/package.json\".\n\nThis endpoint consumes 100 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {}
+                }
+              }
+            },
+            "description": "ID of the dependencies snapshot"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/SocketInternalServerError"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/report/supported": {
+      "get": {
+        "tags": [
+          "Project Reports"
+        ],
+        "summary": "Get supported files for report",
+        "operationId": "getReportSupportedFiles",
+        "security": [
+          {}
+        ],
+        "description": "Get a list of supported files for project report generation.\nFiles are categorized first by environment (e.g. NPM or PyPI), then by name.\n\nFiles whose names match the patterns returned by this endpoint can be uploaded for report generation.\nExamples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "pattern": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        }
+                      },
+                      "required": [
+                        "pattern"
+                      ]
+                    },
+                    "properties": {}
+                  },
+                  "properties": {}
+                }
+              }
+            },
+            "description": "Glob patterns used to match supported files"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/report/delete/{id}": {
+      "delete": {
+        "tags": [
+          "Project Reports"
+        ],
+        "summary": "Delete a report",
+        "operationId": "deleteReport",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "report:write"
+            ]
+          }
+        ],
+        "description": "Delete a specific project report generated with the GitHub app. These endpoints will be merged into the full-scans endpoint so\n\nThis endpoint consumes 10 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "",
+                      "default": "ok"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/report/list": {
+      "get": {
+        "tags": [
+          "Project Reports"
+        ],
+        "summary": "Get list of reports",
+        "deprecated": true,
+        "operationId": "getReportList",
+        "security": [
+          {
+            "basicAuth": [
+              "report:list"
+            ]
+          }
+        ],
+        "description": "Get all your project reports generated with the GitHub app. This endpoint will be merged into the full-scans endpoint soon.\n\nThis endpoint consumes 10 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "url": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "repo": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "branch": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "pull_requests": {
+                        "type": "object",
+                        "description": "",
+                        "default": null
+                      },
+                      "commit": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "owner": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      }
+                    },
+                    "required": [
+                      "branch",
+                      "commit",
+                      "created_at",
+                      "id",
+                      "owner",
+                      "pull_requests",
+                      "repo",
+                      "url"
+                    ]
+                  }
+                }
+              }
+            },
+            "description": "List of project reports"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/report/upload": {
+      "put": {
+        "tags": [
+          "Project Reports"
+        ],
+        "summary": "Create a report",
+        "deprecated": true,
+        "operationId": "createReport",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string",
+                  "default": {
+                    "type": "Buffer",
+                    "data": []
+                  },
+                  "format": "binary",
+                  "description": ""
+                },
+                "properties": {
+                  "issueRules": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": ""
+                    },
+                    "properties": {}
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "basicAuth": [
+              "report:write"
+            ]
+          }
+        ],
+        "description": "Upload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.\n\nThis endpoint consumes 100 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "url": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "url"
+                  ]
+                }
+              }
+            },
+            "description": "ID and URL of the project report"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/report/view/{id}": {
+      "get": {
+        "tags": [
+          "Project Reports"
+        ],
+        "summary": "View a report",
+        "deprecated": true,
+        "operationId": "getReport",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "report:read"
+            ]
+          }
+        ],
+        "description": "Get all the issues, packages, and scores related to an specific project report.\n\nThis endpoint consumes 10 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SocketReport"
+                }
+              }
+            },
+            "description": "Socket report"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "410": {
+            "$ref": "#/components/responses/SocketGone"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/repo/list": {
+      "get": {
+        "tags": [
+          "Repositories"
+        ],
+        "summary": "Get list of GitHub repos and their latest project report",
+        "deprecated": true,
+        "operationId": "getRepoList",
+        "parameters": [
+          {
+            "name": "pageToken",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "repo:list"
+            ]
+          }
+        ],
+        "description": "Get all repositories in an org including their latest project report.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "github_install_id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "github_repo_id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "github_full_name": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "organization_id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "latest_project_report": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "description": "",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "created_at": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              }
+                            },
+                            "required": [
+                              "created_at",
+                              "id"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "results"
+                  ]
+                }
+              }
+            },
+            "description": "List of repos and their latest project report for the organization associated with the token used"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/openapi": {
+      "get": {
+        "tags": [
+          "Misc"
+        ],
+        "summary": "Returns the OpenAPI definition",
+        "operationId": "getOpenAPI",
+        "security": [
+          {}
+        ],
+        "description": "Retrieve the API specification in an Openapi JSON format.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "OpenAPI specification"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/quota": {
+      "get": {
+        "tags": [
+          "Misc"
+        ],
+        "summary": "Get quota",
+        "operationId": "getQuota",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "description": "Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "quota": {
+                      "type": "integer",
+                      "description": "",
+                      "default": 0,
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "quota"
+                  ]
+                }
+              }
+            },
+            "description": "Quota amount"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/organizations": {
+      "get": {
+        "tags": [
+          "Misc"
+        ],
+        "summary": "List organizations",
+        "operationId": "getOrganizations",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "description": "Get information on the current organizations associated with the API key.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "organizations": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "image": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "plan": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "slug": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "image",
+                          "name",
+                          "plan",
+                          "slug"
+                        ]
+                      },
+                      "properties": {}
+                    }
+                  },
+                  "required": [
+                    "organizations"
+                  ]
+                }
+              }
+            },
+            "description": "Organizations information"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/settings": {
+      "post": {
+        "tags": [
+          "Misc"
+        ],
+        "summary": "Calculate settings",
+        "operationId": "postSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "organization": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "description": "Get your current settings the requested organizations and default settings to allow deferrals.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "defaults": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "issueRules": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "object",
+                            "properties": {
+                              "action": {
+                                "type": "string",
+                                "enum": [
+                                  "error",
+                                  "ignore",
+                                  "warn"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "issueRules"
+                      ]
+                    },
+                    "entries": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "start": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "settings": {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "object",
+                              "properties": {
+                                "deferTo": {
+                                  "type": "string",
+                                  "nullable": true
+                                },
+                                "issueRules": {
+                                  "type": "object",
+                                  "nullable": false,
+                                  "additionalProperties": {
+                                    "type": "object",
+                                    "nullable": false,
+                                    "properties": {
+                                      "action": {
+                                        "type": "string",
+                                        "enum": [
+                                          "defer",
+                                          "error",
+                                          "ignore",
+                                          "warn",
+                                          "monitor"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "action"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "deferTo",
+                                "issueRules"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "settings",
+                          "start"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "defaults",
+                    "entries"
+                  ]
+                }
+              }
+            },
+            "description": "Organization settings"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/npm/{package}/{version}/issues": {
+      "get": {
+        "tags": [
+          "npm"
+        ],
+        "summary": "Get issues by package",
+        "deprecated": true,
+        "operationId": "getIssuesByNPMPackage",
+        "parameters": [
+          {
+            "name": "package",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "description": "Get all the issues related with a particular npm package version.\nThis endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.\n\nYou can [see here](https://socket.dev/npm/issue) the full list of issues.\n\nThis endpoint consumes 1 unit of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SocketIssueList"
+                }
+              }
+            },
+            "description": "Socket issue lists"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/npm/{package}/{version}/score": {
+      "get": {
+        "tags": [
+          "npm"
+        ],
+        "summary": "Get score by package",
+        "deprecated": true,
+        "operationId": "getScoreByNPMPackage",
+        "parameters": [
+          {
+            "name": "package",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "description": "Get all the scores and metrics by category that are used to evaluate the package version.\n\nThis endpoint is deprecated. Use the batched \"Get Packages\" endpoint instead.\n\n- depscore: The average of all score factors. (0-1)\n- supplyChainRisk: Score factors relating to supply chain security (0-1)\n- downloadCount: The number of downloads for the package. Higher downloads contribute to a higher score.\n- supplyChainRiskIssueLow/Mid/High/Critical: The number of supply chain risk issues of varying severity. Lower numbers contribute to a higher score.\n- dependencyCount: The number of production dependencies. Lower count contributes to a higher score.\n- devDependencyCount: The number of development dependencies. Lower count contributes to a higher score.\n- transitiveDependencyCount: The number of transitive dependencies. Lower count contributes to a higher score.\n- totalDependencyCount: The total number of dependencies (production + development + transitive). Lower count contributes to a higher score.\n- quality: Score factors relating to code quality (0-1)\n- qualityIssueLow/Mid/High/Critical: The number of code quality issues of varying severity. Lower numbers contribute to a higher score.\n- linesOfCode: The number of lines of code in the package. Lower count contributes to a higher score.\n- readmeLength: The length of the package's README file. Longer READMEs contribute to a higher score.\n- maintenance: Score factors relating to package maintenance (0-1)\n- maintainerCount: The number of maintainers for the package. More maintainers contribute to a higher score.\n- versionsLastWeek/Month/TwoMonths/Year: The number of versions released in different time periods. More recent releases contribute to a higher score.\n- versionCount: The total number of versions released. Higher count contributes to a higher score.\n- maintenanceIssueLow/Mid/High/Critical: The number of maintenance issues of varying severity. Lower numbers contribute to a higher score.\n- vulnerability: Score factors relating to package vulnerabilities (0-1)\n- vulnerabilityIssueLow/Mid/High/Critical: The number of vulnerability issues of varying severity. Lower numbers contribute to a higher score.\n- dependencyVulnerabilityCount: The number of vulnerabilities in the package's dependencies. Lower count contributes to a higher score.\n- vulnerabilityCount: The number of vulnerabilities in the package itself. Lower count contributes to a higher score.\n- license: Score factors relating to package licensing (0-1)\n- licenseIssueLow/Mid/High/Critical: The number of license issues of varying severity. Lower numbers contribute to a higher score.\n- licenseQuality: A score indicating the quality/permissiveness of the package's license. Higher quality contributes to a higher score.\n- miscellaneous: Miscellaneous metadata about the package version.\n- versionAuthorName/Email: The name and email of the version author.\n- fileCount: The number of files in the package.\n- byteCount: The total size in bytes of the package.\n- typeModule: Whether the package declares a \"type\": \"module\" field.\n\nThis endpoint consumes 1 unit of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SocketPackageScore"
+                }
+              }
+            },
+            "description": "Socket package scores"
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
