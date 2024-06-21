@@ -459,7 +459,7 @@ class SocketSdk {
 
   /**
    * @param {string} orgSlug
-   * @param {string} params
+   * @param {{[key: string]: any }} params
    * @returns {Promise<SocketSdkResultType<'createOrgRepo'>>}
    */
   async createOrgRepo (orgSlug, params) {
@@ -477,7 +477,7 @@ class SocketSdk {
   /**
    * @param {string} orgSlug
    * @param {string} repoSlug
-   * @param {string} params
+   * @param {{[key: string]: any }} params
    * @returns {Promise<SocketSdkResultType<'updateOrgRepo'>>}
    */
   async updateOrgRepo (orgSlug, repoSlug, params) {
