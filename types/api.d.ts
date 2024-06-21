@@ -5,219 +5,79 @@
 
 
 export interface paths {
-  "/npm/{package}/{version}/issues": {
+  "/purl": {
     /**
-     * Get issues by package
-     * @description Get all the issues related with a particular npm package version.
-     * This endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.
+     * Get Packages (Beta)
+     * @description Batch retrieval of package metadata and alerts by PURL strings. Compatible witch CycloneDX reports.
      *
-     * You can [see here](https://socket.dev/npm/issue) the full list of issues.
+     * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
+     * CycloneDX SBOMs use the purl format to identify components.
+     * This endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.
      *
-     * This endpoint consumes 1 unit of your quota.
-     */
-    get: operations["getIssuesByNPMPackage"];
-  };
-  "/npm/{package}/{version}/score": {
-    /**
-     * Get score by package
-     * @description Get all the scores and metrics by category that are used to evaluate the package version.
+     * More information on purl and CycloneDX:
      *
-     * - depscore: The average of all score factors. (0-1)
-     * - supplyChainRisk: Score factors relating to supply chain security (0-1)
-     * - downloadCount: The number of downloads for the package. Higher downloads contribute to a higher score.
-     * - supplyChainRiskIssueLow/Mid/High/Critical: The number of supply chain risk issues of varying severity. Lower numbers contribute to a higher score.
-     * - dependencyCount: The number of production dependencies. Lower count contributes to a higher score.
-     * - devDependencyCount: The number of development dependencies. Lower count contributes to a higher score.
-     * - transitiveDependencyCount: The number of transitive dependencies. Lower count contributes to a higher score.
-     * - totalDependencyCount: The total number of dependencies (production + development + transitive). Lower count contributes to a higher score.
-     * - quality: Score factors relating to code quality (0-1)
-     * - qualityIssueLow/Mid/High/Critical: The number of code quality issues of varying severity. Lower numbers contribute to a higher score.
-     * - linesOfCode: The number of lines of code in the package. Lower count contributes to a higher score.
-     * - readmeLength: The length of the package's README file. Longer READMEs contribute to a higher score.
-     * - maintenance: Score factors relating to package maintenance (0-1)
-     * - maintainerCount: The number of maintainers for the package. More maintainers contribute to a higher score.
-     * - versionsLastWeek/Month/TwoMonths/Year: The number of versions released in different time periods. More recent releases contribute to a higher score.
-     * - versionCount: The total number of versions released. Higher count contributes to a higher score.
-     * - maintenanceIssueLow/Mid/High/Critical: The number of maintenance issues of varying severity. Lower numbers contribute to a higher score.
-     * - vulnerability: Score factors relating to package vulnerabilities (0-1)
-     * - vulnerabilityIssueLow/Mid/High/Critical: The number of vulnerability issues of varying severity. Lower numbers contribute to a higher score.
-     * - dependencyVulnerabilityCount: The number of vulnerabilities in the package's dependencies. Lower count contributes to a higher score.
-     * - vulnerabilityCount: The number of vulnerabilities in the package itself. Lower count contributes to a higher score.
-     * - license: Score factors relating to package licensing (0-1)
-     * - licenseIssueLow/Mid/High/Critical: The number of license issues of varying severity. Lower numbers contribute to a higher score.
-     * - licenseQuality: A score indicating the quality/permissiveness of the package's license. Higher quality contributes to a higher score.
-     * - miscellaneous: Miscellaneous metadata about the package version.
-     * - versionAuthorName/Email: The name and email of the version author.
-     * - fileCount: The number of files in the package.
-     * - byteCount: The total size in bytes of the package.
-     * - typeModule: Whether the package declares a "type": "module" field.
+     * - [`purl` Spec](https://github.com/package-url/purl-spec)
+     * - [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)
      *
-     * This endpoint consumes 1 unit of your quota.
-     */
-    get: operations["getScoreByNPMPackage"];
-  };
-  "/report/delete/{id}": {
-    /**
-     * Delete a report
-     * @description Delete a specific project report.
+     * ## Examples:
      *
-     * This endpoint consumes 10 units of your quota.
-     */
-    delete: operations["deleteReport"];
-  };
-  "/report/list": {
-    /**
-     * Get list of reports
-     * @description Get all your project reports.
+     * ### Looking up an npm package:
      *
-     * This endpoint consumes 10 units of your quota.
-     */
-    get: operations["getReportList"];
-  };
-  "/report/upload": {
-    /**
-     * Create a report
-     * @description Upload a lockfile to get your project analyzed by Socket.
-     * You can upload multiple lockfiles in the same request, but each filename must be unique.
+     * ```json
+     * {
+     *   "components": [
+     *     {
+     *       "purl": "pkg:npm/express@4.19.2"
+     *     }
+     *   ]
+     * }
+     * ```
      *
-     * The name of the file must be in the supported list.
+     * ### Looking up an PyPi package:
      *
-     * For example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.
+     * ```json
+     * {
+     *   "components": [
+     *     {
+     *       "purl": "pkg:pypi/django@5.0.6"
+     *     }
+     *   ]
+     * }
+     * ```
+     *
+     * ### Looking up a Maven package:
+     *
+     * ```json
+     * {
+     *   "components": [
+     *     {
+     *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+     *     }
+     *   ]
+     * }
+     * ```
+     *
+     * ### Batch lookup
+     *
+     * ```json
+     * {
+     *   "components": [
+     *     {
+     *       "purl": "pkg:npm/express@4.19.2"
+     *     },
+     *     {
+     *       "purl": "pkg:pypi/django@5.0.6"
+     *     },
+     *     {
+     *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+     *     }
+     *   ]
+     * }
+     * ```
      *
      * This endpoint consumes 100 units of your quota.
      */
-    put: operations["createReport"];
-  };
-  "/report/view/{id}": {
-    /**
-     * View a report
-     * @description Get all the issues, packages, and scores related to an specific project report.
-     *
-     * This endpoint consumes 10 units of your quota.
-     */
-    get: operations["getReport"];
-  };
-  "/report/supported": {
-    /**
-     * Get supported files for report
-     * @description Get a list of supported files for project report generation.
-     * Files are categorized first by environment (e.g. NPM or PyPI), then by name.
-     *
-     * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
-     * Examples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.
-     *
-     * This endpoint consumes 0 units of your quota.
-     */
-    get: operations["getReportSupportedFiles"];
-  };
-  "/openapi": {
-    /**
-     * Returns the OpenAPI definition
-     * @description Retrieve the API specification in an Openapi JSON format.
-     *
-     * This endpoint consumes 0 units of your quota.
-     */
-    get: operations["getOpenAPI"];
-  };
-  "/quota": {
-    /**
-     * Get quota
-     * @description Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
-     *
-     * This endpoint consumes 0 units of your quota.
-     */
-    get: operations["getQuota"];
-  };
-  "/organizations": {
-    /**
-     * List organizations
-     * @description Get information on the current organizations associated with the API key.
-     *
-     * This endpoint consumes 0 units of your quota.
-     */
-    get: operations["getOrganizations"];
-  };
-  "/settings": {
-    /**
-     * Calculate settings
-     * @description Get your current settings the requested organizations and default settings to allow deferrals.
-     *
-     * This endpoint consumes 0 units of your quota.
-     */
-    post: operations["postSettings"];
-  };
-  "/repo/list": {
-    /**
-     * Get list of repos and their latest project report
-     * @description Get all repositories in an org including their latest project report.
-     *
-     * This endpoint consumes 0 units of your quota.
-     */
-    get: operations["getRepoList"];
-  };
-  "/dependencies/search": {
-    /**
-     * Search dependencies
-     * @description Search for any dependency that is being used in your organization.
-     *
-     * This endpoint consumes 0 units of your quota.
-     */
-    post: operations["searchDependencies"];
-  };
-  "/dependencies/upload": {
-    /**
-     * Create a snapshot of all dependencies from manifest information
-     * @description Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.
-     * You can upload multiple lockfiles in the same request, but each filename must be unique.
-     *
-     * The name of the file must be in the supported list.
-     *
-     * For example, these are valid filenames: "requirements.txt", "package.json", "folder/package.json", and "deep/nested/folder/package.json".
-     *
-     * This endpoint consumes 100 units of your quota.
-     */
-    post: operations["createDependenciesSnapshot"];
-  };
-  "/orgs/{org_slug}/repos": {
-    /**
-     * List repositories (unstable)
-     * @description Lists repositories for the specified organization.
-     *
-     * This endpoint consumes 0 units of your quota.
-     */
-    get: operations["getOrgRepoList"];
-    /**
-     * Create repository (unstable)
-     * @description Create a repository.
-     *
-     * Repos collect Full scans and Diff scans and are typically associated with a git repo.
-     *
-     * This endpoint consumes 0 units of your quota.
-     */
-    post: operations["createOrgRepo"];
-  };
-  "/orgs/{org_slug}/repos/{repo_slug}": {
-    /**
-     * Get repository (unstable)
-     * @description Retrieve a repository associated with an organization.
-     *
-     * This endpoint consumes 0 units of your quota.
-     */
-    get: operations["getOrgRepo"];
-    /**
-     * Update repository (unstable)
-     * @description Update details of an existing repository.
-     *
-     * This endpoint consumes 0 units of your quota.
-     */
-    post: operations["updateOrgRepo"];
-    /**
-     * Delete repository (unstable)
-     * @description Delete a single repository and all of its associated Full scans and Diff scans.
-     *
-     * This endpoint consumes 0 units of your quota.
-     */
-    delete: operations["deleteOrgRepo"];
+    post: operations["batchPackageFetch"];
   };
   "/orgs/{org_slug}/full-scans": {
     /**
@@ -260,6 +120,47 @@ export interface paths {
      */
     get: operations["getOrgFullScanMetadata"];
   };
+  "/orgs/{org_slug}/repos": {
+    /**
+     * List repositories
+     * @description Lists repositories for the specified organization.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getOrgRepoList"];
+    /**
+     * Create repository
+     * @description Create a repository.
+     *
+     * Repos collect Full scans and Diff scans and are typically associated with a git repo.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    post: operations["createOrgRepo"];
+  };
+  "/orgs/{org_slug}/repos/{repo_slug}": {
+    /**
+     * Get repository
+     * @description Retrieve a repository associated with an organization.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getOrgRepo"];
+    /**
+     * Update repository
+     * @description Update details of an existing repository.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    post: operations["updateOrgRepo"];
+    /**
+     * Delete repository
+     * @description Delete a single repository and all of its associated Full scans and Diff scans.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    delete: operations["deleteOrgRepo"];
+  };
   "/orgs/{org_slug}/audit-log": {
     /**
      * Get Audit Log Events
@@ -287,14 +188,186 @@ export interface paths {
      */
     get: operations["getRepoAnalytics"];
   };
-  "/purl": {
+  "/dependencies/search": {
     /**
-     * Get Packages (unstable)
-     * @description Batch retrieval of package metadata and alerts by PURL strings
+     * Search dependencies
+     * @description Search for any dependency that is being used in your organization.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    post: operations["searchDependencies"];
+  };
+  "/dependencies/upload": {
+    /**
+     * Create a snapshot of all dependencies from manifest information
+     * @description Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.
+     * You can upload multiple lockfiles in the same request, but each filename must be unique.
+     *
+     * The name of the file must be in the supported list.
+     *
+     * For example, these are valid filenames: "requirements.txt", "package.json", "folder/package.json", and "deep/nested/folder/package.json".
      *
      * This endpoint consumes 100 units of your quota.
      */
-    post: operations["batchPackageFetch"];
+    post: operations["createDependenciesSnapshot"];
+  };
+  "/report/supported": {
+    /**
+     * Get supported files for report
+     * @description Get a list of supported files for project report generation.
+     * Files are categorized first by environment (e.g. NPM or PyPI), then by name.
+     *
+     * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
+     * Examples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getReportSupportedFiles"];
+  };
+  "/report/delete/{id}": {
+    /**
+     * Delete a report
+     * @description Delete a specific project report generated with the GitHub app. These endpoints will be merged into the full-scans endpoint so
+     *
+     * This endpoint consumes 10 units of your quota.
+     */
+    delete: operations["deleteReport"];
+  };
+  "/report/list": {
+    /**
+     * Get list of reports
+     * @deprecated
+     * @description Get all your project reports generated with the GitHub app. This endpoint will be merged into the full-scans endpoint soon.
+     *
+     * This endpoint consumes 10 units of your quota.
+     */
+    get: operations["getReportList"];
+  };
+  "/report/upload": {
+    /**
+     * Create a report
+     * @deprecated
+     * @description Upload a lockfile to get your project analyzed by Socket.
+     * You can upload multiple lockfiles in the same request, but each filename must be unique.
+     *
+     * The name of the file must be in the supported list.
+     *
+     * For example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.
+     *
+     * This endpoint consumes 100 units of your quota.
+     */
+    put: operations["createReport"];
+  };
+  "/report/view/{id}": {
+    /**
+     * View a report
+     * @deprecated
+     * @description Get all the issues, packages, and scores related to an specific project report.
+     *
+     * This endpoint consumes 10 units of your quota.
+     */
+    get: operations["getReport"];
+  };
+  "/repo/list": {
+    /**
+     * Get list of GitHub repos and their latest project report
+     * @deprecated
+     * @description Get all repositories in an org including their latest project report.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getRepoList"];
+  };
+  "/openapi": {
+    /**
+     * Returns the OpenAPI definition
+     * @description Retrieve the API specification in an Openapi JSON format.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getOpenAPI"];
+  };
+  "/quota": {
+    /**
+     * Get quota
+     * @description Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getQuota"];
+  };
+  "/organizations": {
+    /**
+     * List organizations
+     * @description Get information on the current organizations associated with the API key.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getOrganizations"];
+  };
+  "/settings": {
+    /**
+     * Calculate settings
+     * @description Get your current settings the requested organizations and default settings to allow deferrals.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    post: operations["postSettings"];
+  };
+  "/npm/{package}/{version}/issues": {
+    /**
+     * Get issues by package
+     * @deprecated
+     * @description Get all the issues related with a particular npm package version.
+     * This endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.
+     *
+     * You can [see here](https://socket.dev/npm/issue) the full list of issues.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     */
+    get: operations["getIssuesByNPMPackage"];
+  };
+  "/npm/{package}/{version}/score": {
+    /**
+     * Get score by package
+     * @deprecated
+     * @description Get all the scores and metrics by category that are used to evaluate the package version.
+     *
+     * This endpoint is deprecated. Use the batched "Get Packages" endpoint instead.
+     *
+     * - depscore: The average of all score factors. (0-1)
+     * - supplyChainRisk: Score factors relating to supply chain security (0-1)
+     * - downloadCount: The number of downloads for the package. Higher downloads contribute to a higher score.
+     * - supplyChainRiskIssueLow/Mid/High/Critical: The number of supply chain risk issues of varying severity. Lower numbers contribute to a higher score.
+     * - dependencyCount: The number of production dependencies. Lower count contributes to a higher score.
+     * - devDependencyCount: The number of development dependencies. Lower count contributes to a higher score.
+     * - transitiveDependencyCount: The number of transitive dependencies. Lower count contributes to a higher score.
+     * - totalDependencyCount: The total number of dependencies (production + development + transitive). Lower count contributes to a higher score.
+     * - quality: Score factors relating to code quality (0-1)
+     * - qualityIssueLow/Mid/High/Critical: The number of code quality issues of varying severity. Lower numbers contribute to a higher score.
+     * - linesOfCode: The number of lines of code in the package. Lower count contributes to a higher score.
+     * - readmeLength: The length of the package's README file. Longer READMEs contribute to a higher score.
+     * - maintenance: Score factors relating to package maintenance (0-1)
+     * - maintainerCount: The number of maintainers for the package. More maintainers contribute to a higher score.
+     * - versionsLastWeek/Month/TwoMonths/Year: The number of versions released in different time periods. More recent releases contribute to a higher score.
+     * - versionCount: The total number of versions released. Higher count contributes to a higher score.
+     * - maintenanceIssueLow/Mid/High/Critical: The number of maintenance issues of varying severity. Lower numbers contribute to a higher score.
+     * - vulnerability: Score factors relating to package vulnerabilities (0-1)
+     * - vulnerabilityIssueLow/Mid/High/Critical: The number of vulnerability issues of varying severity. Lower numbers contribute to a higher score.
+     * - dependencyVulnerabilityCount: The number of vulnerabilities in the package's dependencies. Lower count contributes to a higher score.
+     * - vulnerabilityCount: The number of vulnerabilities in the package itself. Lower count contributes to a higher score.
+     * - license: Score factors relating to package licensing (0-1)
+     * - licenseIssueLow/Mid/High/Critical: The number of license issues of varying severity. Lower numbers contribute to a higher score.
+     * - licenseQuality: A score indicating the quality/permissiveness of the package's license. Higher quality contributes to a higher score.
+     * - miscellaneous: Miscellaneous metadata about the package version.
+     * - versionAuthorName/Email: The name and email of the version author.
+     * - fileCount: The number of files in the package.
+     * - byteCount: The total size in bytes of the package.
+     * - typeModule: Whether the package declares a "type": "module" field.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     */
+    get: operations["getScoreByNPMPackage"];
   };
 }
 
@@ -302,16 +375,18 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
-    SocketIssueList: components["schemas"]["SocketIssue"][];
-    SocketPackageScore: {
-      supplyChainRisk: components["schemas"]["SocketMetricSchema"];
-      quality: components["schemas"]["SocketMetricSchema"];
-      maintenance: components["schemas"]["SocketMetricSchema"];
-      vulnerability: components["schemas"]["SocketMetricSchema"];
-      license: components["schemas"]["SocketMetricSchema"];
-      miscellaneous: components["schemas"]["SocketMetricSchema"];
-      /** @default 0 */
-      depscore: number;
+    /**
+     * @default low
+     * @enum {string}
+     */
+    SocketIssueSeverity: "low" | "middle" | "high" | "critical";
+    /**
+     * @default miscellaneous
+     * @enum {string}
+     */
+    SocketCategory: "supplyChainRisk" | "quality" | "maintenance" | "vulnerability" | "license" | "miscellaneous";
+    SocketBatchPURLFetch: {
+      components: components["schemas"]["SocketBatchPURLRequest"][];
     };
     SocketReport: {
       /** @default */
@@ -334,18 +409,20 @@ export interface components {
       /** @default */
       url: string;
     };
-    /**
-     * @default low
-     * @enum {string}
-     */
-    SocketIssueSeverity: "low" | "middle" | "high" | "critical";
-    /**
-     * @default miscellaneous
-     * @enum {string}
-     */
-    SocketCategory: "supplyChainRisk" | "quality" | "maintenance" | "vulnerability" | "license" | "miscellaneous";
-    SocketBatchPURLFetch: {
-      components: components["schemas"]["SocketBatchPURLRequest"][];
+    SocketIssueList: components["schemas"]["SocketIssue"][];
+    SocketPackageScore: {
+      supplyChainRisk: components["schemas"]["SocketMetricSchema"];
+      quality: components["schemas"]["SocketMetricSchema"];
+      maintenance: components["schemas"]["SocketMetricSchema"];
+      vulnerability: components["schemas"]["SocketMetricSchema"];
+      license: components["schemas"]["SocketMetricSchema"];
+      miscellaneous: components["schemas"]["SocketMetricSchema"];
+      /** @default 0 */
+      depscore: number;
+    };
+    SocketBatchPURLRequest: {
+      /** @default */
+      purl: string;
     };
     SocketIssue: ({
       /** @enum {string} */
@@ -1596,10 +1673,6 @@ export interface components {
       /** @default */
       limitingMetric?: string;
     };
-    SocketBatchPURLRequest: {
-      /** @default */
-      purl: string;
-    };
     SocketIssueBasics: {
       severity: components["schemas"]["SocketIssueSeverity"];
       category: components["schemas"]["SocketCategory"];
@@ -1770,8 +1843,8 @@ export interface components {
         };
       };
     };
-    /** @description Gone */
-    SocketGone: {
+    /** @description Internal server error */
+    SocketInternalServerError: {
       content: {
         "application/json": {
           error: {
@@ -1781,8 +1854,8 @@ export interface components {
         };
       };
     };
-    /** @description Internal server error */
-    SocketInternalServerError: {
+    /** @description Gone */
+    SocketGone: {
       content: {
         "application/json": {
           error: {
@@ -1807,975 +1880,178 @@ export type external = Record<string, never>;
 export interface operations {
 
   /**
-   * Get issues by package
-   * @description Get all the issues related with a particular npm package version.
-   * This endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.
+   * Get Packages (Beta)
+   * @description Batch retrieval of package metadata and alerts by PURL strings. Compatible witch CycloneDX reports.
    *
-   * You can [see here](https://socket.dev/npm/issue) the full list of issues.
+   * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
+   * CycloneDX SBOMs use the purl format to identify components.
+   * This endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.
    *
-   * This endpoint consumes 1 unit of your quota.
-   */
-  getIssuesByNPMPackage: {
-    parameters: {
-      path: {
-        package: string;
-        version: string;
-      };
-    };
-    responses: {
-      /** @description Socket issue lists */
-      200: {
-        content: {
-          "application/json": components["schemas"]["SocketIssueList"];
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Get score by package
-   * @description Get all the scores and metrics by category that are used to evaluate the package version.
+   * More information on purl and CycloneDX:
    *
-   * - depscore: The average of all score factors. (0-1)
-   * - supplyChainRisk: Score factors relating to supply chain security (0-1)
-   * - downloadCount: The number of downloads for the package. Higher downloads contribute to a higher score.
-   * - supplyChainRiskIssueLow/Mid/High/Critical: The number of supply chain risk issues of varying severity. Lower numbers contribute to a higher score.
-   * - dependencyCount: The number of production dependencies. Lower count contributes to a higher score.
-   * - devDependencyCount: The number of development dependencies. Lower count contributes to a higher score.
-   * - transitiveDependencyCount: The number of transitive dependencies. Lower count contributes to a higher score.
-   * - totalDependencyCount: The total number of dependencies (production + development + transitive). Lower count contributes to a higher score.
-   * - quality: Score factors relating to code quality (0-1)
-   * - qualityIssueLow/Mid/High/Critical: The number of code quality issues of varying severity. Lower numbers contribute to a higher score.
-   * - linesOfCode: The number of lines of code in the package. Lower count contributes to a higher score.
-   * - readmeLength: The length of the package's README file. Longer READMEs contribute to a higher score.
-   * - maintenance: Score factors relating to package maintenance (0-1)
-   * - maintainerCount: The number of maintainers for the package. More maintainers contribute to a higher score.
-   * - versionsLastWeek/Month/TwoMonths/Year: The number of versions released in different time periods. More recent releases contribute to a higher score.
-   * - versionCount: The total number of versions released. Higher count contributes to a higher score.
-   * - maintenanceIssueLow/Mid/High/Critical: The number of maintenance issues of varying severity. Lower numbers contribute to a higher score.
-   * - vulnerability: Score factors relating to package vulnerabilities (0-1)
-   * - vulnerabilityIssueLow/Mid/High/Critical: The number of vulnerability issues of varying severity. Lower numbers contribute to a higher score.
-   * - dependencyVulnerabilityCount: The number of vulnerabilities in the package's dependencies. Lower count contributes to a higher score.
-   * - vulnerabilityCount: The number of vulnerabilities in the package itself. Lower count contributes to a higher score.
-   * - license: Score factors relating to package licensing (0-1)
-   * - licenseIssueLow/Mid/High/Critical: The number of license issues of varying severity. Lower numbers contribute to a higher score.
-   * - licenseQuality: A score indicating the quality/permissiveness of the package's license. Higher quality contributes to a higher score.
-   * - miscellaneous: Miscellaneous metadata about the package version.
-   * - versionAuthorName/Email: The name and email of the version author.
-   * - fileCount: The number of files in the package.
-   * - byteCount: The total size in bytes of the package.
-   * - typeModule: Whether the package declares a "type": "module" field.
+   * - [`purl` Spec](https://github.com/package-url/purl-spec)
+   * - [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)
    *
-   * This endpoint consumes 1 unit of your quota.
-   */
-  getScoreByNPMPackage: {
-    parameters: {
-      path: {
-        package: string;
-        version: string;
-      };
-    };
-    responses: {
-      /** @description Socket package scores */
-      200: {
-        content: {
-          "application/json": components["schemas"]["SocketPackageScore"];
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Delete a report
-   * @description Delete a specific project report.
+   * ## Examples:
    *
-   * This endpoint consumes 10 units of your quota.
-   */
-  deleteReport: {
-    parameters: {
-      path: {
-        id: string;
-      };
-    };
-    responses: {
-      /** @description Success */
-      200: {
-        content: {
-          "application/json": {
-            /** @default ok */
-            status: string;
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Get list of reports
-   * @description Get all your project reports.
+   * ### Looking up an npm package:
    *
-   * This endpoint consumes 10 units of your quota.
-   */
-  getReportList: {
-    responses: {
-      /** @description List of project reports */
-      200: {
-        content: {
-          "application/json": {
-              /** @default */
-              id: string;
-              /** @default */
-              url: string;
-              /** @default */
-              repo: string;
-              /** @default */
-              branch: string;
-              /** @default null */
-              pull_requests: Record<string, never>;
-              /** @default */
-              commit: string;
-              /** @default */
-              owner: string;
-              /** @default */
-              created_at: string;
-            }[];
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Create a report
-   * @description Upload a lockfile to get your project analyzed by Socket.
-   * You can upload multiple lockfiles in the same request, but each filename must be unique.
+   * ```json
+   * {
+   *   "components": [
+   *     {
+   *       "purl": "pkg:npm/express@4.19.2"
+   *     }
+   *   ]
+   * }
+   * ```
    *
-   * The name of the file must be in the supported list.
+   * ### Looking up an PyPi package:
    *
-   * For example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.
+   * ```json
+   * {
+   *   "components": [
+   *     {
+   *       "purl": "pkg:pypi/django@5.0.6"
+   *     }
+   *   ]
+   * }
+   * ```
+   *
+   * ### Looking up a Maven package:
+   *
+   * ```json
+   * {
+   *   "components": [
+   *     {
+   *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+   *     }
+   *   ]
+   * }
+   * ```
+   *
+   * ### Batch lookup
+   *
+   * ```json
+   * {
+   *   "components": [
+   *     {
+   *       "purl": "pkg:npm/express@4.19.2"
+   *     },
+   *     {
+   *       "purl": "pkg:pypi/django@5.0.6"
+   *     },
+   *     {
+   *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+   *     }
+   *   ]
+   * }
+   * ```
    *
    * This endpoint consumes 100 units of your quota.
    */
-  createReport: {
+  batchPackageFetch: {
+    parameters: {
+      query?: {
+        license?: boolean;
+        alerts?: boolean;
+      };
+    };
     requestBody?: {
       content: {
-        "multipart/form-data": {
-          issueRules?: {
-            [key: string]: boolean;
-          };
-          [key: string]: undefined;
-        };
+        "application/json": components["schemas"]["SocketBatchPURLFetch"];
       };
     };
     responses: {
-      /** @description ID and URL of the project report */
+      /** @description Socket issue lists and scores for all packages */
       200: {
         content: {
-          "application/json": {
+          "application/x-ndjson": {
+            /**
+             * @default unknown
+             * @enum {string}
+             */
+            type: "unknown" | "npm" | "pypi" | "golang";
+            /** @default */
+            namespace?: string;
+            /** @default */
+            name?: string;
+            /** @default */
+            version?: string;
+            /** @default */
+            subpath?: string;
+            /** @default */
+            release?: string;
             /** @default */
             id: string;
-            /** @default */
-            url: string;
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * View a report
-   * @description Get all the issues, packages, and scores related to an specific project report.
-   *
-   * This endpoint consumes 10 units of your quota.
-   */
-  getReport: {
-    parameters: {
-      path: {
-        id: string;
-      };
-    };
-    responses: {
-      /** @description Socket report */
-      200: {
-        content: {
-          "application/json": components["schemas"]["SocketReport"];
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      410: components["responses"]["SocketGone"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Get supported files for report
-   * @description Get a list of supported files for project report generation.
-   * Files are categorized first by environment (e.g. NPM or PyPI), then by name.
-   *
-   * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
-   * Examples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.
-   *
-   * This endpoint consumes 0 units of your quota.
-   */
-  getReportSupportedFiles: {
-    responses: {
-      /** @description Glob patterns used to match supported files */
-      200: {
-        content: {
-          "application/json": {
-            [key: string]: {
-              [key: string]: {
-                /** @default */
-                pattern: string;
-              };
-            };
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Returns the OpenAPI definition
-   * @description Retrieve the API specification in an Openapi JSON format.
-   *
-   * This endpoint consumes 0 units of your quota.
-   */
-  getOpenAPI: {
-    responses: {
-      /** @description OpenAPI specification */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Get quota
-   * @description Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
-   *
-   * This endpoint consumes 0 units of your quota.
-   */
-  getQuota: {
-    responses: {
-      /** @description Quota amount */
-      200: {
-        content: {
-          "application/json": {
-            /** @default 0 */
-            quota: number;
-          };
-        };
-      };
-      401: components["responses"]["SocketUnauthorized"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * List organizations
-   * @description Get information on the current organizations associated with the API key.
-   *
-   * This endpoint consumes 0 units of your quota.
-   */
-  getOrganizations: {
-    responses: {
-      /** @description Organizations information */
-      200: {
-        content: {
-          "application/json": {
-            organizations: {
-              [key: string]: {
-                /** @default */
-                id: string;
-                /** @default */
-                name: string;
-                /** @default */
-                image: string;
-                /** @default */
-                plan: string;
-                /** @default */
-                slug: string;
-              };
-            };
-          };
-        };
-      };
-      401: components["responses"]["SocketUnauthorized"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Calculate settings
-   * @description Get your current settings the requested organizations and default settings to allow deferrals.
-   *
-   * This endpoint consumes 0 units of your quota.
-   */
-  postSettings: {
-    requestBody?: {
-      content: {
-        "application/json": {
-            /** @default */
-            organization?: string;
-          }[];
-      };
-    };
-    responses: {
-      /** @description Organization settings */
-      200: {
-        content: {
-          "application/json": {
-            defaults: {
-              issueRules: {
-                [key: string]: {
-                  /** @enum {string} */
-                  action?: "error" | "ignore" | "warn";
-                };
-              };
-            };
-            entries: ({
-                /** @default */
-                start: string | null;
-                settings: {
-                  [key: string]: {
-                    deferTo: string | null;
-                    issueRules: {
-                      [key: string]: {
-                        /** @enum {string} */
-                        action: "defer" | "error" | "ignore" | "warn" | "monitor";
-                      };
-                    };
-                  };
-                };
-              })[];
-          };
-        };
-      };
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Get list of repos and their latest project report
-   * @description Get all repositories in an org including their latest project report.
-   *
-   * This endpoint consumes 0 units of your quota.
-   */
-  getRepoList: {
-    parameters: {
-      query?: {
-        pageToken?: string;
-      };
-    };
-    responses: {
-      /** @description List of repos and their latest project report for the organization associated with the token used */
-      200: {
-        content: {
-          "application/json": {
-            results: {
-                /** @default */
-                id?: string;
-                /** @default */
-                created_at?: string;
-                /** @default */
-                updated_at?: string;
-                /** @default */
-                github_install_id?: string;
-                /** @default */
-                github_repo_id?: string;
-                /** @default */
-                name?: string;
-                /** @default */
-                github_full_name?: string;
-                /** @default */
-                organization_id?: string;
-                latest_project_report?: {
-                  /** @default */
-                  id: string;
-                  /** @default */
-                  created_at: string;
-                };
-              }[];
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Search dependencies
-   * @description Search for any dependency that is being used in your organization.
-   *
-   * This endpoint consumes 0 units of your quota.
-   */
-  searchDependencies: {
-    requestBody?: {
-      content: {
-        "application/json": {
-          /** @default 50 */
-          limit: number;
-          /** @default 0 */
-          offset: number;
-        };
-      };
-    };
-    responses: {
-      /** @description List of repos and their latest project report for the organization associated with the token used */
-      200: {
-        content: {
-          "application/json": {
             /** @default false */
-            end: boolean;
-            /** @default 1000 */
-            limit: number;
+            direct?: boolean;
+            manifestFiles?: {
+                /** @default */
+                file: string;
+                /** @default 0 */
+                start?: number;
+                /** @default 0 */
+                end?: number;
+              }[];
+            topLevelAncestors?: string[];
+            dependencies?: string[];
+            artifact?: {
+              /**
+               * @default unknown
+               * @enum {string}
+               */
+              type: "unknown" | "npm" | "pypi" | "golang";
+              /** @default */
+              namespace?: string;
+              /** @default */
+              name?: string;
+              /** @default */
+              version?: string;
+              /** @default */
+              subpath?: string;
+              /** @default */
+              release?: string;
+              /** @default */
+              id: string;
+            };
+            /** @default */
+            license?: string;
+            author?: string[];
             /** @default 0 */
-            offset: number;
-            rows: {
+            size?: number;
+            score?: {
+              /** @default 0 */
+              supplyChain: number;
+              /** @default 0 */
+              quality: number;
+              /** @default 0 */
+              maintenance: number;
+              /** @default 0 */
+              vulnerability: number;
+              /** @default 0 */
+              license: number;
+              /** @default 0 */
+              overall: number;
+            };
+            alerts?: {
                 /** @default */
-                branch: string;
-                /** @default false */
-                direct: boolean;
-                /** @default */
-                id: string;
-                /** @default */
-                name: string;
-                /** @default */
-                namespace: string;
-                /** @default */
-                repository: string;
+                key: string;
                 /** @default */
                 type: string;
+                severity: components["schemas"]["SocketIssueSeverity"];
+                category: components["schemas"]["SocketCategory"];
                 /** @default */
-                version: string;
+                file?: string;
+                /** @default 0 */
+                start?: number;
+                /** @default 0 */
+                end?: number;
+                /** @default null */
+                props?: Record<string, never>;
               }[];
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Create a snapshot of all dependencies from manifest information
-   * @description Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.
-   * You can upload multiple lockfiles in the same request, but each filename must be unique.
-   *
-   * The name of the file must be in the supported list.
-   *
-   * For example, these are valid filenames: "requirements.txt", "package.json", "folder/package.json", and "deep/nested/folder/package.json".
-   *
-   * This endpoint consumes 100 units of your quota.
-   */
-  createDependenciesSnapshot: {
-    parameters: {
-      query?: {
-        repository?: string;
-        branch?: string;
-      };
-    };
-    requestBody?: {
-      content: {
-        "multipart/form-data": {
-          /** @default */
-          repository?: string;
-          /** @default */
-          branch?: string;
-          [key: string]: undefined;
-        };
-      };
-    };
-    responses: {
-      /** @description ID of the dependencies snapshot */
-      200: {
-        content: {
-          "application/json": Record<string, never>;
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-      500: components["responses"]["SocketInternalServerError"];
-    };
-  };
-  /**
-   * List repositories (unstable)
-   * @description Lists repositories for the specified organization.
-   *
-   * This endpoint consumes 0 units of your quota.
-   */
-  getOrgRepoList: {
-    parameters: {
-      query?: {
-        sort?: string;
-        direction?: string;
-        per_page?: number;
-        page?: number;
-      };
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string;
-      };
-    };
-    responses: {
-      /** @description Lists repositories for the specified organization. The authenticated user must be a member of the organization. */
-      200: {
-        content: {
-          "application/json": {
-            results: ({
-                /**
-                 * @description The ID of the repository
-                 * @default
-                 */
-                id?: string;
-                /**
-                 * @description The creation date of the repository
-                 * @default
-                 */
-                created_at?: string;
-                /**
-                 * @description The last update date of the repository
-                 * @default
-                 */
-                updated_at?: string;
-                /**
-                 * @description The slug of the repository
-                 * @default
-                 */
-                slug?: string;
-                /**
-                 * @description The ID of the head full scan of the repository
-                 * @default
-                 */
-                head_full_scan_id?: string;
-                /**
-                 * @description The name of the repository
-                 * @default
-                 */
-                name?: string;
-                /**
-                 * @description The description of the repository
-                 * @default
-                 */
-                description?: string;
-                /**
-                 * @description The homepage URL of the repository
-                 * @default
-                 */
-                homepage?: string;
-                /**
-                 * @description The visibility of the repository
-                 * @default private
-                 * @enum {string}
-                 */
-                visibility?: "public" | "private";
-                /**
-                 * @description Whether the repository is archived or not
-                 * @default false
-                 */
-                archived?: boolean;
-                /**
-                 * @description The default branch of the repository
-                 * @default main
-                 */
-                default_branch?: string;
-              })[];
             /** @default 0 */
-            nextPage: number;
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Create repository (unstable)
-   * @description Create a repository.
-   *
-   * Repos collect Full scans and Diff scans and are typically associated with a git repo.
-   *
-   * This endpoint consumes 0 units of your quota.
-   */
-  createOrgRepo: {
-    parameters: {
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string;
-      };
-    };
-    requestBody?: {
-      content: {
-        "application/json": {
-          /**
-           * @description The name of the repository
-           * @default
-           */
-          name?: string;
-          /**
-           * @description The description of the repository
-           * @default
-           */
-          description?: string;
-          /**
-           * @description The homepage URL of the repository
-           * @default
-           */
-          homepage?: string;
-          /**
-           * @description The visibility of the repository
-           * @default private
-           * @enum {string}
-           */
-          visibility?: "public" | "private";
-          /**
-           * @description Whether the repository is archived or not
-           * @default false
-           */
-          archived?: boolean;
-          /**
-           * @description The default branch of the repository
-           * @default main
-           */
-          default_branch?: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Lists repositories for the specified organization. The authenticated user must be a member of the organization. */
-      201: {
-        content: {
-          "application/json": {
-            /**
-             * @description The ID of the repository
-             * @default
-             */
-            id?: string;
-            /**
-             * @description The creation date of the repository
-             * @default
-             */
-            created_at?: string;
-            /**
-             * @description The last update date of the repository
-             * @default
-             */
-            updated_at?: string;
-            /**
-             * @description The slug of the repository
-             * @default
-             */
-            slug?: string;
-            /**
-             * @description The ID of the head full scan of the repository
-             * @default
-             */
-            head_full_scan_id?: string;
-            /**
-             * @description The name of the repository
-             * @default
-             */
-            name?: string;
-            /**
-             * @description The description of the repository
-             * @default
-             */
-            description?: string;
-            /**
-             * @description The homepage URL of the repository
-             * @default
-             */
-            homepage?: string;
-            /**
-             * @description The visibility of the repository
-             * @default private
-             * @enum {string}
-             */
-            visibility?: "public" | "private";
-            /**
-             * @description Whether the repository is archived or not
-             * @default false
-             */
-            archived?: boolean;
-            /**
-             * @description The default branch of the repository
-             * @default main
-             */
-            default_branch?: string;
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Get repository (unstable)
-   * @description Retrieve a repository associated with an organization.
-   *
-   * This endpoint consumes 0 units of your quota.
-   */
-  getOrgRepo: {
-    parameters: {
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string;
-        /** @description The slug of the repository */
-        repo_slug: string;
-      };
-    };
-    responses: {
-      /** @description Lists repositories for the specified organization. The authenticated user must be a member of the organization. */
-      200: {
-        content: {
-          "application/json": {
-            /**
-             * @description The ID of the repository
-             * @default
-             */
-            id?: string;
-            /**
-             * @description The creation date of the repository
-             * @default
-             */
-            created_at?: string;
-            /**
-             * @description The last update date of the repository
-             * @default
-             */
-            updated_at?: string;
-            /**
-             * @description The slug of the repository
-             * @default
-             */
-            slug?: string;
-            /**
-             * @description The ID of the head full scan of the repository
-             * @default
-             */
-            head_full_scan_id?: string;
-            /**
-             * @description The name of the repository
-             * @default
-             */
-            name?: string;
-            /**
-             * @description The description of the repository
-             * @default
-             */
-            description?: string;
-            /**
-             * @description The homepage URL of the repository
-             * @default
-             */
-            homepage?: string;
-            /**
-             * @description The visibility of the repository
-             * @default private
-             * @enum {string}
-             */
-            visibility?: "public" | "private";
-            /**
-             * @description Whether the repository is archived or not
-             * @default false
-             */
-            archived?: boolean;
-            /**
-             * @description The default branch of the repository
-             * @default main
-             */
-            default_branch?: string;
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Update repository (unstable)
-   * @description Update details of an existing repository.
-   *
-   * This endpoint consumes 0 units of your quota.
-   */
-  updateOrgRepo: {
-    parameters: {
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string;
-        /** @description The slug of the repository */
-        repo_slug: string;
-      };
-    };
-    requestBody?: {
-      content: {
-        "application/json": {
-          /**
-           * @description The name of the repository
-           * @default
-           */
-          name?: string;
-          /**
-           * @description The description of the repository
-           * @default
-           */
-          description?: string;
-          /**
-           * @description The homepage URL of the repository
-           * @default
-           */
-          homepage?: string;
-          /**
-           * @description The visibility of the repository
-           * @default private
-           * @enum {string}
-           */
-          visibility?: "public" | "private";
-          /**
-           * @description Whether the repository is archived or not
-           * @default false
-           */
-          archived?: boolean;
-          /**
-           * @description The default branch of the repository
-           * @default main
-           */
-          default_branch?: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Update a repositories details */
-      200: {
-        content: {
-          "application/json": {
-            /**
-             * @description The ID of the repository
-             * @default
-             */
-            id?: string;
-            /**
-             * @description The creation date of the repository
-             * @default
-             */
-            created_at?: string;
-            /**
-             * @description The last update date of the repository
-             * @default
-             */
-            updated_at?: string;
-            /**
-             * @description The slug of the repository
-             * @default
-             */
-            slug?: string;
-            /**
-             * @description The ID of the head full scan of the repository
-             * @default
-             */
-            head_full_scan_id?: string;
-            /**
-             * @description The name of the repository
-             * @default
-             */
-            name?: string;
-            /**
-             * @description The description of the repository
-             * @default
-             */
-            description?: string;
-            /**
-             * @description The homepage URL of the repository
-             * @default
-             */
-            homepage?: string;
-            /**
-             * @description The visibility of the repository
-             * @default private
-             * @enum {string}
-             */
-            visibility?: "public" | "private";
-            /**
-             * @description Whether the repository is archived or not
-             * @default false
-             */
-            archived?: boolean;
-            /**
-             * @description The default branch of the repository
-             * @default main
-             */
-            default_branch?: string;
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Delete repository (unstable)
-   * @description Delete a single repository and all of its associated Full scans and Diff scans.
-   *
-   * This endpoint consumes 0 units of your quota.
-   */
-  deleteOrgRepo: {
-    parameters: {
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string;
-        /** @description The slug of the repository */
-        repo_slug: string;
-      };
-    };
-    responses: {
-      /** @description Success */
-      200: {
-        content: {
-          "application/json": {
-            /** @default ok */
-            status: string;
+            batchIndex?: number;
           };
         };
       };
@@ -3123,6 +2399,464 @@ export interface operations {
     };
   };
   /**
+   * List repositories
+   * @description Lists repositories for the specified organization.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getOrgRepoList: {
+    parameters: {
+      query?: {
+        sort?: string;
+        direction?: string;
+        per_page?: number;
+        page?: number;
+      };
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+      };
+    };
+    responses: {
+      /** @description Lists repositories for the specified organization. The authenticated user must be a member of the organization. */
+      200: {
+        content: {
+          "application/json": {
+            results: ({
+                /**
+                 * @description The ID of the repository
+                 * @default
+                 */
+                id?: string;
+                /**
+                 * @description The creation date of the repository
+                 * @default
+                 */
+                created_at?: string;
+                /**
+                 * @description The last update date of the repository
+                 * @default
+                 */
+                updated_at?: string;
+                /**
+                 * @description The slug of the repository
+                 * @default
+                 */
+                slug?: string;
+                /**
+                 * @description The ID of the head full scan of the repository
+                 * @default
+                 */
+                head_full_scan_id?: string;
+                /**
+                 * @description The name of the repository
+                 * @default
+                 */
+                name?: string;
+                /**
+                 * @description The description of the repository
+                 * @default
+                 */
+                description?: string;
+                /**
+                 * @description The homepage URL of the repository
+                 * @default
+                 */
+                homepage?: string;
+                /**
+                 * @description The visibility of the repository
+                 * @default private
+                 * @enum {string}
+                 */
+                visibility?: "public" | "private";
+                /**
+                 * @description Whether the repository is archived or not
+                 * @default false
+                 */
+                archived?: boolean;
+                /**
+                 * @description The default branch of the repository
+                 * @default main
+                 */
+                default_branch?: string;
+              })[];
+            /** @default 0 */
+            nextPage: number;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Create repository
+   * @description Create a repository.
+   *
+   * Repos collect Full scans and Diff scans and are typically associated with a git repo.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  createOrgRepo: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          /**
+           * @description The name of the repository
+           * @default
+           */
+          name?: string;
+          /**
+           * @description The description of the repository
+           * @default
+           */
+          description?: string;
+          /**
+           * @description The homepage URL of the repository
+           * @default
+           */
+          homepage?: string;
+          /**
+           * @description The visibility of the repository
+           * @default private
+           * @enum {string}
+           */
+          visibility?: "public" | "private";
+          /**
+           * @description Whether the repository is archived or not
+           * @default false
+           */
+          archived?: boolean;
+          /**
+           * @description The default branch of the repository
+           * @default main
+           */
+          default_branch?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Lists repositories for the specified organization. The authenticated user must be a member of the organization. */
+      201: {
+        content: {
+          "application/json": {
+            /**
+             * @description The ID of the repository
+             * @default
+             */
+            id?: string;
+            /**
+             * @description The creation date of the repository
+             * @default
+             */
+            created_at?: string;
+            /**
+             * @description The last update date of the repository
+             * @default
+             */
+            updated_at?: string;
+            /**
+             * @description The slug of the repository
+             * @default
+             */
+            slug?: string;
+            /**
+             * @description The ID of the head full scan of the repository
+             * @default
+             */
+            head_full_scan_id?: string;
+            /**
+             * @description The name of the repository
+             * @default
+             */
+            name?: string;
+            /**
+             * @description The description of the repository
+             * @default
+             */
+            description?: string;
+            /**
+             * @description The homepage URL of the repository
+             * @default
+             */
+            homepage?: string;
+            /**
+             * @description The visibility of the repository
+             * @default private
+             * @enum {string}
+             */
+            visibility?: "public" | "private";
+            /**
+             * @description Whether the repository is archived or not
+             * @default false
+             */
+            archived?: boolean;
+            /**
+             * @description The default branch of the repository
+             * @default main
+             */
+            default_branch?: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get repository
+   * @description Retrieve a repository associated with an organization.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getOrgRepo: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+        /** @description The slug of the repository */
+        repo_slug: string;
+      };
+    };
+    responses: {
+      /** @description Lists repositories for the specified organization. The authenticated user must be a member of the organization. */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * @description The ID of the repository
+             * @default
+             */
+            id?: string;
+            /**
+             * @description The creation date of the repository
+             * @default
+             */
+            created_at?: string;
+            /**
+             * @description The last update date of the repository
+             * @default
+             */
+            updated_at?: string;
+            /**
+             * @description The slug of the repository
+             * @default
+             */
+            slug?: string;
+            /**
+             * @description The ID of the head full scan of the repository
+             * @default
+             */
+            head_full_scan_id?: string;
+            /**
+             * @description The name of the repository
+             * @default
+             */
+            name?: string;
+            /**
+             * @description The description of the repository
+             * @default
+             */
+            description?: string;
+            /**
+             * @description The homepage URL of the repository
+             * @default
+             */
+            homepage?: string;
+            /**
+             * @description The visibility of the repository
+             * @default private
+             * @enum {string}
+             */
+            visibility?: "public" | "private";
+            /**
+             * @description Whether the repository is archived or not
+             * @default false
+             */
+            archived?: boolean;
+            /**
+             * @description The default branch of the repository
+             * @default main
+             */
+            default_branch?: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Update repository
+   * @description Update details of an existing repository.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  updateOrgRepo: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+        /** @description The slug of the repository */
+        repo_slug: string;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          /**
+           * @description The name of the repository
+           * @default
+           */
+          name?: string;
+          /**
+           * @description The description of the repository
+           * @default
+           */
+          description?: string;
+          /**
+           * @description The homepage URL of the repository
+           * @default
+           */
+          homepage?: string;
+          /**
+           * @description The visibility of the repository
+           * @default private
+           * @enum {string}
+           */
+          visibility?: "public" | "private";
+          /**
+           * @description Whether the repository is archived or not
+           * @default false
+           */
+          archived?: boolean;
+          /**
+           * @description The default branch of the repository
+           * @default main
+           */
+          default_branch?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Update a repositories details */
+      200: {
+        content: {
+          "application/json": {
+            /**
+             * @description The ID of the repository
+             * @default
+             */
+            id?: string;
+            /**
+             * @description The creation date of the repository
+             * @default
+             */
+            created_at?: string;
+            /**
+             * @description The last update date of the repository
+             * @default
+             */
+            updated_at?: string;
+            /**
+             * @description The slug of the repository
+             * @default
+             */
+            slug?: string;
+            /**
+             * @description The ID of the head full scan of the repository
+             * @default
+             */
+            head_full_scan_id?: string;
+            /**
+             * @description The name of the repository
+             * @default
+             */
+            name?: string;
+            /**
+             * @description The description of the repository
+             * @default
+             */
+            description?: string;
+            /**
+             * @description The homepage URL of the repository
+             * @default
+             */
+            homepage?: string;
+            /**
+             * @description The visibility of the repository
+             * @default private
+             * @enum {string}
+             */
+            visibility?: "public" | "private";
+            /**
+             * @description Whether the repository is archived or not
+             * @default false
+             */
+            archived?: boolean;
+            /**
+             * @description The default branch of the repository
+             * @default main
+             */
+            default_branch?: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Delete repository
+   * @description Delete a single repository and all of its associated Full scans and Diff scans.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  deleteOrgRepo: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+        /** @description The slug of the repository */
+        repo_slug: string;
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        content: {
+          "application/json": {
+            /** @default ok */
+            status: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
    * Get Audit Log Events
    * @description Paginated list of audit log events.
    *
@@ -3131,7 +2865,7 @@ export interface operations {
   getAuditLogEvents: {
     parameters: {
       query?: {
-        /** @description Filter audit log events by type */
+        /** @description Filter audit log events by type. Omit for all types. */
         type?: "BookDemo" | "CancelInvitation" | "ChangeMemberRole" | "ChangePlanSubscriptionSeats" | "ContactForm" | "CreateApiToken" | "CreateUser" | "GithubAppInstallation" | "JoinOrganizationByVcs" | "LinkAccount" | "RemoveMember" | "ResetInvitationLink" | "ResetOrganizationSettingToDefault" | "RotateApiToken" | "SendInvitation" | "SignIn" | "SignOut" | "Subscribe" | "SyncOrganization" | "TransferOwnership" | "UpdateAlertTriage" | "UpdateApiTokenName" | "UpdateApiTokenScopes" | "UpdateApiTokenVisibility" | "UpdateOrganizationSetting" | "UpgradeOrganizationPlan" | "VerifiedEmail";
         /** @description Number of events per page */
         per_page?: number;
@@ -3317,113 +3051,526 @@ export interface operations {
     };
   };
   /**
-   * Get Packages (unstable)
-   * @description Batch retrieval of package metadata and alerts by PURL strings
+   * Search dependencies
+   * @description Search for any dependency that is being used in your organization.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  searchDependencies: {
+    requestBody?: {
+      content: {
+        "application/json": {
+          /** @default 50 */
+          limit: number;
+          /** @default 0 */
+          offset: number;
+        };
+      };
+    };
+    responses: {
+      /** @description List of repos and their latest project report for the organization associated with the token used */
+      200: {
+        content: {
+          "application/json": {
+            /** @default false */
+            end: boolean;
+            /** @default 1000 */
+            limit: number;
+            /** @default 0 */
+            offset: number;
+            rows: {
+                /** @default */
+                branch: string;
+                /** @default false */
+                direct: boolean;
+                /** @default */
+                id: string;
+                /** @default */
+                name: string;
+                /** @default */
+                namespace: string;
+                /** @default */
+                repository: string;
+                /** @default */
+                type: string;
+                /** @default */
+                version: string;
+              }[];
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Create a snapshot of all dependencies from manifest information
+   * @description Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.
+   * You can upload multiple lockfiles in the same request, but each filename must be unique.
+   *
+   * The name of the file must be in the supported list.
+   *
+   * For example, these are valid filenames: "requirements.txt", "package.json", "folder/package.json", and "deep/nested/folder/package.json".
    *
    * This endpoint consumes 100 units of your quota.
    */
-  batchPackageFetch: {
+  createDependenciesSnapshot: {
     parameters: {
       query?: {
-        license?: boolean;
+        repository?: string;
+        branch?: string;
       };
     };
     requestBody?: {
       content: {
-        "application/json": components["schemas"]["SocketBatchPURLFetch"];
+        "multipart/form-data": {
+          /** @default */
+          repository?: string;
+          /** @default */
+          branch?: string;
+          [key: string]: undefined;
+        };
       };
     };
     responses: {
-      /** @description Socket issue lists and scores for all packages */
+      /** @description ID of the dependencies snapshot */
       200: {
         content: {
-          "application/x-ndjson": {
-            /**
-             * @default unknown
-             * @enum {string}
-             */
-            type: "unknown" | "npm" | "pypi" | "golang";
-            /** @default */
-            namespace?: string;
-            /** @default */
-            name?: string;
-            /** @default */
-            version?: string;
-            /** @default */
-            subpath?: string;
-            /** @default */
-            release?: string;
-            /** @default */
-            id: string;
-            /** @default false */
-            direct?: boolean;
-            manifestFiles?: {
+          "application/json": Record<string, never>;
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+      500: components["responses"]["SocketInternalServerError"];
+    };
+  };
+  /**
+   * Get supported files for report
+   * @description Get a list of supported files for project report generation.
+   * Files are categorized first by environment (e.g. NPM or PyPI), then by name.
+   *
+   * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
+   * Examples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getReportSupportedFiles: {
+    responses: {
+      /** @description Glob patterns used to match supported files */
+      200: {
+        content: {
+          "application/json": {
+            [key: string]: {
+              [key: string]: {
                 /** @default */
-                file: string;
-                /** @default 0 */
-                start?: number;
-                /** @default 0 */
-                end?: number;
-              }[];
-            topLevelAncestors?: string[];
-            dependencies?: string[];
-            artifact?: {
-              /**
-               * @default unknown
-               * @enum {string}
-               */
-              type: "unknown" | "npm" | "pypi" | "golang";
-              /** @default */
-              namespace?: string;
-              /** @default */
-              name?: string;
-              /** @default */
-              version?: string;
-              /** @default */
-              subpath?: string;
-              /** @default */
-              release?: string;
+                pattern: string;
+              };
+            };
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Delete a report
+   * @description Delete a specific project report generated with the GitHub app. These endpoints will be merged into the full-scans endpoint so
+   *
+   * This endpoint consumes 10 units of your quota.
+   */
+  deleteReport: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        content: {
+          "application/json": {
+            /** @default ok */
+            status: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get list of reports
+   * @deprecated
+   * @description Get all your project reports generated with the GitHub app. This endpoint will be merged into the full-scans endpoint soon.
+   *
+   * This endpoint consumes 10 units of your quota.
+   */
+  getReportList: {
+    responses: {
+      /** @description List of project reports */
+      200: {
+        content: {
+          "application/json": {
               /** @default */
               id: string;
-            };
-            /** @default */
-            license?: string;
-            author?: string[];
-            /** @default 0 */
-            size?: number;
-            score?: {
-              /** @default 0 */
-              supplyChain: number;
-              /** @default 0 */
-              quality: number;
-              /** @default 0 */
-              maintenance: number;
-              /** @default 0 */
-              vulnerability: number;
-              /** @default 0 */
-              license: number;
-              /** @default 0 */
-              overall: number;
-            };
-            alerts?: {
-                /** @default */
-                key: string;
-                /** @default */
-                type: string;
-                severity: components["schemas"]["SocketIssueSeverity"];
-                category: components["schemas"]["SocketCategory"];
-                /** @default */
-                file?: string;
-                /** @default 0 */
-                start?: number;
-                /** @default 0 */
-                end?: number;
-                /** @default null */
-                props?: Record<string, never>;
-              }[];
-            /** @default 0 */
-            batchIndex?: number;
+              /** @default */
+              url: string;
+              /** @default */
+              repo: string;
+              /** @default */
+              branch: string;
+              /** @default null */
+              pull_requests: Record<string, never>;
+              /** @default */
+              commit: string;
+              /** @default */
+              owner: string;
+              /** @default */
+              created_at: string;
+            }[];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Create a report
+   * @deprecated
+   * @description Upload a lockfile to get your project analyzed by Socket.
+   * You can upload multiple lockfiles in the same request, but each filename must be unique.
+   *
+   * The name of the file must be in the supported list.
+   *
+   * For example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.
+   *
+   * This endpoint consumes 100 units of your quota.
+   */
+  createReport: {
+    requestBody?: {
+      content: {
+        "multipart/form-data": {
+          issueRules?: {
+            [key: string]: boolean;
           };
+          [key: string]: undefined;
+        };
+      };
+    };
+    responses: {
+      /** @description ID and URL of the project report */
+      200: {
+        content: {
+          "application/json": {
+            /** @default */
+            id: string;
+            /** @default */
+            url: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * View a report
+   * @deprecated
+   * @description Get all the issues, packages, and scores related to an specific project report.
+   *
+   * This endpoint consumes 10 units of your quota.
+   */
+  getReport: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Socket report */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SocketReport"];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      410: components["responses"]["SocketGone"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get list of GitHub repos and their latest project report
+   * @deprecated
+   * @description Get all repositories in an org including their latest project report.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getRepoList: {
+    parameters: {
+      query?: {
+        pageToken?: string;
+      };
+    };
+    responses: {
+      /** @description List of repos and their latest project report for the organization associated with the token used */
+      200: {
+        content: {
+          "application/json": {
+            results: {
+                /** @default */
+                id?: string;
+                /** @default */
+                created_at?: string;
+                /** @default */
+                updated_at?: string;
+                /** @default */
+                github_install_id?: string;
+                /** @default */
+                github_repo_id?: string;
+                /** @default */
+                name?: string;
+                /** @default */
+                github_full_name?: string;
+                /** @default */
+                organization_id?: string;
+                latest_project_report?: {
+                  /** @default */
+                  id: string;
+                  /** @default */
+                  created_at: string;
+                };
+              }[];
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Returns the OpenAPI definition
+   * @description Retrieve the API specification in an Openapi JSON format.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getOpenAPI: {
+    responses: {
+      /** @description OpenAPI specification */
+      200: {
+        content: {
+          "application/json": unknown;
+        };
+      };
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get quota
+   * @description Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getQuota: {
+    responses: {
+      /** @description Quota amount */
+      200: {
+        content: {
+          "application/json": {
+            /** @default 0 */
+            quota: number;
+          };
+        };
+      };
+      401: components["responses"]["SocketUnauthorized"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * List organizations
+   * @description Get information on the current organizations associated with the API key.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getOrganizations: {
+    responses: {
+      /** @description Organizations information */
+      200: {
+        content: {
+          "application/json": {
+            organizations: {
+              [key: string]: {
+                /** @default */
+                id: string;
+                /** @default */
+                name: string;
+                /** @default */
+                image: string;
+                /** @default */
+                plan: string;
+                /** @default */
+                slug: string;
+              };
+            };
+          };
+        };
+      };
+      401: components["responses"]["SocketUnauthorized"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Calculate settings
+   * @description Get your current settings the requested organizations and default settings to allow deferrals.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  postSettings: {
+    requestBody?: {
+      content: {
+        "application/json": {
+            /** @default */
+            organization?: string;
+          }[];
+      };
+    };
+    responses: {
+      /** @description Organization settings */
+      200: {
+        content: {
+          "application/json": {
+            defaults: {
+              issueRules: {
+                [key: string]: {
+                  /** @enum {string} */
+                  action?: "error" | "ignore" | "warn";
+                };
+              };
+            };
+            entries: ({
+                /** @default */
+                start: string | null;
+                settings: {
+                  [key: string]: {
+                    deferTo: string | null;
+                    issueRules: {
+                      [key: string]: {
+                        /** @enum {string} */
+                        action: "defer" | "error" | "ignore" | "warn" | "monitor";
+                      };
+                    };
+                  };
+                };
+              })[];
+          };
+        };
+      };
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get issues by package
+   * @deprecated
+   * @description Get all the issues related with a particular npm package version.
+   * This endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.
+   *
+   * You can [see here](https://socket.dev/npm/issue) the full list of issues.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   */
+  getIssuesByNPMPackage: {
+    parameters: {
+      path: {
+        package: string;
+        version: string;
+      };
+    };
+    responses: {
+      /** @description Socket issue lists */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SocketIssueList"];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get score by package
+   * @deprecated
+   * @description Get all the scores and metrics by category that are used to evaluate the package version.
+   *
+   * This endpoint is deprecated. Use the batched "Get Packages" endpoint instead.
+   *
+   * - depscore: The average of all score factors. (0-1)
+   * - supplyChainRisk: Score factors relating to supply chain security (0-1)
+   * - downloadCount: The number of downloads for the package. Higher downloads contribute to a higher score.
+   * - supplyChainRiskIssueLow/Mid/High/Critical: The number of supply chain risk issues of varying severity. Lower numbers contribute to a higher score.
+   * - dependencyCount: The number of production dependencies. Lower count contributes to a higher score.
+   * - devDependencyCount: The number of development dependencies. Lower count contributes to a higher score.
+   * - transitiveDependencyCount: The number of transitive dependencies. Lower count contributes to a higher score.
+   * - totalDependencyCount: The total number of dependencies (production + development + transitive). Lower count contributes to a higher score.
+   * - quality: Score factors relating to code quality (0-1)
+   * - qualityIssueLow/Mid/High/Critical: The number of code quality issues of varying severity. Lower numbers contribute to a higher score.
+   * - linesOfCode: The number of lines of code in the package. Lower count contributes to a higher score.
+   * - readmeLength: The length of the package's README file. Longer READMEs contribute to a higher score.
+   * - maintenance: Score factors relating to package maintenance (0-1)
+   * - maintainerCount: The number of maintainers for the package. More maintainers contribute to a higher score.
+   * - versionsLastWeek/Month/TwoMonths/Year: The number of versions released in different time periods. More recent releases contribute to a higher score.
+   * - versionCount: The total number of versions released. Higher count contributes to a higher score.
+   * - maintenanceIssueLow/Mid/High/Critical: The number of maintenance issues of varying severity. Lower numbers contribute to a higher score.
+   * - vulnerability: Score factors relating to package vulnerabilities (0-1)
+   * - vulnerabilityIssueLow/Mid/High/Critical: The number of vulnerability issues of varying severity. Lower numbers contribute to a higher score.
+   * - dependencyVulnerabilityCount: The number of vulnerabilities in the package's dependencies. Lower count contributes to a higher score.
+   * - vulnerabilityCount: The number of vulnerabilities in the package itself. Lower count contributes to a higher score.
+   * - license: Score factors relating to package licensing (0-1)
+   * - licenseIssueLow/Mid/High/Critical: The number of license issues of varying severity. Lower numbers contribute to a higher score.
+   * - licenseQuality: A score indicating the quality/permissiveness of the package's license. Higher quality contributes to a higher score.
+   * - miscellaneous: Miscellaneous metadata about the package version.
+   * - versionAuthorName/Email: The name and email of the version author.
+   * - fileCount: The number of files in the package.
+   * - byteCount: The total size in bytes of the package.
+   * - typeModule: Whether the package declares a "type": "module" field.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   */
+  getScoreByNPMPackage: {
+    parameters: {
+      path: {
+        package: string;
+        version: string;
+      };
+    };
+    responses: {
+      /** @description Socket package scores */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SocketPackageScore"];
         };
       };
       400: components["responses"]["SocketBadRequest"];
