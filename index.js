@@ -499,7 +499,7 @@ class SocketSdk {
    */
     async batchPackageFetch (queryParams, components) {
       const formattedQueryParam = new URLSearchParams(queryParams)
-      
+
       try {
         const client = await this.#getClient()
         const data = await client.post(`purl?${formattedQueryParam}`, { json: components }).json()
