@@ -493,6 +493,23 @@ class SocketSdk {
   }
 
   /**
+   * @param {{[key: string]: string }} queryParams
+   * @param {{components: {purl: string}[] }} components
+   * @returns {Promise<SocketSdkResultType<'batchPackageFetch'>>}
+   */
+    async batchPackageFetch (queryParams, components) {
+      const formattedQueryParam = new URLSearchParams(queryParams)
+
+      try {
+        const client = await this.#getClient()
+        const data = await client.post(`purl?${formattedQueryParam}`, { json: components }).json()
+        return { success: true, status: 200, data }
+      } catch (err) {
+        return /** @type {SocketSdkErrorType<'batchPackageFetch'>} */ (this.#handleApiError(err))
+      }
+    }
+
+  /**
    * @param {Array<{ organization?: string }>} selectors
    * @returns {Promise<SocketSdkResultType<'postSettings'>>}
    */
