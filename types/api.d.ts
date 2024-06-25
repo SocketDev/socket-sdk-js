@@ -270,9 +270,9 @@ export interface paths {
   };
   "/repo/list": {
     /**
-     * Get list of GitHub repos and their latest project report
+     * List GitHub repositories
      * @deprecated
-     * @description Get all repositories in an org including their latest project report.
+     * @description Get all GitHub repositories associated with a Socket org.
      *
      * This endpoint consumes 0 units of your quota.
      */
@@ -3068,7 +3068,7 @@ export interface operations {
       };
     };
     responses: {
-      /** @description List of repos and their latest project report for the organization associated with the token used */
+      /** @description Search dependencies response */
       200: {
         content: {
           "application/json": {
@@ -3316,9 +3316,9 @@ export interface operations {
     };
   };
   /**
-   * Get list of GitHub repos and their latest project report
+   * List GitHub repositories
    * @deprecated
-   * @description Get all repositories in an org including their latest project report.
+   * @description Get all GitHub repositories associated with a Socket org.
    *
    * This endpoint consumes 0 units of your quota.
    */
@@ -3329,7 +3329,7 @@ export interface operations {
       };
     };
     responses: {
-      /** @description List of repos and their latest project report for the organization associated with the token used */
+      /** @description List of GitHub repositories associated with the organization. */
       200: {
         content: {
           "application/json": {
