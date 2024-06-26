@@ -502,8 +502,14 @@ class SocketSdk {
 
       try {
         const client = await this.#getClient()
-        const data = await client.post(`purl?${formattedQueryParam}`, { json: components }).json()
-        return { success: true, status: 200, data }
+        const data = await client.post(`purl?${formattedQueryParam}`, { json: components })
+
+        // Parse the ndjson response
+        const /** @type {{[key: string]: any}[]} */ resp_json = []
+        const ndjson = data.body.split('\n')
+        ndjson.map(o => o && resp_json.push(JSON.parse(o)))
+
+        return { success: true, status: 200, data: resp_json }
       } catch (err) {
         return /** @type {SocketSdkErrorType<'batchPackageFetch'>} */ (this.#handleApiError(err))
       }
