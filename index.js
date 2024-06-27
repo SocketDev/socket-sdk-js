@@ -511,7 +511,7 @@ class SocketSdk {
 
   /**
    * @param {{[key: string]: number }} params
-   * @returns {Promise<SocketSdkResultType<'batchPackageFetch'>>}
+   * @returns {Promise<SocketSdkResultType<'searchDependencies'>>}
    */
     async searchDependencies (params) {
       try {
@@ -519,7 +519,7 @@ class SocketSdk {
         const data = await client.post('dependencies/search', { json: params }).json()
         return { success: true, status: 200, data }
       } catch (err) {
-        return /** @type {SocketSdkErrorType<'batchPackageFetch'>} */ (this.#handleApiError(err))
+        return /** @type {SocketSdkErrorType<'searchDependencies'>} */ (this.#handleApiError(err))
       }
     }
 
