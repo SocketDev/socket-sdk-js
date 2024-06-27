@@ -510,6 +510,20 @@ class SocketSdk {
     }
 
   /**
+   * @param {{[key: string]: number }} params
+   * @returns {Promise<SocketSdkResultType<'batchPackageFetch'>>}
+   */
+    async searchDependencies (params) {
+      try {
+        const client = await this.#getClient()
+        const data = await client.post('dependencies/search', { json: params }).json()
+        return { success: true, status: 200, data }
+      } catch (err) {
+        return /** @type {SocketSdkErrorType<'batchPackageFetch'>} */ (this.#handleApiError(err))
+      }
+    }
+
+  /**
    * @param {Array<{ organization?: string }>} selectors
    * @returns {Promise<SocketSdkResultType<'postSettings'>>}
    */
