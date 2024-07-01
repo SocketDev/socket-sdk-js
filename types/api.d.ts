@@ -5,79 +5,64 @@
 
 
 export interface paths {
-  "/purl": {
+  "/analytics/org/{filter}": {
     /**
-     * Get Packages (Beta)
-     * @description Batch retrieval of package metadata and alerts by PURL strings. Compatible witch CycloneDX reports.
+     * Get organization analytics (unstable)
+     * @description Get analytics data regarding the number of alerts found across all active repositories.
      *
-     * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
-     * CycloneDX SBOMs use the purl format to identify components.
-     * This endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getOrgAnalytics"];
+  };
+  "/analytics/repo/{name}/{filter}": {
+    /**
+     * Get repository analytics
+     * @description Get analytics data regarding the number of alerts found in a single repository.
      *
-     * More information on purl and CycloneDX:
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getRepoAnalytics"];
+  };
+  "/dependencies/search": {
+    /**
+     * Search dependencies
+     * @description Search for any dependency that is being used in your organization.
      *
-     * - [`purl` Spec](https://github.com/package-url/purl-spec)
-     * - [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)
+     * This endpoint consumes 0 units of your quota.
+     */
+    post: operations["searchDependencies"];
+  };
+  "/dependencies/upload": {
+    /**
+     * Create a snapshot of all dependencies from manifest information
+     * @description Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.
+     * You can upload multiple lockfiles in the same request, but each filename must be unique.
      *
-     * ## Examples:
+     * The name of the file must be in the supported list.
      *
-     * ### Looking up an npm package:
-     *
-     * ```json
-     * {
-     *   "components": [
-     *     {
-     *       "purl": "pkg:npm/express@4.19.2"
-     *     }
-     *   ]
-     * }
-     * ```
-     *
-     * ### Looking up an PyPi package:
-     *
-     * ```json
-     * {
-     *   "components": [
-     *     {
-     *       "purl": "pkg:pypi/django@5.0.6"
-     *     }
-     *   ]
-     * }
-     * ```
-     *
-     * ### Looking up a Maven package:
-     *
-     * ```json
-     * {
-     *   "components": [
-     *     {
-     *       "purl": "pkg:maven/log4j/log4j@1.2.17"
-     *     }
-     *   ]
-     * }
-     * ```
-     *
-     * ### Batch lookup
-     *
-     * ```json
-     * {
-     *   "components": [
-     *     {
-     *       "purl": "pkg:npm/express@4.19.2"
-     *     },
-     *     {
-     *       "purl": "pkg:pypi/django@5.0.6"
-     *     },
-     *     {
-     *       "purl": "pkg:maven/log4j/log4j@1.2.17"
-     *     }
-     *   ]
-     * }
-     * ```
+     * For example, these are valid filenames: "requirements.txt", "package.json", "folder/package.json", and "deep/nested/folder/package.json".
      *
      * This endpoint consumes 100 units of your quota.
      */
-    post: operations["batchPackageFetch"];
+    post: operations["createDependenciesSnapshot"];
+  };
+  "/orgs/{org_slug}/audit-log": {
+    /**
+     * Get Audit Log Events
+     * @description Paginated list of audit log events.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getAuditLogEvents"];
+  };
+  "/orgs/{org_slug}/cdx/{id}": {
+    /**
+     * EXPERIMENTAL: Export CycloneDX SBOM
+     * @description Export a SocketSBOM as a CycloneDX SBOM
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["exportSBOM"];
   };
   "/orgs/{org_slug}/full-scans": {
     /**
@@ -161,122 +146,79 @@ export interface paths {
      */
     delete: operations["deleteOrgRepo"];
   };
-  "/orgs/{org_slug}/audit-log": {
+  "/purl": {
     /**
-     * Get Audit Log Events
-     * @description Paginated list of audit log events.
+     * Get Packages (Beta)
+     * @description Batch retrieval of package metadata and alerts by PURL strings. Compatible witch CycloneDX reports.
      *
-     * This endpoint consumes 0 units of your quota.
-     */
-    get: operations["getAuditLogEvents"];
-  };
-  "/analytics/org/{filter}": {
-    /**
-     * Get organization analytics (unstable)
-     * @description Get analytics data regarding the number of alerts found across all active repositories.
+     * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
+     * CycloneDX SBOMs use the purl format to identify components.
+     * This endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.
      *
-     * This endpoint consumes 0 units of your quota.
-     */
-    get: operations["getOrgAnalytics"];
-  };
-  "/analytics/repo/{name}/{filter}": {
-    /**
-     * Get repository analytics
-     * @description Get analytics data regarding the number of alerts found in a single repository.
+     * More information on purl and CycloneDX:
      *
-     * This endpoint consumes 0 units of your quota.
-     */
-    get: operations["getRepoAnalytics"];
-  };
-  "/dependencies/search": {
-    /**
-     * Search dependencies
-     * @description Search for any dependency that is being used in your organization.
+     * - [`purl` Spec](https://github.com/package-url/purl-spec)
+     * - [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)
      *
-     * This endpoint consumes 0 units of your quota.
-     */
-    post: operations["searchDependencies"];
-  };
-  "/dependencies/upload": {
-    /**
-     * Create a snapshot of all dependencies from manifest information
-     * @description Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.
-     * You can upload multiple lockfiles in the same request, but each filename must be unique.
+     * ## Examples:
      *
-     * The name of the file must be in the supported list.
+     * ### Looking up an npm package:
      *
-     * For example, these are valid filenames: "requirements.txt", "package.json", "folder/package.json", and "deep/nested/folder/package.json".
+     * ```json
+     * {
+     *   "components": [
+     *     {
+     *       "purl": "pkg:npm/express@4.19.2"
+     *     }
+     *   ]
+     * }
+     * ```
+     *
+     * ### Looking up an PyPi package:
+     *
+     * ```json
+     * {
+     *   "components": [
+     *     {
+     *       "purl": "pkg:pypi/django@5.0.6"
+     *     }
+     *   ]
+     * }
+     * ```
+     *
+     * ### Looking up a Maven package:
+     *
+     * ```json
+     * {
+     *   "components": [
+     *     {
+     *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+     *     }
+     *   ]
+     * }
+     * ```
+     *
+     * ### Batch lookup
+     *
+     * ```json
+     * {
+     *   "components": [
+     *     {
+     *       "purl": "pkg:npm/express@4.19.2"
+     *     },
+     *     {
+     *       "purl": "pkg:pypi/django@5.0.6"
+     *     },
+     *     {
+     *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+     *     }
+     *   ]
+     * }
+     * ```
      *
      * This endpoint consumes 100 units of your quota.
      */
-    post: operations["createDependenciesSnapshot"];
-  };
-  "/report/supported": {
-    /**
-     * Get supported files for report
-     * @description Get a list of supported files for project report generation.
-     * Files are categorized first by environment (e.g. NPM or PyPI), then by name.
-     *
-     * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
-     * Examples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.
-     *
-     * This endpoint consumes 0 units of your quota.
-     */
-    get: operations["getReportSupportedFiles"];
-  };
-  "/report/delete/{id}": {
-    /**
-     * Delete a report
-     * @description Delete a specific project report generated with the GitHub app. These endpoints will be merged into the full-scans endpoint so
-     *
-     * This endpoint consumes 10 units of your quota.
-     */
-    delete: operations["deleteReport"];
-  };
-  "/report/list": {
-    /**
-     * Get list of reports
-     * @deprecated
-     * @description Get all your project reports generated with the GitHub app. This endpoint will be merged into the full-scans endpoint soon.
-     *
-     * This endpoint consumes 10 units of your quota.
-     */
-    get: operations["getReportList"];
-  };
-  "/report/upload": {
-    /**
-     * Create a report
-     * @deprecated
-     * @description Upload a lockfile to get your project analyzed by Socket.
-     * You can upload multiple lockfiles in the same request, but each filename must be unique.
-     *
-     * The name of the file must be in the supported list.
-     *
-     * For example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.
-     *
-     * This endpoint consumes 100 units of your quota.
-     */
-    put: operations["createReport"];
-  };
-  "/report/view/{id}": {
-    /**
-     * View a report
-     * @deprecated
-     * @description Get all the issues, packages, and scores related to an specific project report.
-     *
-     * This endpoint consumes 10 units of your quota.
-     */
-    get: operations["getReport"];
-  };
-  "/repo/list": {
-    /**
-     * List GitHub repositories
-     * @deprecated
-     * @description Get all GitHub repositories associated with a Socket org.
-     *
-     * This endpoint consumes 0 units of your quota.
-     */
-    get: operations["getRepoList"];
+    post: operations["batchPackageFetch"];
   };
   "/openapi": {
     /**
@@ -369,12 +311,124 @@ export interface paths {
      */
     get: operations["getScoreByNPMPackage"];
   };
+  "/repo/list": {
+    /**
+     * List GitHub repositories
+     * @deprecated
+     * @description Get all GitHub repositories associated with a Socket org.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getRepoList"];
+  };
+  "/report/supported": {
+    /**
+     * Get supported files for report
+     * @description Get a list of supported files for project report generation.
+     * Files are categorized first by environment (e.g. NPM or PyPI), then by name.
+     *
+     * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
+     * Examples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.
+     *
+     * This endpoint consumes 0 units of your quota.
+     */
+    get: operations["getReportSupportedFiles"];
+  };
+  "/report/delete/{id}": {
+    /**
+     * Delete a report
+     * @description Delete a specific project report generated with the GitHub app. These endpoints will be merged into the full-scans endpoint so
+     *
+     * This endpoint consumes 10 units of your quota.
+     */
+    delete: operations["deleteReport"];
+  };
+  "/report/list": {
+    /**
+     * Get list of reports
+     * @deprecated
+     * @description Get all your project reports generated with the GitHub app. This endpoint will be merged into the full-scans endpoint soon.
+     *
+     * This endpoint consumes 10 units of your quota.
+     */
+    get: operations["getReportList"];
+  };
+  "/report/upload": {
+    /**
+     * Create a report
+     * @deprecated
+     * @description Upload a lockfile to get your project analyzed by Socket.
+     * You can upload multiple lockfiles in the same request, but each filename must be unique.
+     *
+     * The name of the file must be in the supported list.
+     *
+     * For example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.
+     *
+     * This endpoint consumes 100 units of your quota.
+     */
+    put: operations["createReport"];
+  };
+  "/report/view/{id}": {
+    /**
+     * View a report
+     * @deprecated
+     * @description Get all the issues, packages, and scores related to an specific project report.
+     *
+     * This endpoint consumes 10 units of your quota.
+     */
+    get: operations["getReport"];
+  };
 }
 
 export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    CDX_JSON: {
+      /** @default CycloneDX */
+      bomFormat: string;
+      /** @default 1.5 */
+      specVersion: string;
+      /** @default */
+      serialNumber: string;
+      /** @default 0 */
+      version: number;
+      metadata: {
+        /** @default */
+        timestamp: string;
+        tools: {
+          components: (components["schemas"]["CDXComponent"] & {
+              /** @default Socket */
+              author?: string;
+              /** @default Socket */
+              publisher?: string;
+            })[];
+        };
+        authors: {
+            /** @default Socket */
+            name: string;
+          }[];
+        /** @default */
+        supplier?: string;
+        lifecycles: {
+            /** @default build */
+            phase: string;
+          }[];
+        component: components["schemas"]["CDXComponent"];
+        properties?: {
+            /** @default */
+            name: string;
+            /** @default */
+            value: string;
+          }[];
+      };
+      components: components["schemas"]["CDXComponent"][];
+      dependencies: {
+          /** @default */
+          ref: string;
+          dependsOn?: string[];
+        }[];
+    };
     /**
      * @default low
      * @enum {string}
@@ -387,6 +441,17 @@ export interface components {
     SocketCategory: "supplyChainRisk" | "quality" | "maintenance" | "vulnerability" | "license" | "miscellaneous";
     SocketBatchPURLFetch: {
       components: components["schemas"]["SocketBatchPURLRequest"][];
+    };
+    SocketIssueList: components["schemas"]["SocketIssue"][];
+    SocketPackageScore: {
+      supplyChainRisk: components["schemas"]["SocketMetricSchema"];
+      quality: components["schemas"]["SocketMetricSchema"];
+      maintenance: components["schemas"]["SocketMetricSchema"];
+      vulnerability: components["schemas"]["SocketMetricSchema"];
+      license: components["schemas"]["SocketMetricSchema"];
+      miscellaneous: components["schemas"]["SocketMetricSchema"];
+      /** @default 0 */
+      depscore: number;
     };
     SocketReport: {
       /** @default */
@@ -409,16 +474,87 @@ export interface components {
       /** @default */
       url: string;
     };
-    SocketIssueList: components["schemas"]["SocketIssue"][];
-    SocketPackageScore: {
-      supplyChainRisk: components["schemas"]["SocketMetricSchema"];
-      quality: components["schemas"]["SocketMetricSchema"];
-      maintenance: components["schemas"]["SocketMetricSchema"];
-      vulnerability: components["schemas"]["SocketMetricSchema"];
-      license: components["schemas"]["SocketMetricSchema"];
-      miscellaneous: components["schemas"]["SocketMetricSchema"];
-      /** @default 0 */
-      depscore: number;
+    CDXComponent: {
+      /** @default */
+      author?: string;
+      /** @default */
+      publisher?: string;
+      /** @default */
+      group: string;
+      /** @default */
+      name: string;
+      /** @default */
+      version: string;
+      /** @default */
+      description?: string;
+      /** @default */
+      scope?: string;
+      hashes?: {
+          /** @default */
+          alg: string;
+          /** @default */
+          content: string;
+        }[];
+      licenses?: {
+          license: {
+            /** @default */
+            id?: string;
+            /** @default */
+            name?: string;
+            /** @default */
+            url?: string;
+          };
+        }[];
+      /** @default */
+      purl: string;
+      externalReferences?: {
+          /** @default */
+          type: string;
+          /** @default */
+          url: string;
+        }[];
+      /** @default application */
+      type: string;
+      /** @default */
+      "bom-ref": string;
+      evidence?: {
+        identity: {
+          /** @default */
+          field: string;
+          /** @default 0 */
+          confidence: number;
+          methods: {
+              /** @default */
+              technique: string;
+              /** @default 0 */
+              confidence: number;
+              /** @default */
+              value: string;
+            }[];
+        };
+        occurrences?: {
+            /** @default */
+            location: string;
+          }[];
+      };
+      tags?: string[];
+      properties?: {
+          /** @default */
+          name: string;
+          /** @default */
+          value: string;
+        }[];
+      cryptoProperties?: {
+          /** @default */
+          assetType: string;
+          algorithmProperties: {
+            /** @default */
+            executionEnvironment: string;
+            /** @default */
+            implementationPlatform: string;
+          };
+        }[];
+      components?: components["schemas"]["CDXComponent"][];
     };
     SocketBatchPURLRequest: {
       /** @default */
@@ -1814,17 +1950,6 @@ export interface components {
         };
       };
     };
-    /** @description Resource not found */
-    SocketNotFoundResponse: {
-      content: {
-        "application/json": {
-          error: {
-            /** @default */
-            message: string;
-          };
-        };
-      };
-    };
     /** @description Insufficient quota for API route */
     SocketTooManyRequestsResponse: {
       headers: {
@@ -1834,6 +1959,17 @@ export interface components {
          */
         "Retry-After"?: number;
       };
+      content: {
+        "application/json": {
+          error: {
+            /** @default */
+            message: string;
+          };
+        };
+      };
+    };
+    /** @description Resource not found */
+    SocketNotFoundResponse: {
       content: {
         "application/json": {
           error: {
@@ -1880,178 +2016,177 @@ export type external = Record<string, never>;
 export interface operations {
 
   /**
-   * Get Packages (Beta)
-   * @description Batch retrieval of package metadata and alerts by PURL strings. Compatible witch CycloneDX reports.
+   * Get organization analytics (unstable)
+   * @description Get analytics data regarding the number of alerts found across all active repositories.
    *
-   * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
-   * CycloneDX SBOMs use the purl format to identify components.
-   * This endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.
-   *
-   * More information on purl and CycloneDX:
-   *
-   * - [`purl` Spec](https://github.com/package-url/purl-spec)
-   * - [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)
-   *
-   * ## Examples:
-   *
-   * ### Looking up an npm package:
-   *
-   * ```json
-   * {
-   *   "components": [
-   *     {
-   *       "purl": "pkg:npm/express@4.19.2"
-   *     }
-   *   ]
-   * }
-   * ```
-   *
-   * ### Looking up an PyPi package:
-   *
-   * ```json
-   * {
-   *   "components": [
-   *     {
-   *       "purl": "pkg:pypi/django@5.0.6"
-   *     }
-   *   ]
-   * }
-   * ```
-   *
-   * ### Looking up a Maven package:
-   *
-   * ```json
-   * {
-   *   "components": [
-   *     {
-   *       "purl": "pkg:maven/log4j/log4j@1.2.17"
-   *     }
-   *   ]
-   * }
-   * ```
-   *
-   * ### Batch lookup
-   *
-   * ```json
-   * {
-   *   "components": [
-   *     {
-   *       "purl": "pkg:npm/express@4.19.2"
-   *     },
-   *     {
-   *       "purl": "pkg:pypi/django@5.0.6"
-   *     },
-   *     {
-   *       "purl": "pkg:maven/log4j/log4j@1.2.17"
-   *     }
-   *   ]
-   * }
-   * ```
-   *
-   * This endpoint consumes 100 units of your quota.
+   * This endpoint consumes 0 units of your quota.
    */
-  batchPackageFetch: {
+  getOrgAnalytics: {
     parameters: {
-      query?: {
-        license?: boolean;
-        alerts?: boolean;
-      };
-    };
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["SocketBatchPURLFetch"];
+      path: {
+        filter: string;
       };
     };
     responses: {
-      /** @description Socket issue lists and scores for all packages */
+      /** @description Socket analytics - organization-level data */
       200: {
         content: {
-          "application/x-ndjson": {
-            /**
-             * @default unknown
-             * @enum {string}
-             */
-            type: "unknown" | "npm" | "pypi" | "golang";
-            /** @default */
-            namespace?: string;
-            /** @default */
-            name?: string;
-            /** @default */
-            version?: string;
-            /** @default */
-            subpath?: string;
-            /** @default */
-            release?: string;
-            /** @default */
-            id: string;
+          "application/json": {
+              /** @default 0 */
+              id: number;
+              /** @default */
+              created_at: string;
+              /** @default */
+              repository_id: string;
+              /** @default 0 */
+              organization_id: number;
+              /** @default */
+              repository_name: string;
+              /** @default 0 */
+              total_critical_alerts: number;
+              /** @default 0 */
+              total_high_alerts: number;
+              /** @default 0 */
+              total_medium_alerts: number;
+              /** @default 0 */
+              total_low_alerts: number;
+              /** @default 0 */
+              total_critical_added: number;
+              /** @default 0 */
+              total_high_added: number;
+              /** @default 0 */
+              total_medium_added: number;
+              /** @default 0 */
+              total_low_added: number;
+              /** @default 0 */
+              total_critical_prevented: number;
+              /** @default 0 */
+              total_high_prevented: number;
+              /** @default 0 */
+              total_medium_prevented: number;
+              /** @default 0 */
+              total_low_prevented: number;
+              /** @default {} */
+              top_five_alert_types: Record<string, never>;
+            }[];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get repository analytics
+   * @description Get analytics data regarding the number of alerts found in a single repository.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getRepoAnalytics: {
+    parameters: {
+      path: {
+        name: string;
+        filter: string;
+      };
+    };
+    responses: {
+      /** @description Socket analytics - repo-level data */
+      200: {
+        content: {
+          "application/json": {
+              /** @default 0 */
+              id: number;
+              /** @default */
+              repository_id: string;
+              /** @default */
+              created_at: string;
+              /** @default 0 */
+              organization_id: number;
+              /** @default */
+              repository_name: string;
+              /** @default 0 */
+              total_critical_alerts: number;
+              /** @default 0 */
+              total_high_alerts: number;
+              /** @default 0 */
+              total_medium_alerts: number;
+              /** @default 0 */
+              total_low_alerts: number;
+              /** @default 0 */
+              total_critical_added: number;
+              /** @default 0 */
+              total_high_added: number;
+              /** @default 0 */
+              total_medium_added: number;
+              /** @default 0 */
+              total_low_added: number;
+              /** @default 0 */
+              total_critical_prevented: number;
+              /** @default 0 */
+              total_high_prevented: number;
+              /** @default 0 */
+              total_medium_prevented: number;
+              /** @default 0 */
+              total_low_prevented: number;
+              /** @default {} */
+              top_five_alert_types: Record<string, never>;
+            }[];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Search dependencies
+   * @description Search for any dependency that is being used in your organization.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  searchDependencies: {
+    requestBody?: {
+      content: {
+        "application/json": {
+          /** @default 50 */
+          limit: number;
+          /** @default 0 */
+          offset: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Search dependencies response */
+      200: {
+        content: {
+          "application/json": {
             /** @default false */
-            direct?: boolean;
-            manifestFiles?: {
-                /** @default */
-                file: string;
-                /** @default 0 */
-                start?: number;
-                /** @default 0 */
-                end?: number;
-              }[];
-            topLevelAncestors?: string[];
-            dependencies?: string[];
-            artifact?: {
-              /**
-               * @default unknown
-               * @enum {string}
-               */
-              type: "unknown" | "npm" | "pypi" | "golang";
-              /** @default */
-              namespace?: string;
-              /** @default */
-              name?: string;
-              /** @default */
-              version?: string;
-              /** @default */
-              subpath?: string;
-              /** @default */
-              release?: string;
-              /** @default */
-              id: string;
-            };
-            /** @default */
-            license?: string;
-            author?: string[];
+            end: boolean;
+            /** @default 1000 */
+            limit: number;
             /** @default 0 */
-            size?: number;
-            score?: {
-              /** @default 0 */
-              supplyChain: number;
-              /** @default 0 */
-              quality: number;
-              /** @default 0 */
-              maintenance: number;
-              /** @default 0 */
-              vulnerability: number;
-              /** @default 0 */
-              license: number;
-              /** @default 0 */
-              overall: number;
-            };
-            alerts?: {
+            offset: number;
+            rows: {
                 /** @default */
-                key: string;
+                branch: string;
+                /** @default false */
+                direct: boolean;
+                /** @default */
+                id: string;
+                /** @default */
+                name: string;
+                /** @default */
+                namespace: string;
+                /** @default */
+                repository: string;
                 /** @default */
                 type: string;
-                severity: components["schemas"]["SocketIssueSeverity"];
-                category: components["schemas"]["SocketCategory"];
                 /** @default */
-                file?: string;
-                /** @default 0 */
-                start?: number;
-                /** @default 0 */
-                end?: number;
-                /** @default null */
-                props?: Record<string, never>;
+                version: string;
               }[];
-            /** @default 0 */
-            batchIndex?: number;
           };
         };
       };
@@ -2059,6 +2194,152 @@ export interface operations {
       401: components["responses"]["SocketUnauthorized"];
       403: components["responses"]["SocketForbidden"];
       404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Create a snapshot of all dependencies from manifest information
+   * @description Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.
+   * You can upload multiple lockfiles in the same request, but each filename must be unique.
+   *
+   * The name of the file must be in the supported list.
+   *
+   * For example, these are valid filenames: "requirements.txt", "package.json", "folder/package.json", and "deep/nested/folder/package.json".
+   *
+   * This endpoint consumes 100 units of your quota.
+   */
+  createDependenciesSnapshot: {
+    parameters: {
+      query?: {
+        repository?: string;
+        branch?: string;
+      };
+    };
+    requestBody?: {
+      content: {
+        "multipart/form-data": {
+          /** @default */
+          repository?: string;
+          /** @default */
+          branch?: string;
+          [key: string]: undefined;
+        };
+      };
+    };
+    responses: {
+      /** @description ID of the dependencies snapshot */
+      200: {
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+      500: components["responses"]["SocketInternalServerError"];
+    };
+  };
+  /**
+   * Get Audit Log Events
+   * @description Paginated list of audit log events.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getAuditLogEvents: {
+    parameters: {
+      query?: {
+        /** @description Filter audit log events by type. Omit for all types. */
+        type?: "BookDemo" | "CancelInvitation" | "ChangeMemberRole" | "ChangePlanSubscriptionSeats" | "ContactForm" | "CreateApiToken" | "CreateUser" | "GithubAppInstallation" | "JoinOrganizationByVcs" | "LinkAccount" | "RemoveMember" | "ResetInvitationLink" | "ResetOrganizationSettingToDefault" | "RotateApiToken" | "SendInvitation" | "SignIn" | "SignOut" | "Subscribe" | "SyncOrganization" | "TransferOwnership" | "UpdateAlertTriage" | "UpdateApiTokenName" | "UpdateApiTokenScopes" | "UpdateApiTokenVisibility" | "UpdateOrganizationSetting" | "UpgradeOrganizationPlan" | "VerifiedEmail";
+        /** @description Number of events per page */
+        per_page?: number;
+        /** @description Page token */
+        page?: string;
+      };
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+      };
+    };
+    responses: {
+      /** @description The paginated list of events in an organizations audit log and the next page querystring token. */
+      200: {
+        content: {
+          "application/json": {
+            results: {
+                /** @default */
+                event_id?: string;
+                /** @default */
+                created_at?: string;
+                /** @default */
+                updated_at?: string;
+                /** @default */
+                country_code?: string;
+                /** @default */
+                organization_id?: string;
+                /** @default */
+                ip_address?: string;
+                /** @default null */
+                payload?: Record<string, never>;
+                /** @default 0 */
+                status_code?: number;
+                /** @default */
+                type?: string;
+                /** @default */
+                user_agent?: string;
+                /** @default */
+                user_id?: string;
+                /** @default */
+                user_email?: string;
+                /** @default */
+                user_image?: string;
+                /** @default */
+                organization_name?: string;
+              }[];
+            /** @default */
+            nextPage: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * EXPERIMENTAL: Export CycloneDX SBOM
+   * @description Export a SocketSBOM as a CycloneDX SBOM
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  exportSBOM: {
+    parameters: {
+      query?: {
+        author?: string;
+        project_group?: string;
+        project_name?: string;
+        project_version?: string;
+        project_id?: string;
+      };
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+        /** @description The full scan or sbom report ID */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Socket issue lists and scores for all packages */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CDX_JSON"];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
       429: components["responses"]["SocketTooManyRequestsResponse"];
     };
   };
@@ -2857,506 +3138,178 @@ export interface operations {
     };
   };
   /**
-   * Get Audit Log Events
-   * @description Paginated list of audit log events.
+   * Get Packages (Beta)
+   * @description Batch retrieval of package metadata and alerts by PURL strings. Compatible witch CycloneDX reports.
    *
-   * This endpoint consumes 0 units of your quota.
+   * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
+   * CycloneDX SBOMs use the purl format to identify components.
+   * This endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.
+   *
+   * More information on purl and CycloneDX:
+   *
+   * - [`purl` Spec](https://github.com/package-url/purl-spec)
+   * - [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)
+   *
+   * ## Examples:
+   *
+   * ### Looking up an npm package:
+   *
+   * ```json
+   * {
+   *   "components": [
+   *     {
+   *       "purl": "pkg:npm/express@4.19.2"
+   *     }
+   *   ]
+   * }
+   * ```
+   *
+   * ### Looking up an PyPi package:
+   *
+   * ```json
+   * {
+   *   "components": [
+   *     {
+   *       "purl": "pkg:pypi/django@5.0.6"
+   *     }
+   *   ]
+   * }
+   * ```
+   *
+   * ### Looking up a Maven package:
+   *
+   * ```json
+   * {
+   *   "components": [
+   *     {
+   *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+   *     }
+   *   ]
+   * }
+   * ```
+   *
+   * ### Batch lookup
+   *
+   * ```json
+   * {
+   *   "components": [
+   *     {
+   *       "purl": "pkg:npm/express@4.19.2"
+   *     },
+   *     {
+   *       "purl": "pkg:pypi/django@5.0.6"
+   *     },
+   *     {
+   *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+   *     }
+   *   ]
+   * }
+   * ```
+   *
+   * This endpoint consumes 100 units of your quota.
    */
-  getAuditLogEvents: {
+  batchPackageFetch: {
     parameters: {
       query?: {
-        /** @description Filter audit log events by type. Omit for all types. */
-        type?: "BookDemo" | "CancelInvitation" | "ChangeMemberRole" | "ChangePlanSubscriptionSeats" | "ContactForm" | "CreateApiToken" | "CreateUser" | "GithubAppInstallation" | "JoinOrganizationByVcs" | "LinkAccount" | "RemoveMember" | "ResetInvitationLink" | "ResetOrganizationSettingToDefault" | "RotateApiToken" | "SendInvitation" | "SignIn" | "SignOut" | "Subscribe" | "SyncOrganization" | "TransferOwnership" | "UpdateAlertTriage" | "UpdateApiTokenName" | "UpdateApiTokenScopes" | "UpdateApiTokenVisibility" | "UpdateOrganizationSetting" | "UpgradeOrganizationPlan" | "VerifiedEmail";
-        /** @description Number of events per page */
-        per_page?: number;
-        /** @description Page token */
-        page?: string;
+        license?: boolean;
+        alerts?: boolean;
       };
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["SocketBatchPURLFetch"];
       };
     };
     responses: {
-      /** @description The paginated list of events in an organizations audit log and the next page querystring token. */
+      /** @description Socket issue lists and scores for all packages */
       200: {
         content: {
-          "application/json": {
-            results: {
-                /** @default */
-                event_id?: string;
-                /** @default */
-                created_at?: string;
-                /** @default */
-                updated_at?: string;
-                /** @default */
-                country_code?: string;
-                /** @default */
-                organization_id?: string;
-                /** @default */
-                ip_address?: string;
-                /** @default null */
-                payload?: Record<string, never>;
-                /** @default 0 */
-                status_code?: number;
-                /** @default */
-                type?: string;
-                /** @default */
-                user_agent?: string;
-                /** @default */
-                user_id?: string;
-                /** @default */
-                user_email?: string;
-                /** @default */
-                user_image?: string;
-                /** @default */
-                organization_name?: string;
-              }[];
+          "application/x-ndjson": {
+            /**
+             * @default unknown
+             * @enum {string}
+             */
+            type: "unknown" | "npm" | "pypi" | "golang";
             /** @default */
-            nextPage: string;
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Get organization analytics (unstable)
-   * @description Get analytics data regarding the number of alerts found across all active repositories.
-   *
-   * This endpoint consumes 0 units of your quota.
-   */
-  getOrgAnalytics: {
-    parameters: {
-      path: {
-        filter: string;
-      };
-    };
-    responses: {
-      /** @description Socket analytics - organization-level data */
-      200: {
-        content: {
-          "application/json": {
-              /** @default 0 */
-              id: number;
-              /** @default */
-              created_at: string;
-              /** @default */
-              repository_id: string;
-              /** @default 0 */
-              organization_id: number;
-              /** @default */
-              repository_name: string;
-              /** @default 0 */
-              total_critical_alerts: number;
-              /** @default 0 */
-              total_high_alerts: number;
-              /** @default 0 */
-              total_medium_alerts: number;
-              /** @default 0 */
-              total_low_alerts: number;
-              /** @default 0 */
-              total_critical_added: number;
-              /** @default 0 */
-              total_high_added: number;
-              /** @default 0 */
-              total_medium_added: number;
-              /** @default 0 */
-              total_low_added: number;
-              /** @default 0 */
-              total_critical_prevented: number;
-              /** @default 0 */
-              total_high_prevented: number;
-              /** @default 0 */
-              total_medium_prevented: number;
-              /** @default 0 */
-              total_low_prevented: number;
-              /** @default {} */
-              top_five_alert_types: Record<string, never>;
-            }[];
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Get repository analytics
-   * @description Get analytics data regarding the number of alerts found in a single repository.
-   *
-   * This endpoint consumes 0 units of your quota.
-   */
-  getRepoAnalytics: {
-    parameters: {
-      path: {
-        name: string;
-        filter: string;
-      };
-    };
-    responses: {
-      /** @description Socket analytics - repo-level data */
-      200: {
-        content: {
-          "application/json": {
-              /** @default 0 */
-              id: number;
-              /** @default */
-              repository_id: string;
-              /** @default */
-              created_at: string;
-              /** @default 0 */
-              organization_id: number;
-              /** @default */
-              repository_name: string;
-              /** @default 0 */
-              total_critical_alerts: number;
-              /** @default 0 */
-              total_high_alerts: number;
-              /** @default 0 */
-              total_medium_alerts: number;
-              /** @default 0 */
-              total_low_alerts: number;
-              /** @default 0 */
-              total_critical_added: number;
-              /** @default 0 */
-              total_high_added: number;
-              /** @default 0 */
-              total_medium_added: number;
-              /** @default 0 */
-              total_low_added: number;
-              /** @default 0 */
-              total_critical_prevented: number;
-              /** @default 0 */
-              total_high_prevented: number;
-              /** @default 0 */
-              total_medium_prevented: number;
-              /** @default 0 */
-              total_low_prevented: number;
-              /** @default {} */
-              top_five_alert_types: Record<string, never>;
-            }[];
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Search dependencies
-   * @description Search for any dependency that is being used in your organization.
-   *
-   * This endpoint consumes 0 units of your quota.
-   */
-  searchDependencies: {
-    requestBody?: {
-      content: {
-        "application/json": {
-          /** @default 50 */
-          limit: number;
-          /** @default 0 */
-          offset: number;
-        };
-      };
-    };
-    responses: {
-      /** @description Search dependencies response */
-      200: {
-        content: {
-          "application/json": {
-            /** @default false */
-            end: boolean;
-            /** @default 1000 */
-            limit: number;
-            /** @default 0 */
-            offset: number;
-            rows: {
-                /** @default */
-                branch: string;
-                /** @default false */
-                direct: boolean;
-                /** @default */
-                id: string;
-                /** @default */
-                name: string;
-                /** @default */
-                namespace: string;
-                /** @default */
-                repository: string;
-                /** @default */
-                type: string;
-                /** @default */
-                version: string;
-              }[];
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Create a snapshot of all dependencies from manifest information
-   * @description Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.
-   * You can upload multiple lockfiles in the same request, but each filename must be unique.
-   *
-   * The name of the file must be in the supported list.
-   *
-   * For example, these are valid filenames: "requirements.txt", "package.json", "folder/package.json", and "deep/nested/folder/package.json".
-   *
-   * This endpoint consumes 100 units of your quota.
-   */
-  createDependenciesSnapshot: {
-    parameters: {
-      query?: {
-        repository?: string;
-        branch?: string;
-      };
-    };
-    requestBody?: {
-      content: {
-        "multipart/form-data": {
-          /** @default */
-          repository?: string;
-          /** @default */
-          branch?: string;
-          [key: string]: undefined;
-        };
-      };
-    };
-    responses: {
-      /** @description ID of the dependencies snapshot */
-      200: {
-        content: {
-          "application/json": Record<string, never>;
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-      500: components["responses"]["SocketInternalServerError"];
-    };
-  };
-  /**
-   * Get supported files for report
-   * @description Get a list of supported files for project report generation.
-   * Files are categorized first by environment (e.g. NPM or PyPI), then by name.
-   *
-   * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
-   * Examples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.
-   *
-   * This endpoint consumes 0 units of your quota.
-   */
-  getReportSupportedFiles: {
-    responses: {
-      /** @description Glob patterns used to match supported files */
-      200: {
-        content: {
-          "application/json": {
-            [key: string]: {
-              [key: string]: {
-                /** @default */
-                pattern: string;
-              };
-            };
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Delete a report
-   * @description Delete a specific project report generated with the GitHub app. These endpoints will be merged into the full-scans endpoint so
-   *
-   * This endpoint consumes 10 units of your quota.
-   */
-  deleteReport: {
-    parameters: {
-      path: {
-        id: string;
-      };
-    };
-    responses: {
-      /** @description Success */
-      200: {
-        content: {
-          "application/json": {
-            /** @default ok */
-            status: string;
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Get list of reports
-   * @deprecated
-   * @description Get all your project reports generated with the GitHub app. This endpoint will be merged into the full-scans endpoint soon.
-   *
-   * This endpoint consumes 10 units of your quota.
-   */
-  getReportList: {
-    responses: {
-      /** @description List of project reports */
-      200: {
-        content: {
-          "application/json": {
-              /** @default */
-              id: string;
-              /** @default */
-              url: string;
-              /** @default */
-              repo: string;
-              /** @default */
-              branch: string;
-              /** @default null */
-              pull_requests: Record<string, never>;
-              /** @default */
-              commit: string;
-              /** @default */
-              owner: string;
-              /** @default */
-              created_at: string;
-            }[];
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Create a report
-   * @deprecated
-   * @description Upload a lockfile to get your project analyzed by Socket.
-   * You can upload multiple lockfiles in the same request, but each filename must be unique.
-   *
-   * The name of the file must be in the supported list.
-   *
-   * For example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.
-   *
-   * This endpoint consumes 100 units of your quota.
-   */
-  createReport: {
-    requestBody?: {
-      content: {
-        "multipart/form-data": {
-          issueRules?: {
-            [key: string]: boolean;
-          };
-          [key: string]: undefined;
-        };
-      };
-    };
-    responses: {
-      /** @description ID and URL of the project report */
-      200: {
-        content: {
-          "application/json": {
+            namespace?: string;
+            /** @default */
+            name?: string;
+            /** @default */
+            version?: string;
+            /** @default */
+            subpath?: string;
+            /** @default */
+            release?: string;
             /** @default */
             id: string;
-            /** @default */
-            url: string;
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * View a report
-   * @deprecated
-   * @description Get all the issues, packages, and scores related to an specific project report.
-   *
-   * This endpoint consumes 10 units of your quota.
-   */
-  getReport: {
-    parameters: {
-      path: {
-        id: string;
-      };
-    };
-    responses: {
-      /** @description Socket report */
-      200: {
-        content: {
-          "application/json": components["schemas"]["SocketReport"];
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      410: components["responses"]["SocketGone"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * List GitHub repositories
-   * @deprecated
-   * @description Get all GitHub repositories associated with a Socket org.
-   *
-   * This endpoint consumes 0 units of your quota.
-   */
-  getRepoList: {
-    parameters: {
-      query?: {
-        pageToken?: string;
-      };
-    };
-    responses: {
-      /** @description List of GitHub repositories associated with the organization. */
-      200: {
-        content: {
-          "application/json": {
-            results: {
+            /** @default false */
+            direct?: boolean;
+            manifestFiles?: {
                 /** @default */
-                id?: string;
-                /** @default */
-                created_at?: string;
-                /** @default */
-                updated_at?: string;
-                /** @default */
-                github_install_id?: string;
-                /** @default */
-                github_repo_id?: string;
-                /** @default */
-                name?: string;
-                /** @default */
-                github_full_name?: string;
-                /** @default */
-                organization_id?: string;
-                latest_project_report?: {
-                  /** @default */
-                  id: string;
-                  /** @default */
-                  created_at: string;
-                };
+                file: string;
+                /** @default 0 */
+                start?: number;
+                /** @default 0 */
+                end?: number;
               }[];
+            topLevelAncestors?: string[];
+            dependencies?: string[];
+            artifact?: {
+              /**
+               * @default unknown
+               * @enum {string}
+               */
+              type: "unknown" | "npm" | "pypi" | "golang";
+              /** @default */
+              namespace?: string;
+              /** @default */
+              name?: string;
+              /** @default */
+              version?: string;
+              /** @default */
+              subpath?: string;
+              /** @default */
+              release?: string;
+              /** @default */
+              id: string;
+            };
+            /** @default */
+            license?: string;
+            author?: string[];
+            /** @default 0 */
+            size?: number;
+            score?: {
+              /** @default 0 */
+              supplyChain: number;
+              /** @default 0 */
+              quality: number;
+              /** @default 0 */
+              maintenance: number;
+              /** @default 0 */
+              vulnerability: number;
+              /** @default 0 */
+              license: number;
+              /** @default 0 */
+              overall: number;
+            };
+            alerts?: {
+                /** @default */
+                key: string;
+                /** @default */
+                type: string;
+                severity: components["schemas"]["SocketIssueSeverity"];
+                category: components["schemas"]["SocketCategory"];
+                /** @default */
+                file?: string;
+                /** @default 0 */
+                start?: number;
+                /** @default 0 */
+                end?: number;
+                /** @default null */
+                props?: Record<string, never>;
+              }[];
+            /** @default 0 */
+            batchIndex?: number;
           };
         };
       };
@@ -3577,6 +3530,224 @@ export interface operations {
       401: components["responses"]["SocketUnauthorized"];
       403: components["responses"]["SocketForbidden"];
       404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * List GitHub repositories
+   * @deprecated
+   * @description Get all GitHub repositories associated with a Socket org.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getRepoList: {
+    parameters: {
+      query?: {
+        pageToken?: string;
+      };
+    };
+    responses: {
+      /** @description List of GitHub repositories associated with the organization. */
+      200: {
+        content: {
+          "application/json": {
+            results: {
+                /** @default */
+                id?: string;
+                /** @default */
+                created_at?: string;
+                /** @default */
+                updated_at?: string;
+                /** @default */
+                github_install_id?: string;
+                /** @default */
+                github_repo_id?: string;
+                /** @default */
+                name?: string;
+                /** @default */
+                github_full_name?: string;
+                /** @default */
+                organization_id?: string;
+                latest_project_report?: {
+                  /** @default */
+                  id: string;
+                  /** @default */
+                  created_at: string;
+                };
+              }[];
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get supported files for report
+   * @description Get a list of supported files for project report generation.
+   * Files are categorized first by environment (e.g. NPM or PyPI), then by name.
+   *
+   * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
+   * Examples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.
+   *
+   * This endpoint consumes 0 units of your quota.
+   */
+  getReportSupportedFiles: {
+    responses: {
+      /** @description Glob patterns used to match supported files */
+      200: {
+        content: {
+          "application/json": {
+            [key: string]: {
+              [key: string]: {
+                /** @default */
+                pattern: string;
+              };
+            };
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Delete a report
+   * @description Delete a specific project report generated with the GitHub app. These endpoints will be merged into the full-scans endpoint so
+   *
+   * This endpoint consumes 10 units of your quota.
+   */
+  deleteReport: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        content: {
+          "application/json": {
+            /** @default ok */
+            status: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get list of reports
+   * @deprecated
+   * @description Get all your project reports generated with the GitHub app. This endpoint will be merged into the full-scans endpoint soon.
+   *
+   * This endpoint consumes 10 units of your quota.
+   */
+  getReportList: {
+    responses: {
+      /** @description List of project reports */
+      200: {
+        content: {
+          "application/json": {
+              /** @default */
+              id: string;
+              /** @default */
+              url: string;
+              /** @default */
+              repo: string;
+              /** @default */
+              branch: string;
+              /** @default null */
+              pull_requests: Record<string, never>;
+              /** @default */
+              commit: string;
+              /** @default */
+              owner: string;
+              /** @default */
+              created_at: string;
+            }[];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Create a report
+   * @deprecated
+   * @description Upload a lockfile to get your project analyzed by Socket.
+   * You can upload multiple lockfiles in the same request, but each filename must be unique.
+   *
+   * The name of the file must be in the supported list.
+   *
+   * For example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.
+   *
+   * This endpoint consumes 100 units of your quota.
+   */
+  createReport: {
+    requestBody?: {
+      content: {
+        "multipart/form-data": {
+          issueRules?: {
+            [key: string]: boolean;
+          };
+          [key: string]: undefined;
+        };
+      };
+    };
+    responses: {
+      /** @description ID and URL of the project report */
+      200: {
+        content: {
+          "application/json": {
+            /** @default */
+            id: string;
+            /** @default */
+            url: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * View a report
+   * @deprecated
+   * @description Get all the issues, packages, and scores related to an specific project report.
+   *
+   * This endpoint consumes 10 units of your quota.
+   */
+  getReport: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Socket report */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SocketReport"];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      410: components["responses"]["SocketGone"];
       429: components["responses"]["SocketTooManyRequestsResponse"];
     };
   };
