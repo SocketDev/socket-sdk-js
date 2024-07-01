@@ -109,38 +109,6 @@
         },
         "description": "Insufficient max_quota for API method"
       },
-      "SocketNotFoundResponse": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "additionalProperties": false,
-              "description": "",
-              "properties": {
-                "error": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    }
-                  },
-                  "required": [
-                    "message"
-                  ]
-                }
-              },
-              "required": [
-                "error"
-              ]
-            }
-          }
-        },
-        "description": "Resource not found"
-      },
       "SocketTooManyRequestsResponse": {
         "description": "Insufficient quota for API route",
         "headers": {
@@ -181,6 +149,38 @@
             }
           }
         }
+      },
+      "SocketNotFoundResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "",
+              "properties": {
+                "error": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              },
+              "required": [
+                "error"
+              ]
+            }
+          }
+        },
+        "description": "Resource not found"
       },
       "SocketInternalServerError": {
         "content": {
@@ -248,6 +248,195 @@
       }
     },
     "schemas": {
+      "CDX_JSON": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "bomFormat": {
+            "type": "string",
+            "description": "",
+            "default": "CycloneDX"
+          },
+          "specVersion": {
+            "type": "string",
+            "description": "",
+            "default": "1.5"
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "version": {
+            "type": "number",
+            "description": "",
+            "default": 0
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "description": "",
+                "default": ""
+              },
+              "tools": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "",
+                "properties": {
+                  "components": {
+                    "type": "array",
+                    "items": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/CDXComponent"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "author": {
+                              "type": "string",
+                              "description": "",
+                              "default": "Socket"
+                            },
+                            "publisher": {
+                              "type": "string",
+                              "description": "",
+                              "default": "Socket"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "components"
+                ]
+              },
+              "authors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "",
+                      "default": "Socket"
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ]
+                }
+              },
+              "supplier": {
+                "type": "string",
+                "description": "",
+                "default": ""
+              },
+              "lifecycles": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "phase": {
+                      "type": "string",
+                      "description": "",
+                      "default": "build"
+                    }
+                  },
+                  "required": [
+                    "phase"
+                  ]
+                }
+              },
+              "component": {
+                "$ref": "#/components/schemas/CDXComponent"
+              },
+              "properties": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "value": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "value"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "authors",
+              "component",
+              "lifecycles",
+              "timestamp",
+              "tools"
+            ]
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CDXComponent"
+            }
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "ref": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "dependsOn": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "",
+                    "default": ""
+                  }
+                }
+              },
+              "required": [
+                "ref"
+              ]
+            }
+          }
+        },
+        "required": [
+          "bomFormat",
+          "components",
+          "dependencies",
+          "metadata",
+          "serialNumber",
+          "specVersion",
+          "version"
+        ]
+      },
       "SocketIssueSeverity": {
         "type": "string",
         "enum": [
@@ -285,6 +474,51 @@
         },
         "required": [
           "components"
+        ]
+      },
+      "SocketIssueList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/SocketIssue"
+        }
+      },
+      "SocketPackageScore": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "supplyChainRisk": {
+            "$ref": "#/components/schemas/SocketMetricSchema"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/SocketMetricSchema"
+          },
+          "maintenance": {
+            "$ref": "#/components/schemas/SocketMetricSchema"
+          },
+          "vulnerability": {
+            "$ref": "#/components/schemas/SocketMetricSchema"
+          },
+          "license": {
+            "$ref": "#/components/schemas/SocketMetricSchema"
+          },
+          "miscellaneous": {
+            "$ref": "#/components/schemas/SocketMetricSchema"
+          },
+          "depscore": {
+            "type": "number",
+            "description": "",
+            "default": 0
+          }
+        },
+        "required": [
+          "depscore",
+          "license",
+          "maintenance",
+          "miscellaneous",
+          "quality",
+          "supplyChainRisk",
+          "vulnerability"
         ]
       },
       "SocketReport": {
@@ -358,49 +592,307 @@
           "url"
         ]
       },
-      "SocketIssueList": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/SocketIssue"
-        }
-      },
-      "SocketPackageScore": {
+      "CDXComponent": {
         "type": "object",
         "additionalProperties": false,
-        "description": "",
         "properties": {
-          "supplyChainRisk": {
-            "$ref": "#/components/schemas/SocketMetricSchema"
-          },
-          "quality": {
-            "$ref": "#/components/schemas/SocketMetricSchema"
-          },
-          "maintenance": {
-            "$ref": "#/components/schemas/SocketMetricSchema"
-          },
-          "vulnerability": {
-            "$ref": "#/components/schemas/SocketMetricSchema"
-          },
-          "license": {
-            "$ref": "#/components/schemas/SocketMetricSchema"
-          },
-          "miscellaneous": {
-            "$ref": "#/components/schemas/SocketMetricSchema"
-          },
-          "depscore": {
-            "type": "number",
+          "author": {
+            "type": "string",
             "description": "",
-            "default": 0
+            "default": ""
+          },
+          "publisher": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "group": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "name": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "version": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "scope": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "hashes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "",
+              "properties": {
+                "alg": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "content": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                }
+              },
+              "required": [
+                "alg",
+                "content"
+              ]
+            }
+          },
+          "licenses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "",
+              "properties": {
+                "license": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "url": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  }
+                }
+              },
+              "required": [
+                "license"
+              ]
+            }
+          },
+          "purl": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "externalReferences": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "url": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                }
+              },
+              "required": [
+                "type",
+                "url"
+              ]
+            }
+          },
+          "type": {
+            "type": "string",
+            "description": "",
+            "default": "application"
+          },
+          "bom-ref": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "evidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "identity": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "",
+                "properties": {
+                  "field": {
+                    "type": "string",
+                    "description": "",
+                    "default": ""
+                  },
+                  "confidence": {
+                    "type": "number",
+                    "description": "",
+                    "default": 0
+                  },
+                  "methods": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "technique": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "confidence": {
+                          "type": "number",
+                          "description": "",
+                          "default": 0
+                        },
+                        "value": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        }
+                      },
+                      "required": [
+                        "confidence",
+                        "technique",
+                        "value"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "confidence",
+                  "field",
+                  "methods"
+                ]
+              },
+              "occurrences": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "location": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "location"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "identity"
+            ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            }
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "value": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                }
+              },
+              "required": [
+                "name",
+                "value"
+              ]
+            }
+          },
+          "cryptoProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "",
+              "properties": {
+                "assetType": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "algorithmProperties": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "executionEnvironment": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "implementationPlatform": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "executionEnvironment",
+                    "implementationPlatform"
+                  ]
+                }
+              },
+              "required": [
+                "algorithmProperties",
+                "assetType"
+              ]
+            }
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CDXComponent"
+            }
           }
         },
         "required": [
-          "depscore",
-          "license",
-          "maintenance",
-          "miscellaneous",
-          "quality",
-          "supplyChainRisk",
-          "vulnerability"
+          "bom-ref",
+          "group",
+          "name",
+          "purl",
+          "type",
+          "version"
         ]
       },
       "SocketBatchPURLRequest": {
@@ -6083,42 +6575,391 @@
     }
   },
   "paths": {
-    "/purl": {
-      "post": {
+    "/analytics/org/{filter}": {
+      "get": {
         "tags": [
-          "Packages"
+          "Analytics"
         ],
-        "summary": "Get Packages (Beta)",
-        "externalDocs": {
-          "description": "Socket Package URLs (purl)",
-          "url": "https://docs.socket.dev/reference/socket-package-urls-purl"
-        },
-        "operationId": "batchPackageFetch",
+        "summary": "Get organization analytics (unstable)",
+        "operationId": "getOrgAnalytics",
         "parameters": [
           {
-            "name": "license",
-            "in": "query",
-            "required": false,
+            "name": "filter",
+            "in": "path",
+            "required": true,
+            "description": "",
             "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          },
-          {
-            "name": "alerts",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
+              "type": "string"
             }
           }
         ],
+        "security": [
+          {
+            "basicAuth": [
+              "report:write"
+            ]
+          }
+        ],
+        "description": "Get analytics data regarding the number of alerts found across all active repositories.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "repository_id": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "organization_id": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "repository_name": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "total_critical_alerts": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_high_alerts": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_medium_alerts": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_low_alerts": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_critical_added": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_high_added": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_medium_added": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_low_added": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_critical_prevented": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_high_prevented": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_medium_prevented": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_low_prevented": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "top_five_alert_types": {
+                        "type": "object",
+                        "default": {},
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "created_at",
+                      "id",
+                      "organization_id",
+                      "repository_id",
+                      "repository_name",
+                      "top_five_alert_types",
+                      "total_critical_added",
+                      "total_critical_alerts",
+                      "total_critical_prevented",
+                      "total_high_added",
+                      "total_high_alerts",
+                      "total_high_prevented",
+                      "total_low_added",
+                      "total_low_alerts",
+                      "total_low_prevented",
+                      "total_medium_added",
+                      "total_medium_alerts",
+                      "total_medium_prevented"
+                    ]
+                  }
+                }
+              }
+            },
+            "description": "Socket analytics - organization-level data"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/analytics/repo/{name}/{filter}": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Get repository analytics",
+        "operationId": "getRepoAnalytics",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "report:write"
+            ]
+          }
+        ],
+        "description": "Get analytics data regarding the number of alerts found in a single repository.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "repository_id": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "organization_id": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "repository_name": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "total_critical_alerts": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_high_alerts": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_medium_alerts": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_low_alerts": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_critical_added": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_high_added": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_medium_added": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_low_added": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_critical_prevented": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_high_prevented": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_medium_prevented": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "total_low_prevented": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "top_five_alert_types": {
+                        "type": "object",
+                        "default": {},
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "created_at",
+                      "id",
+                      "organization_id",
+                      "repository_id",
+                      "repository_name",
+                      "top_five_alert_types",
+                      "total_critical_added",
+                      "total_critical_alerts",
+                      "total_critical_prevented",
+                      "total_high_added",
+                      "total_high_alerts",
+                      "total_high_prevented",
+                      "total_low_added",
+                      "total_low_alerts",
+                      "total_low_prevented",
+                      "total_medium_added",
+                      "total_medium_alerts",
+                      "total_medium_prevented"
+                    ]
+                  }
+                }
+              }
+            },
+            "description": "Socket analytics - repo-level data"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/dependencies/search": {
+      "post": {
+        "tags": [
+          "Dependencies"
+        ],
+        "summary": "Search dependencies",
+        "operationId": "searchDependencies",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SocketBatchPURLFetch"
+                "type": "object",
+                "additionalProperties": false,
+                "description": "",
+                "properties": {
+                  "limit": {
+                    "type": "integer",
+                    "description": "",
+                    "default": 50,
+                    "minimum": 1,
+                    "maximum": 1000
+                  },
+                  "offset": {
+                    "type": "integer",
+                    "description": "",
+                    "default": 0,
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "limit",
+                  "offset"
+                ]
               }
             }
           },
@@ -6126,230 +6967,67 @@
         },
         "security": [
           {
-            "basicAuth": [
-              "packages:list"
-            ]
+            "basicAuth": []
           }
         ],
-        "description": "Batch retrieval of package metadata and alerts by PURL strings. Compatible witch CycloneDX reports.\n\nPackage URLs (PURLs) are an ecosystem agnostic way to identify packages.\nCycloneDX SBOMs use the purl format to identify components.\nThis endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.\n\nMore information on purl and CycloneDX:\n\n- [`purl` Spec](https://github.com/package-url/purl-spec)\n- [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)\n\n## Examples:\n\n### Looking up an npm package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\n### Looking up an PyPi package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    }\n  ]\n}\n```\n\n### Looking up a Maven package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### Batch lookup\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    },\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    },\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\nThis endpoint consumes 100 units of your quota.",
+        "description": "Search for any dependency that is being used in your organization.\n\nThis endpoint consumes 0 units of your quota.",
         "responses": {
           "200": {
             "content": {
-              "application/x-ndjson": {
+              "application/json": {
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
+                  "description": "",
                   "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "unknown",
-                        "npm",
-                        "pypi",
-                        "golang"
-                      ],
-                      "description": "",
-                      "default": "unknown"
-                    },
-                    "namespace": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "version": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "subpath": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "release": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "id": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "direct": {
+                    "end": {
                       "type": "boolean",
                       "default": false,
                       "description": ""
                     },
-                    "manifestFiles": {
+                    "limit": {
+                      "type": "integer",
+                      "description": "",
+                      "default": 1000
+                    },
+                    "offset": {
+                      "type": "integer",
+                      "description": "",
+                      "default": 0
+                    },
+                    "rows": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "additionalProperties": false,
+                        "description": "",
                         "properties": {
-                          "file": {
+                          "branch": {
                             "type": "string",
                             "description": "",
                             "default": ""
                           },
-                          "start": {
-                            "type": "integer",
-                            "description": "",
-                            "default": 0
+                          "direct": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": ""
                           },
-                          "end": {
-                            "type": "integer",
+                          "id": {
+                            "type": "string",
                             "description": "",
-                            "default": 0
-                          }
-                        },
-                        "required": [
-                          "file"
-                        ]
-                      }
-                    },
-                    "topLevelAncestors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      }
-                    },
-                    "dependencies": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      }
-                    },
-                    "artifact": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "unknown",
-                            "npm",
-                            "pypi",
-                            "golang"
-                          ],
-                          "description": "",
-                          "default": "unknown"
-                        },
-                        "namespace": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "name": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "version": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "subpath": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "release": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "id": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "type"
-                      ]
-                    },
-                    "license": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "author": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      }
-                    },
-                    "size": {
-                      "type": "number",
-                      "description": "",
-                      "default": 0
-                    },
-                    "score": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "description": "",
-                      "properties": {
-                        "supplyChain": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "quality": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "maintenance": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "vulnerability": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "license": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "overall": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        }
-                      },
-                      "required": [
-                        "license",
-                        "maintenance",
-                        "overall",
-                        "quality",
-                        "supplyChain",
-                        "vulnerability"
-                      ]
-                    },
-                    "alerts": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "key": {
+                            "default": ""
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "namespace": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "repository": {
                             "type": "string",
                             "description": "",
                             "default": ""
@@ -6359,51 +7037,456 @@
                             "description": "",
                             "default": ""
                           },
-                          "severity": {
-                            "$ref": "#/components/schemas/SocketIssueSeverity"
-                          },
-                          "category": {
-                            "$ref": "#/components/schemas/SocketCategory"
-                          },
-                          "file": {
+                          "version": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          }
+                        },
+                        "required": [
+                          "branch",
+                          "direct",
+                          "id",
+                          "name",
+                          "namespace",
+                          "repository",
+                          "type",
+                          "version"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "end",
+                    "limit",
+                    "offset",
+                    "rows"
+                  ]
+                }
+              }
+            },
+            "description": "Search dependencies response"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/dependencies/upload": {
+      "post": {
+        "tags": [
+          "Dependencies"
+        ],
+        "summary": "Create a snapshot of all dependencies from manifest information",
+        "operationId": "createDependenciesSnapshot",
+        "parameters": [
+          {
+            "name": "repository",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "branch",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string",
+                  "default": {
+                    "type": "Buffer",
+                    "data": []
+                  },
+                  "format": "binary",
+                  "description": ""
+                },
+                "properties": {
+                  "repository": {
+                    "type": "string",
+                    "description": "",
+                    "default": ""
+                  },
+                  "branch": {
+                    "type": "string",
+                    "description": "",
+                    "default": ""
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "basicAuth": [
+              "report:write"
+            ]
+          }
+        ],
+        "description": "Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: \"requirements.txt\", \"package.json\", \"folder/package.json\", and \"deep/nested/folder/package.json\".\n\nThis endpoint consumes 100 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {}
+                }
+              }
+            },
+            "description": "ID of the dependencies snapshot"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/SocketInternalServerError"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/audit-log": {
+      "get": {
+        "tags": [
+          "Audit Log"
+        ],
+        "summary": "Get Audit Log Events",
+        "operationId": "getAuditLogEvents",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Filter audit log events by type. Omit for all types.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "BookDemo",
+                "CancelInvitation",
+                "ChangeMemberRole",
+                "ChangePlanSubscriptionSeats",
+                "ContactForm",
+                "CreateApiToken",
+                "CreateUser",
+                "GithubAppInstallation",
+                "JoinOrganizationByVcs",
+                "LinkAccount",
+                "RemoveMember",
+                "ResetInvitationLink",
+                "ResetOrganizationSettingToDefault",
+                "RotateApiToken",
+                "SendInvitation",
+                "SignIn",
+                "SignOut",
+                "Subscribe",
+                "SyncOrganization",
+                "TransferOwnership",
+                "UpdateAlertTriage",
+                "UpdateApiTokenName",
+                "UpdateApiTokenScopes",
+                "UpdateApiTokenVisibility",
+                "UpdateOrganizationSetting",
+                "UpgradeOrganizationPlan",
+                "VerifiedEmail"
+              ]
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "Number of events per page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 30
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Page token",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "audit-log:list"
+            ]
+          }
+        ],
+        "description": "Paginated list of audit log events.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "event_id": {
                             "type": "string",
                             "description": "",
                             "default": ""
                           },
-                          "start": {
-                            "type": "integer",
+                          "created_at": {
+                            "type": "string",
                             "description": "",
-                            "default": 0
+                            "default": ""
                           },
-                          "end": {
-                            "type": "integer",
+                          "updated_at": {
+                            "type": "string",
                             "description": "",
-                            "default": 0
+                            "default": ""
                           },
-                          "props": {
+                          "country_code": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "organization_id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "ip_address": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "payload": {
                             "type": "object",
                             "description": "",
                             "default": null
+                          },
+                          "status_code": {
+                            "type": "integer",
+                            "description": "",
+                            "default": 0
+                          },
+                          "type": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "user_agent": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "user_id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "user_email": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "user_image": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "organization_name": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
                           }
-                        },
-                        "required": [
-                          "category",
-                          "key",
-                          "severity",
-                          "type"
-                        ]
+                        }
                       }
                     },
-                    "batchIndex": {
-                      "type": "integer",
+                    "nextPage": {
+                      "type": "string",
                       "description": "",
-                      "default": 0
+                      "default": ""
                     }
                   },
                   "required": [
-                    "id",
-                    "type"
+                    "nextPage",
+                    "results"
                   ]
+                }
+              }
+            },
+            "description": "The paginated list of events in an organizations audit log and the next page querystring token."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/cdx/{id}": {
+      "get": {
+        "tags": [
+          "CycloneDX",
+          "SBOM"
+        ],
+        "summary": "EXPERIMENTAL: Export CycloneDX SBOM",
+        "operationId": "exportSBOM",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The full scan or sbom report ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "author",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": "OWASP Foundation"
+            }
+          },
+          {
+            "name": "project_group",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "project_name",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "project_version",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "report:read"
+            ]
+          }
+        ],
+        "description": "Export a SocketSBOM as a CycloneDX SBOM\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CDX_JSON"
                 }
               }
             },
@@ -6417,9 +7500,6 @@
           },
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -8088,599 +9168,42 @@
         "x-readme": {}
       }
     },
-    "/orgs/{org_slug}/audit-log": {
-      "get": {
-        "tags": [
-          "Audit Log"
-        ],
-        "summary": "Get Audit Log Events",
-        "operationId": "getAuditLogEvents",
-        "parameters": [
-          {
-            "name": "org_slug",
-            "in": "path",
-            "required": true,
-            "description": "The slug of the organization",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "type",
-            "in": "query",
-            "required": false,
-            "description": "Filter audit log events by type. Omit for all types.",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "BookDemo",
-                "CancelInvitation",
-                "ChangeMemberRole",
-                "ChangePlanSubscriptionSeats",
-                "ContactForm",
-                "CreateApiToken",
-                "CreateUser",
-                "GithubAppInstallation",
-                "JoinOrganizationByVcs",
-                "LinkAccount",
-                "RemoveMember",
-                "ResetInvitationLink",
-                "ResetOrganizationSettingToDefault",
-                "RotateApiToken",
-                "SendInvitation",
-                "SignIn",
-                "SignOut",
-                "Subscribe",
-                "SyncOrganization",
-                "TransferOwnership",
-                "UpdateAlertTriage",
-                "UpdateApiTokenName",
-                "UpdateApiTokenScopes",
-                "UpdateApiTokenVisibility",
-                "UpdateOrganizationSetting",
-                "UpgradeOrganizationPlan",
-                "VerifiedEmail"
-              ]
-            }
-          },
-          {
-            "name": "per_page",
-            "in": "query",
-            "required": false,
-            "description": "Number of events per page",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 30
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "description": "Page token",
-            "schema": {
-              "type": "string",
-              "default": "1"
-            }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": [
-              "audit-log:list"
-            ]
-          }
-        ],
-        "description": "Paginated list of audit log events.\n\nThis endpoint consumes 0 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "event_id": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "created_at": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "updated_at": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "country_code": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "organization_id": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "ip_address": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "payload": {
-                            "type": "object",
-                            "description": "",
-                            "default": null
-                          },
-                          "status_code": {
-                            "type": "integer",
-                            "description": "",
-                            "default": 0
-                          },
-                          "type": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "user_agent": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "user_id": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "user_email": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "user_image": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "organization_name": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          }
-                        }
-                      }
-                    },
-                    "nextPage": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    }
-                  },
-                  "required": [
-                    "nextPage",
-                    "results"
-                  ]
-                }
-              }
-            },
-            "description": "The paginated list of events in an organizations audit log and the next page querystring token."
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/analytics/org/{filter}": {
-      "get": {
-        "tags": [
-          "Analytics"
-        ],
-        "summary": "Get organization analytics (unstable)",
-        "operationId": "getOrgAnalytics",
-        "parameters": [
-          {
-            "name": "filter",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": [
-              "report:write"
-            ]
-          }
-        ],
-        "description": "Get analytics data regarding the number of alerts found across all active repositories.\n\nThis endpoint consumes 0 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "description": "",
-                    "properties": {
-                      "id": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "created_at": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "repository_id": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "organization_id": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "repository_name": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "total_critical_alerts": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_high_alerts": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_medium_alerts": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_low_alerts": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_critical_added": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_high_added": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_medium_added": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_low_added": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_critical_prevented": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_high_prevented": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_medium_prevented": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_low_prevented": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "top_five_alert_types": {
-                        "type": "object",
-                        "default": {},
-                        "additionalProperties": false
-                      }
-                    },
-                    "required": [
-                      "created_at",
-                      "id",
-                      "organization_id",
-                      "repository_id",
-                      "repository_name",
-                      "top_five_alert_types",
-                      "total_critical_added",
-                      "total_critical_alerts",
-                      "total_critical_prevented",
-                      "total_high_added",
-                      "total_high_alerts",
-                      "total_high_prevented",
-                      "total_low_added",
-                      "total_low_alerts",
-                      "total_low_prevented",
-                      "total_medium_added",
-                      "total_medium_alerts",
-                      "total_medium_prevented"
-                    ]
-                  }
-                }
-              }
-            },
-            "description": "Socket analytics - organization-level data"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/analytics/repo/{name}/{filter}": {
-      "get": {
-        "tags": [
-          "Analytics"
-        ],
-        "summary": "Get repository analytics",
-        "operationId": "getRepoAnalytics",
-        "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filter",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": [
-              "report:write"
-            ]
-          }
-        ],
-        "description": "Get analytics data regarding the number of alerts found in a single repository.\n\nThis endpoint consumes 0 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "description": "",
-                    "properties": {
-                      "id": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "repository_id": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "created_at": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "organization_id": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "repository_name": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "total_critical_alerts": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_high_alerts": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_medium_alerts": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_low_alerts": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_critical_added": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_high_added": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_medium_added": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_low_added": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_critical_prevented": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_high_prevented": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_medium_prevented": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "total_low_prevented": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                      },
-                      "top_five_alert_types": {
-                        "type": "object",
-                        "default": {},
-                        "additionalProperties": false
-                      }
-                    },
-                    "required": [
-                      "created_at",
-                      "id",
-                      "organization_id",
-                      "repository_id",
-                      "repository_name",
-                      "top_five_alert_types",
-                      "total_critical_added",
-                      "total_critical_alerts",
-                      "total_critical_prevented",
-                      "total_high_added",
-                      "total_high_alerts",
-                      "total_high_prevented",
-                      "total_low_added",
-                      "total_low_alerts",
-                      "total_low_prevented",
-                      "total_medium_added",
-                      "total_medium_alerts",
-                      "total_medium_prevented"
-                    ]
-                  }
-                }
-              }
-            },
-            "description": "Socket analytics - repo-level data"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/dependencies/search": {
+    "/purl": {
       "post": {
         "tags": [
-          "Dependencies"
+          "Packages"
         ],
-        "summary": "Search dependencies",
-        "operationId": "searchDependencies",
+        "summary": "Get Packages (Beta)",
+        "externalDocs": {
+          "description": "Socket Package URLs (purl)",
+          "url": "https://docs.socket.dev/reference/socket-package-urls-purl"
+        },
+        "operationId": "batchPackageFetch",
+        "parameters": [
+          {
+            "name": "license",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "alerts",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": false,
-                "description": "",
-                "properties": {
-                  "limit": {
-                    "type": "integer",
-                    "description": "",
-                    "default": 50,
-                    "minimum": 1,
-                    "maximum": 1000
-                  },
-                  "offset": {
-                    "type": "integer",
-                    "description": "",
-                    "default": 0,
-                    "minimum": 0
-                  }
-                },
-                "required": [
-                  "limit",
-                  "offset"
-                ]
+                "$ref": "#/components/schemas/SocketBatchPURLFetch"
               }
             }
           },
@@ -8688,715 +9211,288 @@
         },
         "security": [
           {
-            "basicAuth": []
+            "basicAuth": [
+              "packages:list"
+            ]
           }
         ],
-        "description": "Search for any dependency that is being used in your organization.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Batch retrieval of package metadata and alerts by PURL strings. Compatible witch CycloneDX reports.\n\nPackage URLs (PURLs) are an ecosystem agnostic way to identify packages.\nCycloneDX SBOMs use the purl format to identify components.\nThis endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.\n\nMore information on purl and CycloneDX:\n\n- [`purl` Spec](https://github.com/package-url/purl-spec)\n- [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)\n\n## Examples:\n\n### Looking up an npm package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\n### Looking up an PyPi package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    }\n  ]\n}\n```\n\n### Looking up a Maven package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### Batch lookup\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    },\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    },\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\nThis endpoint consumes 100 units of your quota.",
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+              "application/x-ndjson": {
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
-                  "description": "",
                   "properties": {
-                    "end": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "unknown",
+                        "npm",
+                        "pypi",
+                        "golang"
+                      ],
+                      "description": "",
+                      "default": "unknown"
+                    },
+                    "namespace": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "version": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "subpath": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "release": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "direct": {
                       "type": "boolean",
                       "default": false,
                       "description": ""
                     },
-                    "limit": {
-                      "type": "integer",
-                      "description": "",
-                      "default": 1000
-                    },
-                    "offset": {
-                      "type": "integer",
-                      "description": "",
-                      "default": 0
-                    },
-                    "rows": {
+                    "manifestFiles": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "additionalProperties": false,
-                        "description": "",
                         "properties": {
-                          "branch": {
+                          "file": {
                             "type": "string",
                             "description": "",
                             "default": ""
                           },
-                          "direct": {
-                            "type": "boolean",
-                            "default": false,
-                            "description": ""
-                          },
-                          "id": {
-                            "type": "string",
+                          "start": {
+                            "type": "integer",
                             "description": "",
-                            "default": ""
+                            "default": 0
                           },
-                          "name": {
-                            "type": "string",
+                          "end": {
+                            "type": "integer",
                             "description": "",
-                            "default": ""
-                          },
-                          "namespace": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "repository": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "type": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "version": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
+                            "default": 0
                           }
                         },
                         "required": [
-                          "branch",
-                          "direct",
-                          "id",
-                          "name",
-                          "namespace",
-                          "repository",
-                          "type",
-                          "version"
+                          "file"
                         ]
                       }
-                    }
-                  },
-                  "required": [
-                    "end",
-                    "limit",
-                    "offset",
-                    "rows"
-                  ]
-                }
-              }
-            },
-            "description": "Search dependencies response"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/dependencies/upload": {
-      "post": {
-        "tags": [
-          "Dependencies"
-        ],
-        "summary": "Create a snapshot of all dependencies from manifest information",
-        "operationId": "createDependenciesSnapshot",
-        "parameters": [
-          {
-            "name": "repository",
-            "in": "query",
-            "required": false,
-            "description": "",
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "branch",
-            "in": "query",
-            "required": false,
-            "description": "",
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string",
-                  "default": {
-                    "type": "Buffer",
-                    "data": []
-                  },
-                  "format": "binary",
-                  "description": ""
-                },
-                "properties": {
-                  "repository": {
-                    "type": "string",
-                    "description": "",
-                    "default": ""
-                  },
-                  "branch": {
-                    "type": "string",
-                    "description": "",
-                    "default": ""
-                  }
-                }
-              }
-            }
-          },
-          "required": false
-        },
-        "security": [
-          {
-            "basicAuth": [
-              "report:write"
-            ]
-          }
-        ],
-        "description": "Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: \"requirements.txt\", \"package.json\", \"folder/package.json\", and \"deep/nested/folder/package.json\".\n\nThis endpoint consumes 100 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {}
-                }
-              }
-            },
-            "description": "ID of the dependencies snapshot"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          },
-          "500": {
-            "$ref": "#/components/responses/SocketInternalServerError"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/report/supported": {
-      "get": {
-        "tags": [
-          "Project Reports"
-        ],
-        "summary": "Get supported files for report",
-        "operationId": "getReportSupportedFiles",
-        "security": [
-          {}
-        ],
-        "description": "Get a list of supported files for project report generation.\nFiles are categorized first by environment (e.g. NPM or PyPI), then by name.\n\nFiles whose names match the patterns returned by this endpoint can be uploaded for report generation.\nExamples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.\n\nThis endpoint consumes 0 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "object",
-                    "additionalProperties": {
+                    },
+                    "topLevelAncestors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      }
+                    },
+                    "dependencies": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      }
+                    },
+                    "artifact": {
                       "type": "object",
                       "additionalProperties": false,
-                      "description": "",
                       "properties": {
-                        "pattern": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "unknown",
+                            "npm",
+                            "pypi",
+                            "golang"
+                          ],
+                          "description": "",
+                          "default": "unknown"
+                        },
+                        "namespace": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "version": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "subpath": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "release": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "id": {
                           "type": "string",
                           "description": "",
                           "default": ""
                         }
                       },
                       "required": [
-                        "pattern"
+                        "id",
+                        "type"
                       ]
                     },
-                    "properties": {}
-                  },
-                  "properties": {}
-                }
-              }
-            },
-            "description": "Glob patterns used to match supported files"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/report/delete/{id}": {
-      "delete": {
-        "tags": [
-          "Project Reports"
-        ],
-        "summary": "Delete a report",
-        "operationId": "deleteReport",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": [
-              "report:write"
-            ]
-          }
-        ],
-        "description": "Delete a specific project report generated with the GitHub app. These endpoints will be merged into the full-scans endpoint so\n\nThis endpoint consumes 10 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "status": {
+                    "license": {
                       "type": "string",
                       "description": "",
-                      "default": "ok"
-                    }
-                  },
-                  "required": [
-                    "status"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/report/list": {
-      "get": {
-        "tags": [
-          "Project Reports"
-        ],
-        "summary": "Get list of reports",
-        "deprecated": true,
-        "operationId": "getReportList",
-        "security": [
-          {
-            "basicAuth": [
-              "report:list"
-            ]
-          }
-        ],
-        "description": "Get all your project reports generated with the GitHub app. This endpoint will be merged into the full-scans endpoint soon.\n\nThis endpoint consumes 10 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "description": "",
-                    "properties": {
-                      "id": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "url": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "repo": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "branch": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "pull_requests": {
-                        "type": "object",
-                        "description": "",
-                        "default": null
-                      },
-                      "commit": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "owner": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "created_at": {
+                      "default": ""
+                    },
+                    "author": {
+                      "type": "array",
+                      "items": {
                         "type": "string",
                         "description": "",
                         "default": ""
                       }
                     },
-                    "required": [
-                      "branch",
-                      "commit",
-                      "created_at",
-                      "id",
-                      "owner",
-                      "pull_requests",
-                      "repo",
-                      "url"
-                    ]
-                  }
-                }
-              }
-            },
-            "description": "List of project reports"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/report/upload": {
-      "put": {
-        "tags": [
-          "Project Reports"
-        ],
-        "summary": "Create a report",
-        "deprecated": true,
-        "operationId": "createReport",
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string",
-                  "default": {
-                    "type": "Buffer",
-                    "data": []
-                  },
-                  "format": "binary",
-                  "description": ""
-                },
-                "properties": {
-                  "issueRules": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "boolean",
-                      "default": false,
-                      "description": ""
-                    },
-                    "properties": {}
-                  }
-                }
-              }
-            }
-          },
-          "required": false
-        },
-        "security": [
-          {
-            "basicAuth": [
-              "report:write"
-            ]
-          }
-        ],
-        "description": "Upload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.\n\nThis endpoint consumes 100 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "id": {
-                      "type": "string",
+                    "size": {
+                      "type": "number",
                       "description": "",
-                      "default": ""
+                      "default": 0
                     },
-                    "url": {
-                      "type": "string",
+                    "score": {
+                      "type": "object",
+                      "additionalProperties": false,
                       "description": "",
-                      "default": ""
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "url"
-                  ]
-                }
-              }
-            },
-            "description": "ID and URL of the project report"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/report/view/{id}": {
-      "get": {
-        "tags": [
-          "Project Reports"
-        ],
-        "summary": "View a report",
-        "deprecated": true,
-        "operationId": "getReport",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": [
-              "report:read"
-            ]
-          }
-        ],
-        "description": "Get all the issues, packages, and scores related to an specific project report.\n\nThis endpoint consumes 10 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SocketReport"
-                }
-              }
-            },
-            "description": "Socket report"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "410": {
-            "$ref": "#/components/responses/SocketGone"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/repo/list": {
-      "get": {
-        "tags": [
-          "Repositories"
-        ],
-        "summary": "List GitHub repositories",
-        "deprecated": true,
-        "operationId": "getRepoList",
-        "parameters": [
-          {
-            "name": "pageToken",
-            "in": "query",
-            "required": false,
-            "description": "",
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": [
-              "repo:list"
-            ]
-          }
-        ],
-        "description": "Get all GitHub repositories associated with a Socket org.\n\nThis endpoint consumes 0 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "results": {
+                      "properties": {
+                        "supplyChain": {
+                          "type": "number",
+                          "description": "",
+                          "default": 0
+                        },
+                        "quality": {
+                          "type": "number",
+                          "description": "",
+                          "default": 0
+                        },
+                        "maintenance": {
+                          "type": "number",
+                          "description": "",
+                          "default": 0
+                        },
+                        "vulnerability": {
+                          "type": "number",
+                          "description": "",
+                          "default": 0
+                        },
+                        "license": {
+                          "type": "number",
+                          "description": "",
+                          "default": 0
+                        },
+                        "overall": {
+                          "type": "number",
+                          "description": "",
+                          "default": 0
+                        }
+                      },
+                      "required": [
+                        "license",
+                        "maintenance",
+                        "overall",
+                        "quality",
+                        "supplyChain",
+                        "vulnerability"
+                      ]
+                    },
+                    "alerts": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "additionalProperties": false,
                         "properties": {
-                          "id": {
+                          "key": {
                             "type": "string",
                             "description": "",
                             "default": ""
                           },
-                          "created_at": {
+                          "type": {
                             "type": "string",
                             "description": "",
                             "default": ""
                           },
-                          "updated_at": {
+                          "severity": {
+                            "$ref": "#/components/schemas/SocketIssueSeverity"
+                          },
+                          "category": {
+                            "$ref": "#/components/schemas/SocketCategory"
+                          },
+                          "file": {
                             "type": "string",
                             "description": "",
                             "default": ""
                           },
-                          "github_install_id": {
-                            "type": "string",
+                          "start": {
+                            "type": "integer",
                             "description": "",
-                            "default": ""
+                            "default": 0
                           },
-                          "github_repo_id": {
-                            "type": "string",
+                          "end": {
+                            "type": "integer",
                             "description": "",
-                            "default": ""
+                            "default": 0
                           },
-                          "name": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "github_full_name": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "organization_id": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "latest_project_report": {
+                          "props": {
                             "type": "object",
-                            "additionalProperties": false,
                             "description": "",
-                            "properties": {
-                              "id": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "created_at": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              }
-                            },
-                            "required": [
-                              "created_at",
-                              "id"
-                            ]
+                            "default": null
                           }
-                        }
+                        },
+                        "required": [
+                          "category",
+                          "key",
+                          "severity",
+                          "type"
+                        ]
                       }
+                    },
+                    "batchIndex": {
+                      "type": "integer",
+                      "description": "",
+                      "default": 0
                     }
                   },
                   "required": [
-                    "results"
+                    "id",
+                    "type"
                   ]
                 }
               }
             },
-            "description": "List of GitHub repositories associated with the organization."
+            "description": "Socket issue lists and scores for all packages"
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -9842,6 +9938,515 @@
           },
           "404": {
             "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/repo/list": {
+      "get": {
+        "tags": [
+          "Repositories"
+        ],
+        "summary": "List GitHub repositories",
+        "deprecated": true,
+        "operationId": "getRepoList",
+        "parameters": [
+          {
+            "name": "pageToken",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "repo:list"
+            ]
+          }
+        ],
+        "description": "Get all GitHub repositories associated with a Socket org.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "github_install_id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "github_repo_id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "github_full_name": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "organization_id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "latest_project_report": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "description": "",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "created_at": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              }
+                            },
+                            "required": [
+                              "created_at",
+                              "id"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "results"
+                  ]
+                }
+              }
+            },
+            "description": "List of GitHub repositories associated with the organization."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/report/supported": {
+      "get": {
+        "tags": [
+          "Project Reports"
+        ],
+        "summary": "Get supported files for report",
+        "operationId": "getReportSupportedFiles",
+        "security": [
+          {}
+        ],
+        "description": "Get a list of supported files for project report generation.\nFiles are categorized first by environment (e.g. NPM or PyPI), then by name.\n\nFiles whose names match the patterns returned by this endpoint can be uploaded for report generation.\nExamples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.\n\nThis endpoint consumes 0 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "pattern": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        }
+                      },
+                      "required": [
+                        "pattern"
+                      ]
+                    },
+                    "properties": {}
+                  },
+                  "properties": {}
+                }
+              }
+            },
+            "description": "Glob patterns used to match supported files"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/report/delete/{id}": {
+      "delete": {
+        "tags": [
+          "Project Reports"
+        ],
+        "summary": "Delete a report",
+        "operationId": "deleteReport",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "report:write"
+            ]
+          }
+        ],
+        "description": "Delete a specific project report generated with the GitHub app. These endpoints will be merged into the full-scans endpoint so\n\nThis endpoint consumes 10 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "",
+                      "default": "ok"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/report/list": {
+      "get": {
+        "tags": [
+          "Project Reports"
+        ],
+        "summary": "Get list of reports",
+        "deprecated": true,
+        "operationId": "getReportList",
+        "security": [
+          {
+            "basicAuth": [
+              "report:list"
+            ]
+          }
+        ],
+        "description": "Get all your project reports generated with the GitHub app. This endpoint will be merged into the full-scans endpoint soon.\n\nThis endpoint consumes 10 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "url": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "repo": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "branch": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "pull_requests": {
+                        "type": "object",
+                        "description": "",
+                        "default": null
+                      },
+                      "commit": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "owner": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      }
+                    },
+                    "required": [
+                      "branch",
+                      "commit",
+                      "created_at",
+                      "id",
+                      "owner",
+                      "pull_requests",
+                      "repo",
+                      "url"
+                    ]
+                  }
+                }
+              }
+            },
+            "description": "List of project reports"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/report/upload": {
+      "put": {
+        "tags": [
+          "Project Reports"
+        ],
+        "summary": "Create a report",
+        "deprecated": true,
+        "operationId": "createReport",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string",
+                  "default": {
+                    "type": "Buffer",
+                    "data": []
+                  },
+                  "format": "binary",
+                  "description": ""
+                },
+                "properties": {
+                  "issueRules": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": ""
+                    },
+                    "properties": {}
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "basicAuth": [
+              "report:write"
+            ]
+          }
+        ],
+        "description": "Upload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.\n\nThis endpoint consumes 100 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "url": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "url"
+                  ]
+                }
+              }
+            },
+            "description": "ID and URL of the project report"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/report/view/{id}": {
+      "get": {
+        "tags": [
+          "Project Reports"
+        ],
+        "summary": "View a report",
+        "deprecated": true,
+        "operationId": "getReport",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "report:read"
+            ]
+          }
+        ],
+        "description": "Get all the issues, packages, and scores related to an specific project report.\n\nThis endpoint consumes 10 units of your quota.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SocketReport"
+                }
+              }
+            },
+            "description": "Socket report"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "410": {
+            "$ref": "#/components/responses/SocketGone"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
