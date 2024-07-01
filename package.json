@@ -58,7 +58,7 @@
     "mocha": "^10.1.0",
     "nock": "^13.2.9",
     "npm-run-all2": "^6.0.4",
-    "openapi-typescript": "^6.3.2",
+    "openapi-typescript": "^7.0.0",
     "type-coverage": "^2.24.1",
     "typescript": "~5.0.4"
   },
