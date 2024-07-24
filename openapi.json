@@ -248,29 +248,65 @@
       }
     },
     "schemas": {
-      "SocketIssueSeverity": {
-        "type": "string",
-        "enum": [
-          "low",
-          "middle",
-          "high",
-          "critical"
-        ],
-        "description": "",
-        "default": "low"
-      },
-      "SocketCategory": {
-        "type": "string",
-        "enum": [
-          "supplyChainRisk",
-          "quality",
-          "maintenance",
-          "vulnerability",
-          "license",
-          "miscellaneous"
-        ],
-        "description": "",
-        "default": "miscellaneous"
+      "SocketArtifact": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SocketPURL"
+          },
+          {
+            "$ref": "#/components/schemas/SocketArtifactLink"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/SocketId"
+              },
+              "license": {
+                "type": "string",
+                "description": "",
+                "default": ""
+              },
+              "licenseDetails": {
+                "$ref": "#/components/schemas/LicenseDetails"
+              },
+              "licenseAttrib": {
+                "$ref": "#/components/schemas/SAttrib1_N"
+              },
+              "author": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                }
+              },
+              "size": {
+                "type": "number",
+                "description": "",
+                "default": 0
+              },
+              "score": {
+                "$ref": "#/components/schemas/SocketScore"
+              },
+              "alerts": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SocketAlert"
+                }
+              },
+              "batchIndex": {
+                "type": "integer",
+                "description": "",
+                "default": 0
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        ]
       },
       "SocketBatchPURLFetch": {
         "type": "object",
@@ -285,6 +321,431 @@
         },
         "required": [
           "components"
+        ]
+      },
+      "CDXManifestSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "bomFormat": {
+            "type": "string",
+            "description": "",
+            "default": "CycloneDX"
+          },
+          "specVersion": {
+            "type": "string",
+            "description": "",
+            "default": "1.5"
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "version": {
+            "type": "number",
+            "description": "",
+            "default": 0
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "description": "",
+                "default": ""
+              },
+              "tools": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "",
+                "properties": {
+                  "components": {
+                    "type": "array",
+                    "items": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/CDXComponentSchema"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "author": {
+                              "type": "string",
+                              "description": "",
+                              "default": "Socket"
+                            },
+                            "authors": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": "Socket"
+                              }
+                            },
+                            "publisher": {
+                              "type": "string",
+                              "description": "",
+                              "default": "Socket"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "components"
+                ]
+              },
+              "authors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "",
+                      "default": "Socket"
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ]
+                }
+              },
+              "supplier": {
+                "type": "string",
+                "description": "",
+                "default": ""
+              },
+              "lifecycles": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "phase": {
+                      "type": "string",
+                      "description": "",
+                      "default": "build"
+                    }
+                  },
+                  "required": [
+                    "phase"
+                  ]
+                }
+              },
+              "component": {
+                "$ref": "#/components/schemas/CDXComponentSchema"
+              },
+              "properties": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "value": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "value"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "authors",
+              "component",
+              "lifecycles",
+              "timestamp",
+              "tools"
+            ]
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CDXComponentSchema"
+            }
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "ref": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "dependsOn": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "",
+                    "default": ""
+                  }
+                }
+              },
+              "required": [
+                "ref"
+              ]
+            }
+          }
+        },
+        "required": [
+          "bomFormat",
+          "components",
+          "dependencies",
+          "metadata",
+          "serialNumber",
+          "specVersion",
+          "version"
+        ]
+      },
+      "SPDXManifestSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "spdxVersion": {
+            "type": "string",
+            "description": "",
+            "default": "SPDX-2.3"
+          },
+          "dataLicense": {
+            "type": "string",
+            "description": "",
+            "default": "CC0-1.0"
+          },
+          "SPDXID": {
+            "type": "string",
+            "description": "",
+            "default": "SPDXRef-DOCUMENT"
+          },
+          "name": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "documentNamespace": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "creationInfo": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "",
+            "properties": {
+              "created": {
+                "type": "string",
+                "description": "",
+                "default": ""
+              },
+              "creators": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                }
+              }
+            },
+            "required": [
+              "created",
+              "creators"
+            ]
+          },
+          "documentDescribes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            }
+          },
+          "packages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "SPDXID": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "versionInfo": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "packageFileName": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "description": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "primaryPackagePurpose": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "downloadLocation": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "filesAnalyzed": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": ""
+                },
+                "homepage": {
+                  "type": "string",
+                  "description": "",
+                  "default": "NOASSERTION"
+                },
+                "licenseDeclared": {
+                  "type": "string",
+                  "description": "",
+                  "default": "NOASSERTION"
+                },
+                "externalRefs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "referenceCategory": {
+                        "type": "string",
+                        "description": "",
+                        "default": "PACKAGE-MANAGER"
+                      },
+                      "referenceType": {
+                        "type": "string",
+                        "description": "",
+                        "default": "purl"
+                      },
+                      "referenceLocator": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      }
+                    },
+                    "required": [
+                      "referenceCategory",
+                      "referenceLocator",
+                      "referenceType"
+                    ]
+                  }
+                },
+                "checksums": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "algorithm": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "checksumValue": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      }
+                    },
+                    "required": [
+                      "algorithm",
+                      "checksumValue"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "SPDXID",
+                "externalRefs",
+                "filesAnalyzed",
+                "homepage",
+                "licenseDeclared",
+                "name",
+                "packageFileName",
+                "versionInfo"
+              ]
+            }
+          },
+          "relationships": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "",
+              "properties": {
+                "spdxElementId": {
+                  "type": "string",
+                  "description": "",
+                  "default": "SPDXRef-DOCUMENT"
+                },
+                "relatedSpdxElement": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "relationshipType": {
+                  "type": "string",
+                  "description": "",
+                  "default": "DESCRIBES"
+                }
+              },
+              "required": [
+                "relatedSpdxElement",
+                "relationshipType",
+                "spdxElementId"
+              ]
+            }
+          }
+        },
+        "required": [
+          "SPDXID",
+          "creationInfo",
+          "dataLicense",
+          "documentDescribes",
+          "documentNamespace",
+          "name",
+          "packages",
+          "relationships",
+          "spdxVersion"
         ]
       },
       "SocketReport": {
@@ -403,6 +864,283 @@
           "vulnerability"
         ]
       },
+      "SocketPURL": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/SocketPURL_Type"
+          },
+          "namespace": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "name": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "version": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "subpath": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "release": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "SocketId": {
+        "type": "string",
+        "description": "",
+        "default": ""
+      },
+      "SocketArtifactLink": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "direct": {
+            "type": "boolean",
+            "default": false,
+            "description": ""
+          },
+          "manifestFiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SocketManifestReference"
+            }
+          },
+          "topLevelAncestors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SocketId"
+            }
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SocketId"
+            }
+          },
+          "artifact": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SocketPURL"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "$ref": "#/components/schemas/SocketId"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "LicenseDetails": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "",
+          "properties": {
+            "spdxDisj": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            },
+            "provenance": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            },
+            "filepath": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            },
+            "match_strength": {
+              "type": "number",
+              "description": "",
+              "default": 0
+            }
+          },
+          "required": [
+            "filepath",
+            "match_strength",
+            "provenance",
+            "spdxDisj"
+          ]
+        }
+      },
+      "SAttrib1_N": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "",
+          "properties": {
+            "attribText": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            },
+            "attribData": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "",
+                "properties": {
+                  "purl": {
+                    "type": "string",
+                    "description": "",
+                    "default": ""
+                  },
+                  "foundInFilepath": {
+                    "type": "string",
+                    "description": "",
+                    "default": ""
+                  },
+                  "spdxExpr": {
+                    "type": "string",
+                    "description": "",
+                    "default": ""
+                  },
+                  "foundAuthors": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  }
+                },
+                "required": [
+                  "foundAuthors",
+                  "foundInFilepath",
+                  "purl",
+                  "spdxExpr"
+                ]
+              }
+            }
+          },
+          "required": [
+            "attribData",
+            "attribText"
+          ]
+        }
+      },
+      "SocketScore": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "supplyChain": {
+            "type": "number",
+            "description": "",
+            "default": 0
+          },
+          "quality": {
+            "type": "number",
+            "description": "",
+            "default": 0
+          },
+          "maintenance": {
+            "type": "number",
+            "description": "",
+            "default": 0
+          },
+          "vulnerability": {
+            "type": "number",
+            "description": "",
+            "default": 0
+          },
+          "license": {
+            "type": "number",
+            "description": "",
+            "default": 0
+          },
+          "overall": {
+            "type": "number",
+            "description": "",
+            "default": 0
+          }
+        },
+        "required": [
+          "license",
+          "maintenance",
+          "overall",
+          "quality",
+          "supplyChain",
+          "vulnerability"
+        ]
+      },
+      "SocketAlert": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "type": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "severity": {
+            "$ref": "#/components/schemas/SocketIssueSeverity"
+          },
+          "category": {
+            "$ref": "#/components/schemas/SocketCategory"
+          },
+          "file": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "start": {
+            "type": "integer",
+            "description": "",
+            "default": 0
+          },
+          "end": {
+            "type": "integer",
+            "description": "",
+            "default": 0
+          },
+          "props": {
+            "type": "object",
+            "description": "",
+            "default": null
+          }
+        },
+        "required": [
+          "category",
+          "key",
+          "severity",
+          "type"
+        ]
+      },
       "SocketBatchPURLRequest": {
         "type": "object",
         "additionalProperties": false,
@@ -416,6 +1154,310 @@
         },
         "required": [
           "purl"
+        ]
+      },
+      "CDXComponentSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "author": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "publisher": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "group": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "name": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "version": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "scope": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "hashes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "",
+              "properties": {
+                "alg": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "content": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                }
+              },
+              "required": [
+                "alg",
+                "content"
+              ]
+            }
+          },
+          "licenses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "expression": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "license": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "url": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "purl": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "externalReferences": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "url": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                }
+              },
+              "required": [
+                "type",
+                "url"
+              ]
+            }
+          },
+          "type": {
+            "type": "string",
+            "description": "",
+            "default": "application"
+          },
+          "bom-ref": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "evidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "identity": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "",
+                "properties": {
+                  "field": {
+                    "type": "string",
+                    "description": "",
+                    "default": ""
+                  },
+                  "confidence": {
+                    "type": "number",
+                    "description": "",
+                    "default": 0
+                  },
+                  "methods": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "technique": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "confidence": {
+                          "type": "number",
+                          "description": "",
+                          "default": 0
+                        },
+                        "value": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        }
+                      },
+                      "required": [
+                        "confidence",
+                        "technique",
+                        "value"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "confidence",
+                  "field",
+                  "methods"
+                ]
+              },
+              "occurrences": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "location": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "location"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "identity"
+            ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            }
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "value": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                }
+              },
+              "required": [
+                "name",
+                "value"
+              ]
+            }
+          },
+          "cryptoProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "",
+              "properties": {
+                "assetType": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "algorithmProperties": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "executionEnvironment": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "implementationPlatform": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "executionEnvironment",
+                    "implementationPlatform"
+                  ]
+                }
+              },
+              "required": [
+                "algorithmProperties",
+                "assetType"
+              ]
+            }
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CDXComponentSchema"
+            }
+          }
+        },
+        "required": [
+          "bom-ref",
+          "group",
+          "name",
+          "purl",
+          "type",
+          "version"
         ]
       },
       "SocketIssue": {
@@ -5705,6 +6747,65 @@
           "score"
         ]
       },
+      "SocketPURL_Type": {
+        "type": "string",
+        "enum": [
+          "unknown",
+          "npm",
+          "pypi",
+          "golang"
+        ],
+        "description": "",
+        "default": "unknown"
+      },
+      "SocketManifestReference": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "start": {
+            "type": "integer",
+            "description": "",
+            "default": 0
+          },
+          "end": {
+            "type": "integer",
+            "description": "",
+            "default": 0
+          }
+        },
+        "required": [
+          "file"
+        ]
+      },
+      "SocketIssueSeverity": {
+        "type": "string",
+        "enum": [
+          "low",
+          "middle",
+          "high",
+          "critical"
+        ],
+        "description": "",
+        "default": "low"
+      },
+      "SocketCategory": {
+        "type": "string",
+        "enum": [
+          "supplyChainRisk",
+          "quality",
+          "maintenance",
+          "vulnerability",
+          "license",
+          "miscellaneous"
+        ],
+        "description": "",
+        "default": "miscellaneous"
+      },
       "SocketIssueBasics": {
         "type": "object",
         "additionalProperties": false,
@@ -6096,7 +7197,16 @@
         "operationId": "batchPackageFetch",
         "parameters": [
           {
-            "name": "license",
+            "name": "licensedetails",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "licenseattrib",
             "in": "query",
             "required": false,
             "schema": {
@@ -6131,279 +7241,13 @@
             ]
           }
         ],
-        "description": "Batch retrieval of package metadata and alerts by PURL strings. Compatible witch CycloneDX reports.\n\nPackage URLs (PURLs) are an ecosystem agnostic way to identify packages.\nCycloneDX SBOMs use the purl format to identify components.\nThis endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.\n\nMore information on purl and CycloneDX:\n\n- [`purl` Spec](https://github.com/package-url/purl-spec)\n- [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)\n\n## Examples:\n\n### Looking up an npm package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\n### Looking up an PyPi package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    }\n  ]\n}\n```\n\n### Looking up a Maven package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### Batch lookup\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    },\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    },\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\nThis endpoint consumes 100 units of your quota.",
+        "description": "Batch retrieval of package metadata and alerts by PURL strings. Compatible witch CycloneDX reports.\n\nPackage URLs (PURLs) are an ecosystem agnostic way to identify packages.\nCycloneDX SBOMs use the purl format to identify components.\nThis endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.\n\nMore information on purl and CycloneDX:\n\n- [`purl` Spec](https://github.com/package-url/purl-spec)\n- [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)\n\n## Examples:\n\n### Looking up an npm package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\n### Looking up an PyPi package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    }\n  ]\n}\n```\n\n### Looking up a Maven package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### Batch lookup\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    },\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    },\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- packages:list",
         "responses": {
           "200": {
             "content": {
               "application/x-ndjson": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "unknown",
-                        "npm",
-                        "pypi",
-                        "golang"
-                      ],
-                      "description": "",
-                      "default": "unknown"
-                    },
-                    "namespace": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "version": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "subpath": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "release": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "id": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "direct": {
-                      "type": "boolean",
-                      "default": false,
-                      "description": ""
-                    },
-                    "manifestFiles": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "file": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "start": {
-                            "type": "integer",
-                            "description": "",
-                            "default": 0
-                          },
-                          "end": {
-                            "type": "integer",
-                            "description": "",
-                            "default": 0
-                          }
-                        },
-                        "required": [
-                          "file"
-                        ]
-                      }
-                    },
-                    "topLevelAncestors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      }
-                    },
-                    "dependencies": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      }
-                    },
-                    "artifact": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "unknown",
-                            "npm",
-                            "pypi",
-                            "golang"
-                          ],
-                          "description": "",
-                          "default": "unknown"
-                        },
-                        "namespace": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "name": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "version": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "subpath": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "release": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "id": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "type"
-                      ]
-                    },
-                    "license": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "author": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      }
-                    },
-                    "size": {
-                      "type": "number",
-                      "description": "",
-                      "default": 0
-                    },
-                    "score": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "description": "",
-                      "properties": {
-                        "supplyChain": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "quality": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "maintenance": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "vulnerability": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "license": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "overall": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        }
-                      },
-                      "required": [
-                        "license",
-                        "maintenance",
-                        "overall",
-                        "quality",
-                        "supplyChain",
-                        "vulnerability"
-                      ]
-                    },
-                    "alerts": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "key": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "type": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "severity": {
-                            "$ref": "#/components/schemas/SocketIssueSeverity"
-                          },
-                          "category": {
-                            "$ref": "#/components/schemas/SocketCategory"
-                          },
-                          "file": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "start": {
-                            "type": "integer",
-                            "description": "",
-                            "default": 0
-                          },
-                          "end": {
-                            "type": "integer",
-                            "description": "",
-                            "default": 0
-                          },
-                          "props": {
-                            "type": "object",
-                            "description": "",
-                            "default": null
-                          }
-                        },
-                        "required": [
-                          "category",
-                          "key",
-                          "severity",
-                          "type"
-                        ]
-                      }
-                    },
-                    "batchIndex": {
-                      "type": "integer",
-                      "description": "",
-                      "default": 0
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "type"
-                  ]
+                  "$ref": "#/components/schemas/SocketArtifact"
                 }
               }
             },
@@ -6420,6 +7264,440 @@
           },
           "404": {
             "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/audit-log": {
+      "get": {
+        "tags": [
+          "Audit Log"
+        ],
+        "summary": "Get Audit Log Events",
+        "operationId": "getAuditLogEvents",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Filter audit log events by type. Omit for all types.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "BookDemo",
+                "CancelInvitation",
+                "ChangeMemberRole",
+                "ChangePlanSubscriptionSeats",
+                "ContactForm",
+                "CreateApiToken",
+                "CreateUser",
+                "GithubAppInstallation",
+                "JoinOrganizationByVcs",
+                "LinkAccount",
+                "RemoveMember",
+                "ResetInvitationLink",
+                "ResetOrganizationSettingToDefault",
+                "RotateApiToken",
+                "SendInvitation",
+                "SignIn",
+                "SignOut",
+                "Subscribe",
+                "SyncOrganization",
+                "TransferOwnership",
+                "UpdateAlertTriage",
+                "UpdateApiTokenName",
+                "UpdateApiTokenScopes",
+                "UpdateApiTokenVisibility",
+                "UpdateOrganizationSetting",
+                "UpgradeOrganizationPlan",
+                "VerifiedEmail",
+                "DeleteRepository",
+                "DeleteReport"
+              ]
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "Number of events per page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 30
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Page token",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "audit-log:list"
+            ]
+          }
+        ],
+        "description": "Paginated list of audit log events.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- audit-log:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "event_id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "country_code": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "organization_id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "ip_address": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "payload": {
+                            "type": "object",
+                            "description": "",
+                            "default": null
+                          },
+                          "status_code": {
+                            "type": "integer",
+                            "description": "",
+                            "default": 0
+                          },
+                          "type": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "user_agent": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "user_id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "user_email": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "user_image": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "organization_name": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          }
+                        }
+                      }
+                    },
+                    "nextPage": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "nextPage",
+                    "results"
+                  ]
+                }
+              }
+            },
+            "description": "The paginated list of events in an organizations audit log and the next page querystring token."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/export/cdx/{id}": {
+      "get": {
+        "tags": [
+          "Export"
+        ],
+        "summary": "Export CycloneDX SBOM (Beta)",
+        "operationId": "exportCDX",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The full scan OR sbom report ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "author",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": "OWASP Foundation"
+            }
+          },
+          {
+            "name": "project_group",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "project_name",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "project_version",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "report:read"
+            ]
+          }
+        ],
+        "description": "Export a Socket SBOM as a CycloneDX SBOM\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:read",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CDXManifestSchema"
+                }
+              }
+            },
+            "description": "CycloneDX SBOM"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/export/spdx/{id}": {
+      "get": {
+        "tags": [
+          "Export"
+        ],
+        "summary": "Export SPDX SBOM (Beta)",
+        "operationId": "exportSPDX",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The full scan OR sbom report ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "author",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": "OWASP Foundation"
+            }
+          },
+          {
+            "name": "project_group",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "project_name",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "project_version",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "report:read"
+            ]
+          }
+        ],
+        "description": "Export a Socket SBOM as a SPDX SBOM\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:read",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SPDXManifestSchema"
+                }
+              }
+            },
+            "description": "SPDX SBOM"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -6449,19 +7727,27 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "Specify Sort order.",
             "schema": {
               "type": "string",
-              "default": "created"
+              "enum": [
+                "name",
+                "created_at"
+              ],
+              "default": "created_at"
             }
           },
           {
             "name": "direction",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "Specify sort direction.",
             "schema": {
               "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
               "default": "desc"
             }
           },
@@ -6469,7 +7755,7 @@
             "name": "per_page",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "Specify the maximum number of results to return per page.",
             "schema": {
               "type": "integer",
               "minimum": 1,
@@ -6481,11 +7767,29 @@
             "name": "page",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "The token specifying which page to return.",
             "schema": {
               "type": "integer",
               "minimum": 1,
               "default": 1
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "A Unix timestamp in seconds that filters full-scans prior to the date.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repo",
+            "in": "query",
+            "required": false,
+            "description": "A repository slug to filter full-scans by.",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -6496,7 +7800,7 @@
             ]
           }
         ],
-        "description": "Returns a paginated list of all full scans in an org, excluding SBOM artifacts.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Returns a paginated list of all full scans in an org, excluding SBOM artifacts.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
         "responses": {
           "200": {
             "content": {
@@ -6737,7 +8041,7 @@
             ]
           }
         ],
-        "description": "Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:create",
         "responses": {
           "201": {
             "content": {
@@ -6868,279 +8172,13 @@
             ]
           }
         ],
-        "description": "Stream all SBOM artifacts for a full scan.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Stream all SBOM artifacts for a full scan.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
         "responses": {
           "200": {
             "content": {
               "application/x-ndjson": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "unknown",
-                        "npm",
-                        "pypi",
-                        "golang"
-                      ],
-                      "description": "",
-                      "default": "unknown"
-                    },
-                    "namespace": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "version": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "subpath": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "release": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "id": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "direct": {
-                      "type": "boolean",
-                      "default": false,
-                      "description": ""
-                    },
-                    "manifestFiles": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "file": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "start": {
-                            "type": "integer",
-                            "description": "",
-                            "default": 0
-                          },
-                          "end": {
-                            "type": "integer",
-                            "description": "",
-                            "default": 0
-                          }
-                        },
-                        "required": [
-                          "file"
-                        ]
-                      }
-                    },
-                    "topLevelAncestors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      }
-                    },
-                    "dependencies": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      }
-                    },
-                    "artifact": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "unknown",
-                            "npm",
-                            "pypi",
-                            "golang"
-                          ],
-                          "description": "",
-                          "default": "unknown"
-                        },
-                        "namespace": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "name": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "version": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "subpath": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "release": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "id": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "type"
-                      ]
-                    },
-                    "license": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "author": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      }
-                    },
-                    "size": {
-                      "type": "number",
-                      "description": "",
-                      "default": 0
-                    },
-                    "score": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "description": "",
-                      "properties": {
-                        "supplyChain": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "quality": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "maintenance": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "vulnerability": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "license": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "overall": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        }
-                      },
-                      "required": [
-                        "license",
-                        "maintenance",
-                        "overall",
-                        "quality",
-                        "supplyChain",
-                        "vulnerability"
-                      ]
-                    },
-                    "alerts": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "key": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "type": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "severity": {
-                            "$ref": "#/components/schemas/SocketIssueSeverity"
-                          },
-                          "category": {
-                            "$ref": "#/components/schemas/SocketCategory"
-                          },
-                          "file": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "start": {
-                            "type": "integer",
-                            "description": "",
-                            "default": 0
-                          },
-                          "end": {
-                            "type": "integer",
-                            "description": "",
-                            "default": 0
-                          },
-                          "props": {
-                            "type": "object",
-                            "description": "",
-                            "default": null
-                          }
-                        },
-                        "required": [
-                          "category",
-                          "key",
-                          "severity",
-                          "type"
-                        ]
-                      }
-                    },
-                    "batchIndex": {
-                      "type": "integer",
-                      "description": "",
-                      "default": 0
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "type"
-                  ]
+                  "$ref": "#/components/schemas/SocketArtifact"
                 }
               }
             },
@@ -7197,7 +8235,7 @@
             ]
           }
         ],
-        "description": "Delete an existing full scan.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Delete an existing full scan.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:delete",
         "responses": {
           "200": {
             "content": {
@@ -7274,7 +8312,7 @@
             ]
           }
         ],
-        "description": "Get metadata for a single full scan\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Get metadata for a single full scan\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
         "responses": {
           "200": {
             "content": {
@@ -7439,7 +8477,7 @@
             ]
           }
         ],
-        "description": "Lists repositories for the specified organization.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Lists repositories for the specified organization.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- repo:list",
         "responses": {
           "200": {
             "content": {
@@ -7621,7 +8659,7 @@
             ]
           }
         ],
-        "description": "Create a repository.\n\nRepos collect Full scans and Diff scans and are typically associated with a git repo.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Create a repository.\n\nRepos collect Full scans and Diff scans and are typically associated with a git repo.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- repo:create",
         "responses": {
           "201": {
             "content": {
@@ -7748,7 +8786,7 @@
             ]
           }
         ],
-        "description": "Retrieve a repository associated with an organization.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Retrieve a repository associated with an organization.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- repo:list",
         "responses": {
           "200": {
             "content": {
@@ -7920,7 +8958,7 @@
             ]
           }
         ],
-        "description": "Update details of an existing repository.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Update details of an existing repository.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- repo:update",
         "responses": {
           "200": {
             "content": {
@@ -8045,7 +9083,7 @@
             ]
           }
         ],
-        "description": "Delete a single repository and all of its associated Full scans and Diff scans.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Delete a single repository and all of its associated Full scans and Diff scans.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- repo:delete",
         "responses": {
           "200": {
             "content": {
@@ -8068,214 +9106,6 @@
               }
             },
             "description": "Success"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/orgs/{org_slug}/audit-log": {
-      "get": {
-        "tags": [
-          "Audit Log"
-        ],
-        "summary": "Get Audit Log Events",
-        "operationId": "getAuditLogEvents",
-        "parameters": [
-          {
-            "name": "org_slug",
-            "in": "path",
-            "required": true,
-            "description": "The slug of the organization",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "type",
-            "in": "query",
-            "required": false,
-            "description": "Filter audit log events by type. Omit for all types.",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "BookDemo",
-                "CancelInvitation",
-                "ChangeMemberRole",
-                "ChangePlanSubscriptionSeats",
-                "ContactForm",
-                "CreateApiToken",
-                "CreateUser",
-                "GithubAppInstallation",
-                "JoinOrganizationByVcs",
-                "LinkAccount",
-                "RemoveMember",
-                "ResetInvitationLink",
-                "ResetOrganizationSettingToDefault",
-                "RotateApiToken",
-                "SendInvitation",
-                "SignIn",
-                "SignOut",
-                "Subscribe",
-                "SyncOrganization",
-                "TransferOwnership",
-                "UpdateAlertTriage",
-                "UpdateApiTokenName",
-                "UpdateApiTokenScopes",
-                "UpdateApiTokenVisibility",
-                "UpdateOrganizationSetting",
-                "UpgradeOrganizationPlan",
-                "VerifiedEmail"
-              ]
-            }
-          },
-          {
-            "name": "per_page",
-            "in": "query",
-            "required": false,
-            "description": "Number of events per page",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 30
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "description": "Page token",
-            "schema": {
-              "type": "string",
-              "default": "1"
-            }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": [
-              "audit-log:list"
-            ]
-          }
-        ],
-        "description": "Paginated list of audit log events.\n\nThis endpoint consumes 0 units of your quota.",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "event_id": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "created_at": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "updated_at": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "country_code": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "organization_id": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "ip_address": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "payload": {
-                            "type": "object",
-                            "description": "",
-                            "default": null
-                          },
-                          "status_code": {
-                            "type": "integer",
-                            "description": "",
-                            "default": 0
-                          },
-                          "type": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "user_agent": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "user_id": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "user_email": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "user_image": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "organization_name": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          }
-                        }
-                      }
-                    },
-                    "nextPage": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    }
-                  },
-                  "required": [
-                    "nextPage",
-                    "results"
-                  ]
-                }
-              }
-            },
-            "description": "The paginated list of events in an organizations audit log and the next page querystring token."
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -8321,7 +9151,7 @@
             ]
           }
         ],
-        "description": "Get analytics data regarding the number of alerts found across all active repositories.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Get analytics data regarding the number of alerts found across all active repositories.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
         "responses": {
           "200": {
             "content": {
@@ -8500,7 +9330,7 @@
             ]
           }
         ],
-        "description": "Get analytics data regarding the number of alerts found in a single repository.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Get analytics data regarding the number of alerts found in a single repository.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
         "responses": {
           "200": {
             "content": {
@@ -8691,7 +9521,7 @@
             "basicAuth": []
           }
         ],
-        "description": "Search for any dependency that is being used in your organization.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Search for any dependency that is being used in your organization.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- Any",
         "responses": {
           "200": {
             "content": {
@@ -8874,7 +9704,7 @@
             ]
           }
         ],
-        "description": "Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: \"requirements.txt\", \"package.json\", \"folder/package.json\", and \"deep/nested/folder/package.json\".\n\nThis endpoint consumes 100 units of your quota.",
+        "description": "Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: \"requirements.txt\", \"package.json\", \"folder/package.json\", and \"deep/nested/folder/package.json\".\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
         "responses": {
           "200": {
             "content": {
@@ -8918,7 +9748,7 @@
         "security": [
           {}
         ],
-        "description": "Get a list of supported files for project report generation.\nFiles are categorized first by environment (e.g. NPM or PyPI), then by name.\n\nFiles whose names match the patterns returned by this endpoint can be uploaded for report generation.\nExamples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Get a list of supported files for project report generation.\nFiles are categorized first by environment (e.g. NPM or PyPI), then by name.\n\nFiles whose names match the patterns returned by this endpoint can be uploaded for report generation.\nExamples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:",
         "responses": {
           "200": {
             "content": {
@@ -8985,7 +9815,7 @@
             ]
           }
         ],
-        "description": "Delete a specific project report generated with the GitHub app. These endpoints will be merged into the full-scans endpoint so\n\nThis endpoint consumes 10 units of your quota.",
+        "description": "Delete a specific project report generated with the GitHub app. These endpoints will be merged into the full-scans endpoint so\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
         "responses": {
           "200": {
             "content": {
@@ -9034,8 +9864,27 @@
           "Project Reports"
         ],
         "summary": "Get list of reports",
-        "deprecated": true,
         "operationId": "getReportList",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "A Unix timestamp in seconds to filter results prior to this date.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repo",
+            "in": "query",
+            "required": false,
+            "description": "When defined, returns only reports for the associated repository slug. ",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "security": [
           {
             "basicAuth": [
@@ -9043,7 +9892,7 @@
             ]
           }
         ],
-        "description": "Get all your project reports generated with the GitHub app. This endpoint will be merged into the full-scans endpoint soon.\n\nThis endpoint consumes 10 units of your quota.",
+        "description": "Get all your project reports generated with the GitHub app. This endpoint will be merged into the full-scans endpoint soon.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:list",
         "responses": {
           "200": {
             "content": {
@@ -9137,7 +9986,6 @@
           "Project Reports"
         ],
         "summary": "Create a report",
-        "deprecated": true,
         "operationId": "createReport",
         "requestBody": {
           "content": {
@@ -9176,7 +10024,7 @@
             ]
           }
         ],
-        "description": "Upload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.\n\nThis endpoint consumes 100 units of your quota.",
+        "description": "Upload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
         "responses": {
           "200": {
             "content": {
@@ -9228,7 +10076,6 @@
           "Project Reports"
         ],
         "summary": "View a report",
-        "deprecated": true,
         "operationId": "getReport",
         "parameters": [
           {
@@ -9248,7 +10095,7 @@
             ]
           }
         ],
-        "description": "Get all the issues, packages, and scores related to an specific project report.\n\nThis endpoint consumes 10 units of your quota.",
+        "description": "Get all the issues, packages, and scores related to an specific project report.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:read",
         "responses": {
           "200": {
             "content": {
@@ -9309,7 +10156,7 @@
             ]
           }
         ],
-        "description": "Get all GitHub repositories associated with a Socket org.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Get all GitHub repositories associated with a Socket org.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- repo:list",
         "responses": {
           "200": {
             "content": {
@@ -9427,7 +10274,7 @@
         "security": [
           {}
         ],
-        "description": "Retrieve the API specification in an Openapi JSON format.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Retrieve the API specification in an Openapi JSON format.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:",
         "responses": {
           "200": {
             "content": {
@@ -9454,7 +10301,7 @@
             "basicAuth": []
           }
         ],
-        "description": "Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.\n\nThis endpoint consumes 0 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- Any",
         "responses": {
           "200": {
             "content": {
@@ -9501,7 +10348,7 @@
             "basicAuth": []
           }
         ],
-        "description": "Get information on the current organizations associated with the API key.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Get information on the current organizations associated with the API key.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- Any",
         "responses": {
           "200": {
             "content": {
@@ -9606,7 +10453,7 @@
             "basicAuth": []
           }
         ],
-        "description": "Get your current settings the requested organizations and default settings to allow deferrals.\n\nThis endpoint consumes 0 units of your quota.",
+        "description": "Get your current settings the requested organizations and default settings to allow deferrals.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- Any",
         "responses": {
           "200": {
             "content": {
@@ -9756,7 +10603,7 @@
             "basicAuth": []
           }
         ],
-        "description": "Get all the issues related with a particular npm package version.\nThis endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.\n\nYou can [see here](https://socket.dev/npm/issue) the full list of issues.\n\nThis endpoint consumes 1 unit of your quota.",
+        "description": "Get all the issues related with a particular npm package version.\nThis endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.\n\nYou can [see here](https://socket.dev/npm/issue) the full list of issues.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- Any",
         "responses": {
           "200": {
             "content": {
@@ -9819,7 +10666,7 @@
             "basicAuth": []
           }
         ],
-        "description": "Get all the scores and metrics by category that are used to evaluate the package version.\n\nThis endpoint is deprecated. Use the batched \"Get Packages\" endpoint instead.\n\n- depscore: The average of all score factors. (0-1)\n- supplyChainRisk: Score factors relating to supply chain security (0-1)\n- downloadCount: The number of downloads for the package. Higher downloads contribute to a higher score.\n- supplyChainRiskIssueLow/Mid/High/Critical: The number of supply chain risk issues of varying severity. Lower numbers contribute to a higher score.\n- dependencyCount: The number of production dependencies. Lower count contributes to a higher score.\n- devDependencyCount: The number of development dependencies. Lower count contributes to a higher score.\n- transitiveDependencyCount: The number of transitive dependencies. Lower count contributes to a higher score.\n- totalDependencyCount: The total number of dependencies (production + development + transitive). Lower count contributes to a higher score.\n- quality: Score factors relating to code quality (0-1)\n- qualityIssueLow/Mid/High/Critical: The number of code quality issues of varying severity. Lower numbers contribute to a higher score.\n- linesOfCode: The number of lines of code in the package. Lower count contributes to a higher score.\n- readmeLength: The length of the package's README file. Longer READMEs contribute to a higher score.\n- maintenance: Score factors relating to package maintenance (0-1)\n- maintainerCount: The number of maintainers for the package. More maintainers contribute to a higher score.\n- versionsLastWeek/Month/TwoMonths/Year: The number of versions released in different time periods. More recent releases contribute to a higher score.\n- versionCount: The total number of versions released. Higher count contributes to a higher score.\n- maintenanceIssueLow/Mid/High/Critical: The number of maintenance issues of varying severity. Lower numbers contribute to a higher score.\n- vulnerability: Score factors relating to package vulnerabilities (0-1)\n- vulnerabilityIssueLow/Mid/High/Critical: The number of vulnerability issues of varying severity. Lower numbers contribute to a higher score.\n- dependencyVulnerabilityCount: The number of vulnerabilities in the package's dependencies. Lower count contributes to a higher score.\n- vulnerabilityCount: The number of vulnerabilities in the package itself. Lower count contributes to a higher score.\n- license: Score factors relating to package licensing (0-1)\n- licenseIssueLow/Mid/High/Critical: The number of license issues of varying severity. Lower numbers contribute to a higher score.\n- licenseQuality: A score indicating the quality/permissiveness of the package's license. Higher quality contributes to a higher score.\n- miscellaneous: Miscellaneous metadata about the package version.\n- versionAuthorName/Email: The name and email of the version author.\n- fileCount: The number of files in the package.\n- byteCount: The total size in bytes of the package.\n- typeModule: Whether the package declares a \"type\": \"module\" field.\n\nThis endpoint consumes 1 unit of your quota.",
+        "description": "Get all the scores and metrics by category that are used to evaluate the package version.\n\nThis endpoint is deprecated. Use the batched \"Get Packages\" endpoint instead.\n\n- depscore: The average of all score factors. (0-1)\n- supplyChainRisk: Score factors relating to supply chain security (0-1)\n- downloadCount: The number of downloads for the package. Higher downloads contribute to a higher score.\n- supplyChainRiskIssueLow/Mid/High/Critical: The number of supply chain risk issues of varying severity. Lower numbers contribute to a higher score.\n- dependencyCount: The number of production dependencies. Lower count contributes to a higher score.\n- devDependencyCount: The number of development dependencies. Lower count contributes to a higher score.\n- transitiveDependencyCount: The number of transitive dependencies. Lower count contributes to a higher score.\n- totalDependencyCount: The total number of dependencies (production + development + transitive). Lower count contributes to a higher score.\n- quality: Score factors relating to code quality (0-1)\n- qualityIssueLow/Mid/High/Critical: The number of code quality issues of varying severity. Lower numbers contribute to a higher score.\n- linesOfCode: The number of lines of code in the package. Lower count contributes to a higher score.\n- readmeLength: The length of the package's README file. Longer READMEs contribute to a higher score.\n- maintenance: Score factors relating to package maintenance (0-1)\n- maintainerCount: The number of maintainers for the package. More maintainers contribute to a higher score.\n- versionsLastWeek/Month/TwoMonths/Year: The number of versions released in different time periods. More recent releases contribute to a higher score.\n- versionCount: The total number of versions released. Higher count contributes to a higher score.\n- maintenanceIssueLow/Mid/High/Critical: The number of maintenance issues of varying severity. Lower numbers contribute to a higher score.\n- vulnerability: Score factors relating to package vulnerabilities (0-1)\n- vulnerabilityIssueLow/Mid/High/Critical: The number of vulnerability issues of varying severity. Lower numbers contribute to a higher score.\n- dependencyVulnerabilityCount: The number of vulnerabilities in the package's dependencies. Lower count contributes to a higher score.\n- vulnerabilityCount: The number of vulnerabilities in the package itself. Lower count contributes to a higher score.\n- license: Score factors relating to package licensing (0-1)\n- licenseIssueLow/Mid/High/Critical: The number of license issues of varying severity. Lower numbers contribute to a higher score.\n- licenseQuality: A score indicating the quality/permissiveness of the package's license. Higher quality contributes to a higher score.\n- miscellaneous: Miscellaneous metadata about the package version.\n- versionAuthorName/Email: The name and email of the version author.\n- fileCount: The number of files in the package.\n- byteCount: The total size in bytes of the package.\n- typeModule: Whether the package declares a \"type\": \"module\" field.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- Any",
         "responses": {
           "200": {
             "content": {

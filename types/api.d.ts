@@ -76,22 +76,67 @@ export interface paths {
      * ```
      *
      * This endpoint consumes 100 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - packages:list
      */
     post: operations["batchPackageFetch"];
+  };
+  "/orgs/{org_slug}/audit-log": {
+    /**
+     * Get Audit Log Events
+     * @description Paginated list of audit log events.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - audit-log:list
+     */
+    get: operations["getAuditLogEvents"];
+  };
+  "/orgs/{org_slug}/export/cdx/{id}": {
+    /**
+     * Export CycloneDX SBOM (Beta)
+     * @description Export a Socket SBOM as a CycloneDX SBOM
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - report:read
+     */
+    get: operations["exportCDX"];
+  };
+  "/orgs/{org_slug}/export/spdx/{id}": {
+    /**
+     * Export SPDX SBOM (Beta)
+     * @description Export a Socket SBOM as a SPDX SBOM
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - report:read
+     */
+    get: operations["exportSPDX"];
   };
   "/orgs/{org_slug}/full-scans": {
     /**
      * List full scans
      * @description Returns a paginated list of all full scans in an org, excluding SBOM artifacts.
      *
-     * This endpoint consumes 0 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - full-scans:list
      */
     get: operations["getOrgFullScanList"];
     /**
      * Create full scan
      * @description Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.
      *
-     * This endpoint consumes 0 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - full-scans:create
      */
     post: operations["CreateOrgFullScan"];
   };
@@ -100,14 +145,20 @@ export interface paths {
      * Stream full scan
      * @description Stream all SBOM artifacts for a full scan.
      *
-     * This endpoint consumes 0 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - full-scans:list
      */
     get: operations["getOrgFullScan"];
     /**
      * Delete full scan
      * @description Delete an existing full scan.
      *
-     * This endpoint consumes 0 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - full-scans:delete
      */
     delete: operations["deleteOrgFullScan"];
   };
@@ -116,7 +167,10 @@ export interface paths {
      * Get full scan metadata
      * @description Get metadata for a single full scan
      *
-     * This endpoint consumes 0 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - full-scans:list
      */
     get: operations["getOrgFullScanMetadata"];
   };
@@ -125,7 +179,10 @@ export interface paths {
      * List repositories
      * @description Lists repositories for the specified organization.
      *
-     * This endpoint consumes 0 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - repo:list
      */
     get: operations["getOrgRepoList"];
     /**
@@ -134,7 +191,10 @@ export interface paths {
      *
      * Repos collect Full scans and Diff scans and are typically associated with a git repo.
      *
-     * This endpoint consumes 0 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - repo:create
      */
     post: operations["createOrgRepo"];
   };
@@ -143,39 +203,42 @@ export interface paths {
      * Get repository
      * @description Retrieve a repository associated with an organization.
      *
-     * This endpoint consumes 0 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - repo:list
      */
     get: operations["getOrgRepo"];
     /**
      * Update repository
      * @description Update details of an existing repository.
      *
-     * This endpoint consumes 0 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - repo:update
      */
     post: operations["updateOrgRepo"];
     /**
      * Delete repository
      * @description Delete a single repository and all of its associated Full scans and Diff scans.
      *
-     * This endpoint consumes 0 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - repo:delete
      */
     delete: operations["deleteOrgRepo"];
-  };
-  "/orgs/{org_slug}/audit-log": {
-    /**
-     * Get Audit Log Events
-     * @description Paginated list of audit log events.
-     *
-     * This endpoint consumes 0 units of your quota.
-     */
-    get: operations["getAuditLogEvents"];
   };
   "/analytics/org/{filter}": {
     /**
      * Get organization analytics (unstable)
      * @description Get analytics data regarding the number of alerts found across all active repositories.
      *
-     * This endpoint consumes 0 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - report:write
      */
     get: operations["getOrgAnalytics"];
   };
@@ -184,7 +247,10 @@ export interface paths {
      * Get repository analytics
      * @description Get analytics data regarding the number of alerts found in a single repository.
      *
-     * This endpoint consumes 0 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - report:write
      */
     get: operations["getRepoAnalytics"];
   };
@@ -193,7 +259,10 @@ export interface paths {
      * Search dependencies
      * @description Search for any dependency that is being used in your organization.
      *
-     * This endpoint consumes 0 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - Any
      */
     post: operations["searchDependencies"];
   };
@@ -208,6 +277,9 @@ export interface paths {
      * For example, these are valid filenames: "requirements.txt", "package.json", "folder/package.json", and "deep/nested/folder/package.json".
      *
      * This endpoint consumes 100 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - report:write
      */
     post: operations["createDependenciesSnapshot"];
   };
@@ -220,7 +292,9 @@ export interface paths {
      * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
      * Examples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.
      *
-     * This endpoint consumes 0 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      */
     get: operations["getReportSupportedFiles"];
   };
@@ -230,23 +304,27 @@ export interface paths {
      * @description Delete a specific project report generated with the GitHub app. These endpoints will be merged into the full-scans endpoint so
      *
      * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - report:write
      */
     delete: operations["deleteReport"];
   };
   "/report/list": {
     /**
      * Get list of reports
-     * @deprecated
      * @description Get all your project reports generated with the GitHub app. This endpoint will be merged into the full-scans endpoint soon.
      *
      * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - report:list
      */
     get: operations["getReportList"];
   };
   "/report/upload": {
     /**
      * Create a report
-     * @deprecated
      * @description Upload a lockfile to get your project analyzed by Socket.
      * You can upload multiple lockfiles in the same request, but each filename must be unique.
      *
@@ -255,16 +333,21 @@ export interface paths {
      * For example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.
      *
      * This endpoint consumes 100 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - report:write
      */
     put: operations["createReport"];
   };
   "/report/view/{id}": {
     /**
      * View a report
-     * @deprecated
      * @description Get all the issues, packages, and scores related to an specific project report.
      *
      * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - report:read
      */
     get: operations["getReport"];
   };
@@ -274,7 +357,10 @@ export interface paths {
      * @deprecated
      * @description Get all GitHub repositories associated with a Socket org.
      *
-     * This endpoint consumes 0 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - repo:list
      */
     get: operations["getRepoList"];
   };
@@ -283,7 +369,9 @@ export interface paths {
      * Returns the OpenAPI definition
      * @description Retrieve the API specification in an Openapi JSON format.
      *
-     * This endpoint consumes 0 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      */
     get: operations["getOpenAPI"];
   };
@@ -293,6 +381,9 @@ export interface paths {
      * @description Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
      *
      * This endpoint consumes 0 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - Any
      */
     get: operations["getQuota"];
   };
@@ -301,7 +392,10 @@ export interface paths {
      * List organizations
      * @description Get information on the current organizations associated with the API key.
      *
-     * This endpoint consumes 0 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - Any
      */
     get: operations["getOrganizations"];
   };
@@ -310,7 +404,10 @@ export interface paths {
      * Calculate settings
      * @description Get your current settings the requested organizations and default settings to allow deferrals.
      *
-     * This endpoint consumes 0 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - Any
      */
     post: operations["postSettings"];
   };
@@ -324,6 +421,9 @@ export interface paths {
      * You can [see here](https://socket.dev/npm/issue) the full list of issues.
      *
      * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - Any
      */
     get: operations["getIssuesByNPMPackage"];
   };
@@ -366,6 +466,9 @@ export interface paths {
      * - typeModule: Whether the package declares a "type": "module" field.
      *
      * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - Any
      */
     get: operations["getScoreByNPMPackage"];
   };
@@ -375,18 +478,130 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
-    /**
-     * @default low
-     * @enum {string}
-     */
-    SocketIssueSeverity: "low" | "middle" | "high" | "critical";
-    /**
-     * @default miscellaneous
-     * @enum {string}
-     */
-    SocketCategory: "supplyChainRisk" | "quality" | "maintenance" | "vulnerability" | "license" | "miscellaneous";
+    SocketArtifact: components["schemas"]["SocketPURL"] & components["schemas"]["SocketArtifactLink"] & {
+      id: components["schemas"]["SocketId"];
+      /** @default */
+      license?: string;
+      licenseDetails?: components["schemas"]["LicenseDetails"];
+      licenseAttrib?: components["schemas"]["SAttrib1_N"];
+      author?: string[];
+      /** @default 0 */
+      size?: number;
+      score?: components["schemas"]["SocketScore"];
+      alerts?: components["schemas"]["SocketAlert"][];
+      /** @default 0 */
+      batchIndex?: number;
+    };
     SocketBatchPURLFetch: {
       components: components["schemas"]["SocketBatchPURLRequest"][];
+    };
+    CDXManifestSchema: {
+      /** @default CycloneDX */
+      bomFormat: string;
+      /** @default 1.5 */
+      specVersion: string;
+      /** @default */
+      serialNumber: string;
+      /** @default 0 */
+      version: number;
+      metadata: {
+        /** @default */
+        timestamp: string;
+        tools: {
+          components: (components["schemas"]["CDXComponentSchema"] & {
+              /** @default Socket */
+              author?: string;
+              authors?: string[];
+              /** @default Socket */
+              publisher?: string;
+            })[];
+        };
+        authors: {
+            /** @default Socket */
+            name: string;
+          }[];
+        /** @default */
+        supplier?: string;
+        lifecycles: {
+            /** @default build */
+            phase: string;
+          }[];
+        component: components["schemas"]["CDXComponentSchema"];
+        properties?: {
+            /** @default */
+            name: string;
+            /** @default */
+            value: string;
+          }[];
+      };
+      components: components["schemas"]["CDXComponentSchema"][];
+      dependencies: {
+          /** @default */
+          ref: string;
+          dependsOn?: string[];
+        }[];
+    };
+    SPDXManifestSchema: {
+      /** @default SPDX-2.3 */
+      spdxVersion: string;
+      /** @default CC0-1.0 */
+      dataLicense: string;
+      /** @default SPDXRef-DOCUMENT */
+      SPDXID: string;
+      /** @default */
+      name: string;
+      /** @default */
+      documentNamespace: string;
+      creationInfo: {
+        /** @default */
+        created: string;
+        creators: string[];
+      };
+      documentDescribes: string[];
+      packages: {
+          /** @default */
+          name: string;
+          /** @default */
+          SPDXID: string;
+          /** @default */
+          versionInfo: string;
+          /** @default */
+          packageFileName: string;
+          /** @default */
+          description?: string;
+          /** @default */
+          primaryPackagePurpose?: string;
+          /** @default */
+          downloadLocation?: string;
+          /** @default false */
+          filesAnalyzed: boolean;
+          /** @default NOASSERTION */
+          homepage: string;
+          /** @default NOASSERTION */
+          licenseDeclared: string;
+          externalRefs: {
+              /** @default PACKAGE-MANAGER */
+              referenceCategory: string;
+              /** @default purl */
+              referenceType: string;
+              /** @default */
+              referenceLocator: string;
+            }[];
+          checksums?: {
+              /** @default */
+              algorithm: string;
+              /** @default */
+              checksumValue: string;
+            }[];
+        }[];
+      relationships: {
+          /** @default SPDXRef-DOCUMENT */
+          spdxElementId: string;
+          /** @default */
+          relatedSpdxElement: string;
+          /** @default DESCRIBES */
+          relationshipType: string;
+        }[];
     };
     SocketReport: {
       /** @default */
@@ -420,9 +635,171 @@ export interface components {
       /** @default 0 */
       depscore: number;
     };
+    SocketPURL: {
+      type: components["schemas"]["SocketPURL_Type"];
+      /** @default */
+      namespace?: string;
+      /** @default */
+      name?: string;
+      /** @default */
+      version?: string;
+      /** @default */
+      subpath?: string;
+      /** @default */
+      release?: string;
+    };
+    /** @default */
+    SocketId: string;
+    SocketArtifactLink: {
+      /** @default false */
+      direct?: boolean;
+      manifestFiles?: components["schemas"]["SocketManifestReference"][];
+      topLevelAncestors?: components["schemas"]["SocketId"][];
+      dependencies?: components["schemas"]["SocketId"][];
+      artifact?: components["schemas"]["SocketPURL"] & {
+        id: components["schemas"]["SocketId"];
+      };
+    };
+    LicenseDetails: {
+        /** @default */
+        spdxDisj: string;
+        /** @default */
+        provenance: string;
+        /** @default */
+        filepath: string;
+        /** @default 0 */
+        match_strength: number;
+      }[];
+    SAttrib1_N: {
+        /** @default */
+        attribText: string;
+        attribData: {
+            /** @default */
+            purl: string;
+            /** @default */
+            foundInFilepath: string;
+            /** @default */
+            spdxExpr: string;
+            foundAuthors: string[];
+          }[];
+      }[];
+    SocketScore: {
+      /** @default 0 */
+      supplyChain: number;
+      /** @default 0 */
+      quality: number;
+      /** @default 0 */
+      maintenance: number;
+      /** @default 0 */
+      vulnerability: number;
+      /** @default 0 */
+      license: number;
+      /** @default 0 */
+      overall: number;
+    };
+    SocketAlert: {
+      /** @default */
+      key: string;
+      /** @default */
+      type: string;
+      severity: components["schemas"]["SocketIssueSeverity"];
+      category: components["schemas"]["SocketCategory"];
+      /** @default */
+      file?: string;
+      /** @default 0 */
+      start?: number;
+      /** @default 0 */
+      end?: number;
+      /** @default null */
+      props?: Record<string, never>;
+    };
     SocketBatchPURLRequest: {
       /** @default */
       purl: string;
+    };
+    CDXComponentSchema: {
+      /** @default */
+      author?: string;
+      /** @default */
+      publisher?: string;
+      /** @default */
+      group: string;
+      /** @default */
+      name: string;
+      /** @default */
+      version: string;
+      /** @default */
+      description?: string;
+      /** @default */
+      scope?: string;
+      hashes?: {
+          /** @default */
+          alg: string;
+          /** @default */
+          content: string;
+        }[];
+      licenses?: {
+          /** @default */
+          expression?: string;
+          license?: {
+            /** @default */
+            id?: string;
+            /** @default */
+            name?: string;
+            /** @default */
+            url?: string;
+          };
+        }[];
+      /** @default */
+      purl: string;
+      externalReferences?: {
+          /** @default */
+          type: string;
+          /** @default */
+          url: string;
+        }[];
+      /** @default application */
+      type: string;
+      /** @default */
+      "bom-ref": string;
+      evidence?: {
+        identity: {
+          /** @default */
+          field: string;
+          /** @default 0 */
+          confidence: number;
+          methods: {
+              /** @default */
+              technique: string;
+              /** @default 0 */
+              confidence: number;
+              /** @default */
+              value: string;
+            }[];
+        };
+        occurrences?: {
+            /** @default */
+            location: string;
+          }[];
+      };
+      tags?: string[];
+      properties?: {
+          /** @default */
+          name: string;
+          /** @default */
+          value: string;
+        }[];
+      cryptoProperties?: {
+          /** @default */
+          assetType: string;
+          algorithmProperties: {
+            /** @default */
+            executionEnvironment: string;
+            /** @default */
+            implementationPlatform: string;
+          };
+        }[];
+      components?: components["schemas"]["CDXComponentSchema"][];
     };
     SocketIssue: ({
       /** @enum {string} */
@@ -1673,6 +2050,29 @@ export interface components {
       /** @default */
       limitingMetric?: string;
     };
+    /**
+     * @default unknown
+     * @enum {string}
+     */
+    SocketPURL_Type: "unknown" | "npm" | "pypi" | "golang";
+    SocketManifestReference: {
+      /** @default */
+      file: string;
+      /** @default 0 */
+      start?: number;
+      /** @default 0 */
+      end?: number;
+    };
+    /**
+     * @default low
+     * @enum {string}
+     */
+    SocketIssueSeverity: "low" | "middle" | "high" | "critical";
+    /**
+     * @default miscellaneous
+     * @enum {string}
+     */
+    SocketCategory: "supplyChainRisk" | "quality" | "maintenance" | "vulnerability" | "license" | "miscellaneous";
     SocketIssueBasics: {
       severity: components["schemas"]["SocketIssueSeverity"];
       category: components["schemas"]["SocketCategory"];
@@ -1949,11 +2349,15 @@ export interface operations {
    * ```
    *
    * This endpoint consumes 100 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - packages:list
    */
   batchPackageFetch: {
     parameters: {
       query?: {
-        license?: boolean;
+        licensedetails?: boolean;
+        licenseattrib?: boolean;
         alerts?: boolean;
       };
     };
@@ -1966,92 +2370,77 @@ export interface operations {
       /** @description Socket issue lists and scores for all packages */
       200: {
         content: {
-          "application/x-ndjson": {
-            /**
-             * @default unknown
-             * @enum {string}
-             */
-            type: "unknown" | "npm" | "pypi" | "golang";
-            /** @default */
-            namespace?: string;
-            /** @default */
-            name?: string;
-            /** @default */
-            version?: string;
-            /** @default */
-            subpath?: string;
-            /** @default */
-            release?: string;
-            /** @default */
-            id: string;
-            /** @default false */
-            direct?: boolean;
-            manifestFiles?: {
+          "application/x-ndjson": components["schemas"]["SocketArtifact"];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get Audit Log Events
+   * @description Paginated list of audit log events.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - audit-log:list
+   */
+  getAuditLogEvents: {
+    parameters: {
+      query?: {
+        /** @description Filter audit log events by type. Omit for all types. */
+        type?: "BookDemo" | "CancelInvitation" | "ChangeMemberRole" | "ChangePlanSubscriptionSeats" | "ContactForm" | "CreateApiToken" | "CreateUser" | "GithubAppInstallation" | "JoinOrganizationByVcs" | "LinkAccount" | "RemoveMember" | "ResetInvitationLink" | "ResetOrganizationSettingToDefault" | "RotateApiToken" | "SendInvitation" | "SignIn" | "SignOut" | "Subscribe" | "SyncOrganization" | "TransferOwnership" | "UpdateAlertTriage" | "UpdateApiTokenName" | "UpdateApiTokenScopes" | "UpdateApiTokenVisibility" | "UpdateOrganizationSetting" | "UpgradeOrganizationPlan" | "VerifiedEmail" | "DeleteRepository" | "DeleteReport";
+        /** @description Number of events per page */
+        per_page?: number;
+        /** @description Page token */
+        page?: string;
+      };
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+      };
+    };
+    responses: {
+      /** @description The paginated list of events in an organizations audit log and the next page querystring token. */
+      200: {
+        content: {
+          "application/json": {
+            results: {
                 /** @default */
-                file: string;
-                /** @default 0 */
-                start?: number;
-                /** @default 0 */
-                end?: number;
-              }[];
-            topLevelAncestors?: string[];
-            dependencies?: string[];
-            artifact?: {
-              /**
-               * @default unknown
-               * @enum {string}
-               */
-              type: "unknown" | "npm" | "pypi" | "golang";
-              /** @default */
-              namespace?: string;
-              /** @default */
-              name?: string;
-              /** @default */
-              version?: string;
-              /** @default */
-              subpath?: string;
-              /** @default */
-              release?: string;
-              /** @default */
-              id: string;
-            };
-            /** @default */
-            license?: string;
-            author?: string[];
-            /** @default 0 */
-            size?: number;
-            score?: {
-              /** @default 0 */
-              supplyChain: number;
-              /** @default 0 */
-              quality: number;
-              /** @default 0 */
-              maintenance: number;
-              /** @default 0 */
-              vulnerability: number;
-              /** @default 0 */
-              license: number;
-              /** @default 0 */
-              overall: number;
-            };
-            alerts?: {
+                event_id?: string;
                 /** @default */
-                key: string;
+                created_at?: string;
                 /** @default */
-                type: string;
-                severity: components["schemas"]["SocketIssueSeverity"];
-                category: components["schemas"]["SocketCategory"];
+                updated_at?: string;
                 /** @default */
-                file?: string;
-                /** @default 0 */
-                start?: number;
-                /** @default 0 */
-                end?: number;
+                country_code?: string;
+                /** @default */
+                organization_id?: string;
+                /** @default */
+                ip_address?: string;
                 /** @default null */
-                props?: Record<string, never>;
+                payload?: Record<string, never>;
+                /** @default 0 */
+                status_code?: number;
+                /** @default */
+                type?: string;
+                /** @default */
+                user_agent?: string;
+                /** @default */
+                user_id?: string;
+                /** @default */
+                user_email?: string;
+                /** @default */
+                user_image?: string;
+                /** @default */
+                organization_name?: string;
               }[];
-            /** @default 0 */
-            batchIndex?: number;
+            /** @default */
+            nextPage: string;
           };
         };
       };
@@ -2063,18 +2452,105 @@ export interface operations {
     };
   };
   /**
+   * Export CycloneDX SBOM (Beta)
+   * @description Export a Socket SBOM as a CycloneDX SBOM
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - report:read
+   */
+  exportCDX: {
+    parameters: {
+      query?: {
+        author?: string;
+        project_group?: string;
+        project_name?: string;
+        project_version?: string;
+        project_id?: string;
+      };
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+        /** @description The full scan OR sbom report ID */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description CycloneDX SBOM */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CDXManifestSchema"];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Export SPDX SBOM (Beta)
+   * @description Export a Socket SBOM as a SPDX SBOM
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - report:read
+   */
+  exportSPDX: {
+    parameters: {
+      query?: {
+        author?: string;
+        project_group?: string;
+        project_name?: string;
+        project_version?: string;
+        project_id?: string;
+      };
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+        /** @description The full scan OR sbom report ID */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description SPDX SBOM */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SPDXManifestSchema"];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
    * List full scans
    * @description Returns a paginated list of all full scans in an org, excluding SBOM artifacts.
    *
-   * This endpoint consumes 0 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:list
    */
   getOrgFullScanList: {
     parameters: {
       query?: {
-        sort?: string;
-        direction?: string;
+        /** @description Specify Sort order. */
+        sort?: "name" | "created_at";
+        /** @description Specify sort direction. */
+        direction?: "asc" | "desc";
+        /** @description Specify the maximum number of results to return per page. */
         per_page?: number;
+        /** @description The token specifying which page to return. */
         page?: number;
+        /** @description A Unix timestamp in seconds that filters full-scans prior to the date. */
+        from?: string;
+        /** @description A repository slug to filter full-scans by. */
+        repo?: string;
       };
       path: {
         /** @description The slug of the organization */
@@ -2127,7 +2603,10 @@ export interface operations {
    * Create full scan
    * @description Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.
    *
-   * This endpoint consumes 0 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:create
    */
   CreateOrgFullScan: {
     parameters: {
@@ -2202,7 +2681,10 @@ export interface operations {
    * Stream full scan
    * @description Stream all SBOM artifacts for a full scan.
    *
-   * This endpoint consumes 0 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:list
    */
   getOrgFullScan: {
     parameters: {
@@ -2217,93 +2699,7 @@ export interface operations {
       /** @description Socket issue lists and scores for all packages */
       200: {
         content: {
-          "application/x-ndjson": {
-            /**
-             * @default unknown
-             * @enum {string}
-             */
-            type: "unknown" | "npm" | "pypi" | "golang";
-            /** @default */
-            namespace?: string;
-            /** @default */
-            name?: string;
-            /** @default */
-            version?: string;
-            /** @default */
-            subpath?: string;
-            /** @default */
-            release?: string;
-            /** @default */
-            id: string;
-            /** @default false */
-            direct?: boolean;
-            manifestFiles?: {
-                /** @default */
-                file: string;
-                /** @default 0 */
-                start?: number;
-                /** @default 0 */
-                end?: number;
-              }[];
-            topLevelAncestors?: string[];
-            dependencies?: string[];
-            artifact?: {
-              /**
-               * @default unknown
-               * @enum {string}
-               */
-              type: "unknown" | "npm" | "pypi" | "golang";
-              /** @default */
-              namespace?: string;
-              /** @default */
-              name?: string;
-              /** @default */
-              version?: string;
-              /** @default */
-              subpath?: string;
-              /** @default */
-              release?: string;
-              /** @default */
-              id: string;
-            };
-            /** @default */
-            license?: string;
-            author?: string[];
-            /** @default 0 */
-            size?: number;
-            score?: {
-              /** @default 0 */
-              supplyChain: number;
-              /** @default 0 */
-              quality: number;
-              /** @default 0 */
-              maintenance: number;
-              /** @default 0 */
-              vulnerability: number;
-              /** @default 0 */
-              license: number;
-              /** @default 0 */
-              overall: number;
-            };
-            alerts?: {
-                /** @default */
-                key: string;
-                /** @default */
-                type: string;
-                severity: components["schemas"]["SocketIssueSeverity"];
-                category: components["schemas"]["SocketCategory"];
-                /** @default */
-                file?: string;
-                /** @default 0 */
-                start?: number;
-                /** @default 0 */
-                end?: number;
-                /** @default null */
-                props?: Record<string, never>;
-              }[];
-            /** @default 0 */
-            batchIndex?: number;
-          };
+          "application/x-ndjson": components["schemas"]["SocketArtifact"];
         };
       };
       400: components["responses"]["SocketBadRequest"];
@@ -2317,7 +2713,10 @@ export interface operations {
    * Delete full scan
    * @description Delete an existing full scan.
    *
-   * This endpoint consumes 0 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:delete
    */
   deleteOrgFullScan: {
     parameters: {
@@ -2349,7 +2748,10 @@ export interface operations {
    * Get full scan metadata
    * @description Get metadata for a single full scan
    *
-   * This endpoint consumes 0 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:list
    */
   getOrgFullScanMetadata: {
     parameters: {
@@ -2402,7 +2804,10 @@ export interface operations {
    * List repositories
    * @description Lists repositories for the specified organization.
    *
-   * This endpoint consumes 0 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - repo:list
    */
   getOrgRepoList: {
     parameters: {
@@ -2498,7 +2903,10 @@ export interface operations {
    *
    * Repos collect Full scans and Diff scans and are typically associated with a git repo.
    *
-   * This endpoint consumes 0 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - repo:create
    */
   createOrgRepo: {
     parameters: {
@@ -2619,7 +3027,10 @@ export interface operations {
    * Get repository
    * @description Retrieve a repository associated with an organization.
    *
-   * This endpoint consumes 0 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - repo:list
    */
   getOrgRepo: {
     parameters: {
@@ -2705,7 +3116,10 @@ export interface operations {
    * Update repository
    * @description Update details of an existing repository.
    *
-   * This endpoint consumes 0 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - repo:update
    */
   updateOrgRepo: {
     parameters: {
@@ -2828,7 +3242,10 @@ export interface operations {
    * Delete repository
    * @description Delete a single repository and all of its associated Full scans and Diff scans.
    *
-   * This endpoint consumes 0 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - repo:delete
    */
   deleteOrgRepo: {
     parameters: {
@@ -2857,78 +3274,13 @@ export interface operations {
     };
   };
   /**
-   * Get Audit Log Events
-   * @description Paginated list of audit log events.
-   *
-   * This endpoint consumes 0 units of your quota.
-   */
-  getAuditLogEvents: {
-    parameters: {
-      query?: {
-        /** @description Filter audit log events by type. Omit for all types. */
-        type?: "BookDemo" | "CancelInvitation" | "ChangeMemberRole" | "ChangePlanSubscriptionSeats" | "ContactForm" | "CreateApiToken" | "CreateUser" | "GithubAppInstallation" | "JoinOrganizationByVcs" | "LinkAccount" | "RemoveMember" | "ResetInvitationLink" | "ResetOrganizationSettingToDefault" | "RotateApiToken" | "SendInvitation" | "SignIn" | "SignOut" | "Subscribe" | "SyncOrganization" | "TransferOwnership" | "UpdateAlertTriage" | "UpdateApiTokenName" | "UpdateApiTokenScopes" | "UpdateApiTokenVisibility" | "UpdateOrganizationSetting" | "UpgradeOrganizationPlan" | "VerifiedEmail";
-        /** @description Number of events per page */
-        per_page?: number;
-        /** @description Page token */
-        page?: string;
-      };
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string;
-      };
-    };
-    responses: {
-      /** @description The paginated list of events in an organizations audit log and the next page querystring token. */
-      200: {
-        content: {
-          "application/json": {
-            results: {
-                /** @default */
-                event_id?: string;
-                /** @default */
-                created_at?: string;
-                /** @default */
-                updated_at?: string;
-                /** @default */
-                country_code?: string;
-                /** @default */
-                organization_id?: string;
-                /** @default */
-                ip_address?: string;
-                /** @default null */
-                payload?: Record<string, never>;
-                /** @default 0 */
-                status_code?: number;
-                /** @default */
-                type?: string;
-                /** @default */
-                user_agent?: string;
-                /** @default */
-                user_id?: string;
-                /** @default */
-                user_email?: string;
-                /** @default */
-                user_image?: string;
-                /** @default */
-                organization_name?: string;
-              }[];
-            /** @default */
-            nextPage: string;
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
    * Get organization analytics (unstable)
    * @description Get analytics data regarding the number of alerts found across all active repositories.
    *
-   * This endpoint consumes 0 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - report:write
    */
   getOrgAnalytics: {
     parameters: {
@@ -2990,7 +3342,10 @@ export interface operations {
    * Get repository analytics
    * @description Get analytics data regarding the number of alerts found in a single repository.
    *
-   * This endpoint consumes 0 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - report:write
    */
   getRepoAnalytics: {
     parameters: {
@@ -3054,7 +3409,10 @@ export interface operations {
    * Search dependencies
    * @description Search for any dependency that is being used in your organization.
    *
-   * This endpoint consumes 0 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - Any
    */
   searchDependencies: {
     requestBody?: {
@@ -3116,6 +3474,9 @@ export interface operations {
    * For example, these are valid filenames: "requirements.txt", "package.json", "folder/package.json", and "deep/nested/folder/package.json".
    *
    * This endpoint consumes 100 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - report:write
    */
   createDependenciesSnapshot: {
     parameters: {
@@ -3157,7 +3518,9 @@ export interface operations {
    * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
    * Examples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.
    *
-   * This endpoint consumes 0 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    */
   getReportSupportedFiles: {
     responses: {
@@ -3183,6 +3546,9 @@ export interface operations {
    * @description Delete a specific project report generated with the GitHub app. These endpoints will be merged into the full-scans endpoint so
    *
    * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - report:write
    */
   deleteReport: {
     parameters: {
@@ -3209,12 +3575,22 @@ export interface operations {
   };
   /**
    * Get list of reports
-   * @deprecated
    * @description Get all your project reports generated with the GitHub app. This endpoint will be merged into the full-scans endpoint soon.
    *
    * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - report:list
    */
   getReportList: {
+    parameters: {
+      query?: {
+        /** @description A Unix timestamp in seconds to filter results prior to this date. */
+        from?: string;
+        /** @description When defined, returns only reports for the associated repository slug. */
+        repo?: string;
+      };
+    };
     responses: {
       /** @description List of project reports */
       200: {
@@ -3248,7 +3624,6 @@ export interface operations {
   };
   /**
    * Create a report
-   * @deprecated
    * @description Upload a lockfile to get your project analyzed by Socket.
    * You can upload multiple lockfiles in the same request, but each filename must be unique.
    *
@@ -3257,6 +3632,9 @@ export interface operations {
    * For example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.
    *
    * This endpoint consumes 100 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - report:write
    */
   createReport: {
     requestBody?: {
@@ -3289,10 +3667,12 @@ export interface operations {
   };
   /**
    * View a report
-   * @deprecated
    * @description Get all the issues, packages, and scores related to an specific project report.
    *
    * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - report:read
    */
   getReport: {
     parameters: {
@@ -3320,7 +3700,10 @@ export interface operations {
    * @deprecated
    * @description Get all GitHub repositories associated with a Socket org.
    *
-   * This endpoint consumes 0 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - repo:list
    */
   getRepoList: {
     parameters: {
@@ -3371,7 +3754,9 @@ export interface operations {
    * Returns the OpenAPI definition
    * @description Retrieve the API specification in an Openapi JSON format.
    *
-   * This endpoint consumes 0 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    */
   getOpenAPI: {
     responses: {
@@ -3389,6 +3774,9 @@ export interface operations {
    * @description Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
    *
    * This endpoint consumes 0 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - Any
    */
   getQuota: {
     responses: {
@@ -3409,7 +3797,10 @@ export interface operations {
    * List organizations
    * @description Get information on the current organizations associated with the API key.
    *
-   * This endpoint consumes 0 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - Any
    */
   getOrganizations: {
     responses: {
@@ -3442,7 +3833,10 @@ export interface operations {
    * Calculate settings
    * @description Get your current settings the requested organizations and default settings to allow deferrals.
    *
-   * This endpoint consumes 0 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - Any
    */
   postSettings: {
     requestBody?: {
@@ -3498,6 +3892,9 @@ export interface operations {
    * You can [see here](https://socket.dev/npm/issue) the full list of issues.
    *
    * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - Any
    */
   getIssuesByNPMPackage: {
     parameters: {
@@ -3558,6 +3955,9 @@ export interface operations {
    * - typeModule: Whether the package declares a "type": "module" field.
    *
    * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - Any
    */
   getScoreByNPMPackage: {
     parameters: {
