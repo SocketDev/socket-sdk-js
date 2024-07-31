@@ -19,6 +19,9 @@ export interface paths {
      * - [`purl` Spec](https://github.com/package-url/purl-spec)
      * - [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)
      *
+     * This endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).
+     * Actively running analysis will be returned when available on subsequent runs.
+     *
      * ## Examples:
      *
      * ### Looking up an npm package:
@@ -144,6 +147,9 @@ export interface paths {
     /**
      * Stream full scan
      * @description Stream all SBOM artifacts for a full scan.
+     *
+     * This endpoint returns the latest, available alert data for artifacts in the full scan (stale while revalidate).
+     * Actively running analysis will be returned when available on subsequent runs.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -402,7 +408,7 @@ export interface paths {
   "/settings": {
     /**
      * Calculate settings
-     * @description Get your current settings the requested organizations and default settings to allow deferrals.
+     * @description Get current settings for the requested organizations and default settings to allow deferrals.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -2292,6 +2298,9 @@ export interface operations {
    * - [`purl` Spec](https://github.com/package-url/purl-spec)
    * - [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)
    *
+   * This endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).
+   * Actively running analysis will be returned when available on subsequent runs.
+   *
    * ## Examples:
    *
    * ### Looking up an npm package:
@@ -2680,6 +2689,9 @@ export interface operations {
   /**
    * Stream full scan
    * @description Stream all SBOM artifacts for a full scan.
+   *
+   * This endpoint returns the latest, available alert data for artifacts in the full scan (stale while revalidate).
+   * Actively running analysis will be returned when available on subsequent runs.
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -3831,7 +3843,7 @@ export interface operations {
   };
   /**
    * Calculate settings
-   * @description Get your current settings the requested organizations and default settings to allow deferrals.
+   * @description Get current settings for the requested organizations and default settings to allow deferrals.
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -3839,6 +3851,7 @@ export interface operations {
    * - Any
    */
   postSettings: {
+    /** @description Array of organization selector objects (with `organization` field holding the organization ID) to get settings for */
     requestBody?: {
       content: {
         "application/json": {
@@ -3848,7 +3861,7 @@ export interface operations {
       };
     };
     responses: {
-      /** @description Organization settings */
+      /** @description Organization settings. Returned object contains default issue rules and an array of entries, with each entry representing an organization's settings. */
       200: {
         content: {
           "application/json": {
