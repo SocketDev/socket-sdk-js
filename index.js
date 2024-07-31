@@ -530,6 +530,48 @@ class SocketSdk {
     }
 
   /**
+   * @param {{[key: string]: string }} params
+   * @param {string[]} filePaths
+   * @param {string} pathsRelativeTo
+   * @returns {Promise<SocketSdkResultType<'createDependenciesSnapshot'>>}
+   */
+    async createDependenciesSnapshot (params, filePaths, pathsRelativeTo = '.') {
+      const basePath = path.resolve(process.cwd(), pathsRelativeTo)
+      const absoluteFilePaths = filePaths.map(filePath => path.resolve(basePath, filePath))
+      const formattedQueryParams = new URLSearchParams(params)
+
+      const [
+        { FormData },
+        { fileFromPath },
+        client
+      ] = await Promise.all([
+        import('formdata-node'),
+        import('formdata-node/file-from-path'),
+        this.#getClient(),
+      ])
+
+      const body = new FormData()
+
+      const files = await Promise.all(absoluteFilePaths.map(absoluteFilePath => fileFromPath(absoluteFilePath)))
+
+      for (let i = 0, length = files.length; i < length; i++) {
+        const absoluteFilePath = absoluteFilePaths[i]
+        if (absoluteFilePath) {
+          const relativeFilePath = path.relative(basePath, absoluteFilePath)
+          body.set(relativeFilePath, files[i])
+        }
+      }
+
+      try {
+        const data = await client.post(`dependencies/upload?${formattedQueryParams}`, { body }).json()
+
+        return { success: true, status: 200, data }
+      } catch (err) {
+        return /** @type {SocketSdkErrorType<'createDependenciesSnapshot'>} */ (this.#handleApiError(err))
+      }
+    }
+
+  /**
    * @param {Array<{ organization?: string }>} selectors
    * @returns {Promise<SocketSdkResultType<'postSettings'>>}
    */
