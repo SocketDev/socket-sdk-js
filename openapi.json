@@ -7241,7 +7241,7 @@
             ]
           }
         ],
-        "description": "Batch retrieval of package metadata and alerts by PURL strings. Compatible witch CycloneDX reports.\n\nPackage URLs (PURLs) are an ecosystem agnostic way to identify packages.\nCycloneDX SBOMs use the purl format to identify components.\nThis endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.\n\nMore information on purl and CycloneDX:\n\n- [`purl` Spec](https://github.com/package-url/purl-spec)\n- [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)\n\n## Examples:\n\n### Looking up an npm package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\n### Looking up an PyPi package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    }\n  ]\n}\n```\n\n### Looking up a Maven package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### Batch lookup\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    },\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    },\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- packages:list",
+        "description": "Batch retrieval of package metadata and alerts by PURL strings. Compatible witch CycloneDX reports.\n\nPackage URLs (PURLs) are an ecosystem agnostic way to identify packages.\nCycloneDX SBOMs use the purl format to identify components.\nThis endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.\n\nMore information on purl and CycloneDX:\n\n- [`purl` Spec](https://github.com/package-url/purl-spec)\n- [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)\n\nThis endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).\nActively running analysis will be returned when available on subsequent runs.\n\n## Examples:\n\n### Looking up an npm package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\n### Looking up an PyPi package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    }\n  ]\n}\n```\n\n### Looking up a Maven package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### Batch lookup\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    },\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    },\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- packages:list",
         "responses": {
           "200": {
             "content": {
@@ -8172,7 +8172,7 @@
             ]
           }
         ],
-        "description": "Stream all SBOM artifacts for a full scan.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
+        "description": "Stream all SBOM artifacts for a full scan.\n\nThis endpoint returns the latest, available alert data for artifacts in the full scan (stale while revalidate).\nActively running analysis will be returned when available on subsequent runs.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
         "responses": {
           "200": {
             "content": {
@@ -10446,6 +10446,7 @@
               }
             }
           },
+          "description": "Array of organization selector objects (with `organization` field holding the organization ID) to get settings for",
           "required": false
         },
         "security": [
@@ -10453,7 +10454,7 @@
             "basicAuth": []
           }
         ],
-        "description": "Get your current settings the requested organizations and default settings to allow deferrals.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- Any",
+        "description": "Get current settings for the requested organizations and default settings to allow deferrals.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- Any",
         "responses": {
           "200": {
             "content": {
@@ -10556,7 +10557,7 @@
                 }
               }
             },
-            "description": "Organization settings"
+            "description": "Organization settings. Returned object contains default issue rules and an array of entries, with each entry representing an organization's settings."
           },
           "401": {
             "$ref": "#/components/responses/SocketUnauthorized"
