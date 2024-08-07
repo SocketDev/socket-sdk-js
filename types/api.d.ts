@@ -85,6 +85,71 @@ export interface paths {
      */
     post: operations["batchPackageFetch"];
   };
+  "/license-policy": {
+    /**
+     * License Policy (Beta)
+     * @description Diff the license information from a list of packages (as PURL strings) with a configurable license allow list.
+     * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
+     *
+     * ## Allow List Schema
+     *
+     * ```json
+     * {
+     *   requiredApprovalSources?: Array<"fsf" | "osi">,
+     *   allowedApprovalSources?: Array<"fsf" | "osi">,
+     *   allowedFamilies?: Array<"copyleft" | "permissive">,
+     *   allowedTiers?: Array<PermissiveTier | CopyleftTier>,
+     *   allowedSpdxAtoms?: Array<string>
+     * }
+     * ```
+     *
+     * where
+     *
+     * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" | "lead"
+     * CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong copyleft" | "weak copyleft"
+     *
+     * readers can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+     *
+     * ## Return value
+     *
+     * The returned values are objects containing information about license data from the requested
+     * PURLs which violates the allow list. The returned objects contain an spdx disjunction describing the
+     * license data for the violation, the provenance of that information, and a filepath to the source
+     * of the violation (if one is available; there may not be an available path for things like license information
+     * taken from registry metdata). Returned objects have the following shape:
+     * ```json
+     * {
+     *   spdxDisj: string,
+     *   provenance: string,
+     *   filepath?: string,
+     * }
+     * ```
+     *
+     * ### Example request bodies:
+     * ```json
+     * {
+     *   "components": [
+     *     {
+     *       "purl": "pkg:pypi/alt-aiohttp-cors@0.7.1?artifact_id=tar-gz"
+     *     },
+     *     {
+     *       "purl": "pkg:npm/express@4.19.2"
+     *     }
+     *   ],
+     *   "license_allow_list": {
+     *     "allowedFamilies": ["permissive"],
+     *     "allowedSpdxAtoms": ["GPL-1.0-only WITH Autoconf-exception-3.0"]
+     *   }
+     * }
+     * ```
+     *
+     * This endpoint consumes 100 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - packages:list
+     */
+    post: operations["licensePolicy"];
+  };
   "/orgs/{org_slug}/audit-log": {
     /**
      * Get Audit Log Events
@@ -275,6 +340,7 @@ export interface paths {
   "/dependencies/upload": {
     /**
      * Create a snapshot of all dependencies from manifest information
+     * @deprecated
      * @description Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.
      * You can upload multiple lockfiles in the same request, but each filename must be unique.
      *
@@ -501,6 +567,10 @@ export interface components {
     SocketBatchPURLFetch: {
       components: components["schemas"]["SocketBatchPURLRequest"][];
     };
+    LicenseAllowListRequest: {
+      components: components["schemas"]["SocketBatchPURLRequest"][];
+      license_allow_list: components["schemas"]["LicenseAllowList"];
+    };
     CDXManifestSchema: {
       /** @default CycloneDX */
       bomFormat: string;
@@ -722,6 +792,13 @@ export interface components {
     SocketBatchPURLRequest: {
       /** @default */
       purl: string;
+    };
+    LicenseAllowList: {
+      requiredApprovalSources: string[];
+      allowedApprovalSources: string[];
+      allowedFamilies: string[];
+      allowedTiers: string[];
+      allowedSpdxAtoms: string[];
     };
     CDXComponentSchema: {
       /** @default */
@@ -2390,6 +2467,98 @@ export interface operations {
     };
   };
   /**
+   * License Policy (Beta)
+   * @description Diff the license information from a list of packages (as PURL strings) with a configurable license allow list.
+   * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
+   *
+   * ## Allow List Schema
+   *
+   * ```json
+   * {
+   *   requiredApprovalSources?: Array<"fsf" | "osi">,
+   *   allowedApprovalSources?: Array<"fsf" | "osi">,
+   *   allowedFamilies?: Array<"copyleft" | "permissive">,
+   *   allowedTiers?: Array<PermissiveTier | CopyleftTier>,
+   *   allowedSpdxAtoms?: Array<string>
+   * }
+   * ```
+   *
+   * where
+   *
+   * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" | "lead"
+   * CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong copyleft" | "weak copyleft"
+   *
+   * readers can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+   *
+   * ## Return value
+   *
+   * The returned values are objects containing information about license data from the requested
+   * PURLs which violates the allow list. The returned objects contain an spdx disjunction describing the
+   * license data for the violation, the provenance of that information, and a filepath to the source
+   * of the violation (if one is available; there may not be an available path for things like license information
+   * taken from registry metdata). Returned objects have the following shape:
+   * ```json
+   * {
+   *   spdxDisj: string,
+   *   provenance: string,
+   *   filepath?: string,
+   * }
+   * ```
+   *
+   * ### Example request bodies:
+   * ```json
+   * {
+   *   "components": [
+   *     {
+   *       "purl": "pkg:pypi/alt-aiohttp-cors@0.7.1?artifact_id=tar-gz"
+   *     },
+   *     {
+   *       "purl": "pkg:npm/express@4.19.2"
+   *     }
+   *   ],
+   *   "license_allow_list": {
+   *     "allowedFamilies": ["permissive"],
+   *     "allowedSpdxAtoms": ["GPL-1.0-only WITH Autoconf-exception-3.0"]
+   *   }
+   * }
+   * ```
+   *
+   * This endpoint consumes 100 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - packages:list
+   */
+  licensePolicy: {
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["LicenseAllowListRequest"];
+      };
+    };
+    responses: {
+      /** @description Socket issue lists and scores for all packages */
+      200: {
+        content: {
+          "application/x-ndjson": {
+              /** @default */
+              spdxDisj: string;
+              /** @default */
+              provenance: string;
+              /** @default */
+              filepath: string;
+              /** @default */
+              purl: string;
+            }[];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+      500: components["responses"]["SocketInternalServerError"];
+    };
+  };
+  /**
    * Get Audit Log Events
    * @description Paginated list of audit log events.
    *
@@ -3478,6 +3647,7 @@ export interface operations {
   };
   /**
    * Create a snapshot of all dependencies from manifest information
+   * @deprecated
    * @description Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.
    * You can upload multiple lockfiles in the same request, but each filename must be unique.
    *
