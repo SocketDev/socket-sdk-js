@@ -323,6 +323,26 @@
           "components"
         ]
       },
+      "LicenseAllowListRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SocketBatchPURLRequest"
+            }
+          },
+          "license_allow_list": {
+            "$ref": "#/components/schemas/LicenseAllowList"
+          }
+        },
+        "required": [
+          "components",
+          "license_allow_list"
+        ]
+      },
       "CDXManifestSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1154,6 +1174,60 @@
         },
         "required": [
           "purl"
+        ]
+      },
+      "LicenseAllowList": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "requiredApprovalSources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            }
+          },
+          "allowedApprovalSources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            }
+          },
+          "allowedFamilies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            }
+          },
+          "allowedTiers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            }
+          },
+          "allowedSpdxAtoms": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            }
+          }
+        },
+        "required": [
+          "allowedApprovalSources",
+          "allowedFamilies",
+          "allowedSpdxAtoms",
+          "allowedTiers",
+          "requiredApprovalSources"
         ]
       },
       "CDXComponentSchema": {
@@ -7272,6 +7346,97 @@
         "x-readme": {}
       }
     },
+    "/license-policy": {
+      "post": {
+        "tags": [
+          "Packages"
+        ],
+        "summary": "License Policy (Beta)",
+        "operationId": "licensePolicy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LicenseAllowListRequest"
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "basicAuth": [
+              "packages:list"
+            ]
+          }
+        ],
+        "description": "Diff the license information from a list of packages (as PURL strings) with a configurable license allow list.\nPackage URLs (PURLs) are an ecosystem agnostic way to identify packages.\n\n## Allow List Schema\n\n```json\n{\n  requiredApprovalSources?: Array<\"fsf\" | \"osi\">,\n  allowedApprovalSources?: Array<\"fsf\" | \"osi\">,\n  allowedFamilies?: Array<\"copyleft\" | \"permissive\">,\n  allowedTiers?: Array<PermissiveTier | CopyleftTier>,\n  allowedSpdxAtoms?: Array<string>\n}\n```\n\nwhere\n\nPermissiveTier ::= \"model permissive\" | \"gold\" | \"silver\" | \"bronze\" | \"lead\"\nCopyleftTier ::= \"maximal copyleft\" | \"network copyleft\" | \"strong copyleft\" | \"weak copyleft\"\n\nreaders can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.\n\n## Return value\n\nThe returned values are objects containing information about license data from the requested\nPURLs which violates the allow list. The returned objects contain an spdx disjunction describing the\nlicense data for the violation, the provenance of that information, and a filepath to the source\nof the violation (if one is available; there may not be an available path for things like license information\ntaken from registry metdata). Returned objects have the following shape:\n```json\n{\n  spdxDisj: string,\n  provenance: string,\n  filepath?: string,\n}\n```\n\n### Example request bodies:\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/alt-aiohttp-cors@0.7.1?artifact_id=tar-gz\"\n    },\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ],\n  \"license_allow_list\": {\n    \"allowedFamilies\": [\"permissive\"],\n    \"allowedSpdxAtoms\": [\"GPL-1.0-only WITH Autoconf-exception-3.0\"]\n  }\n}\n```\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- packages:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "spdxDisj": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "provenance": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "filepath": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "purl": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      }
+                    },
+                    "required": [
+                      "filepath",
+                      "provenance",
+                      "purl",
+                      "spdxDisj"
+                    ]
+                  }
+                }
+              }
+            },
+            "description": "Socket issue lists and scores for all packages"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/SocketInternalServerError"
+          }
+        },
+        "x-readme": {}
+      }
+    },
     "/orgs/{org_slug}/audit-log": {
       "get": {
         "tags": [
@@ -9643,6 +9808,7 @@
           "Dependencies"
         ],
         "summary": "Create a snapshot of all dependencies from manifest information",
+        "deprecated": true,
         "operationId": "createDependenciesSnapshot",
         "parameters": [
           {
