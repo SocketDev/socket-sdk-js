@@ -5152,6 +5152,58 @@
               "type": {
                 "type": "string",
                 "enum": [
+                  "suspiciousStarActivity"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "percentageSuspiciousStars": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "percentageSuspiciousStars"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
                   "unpopularPackage"
                 ]
               },
@@ -7470,6 +7522,7 @@
                 "CreateApiToken",
                 "CreateUser",
                 "GithubAppInstallation",
+                "JoinOrganization",
                 "JoinOrganizationByVcs",
                 "LinkAccount",
                 "RemoveMember",
