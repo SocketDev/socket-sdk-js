@@ -436,6 +436,18 @@ export interface paths {
      */
     get: operations["getRepoList"];
   };
+  "/threat-feed": {
+    /**
+     * Get Threat Feed Items (Beta)
+     * @description Paginated list of threat feed items.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - threat-feed:list
+     */
+    get: operations["getThreatFeedItems"];
+  };
   "/openapi": {
     /**
      * Returns the OpenAPI definition
@@ -788,6 +800,10 @@ export interface components {
       end?: number;
       /** @default null */
       props?: Record<string, never>;
+      /** @default */
+      action?: string;
+      /** @default 0 */
+      actionPolicyIndex?: number;
     };
     SocketBatchPURLRequest: {
       /** @default */
@@ -1740,6 +1756,8 @@ export interface components {
         props: {
           /** @default 0 */
           percentageSuspiciousStars: number;
+          /** @default */
+          repository: string;
         };
         usage?: components["schemas"]["SocketUsageRef"];
       };
@@ -3934,6 +3952,59 @@ export interface operations {
                   created_at: string;
                 };
               }[];
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get Threat Feed Items (Beta)
+   * @description Paginated list of threat feed items.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - threat-feed:list
+   */
+  getThreatFeedItems: {
+    parameters: {
+      query?: {
+        /** @description Number of items per page */
+        per_page?: number;
+        /** @description Page token */
+        page?: string;
+      };
+    };
+    responses: {
+      /** @description The paginated list of items in the threat feed and the next page querystring token. */
+      200: {
+        content: {
+          "application/json": {
+            results: {
+                /** @default */
+                createdAt?: string;
+                /** @default */
+                description?: string;
+                /** @default 0 */
+                id?: number;
+                /** @default */
+                locationHtmlUrl?: string;
+                /** @default */
+                packageHtmlUrl?: string;
+                /** @default */
+                purl?: string;
+                /** @default */
+                removedAt?: string;
+                /** @default */
+                threatType?: string;
+              }[];
+            /** @default */
+            nextPage: string;
           };
         };
       };
