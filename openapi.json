@@ -1152,6 +1152,16 @@
             "type": "object",
             "description": "",
             "default": null
+          },
+          "action": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "actionPolicyIndex": {
+            "type": "integer",
+            "description": "",
+            "default": 0
           }
         },
         "required": [
@@ -5178,10 +5188,16 @@
                             "type": "number",
                             "description": "",
                             "default": 0
+                          },
+                          "repository": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
                           }
                         },
                         "required": [
-                          "percentageSuspiciousStars"
+                          "percentageSuspiciousStars",
+                          "repository"
                         ]
                       },
                       "usage": {
@@ -10463,6 +10479,137 @@
               }
             },
             "description": "List of GitHub repositories associated with the organization."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/threat-feed": {
+      "get": {
+        "tags": [
+          "Threat Feed"
+        ],
+        "summary": "Get Threat Feed Items (Beta)",
+        "operationId": "getThreatFeedItems",
+        "parameters": [
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "Number of items per page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 30
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Page token",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "threat-feed:list"
+            ]
+          }
+        ],
+        "description": "Paginated list of threat feed items.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- threat-feed:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "createdAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "id": {
+                            "type": "integer",
+                            "description": "",
+                            "default": 0
+                          },
+                          "locationHtmlUrl": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "packageHtmlUrl": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "purl": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "removedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "threatType": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          }
+                        }
+                      }
+                    },
+                    "nextPage": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "nextPage",
+                    "results"
+                  ]
+                }
+              }
+            },
+            "description": "The paginated list of items in the threat feed and the next page querystring token."
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
