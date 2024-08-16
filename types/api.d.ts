@@ -1779,6 +1779,8 @@ export interface components {
         props: {
           /** @default */
           spdxDisj: string;
+          /** @default null */
+          licenseScanResult: Record<string, never>;
         };
         usage?: components["schemas"]["SocketUsageRef"];
       };
