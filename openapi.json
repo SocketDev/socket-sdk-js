@@ -5289,9 +5289,15 @@
                             "type": "string",
                             "description": "",
                             "default": ""
+                          },
+                          "licenseScanResult": {
+                            "type": "object",
+                            "description": "",
+                            "default": null
                           }
                         },
                         "required": [
+                          "licenseScanResult",
                           "spdxDisj"
                         ]
                       },
