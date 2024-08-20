@@ -5291,9 +5291,9 @@
                             "default": ""
                           },
                           "licenseScanResult": {
-                            "type": "object",
+                            "type": "string",
                             "description": "",
-                            "default": null
+                            "default": ""
                           }
                         },
                         "required": [
@@ -7938,6 +7938,2272 @@
           },
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/full-scans/diff": {
+      "get": {
+        "tags": [
+          "Diff Scans"
+        ],
+        "summary": "Stream diff scan",
+        "operationId": "GetOrgDiffScan",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": true,
+            "description": "The base full scan ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": true,
+            "description": "The base full scan ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "preview",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "full-scans:list"
+            ]
+          }
+        ],
+        "description": "Stream a diff scan between two full scans. Returns a diff scan.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "before": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "project_snapshot_hash": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "repository_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "branch": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "commit_message": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "commit_hash": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "pull_request": {
+                          "type": "integer",
+                          "description": "",
+                          "default": 0,
+                          "nullable": true
+                        },
+                        "committers": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          }
+                        },
+                        "organization_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        }
+                      },
+                      "required": [
+                        "branch",
+                        "commit_hash",
+                        "commit_message",
+                        "committers",
+                        "id",
+                        "organization_id",
+                        "project_snapshot_hash",
+                        "pull_request",
+                        "repository_id"
+                      ]
+                    },
+                    "after": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "project_snapshot_hash": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "repository_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "branch": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "commit_message": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "commit_hash": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "pull_request": {
+                          "type": "integer",
+                          "description": "",
+                          "default": 0,
+                          "nullable": true
+                        },
+                        "committers": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          }
+                        },
+                        "organization_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        }
+                      },
+                      "required": [
+                        "branch",
+                        "commit_hash",
+                        "commit_message",
+                        "committers",
+                        "id",
+                        "organization_id",
+                        "project_snapshot_hash",
+                        "pull_request",
+                        "repository_id"
+                      ]
+                    },
+                    "artifacts": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "added": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "diffType": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "base": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "direct": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "toplevelAncestors": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "nullable": true
+                                  }
+                                }
+                              },
+                              "head": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "direct": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "toplevelAncestors": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "nullable": true
+                                  }
+                                }
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "type": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "name": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "namespace": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "files": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "version": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "subpath": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "artifact_id": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "artifactId": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "qualifiers": {},
+                              "scores": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "description": "",
+                                "properties": {
+                                  "supplyChain": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "quality": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "maintenance": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "vulnerability": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "license": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "overall": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  }
+                                },
+                                "required": [
+                                  "license",
+                                  "maintenance",
+                                  "overall",
+                                  "quality",
+                                  "supplyChain",
+                                  "vulnerability"
+                                ]
+                              },
+                              "capabilities": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "description": "",
+                                "properties": {
+                                  "env": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "eval": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "fs": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "net": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "shell": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "unsafe": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  }
+                                },
+                                "required": [
+                                  "env",
+                                  "eval",
+                                  "fs",
+                                  "net",
+                                  "shell",
+                                  "unsafe"
+                                ]
+                              },
+                              "license": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "size": {
+                                "type": "integer",
+                                "description": "",
+                                "default": 0
+                              },
+                              "author": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "state": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "error": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "alerts": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "key": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "type": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "file": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "start": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "end": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "props": {
+                                      "type": "object",
+                                      "description": "",
+                                      "default": null
+                                    },
+                                    "action": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "actionPolicyIndex": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    }
+                                  },
+                                  "required": [
+                                    "key",
+                                    "type"
+                                  ]
+                                }
+                              },
+                              "licenseDetails": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "authors": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string",
+                                        "description": "",
+                                        "default": ""
+                                      }
+                                    },
+                                    "charEnd": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "charStart": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "filepath": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "match_strength": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "filehash": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "provenance": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "spdxDisj": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "object",
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "licenseId": {
+                                              "type": "string",
+                                              "description": "",
+                                              "default": ""
+                                            },
+                                            "licenseExceptionId": {
+                                              "type": "string",
+                                              "description": "",
+                                              "default": ""
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "licenseAttrib": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "description": "",
+                                  "properties": {
+                                    "attribText": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "attribData": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "object",
+                                        "additionalProperties": false,
+                                        "description": "",
+                                        "properties": {
+                                          "purl": {
+                                            "type": "string",
+                                            "description": "",
+                                            "default": ""
+                                          },
+                                          "foundInFilepath": {
+                                            "type": "string",
+                                            "description": "",
+                                            "default": "",
+                                            "nullable": true
+                                          },
+                                          "foundAuthors": {
+                                            "type": "array",
+                                            "items": {
+                                              "type": "string",
+                                              "description": "",
+                                              "default": ""
+                                            }
+                                          },
+                                          "spdxExpr": {
+                                            "type": "string",
+                                            "description": "",
+                                            "default": "",
+                                            "nullable": true
+                                          }
+                                        },
+                                        "required": [
+                                          "foundAuthors",
+                                          "foundInFilepath",
+                                          "purl",
+                                          "spdxExpr"
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  "required": [
+                                    "attribData",
+                                    "attribText"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "removed": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "diffType": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "base": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "direct": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "toplevelAncestors": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "nullable": true
+                                  }
+                                }
+                              },
+                              "head": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "direct": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "toplevelAncestors": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "nullable": true
+                                  }
+                                }
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "type": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "name": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "namespace": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "files": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "version": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "subpath": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "artifact_id": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "artifactId": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "qualifiers": {},
+                              "scores": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "description": "",
+                                "properties": {
+                                  "supplyChain": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "quality": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "maintenance": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "vulnerability": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "license": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "overall": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  }
+                                },
+                                "required": [
+                                  "license",
+                                  "maintenance",
+                                  "overall",
+                                  "quality",
+                                  "supplyChain",
+                                  "vulnerability"
+                                ]
+                              },
+                              "capabilities": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "description": "",
+                                "properties": {
+                                  "env": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "eval": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "fs": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "net": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "shell": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "unsafe": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  }
+                                },
+                                "required": [
+                                  "env",
+                                  "eval",
+                                  "fs",
+                                  "net",
+                                  "shell",
+                                  "unsafe"
+                                ]
+                              },
+                              "license": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "size": {
+                                "type": "integer",
+                                "description": "",
+                                "default": 0
+                              },
+                              "author": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "state": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "error": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "alerts": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "key": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "type": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "file": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "start": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "end": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "props": {
+                                      "type": "object",
+                                      "description": "",
+                                      "default": null
+                                    },
+                                    "action": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "actionPolicyIndex": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    }
+                                  },
+                                  "required": [
+                                    "key",
+                                    "type"
+                                  ]
+                                }
+                              },
+                              "licenseDetails": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "authors": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string",
+                                        "description": "",
+                                        "default": ""
+                                      }
+                                    },
+                                    "charEnd": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "charStart": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "filepath": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "match_strength": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "filehash": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "provenance": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "spdxDisj": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "object",
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "licenseId": {
+                                              "type": "string",
+                                              "description": "",
+                                              "default": ""
+                                            },
+                                            "licenseExceptionId": {
+                                              "type": "string",
+                                              "description": "",
+                                              "default": ""
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "licenseAttrib": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "description": "",
+                                  "properties": {
+                                    "attribText": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "attribData": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "object",
+                                        "additionalProperties": false,
+                                        "description": "",
+                                        "properties": {
+                                          "purl": {
+                                            "type": "string",
+                                            "description": "",
+                                            "default": ""
+                                          },
+                                          "foundInFilepath": {
+                                            "type": "string",
+                                            "description": "",
+                                            "default": "",
+                                            "nullable": true
+                                          },
+                                          "foundAuthors": {
+                                            "type": "array",
+                                            "items": {
+                                              "type": "string",
+                                              "description": "",
+                                              "default": ""
+                                            }
+                                          },
+                                          "spdxExpr": {
+                                            "type": "string",
+                                            "description": "",
+                                            "default": "",
+                                            "nullable": true
+                                          }
+                                        },
+                                        "required": [
+                                          "foundAuthors",
+                                          "foundInFilepath",
+                                          "purl",
+                                          "spdxExpr"
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  "required": [
+                                    "attribData",
+                                    "attribText"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "unchanged": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "diffType": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "base": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "direct": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "toplevelAncestors": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "nullable": true
+                                  }
+                                }
+                              },
+                              "head": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "direct": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "toplevelAncestors": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "nullable": true
+                                  }
+                                }
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "type": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "name": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "namespace": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "files": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "version": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "subpath": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "artifact_id": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "artifactId": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "qualifiers": {},
+                              "scores": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "description": "",
+                                "properties": {
+                                  "supplyChain": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "quality": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "maintenance": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "vulnerability": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "license": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "overall": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  }
+                                },
+                                "required": [
+                                  "license",
+                                  "maintenance",
+                                  "overall",
+                                  "quality",
+                                  "supplyChain",
+                                  "vulnerability"
+                                ]
+                              },
+                              "capabilities": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "description": "",
+                                "properties": {
+                                  "env": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "eval": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "fs": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "net": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "shell": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "unsafe": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  }
+                                },
+                                "required": [
+                                  "env",
+                                  "eval",
+                                  "fs",
+                                  "net",
+                                  "shell",
+                                  "unsafe"
+                                ]
+                              },
+                              "license": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "size": {
+                                "type": "integer",
+                                "description": "",
+                                "default": 0
+                              },
+                              "author": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "state": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "error": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "alerts": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "key": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "type": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "file": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "start": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "end": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "props": {
+                                      "type": "object",
+                                      "description": "",
+                                      "default": null
+                                    },
+                                    "action": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "actionPolicyIndex": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    }
+                                  },
+                                  "required": [
+                                    "key",
+                                    "type"
+                                  ]
+                                }
+                              },
+                              "licenseDetails": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "authors": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string",
+                                        "description": "",
+                                        "default": ""
+                                      }
+                                    },
+                                    "charEnd": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "charStart": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "filepath": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "match_strength": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "filehash": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "provenance": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "spdxDisj": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "object",
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "licenseId": {
+                                              "type": "string",
+                                              "description": "",
+                                              "default": ""
+                                            },
+                                            "licenseExceptionId": {
+                                              "type": "string",
+                                              "description": "",
+                                              "default": ""
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "licenseAttrib": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "description": "",
+                                  "properties": {
+                                    "attribText": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "attribData": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "object",
+                                        "additionalProperties": false,
+                                        "description": "",
+                                        "properties": {
+                                          "purl": {
+                                            "type": "string",
+                                            "description": "",
+                                            "default": ""
+                                          },
+                                          "foundInFilepath": {
+                                            "type": "string",
+                                            "description": "",
+                                            "default": "",
+                                            "nullable": true
+                                          },
+                                          "foundAuthors": {
+                                            "type": "array",
+                                            "items": {
+                                              "type": "string",
+                                              "description": "",
+                                              "default": ""
+                                            }
+                                          },
+                                          "spdxExpr": {
+                                            "type": "string",
+                                            "description": "",
+                                            "default": "",
+                                            "nullable": true
+                                          }
+                                        },
+                                        "required": [
+                                          "foundAuthors",
+                                          "foundInFilepath",
+                                          "purl",
+                                          "spdxExpr"
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  "required": [
+                                    "attribData",
+                                    "attribText"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "replaced": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "diffType": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "base": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "direct": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "toplevelAncestors": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "nullable": true
+                                  }
+                                }
+                              },
+                              "head": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "direct": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "toplevelAncestors": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "nullable": true
+                                  }
+                                }
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "type": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "name": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "namespace": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "files": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "version": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "subpath": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "artifact_id": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "artifactId": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "qualifiers": {},
+                              "scores": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "description": "",
+                                "properties": {
+                                  "supplyChain": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "quality": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "maintenance": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "vulnerability": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "license": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "overall": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  }
+                                },
+                                "required": [
+                                  "license",
+                                  "maintenance",
+                                  "overall",
+                                  "quality",
+                                  "supplyChain",
+                                  "vulnerability"
+                                ]
+                              },
+                              "capabilities": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "description": "",
+                                "properties": {
+                                  "env": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "eval": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "fs": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "net": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "shell": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "unsafe": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  }
+                                },
+                                "required": [
+                                  "env",
+                                  "eval",
+                                  "fs",
+                                  "net",
+                                  "shell",
+                                  "unsafe"
+                                ]
+                              },
+                              "license": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "size": {
+                                "type": "integer",
+                                "description": "",
+                                "default": 0
+                              },
+                              "author": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "state": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "error": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "alerts": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "key": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "type": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "file": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "start": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "end": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "props": {
+                                      "type": "object",
+                                      "description": "",
+                                      "default": null
+                                    },
+                                    "action": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "actionPolicyIndex": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    }
+                                  },
+                                  "required": [
+                                    "key",
+                                    "type"
+                                  ]
+                                }
+                              },
+                              "licenseDetails": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "authors": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string",
+                                        "description": "",
+                                        "default": ""
+                                      }
+                                    },
+                                    "charEnd": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "charStart": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "filepath": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "match_strength": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "filehash": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "provenance": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "spdxDisj": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "object",
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "licenseId": {
+                                              "type": "string",
+                                              "description": "",
+                                              "default": ""
+                                            },
+                                            "licenseExceptionId": {
+                                              "type": "string",
+                                              "description": "",
+                                              "default": ""
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "licenseAttrib": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "description": "",
+                                  "properties": {
+                                    "attribText": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "attribData": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "object",
+                                        "additionalProperties": false,
+                                        "description": "",
+                                        "properties": {
+                                          "purl": {
+                                            "type": "string",
+                                            "description": "",
+                                            "default": ""
+                                          },
+                                          "foundInFilepath": {
+                                            "type": "string",
+                                            "description": "",
+                                            "default": "",
+                                            "nullable": true
+                                          },
+                                          "foundAuthors": {
+                                            "type": "array",
+                                            "items": {
+                                              "type": "string",
+                                              "description": "",
+                                              "default": ""
+                                            }
+                                          },
+                                          "spdxExpr": {
+                                            "type": "string",
+                                            "description": "",
+                                            "default": "",
+                                            "nullable": true
+                                          }
+                                        },
+                                        "required": [
+                                          "foundAuthors",
+                                          "foundInFilepath",
+                                          "purl",
+                                          "spdxExpr"
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  "required": [
+                                    "attribData",
+                                    "attribText"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "updated": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "diffType": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "base": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "direct": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "toplevelAncestors": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "nullable": true
+                                  }
+                                }
+                              },
+                              "head": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "direct": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "toplevelAncestors": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "nullable": true
+                                  }
+                                }
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "type": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "name": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "namespace": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "files": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "version": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "subpath": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "artifact_id": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "artifactId": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "qualifiers": {},
+                              "scores": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "description": "",
+                                "properties": {
+                                  "supplyChain": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "quality": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "maintenance": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "vulnerability": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "license": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  },
+                                  "overall": {
+                                    "type": "number",
+                                    "description": "",
+                                    "default": 0
+                                  }
+                                },
+                                "required": [
+                                  "license",
+                                  "maintenance",
+                                  "overall",
+                                  "quality",
+                                  "supplyChain",
+                                  "vulnerability"
+                                ]
+                              },
+                              "capabilities": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "description": "",
+                                "properties": {
+                                  "env": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "eval": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "fs": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "net": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "shell": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  },
+                                  "unsafe": {
+                                    "type": "boolean",
+                                    "default": false,
+                                    "description": ""
+                                  }
+                                },
+                                "required": [
+                                  "env",
+                                  "eval",
+                                  "fs",
+                                  "net",
+                                  "shell",
+                                  "unsafe"
+                                ]
+                              },
+                              "license": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "size": {
+                                "type": "integer",
+                                "description": "",
+                                "default": 0
+                              },
+                              "author": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "state": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "error": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "alerts": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "key": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "type": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "file": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "start": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "end": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "props": {
+                                      "type": "object",
+                                      "description": "",
+                                      "default": null
+                                    },
+                                    "action": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "actionPolicyIndex": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    }
+                                  },
+                                  "required": [
+                                    "key",
+                                    "type"
+                                  ]
+                                }
+                              },
+                              "licenseDetails": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "authors": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string",
+                                        "description": "",
+                                        "default": ""
+                                      }
+                                    },
+                                    "charEnd": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "charStart": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "filepath": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "match_strength": {
+                                      "type": "integer",
+                                      "description": "",
+                                      "default": 0
+                                    },
+                                    "filehash": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "provenance": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "spdxDisj": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "object",
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "licenseId": {
+                                              "type": "string",
+                                              "description": "",
+                                              "default": ""
+                                            },
+                                            "licenseExceptionId": {
+                                              "type": "string",
+                                              "description": "",
+                                              "default": ""
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "licenseAttrib": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "description": "",
+                                  "properties": {
+                                    "attribText": {
+                                      "type": "string",
+                                      "description": "",
+                                      "default": ""
+                                    },
+                                    "attribData": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "object",
+                                        "additionalProperties": false,
+                                        "description": "",
+                                        "properties": {
+                                          "purl": {
+                                            "type": "string",
+                                            "description": "",
+                                            "default": ""
+                                          },
+                                          "foundInFilepath": {
+                                            "type": "string",
+                                            "description": "",
+                                            "default": "",
+                                            "nullable": true
+                                          },
+                                          "foundAuthors": {
+                                            "type": "array",
+                                            "items": {
+                                              "type": "string",
+                                              "description": "",
+                                              "default": ""
+                                            }
+                                          },
+                                          "spdxExpr": {
+                                            "type": "string",
+                                            "description": "",
+                                            "default": "",
+                                            "nullable": true
+                                          }
+                                        },
+                                        "required": [
+                                          "foundAuthors",
+                                          "foundInFilepath",
+                                          "purl",
+                                          "spdxExpr"
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  "required": [
+                                    "attribData",
+                                    "attribText"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "added",
+                        "removed",
+                        "replaced",
+                        "unchanged",
+                        "updated"
+                      ]
+                    },
+                    "directDependenciesChanged": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": ""
+                    },
+                    "diff_report_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "after",
+                    "artifacts",
+                    "before",
+                    "diff_report_url",
+                    "directDependenciesChanged"
+                  ]
+                }
+              }
+            },
+            "description": "Returns a diff scan. The authenticated user must be a member of the organization."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"

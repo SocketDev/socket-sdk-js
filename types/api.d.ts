@@ -186,6 +186,18 @@ export interface paths {
      */
     get: operations["exportSPDX"];
   };
+  "/orgs/{org_slug}/full-scans/diff": {
+    /**
+     * Stream diff scan
+     * @description Stream a diff scan between two full scans. Returns a diff scan.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - full-scans:list
+     */
+    get: operations["GetOrgDiffScan"];
+  };
   "/orgs/{org_slug}/full-scans": {
     /**
      * List full scans
@@ -1779,8 +1791,8 @@ export interface components {
         props: {
           /** @default */
           spdxDisj: string;
-          /** @default null */
-          licenseScanResult: Record<string, never>;
+          /** @default */
+          licenseScanResult: string;
         };
         usage?: components["schemas"]["SocketUsageRef"];
       };
@@ -2734,6 +2746,703 @@ export interface operations {
       400: components["responses"]["SocketBadRequest"];
       401: components["responses"]["SocketUnauthorized"];
       403: components["responses"]["SocketForbidden"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Stream diff scan
+   * @description Stream a diff scan between two full scans. Returns a diff scan.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:list
+   */
+  GetOrgDiffScan: {
+    parameters: {
+      query: {
+        /** @description The base full scan ID */
+        before: string;
+        /** @description The base full scan ID */
+        after: string;
+        preview: boolean;
+      };
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+      };
+    };
+    responses: {
+      /** @description Returns a diff scan. The authenticated user must be a member of the organization. */
+      200: {
+        content: {
+          "application/json": {
+            before: {
+              /** @default */
+              project_snapshot_hash: string;
+              /** @default */
+              repository_id: string;
+              /** @default */
+              branch: string;
+              /** @default */
+              id: string;
+              /** @default */
+              commit_message: string | null;
+              /** @default */
+              commit_hash: string | null;
+              /** @default 0 */
+              pull_request: number | null;
+              committers: string[];
+              /** @default */
+              organization_id: string;
+            };
+            after: {
+              /** @default */
+              project_snapshot_hash: string;
+              /** @default */
+              repository_id: string;
+              /** @default */
+              branch: string;
+              /** @default */
+              id: string;
+              /** @default */
+              commit_message: string | null;
+              /** @default */
+              commit_hash: string | null;
+              /** @default 0 */
+              pull_request: number | null;
+              committers: string[];
+              /** @default */
+              organization_id: string;
+            };
+            artifacts: {
+              added: ({
+                  /** @default */
+                  diffType?: string;
+                  base?: {
+                    /** @default false */
+                    direct?: boolean;
+                    toplevelAncestors?: string[] | null;
+                  };
+                  head?: {
+                    /** @default false */
+                    direct?: boolean;
+                    toplevelAncestors?: string[] | null;
+                  };
+                  /** @default */
+                  id?: string;
+                  /** @default */
+                  type?: string;
+                  /** @default */
+                  name?: string;
+                  /** @default */
+                  namespace?: string | null;
+                  /** @default */
+                  files?: string;
+                  /** @default */
+                  version?: string | null;
+                  /** @default */
+                  subpath?: string | null;
+                  /** @default */
+                  artifact_id?: string | null;
+                  /** @default */
+                  artifactId?: string | null;
+                  qualifiers?: unknown;
+                  scores?: {
+                    /** @default 0 */
+                    supplyChain: number;
+                    /** @default 0 */
+                    quality: number;
+                    /** @default 0 */
+                    maintenance: number;
+                    /** @default 0 */
+                    vulnerability: number;
+                    /** @default 0 */
+                    license: number;
+                    /** @default 0 */
+                    overall: number;
+                  };
+                  capabilities?: {
+                    /** @default false */
+                    env: boolean;
+                    /** @default false */
+                    eval: boolean;
+                    /** @default false */
+                    fs: boolean;
+                    /** @default false */
+                    net: boolean;
+                    /** @default false */
+                    shell: boolean;
+                    /** @default false */
+                    unsafe: boolean;
+                  };
+                  /** @default */
+                  license?: string;
+                  /** @default 0 */
+                  size?: number;
+                  /** @default */
+                  author?: string;
+                  /** @default */
+                  state?: string;
+                  /** @default */
+                  error?: string;
+                  alerts?: {
+                      /** @default */
+                      key: string;
+                      /** @default 0 */
+                      type: number;
+                      /** @default */
+                      file?: string;
+                      /** @default 0 */
+                      start?: number;
+                      /** @default 0 */
+                      end?: number;
+                      /** @default null */
+                      props?: Record<string, never>;
+                      /** @default */
+                      action?: string;
+                      /** @default 0 */
+                      actionPolicyIndex?: number;
+                    }[];
+                  licenseDetails?: {
+                      authors?: string[];
+                      /** @default 0 */
+                      charEnd?: number;
+                      /** @default 0 */
+                      charStart?: number;
+                      /** @default */
+                      filepath?: string;
+                      /** @default 0 */
+                      match_strength?: number;
+                      /** @default */
+                      filehash?: string;
+                      /** @default */
+                      provenance?: string;
+                      spdxDisj?: {
+                            /** @default */
+                            licenseId?: string;
+                            /** @default */
+                            licenseExceptionId?: string;
+                          }[][];
+                    }[];
+                  licenseAttrib?: ({
+                      /** @default */
+                      attribText: string;
+                      attribData: ({
+                          /** @default */
+                          purl: string;
+                          /** @default */
+                          foundInFilepath: string | null;
+                          foundAuthors: string[];
+                          /** @default */
+                          spdxExpr: string | null;
+                        })[];
+                    })[];
+                })[];
+              removed: ({
+                  /** @default */
+                  diffType?: string;
+                  base?: {
+                    /** @default false */
+                    direct?: boolean;
+                    toplevelAncestors?: string[] | null;
+                  };
+                  head?: {
+                    /** @default false */
+                    direct?: boolean;
+                    toplevelAncestors?: string[] | null;
+                  };
+                  /** @default */
+                  id?: string;
+                  /** @default */
+                  type?: string;
+                  /** @default */
+                  name?: string;
+                  /** @default */
+                  namespace?: string | null;
+                  /** @default */
+                  files?: string;
+                  /** @default */
+                  version?: string | null;
+                  /** @default */
+                  subpath?: string | null;
+                  /** @default */
+                  artifact_id?: string | null;
+                  /** @default */
+                  artifactId?: string | null;
+                  qualifiers?: unknown;
+                  scores?: {
+                    /** @default 0 */
+                    supplyChain: number;
+                    /** @default 0 */
+                    quality: number;
+                    /** @default 0 */
+                    maintenance: number;
+                    /** @default 0 */
+                    vulnerability: number;
+                    /** @default 0 */
+                    license: number;
+                    /** @default 0 */
+                    overall: number;
+                  };
+                  capabilities?: {
+                    /** @default false */
+                    env: boolean;
+                    /** @default false */
+                    eval: boolean;
+                    /** @default false */
+                    fs: boolean;
+                    /** @default false */
+                    net: boolean;
+                    /** @default false */
+                    shell: boolean;
+                    /** @default false */
+                    unsafe: boolean;
+                  };
+                  /** @default */
+                  license?: string;
+                  /** @default 0 */
+                  size?: number;
+                  /** @default */
+                  author?: string;
+                  /** @default */
+                  state?: string;
+                  /** @default */
+                  error?: string;
+                  alerts?: {
+                      /** @default */
+                      key: string;
+                      /** @default 0 */
+                      type: number;
+                      /** @default */
+                      file?: string;
+                      /** @default 0 */
+                      start?: number;
+                      /** @default 0 */
+                      end?: number;
+                      /** @default null */
+                      props?: Record<string, never>;
+                      /** @default */
+                      action?: string;
+                      /** @default 0 */
+                      actionPolicyIndex?: number;
+                    }[];
+                  licenseDetails?: {
+                      authors?: string[];
+                      /** @default 0 */
+                      charEnd?: number;
+                      /** @default 0 */
+                      charStart?: number;
+                      /** @default */
+                      filepath?: string;
+                      /** @default 0 */
+                      match_strength?: number;
+                      /** @default */
+                      filehash?: string;
+                      /** @default */
+                      provenance?: string;
+                      spdxDisj?: {
+                            /** @default */
+                            licenseId?: string;
+                            /** @default */
+                            licenseExceptionId?: string;
+                          }[][];
+                    }[];
+                  licenseAttrib?: ({
+                      /** @default */
+                      attribText: string;
+                      attribData: ({
+                          /** @default */
+                          purl: string;
+                          /** @default */
+                          foundInFilepath: string | null;
+                          foundAuthors: string[];
+                          /** @default */
+                          spdxExpr: string | null;
+                        })[];
+                    })[];
+                })[];
+              unchanged: ({
+                  /** @default */
+                  diffType?: string;
+                  base?: {
+                    /** @default false */
+                    direct?: boolean;
+                    toplevelAncestors?: string[] | null;
+                  };
+                  head?: {
+                    /** @default false */
+                    direct?: boolean;
+                    toplevelAncestors?: string[] | null;
+                  };
+                  /** @default */
+                  id?: string;
+                  /** @default */
+                  type?: string;
+                  /** @default */
+                  name?: string;
+                  /** @default */
+                  namespace?: string | null;
+                  /** @default */
+                  files?: string;
+                  /** @default */
+                  version?: string | null;
+                  /** @default */
+                  subpath?: string | null;
+                  /** @default */
+                  artifact_id?: string | null;
+                  /** @default */
+                  artifactId?: string | null;
+                  qualifiers?: unknown;
+                  scores?: {
+                    /** @default 0 */
+                    supplyChain: number;
+                    /** @default 0 */
+                    quality: number;
+                    /** @default 0 */
+                    maintenance: number;
+                    /** @default 0 */
+                    vulnerability: number;
+                    /** @default 0 */
+                    license: number;
+                    /** @default 0 */
+                    overall: number;
+                  };
+                  capabilities?: {
+                    /** @default false */
+                    env: boolean;
+                    /** @default false */
+                    eval: boolean;
+                    /** @default false */
+                    fs: boolean;
+                    /** @default false */
+                    net: boolean;
+                    /** @default false */
+                    shell: boolean;
+                    /** @default false */
+                    unsafe: boolean;
+                  };
+                  /** @default */
+                  license?: string;
+                  /** @default 0 */
+                  size?: number;
+                  /** @default */
+                  author?: string;
+                  /** @default */
+                  state?: string;
+                  /** @default */
+                  error?: string;
+                  alerts?: {
+                      /** @default */
+                      key: string;
+                      /** @default 0 */
+                      type: number;
+                      /** @default */
+                      file?: string;
+                      /** @default 0 */
+                      start?: number;
+                      /** @default 0 */
+                      end?: number;
+                      /** @default null */
+                      props?: Record<string, never>;
+                      /** @default */
+                      action?: string;
+                      /** @default 0 */
+                      actionPolicyIndex?: number;
+                    }[];
+                  licenseDetails?: {
+                      authors?: string[];
+                      /** @default 0 */
+                      charEnd?: number;
+                      /** @default 0 */
+                      charStart?: number;
+                      /** @default */
+                      filepath?: string;
+                      /** @default 0 */
+                      match_strength?: number;
+                      /** @default */
+                      filehash?: string;
+                      /** @default */
+                      provenance?: string;
+                      spdxDisj?: {
+                            /** @default */
+                            licenseId?: string;
+                            /** @default */
+                            licenseExceptionId?: string;
+                          }[][];
+                    }[];
+                  licenseAttrib?: ({
+                      /** @default */
+                      attribText: string;
+                      attribData: ({
+                          /** @default */
+                          purl: string;
+                          /** @default */
+                          foundInFilepath: string | null;
+                          foundAuthors: string[];
+                          /** @default */
+                          spdxExpr: string | null;
+                        })[];
+                    })[];
+                })[];
+              replaced: ({
+                  /** @default */
+                  diffType?: string;
+                  base?: {
+                    /** @default false */
+                    direct?: boolean;
+                    toplevelAncestors?: string[] | null;
+                  };
+                  head?: {
+                    /** @default false */
+                    direct?: boolean;
+                    toplevelAncestors?: string[] | null;
+                  };
+                  /** @default */
+                  id?: string;
+                  /** @default */
+                  type?: string;
+                  /** @default */
+                  name?: string;
+                  /** @default */
+                  namespace?: string | null;
+                  /** @default */
+                  files?: string;
+                  /** @default */
+                  version?: string | null;
+                  /** @default */
+                  subpath?: string | null;
+                  /** @default */
+                  artifact_id?: string | null;
+                  /** @default */
+                  artifactId?: string | null;
+                  qualifiers?: unknown;
+                  scores?: {
+                    /** @default 0 */
+                    supplyChain: number;
+                    /** @default 0 */
+                    quality: number;
+                    /** @default 0 */
+                    maintenance: number;
+                    /** @default 0 */
+                    vulnerability: number;
+                    /** @default 0 */
+                    license: number;
+                    /** @default 0 */
+                    overall: number;
+                  };
+                  capabilities?: {
+                    /** @default false */
+                    env: boolean;
+                    /** @default false */
+                    eval: boolean;
+                    /** @default false */
+                    fs: boolean;
+                    /** @default false */
+                    net: boolean;
+                    /** @default false */
+                    shell: boolean;
+                    /** @default false */
+                    unsafe: boolean;
+                  };
+                  /** @default */
+                  license?: string;
+                  /** @default 0 */
+                  size?: number;
+                  /** @default */
+                  author?: string;
+                  /** @default */
+                  state?: string;
+                  /** @default */
+                  error?: string;
+                  alerts?: {
+                      /** @default */
+                      key: string;
+                      /** @default 0 */
+                      type: number;
+                      /** @default */
+                      file?: string;
+                      /** @default 0 */
+                      start?: number;
+                      /** @default 0 */
+                      end?: number;
+                      /** @default null */
+                      props?: Record<string, never>;
+                      /** @default */
+                      action?: string;
+                      /** @default 0 */
+                      actionPolicyIndex?: number;
+                    }[];
+                  licenseDetails?: {
+                      authors?: string[];
+                      /** @default 0 */
+                      charEnd?: number;
+                      /** @default 0 */
+                      charStart?: number;
+                      /** @default */
+                      filepath?: string;
+                      /** @default 0 */
+                      match_strength?: number;
+                      /** @default */
+                      filehash?: string;
+                      /** @default */
+                      provenance?: string;
+                      spdxDisj?: {
+                            /** @default */
+                            licenseId?: string;
+                            /** @default */
+                            licenseExceptionId?: string;
+                          }[][];
+                    }[];
+                  licenseAttrib?: ({
+                      /** @default */
+                      attribText: string;
+                      attribData: ({
+                          /** @default */
+                          purl: string;
+                          /** @default */
+                          foundInFilepath: string | null;
+                          foundAuthors: string[];
+                          /** @default */
+                          spdxExpr: string | null;
+                        })[];
+                    })[];
+                })[];
+              updated: ({
+                  /** @default */
+                  diffType?: string;
+                  base?: {
+                    /** @default false */
+                    direct?: boolean;
+                    toplevelAncestors?: string[] | null;
+                  };
+                  head?: {
+                    /** @default false */
+                    direct?: boolean;
+                    toplevelAncestors?: string[] | null;
+                  };
+                  /** @default */
+                  id?: string;
+                  /** @default */
+                  type?: string;
+                  /** @default */
+                  name?: string;
+                  /** @default */
+                  namespace?: string | null;
+                  /** @default */
+                  files?: string;
+                  /** @default */
+                  version?: string | null;
+                  /** @default */
+                  subpath?: string | null;
+                  /** @default */
+                  artifact_id?: string | null;
+                  /** @default */
+                  artifactId?: string | null;
+                  qualifiers?: unknown;
+                  scores?: {
+                    /** @default 0 */
+                    supplyChain: number;
+                    /** @default 0 */
+                    quality: number;
+                    /** @default 0 */
+                    maintenance: number;
+                    /** @default 0 */
+                    vulnerability: number;
+                    /** @default 0 */
+                    license: number;
+                    /** @default 0 */
+                    overall: number;
+                  };
+                  capabilities?: {
+                    /** @default false */
+                    env: boolean;
+                    /** @default false */
+                    eval: boolean;
+                    /** @default false */
+                    fs: boolean;
+                    /** @default false */
+                    net: boolean;
+                    /** @default false */
+                    shell: boolean;
+                    /** @default false */
+                    unsafe: boolean;
+                  };
+                  /** @default */
+                  license?: string;
+                  /** @default 0 */
+                  size?: number;
+                  /** @default */
+                  author?: string;
+                  /** @default */
+                  state?: string;
+                  /** @default */
+                  error?: string;
+                  alerts?: {
+                      /** @default */
+                      key: string;
+                      /** @default 0 */
+                      type: number;
+                      /** @default */
+                      file?: string;
+                      /** @default 0 */
+                      start?: number;
+                      /** @default 0 */
+                      end?: number;
+                      /** @default null */
+                      props?: Record<string, never>;
+                      /** @default */
+                      action?: string;
+                      /** @default 0 */
+                      actionPolicyIndex?: number;
+                    }[];
+                  licenseDetails?: {
+                      authors?: string[];
+                      /** @default 0 */
+                      charEnd?: number;
+                      /** @default 0 */
+                      charStart?: number;
+                      /** @default */
+                      filepath?: string;
+                      /** @default 0 */
+                      match_strength?: number;
+                      /** @default */
+                      filehash?: string;
+                      /** @default */
+                      provenance?: string;
+                      spdxDisj?: {
+                            /** @default */
+                            licenseId?: string;
+                            /** @default */
+                            licenseExceptionId?: string;
+                          }[][];
+                    }[];
+                  licenseAttrib?: ({
+                      /** @default */
+                      attribText: string;
+                      attribData: ({
+                          /** @default */
+                          purl: string;
+                          /** @default */
+                          foundInFilepath: string | null;
+                          foundAuthors: string[];
+                          /** @default */
+                          spdxExpr: string | null;
+                        })[];
+                    })[];
+                })[];
+            };
+            /** @default false */
+            directDependenciesChanged: boolean;
+            /** @default */
+            diff_report_url: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
       429: components["responses"]["SocketTooManyRequestsResponse"];
     };
   };
