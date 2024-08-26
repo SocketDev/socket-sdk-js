@@ -2779,8 +2779,6 @@ export interface operations {
           "application/json": {
             before: {
               /** @default */
-              project_snapshot_hash: string;
-              /** @default */
               repository_id: string;
               /** @default */
               branch: string;
@@ -2797,8 +2795,6 @@ export interface operations {
               organization_id: string;
             };
             after: {
-              /** @default */
-              project_snapshot_hash: string;
               /** @default */
               repository_id: string;
               /** @default */
