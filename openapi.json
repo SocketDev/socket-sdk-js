@@ -8013,11 +8013,6 @@
                       "additionalProperties": false,
                       "description": "",
                       "properties": {
-                        "project_snapshot_hash": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
                         "repository_id": {
                           "type": "string",
                           "description": "",
@@ -8072,7 +8067,6 @@
                         "committers",
                         "id",
                         "organization_id",
-                        "project_snapshot_hash",
                         "pull_request",
                         "repository_id"
                       ]
@@ -8082,11 +8076,6 @@
                       "additionalProperties": false,
                       "description": "",
                       "properties": {
-                        "project_snapshot_hash": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
                         "repository_id": {
                           "type": "string",
                           "description": "",
@@ -8141,7 +8130,6 @@
                         "committers",
                         "id",
                         "organization_id",
-                        "project_snapshot_hash",
                         "pull_request",
                         "repository_id"
                       ]
