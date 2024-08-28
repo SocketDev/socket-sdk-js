@@ -313,6 +313,18 @@ export interface paths {
      */
     delete: operations["deleteOrgRepo"];
   };
+  "/orgs/{org_slug}/settings/integrations/{integration_id}/events": {
+    /**
+     * Get integration events
+     * @description Retrieve events for integration.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - integration:list
+     */
+    get: operations["getIntegrationEvents"];
+  };
   "/analytics/org/{filter}": {
     /**
      * Get organization analytics (unstable)
@@ -2620,6 +2632,8 @@ export interface operations {
         per_page?: number;
         /** @description Page token */
         page?: string;
+        /** @description A Unix timestamp in seconds to filter results prior to this date. */
+        from?: string;
       };
       path: {
         /** @description The slug of the organization */
@@ -4192,6 +4206,64 @@ export interface operations {
     };
   };
   /**
+   * Get integration events
+   * @description Retrieve events for integration.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - integration:list
+   */
+  getIntegrationEvents: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+        /** @description The id of the integration */
+        integration_id: string;
+      };
+    };
+    responses: {
+      /** @description Lists events for the specified integration. The authenticated user must be a member of the organization. */
+      200: {
+        content: {
+          "application/json": {
+              /** @default */
+              id: string;
+              /** @default */
+              integration_id: string;
+              /** @default */
+              type: string;
+              payload: Record<string, never>;
+              /** @default 0 */
+              status_code: number;
+              /** @default */
+              error: string;
+              /** @default */
+              sent_at: string;
+              retry_info: {
+                  /** @default 0 */
+                  status_code: number;
+                  /** @default */
+                  error: string;
+                  /** @default */
+                  sent_at: string;
+                }[];
+              /** @default */
+              created_at: string;
+              /** @default */
+              updated_at: string;
+            }[];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
    * Get organization analytics (unstable)
    * @description Get analytics data regarding the number of alerts found across all active repositories.
    *
@@ -4685,6 +4757,10 @@ export interface operations {
         per_page?: number;
         /** @description Page token */
         page?: string;
+        /** @description Order asc or desc by the createdAt attribute. */
+        direction?: string;
+        /** @description Filter what type of threats to return */
+        filter?: string;
       };
     };
     responses: {

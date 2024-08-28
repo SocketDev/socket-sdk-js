@@ -7590,6 +7590,15 @@
               "type": "string",
               "default": "1"
             }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "A Unix timestamp in seconds to filter results prior to this date.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "security": [
@@ -11620,6 +11629,168 @@
         "x-readme": {}
       }
     },
+    "/orgs/{org_slug}/settings/integrations/{integration_id}/events": {
+      "get": {
+        "tags": [
+          "Organizations",
+          "Integrations",
+          "Events"
+        ],
+        "summary": "Get integration events",
+        "operationId": "getIntegrationEvents",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "integration_id",
+            "in": "path",
+            "required": true,
+            "description": "The id of the integration",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "integration:list"
+            ]
+          }
+        ],
+        "description": "Retrieve events for integration.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- integration:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "integration_id": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "payload": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {}
+                      },
+                      "status_code": {
+                        "type": "integer",
+                        "description": "",
+                        "default": 0
+                      },
+                      "error": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "sent_at": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "retry_info": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "status_code": {
+                              "type": "integer",
+                              "description": "",
+                              "default": 0
+                            },
+                            "error": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "sent_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            }
+                          },
+                          "required": [
+                            "error",
+                            "sent_at",
+                            "status_code"
+                          ]
+                        }
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      }
+                    },
+                    "required": [
+                      "created_at",
+                      "error",
+                      "id",
+                      "integration_id",
+                      "payload",
+                      "retry_info",
+                      "sent_at",
+                      "status_code",
+                      "type",
+                      "updated_at"
+                    ]
+                  }
+                }
+              }
+            },
+            "description": "Lists events for the specified integration. The authenticated user must be a member of the organization."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
     "/analytics/org/{filter}": {
       "get": {
         "tags": [
@@ -12787,6 +12958,26 @@
             "schema": {
               "type": "string",
               "default": "1"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "description": "Order asc or desc by the createdAt attribute.",
+            "schema": {
+              "type": "string",
+              "default": "desc"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "description": "Filter what type of threats to return",
+            "schema": {
+              "type": "string",
+              "default": "mal"
             }
           }
         ],
