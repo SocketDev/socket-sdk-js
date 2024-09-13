@@ -5294,11 +5294,20 @@
                             "type": "string",
                             "description": "",
                             "default": ""
+                          },
+                          "violationData": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "description": "",
+                              "default": null
+                            }
                           }
                         },
                         "required": [
                           "licenseScanResult",
-                          "spdxDisj"
+                          "spdxDisj",
+                          "violationData"
                         ]
                       },
                       "usage": {
@@ -6332,10 +6341,16 @@
                             "type": "string",
                             "description": "",
                             "default": ""
+                          },
+                          "filepathOrProvenance": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
                           }
                         },
                         "required": [
-                          "classifier"
+                          "classifier",
+                          "filepathOrProvenance"
                         ]
                       },
                       "usage": {
@@ -7456,17 +7471,12 @@
                     "additionalProperties": false,
                     "description": "",
                     "properties": {
-                      "spdxDisj": {
+                      "spdxAtomOrExtraData": {
                         "type": "string",
                         "description": "",
                         "default": ""
                       },
-                      "provenance": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "filepath": {
+                      "violationExplanation": {
                         "type": "string",
                         "description": "",
                         "default": ""
@@ -7475,13 +7485,21 @@
                         "type": "string",
                         "description": "",
                         "default": ""
+                      },
+                      "filepathOrProvenance": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        }
                       }
                     },
                     "required": [
-                      "filepath",
-                      "provenance",
+                      "filepathOrProvenance",
                       "purl",
-                      "spdxDisj"
+                      "spdxAtomOrExtraData",
+                      "violationExplanation"
                     ]
                   }
                 }
@@ -7947,6 +7965,734 @@
           },
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/full-scans": {
+      "get": {
+        "tags": [
+          "Full Scans"
+        ],
+        "summary": "List full scans",
+        "operationId": "getOrgFullScanList",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Specify Sort order.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "created_at"
+              ],
+              "default": "created_at"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "description": "Specify sort direction.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "Specify the maximum number of results to return per page.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 30
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "The token specifying which page to return.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "A Unix timestamp in seconds that filters full-scans prior to the date.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repo",
+            "in": "query",
+            "required": false,
+            "description": "A repository slug to filter full-scans by.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "full-scans:list"
+            ]
+          }
+        ],
+        "description": "Returns a paginated list of all full scans in an org, excluding SBOM artifacts.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "organization_id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "repository_id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "committers": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            }
+                          },
+                          "repo": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "branch": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "commit_message": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "commit_hash": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "pull_request": {
+                            "type": "integer",
+                            "description": "",
+                            "default": 0
+                          },
+                          "html_report_url": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          }
+                        }
+                      }
+                    },
+                    "nextPage": {
+                      "type": "integer",
+                      "description": "",
+                      "default": 0
+                    }
+                  },
+                  "required": [
+                    "nextPage",
+                    "results"
+                  ]
+                }
+              }
+            },
+            "description": "Lists repositories for the specified organization. The authenticated user must be a member of the organization."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      },
+      "post": {
+        "tags": [
+          "Full Scans"
+        ],
+        "summary": "Create full scan",
+        "operationId": "CreateOrgFullScan",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repo",
+            "in": "query",
+            "required": true,
+            "description": "The slug of the repository to associate the full-scan with.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "branch",
+            "in": "query",
+            "required": false,
+            "description": "The branch name to associate the full-scan with.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "commit_message",
+            "in": "query",
+            "required": false,
+            "description": "The commit message to associate the full-scan with.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "commit_hash",
+            "in": "query",
+            "required": false,
+            "description": "The commit hash to associate the full-scan with.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pull_request",
+            "in": "query",
+            "required": false,
+            "description": "The pull request number to associate the full-scan with.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "committers",
+            "in": "query",
+            "required": false,
+            "description": "The committers to associate the full-scan with. Set query more than once to set multiple.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "integration_type",
+            "in": "query",
+            "required": false,
+            "description": "The integration type to associate the full-scan with. Defaults to \"Api\" if omitted.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "api",
+                "github",
+                "gitlab",
+                "bitbucket",
+                "azure"
+              ]
+            }
+          },
+          {
+            "name": "integration_org_slug",
+            "in": "query",
+            "required": false,
+            "description": "The integration org slug to associate the full-scan with. If omitted, the Socket org name will be used. This is used to generate links and badges.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "make_default_branch",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "set_as_pending_head",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "tmp",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string",
+                  "default": {
+                    "type": "Buffer",
+                    "data": []
+                  },
+                  "format": "binary",
+                  "description": ""
+                },
+                "properties": {}
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "basicAuth": [
+              "full-scans:create"
+            ]
+          }
+        ],
+        "description": "Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:create",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "organization_id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "repository_id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "committers": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      }
+                    },
+                    "repo": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "branch": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "commit_message": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "commit_hash": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "pull_request": {
+                      "type": "integer",
+                      "description": "",
+                      "default": 0
+                    },
+                    "html_report_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Upload manifest files to create a full scan in an org's repo"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/full-scans/{full_scan_id}": {
+      "get": {
+        "tags": [
+          "Full Scans"
+        ],
+        "summary": "Stream full scan",
+        "operationId": "getOrgFullScan",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "full_scan_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the full scan",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "full-scans:list"
+            ]
+          }
+        ],
+        "description": "Stream all SBOM artifacts for a full scan.\n\nThis endpoint returns the latest, available alert data for artifacts in the full scan (stale while revalidate).\nActively running analysis will be returned when available on subsequent runs.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/SocketArtifact"
+                }
+              }
+            },
+            "description": "Socket issue lists and scores for all packages"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      },
+      "delete": {
+        "tags": [
+          "Full Scans"
+        ],
+        "summary": "Delete full scan",
+        "operationId": "deleteOrgFullScan",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "full_scan_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the full scan",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "full-scans:delete"
+            ]
+          }
+        ],
+        "description": "Delete an existing full scan.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:delete",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "",
+                      "default": "ok"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/full-scans/{full_scan_id}/metadata": {
+      "get": {
+        "tags": [
+          "Full Scans"
+        ],
+        "summary": "Get full scan metadata",
+        "operationId": "getOrgFullScanMetadata",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "full_scan_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the full scan",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "full-scans:list"
+            ]
+          }
+        ],
+        "description": "Get metadata for a single full scan\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "organization_id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "repository_id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "committers": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      }
+                    },
+                    "repo": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "branch": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "commit_message": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "commit_hash": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "pull_request": {
+                      "type": "integer",
+                      "description": "",
+                      "default": 0
+                    },
+                    "html_report_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  }
+                }
+              }
+            },
+            "description": "The data from the full scan"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -10189,709 +10935,6 @@
               }
             },
             "description": "Returns a diff scan. The authenticated user must be a member of the organization."
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/orgs/{org_slug}/full-scans": {
-      "get": {
-        "tags": [
-          "Full Scans"
-        ],
-        "summary": "List full scans",
-        "operationId": "getOrgFullScanList",
-        "parameters": [
-          {
-            "name": "org_slug",
-            "in": "path",
-            "required": true,
-            "description": "The slug of the organization",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "description": "Specify Sort order.",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "name",
-                "created_at"
-              ],
-              "default": "created_at"
-            }
-          },
-          {
-            "name": "direction",
-            "in": "query",
-            "required": false,
-            "description": "Specify sort direction.",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "default": "desc"
-            }
-          },
-          {
-            "name": "per_page",
-            "in": "query",
-            "required": false,
-            "description": "Specify the maximum number of results to return per page.",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 30
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "description": "The token specifying which page to return.",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 1
-            }
-          },
-          {
-            "name": "from",
-            "in": "query",
-            "required": false,
-            "description": "A Unix timestamp in seconds that filters full-scans prior to the date.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "repo",
-            "in": "query",
-            "required": false,
-            "description": "A repository slug to filter full-scans by.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": [
-              "full-scans:list"
-            ]
-          }
-        ],
-        "description": "Returns a paginated list of all full scans in an org, excluding SBOM artifacts.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "created_at": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "updated_at": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "organization_id": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "repository_id": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "committers": {
-                            "type": "array",
-                            "items": {
-                              "type": "string",
-                              "description": "",
-                              "default": ""
-                            }
-                          },
-                          "repo": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "branch": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "commit_message": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "commit_hash": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "pull_request": {
-                            "type": "integer",
-                            "description": "",
-                            "default": 0
-                          },
-                          "html_report_url": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          }
-                        }
-                      }
-                    },
-                    "nextPage": {
-                      "type": "integer",
-                      "description": "",
-                      "default": 0
-                    }
-                  },
-                  "required": [
-                    "nextPage",
-                    "results"
-                  ]
-                }
-              }
-            },
-            "description": "Lists repositories for the specified organization. The authenticated user must be a member of the organization."
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      },
-      "post": {
-        "tags": [
-          "Full Scans"
-        ],
-        "summary": "Create full scan",
-        "operationId": "CreateOrgFullScan",
-        "parameters": [
-          {
-            "name": "org_slug",
-            "in": "path",
-            "required": true,
-            "description": "The slug of the organization",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "repo",
-            "in": "query",
-            "required": true,
-            "description": "The slug of the repository to associate the full-scan with.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "branch",
-            "in": "query",
-            "required": false,
-            "description": "The branch name to associate the full-scan with.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "commit_message",
-            "in": "query",
-            "required": false,
-            "description": "The commit message to associate the full-scan with.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "commit_hash",
-            "in": "query",
-            "required": false,
-            "description": "The commit hash to associate the full-scan with.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "pull_request",
-            "in": "query",
-            "required": false,
-            "description": "The pull request number to associate the full-scan with.",
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            }
-          },
-          {
-            "name": "committers",
-            "in": "query",
-            "required": false,
-            "description": "The committers to associate the full-scan with. Set query more than once to set multiple.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "make_default_branch",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          },
-          {
-            "name": "set_as_pending_head",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          },
-          {
-            "name": "tmp",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string",
-                  "default": {
-                    "type": "Buffer",
-                    "data": []
-                  },
-                  "format": "binary",
-                  "description": ""
-                },
-                "properties": {}
-              }
-            }
-          },
-          "required": false
-        },
-        "security": [
-          {
-            "basicAuth": [
-              "full-scans:create"
-            ]
-          }
-        ],
-        "description": "Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:create",
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "created_at": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "updated_at": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "organization_id": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "repository_id": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "committers": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      }
-                    },
-                    "repo": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "branch": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "commit_message": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "commit_hash": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "pull_request": {
-                      "type": "integer",
-                      "description": "",
-                      "default": 0
-                    },
-                    "html_report_url": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    }
-                  }
-                }
-              }
-            },
-            "description": "Upload manifest files to create a full scan in an org's repo"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/orgs/{org_slug}/full-scans/{full_scan_id}": {
-      "get": {
-        "tags": [
-          "Full Scans"
-        ],
-        "summary": "Stream full scan",
-        "operationId": "getOrgFullScan",
-        "parameters": [
-          {
-            "name": "org_slug",
-            "in": "path",
-            "required": true,
-            "description": "The slug of the organization",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "full_scan_id",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the full scan",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": [
-              "full-scans:list"
-            ]
-          }
-        ],
-        "description": "Stream all SBOM artifacts for a full scan.\n\nThis endpoint returns the latest, available alert data for artifacts in the full scan (stale while revalidate).\nActively running analysis will be returned when available on subsequent runs.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
-        "responses": {
-          "200": {
-            "content": {
-              "application/x-ndjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/SocketArtifact"
-                }
-              }
-            },
-            "description": "Socket issue lists and scores for all packages"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      },
-      "delete": {
-        "tags": [
-          "Full Scans"
-        ],
-        "summary": "Delete full scan",
-        "operationId": "deleteOrgFullScan",
-        "parameters": [
-          {
-            "name": "org_slug",
-            "in": "path",
-            "required": true,
-            "description": "The slug of the organization",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "full_scan_id",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the full scan",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": [
-              "full-scans:delete"
-            ]
-          }
-        ],
-        "description": "Delete an existing full scan.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:delete",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "description": "",
-                      "default": "ok"
-                    }
-                  },
-                  "required": [
-                    "status"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/orgs/{org_slug}/full-scans/{full_scan_id}/metadata": {
-      "get": {
-        "tags": [
-          "Full Scans"
-        ],
-        "summary": "Get full scan metadata",
-        "operationId": "getOrgFullScanMetadata",
-        "parameters": [
-          {
-            "name": "org_slug",
-            "in": "path",
-            "required": true,
-            "description": "The slug of the organization",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "full_scan_id",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the full scan",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "basicAuth": [
-              "full-scans:list"
-            ]
-          }
-        ],
-        "description": "Get metadata for a single full scan\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "created_at": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "updated_at": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "organization_id": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "repository_id": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "committers": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      }
-                    },
-                    "repo": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "branch": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "commit_message": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "commit_hash": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "pull_request": {
-                      "type": "integer",
-                      "description": "",
-                      "default": 0
-                    },
-                    "html_report_url": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    }
-                  }
-                }
-              }
-            },
-            "description": "The data from the full scan"
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
