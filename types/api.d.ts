@@ -186,18 +186,6 @@ export interface paths {
      */
     get: operations["exportSPDX"];
   };
-  "/orgs/{org_slug}/full-scans/diff": {
-    /**
-     * Stream diff scan
-     * @description Stream a diff scan between two full scans. Returns a diff scan.
-     *
-     * This endpoint consumes 1 unit of your quota.
-     *
-     * This endpoint requires the following org token scopes:
-     * - full-scans:list
-     */
-    get: operations["GetOrgDiffScan"];
-  };
   "/orgs/{org_slug}/full-scans": {
     /**
      * List full scans
@@ -256,6 +244,18 @@ export interface paths {
      * - full-scans:list
      */
     get: operations["getOrgFullScanMetadata"];
+  };
+  "/orgs/{org_slug}/full-scans/diff": {
+    /**
+     * Stream diff scan
+     * @description Stream a diff scan between two full scans. Returns a diff scan.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - full-scans:list
+     */
+    get: operations["GetOrgDiffScan"];
   };
   "/orgs/{org_slug}/repos": {
     /**
@@ -1805,6 +1805,7 @@ export interface components {
           spdxDisj: string;
           /** @default */
           licenseScanResult: string;
+          violationData: Record<string, never>[];
         };
         usage?: components["schemas"]["SocketUsageRef"];
       };
@@ -2044,6 +2045,8 @@ export interface components {
         props: {
           /** @default */
           classifier: string;
+          /** @default */
+          filepathOrProvenance: string;
         };
         usage?: components["schemas"]["SocketUsageRef"];
       };
@@ -2596,13 +2599,12 @@ export interface operations {
         content: {
           "application/x-ndjson": {
               /** @default */
-              spdxDisj: string;
+              spdxAtomOrExtraData: string;
               /** @default */
-              provenance: string;
-              /** @default */
-              filepath: string;
+              violationExplanation: string;
               /** @default */
               purl: string;
+              filepathOrProvenance: string[];
             }[];
         };
       };
@@ -2760,6 +2762,286 @@ export interface operations {
       400: components["responses"]["SocketBadRequest"];
       401: components["responses"]["SocketUnauthorized"];
       403: components["responses"]["SocketForbidden"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * List full scans
+   * @description Returns a paginated list of all full scans in an org, excluding SBOM artifacts.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:list
+   */
+  getOrgFullScanList: {
+    parameters: {
+      query?: {
+        /** @description Specify Sort order. */
+        sort?: "name" | "created_at";
+        /** @description Specify sort direction. */
+        direction?: "asc" | "desc";
+        /** @description Specify the maximum number of results to return per page. */
+        per_page?: number;
+        /** @description The token specifying which page to return. */
+        page?: number;
+        /** @description A Unix timestamp in seconds that filters full-scans prior to the date. */
+        from?: string;
+        /** @description A repository slug to filter full-scans by. */
+        repo?: string;
+      };
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+      };
+    };
+    responses: {
+      /** @description Lists repositories for the specified organization. The authenticated user must be a member of the organization. */
+      200: {
+        content: {
+          "application/json": {
+            results: {
+                /** @default */
+                id?: string;
+                /** @default */
+                created_at?: string;
+                /** @default */
+                updated_at?: string;
+                /** @default */
+                organization_id?: string;
+                /** @default */
+                repository_id?: string;
+                committers?: string[];
+                /** @default */
+                repo?: string;
+                /** @default */
+                branch?: string;
+                /** @default */
+                commit_message?: string;
+                /** @default */
+                commit_hash?: string;
+                /** @default 0 */
+                pull_request?: number;
+                /** @default */
+                html_report_url?: string;
+              }[];
+            /** @default 0 */
+            nextPage: number;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Create full scan
+   * @description Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:create
+   */
+  CreateOrgFullScan: {
+    parameters: {
+      query: {
+        /** @description The slug of the repository to associate the full-scan with. */
+        repo: string;
+        /** @description The branch name to associate the full-scan with. */
+        branch?: string;
+        /** @description The commit message to associate the full-scan with. */
+        commit_message?: string;
+        /** @description The commit hash to associate the full-scan with. */
+        commit_hash?: string;
+        /** @description The pull request number to associate the full-scan with. */
+        pull_request?: number;
+        /** @description The committers to associate the full-scan with. Set query more than once to set multiple. */
+        committers?: string;
+        /** @description The integration type to associate the full-scan with. Defaults to "Api" if omitted. */
+        integration_type?: "api" | "github" | "gitlab" | "bitbucket" | "azure";
+        /** @description The integration org slug to associate the full-scan with. If omitted, the Socket org name will be used. This is used to generate links and badges. */
+        integration_org_slug?: string;
+        make_default_branch?: boolean;
+        set_as_pending_head?: boolean;
+        tmp?: boolean;
+      };
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+      };
+    };
+    requestBody?: {
+      content: {
+        "multipart/form-data": {
+          [key: string]: never;
+        };
+      };
+    };
+    responses: {
+      /** @description Upload manifest files to create a full scan in an org's repo */
+      201: {
+        content: {
+          "application/json": {
+            /** @default */
+            id?: string;
+            /** @default */
+            created_at?: string;
+            /** @default */
+            updated_at?: string;
+            /** @default */
+            organization_id?: string;
+            /** @default */
+            repository_id?: string;
+            committers?: string[];
+            /** @default */
+            repo?: string;
+            /** @default */
+            branch?: string;
+            /** @default */
+            commit_message?: string;
+            /** @default */
+            commit_hash?: string;
+            /** @default 0 */
+            pull_request?: number;
+            /** @default */
+            html_report_url?: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Stream full scan
+   * @description Stream all SBOM artifacts for a full scan.
+   *
+   * This endpoint returns the latest, available alert data for artifacts in the full scan (stale while revalidate).
+   * Actively running analysis will be returned when available on subsequent runs.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:list
+   */
+  getOrgFullScan: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+        /** @description The ID of the full scan */
+        full_scan_id: string;
+      };
+    };
+    responses: {
+      /** @description Socket issue lists and scores for all packages */
+      200: {
+        content: {
+          "application/x-ndjson": components["schemas"]["SocketArtifact"];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Delete full scan
+   * @description Delete an existing full scan.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:delete
+   */
+  deleteOrgFullScan: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+        /** @description The ID of the full scan */
+        full_scan_id: string;
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        content: {
+          "application/json": {
+            /** @default ok */
+            status: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get full scan metadata
+   * @description Get metadata for a single full scan
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:list
+   */
+  getOrgFullScanMetadata: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+        /** @description The ID of the full scan */
+        full_scan_id: string;
+      };
+    };
+    responses: {
+      /** @description The data from the full scan */
+      200: {
+        content: {
+          "application/json": {
+            /** @default */
+            id?: string;
+            /** @default */
+            created_at?: string;
+            /** @default */
+            updated_at?: string;
+            /** @default */
+            organization_id?: string;
+            /** @default */
+            repository_id?: string;
+            committers?: string[];
+            /** @default */
+            repo?: string;
+            /** @default */
+            branch?: string;
+            /** @default */
+            commit_message?: string;
+            /** @default */
+            commit_hash?: string;
+            /** @default 0 */
+            pull_request?: number;
+            /** @default */
+            html_report_url?: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
       429: components["responses"]["SocketTooManyRequestsResponse"];
     };
   };
@@ -3446,282 +3728,6 @@ export interface operations {
             directDependenciesChanged: boolean;
             /** @default */
             diff_report_url: string;
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * List full scans
-   * @description Returns a paginated list of all full scans in an org, excluding SBOM artifacts.
-   *
-   * This endpoint consumes 1 unit of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - full-scans:list
-   */
-  getOrgFullScanList: {
-    parameters: {
-      query?: {
-        /** @description Specify Sort order. */
-        sort?: "name" | "created_at";
-        /** @description Specify sort direction. */
-        direction?: "asc" | "desc";
-        /** @description Specify the maximum number of results to return per page. */
-        per_page?: number;
-        /** @description The token specifying which page to return. */
-        page?: number;
-        /** @description A Unix timestamp in seconds that filters full-scans prior to the date. */
-        from?: string;
-        /** @description A repository slug to filter full-scans by. */
-        repo?: string;
-      };
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string;
-      };
-    };
-    responses: {
-      /** @description Lists repositories for the specified organization. The authenticated user must be a member of the organization. */
-      200: {
-        content: {
-          "application/json": {
-            results: {
-                /** @default */
-                id?: string;
-                /** @default */
-                created_at?: string;
-                /** @default */
-                updated_at?: string;
-                /** @default */
-                organization_id?: string;
-                /** @default */
-                repository_id?: string;
-                committers?: string[];
-                /** @default */
-                repo?: string;
-                /** @default */
-                branch?: string;
-                /** @default */
-                commit_message?: string;
-                /** @default */
-                commit_hash?: string;
-                /** @default 0 */
-                pull_request?: number;
-                /** @default */
-                html_report_url?: string;
-              }[];
-            /** @default 0 */
-            nextPage: number;
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Create full scan
-   * @description Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.
-   *
-   * This endpoint consumes 1 unit of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - full-scans:create
-   */
-  CreateOrgFullScan: {
-    parameters: {
-      query: {
-        /** @description The slug of the repository to associate the full-scan with. */
-        repo: string;
-        /** @description The branch name to associate the full-scan with. */
-        branch?: string;
-        /** @description The commit message to associate the full-scan with. */
-        commit_message?: string;
-        /** @description The commit hash to associate the full-scan with. */
-        commit_hash?: string;
-        /** @description The pull request number to associate the full-scan with. */
-        pull_request?: number;
-        /** @description The committers to associate the full-scan with. Set query more than once to set multiple. */
-        committers?: string;
-        make_default_branch?: boolean;
-        set_as_pending_head?: boolean;
-        tmp?: boolean;
-      };
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string;
-      };
-    };
-    requestBody?: {
-      content: {
-        "multipart/form-data": {
-          [key: string]: never;
-        };
-      };
-    };
-    responses: {
-      /** @description Upload manifest files to create a full scan in an org's repo */
-      201: {
-        content: {
-          "application/json": {
-            /** @default */
-            id?: string;
-            /** @default */
-            created_at?: string;
-            /** @default */
-            updated_at?: string;
-            /** @default */
-            organization_id?: string;
-            /** @default */
-            repository_id?: string;
-            committers?: string[];
-            /** @default */
-            repo?: string;
-            /** @default */
-            branch?: string;
-            /** @default */
-            commit_message?: string;
-            /** @default */
-            commit_hash?: string;
-            /** @default 0 */
-            pull_request?: number;
-            /** @default */
-            html_report_url?: string;
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Stream full scan
-   * @description Stream all SBOM artifacts for a full scan.
-   *
-   * This endpoint returns the latest, available alert data for artifacts in the full scan (stale while revalidate).
-   * Actively running analysis will be returned when available on subsequent runs.
-   *
-   * This endpoint consumes 1 unit of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - full-scans:list
-   */
-  getOrgFullScan: {
-    parameters: {
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string;
-        /** @description The ID of the full scan */
-        full_scan_id: string;
-      };
-    };
-    responses: {
-      /** @description Socket issue lists and scores for all packages */
-      200: {
-        content: {
-          "application/x-ndjson": components["schemas"]["SocketArtifact"];
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Delete full scan
-   * @description Delete an existing full scan.
-   *
-   * This endpoint consumes 1 unit of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - full-scans:delete
-   */
-  deleteOrgFullScan: {
-    parameters: {
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string;
-        /** @description The ID of the full scan */
-        full_scan_id: string;
-      };
-    };
-    responses: {
-      /** @description Success */
-      200: {
-        content: {
-          "application/json": {
-            /** @default ok */
-            status: string;
-          };
-        };
-      };
-      400: components["responses"]["SocketBadRequest"];
-      401: components["responses"]["SocketUnauthorized"];
-      403: components["responses"]["SocketForbidden"];
-      404: components["responses"]["SocketNotFoundResponse"];
-      429: components["responses"]["SocketTooManyRequestsResponse"];
-    };
-  };
-  /**
-   * Get full scan metadata
-   * @description Get metadata for a single full scan
-   *
-   * This endpoint consumes 1 unit of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - full-scans:list
-   */
-  getOrgFullScanMetadata: {
-    parameters: {
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string;
-        /** @description The ID of the full scan */
-        full_scan_id: string;
-      };
-    };
-    responses: {
-      /** @description The data from the full scan */
-      200: {
-        content: {
-          "application/json": {
-            /** @default */
-            id?: string;
-            /** @default */
-            created_at?: string;
-            /** @default */
-            updated_at?: string;
-            /** @default */
-            organization_id?: string;
-            /** @default */
-            repository_id?: string;
-            committers?: string[];
-            /** @default */
-            repo?: string;
-            /** @default */
-            branch?: string;
-            /** @default */
-            commit_message?: string;
-            /** @default */
-            commit_hash?: string;
-            /** @default 0 */
-            pull_request?: number;
-            /** @default */
-            html_report_url?: string;
           };
         };
       };
