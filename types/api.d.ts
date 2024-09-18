@@ -88,18 +88,19 @@ export interface paths {
   "/license-policy": {
     /**
      * License Policy (Beta)
-     * @description Diff the license information from a list of packages (as PURL strings) with a configurable license allow list.
-     * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
+     * @description Compare the license data found for a list of packages (as PURL strings) with a configurable license allow list,
+     * returning information about license data which does not comply with the license allow list.
      *
      * ## Allow List Schema
      *
      * ```json
      * {
-     *   requiredApprovalSources?: Array<"fsf" | "osi">,
      *   allowedApprovalSources?: Array<"fsf" | "osi">,
      *   allowedFamilies?: Array<"copyleft" | "permissive">,
      *   allowedTiers?: Array<PermissiveTier | CopyleftTier>,
-     *   allowedSpdxAtoms?: Array<string>
+     *   allowedStrings?: Array<string>
+     *   allowedPURLs?: Array<string>
+     *   focusAlertsHere?: boolean
      * }
      * ```
      *
@@ -112,17 +113,22 @@ export interface paths {
      *
      * ## Return value
      *
-     * The returned values are objects containing information about license data from the requested
-     * PURLs which violates the allow list. The returned objects contain an spdx disjunction describing the
-     * license data for the violation, the provenance of that information, and a filepath to the source
-     * of the violation (if one is available; there may not be an available path for things like license information
-     * taken from registry metdata). Returned objects have the following shape:
+     * For each requested PURL, an array is returned. Each array contains a list of license policy violations
+     * detected for the requested PURL.
+     *
+     * Violations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,
+     * a message describing why the license data is believed to be incompatible with the license policy, and a list
+     * of locations (by filepath or other provenance information) where the offending license data may be found.
+     *
      * ```json
-     * {
-     *   spdxDisj: string,
-     *   provenance: string,
-     *   filepath?: string,
-     * }
+     * Array<
+     *   Array<{
+     *     purl: string,
+     *     spdxAtomOrExtraData: string,
+     *     violationExplanation: string,
+     *     filepathOrProvenance: Array<string>
+     *   }>
+     * >
      * ```
      *
      * ### Example request bodies:
@@ -137,8 +143,9 @@ export interface paths {
      *     }
      *   ],
      *   "license_allow_list": {
+     *     "allowedApprovalSources: ["fsf", "osi"],
      *     "allowedFamilies": ["permissive"],
-     *     "allowedSpdxAtoms": ["GPL-1.0-only WITH Autoconf-exception-3.0"]
+     *     "allowedStrings": ["License :: OSI Approved :: BSD License", "UniqueLicense-2.0"]
      *   }
      * }
      * ```
@@ -834,11 +841,13 @@ export interface components {
       purl: string;
     };
     LicenseAllowList: {
-      requiredApprovalSources: string[];
       allowedApprovalSources: string[];
       allowedFamilies: string[];
       allowedTiers: string[];
-      allowedSpdxAtoms: string[];
+      allowedStrings: string[];
+      allowedPURLs: string[];
+      /** @default false */
+      focusAlertsHere: boolean;
     };
     CDXComponentSchema: {
       /** @default */
@@ -2527,18 +2536,19 @@ export interface operations {
   };
   /**
    * License Policy (Beta)
-   * @description Diff the license information from a list of packages (as PURL strings) with a configurable license allow list.
-   * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
+   * @description Compare the license data found for a list of packages (as PURL strings) with a configurable license allow list,
+   * returning information about license data which does not comply with the license allow list.
    *
    * ## Allow List Schema
    *
    * ```json
    * {
-   *   requiredApprovalSources?: Array<"fsf" | "osi">,
    *   allowedApprovalSources?: Array<"fsf" | "osi">,
    *   allowedFamilies?: Array<"copyleft" | "permissive">,
    *   allowedTiers?: Array<PermissiveTier | CopyleftTier>,
-   *   allowedSpdxAtoms?: Array<string>
+   *   allowedStrings?: Array<string>
+   *   allowedPURLs?: Array<string>
+   *   focusAlertsHere?: boolean
    * }
    * ```
    *
@@ -2551,17 +2561,22 @@ export interface operations {
    *
    * ## Return value
    *
-   * The returned values are objects containing information about license data from the requested
-   * PURLs which violates the allow list. The returned objects contain an spdx disjunction describing the
-   * license data for the violation, the provenance of that information, and a filepath to the source
-   * of the violation (if one is available; there may not be an available path for things like license information
-   * taken from registry metdata). Returned objects have the following shape:
+   * For each requested PURL, an array is returned. Each array contains a list of license policy violations
+   * detected for the requested PURL.
+   *
+   * Violations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,
+   * a message describing why the license data is believed to be incompatible with the license policy, and a list
+   * of locations (by filepath or other provenance information) where the offending license data may be found.
+   *
    * ```json
-   * {
-   *   spdxDisj: string,
-   *   provenance: string,
-   *   filepath?: string,
-   * }
+   * Array<
+   *   Array<{
+   *     purl: string,
+   *     spdxAtomOrExtraData: string,
+   *     violationExplanation: string,
+   *     filepathOrProvenance: Array<string>
+   *   }>
+   * >
    * ```
    *
    * ### Example request bodies:
@@ -2576,8 +2591,9 @@ export interface operations {
    *     }
    *   ],
    *   "license_allow_list": {
+   *     "allowedApprovalSources: ["fsf", "osi"],
    *     "allowedFamilies": ["permissive"],
-   *     "allowedSpdxAtoms": ["GPL-1.0-only WITH Autoconf-exception-3.0"]
+   *     "allowedStrings": ["License :: OSI Approved :: BSD License", "UniqueLicense-2.0"]
    *   }
    * }
    * ```
