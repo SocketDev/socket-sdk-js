@@ -1191,14 +1191,6 @@
         "additionalProperties": false,
         "description": "",
         "properties": {
-          "requiredApprovalSources": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "",
-              "default": ""
-            }
-          },
           "allowedApprovalSources": {
             "type": "array",
             "items": {
@@ -1223,21 +1215,35 @@
               "default": ""
             }
           },
-          "allowedSpdxAtoms": {
+          "allowedStrings": {
             "type": "array",
             "items": {
               "type": "string",
               "description": "",
               "default": ""
             }
+          },
+          "allowedPURLs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            }
+          },
+          "focusAlertsHere": {
+            "type": "boolean",
+            "default": false,
+            "description": ""
           }
         },
         "required": [
           "allowedApprovalSources",
           "allowedFamilies",
-          "allowedSpdxAtoms",
+          "allowedPURLs",
+          "allowedStrings",
           "allowedTiers",
-          "requiredApprovalSources"
+          "focusAlertsHere"
         ]
       },
       "CDXComponentSchema": {
@@ -7459,7 +7465,7 @@
             ]
           }
         ],
-        "description": "Diff the license information from a list of packages (as PURL strings) with a configurable license allow list.\nPackage URLs (PURLs) are an ecosystem agnostic way to identify packages.\n\n## Allow List Schema\n\n```json\n{\n  requiredApprovalSources?: Array<\"fsf\" | \"osi\">,\n  allowedApprovalSources?: Array<\"fsf\" | \"osi\">,\n  allowedFamilies?: Array<\"copyleft\" | \"permissive\">,\n  allowedTiers?: Array<PermissiveTier | CopyleftTier>,\n  allowedSpdxAtoms?: Array<string>\n}\n```\n\nwhere\n\nPermissiveTier ::= \"model permissive\" | \"gold\" | \"silver\" | \"bronze\" | \"lead\"\nCopyleftTier ::= \"maximal copyleft\" | \"network copyleft\" | \"strong copyleft\" | \"weak copyleft\"\n\nreaders can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.\n\n## Return value\n\nThe returned values are objects containing information about license data from the requested\nPURLs which violates the allow list. The returned objects contain an spdx disjunction describing the\nlicense data for the violation, the provenance of that information, and a filepath to the source\nof the violation (if one is available; there may not be an available path for things like license information\ntaken from registry metdata). Returned objects have the following shape:\n```json\n{\n  spdxDisj: string,\n  provenance: string,\n  filepath?: string,\n}\n```\n\n### Example request bodies:\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/alt-aiohttp-cors@0.7.1?artifact_id=tar-gz\"\n    },\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ],\n  \"license_allow_list\": {\n    \"allowedFamilies\": [\"permissive\"],\n    \"allowedSpdxAtoms\": [\"GPL-1.0-only WITH Autoconf-exception-3.0\"]\n  }\n}\n```\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- packages:list",
+        "description": "Compare the license data found for a list of packages (as PURL strings) with a configurable license allow list,\nreturning information about license data which does not comply with the license allow list.\n\n## Allow List Schema\n\n```json\n{\n  allowedApprovalSources?: Array<\"fsf\" | \"osi\">,\n  allowedFamilies?: Array<\"copyleft\" | \"permissive\">,\n  allowedTiers?: Array<PermissiveTier | CopyleftTier>,\n  allowedStrings?: Array<string>\n  allowedPURLs?: Array<string>\n  focusAlertsHere?: boolean\n}\n```\n\nwhere\n\nPermissiveTier ::= \"model permissive\" | \"gold\" | \"silver\" | \"bronze\" | \"lead\"\nCopyleftTier ::= \"maximal copyleft\" | \"network copyleft\" | \"strong copyleft\" | \"weak copyleft\"\n\nreaders can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.\n\n## Return value\n\nFor each requested PURL, an array is returned. Each array contains a list of license policy violations \ndetected for the requested PURL.\n\nViolations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,\na message describing why the license data is believed to be incompatible with the license policy, and a list\nof locations (by filepath or other provenance information) where the offending license data may be found.\n\n```json\nArray<\n  Array<{\n    purl: string,\n    spdxAtomOrExtraData: string,\n    violationExplanation: string,\n    filepathOrProvenance: Array<string>\n  }>\n>\n```\n\n### Example request bodies:\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/alt-aiohttp-cors@0.7.1?artifact_id=tar-gz\"\n    },\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ],\n  \"license_allow_list\": {\n    \"allowedApprovalSources: [\"fsf\", \"osi\"],\n    \"allowedFamilies\": [\"permissive\"],\n    \"allowedStrings\": [\"License :: OSI Approved :: BSD License\", \"UniqueLicense-2.0\"]\n  }\n}\n```\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- packages:list",
         "responses": {
           "200": {
             "content": {
