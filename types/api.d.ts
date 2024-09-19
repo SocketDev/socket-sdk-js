@@ -157,6 +157,87 @@ export interface paths {
      */
     post: operations["licensePolicy"];
   };
+  "/saturate-license-policy": {
+    /**
+     * Saturate License Policy (Beta)
+     * @description Get the "saturated" version of a license policy's allow list, filling in the entire set of allowed
+     * license data. For example, the saturated form of a license allow list which only specifies that
+     * licenses in the tier "maximal copyleft" are allowed is shown below (note the expanded `allowedStrings` property):
+     *
+     * ```json
+     * {
+     *   "allowedApprovalSources": [],
+     *   "allowedFamilies": [],
+     *   "allowedTiers": [
+     *     "maximal copyleft"
+     *   ],
+     *   "allowedStrings": [
+     *     "Parity-6.0.0",
+     *     "QPL-1.0-INRIA-2004",
+     *     "QPL-1.0",
+     *     "RPL-1.1",
+     *     "RPL-1.5"
+     *   ],
+     *   "allowedPURLs": [],
+     *   "focusAlertsHere": false
+     * }
+     * ```
+     *
+     * This may be helpful for users who want to compose more complex sets of allowed license data via
+     * the "allowedStrings" property, or for users who want to know more about the contents of a particular
+     * license group (family, tier, or approval source).
+     *
+     * ## Allow List Schema
+     *
+     * ```json
+     * ```
+     *
+     * where
+     *
+     * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" | "lead"
+     * CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong copyleft" | "weak copyleft"
+     *
+     * ## Return Value
+     *
+     * The returned value has the same shape as a license allow list:
+     *
+     * ```json
+     * {
+     *   allowedApprovalSources?: Array<"fsf" | "osi">,
+     *   allowedFamilies?: Array<"copyleft" | "permissive">,
+     *   allowedTiers?: Array<PermissiveTier | CopyleftTier>,
+     *   allowedStrings?: Array<string>
+     *   allowedPURLs?: Array<string>
+     *   focusAlertsHere?: boolean
+     * }
+     * ```
+     *
+     * where
+     *
+     * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" | "lead"
+     * CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong copyleft" | "weak copyleft"
+     *
+     * readers can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+     *
+     * ### Example request bodies:
+     * ```json
+     * {
+     *   "allowedApprovalSources": ["fsf"],
+     *   "allowedPURLs": [],
+     *   "allowedFamilies": ["copyleft"],
+     *   "allowedTiers": ["model permissive"],
+     *   "allowedStrings": ["License :: OSI Approved :: BSD License"],
+     *   "focusAlertsHere": false
+     * }
+     * ```
+     *
+     * This endpoint consumes 100 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - packages:list
+     */
+    post: operations["saturateLicensePolicy"];
+  };
   "/orgs/{org_slug}/audit-log": {
     /**
      * Get Audit Log Events
@@ -614,6 +695,15 @@ export interface components {
       components: components["schemas"]["SocketBatchPURLRequest"][];
       license_allow_list: components["schemas"]["LicenseAllowList"];
     };
+    LicenseAllowList: {
+      allowedApprovalSources: string[];
+      allowedFamilies: string[];
+      allowedTiers: string[];
+      allowedStrings: string[];
+      allowedPURLs: string[];
+      /** @default false */
+      focusAlertsHere: boolean;
+    };
     CDXManifestSchema: {
       /** @default CycloneDX */
       bomFormat: string;
@@ -839,15 +929,6 @@ export interface components {
     SocketBatchPURLRequest: {
       /** @default */
       purl: string;
-    };
-    LicenseAllowList: {
-      allowedApprovalSources: string[];
-      allowedFamilies: string[];
-      allowedTiers: string[];
-      allowedStrings: string[];
-      allowedPURLs: string[];
-      /** @default false */
-      focusAlertsHere: boolean;
     };
     CDXComponentSchema: {
       /** @default */
@@ -2622,6 +2703,105 @@ export interface operations {
               purl: string;
               filepathOrProvenance: string[];
             }[];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+      500: components["responses"]["SocketInternalServerError"];
+    };
+  };
+  /**
+   * Saturate License Policy (Beta)
+   * @description Get the "saturated" version of a license policy's allow list, filling in the entire set of allowed
+   * license data. For example, the saturated form of a license allow list which only specifies that
+   * licenses in the tier "maximal copyleft" are allowed is shown below (note the expanded `allowedStrings` property):
+   *
+   * ```json
+   * {
+   *   "allowedApprovalSources": [],
+   *   "allowedFamilies": [],
+   *   "allowedTiers": [
+   *     "maximal copyleft"
+   *   ],
+   *   "allowedStrings": [
+   *     "Parity-6.0.0",
+   *     "QPL-1.0-INRIA-2004",
+   *     "QPL-1.0",
+   *     "RPL-1.1",
+   *     "RPL-1.5"
+   *   ],
+   *   "allowedPURLs": [],
+   *   "focusAlertsHere": false
+   * }
+   * ```
+   *
+   * This may be helpful for users who want to compose more complex sets of allowed license data via
+   * the "allowedStrings" property, or for users who want to know more about the contents of a particular
+   * license group (family, tier, or approval source).
+   *
+   * ## Allow List Schema
+   *
+   * ```json
+   * ```
+   *
+   * where
+   *
+   * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" | "lead"
+   * CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong copyleft" | "weak copyleft"
+   *
+   * ## Return Value
+   *
+   * The returned value has the same shape as a license allow list:
+   *
+   * ```json
+   * {
+   *   allowedApprovalSources?: Array<"fsf" | "osi">,
+   *   allowedFamilies?: Array<"copyleft" | "permissive">,
+   *   allowedTiers?: Array<PermissiveTier | CopyleftTier>,
+   *   allowedStrings?: Array<string>
+   *   allowedPURLs?: Array<string>
+   *   focusAlertsHere?: boolean
+   * }
+   * ```
+   *
+   * where
+   *
+   * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" | "lead"
+   * CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong copyleft" | "weak copyleft"
+   *
+   * readers can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+   *
+   * ### Example request bodies:
+   * ```json
+   * {
+   *   "allowedApprovalSources": ["fsf"],
+   *   "allowedPURLs": [],
+   *   "allowedFamilies": ["copyleft"],
+   *   "allowedTiers": ["model permissive"],
+   *   "allowedStrings": ["License :: OSI Approved :: BSD License"],
+   *   "focusAlertsHere": false
+   * }
+   * ```
+   *
+   * This endpoint consumes 100 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - packages:list
+   */
+  saturateLicensePolicy: {
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["LicenseAllowList"];
+      };
+    };
+    responses: {
+      /** @description Saturated License Allow List */
+      200: {
+        content: {
+          "application/json": components["schemas"]["LicenseAllowList"];
         };
       };
       400: components["responses"]["SocketBadRequest"];
