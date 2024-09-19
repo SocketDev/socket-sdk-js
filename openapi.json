@@ -343,6 +343,66 @@
           "license_allow_list"
         ]
       },
+      "LicenseAllowList": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "allowedApprovalSources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            }
+          },
+          "allowedFamilies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            }
+          },
+          "allowedTiers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            }
+          },
+          "allowedStrings": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            }
+          },
+          "allowedPURLs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            }
+          },
+          "focusAlertsHere": {
+            "type": "boolean",
+            "default": false,
+            "description": ""
+          }
+        },
+        "required": [
+          "allowedApprovalSources",
+          "allowedFamilies",
+          "allowedPURLs",
+          "allowedStrings",
+          "allowedTiers",
+          "focusAlertsHere"
+        ]
+      },
       "CDXManifestSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1184,66 +1244,6 @@
         },
         "required": [
           "purl"
-        ]
-      },
-      "LicenseAllowList": {
-        "type": "object",
-        "additionalProperties": false,
-        "description": "",
-        "properties": {
-          "allowedApprovalSources": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "",
-              "default": ""
-            }
-          },
-          "allowedFamilies": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "",
-              "default": ""
-            }
-          },
-          "allowedTiers": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "",
-              "default": ""
-            }
-          },
-          "allowedStrings": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "",
-              "default": ""
-            }
-          },
-          "allowedPURLs": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "",
-              "default": ""
-            }
-          },
-          "focusAlertsHere": {
-            "type": "boolean",
-            "default": false,
-            "description": ""
-          }
-        },
-        "required": [
-          "allowedApprovalSources",
-          "allowedFamilies",
-          "allowedPURLs",
-          "allowedStrings",
-          "allowedTiers",
-          "focusAlertsHere"
         ]
       },
       "CDXComponentSchema": {
@@ -7512,6 +7512,64 @@
               }
             },
             "description": "Socket issue lists and scores for all packages"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/SocketInternalServerError"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/saturate-license-policy": {
+      "post": {
+        "tags": [
+          "Packages"
+        ],
+        "summary": "Saturate License Policy (Beta)",
+        "operationId": "saturateLicensePolicy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LicenseAllowList"
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "basicAuth": [
+              "packages:list"
+            ]
+          }
+        ],
+        "description": "Get the \"saturated\" version of a license policy's allow list, filling in the entire set of allowed\nlicense data. For example, the saturated form of a license allow list which only specifies that\nlicenses in the tier \"maximal copyleft\" are allowed is shown below (note the expanded `allowedStrings` property):\n\n```json\n{\n  \"allowedApprovalSources\": [],\n  \"allowedFamilies\": [],\n  \"allowedTiers\": [\n    \"maximal copyleft\"\n  ],\n  \"allowedStrings\": [\n    \"Parity-6.0.0\",\n    \"QPL-1.0-INRIA-2004\",\n    \"QPL-1.0\",\n    \"RPL-1.1\",\n    \"RPL-1.5\"\n  ],\n  \"allowedPURLs\": [],\n  \"focusAlertsHere\": false\n}\n```  \n\nThis may be helpful for users who want to compose more complex sets of allowed license data via \nthe \"allowedStrings\" property, or for users who want to know more about the contents of a particular\nlicense group (family, tier, or approval source).\n\n## Allow List Schema\n\n```json\n```\n\nwhere\n\nPermissiveTier ::= \"model permissive\" | \"gold\" | \"silver\" | \"bronze\" | \"lead\"\nCopyleftTier ::= \"maximal copyleft\" | \"network copyleft\" | \"strong copyleft\" | \"weak copyleft\"\n\n## Return Value\n\nThe returned value has the same shape as a license allow list:\n\n```json\n{\n  allowedApprovalSources?: Array<\"fsf\" | \"osi\">,\n  allowedFamilies?: Array<\"copyleft\" | \"permissive\">,\n  allowedTiers?: Array<PermissiveTier | CopyleftTier>,\n  allowedStrings?: Array<string>\n  allowedPURLs?: Array<string>\n  focusAlertsHere?: boolean\n}\n```\n\nwhere\n\nPermissiveTier ::= \"model permissive\" | \"gold\" | \"silver\" | \"bronze\" | \"lead\"\nCopyleftTier ::= \"maximal copyleft\" | \"network copyleft\" | \"strong copyleft\" | \"weak copyleft\"\n\nreaders can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.\n\n### Example request bodies:\n```json\n{\n  \"allowedApprovalSources\": [\"fsf\"],\n  \"allowedPURLs\": [],\n  \"allowedFamilies\": [\"copyleft\"],\n  \"allowedTiers\": [\"model permissive\"],\n  \"allowedStrings\": [\"License :: OSI Approved :: BSD License\"],\n  \"focusAlertsHere\": false\n}\n```\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- packages:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LicenseAllowList"
+                }
+              }
+            },
+            "description": "Saturated License Allow List"
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
