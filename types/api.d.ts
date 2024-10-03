@@ -2591,8 +2591,11 @@ export interface operations {
   batchPackageFetch: {
     parameters: {
       query?: {
+        /** @description Include detailed license information, including location and match strength, for each license datum. */
         licensedetails?: boolean;
+        /** @description Include license attribution data, including license text and author information. Maps attribution/license text to a list of data objects to which that attribution info applies. */
         licenseattrib?: boolean;
+        /** @description Include alert metadata. */
         alerts?: boolean;
       };
     };
@@ -3006,6 +3009,8 @@ export interface operations {
                 /** @default */
                 organization_id?: string;
                 /** @default */
+                organization_slug?: string;
+                /** @default */
                 repository_id?: string;
                 committers?: string[];
                 /** @default */
@@ -3061,8 +3066,11 @@ export interface operations {
         integration_type?: "api" | "github" | "gitlab" | "bitbucket" | "azure";
         /** @description The integration org slug to associate the full-scan with. If omitted, the Socket org name will be used. This is used to generate links and badges. */
         integration_org_slug?: string;
+        /** @description Set the default branch of the repository to the branch of this full-scan. A branch name is required with this option. */
         make_default_branch?: boolean;
+        /** @description Designate this full-scan as the latest scan of a given branch. Default branch head scans are included in org alerts. */
         set_as_pending_head?: boolean;
+        /** @description Create a temporary full-scan that is not listed in the reports dashboard. */
         tmp?: boolean;
       };
       path: {
@@ -3090,6 +3098,8 @@ export interface operations {
             updated_at?: string;
             /** @default */
             organization_id?: string;
+            /** @default */
+            organization_slug?: string;
             /** @default */
             repository_id?: string;
             committers?: string[];
@@ -3217,6 +3227,8 @@ export interface operations {
             /** @default */
             organization_id?: string;
             /** @default */
+            organization_slug?: string;
+            /** @default */
             repository_id?: string;
             committers?: string[];
             /** @default */
@@ -3257,6 +3269,7 @@ export interface operations {
         before: string;
         /** @description The base full scan ID */
         after: string;
+        /** @description Create a diff-scan that is not persisted. */
         preview: boolean;
       };
       path: {

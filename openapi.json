@@ -7369,6 +7369,7 @@
             "name": "licensedetails",
             "in": "query",
             "required": false,
+            "description": "Include detailed license information, including location and match strength, for each license datum.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -7378,6 +7379,7 @@
             "name": "licenseattrib",
             "in": "query",
             "required": false,
+            "description": "Include license attribution data, including license text and author information. Maps attribution/license text to a list of data objects to which that attribution info applies.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -7387,6 +7389,7 @@
             "name": "alerts",
             "in": "query",
             "required": false,
+            "description": "Include alert metadata.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -8167,6 +8170,11 @@
                             "description": "",
                             "default": ""
                           },
+                          "organization_slug": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
                           "repository_id": {
                             "type": "string",
                             "description": "",
@@ -8346,6 +8354,7 @@
             "name": "make_default_branch",
             "in": "query",
             "required": false,
+            "description": "Set the default branch of the repository to the branch of this full-scan. A branch name is required with this option.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -8355,6 +8364,7 @@
             "name": "set_as_pending_head",
             "in": "query",
             "required": false,
+            "description": "Designate this full-scan as the latest scan of a given branch. Default branch head scans are included in org alerts.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -8364,6 +8374,7 @@
             "name": "tmp",
             "in": "query",
             "required": false,
+            "description": "Create a temporary full-scan that is not listed in the reports dashboard.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -8422,6 +8433,11 @@
                       "default": ""
                     },
                     "organization_id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "organization_slug": {
                       "type": "string",
                       "description": "",
                       "default": ""
@@ -8697,6 +8713,11 @@
                       "description": "",
                       "default": ""
                     },
+                    "organization_slug": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
                     "repository_id": {
                       "type": "string",
                       "description": "",
@@ -8804,6 +8825,7 @@
             "name": "preview",
             "in": "query",
             "required": true,
+            "description": "Create a diff-scan that is not persisted.",
             "schema": {
               "type": "boolean",
               "default": false
