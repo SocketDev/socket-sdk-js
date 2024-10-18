@@ -413,6 +413,28 @@ export interface paths {
      */
     get: operations["getIntegrationEvents"];
   };
+  "/orgs/{org_slug}/settings/security-policy": {
+    /**
+     * Get Organization Security Policy
+     * @description Retrieve the security policy of an organization.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - security-policy:read
+     */
+    get: operations["getOrgSecurityPolicy"];
+    /**
+     * Update Security Policy
+     * @description Update the security policy of an organization.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - security-policy:update
+     */
+    post: operations["updateOrgSecurityPolicy"];
+  };
   "/analytics/org/{filter}": {
     /**
      * Get organization analytics (unstable)
@@ -1016,6 +1038,107 @@ export interface components {
     };
     SocketIssue: ({
       /** @enum {string} */
+      type?: "gptSecurity";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          notes: string;
+          /** @default 0 */
+          confidence: number;
+          /** @default 0 */
+          severity: number;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "gptAnomaly";
+      value?: components["schemas"]["SocketIssueBasics"] & ({
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          notes: string;
+          /** @default 0 */
+          confidence: number;
+          /** @default 0 */
+          severity: number;
+          /**
+           * @default medium
+           * @enum {string}
+           */
+          risk: "low" | "medium" | "high";
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      });
+    }) | ({
+      /** @enum {string} */
+      type?: "gptMalware";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          notes: string;
+          /** @default 0 */
+          confidence: number;
+          /** @default 0 */
+          severity: number;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "filesystemAccess";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default fs */
+          module: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "networkAccess";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default net */
+          module: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "shellAccess";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default child_process */
+          module: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "debugAccess";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default vm */
+          module: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
       type?: "criticalCVE";
       value?: components["schemas"]["SocketIssueBasics"] & {
         /** @default */
@@ -1176,508 +1299,6 @@ export interface components {
       };
     }) | ({
       /** @enum {string} */
-      type?: "installScripts";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          script: string;
-          /** @default */
-          source: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "hasNativeCode";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "binScriptConfusion";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          binScript: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "shellScriptOverride";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          binScript: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "filesystemAccess";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default fs */
-          module: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "networkAccess";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default net */
-          module: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "shellAccess";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default child_process */
-          module: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "debugAccess";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default vm */
-          module: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "longStrings";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "highEntropyStrings";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "urlStrings";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          urlFragment: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "usesEval";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default eval */
-          evalType: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "dynamicRequire";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "envVars";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          envVars: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "missingDependency";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          name: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "unusedDependency";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          name: string;
-          /** @default */
-          version: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "peerDependency";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          name: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "uncaughtOptionalDependency";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          name: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "unresolvedRequire";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "extraneousDependency";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "obfuscatedRequire";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "obfuscatedFile";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default 0 */
-          confidence: number;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "minifiedFile";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default 0 */
-          confidence: number;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "bidi";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "zeroWidth";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "badEncoding";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default utf8 */
-          encoding: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "homoglyphs";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "invisibleChars";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "suspiciousString";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          pattern: string;
-          /** @default */
-          explanation: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "invalidPackageJSON";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "httpDependency";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          packageName: string;
-          /** @default */
-          url: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "gitDependency";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          packageName: string;
-          /** @default */
-          url: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "gitHubDependency";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          packageName: string;
-          /** @default */
-          githubUser: string;
-          /** @default */
-          githubRepo: string;
-          /** @default */
-          commitsh: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "fileDependency";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          packageName: string;
-          /** @default */
-          filePath: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "noTests";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "noRepository";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "badSemver";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "badSemverDependency";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          packageName: string;
-          /** @default */
-          packageVersion: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "noV1";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "noWebsite";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "noBugTracker";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "noAuthorData";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "typeModuleCompatibility";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "floatingDependency";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          dependency: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "manifestConfusion";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          key: string;
-          /** @default */
-          description: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
       type?: "emptyPackage";
       value?: components["schemas"]["SocketIssueBasics"] & {
         /** @default */
@@ -1709,175 +1330,6 @@ export interface components {
     }) | ({
       /** @enum {string} */
       type?: "shrinkwrap";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "deprecated";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default This package is deprecated */
-          reason: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "chronoAnomaly";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          prevChronoDate: string;
-          /** @default */
-          prevChronoVersion: string;
-          /** @default */
-          prevSemverDate: string;
-          /** @default */
-          prevSemverVersion: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "compromisedSSHKey";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          fingerprint: string;
-          /** @default */
-          sshKey: string;
-          /** @default */
-          username: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "semverAnomaly";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          prevVersion: string;
-          /** @default */
-          newVersion: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "newAuthor";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          prevAuthor: string;
-          /** @default */
-          newAuthor: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "unstableOwnership";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          author: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "missingAuthor";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "unmaintained";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          lastPublish: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "unpublished";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          version: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "majorRefactor";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default 0 */
-          linesChanged: number;
-          /** @default 0 */
-          prevSize: number;
-          /** @default 0 */
-          curSize: number;
-          /** @default 0 */
-          changedPercent: number;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "missingTarball";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: Record<string, never>;
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "suspiciousStarActivity";
-      value?: components["schemas"]["SocketIssueBasics"] & {
-        /** @default */
-        description: string;
-        props: {
-          /** @default 0 */
-          percentageSuspiciousStars: number;
-          /** @default */
-          repository: string;
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      };
-    }) | ({
-      /** @enum {string} */
-      type?: "unpopularPackage";
       value?: components["schemas"]["SocketIssueBasics"] & {
         /** @default */
         description: string;
@@ -2142,19 +1594,182 @@ export interface components {
       };
     }) | ({
       /** @enum {string} */
-      type?: "didYouMean";
+      type?: "invalidPackageJSON";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "httpDependency";
       value?: components["schemas"]["SocketIssueBasics"] & {
         /** @default */
         description: string;
         props: {
           /** @default */
-          alternatePackage: string;
-          /** @default 0 */
-          editDistance: number;
-          /** @default 0 */
-          downloads: number;
-          /** @default 1 */
-          downloadsRatio: number;
+          packageName: string;
+          /** @default */
+          url: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "gitDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          packageName: string;
+          /** @default */
+          url: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "gitHubDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          packageName: string;
+          /** @default */
+          githubUser: string;
+          /** @default */
+          githubRepo: string;
+          /** @default */
+          commitsh: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "fileDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          packageName: string;
+          /** @default */
+          filePath: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "noTests";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "noRepository";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "badSemver";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "badSemverDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          packageName: string;
+          /** @default */
+          packageVersion: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "noV1";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "noWebsite";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "noBugTracker";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "noAuthorData";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "typeModuleCompatibility";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "floatingDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          dependency: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "manifestConfusion";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          key: string;
+          /** @default */
+          description: string;
         };
         usage?: components["schemas"]["SocketUsageRef"];
       };
@@ -2202,54 +1817,476 @@ export interface components {
       };
     }) | ({
       /** @enum {string} */
-      type?: "gptSecurity";
+      type?: "deprecated";
       value?: components["schemas"]["SocketIssueBasics"] & {
         /** @default */
         description: string;
         props: {
-          /** @default */
-          notes: string;
-          /** @default 0 */
-          confidence: number;
-          /** @default 0 */
-          severity: number;
+          /** @default This package is deprecated */
+          reason: string;
         };
         usage?: components["schemas"]["SocketUsageRef"];
       };
     }) | ({
       /** @enum {string} */
-      type?: "gptAnomaly";
-      value?: components["schemas"]["SocketIssueBasics"] & ({
-        /** @default */
-        description: string;
-        props: {
-          /** @default */
-          notes: string;
-          /** @default 0 */
-          confidence: number;
-          /** @default 0 */
-          severity: number;
-          /**
-           * @default medium
-           * @enum {string}
-           */
-          risk: "low" | "medium" | "high";
-        };
-        usage?: components["schemas"]["SocketUsageRef"];
-      });
-    }) | ({
-      /** @enum {string} */
-      type?: "gptMalware";
+      type?: "chronoAnomaly";
       value?: components["schemas"]["SocketIssueBasics"] & {
         /** @default */
         description: string;
         props: {
           /** @default */
-          notes: string;
+          prevChronoDate: string;
+          /** @default */
+          prevChronoVersion: string;
+          /** @default */
+          prevSemverDate: string;
+          /** @default */
+          prevSemverVersion: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "compromisedSSHKey";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          fingerprint: string;
+          /** @default */
+          sshKey: string;
+          /** @default */
+          username: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "semverAnomaly";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          prevVersion: string;
+          /** @default */
+          newVersion: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "newAuthor";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          prevAuthor: string;
+          /** @default */
+          newAuthor: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "unstableOwnership";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          author: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "missingAuthor";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "unmaintained";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          lastPublish: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "unpublished";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          version: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "majorRefactor";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default 0 */
+          linesChanged: number;
+          /** @default 0 */
+          prevSize: number;
+          /** @default 0 */
+          curSize: number;
+          /** @default 0 */
+          changedPercent: number;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "missingTarball";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "suspiciousStarActivity";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default 0 */
+          percentageSuspiciousStars: number;
+          /** @default */
+          repository: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "unpopularPackage";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "socketUpgradeAvailable";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          categories: string[];
+          /** @default false */
+          deprecated: boolean;
+          interop: string[];
+          /** @default */
+          replacementPURL: string;
+          /** @default */
+          version: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "longStrings";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "highEntropyStrings";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "urlStrings";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          urlFragment: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "usesEval";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default eval */
+          evalType: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "dynamicRequire";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "envVars";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          envVars: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "missingDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          name: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "unusedDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          name: string;
+          /** @default */
+          version: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "peerDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          name: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "uncaughtOptionalDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          name: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "unresolvedRequire";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "extraneousDependency";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "obfuscatedRequire";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "obfuscatedFile";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
           /** @default 0 */
           confidence: number;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "minifiedFile";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
           /** @default 0 */
-          severity: number;
+          confidence: number;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "installScripts";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          script: string;
+          /** @default */
+          source: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "hasNativeCode";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          source: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "binScriptConfusion";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          binScript: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "shellScriptOverride";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          binScript: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "didYouMean";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          alternatePackage: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "bidi";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "zeroWidth";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "badEncoding";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default utf8 */
+          encoding: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "homoglyphs";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "invisibleChars";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: Record<string, never>;
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
+      type?: "suspiciousString";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          pattern: string;
+          /** @default */
+          explanation: string;
         };
         usage?: components["schemas"]["SocketUsageRef"];
       };
@@ -2591,8 +2628,11 @@ export interface operations {
   batchPackageFetch: {
     parameters: {
       query?: {
+        /** @description Include detailed license information, including location and match strength, for each license datum. */
         licensedetails?: boolean;
+        /** @description Include license attribution data, including license text and author information. Maps attribution/license text to a list of data objects to which that attribution info applies. */
         licenseattrib?: boolean;
+        /** @description Include alert metadata. */
         alerts?: boolean;
       };
     };
@@ -3006,6 +3046,8 @@ export interface operations {
                 /** @default */
                 organization_id?: string;
                 /** @default */
+                organization_slug?: string;
+                /** @default */
                 repository_id?: string;
                 committers?: string[];
                 /** @default */
@@ -3061,8 +3103,11 @@ export interface operations {
         integration_type?: "api" | "github" | "gitlab" | "bitbucket" | "azure";
         /** @description The integration org slug to associate the full-scan with. If omitted, the Socket org name will be used. This is used to generate links and badges. */
         integration_org_slug?: string;
+        /** @description Set the default branch of the repository to the branch of this full-scan. A branch name is required with this option. */
         make_default_branch?: boolean;
+        /** @description Designate this full-scan as the latest scan of a given branch. Default branch head scans are included in org alerts. */
         set_as_pending_head?: boolean;
+        /** @description Create a temporary full-scan that is not listed in the reports dashboard. */
         tmp?: boolean;
       };
       path: {
@@ -3090,6 +3135,8 @@ export interface operations {
             updated_at?: string;
             /** @default */
             organization_id?: string;
+            /** @default */
+            organization_slug?: string;
             /** @default */
             repository_id?: string;
             committers?: string[];
@@ -3217,6 +3264,8 @@ export interface operations {
             /** @default */
             organization_id?: string;
             /** @default */
+            organization_slug?: string;
+            /** @default */
             repository_id?: string;
             committers?: string[];
             /** @default */
@@ -3257,6 +3306,7 @@ export interface operations {
         before: string;
         /** @description The base full scan ID */
         after: string;
+        /** @description Create a diff-scan that is not persisted. */
         preview: boolean;
       };
       path: {
@@ -4302,7 +4352,7 @@ export interface operations {
       };
     };
     responses: {
-      /** @description Update a repositories details */
+      /** @description Updated repository details */
       200: {
         content: {
           "application/json": {
@@ -4456,6 +4506,2126 @@ export interface operations {
               /** @default */
               updated_at: string;
             }[];
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Get Organization Security Policy
+   * @description Retrieve the security policy of an organization.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - security-policy:read
+   */
+  getOrgSecurityPolicy: {
+    parameters: {
+      query?: {
+        /** @description Return only customized security policy rules. */
+        custom_rules_only?: boolean;
+      };
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+      };
+    };
+    responses: {
+      /** @description Retrieved security policy details */
+      200: {
+        content: {
+          "application/json": {
+            securityPolicyRules?: {
+              gptSecurity?: {
+                /**
+                 * @description The action to take for gptSecurity issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              gptAnomaly?: {
+                /**
+                 * @description The action to take for gptAnomaly issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              gptMalware?: {
+                /**
+                 * @description The action to take for gptMalware issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              filesystemAccess?: {
+                /**
+                 * @description The action to take for filesystemAccess issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              networkAccess?: {
+                /**
+                 * @description The action to take for networkAccess issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              shellAccess?: {
+                /**
+                 * @description The action to take for shellAccess issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              debugAccess?: {
+                /**
+                 * @description The action to take for debugAccess issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              criticalCVE?: {
+                /**
+                 * @description The action to take for criticalCVE issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              cve?: {
+                /**
+                 * @description The action to take for cve issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              mediumCVE?: {
+                /**
+                 * @description The action to take for mediumCVE issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              mildCVE?: {
+                /**
+                 * @description The action to take for mildCVE issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              emptyPackage?: {
+                /**
+                 * @description The action to take for emptyPackage issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              trivialPackage?: {
+                /**
+                 * @description The action to take for trivialPackage issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              noREADME?: {
+                /**
+                 * @description The action to take for noREADME issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              shrinkwrap?: {
+                /**
+                 * @description The action to take for shrinkwrap issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              licenseSpdxDisj?: {
+                /**
+                 * @description The action to take for licenseSpdxDisj issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              unsafeCopyright?: {
+                /**
+                 * @description The action to take for unsafeCopyright issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              licenseChange?: {
+                /**
+                 * @description The action to take for licenseChange issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              nonOSILicense?: {
+                /**
+                 * @description The action to take for nonOSILicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              deprecatedLicense?: {
+                /**
+                 * @description The action to take for deprecatedLicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              missingLicense?: {
+                /**
+                 * @description The action to take for missingLicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              nonSPDXLicense?: {
+                /**
+                 * @description The action to take for nonSPDXLicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              unclearLicense?: {
+                /**
+                 * @description The action to take for unclearLicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              mixedLicense?: {
+                /**
+                 * @description The action to take for mixedLicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              notice?: {
+                /**
+                 * @description The action to take for notice issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              modifiedLicense?: {
+                /**
+                 * @description The action to take for modifiedLicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              modifiedException?: {
+                /**
+                 * @description The action to take for modifiedException issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              licenseException?: {
+                /**
+                 * @description The action to take for licenseException issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              deprecatedException?: {
+                /**
+                 * @description The action to take for deprecatedException issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              miscLicenseIssues?: {
+                /**
+                 * @description The action to take for miscLicenseIssues issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              unidentifiedLicense?: {
+                /**
+                 * @description The action to take for unidentifiedLicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              noLicenseFound?: {
+                /**
+                 * @description The action to take for noLicenseFound issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              explicitlyUnlicensedItem?: {
+                /**
+                 * @description The action to take for explicitlyUnlicensedItem issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              copyleftLicense?: {
+                /**
+                 * @description The action to take for copyleftLicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              nonpermissiveLicense?: {
+                /**
+                 * @description The action to take for nonpermissiveLicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              ambiguousClassifier?: {
+                /**
+                 * @description The action to take for ambiguousClassifier issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              invalidPackageJSON?: {
+                /**
+                 * @description The action to take for invalidPackageJSON issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              httpDependency?: {
+                /**
+                 * @description The action to take for httpDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              gitDependency?: {
+                /**
+                 * @description The action to take for gitDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              gitHubDependency?: {
+                /**
+                 * @description The action to take for gitHubDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              fileDependency?: {
+                /**
+                 * @description The action to take for fileDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              noTests?: {
+                /**
+                 * @description The action to take for noTests issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              noRepository?: {
+                /**
+                 * @description The action to take for noRepository issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              badSemver?: {
+                /**
+                 * @description The action to take for badSemver issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              badSemverDependency?: {
+                /**
+                 * @description The action to take for badSemverDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              noV1?: {
+                /**
+                 * @description The action to take for noV1 issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              noWebsite?: {
+                /**
+                 * @description The action to take for noWebsite issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              noBugTracker?: {
+                /**
+                 * @description The action to take for noBugTracker issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              noAuthorData?: {
+                /**
+                 * @description The action to take for noAuthorData issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              typeModuleCompatibility?: {
+                /**
+                 * @description The action to take for typeModuleCompatibility issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              floatingDependency?: {
+                /**
+                 * @description The action to take for floatingDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              manifestConfusion?: {
+                /**
+                 * @description The action to take for manifestConfusion issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              malware?: {
+                /**
+                 * @description The action to take for malware issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              telemetry?: {
+                /**
+                 * @description The action to take for telemetry issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              troll?: {
+                /**
+                 * @description The action to take for troll issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              deprecated?: {
+                /**
+                 * @description The action to take for deprecated issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              chronoAnomaly?: {
+                /**
+                 * @description The action to take for chronoAnomaly issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              compromisedSSHKey?: {
+                /**
+                 * @description The action to take for compromisedSSHKey issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              semverAnomaly?: {
+                /**
+                 * @description The action to take for semverAnomaly issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              newAuthor?: {
+                /**
+                 * @description The action to take for newAuthor issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              unstableOwnership?: {
+                /**
+                 * @description The action to take for unstableOwnership issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              missingAuthor?: {
+                /**
+                 * @description The action to take for missingAuthor issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              unmaintained?: {
+                /**
+                 * @description The action to take for unmaintained issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              unpublished?: {
+                /**
+                 * @description The action to take for unpublished issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              majorRefactor?: {
+                /**
+                 * @description The action to take for majorRefactor issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              missingTarball?: {
+                /**
+                 * @description The action to take for missingTarball issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              suspiciousStarActivity?: {
+                /**
+                 * @description The action to take for suspiciousStarActivity issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              unpopularPackage?: {
+                /**
+                 * @description The action to take for unpopularPackage issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              socketUpgradeAvailable?: {
+                /**
+                 * @description The action to take for socketUpgradeAvailable issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              longStrings?: {
+                /**
+                 * @description The action to take for longStrings issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              highEntropyStrings?: {
+                /**
+                 * @description The action to take for highEntropyStrings issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              urlStrings?: {
+                /**
+                 * @description The action to take for urlStrings issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              usesEval?: {
+                /**
+                 * @description The action to take for usesEval issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              dynamicRequire?: {
+                /**
+                 * @description The action to take for dynamicRequire issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              envVars?: {
+                /**
+                 * @description The action to take for envVars issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              missingDependency?: {
+                /**
+                 * @description The action to take for missingDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              unusedDependency?: {
+                /**
+                 * @description The action to take for unusedDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              peerDependency?: {
+                /**
+                 * @description The action to take for peerDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              uncaughtOptionalDependency?: {
+                /**
+                 * @description The action to take for uncaughtOptionalDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              unresolvedRequire?: {
+                /**
+                 * @description The action to take for unresolvedRequire issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              extraneousDependency?: {
+                /**
+                 * @description The action to take for extraneousDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              obfuscatedRequire?: {
+                /**
+                 * @description The action to take for obfuscatedRequire issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              obfuscatedFile?: {
+                /**
+                 * @description The action to take for obfuscatedFile issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              minifiedFile?: {
+                /**
+                 * @description The action to take for minifiedFile issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              installScripts?: {
+                /**
+                 * @description The action to take for installScripts issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              hasNativeCode?: {
+                /**
+                 * @description The action to take for hasNativeCode issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              binScriptConfusion?: {
+                /**
+                 * @description The action to take for binScriptConfusion issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              shellScriptOverride?: {
+                /**
+                 * @description The action to take for shellScriptOverride issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              didYouMean?: {
+                /**
+                 * @description The action to take for didYouMean issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              bidi?: {
+                /**
+                 * @description The action to take for bidi issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              zeroWidth?: {
+                /**
+                 * @description The action to take for zeroWidth issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              badEncoding?: {
+                /**
+                 * @description The action to take for badEncoding issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              homoglyphs?: {
+                /**
+                 * @description The action to take for homoglyphs issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              invisibleChars?: {
+                /**
+                 * @description The action to take for invisibleChars issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              suspiciousString?: {
+                /**
+                 * @description The action to take for suspiciousString issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              potentialVulnerability?: {
+                /**
+                 * @description The action to take for potentialVulnerability issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+            };
+            /**
+             * @description The default security policy for the organization
+             * @default default
+             * @enum {string}
+             */
+            securityPolicyDefault?: "default" | "low" | "medium" | "high";
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Update Security Policy
+   * @description Update the security policy of an organization.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - security-policy:update
+   */
+  updateOrgSecurityPolicy: {
+    parameters: {
+      query?: {
+        /** @description Return only customized security policy rules in the response. */
+        custom_rules_only?: boolean;
+      };
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          /**
+           * @description The default security policy for the organization
+           * @enum {string}
+           */
+          policyDefault?: "default" | "low" | "medium" | "high";
+          policyRules?: {
+            gptSecurity?: {
+              /**
+               * @description The action to take for gptSecurity issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            gptAnomaly?: {
+              /**
+               * @description The action to take for gptAnomaly issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            gptMalware?: {
+              /**
+               * @description The action to take for gptMalware issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            filesystemAccess?: {
+              /**
+               * @description The action to take for filesystemAccess issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            networkAccess?: {
+              /**
+               * @description The action to take for networkAccess issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            shellAccess?: {
+              /**
+               * @description The action to take for shellAccess issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            debugAccess?: {
+              /**
+               * @description The action to take for debugAccess issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            criticalCVE?: {
+              /**
+               * @description The action to take for criticalCVE issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            cve?: {
+              /**
+               * @description The action to take for cve issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            mediumCVE?: {
+              /**
+               * @description The action to take for mediumCVE issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            mildCVE?: {
+              /**
+               * @description The action to take for mildCVE issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            emptyPackage?: {
+              /**
+               * @description The action to take for emptyPackage issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            trivialPackage?: {
+              /**
+               * @description The action to take for trivialPackage issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            noREADME?: {
+              /**
+               * @description The action to take for noREADME issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            shrinkwrap?: {
+              /**
+               * @description The action to take for shrinkwrap issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            licenseSpdxDisj?: {
+              /**
+               * @description The action to take for licenseSpdxDisj issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            unsafeCopyright?: {
+              /**
+               * @description The action to take for unsafeCopyright issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            licenseChange?: {
+              /**
+               * @description The action to take for licenseChange issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            nonOSILicense?: {
+              /**
+               * @description The action to take for nonOSILicense issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            deprecatedLicense?: {
+              /**
+               * @description The action to take for deprecatedLicense issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            missingLicense?: {
+              /**
+               * @description The action to take for missingLicense issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            nonSPDXLicense?: {
+              /**
+               * @description The action to take for nonSPDXLicense issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            unclearLicense?: {
+              /**
+               * @description The action to take for unclearLicense issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            mixedLicense?: {
+              /**
+               * @description The action to take for mixedLicense issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            notice?: {
+              /**
+               * @description The action to take for notice issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            modifiedLicense?: {
+              /**
+               * @description The action to take for modifiedLicense issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            modifiedException?: {
+              /**
+               * @description The action to take for modifiedException issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            licenseException?: {
+              /**
+               * @description The action to take for licenseException issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            deprecatedException?: {
+              /**
+               * @description The action to take for deprecatedException issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            miscLicenseIssues?: {
+              /**
+               * @description The action to take for miscLicenseIssues issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            unidentifiedLicense?: {
+              /**
+               * @description The action to take for unidentifiedLicense issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            noLicenseFound?: {
+              /**
+               * @description The action to take for noLicenseFound issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            explicitlyUnlicensedItem?: {
+              /**
+               * @description The action to take for explicitlyUnlicensedItem issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            copyleftLicense?: {
+              /**
+               * @description The action to take for copyleftLicense issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            nonpermissiveLicense?: {
+              /**
+               * @description The action to take for nonpermissiveLicense issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            ambiguousClassifier?: {
+              /**
+               * @description The action to take for ambiguousClassifier issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            invalidPackageJSON?: {
+              /**
+               * @description The action to take for invalidPackageJSON issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            httpDependency?: {
+              /**
+               * @description The action to take for httpDependency issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            gitDependency?: {
+              /**
+               * @description The action to take for gitDependency issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            gitHubDependency?: {
+              /**
+               * @description The action to take for gitHubDependency issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            fileDependency?: {
+              /**
+               * @description The action to take for fileDependency issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            noTests?: {
+              /**
+               * @description The action to take for noTests issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            noRepository?: {
+              /**
+               * @description The action to take for noRepository issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            badSemver?: {
+              /**
+               * @description The action to take for badSemver issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            badSemverDependency?: {
+              /**
+               * @description The action to take for badSemverDependency issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            noV1?: {
+              /**
+               * @description The action to take for noV1 issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            noWebsite?: {
+              /**
+               * @description The action to take for noWebsite issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            noBugTracker?: {
+              /**
+               * @description The action to take for noBugTracker issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            noAuthorData?: {
+              /**
+               * @description The action to take for noAuthorData issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            typeModuleCompatibility?: {
+              /**
+               * @description The action to take for typeModuleCompatibility issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            floatingDependency?: {
+              /**
+               * @description The action to take for floatingDependency issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            manifestConfusion?: {
+              /**
+               * @description The action to take for manifestConfusion issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            malware?: {
+              /**
+               * @description The action to take for malware issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            telemetry?: {
+              /**
+               * @description The action to take for telemetry issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            troll?: {
+              /**
+               * @description The action to take for troll issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            deprecated?: {
+              /**
+               * @description The action to take for deprecated issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            chronoAnomaly?: {
+              /**
+               * @description The action to take for chronoAnomaly issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            compromisedSSHKey?: {
+              /**
+               * @description The action to take for compromisedSSHKey issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            semverAnomaly?: {
+              /**
+               * @description The action to take for semverAnomaly issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            newAuthor?: {
+              /**
+               * @description The action to take for newAuthor issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            unstableOwnership?: {
+              /**
+               * @description The action to take for unstableOwnership issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            missingAuthor?: {
+              /**
+               * @description The action to take for missingAuthor issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            unmaintained?: {
+              /**
+               * @description The action to take for unmaintained issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            unpublished?: {
+              /**
+               * @description The action to take for unpublished issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            majorRefactor?: {
+              /**
+               * @description The action to take for majorRefactor issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            missingTarball?: {
+              /**
+               * @description The action to take for missingTarball issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            suspiciousStarActivity?: {
+              /**
+               * @description The action to take for suspiciousStarActivity issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            unpopularPackage?: {
+              /**
+               * @description The action to take for unpopularPackage issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            socketUpgradeAvailable?: {
+              /**
+               * @description The action to take for socketUpgradeAvailable issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            longStrings?: {
+              /**
+               * @description The action to take for longStrings issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            highEntropyStrings?: {
+              /**
+               * @description The action to take for highEntropyStrings issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            urlStrings?: {
+              /**
+               * @description The action to take for urlStrings issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            usesEval?: {
+              /**
+               * @description The action to take for usesEval issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            dynamicRequire?: {
+              /**
+               * @description The action to take for dynamicRequire issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            envVars?: {
+              /**
+               * @description The action to take for envVars issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            missingDependency?: {
+              /**
+               * @description The action to take for missingDependency issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            unusedDependency?: {
+              /**
+               * @description The action to take for unusedDependency issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            peerDependency?: {
+              /**
+               * @description The action to take for peerDependency issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            uncaughtOptionalDependency?: {
+              /**
+               * @description The action to take for uncaughtOptionalDependency issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            unresolvedRequire?: {
+              /**
+               * @description The action to take for unresolvedRequire issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            extraneousDependency?: {
+              /**
+               * @description The action to take for extraneousDependency issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            obfuscatedRequire?: {
+              /**
+               * @description The action to take for obfuscatedRequire issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            obfuscatedFile?: {
+              /**
+               * @description The action to take for obfuscatedFile issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            minifiedFile?: {
+              /**
+               * @description The action to take for minifiedFile issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            installScripts?: {
+              /**
+               * @description The action to take for installScripts issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            hasNativeCode?: {
+              /**
+               * @description The action to take for hasNativeCode issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            binScriptConfusion?: {
+              /**
+               * @description The action to take for binScriptConfusion issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            shellScriptOverride?: {
+              /**
+               * @description The action to take for shellScriptOverride issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            didYouMean?: {
+              /**
+               * @description The action to take for didYouMean issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            bidi?: {
+              /**
+               * @description The action to take for bidi issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            zeroWidth?: {
+              /**
+               * @description The action to take for zeroWidth issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            badEncoding?: {
+              /**
+               * @description The action to take for badEncoding issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            homoglyphs?: {
+              /**
+               * @description The action to take for homoglyphs issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            invisibleChars?: {
+              /**
+               * @description The action to take for invisibleChars issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            suspiciousString?: {
+              /**
+               * @description The action to take for suspiciousString issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+            potentialVulnerability?: {
+              /**
+               * @description The action to take for potentialVulnerability issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
+          };
+          /**
+           * @description Reset the policy rules to the default. When set to true, do not include any policyRules updates.
+           * @default false
+           */
+          resetPolicyRules?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Updated repository details */
+      200: {
+        content: {
+          "application/json": {
+            securityPolicyRules?: {
+              gptSecurity?: {
+                /**
+                 * @description The action to take for gptSecurity issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              gptAnomaly?: {
+                /**
+                 * @description The action to take for gptAnomaly issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              gptMalware?: {
+                /**
+                 * @description The action to take for gptMalware issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              filesystemAccess?: {
+                /**
+                 * @description The action to take for filesystemAccess issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              networkAccess?: {
+                /**
+                 * @description The action to take for networkAccess issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              shellAccess?: {
+                /**
+                 * @description The action to take for shellAccess issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              debugAccess?: {
+                /**
+                 * @description The action to take for debugAccess issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              criticalCVE?: {
+                /**
+                 * @description The action to take for criticalCVE issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              cve?: {
+                /**
+                 * @description The action to take for cve issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              mediumCVE?: {
+                /**
+                 * @description The action to take for mediumCVE issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              mildCVE?: {
+                /**
+                 * @description The action to take for mildCVE issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              emptyPackage?: {
+                /**
+                 * @description The action to take for emptyPackage issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              trivialPackage?: {
+                /**
+                 * @description The action to take for trivialPackage issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              noREADME?: {
+                /**
+                 * @description The action to take for noREADME issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              shrinkwrap?: {
+                /**
+                 * @description The action to take for shrinkwrap issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              licenseSpdxDisj?: {
+                /**
+                 * @description The action to take for licenseSpdxDisj issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              unsafeCopyright?: {
+                /**
+                 * @description The action to take for unsafeCopyright issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              licenseChange?: {
+                /**
+                 * @description The action to take for licenseChange issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              nonOSILicense?: {
+                /**
+                 * @description The action to take for nonOSILicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              deprecatedLicense?: {
+                /**
+                 * @description The action to take for deprecatedLicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              missingLicense?: {
+                /**
+                 * @description The action to take for missingLicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              nonSPDXLicense?: {
+                /**
+                 * @description The action to take for nonSPDXLicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              unclearLicense?: {
+                /**
+                 * @description The action to take for unclearLicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              mixedLicense?: {
+                /**
+                 * @description The action to take for mixedLicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              notice?: {
+                /**
+                 * @description The action to take for notice issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              modifiedLicense?: {
+                /**
+                 * @description The action to take for modifiedLicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              modifiedException?: {
+                /**
+                 * @description The action to take for modifiedException issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              licenseException?: {
+                /**
+                 * @description The action to take for licenseException issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              deprecatedException?: {
+                /**
+                 * @description The action to take for deprecatedException issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              miscLicenseIssues?: {
+                /**
+                 * @description The action to take for miscLicenseIssues issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              unidentifiedLicense?: {
+                /**
+                 * @description The action to take for unidentifiedLicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              noLicenseFound?: {
+                /**
+                 * @description The action to take for noLicenseFound issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              explicitlyUnlicensedItem?: {
+                /**
+                 * @description The action to take for explicitlyUnlicensedItem issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              copyleftLicense?: {
+                /**
+                 * @description The action to take for copyleftLicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              nonpermissiveLicense?: {
+                /**
+                 * @description The action to take for nonpermissiveLicense issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              ambiguousClassifier?: {
+                /**
+                 * @description The action to take for ambiguousClassifier issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              invalidPackageJSON?: {
+                /**
+                 * @description The action to take for invalidPackageJSON issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              httpDependency?: {
+                /**
+                 * @description The action to take for httpDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              gitDependency?: {
+                /**
+                 * @description The action to take for gitDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              gitHubDependency?: {
+                /**
+                 * @description The action to take for gitHubDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              fileDependency?: {
+                /**
+                 * @description The action to take for fileDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              noTests?: {
+                /**
+                 * @description The action to take for noTests issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              noRepository?: {
+                /**
+                 * @description The action to take for noRepository issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              badSemver?: {
+                /**
+                 * @description The action to take for badSemver issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              badSemverDependency?: {
+                /**
+                 * @description The action to take for badSemverDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              noV1?: {
+                /**
+                 * @description The action to take for noV1 issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              noWebsite?: {
+                /**
+                 * @description The action to take for noWebsite issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              noBugTracker?: {
+                /**
+                 * @description The action to take for noBugTracker issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              noAuthorData?: {
+                /**
+                 * @description The action to take for noAuthorData issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              typeModuleCompatibility?: {
+                /**
+                 * @description The action to take for typeModuleCompatibility issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              floatingDependency?: {
+                /**
+                 * @description The action to take for floatingDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              manifestConfusion?: {
+                /**
+                 * @description The action to take for manifestConfusion issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              malware?: {
+                /**
+                 * @description The action to take for malware issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              telemetry?: {
+                /**
+                 * @description The action to take for telemetry issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              troll?: {
+                /**
+                 * @description The action to take for troll issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              deprecated?: {
+                /**
+                 * @description The action to take for deprecated issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              chronoAnomaly?: {
+                /**
+                 * @description The action to take for chronoAnomaly issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              compromisedSSHKey?: {
+                /**
+                 * @description The action to take for compromisedSSHKey issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              semverAnomaly?: {
+                /**
+                 * @description The action to take for semverAnomaly issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              newAuthor?: {
+                /**
+                 * @description The action to take for newAuthor issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              unstableOwnership?: {
+                /**
+                 * @description The action to take for unstableOwnership issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              missingAuthor?: {
+                /**
+                 * @description The action to take for missingAuthor issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              unmaintained?: {
+                /**
+                 * @description The action to take for unmaintained issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              unpublished?: {
+                /**
+                 * @description The action to take for unpublished issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              majorRefactor?: {
+                /**
+                 * @description The action to take for majorRefactor issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              missingTarball?: {
+                /**
+                 * @description The action to take for missingTarball issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              suspiciousStarActivity?: {
+                /**
+                 * @description The action to take for suspiciousStarActivity issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              unpopularPackage?: {
+                /**
+                 * @description The action to take for unpopularPackage issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              socketUpgradeAvailable?: {
+                /**
+                 * @description The action to take for socketUpgradeAvailable issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              longStrings?: {
+                /**
+                 * @description The action to take for longStrings issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              highEntropyStrings?: {
+                /**
+                 * @description The action to take for highEntropyStrings issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              urlStrings?: {
+                /**
+                 * @description The action to take for urlStrings issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              usesEval?: {
+                /**
+                 * @description The action to take for usesEval issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              dynamicRequire?: {
+                /**
+                 * @description The action to take for dynamicRequire issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              envVars?: {
+                /**
+                 * @description The action to take for envVars issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              missingDependency?: {
+                /**
+                 * @description The action to take for missingDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              unusedDependency?: {
+                /**
+                 * @description The action to take for unusedDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              peerDependency?: {
+                /**
+                 * @description The action to take for peerDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              uncaughtOptionalDependency?: {
+                /**
+                 * @description The action to take for uncaughtOptionalDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              unresolvedRequire?: {
+                /**
+                 * @description The action to take for unresolvedRequire issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              extraneousDependency?: {
+                /**
+                 * @description The action to take for extraneousDependency issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              obfuscatedRequire?: {
+                /**
+                 * @description The action to take for obfuscatedRequire issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              obfuscatedFile?: {
+                /**
+                 * @description The action to take for obfuscatedFile issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              minifiedFile?: {
+                /**
+                 * @description The action to take for minifiedFile issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              installScripts?: {
+                /**
+                 * @description The action to take for installScripts issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              hasNativeCode?: {
+                /**
+                 * @description The action to take for hasNativeCode issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              binScriptConfusion?: {
+                /**
+                 * @description The action to take for binScriptConfusion issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              shellScriptOverride?: {
+                /**
+                 * @description The action to take for shellScriptOverride issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              didYouMean?: {
+                /**
+                 * @description The action to take for didYouMean issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              bidi?: {
+                /**
+                 * @description The action to take for bidi issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              zeroWidth?: {
+                /**
+                 * @description The action to take for zeroWidth issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              badEncoding?: {
+                /**
+                 * @description The action to take for badEncoding issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              homoglyphs?: {
+                /**
+                 * @description The action to take for homoglyphs issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              invisibleChars?: {
+                /**
+                 * @description The action to take for invisibleChars issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              suspiciousString?: {
+                /**
+                 * @description The action to take for suspiciousString issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              potentialVulnerability?: {
+                /**
+                 * @description The action to take for potentialVulnerability issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+            };
+            /**
+             * @description The default security policy for the organization
+             * @default default
+             * @enum {string}
+             */
+            securityPolicyDefault?: "default" | "low" | "medium" | "high";
+          };
         };
       };
       400: components["responses"]["SocketBadRequest"];
