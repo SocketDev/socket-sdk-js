@@ -7716,6 +7716,7 @@
                 "SyncOrganization",
                 "TransferOwnership",
                 "UpdateAlertTriage",
+                "UpdateApiTokenCommitter",
                 "UpdateApiTokenName",
                 "UpdateApiTokenScopes",
                 "UpdateApiTokenVisibility",
@@ -8862,9 +8863,9 @@
     "/orgs/{org_slug}/full-scans/diff": {
       "get": {
         "tags": [
-          "Diff Scans"
+          "Full Scans"
         ],
-        "summary": "Stream diff scan",
+        "summary": "Diff Full Scans",
         "operationId": "GetOrgDiffScan",
         "parameters": [
           {
@@ -8893,16 +8894,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "preview",
-            "in": "query",
-            "required": true,
-            "description": "Create a diff-scan that is not persisted.",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
           }
         ],
         "security": [
@@ -8912,7 +8903,7 @@
             ]
           }
         ],
-        "description": "Stream a diff scan between two full scans. Returns a diff scan.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
+        "description": "Get the difference between two Full Scans.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
         "responses": {
           "200": {
             "content": {
@@ -11093,7 +11084,7 @@
                 }
               }
             },
-            "description": "Returns a diff scan. The authenticated user must be a member of the organization."
+            "description": "The differnce between the two provided Full Scans."
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"

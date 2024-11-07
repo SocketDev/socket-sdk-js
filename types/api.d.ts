@@ -335,8 +335,8 @@ export interface paths {
   };
   "/orgs/{org_slug}/full-scans/diff": {
     /**
-     * Stream diff scan
-     * @description Stream a diff scan between two full scans. Returns a diff scan.
+     * Diff Full Scans
+     * @description Get the difference between two Full Scans.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -2865,7 +2865,7 @@ export interface operations {
     parameters: {
       query?: {
         /** @description Filter audit log events by type. Omit for all types. */
-        type?: "BookDemo" | "CancelInvitation" | "ChangeMemberRole" | "ChangePlanSubscriptionSeats" | "ContactForm" | "CreateApiToken" | "CreateUser" | "GithubAppInstallation" | "JoinOrganization" | "JoinOrganizationByVcs" | "LinkAccount" | "RemoveMember" | "ResetInvitationLink" | "ResetOrganizationSettingToDefault" | "RotateApiToken" | "SendInvitation" | "SignIn" | "SignOut" | "Subscribe" | "SyncOrganization" | "TransferOwnership" | "UpdateAlertTriage" | "UpdateApiTokenName" | "UpdateApiTokenScopes" | "UpdateApiTokenVisibility" | "UpdateOrganizationSetting" | "UpgradeOrganizationPlan" | "VerifiedEmail" | "DeleteRepository" | "DeleteReport";
+        type?: "BookDemo" | "CancelInvitation" | "ChangeMemberRole" | "ChangePlanSubscriptionSeats" | "ContactForm" | "CreateApiToken" | "CreateUser" | "GithubAppInstallation" | "JoinOrganization" | "JoinOrganizationByVcs" | "LinkAccount" | "RemoveMember" | "ResetInvitationLink" | "ResetOrganizationSettingToDefault" | "RotateApiToken" | "SendInvitation" | "SignIn" | "SignOut" | "Subscribe" | "SyncOrganization" | "TransferOwnership" | "UpdateAlertTriage" | "UpdateApiTokenCommitter" | "UpdateApiTokenName" | "UpdateApiTokenScopes" | "UpdateApiTokenVisibility" | "UpdateOrganizationSetting" | "UpgradeOrganizationPlan" | "VerifiedEmail" | "DeleteRepository" | "DeleteReport";
         /** @description Number of events per page */
         per_page?: number;
         /** @description Page token */
@@ -3291,8 +3291,8 @@ export interface operations {
     };
   };
   /**
-   * Stream diff scan
-   * @description Stream a diff scan between two full scans. Returns a diff scan.
+   * Diff Full Scans
+   * @description Get the difference between two Full Scans.
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -3306,8 +3306,6 @@ export interface operations {
         before: string;
         /** @description The base full scan ID */
         after: string;
-        /** @description Create a diff-scan that is not persisted. */
-        preview: boolean;
       };
       path: {
         /** @description The slug of the organization */
@@ -3315,7 +3313,7 @@ export interface operations {
       };
     };
     responses: {
-      /** @description Returns a diff scan. The authenticated user must be a member of the organization. */
+      /** @description The differnce between the two provided Full Scans. */
       200: {
         content: {
           "application/json": {
