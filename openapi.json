@@ -18236,6 +18236,320 @@
         "x-readme": {}
       }
     },
+    "/orgs/{org_slug}/settings/license-policy": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Get Organization License Policy",
+        "operationId": "getOrgLicensePolicy",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "license-policy:read"
+            ]
+          }
+        ],
+        "description": "Retrieve the license policy of an organization.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- license-policy:read",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "license_policy_org_id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "license_policy": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "allowed": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": ""
+                          },
+                          "licenseId": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "deprecated": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": ""
+                          },
+                          "fsfLibre": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": ""
+                          },
+                          "osiApproved": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": ""
+                          },
+                          "crossRef": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "blueOakTier": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "blueOakFamily": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "licenseExceptionId": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "isDeprecatedLicenseId": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": ""
+                          }
+                        }
+                      },
+                      "properties": {}
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Retrieved license policy details"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      },
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Update License Policy",
+        "operationId": "updateOrgLicensePolicy",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "merge_update",
+            "in": "query",
+            "required": true,
+            "description": "Merge the policy update with the existing policy. Default is true. If false, the existing policy will be replaced with the new policy.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "quick_setup": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "permissive": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": ""
+                      },
+                      "weak_copyleft": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": ""
+                      },
+                      "strong_copyleft": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": ""
+                      },
+                      "lead": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": ""
+                      }
+                    }
+                  },
+                  "license_policy": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": ""
+                    },
+                    "properties": {}
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "basicAuth": [
+              "license-policy:update"
+            ]
+          }
+        ],
+        "description": "Update the license policy of an organization.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- license-policy:update",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "license_policy_org_id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "license_policy": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "allowed": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": ""
+                          },
+                          "licenseId": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "deprecated": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": ""
+                          },
+                          "fsfLibre": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": ""
+                          },
+                          "osiApproved": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": ""
+                          },
+                          "crossRef": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "blueOakTier": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "blueOakFamily": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "licenseExceptionId": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "isDeprecatedLicenseId": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": ""
+                          }
+                        }
+                      },
+                      "properties": {}
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Updated repository details"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
     "/analytics/org/{filter}": {
       "get": {
         "tags": [
@@ -18907,6 +19221,7 @@
           "Project Reports"
         ],
         "summary": "Delete a report",
+        "deprecated": true,
         "operationId": "deleteReport",
         "parameters": [
           {
@@ -18926,7 +19241,7 @@
             ]
           }
         ],
-        "description": "Delete a specific project report generated with the GitHub app. These endpoints will be merged into the full-scans endpoint so\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
+        "description": "Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Delete a specific project report generated with the GitHub app.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
         "responses": {
           "200": {
             "content": {
@@ -18975,6 +19290,7 @@
           "Project Reports"
         ],
         "summary": "Get list of reports",
+        "deprecated": true,
         "operationId": "getReportList",
         "parameters": [
           {
@@ -19003,7 +19319,7 @@
             ]
           }
         ],
-        "description": "Get all your project reports generated with the GitHub app. This endpoint will be merged into the full-scans endpoint soon.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:list",
+        "description": "Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all your project reports generated with the GitHub app.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:list",
         "responses": {
           "200": {
             "content": {
@@ -19097,6 +19413,7 @@
           "Project Reports"
         ],
         "summary": "Create a report",
+        "deprecated": true,
         "operationId": "createReport",
         "requestBody": {
           "content": {
@@ -19135,7 +19452,7 @@
             ]
           }
         ],
-        "description": "Upload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
+        "description": "Deprecated: Use `/orgs/{org_slug}/full-scans` instead.\n\nUpload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
         "responses": {
           "200": {
             "content": {
@@ -19187,6 +19504,7 @@
           "Project Reports"
         ],
         "summary": "View a report",
+        "deprecated": true,
         "operationId": "getReport",
         "parameters": [
           {
@@ -19206,7 +19524,7 @@
             ]
           }
         ],
-        "description": "Get all the issues, packages, and scores related to an specific project report.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:read",
+        "description": "Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all the issues, packages, and scores related to an specific project report.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:read",
         "responses": {
           "200": {
             "content": {
@@ -19267,7 +19585,7 @@
             ]
           }
         ],
-        "description": "Get all GitHub repositories associated with a Socket org.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- repo:list",
+        "description": "Deprecated: Use `/orgs/{org_slug}/repos` instead. Get all GitHub repositories associated with a Socket org.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- repo:list",
         "responses": {
           "200": {
             "content": {
