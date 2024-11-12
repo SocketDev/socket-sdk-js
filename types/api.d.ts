@@ -435,6 +435,28 @@ export interface paths {
      */
     post: operations["updateOrgSecurityPolicy"];
   };
+  "/orgs/{org_slug}/settings/license-policy": {
+    /**
+     * Get Organization License Policy
+     * @description Retrieve the license policy of an organization.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - license-policy:read
+     */
+    get: operations["getOrgLicensePolicy"];
+    /**
+     * Update License Policy
+     * @description Update the license policy of an organization.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - license-policy:update
+     */
+    post: operations["updateOrgLicensePolicy"];
+  };
   "/analytics/org/{filter}": {
     /**
      * Get organization analytics (unstable)
@@ -507,7 +529,8 @@ export interface paths {
   "/report/delete/{id}": {
     /**
      * Delete a report
-     * @description Delete a specific project report generated with the GitHub app. These endpoints will be merged into the full-scans endpoint so
+     * @deprecated
+     * @description Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Delete a specific project report generated with the GitHub app.
      *
      * This endpoint consumes 10 units of your quota.
      *
@@ -519,7 +542,8 @@ export interface paths {
   "/report/list": {
     /**
      * Get list of reports
-     * @description Get all your project reports generated with the GitHub app. This endpoint will be merged into the full-scans endpoint soon.
+     * @deprecated
+     * @description Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all your project reports generated with the GitHub app.
      *
      * This endpoint consumes 10 units of your quota.
      *
@@ -531,7 +555,10 @@ export interface paths {
   "/report/upload": {
     /**
      * Create a report
-     * @description Upload a lockfile to get your project analyzed by Socket.
+     * @deprecated
+     * @description Deprecated: Use `/orgs/{org_slug}/full-scans` instead.
+     *
+     * Upload a lockfile to get your project analyzed by Socket.
      * You can upload multiple lockfiles in the same request, but each filename must be unique.
      *
      * The name of the file must be in the supported list.
@@ -548,7 +575,8 @@ export interface paths {
   "/report/view/{id}": {
     /**
      * View a report
-     * @description Get all the issues, packages, and scores related to an specific project report.
+     * @deprecated
+     * @description Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all the issues, packages, and scores related to an specific project report.
      *
      * This endpoint consumes 10 units of your quota.
      *
@@ -561,7 +589,7 @@ export interface paths {
     /**
      * List GitHub repositories
      * @deprecated
-     * @description Get all GitHub repositories associated with a Socket org.
+     * @description Deprecated: Use `/orgs/{org_slug}/repos` instead. Get all GitHub repositories associated with a Socket org.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -6634,6 +6662,147 @@ export interface operations {
     };
   };
   /**
+   * Get Organization License Policy
+   * @description Retrieve the license policy of an organization.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - license-policy:read
+   */
+  getOrgLicensePolicy: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+      };
+    };
+    responses: {
+      /** @description Retrieved license policy details */
+      200: {
+        content: {
+          "application/json": {
+            /** @default */
+            license_policy_org_id?: string;
+            license_policy?: {
+              [key: string]: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+            };
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Update License Policy
+   * @description Update the license policy of an organization.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - license-policy:update
+   */
+  updateOrgLicensePolicy: {
+    parameters: {
+      query: {
+        /** @description Merge the policy update with the existing policy. Default is true. If false, the existing policy will be replaced with the new policy. */
+        merge_update: boolean;
+      };
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          quick_setup?: {
+            /** @default false */
+            permissive?: boolean;
+            /** @default false */
+            weak_copyleft?: boolean;
+            /** @default false */
+            strong_copyleft?: boolean;
+            /** @default false */
+            lead?: boolean;
+          };
+          license_policy?: {
+            [key: string]: boolean;
+          };
+        };
+      };
+    };
+    responses: {
+      /** @description Updated repository details */
+      200: {
+        content: {
+          "application/json": {
+            /** @default */
+            license_policy_org_id?: string;
+            license_policy?: {
+              [key: string]: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+            };
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
    * Get organization analytics (unstable)
    * @description Get analytics data regarding the number of alerts found across all active repositories.
    *
@@ -6904,7 +7073,8 @@ export interface operations {
   };
   /**
    * Delete a report
-   * @description Delete a specific project report generated with the GitHub app. These endpoints will be merged into the full-scans endpoint so
+   * @deprecated
+   * @description Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Delete a specific project report generated with the GitHub app.
    *
    * This endpoint consumes 10 units of your quota.
    *
@@ -6936,7 +7106,8 @@ export interface operations {
   };
   /**
    * Get list of reports
-   * @description Get all your project reports generated with the GitHub app. This endpoint will be merged into the full-scans endpoint soon.
+   * @deprecated
+   * @description Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all your project reports generated with the GitHub app.
    *
    * This endpoint consumes 10 units of your quota.
    *
@@ -6985,7 +7156,10 @@ export interface operations {
   };
   /**
    * Create a report
-   * @description Upload a lockfile to get your project analyzed by Socket.
+   * @deprecated
+   * @description Deprecated: Use `/orgs/{org_slug}/full-scans` instead.
+   *
+   * Upload a lockfile to get your project analyzed by Socket.
    * You can upload multiple lockfiles in the same request, but each filename must be unique.
    *
    * The name of the file must be in the supported list.
@@ -7028,7 +7202,8 @@ export interface operations {
   };
   /**
    * View a report
-   * @description Get all the issues, packages, and scores related to an specific project report.
+   * @deprecated
+   * @description Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all the issues, packages, and scores related to an specific project report.
    *
    * This endpoint consumes 10 units of your quota.
    *
@@ -7059,7 +7234,7 @@ export interface operations {
   /**
    * List GitHub repositories
    * @deprecated
-   * @description Get all GitHub repositories associated with a Socket org.
+   * @description Deprecated: Use `/orgs/{org_slug}/repos` instead. Get all GitHub repositories associated with a Socket org.
    *
    * This endpoint consumes 1 unit of your quota.
    *
