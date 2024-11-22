@@ -7303,9 +7303,15 @@ export interface operations {
         /** @description Page token */
         page?: string;
         /** @description Order asc or desc by the createdAt attribute. */
-        direction?: string;
+        direction?: "desc" | "asc";
         /** @description Filter what type of threats to return */
-        filter?: string;
+        filter?: "u" | "c" | "fp" | "tp" | "mal" | "vuln" | "anom" | "joke" | "spy" | "typo" | "secret";
+        /** @description Filter threats by package name */
+        name?: string;
+        /** @description Filter threats by package version */
+        version?: string;
+        /** @description Filter threats by package ecosystem type */
+        ecosystem?: "gem" | "golang" | "maven" | "npm" | "pypi";
       };
     };
     responses: {

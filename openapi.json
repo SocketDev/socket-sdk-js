@@ -19730,6 +19730,10 @@
             "description": "Order asc or desc by the createdAt attribute.",
             "schema": {
               "type": "string",
+              "enum": [
+                "desc",
+                "asc"
+              ],
               "default": "desc"
             }
           },
@@ -19740,7 +19744,56 @@
             "description": "Filter what type of threats to return",
             "schema": {
               "type": "string",
+              "enum": [
+                "u",
+                "c",
+                "fp",
+                "tp",
+                "mal",
+                "vuln",
+                "anom",
+                "joke",
+                "spy",
+                "typo",
+                "secret"
+              ],
               "default": "mal"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "description": "Filter threats by package name",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "description": "Filter threats by package version",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ecosystem",
+            "in": "query",
+            "required": false,
+            "description": "Filter threats by package ecosystem type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "gem",
+                "golang",
+                "maven",
+                "npm",
+                "pypi"
+              ]
             }
           }
         ],
