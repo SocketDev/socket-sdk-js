@@ -1,5 +1,4 @@
 # @socketsecurity/sdk
-
 [![Socket Badge](https://socket.dev/api/badge/npm/package/@socketsecurity/sdk)](https://socket.dev/npm/package/@socketsecurity/sdk)
 [![npm version](https://img.shields.io/npm/v/@socketsecurity/sdk.svg?style=flat)](https://www.npmjs.com/package/@socketsecurity/sdk)
 [![TypeScript types](https://img.shields.io/npm/types/@socketsecurity/sdk.svg?style=flat)](https://www.npmjs.com/package/@socketsecurity/sdk)
