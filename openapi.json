@@ -6617,6 +6617,58 @@
               "type": {
                 "type": "string",
                 "enum": [
+                  "gptDidYouMean"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "alternatePackage": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          }
+                        },
+                        "required": [
+                          "alternatePackage"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
                   "bidi"
                 ]
               },
@@ -7920,7 +7972,7 @@
             "name": "author",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "The person(s) who created the BOM.\nSet this value if you're intending the modify the BOM and claim authorship.",
             "schema": {
               "type": "string",
               "default": "OWASP Foundation"
@@ -7930,7 +7982,7 @@
             "name": "project_group",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "Dependency track project group",
             "schema": {
               "type": "string",
               "default": ""
@@ -7940,7 +7992,7 @@
             "name": "project_name",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "Dependency track project name. Default use the directory name",
             "schema": {
               "type": "string",
               "default": ""
@@ -7950,7 +8002,7 @@
             "name": "project_version",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "Dependency track project version",
             "schema": {
               "type": "string",
               "default": ""
@@ -7960,7 +8012,7 @@
             "name": "project_id",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "Dependency track project id. Either provide the id or the project name and version together",
             "schema": {
               "type": "string",
               "default": ""
@@ -8032,7 +8084,7 @@
             "name": "author",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "The person(s) who created the BOM.\nSet this value if you're intending the modify the BOM and claim authorship.",
             "schema": {
               "type": "string",
               "default": "OWASP Foundation"
@@ -8042,7 +8094,7 @@
             "name": "project_group",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "Dependency track project group",
             "schema": {
               "type": "string",
               "default": ""
@@ -8052,7 +8104,7 @@
             "name": "project_name",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "Dependency track project name. Default use the directory name",
             "schema": {
               "type": "string",
               "default": ""
@@ -8062,7 +8114,7 @@
             "name": "project_version",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "Dependency track project version",
             "schema": {
               "type": "string",
               "default": ""
@@ -8072,7 +8124,7 @@
             "name": "project_id",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "Dependency track project id. Either provide the id or the project name and version together",
             "schema": {
               "type": "string",
               "default": ""
@@ -11822,6 +11874,277 @@
         "x-readme": {}
       }
     },
+    "/orgs/{org_slug}/triage/alerts": {
+      "get": {
+        "tags": [
+          "Triage"
+        ],
+        "summary": "List Org Alert Triage",
+        "operationId": "getOrgTriage",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": "created_at"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": "desc"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 30
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": [
+              "triage:alerts-list"
+            ]
+          }
+        ],
+        "description": "Get alert triage actions for an organization.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- triage:alerts-list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "alert_key": {
+                            "type": "string",
+                            "description": "The alert_key associated with the triage state",
+                            "default": ""
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "description": "The creation date of the triage action",
+                            "default": ""
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "description": "The last update date of the triage action",
+                            "default": ""
+                          },
+                          "note": {
+                            "type": "string",
+                            "description": "The note associated with the triage action",
+                            "default": ""
+                          },
+                          "organization_id": {
+                            "type": "string",
+                            "description": "The organization id associated with the triage action",
+                            "default": ""
+                          },
+                          "state": {
+                            "type": "string",
+                            "enum": [
+                              "block",
+                              "ignore",
+                              "inherit",
+                              "monitor",
+                              "warn"
+                            ],
+                            "description": "The triage state of the alert",
+                            "default": "inherit"
+                          }
+                        }
+                      }
+                    },
+                    "nextPage": {
+                      "type": "integer",
+                      "description": "",
+                      "default": 0
+                    }
+                  },
+                  "required": [
+                    "nextPage",
+                    "results"
+                  ]
+                }
+              }
+            },
+            "description": "Lists triage actions for the specified organization."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      },
+      "post": {
+        "tags": [
+          "Triage"
+        ],
+        "summary": "Update Org Alert Triage",
+        "operationId": "updateOrgAlertTriage",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "",
+                "properties": {
+                  "alertTriage": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "alertKey": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "note": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "block",
+                            "ignore",
+                            "inherit",
+                            "monitor",
+                            "warn"
+                          ],
+                          "description": "The triage state of the alert"
+                        }
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "alertTriage"
+                ]
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "basicAuth": [
+              "triage:alerts-update"
+            ]
+          }
+        ],
+        "description": "Update triage actions on organizaton alerts.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- triage:alerts-update",
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "result": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            },
+            "description": "Updated Alert Triage"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
     "/orgs/{org_slug}/settings/integrations/{integration_id}/events": {
       "get": {
         "tags": [
@@ -13895,6 +14218,27 @@
                                 "ignore"
                               ],
                               "description": "The action to take for didYouMean issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "gptDidYouMean": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for gptDidYouMean issues."
                             }
                           },
                           "required": [
@@ -16002,6 +16346,27 @@
                           "action"
                         ]
                       },
+                      "gptDidYouMean": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for gptDidYouMean issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
                       "bidi": {
                         "type": "object",
                         "additionalProperties": false,
@@ -18045,6 +18410,27 @@
                                 "ignore"
                               ],
                               "description": "The action to take for didYouMean issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "gptDidYouMean": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for gptDidYouMean issues."
                             }
                           },
                           "required": [
