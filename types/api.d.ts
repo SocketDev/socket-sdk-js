@@ -401,6 +401,28 @@ export interface paths {
      */
     delete: operations["deleteOrgRepo"];
   };
+  "/orgs/{org_slug}/triage/alerts": {
+    /**
+     * List Org Alert Triage
+     * @description Get alert triage actions for an organization.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - triage:alerts-list
+     */
+    get: operations["getOrgTriage"];
+    /**
+     * Update Org Alert Triage
+     * @description Update triage actions on organizaton alerts.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - triage:alerts-update
+     */
+    post: operations["updateOrgAlertTriage"];
+  };
   "/orgs/{org_slug}/settings/integrations/{integration_id}/events": {
     /**
      * Get integration events
@@ -2258,6 +2280,18 @@ export interface components {
       };
     }) | ({
       /** @enum {string} */
+      type?: "gptDidYouMean";
+      value?: components["schemas"]["SocketIssueBasics"] & {
+        /** @default */
+        description: string;
+        props: {
+          /** @default */
+          alternatePackage: string;
+        };
+        usage?: components["schemas"]["SocketUsageRef"];
+      };
+    }) | ({
+      /** @enum {string} */
       type?: "bidi";
       value?: components["schemas"]["SocketIssueBasics"] & {
         /** @default */
@@ -2965,10 +2999,18 @@ export interface operations {
   exportCDX: {
     parameters: {
       query?: {
+        /**
+         * @description The person(s) who created the BOM.
+         * Set this value if you're intending the modify the BOM and claim authorship.
+         */
         author?: string;
+        /** @description Dependency track project group */
         project_group?: string;
+        /** @description Dependency track project name. Default use the directory name */
         project_name?: string;
+        /** @description Dependency track project version */
         project_version?: string;
+        /** @description Dependency track project id. Either provide the id or the project name and version together */
         project_id?: string;
       };
       path: {
@@ -3003,10 +3045,18 @@ export interface operations {
   exportSPDX: {
     parameters: {
       query?: {
+        /**
+         * @description The person(s) who created the BOM.
+         * Set this value if you're intending the modify the BOM and claim authorship.
+         */
         author?: string;
+        /** @description Dependency track project group */
         project_group?: string;
+        /** @description Dependency track project name. Default use the directory name */
         project_name?: string;
+        /** @description Dependency track project version */
         project_version?: string;
+        /** @description Dependency track project id. Either provide the id or the project name and version together */
         project_id?: string;
       };
       path: {
@@ -4484,6 +4534,128 @@ export interface operations {
     };
   };
   /**
+   * List Org Alert Triage
+   * @description Get alert triage actions for an organization.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - triage:alerts-list
+   */
+  getOrgTriage: {
+    parameters: {
+      query?: {
+        sort?: string;
+        direction?: string;
+        per_page?: number;
+        page?: number;
+      };
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+      };
+    };
+    responses: {
+      /** @description Lists triage actions for the specified organization. */
+      200: {
+        content: {
+          "application/json": {
+            results: ({
+                /**
+                 * @description The alert_key associated with the triage state
+                 * @default
+                 */
+                alert_key?: string;
+                /**
+                 * @description The creation date of the triage action
+                 * @default
+                 */
+                created_at?: string;
+                /**
+                 * @description The last update date of the triage action
+                 * @default
+                 */
+                updated_at?: string;
+                /**
+                 * @description The note associated with the triage action
+                 * @default
+                 */
+                note?: string;
+                /**
+                 * @description The organization id associated with the triage action
+                 * @default
+                 */
+                organization_id?: string;
+                /**
+                 * @description The triage state of the alert
+                 * @default inherit
+                 * @enum {string}
+                 */
+                state?: "block" | "ignore" | "inherit" | "monitor" | "warn";
+              })[];
+            /** @default 0 */
+            nextPage: number;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Update Org Alert Triage
+   * @description Update triage actions on organizaton alerts.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - triage:alerts-update
+   */
+  updateOrgAlertTriage: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+      };
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          alertTriage: ({
+              /** @default */
+              alertKey?: string;
+              /** @default */
+              note?: string;
+              /**
+               * @description The triage state of the alert
+               * @enum {string}
+               */
+              state?: "block" | "ignore" | "inherit" | "monitor" | "warn";
+            })[];
+        };
+      };
+    };
+    responses: {
+      /** @description Updated Alert Triage */
+      202: {
+        content: {
+          "application/json": {
+            /** @default */
+            result: string;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
    * Get integration events
    * @description Retrieve events for integration.
    *
@@ -5186,6 +5358,13 @@ export interface operations {
               didYouMean?: {
                 /**
                  * @description The action to take for didYouMean issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              gptDidYouMean?: {
+                /**
+                 * @description The action to take for gptDidYouMean issues.
                  * @enum {string}
                  */
                 action: "defer" | "error" | "warn" | "monitor" | "ignore";
@@ -5908,6 +6087,13 @@ export interface operations {
                */
               action: "defer" | "error" | "warn" | "monitor" | "ignore";
             };
+            gptDidYouMean?: {
+              /**
+               * @description The action to take for gptDidYouMean issues.
+               * @enum {string}
+               */
+              action: "defer" | "error" | "warn" | "monitor" | "ignore";
+            };
             bidi?: {
               /**
                * @description The action to take for bidi issues.
@@ -6591,6 +6777,13 @@ export interface operations {
               didYouMean?: {
                 /**
                  * @description The action to take for didYouMean issues.
+                 * @enum {string}
+                 */
+                action: "defer" | "error" | "warn" | "monitor" | "ignore";
+              };
+              gptDidYouMean?: {
+                /**
+                 * @description The action to take for gptDidYouMean issues.
                  * @enum {string}
                  */
                 action: "defer" | "error" | "warn" | "monitor" | "ignore";
