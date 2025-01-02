@@ -63,6 +63,8 @@ const { SocketSdk } = require('@socketsecurity/sdk')
 * `getOrganizations()`
 * `postSettings(selectors)`
   * `selectors`: An array of settings selectors, e.g. `[{ organization: 'id' }]`
+* `getOrgSecurityPolicy(orgSlug)`
+  * `orgSlug`: the slug of the organization
 
 ## Additional exports
 
