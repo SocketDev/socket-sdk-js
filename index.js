@@ -588,6 +588,22 @@ class SocketSdk {
   }
 
   /**
+   * @param {string} orgSlug
+   * @returns {Promise<SocketSdkResultType<'getOrgSecurityPolicy'>>}
+   */
+  async getOrgSecurityPolicy (orgSlug) {
+    const orgSlugParam = encodeURIComponent(orgSlug)
+
+    try {
+      const client = await this.#getClient()
+      const data = await client.get(`orgs/${orgSlugParam}/settings/security-policy`).json()
+      return { success: true, status: 200, data }
+    } catch (err) {
+      return /** @type {SocketSdkErrorType<'getOrgSecurityPolicy'>} */ (this.#handleApiError(err))
+    }
+  }
+
+  /**
    * @param {unknown} err
    * @returns {{ success: false, status: number, error: Record<string,unknown> }}
    */
