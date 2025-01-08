@@ -1,6 +1,6 @@
 {
   "name": "sdk",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "license": "MIT",
   "description": "SDK for the Socket API client",
   "author": {
