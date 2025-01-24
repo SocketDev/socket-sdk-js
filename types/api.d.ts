@@ -823,24 +823,16 @@ export interface components {
     };
     LicenseAllowListRequest: {
       components: components["schemas"]["SocketBatchPURLRequest"][];
-      allow: components["schemas"]["LicenseAllowList"];
-      warn: components["schemas"]["LicenseAllowList"];
-      license_allow_list: {
-        allowedApprovalSources: string[];
-        allowedFamilies: string[];
-        allowedTiers: string[];
-        allowedStrings: string[];
-        allowedPURLs: string[];
-        /** @default false */
-        focusAlertsHere: boolean;
-      } | null;
-    };
-    LicensePolicy: {
-      allow: components["schemas"]["LicenseAllowListElabbed"];
-      warn: components["schemas"]["LicenseAllowListElabbed"];
+      license_allow_list: components["schemas"]["LicenseAllowList"];
     };
     LicenseAllowList: {
-      strings: string[];
+      allowedApprovalSources: string[];
+      allowedFamilies: string[];
+      allowedTiers: string[];
+      allowedStrings: string[];
+      allowedPURLs: string[];
+      /** @default false */
+      focusAlertsHere: boolean;
     };
     CDXManifestSchema: {
       /** @default CycloneDX */
@@ -1071,12 +1063,6 @@ export interface components {
     SocketBatchPURLRequest: {
       /** @default */
       purl: string;
-    };
-    LicenseAllowListElabbed: {
-      strings: string[];
-      classes: string[];
-      packageURLs: string[];
-      disjs: string[];
     };
     CDXComponentSchema: {
       /** @default */
@@ -1474,7 +1460,6 @@ export interface components {
           /** @default */
           licenseScanResult: string;
           violationData: Record<string, never>[];
-          warnData: Record<string, never>[];
         };
         usage?: components["schemas"]["SocketUsageRef"];
       };
@@ -2970,24 +2955,14 @@ export interface operations {
   saturateLicensePolicy: {
     requestBody?: {
       content: {
-        "application/json": {
-          allow: components["schemas"]["LicenseAllowList"];
-          warn: components["schemas"]["LicenseAllowList"];
-          allowedApprovalSources: string[] | null;
-          allowedFamilies: string[] | null;
-          allowedTiers: string[] | null;
-          allowedStrings: string[] | null;
-          allowedPURLs: string[] | null;
-          /** @default false */
-          focusAlertsHere: boolean | null;
-        };
+        "application/json": components["schemas"]["LicenseAllowList"];
       };
     };
     responses: {
       /** @description Saturated License Allow List */
       200: {
         content: {
-          "application/json": components["schemas"]["LicensePolicy"];
+          "application/json": components["schemas"]["LicenseAllowList"];
         };
       };
       400: components["responses"]["SocketBadRequest"];
