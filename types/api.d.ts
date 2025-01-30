@@ -823,24 +823,16 @@ export interface components {
     };
     LicenseAllowListRequest: {
       components: components["schemas"]["SocketBatchPURLRequest"][];
-      allow: components["schemas"]["LicenseAllowList"];
-      warn: components["schemas"]["LicenseAllowList"];
-      license_allow_list: {
-        allowedApprovalSources: string[];
-        allowedFamilies: string[];
-        allowedTiers: string[];
-        allowedStrings: string[];
-        allowedPURLs: string[];
-        /** @default false */
-        focusAlertsHere: boolean;
-      } | null;
-    };
-    LicensePolicy: {
-      allow: components["schemas"]["LicenseAllowListElabbed"];
-      warn: components["schemas"]["LicenseAllowListElabbed"];
+      license_allow_list: components["schemas"]["LicenseAllowList"];
     };
     LicenseAllowList: {
-      strings: string[];
+      allowedApprovalSources: string[];
+      allowedFamilies: string[];
+      allowedTiers: string[];
+      allowedStrings: string[];
+      allowedPURLs: string[];
+      /** @default false */
+      focusAlertsHere: boolean;
     };
     CDXManifestSchema: {
       /** @default CycloneDX */
@@ -949,6 +941,36 @@ export interface components {
           /** @default DESCRIBES */
           relationshipType: string;
         }[];
+    };
+    SocketDiffArtifact: components["schemas"]["SocketPURL"] & {
+      id: components["schemas"]["SocketId"];
+      diffType: components["schemas"]["SocketDiffArtifactType"];
+      head?: components["schemas"]["SocketArtifactLink"][];
+      base?: components["schemas"]["SocketArtifactLink"][];
+      qualifiers?: unknown;
+      capabilities?: {
+        /** @default false */
+        env: boolean;
+        /** @default false */
+        eval: boolean;
+        /** @default false */
+        fs: boolean;
+        /** @default false */
+        net: boolean;
+        /** @default false */
+        shell: boolean;
+        /** @default false */
+        unsafe: boolean;
+      };
+      /** @default */
+      license?: string;
+      licenseDetails?: components["schemas"]["LicenseDetails"];
+      licenseAttrib?: components["schemas"]["SAttrib1_N"];
+      author?: string[];
+      /** @default 0 */
+      size?: number;
+      score?: components["schemas"]["SocketScore"];
+      alerts?: components["schemas"]["SocketAlert"][];
     };
     SocketReport: {
       /** @default */
@@ -1072,12 +1094,6 @@ export interface components {
       /** @default */
       purl: string;
     };
-    LicenseAllowListElabbed: {
-      strings: string[];
-      classes: string[];
-      packageURLs: string[];
-      disjs: string[];
-    };
     CDXComponentSchema: {
       /** @default */
       author?: string;
@@ -1162,6 +1178,11 @@ export interface components {
         }[];
       components?: components["schemas"]["CDXComponentSchema"][];
     };
+    /**
+     * @default unchanged
+     * @enum {string}
+     */
+    SocketDiffArtifactType: "added" | "removed" | "updated" | "replaced" | "unchanged";
     SocketIssue: ({
       /** @enum {string} */
       type?: "gptSecurity";
@@ -1474,7 +1495,6 @@ export interface components {
           /** @default */
           licenseScanResult: string;
           violationData: Record<string, never>[];
-          warnData: Record<string, never>[];
         };
         usage?: components["schemas"]["SocketUsageRef"];
       };
@@ -2970,24 +2990,14 @@ export interface operations {
   saturateLicensePolicy: {
     requestBody?: {
       content: {
-        "application/json": {
-          allow: components["schemas"]["LicenseAllowList"];
-          warn: components["schemas"]["LicenseAllowList"];
-          allowedApprovalSources: string[] | null;
-          allowedFamilies: string[] | null;
-          allowedTiers: string[] | null;
-          allowedStrings: string[] | null;
-          allowedPURLs: string[] | null;
-          /** @default false */
-          focusAlertsHere: boolean | null;
-        };
+        "application/json": components["schemas"]["LicenseAllowList"];
       };
     };
     responses: {
       /** @description Saturated License Allow List */
       200: {
         content: {
-          "application/json": components["schemas"]["LicensePolicy"];
+          "application/json": components["schemas"]["LicenseAllowList"];
         };
       };
       400: components["responses"]["SocketBadRequest"];
@@ -3475,7 +3485,7 @@ export interface operations {
       };
     };
     responses: {
-      /** @description The differnce between the two provided Full Scans. */
+      /** @description The difference between the two provided Full Scans. */
       200: {
         content: {
           "application/json": {
@@ -3514,621 +3524,11 @@ export interface operations {
               organization_id: string;
             };
             artifacts: {
-              added: ({
-                  /** @default */
-                  diffType?: string;
-                  base?: {
-                    /** @default false */
-                    direct?: boolean;
-                    toplevelAncestors?: string[] | null;
-                  };
-                  head?: {
-                    /** @default false */
-                    direct?: boolean;
-                    toplevelAncestors?: string[] | null;
-                  };
-                  /** @default */
-                  id?: string;
-                  /** @default */
-                  type?: string;
-                  /** @default */
-                  name?: string;
-                  /** @default */
-                  namespace?: string | null;
-                  /** @default */
-                  files?: string;
-                  /** @default */
-                  version?: string | null;
-                  /** @default */
-                  subpath?: string | null;
-                  /** @default */
-                  artifact_id?: string | null;
-                  /** @default */
-                  artifactId?: string | null;
-                  qualifiers?: unknown;
-                  scores?: {
-                    /** @default 0 */
-                    supplyChain: number;
-                    /** @default 0 */
-                    quality: number;
-                    /** @default 0 */
-                    maintenance: number;
-                    /** @default 0 */
-                    vulnerability: number;
-                    /** @default 0 */
-                    license: number;
-                    /** @default 0 */
-                    overall: number;
-                  };
-                  capabilities?: {
-                    /** @default false */
-                    env: boolean;
-                    /** @default false */
-                    eval: boolean;
-                    /** @default false */
-                    fs: boolean;
-                    /** @default false */
-                    net: boolean;
-                    /** @default false */
-                    shell: boolean;
-                    /** @default false */
-                    unsafe: boolean;
-                  };
-                  /** @default */
-                  license?: string;
-                  /** @default 0 */
-                  size?: number;
-                  /** @default */
-                  author?: string;
-                  /** @default */
-                  state?: string;
-                  /** @default */
-                  error?: string;
-                  alerts?: {
-                      /** @default */
-                      key: string;
-                      /** @default 0 */
-                      type: number;
-                      /** @default */
-                      file?: string;
-                      /** @default 0 */
-                      start?: number;
-                      /** @default 0 */
-                      end?: number;
-                      /** @default null */
-                      props?: Record<string, never>;
-                      /** @default */
-                      action?: string;
-                      /** @default 0 */
-                      actionPolicyIndex?: number;
-                    }[];
-                  licenseDetails?: {
-                      authors?: string[];
-                      /** @default 0 */
-                      charEnd?: number;
-                      /** @default 0 */
-                      charStart?: number;
-                      /** @default */
-                      filepath?: string;
-                      /** @default 0 */
-                      match_strength?: number;
-                      /** @default */
-                      filehash?: string;
-                      /** @default */
-                      provenance?: string;
-                      spdxDisj?: {
-                            /** @default */
-                            licenseId?: string;
-                            /** @default */
-                            licenseExceptionId?: string;
-                          }[][];
-                    }[];
-                  licenseAttrib?: ({
-                      /** @default */
-                      attribText: string;
-                      attribData: ({
-                          /** @default */
-                          purl: string;
-                          /** @default */
-                          foundInFilepath: string | null;
-                          foundAuthors: string[];
-                          /** @default */
-                          spdxExpr: string | null;
-                        })[];
-                    })[];
-                })[];
-              removed: ({
-                  /** @default */
-                  diffType?: string;
-                  base?: {
-                    /** @default false */
-                    direct?: boolean;
-                    toplevelAncestors?: string[] | null;
-                  };
-                  head?: {
-                    /** @default false */
-                    direct?: boolean;
-                    toplevelAncestors?: string[] | null;
-                  };
-                  /** @default */
-                  id?: string;
-                  /** @default */
-                  type?: string;
-                  /** @default */
-                  name?: string;
-                  /** @default */
-                  namespace?: string | null;
-                  /** @default */
-                  files?: string;
-                  /** @default */
-                  version?: string | null;
-                  /** @default */
-                  subpath?: string | null;
-                  /** @default */
-                  artifact_id?: string | null;
-                  /** @default */
-                  artifactId?: string | null;
-                  qualifiers?: unknown;
-                  scores?: {
-                    /** @default 0 */
-                    supplyChain: number;
-                    /** @default 0 */
-                    quality: number;
-                    /** @default 0 */
-                    maintenance: number;
-                    /** @default 0 */
-                    vulnerability: number;
-                    /** @default 0 */
-                    license: number;
-                    /** @default 0 */
-                    overall: number;
-                  };
-                  capabilities?: {
-                    /** @default false */
-                    env: boolean;
-                    /** @default false */
-                    eval: boolean;
-                    /** @default false */
-                    fs: boolean;
-                    /** @default false */
-                    net: boolean;
-                    /** @default false */
-                    shell: boolean;
-                    /** @default false */
-                    unsafe: boolean;
-                  };
-                  /** @default */
-                  license?: string;
-                  /** @default 0 */
-                  size?: number;
-                  /** @default */
-                  author?: string;
-                  /** @default */
-                  state?: string;
-                  /** @default */
-                  error?: string;
-                  alerts?: {
-                      /** @default */
-                      key: string;
-                      /** @default 0 */
-                      type: number;
-                      /** @default */
-                      file?: string;
-                      /** @default 0 */
-                      start?: number;
-                      /** @default 0 */
-                      end?: number;
-                      /** @default null */
-                      props?: Record<string, never>;
-                      /** @default */
-                      action?: string;
-                      /** @default 0 */
-                      actionPolicyIndex?: number;
-                    }[];
-                  licenseDetails?: {
-                      authors?: string[];
-                      /** @default 0 */
-                      charEnd?: number;
-                      /** @default 0 */
-                      charStart?: number;
-                      /** @default */
-                      filepath?: string;
-                      /** @default 0 */
-                      match_strength?: number;
-                      /** @default */
-                      filehash?: string;
-                      /** @default */
-                      provenance?: string;
-                      spdxDisj?: {
-                            /** @default */
-                            licenseId?: string;
-                            /** @default */
-                            licenseExceptionId?: string;
-                          }[][];
-                    }[];
-                  licenseAttrib?: ({
-                      /** @default */
-                      attribText: string;
-                      attribData: ({
-                          /** @default */
-                          purl: string;
-                          /** @default */
-                          foundInFilepath: string | null;
-                          foundAuthors: string[];
-                          /** @default */
-                          spdxExpr: string | null;
-                        })[];
-                    })[];
-                })[];
-              unchanged: ({
-                  /** @default */
-                  diffType?: string;
-                  base?: {
-                    /** @default false */
-                    direct?: boolean;
-                    toplevelAncestors?: string[] | null;
-                  };
-                  head?: {
-                    /** @default false */
-                    direct?: boolean;
-                    toplevelAncestors?: string[] | null;
-                  };
-                  /** @default */
-                  id?: string;
-                  /** @default */
-                  type?: string;
-                  /** @default */
-                  name?: string;
-                  /** @default */
-                  namespace?: string | null;
-                  /** @default */
-                  files?: string;
-                  /** @default */
-                  version?: string | null;
-                  /** @default */
-                  subpath?: string | null;
-                  /** @default */
-                  artifact_id?: string | null;
-                  /** @default */
-                  artifactId?: string | null;
-                  qualifiers?: unknown;
-                  scores?: {
-                    /** @default 0 */
-                    supplyChain: number;
-                    /** @default 0 */
-                    quality: number;
-                    /** @default 0 */
-                    maintenance: number;
-                    /** @default 0 */
-                    vulnerability: number;
-                    /** @default 0 */
-                    license: number;
-                    /** @default 0 */
-                    overall: number;
-                  };
-                  capabilities?: {
-                    /** @default false */
-                    env: boolean;
-                    /** @default false */
-                    eval: boolean;
-                    /** @default false */
-                    fs: boolean;
-                    /** @default false */
-                    net: boolean;
-                    /** @default false */
-                    shell: boolean;
-                    /** @default false */
-                    unsafe: boolean;
-                  };
-                  /** @default */
-                  license?: string;
-                  /** @default 0 */
-                  size?: number;
-                  /** @default */
-                  author?: string;
-                  /** @default */
-                  state?: string;
-                  /** @default */
-                  error?: string;
-                  alerts?: {
-                      /** @default */
-                      key: string;
-                      /** @default 0 */
-                      type: number;
-                      /** @default */
-                      file?: string;
-                      /** @default 0 */
-                      start?: number;
-                      /** @default 0 */
-                      end?: number;
-                      /** @default null */
-                      props?: Record<string, never>;
-                      /** @default */
-                      action?: string;
-                      /** @default 0 */
-                      actionPolicyIndex?: number;
-                    }[];
-                  licenseDetails?: {
-                      authors?: string[];
-                      /** @default 0 */
-                      charEnd?: number;
-                      /** @default 0 */
-                      charStart?: number;
-                      /** @default */
-                      filepath?: string;
-                      /** @default 0 */
-                      match_strength?: number;
-                      /** @default */
-                      filehash?: string;
-                      /** @default */
-                      provenance?: string;
-                      spdxDisj?: {
-                            /** @default */
-                            licenseId?: string;
-                            /** @default */
-                            licenseExceptionId?: string;
-                          }[][];
-                    }[];
-                  licenseAttrib?: ({
-                      /** @default */
-                      attribText: string;
-                      attribData: ({
-                          /** @default */
-                          purl: string;
-                          /** @default */
-                          foundInFilepath: string | null;
-                          foundAuthors: string[];
-                          /** @default */
-                          spdxExpr: string | null;
-                        })[];
-                    })[];
-                })[];
-              replaced: ({
-                  /** @default */
-                  diffType?: string;
-                  base?: {
-                    /** @default false */
-                    direct?: boolean;
-                    toplevelAncestors?: string[] | null;
-                  };
-                  head?: {
-                    /** @default false */
-                    direct?: boolean;
-                    toplevelAncestors?: string[] | null;
-                  };
-                  /** @default */
-                  id?: string;
-                  /** @default */
-                  type?: string;
-                  /** @default */
-                  name?: string;
-                  /** @default */
-                  namespace?: string | null;
-                  /** @default */
-                  files?: string;
-                  /** @default */
-                  version?: string | null;
-                  /** @default */
-                  subpath?: string | null;
-                  /** @default */
-                  artifact_id?: string | null;
-                  /** @default */
-                  artifactId?: string | null;
-                  qualifiers?: unknown;
-                  scores?: {
-                    /** @default 0 */
-                    supplyChain: number;
-                    /** @default 0 */
-                    quality: number;
-                    /** @default 0 */
-                    maintenance: number;
-                    /** @default 0 */
-                    vulnerability: number;
-                    /** @default 0 */
-                    license: number;
-                    /** @default 0 */
-                    overall: number;
-                  };
-                  capabilities?: {
-                    /** @default false */
-                    env: boolean;
-                    /** @default false */
-                    eval: boolean;
-                    /** @default false */
-                    fs: boolean;
-                    /** @default false */
-                    net: boolean;
-                    /** @default false */
-                    shell: boolean;
-                    /** @default false */
-                    unsafe: boolean;
-                  };
-                  /** @default */
-                  license?: string;
-                  /** @default 0 */
-                  size?: number;
-                  /** @default */
-                  author?: string;
-                  /** @default */
-                  state?: string;
-                  /** @default */
-                  error?: string;
-                  alerts?: {
-                      /** @default */
-                      key: string;
-                      /** @default 0 */
-                      type: number;
-                      /** @default */
-                      file?: string;
-                      /** @default 0 */
-                      start?: number;
-                      /** @default 0 */
-                      end?: number;
-                      /** @default null */
-                      props?: Record<string, never>;
-                      /** @default */
-                      action?: string;
-                      /** @default 0 */
-                      actionPolicyIndex?: number;
-                    }[];
-                  licenseDetails?: {
-                      authors?: string[];
-                      /** @default 0 */
-                      charEnd?: number;
-                      /** @default 0 */
-                      charStart?: number;
-                      /** @default */
-                      filepath?: string;
-                      /** @default 0 */
-                      match_strength?: number;
-                      /** @default */
-                      filehash?: string;
-                      /** @default */
-                      provenance?: string;
-                      spdxDisj?: {
-                            /** @default */
-                            licenseId?: string;
-                            /** @default */
-                            licenseExceptionId?: string;
-                          }[][];
-                    }[];
-                  licenseAttrib?: ({
-                      /** @default */
-                      attribText: string;
-                      attribData: ({
-                          /** @default */
-                          purl: string;
-                          /** @default */
-                          foundInFilepath: string | null;
-                          foundAuthors: string[];
-                          /** @default */
-                          spdxExpr: string | null;
-                        })[];
-                    })[];
-                })[];
-              updated: ({
-                  /** @default */
-                  diffType?: string;
-                  base?: {
-                    /** @default false */
-                    direct?: boolean;
-                    toplevelAncestors?: string[] | null;
-                  };
-                  head?: {
-                    /** @default false */
-                    direct?: boolean;
-                    toplevelAncestors?: string[] | null;
-                  };
-                  /** @default */
-                  id?: string;
-                  /** @default */
-                  type?: string;
-                  /** @default */
-                  name?: string;
-                  /** @default */
-                  namespace?: string | null;
-                  /** @default */
-                  files?: string;
-                  /** @default */
-                  version?: string | null;
-                  /** @default */
-                  subpath?: string | null;
-                  /** @default */
-                  artifact_id?: string | null;
-                  /** @default */
-                  artifactId?: string | null;
-                  qualifiers?: unknown;
-                  scores?: {
-                    /** @default 0 */
-                    supplyChain: number;
-                    /** @default 0 */
-                    quality: number;
-                    /** @default 0 */
-                    maintenance: number;
-                    /** @default 0 */
-                    vulnerability: number;
-                    /** @default 0 */
-                    license: number;
-                    /** @default 0 */
-                    overall: number;
-                  };
-                  capabilities?: {
-                    /** @default false */
-                    env: boolean;
-                    /** @default false */
-                    eval: boolean;
-                    /** @default false */
-                    fs: boolean;
-                    /** @default false */
-                    net: boolean;
-                    /** @default false */
-                    shell: boolean;
-                    /** @default false */
-                    unsafe: boolean;
-                  };
-                  /** @default */
-                  license?: string;
-                  /** @default 0 */
-                  size?: number;
-                  /** @default */
-                  author?: string;
-                  /** @default */
-                  state?: string;
-                  /** @default */
-                  error?: string;
-                  alerts?: {
-                      /** @default */
-                      key: string;
-                      /** @default 0 */
-                      type: number;
-                      /** @default */
-                      file?: string;
-                      /** @default 0 */
-                      start?: number;
-                      /** @default 0 */
-                      end?: number;
-                      /** @default null */
-                      props?: Record<string, never>;
-                      /** @default */
-                      action?: string;
-                      /** @default 0 */
-                      actionPolicyIndex?: number;
-                    }[];
-                  licenseDetails?: {
-                      authors?: string[];
-                      /** @default 0 */
-                      charEnd?: number;
-                      /** @default 0 */
-                      charStart?: number;
-                      /** @default */
-                      filepath?: string;
-                      /** @default 0 */
-                      match_strength?: number;
-                      /** @default */
-                      filehash?: string;
-                      /** @default */
-                      provenance?: string;
-                      spdxDisj?: {
-                            /** @default */
-                            licenseId?: string;
-                            /** @default */
-                            licenseExceptionId?: string;
-                          }[][];
-                    }[];
-                  licenseAttrib?: ({
-                      /** @default */
-                      attribText: string;
-                      attribData: ({
-                          /** @default */
-                          purl: string;
-                          /** @default */
-                          foundInFilepath: string | null;
-                          foundAuthors: string[];
-                          /** @default */
-                          spdxExpr: string | null;
-                        })[];
-                    })[];
-                })[];
+              added: components["schemas"]["SocketDiffArtifact"][];
+              removed: components["schemas"]["SocketDiffArtifact"][];
+              unchanged: components["schemas"]["SocketDiffArtifact"][];
+              replaced: components["schemas"]["SocketDiffArtifact"][];
+              updated: components["schemas"]["SocketDiffArtifact"][];
             };
             /** @default false */
             directDependenciesChanged: boolean;
