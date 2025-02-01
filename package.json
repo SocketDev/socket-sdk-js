@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "formdata-node": "^5.0.0",
-    "got": "^12.5.3",
+    "got": "^14.4.5",
     "pony-cause": "^2.1.8"
   },
   "devDependencies": {
