@@ -484,9 +484,7 @@ export interface paths {
   "/orgs/{org_slug}/settings/integrations/{integration_id}/events": {
     /**
      * Get integration events
-     * @description Retrieve events for integration.
-     *
-     * This endpoint consumes 1 unit of your quota.
+     * @description This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
      * - integration:list
@@ -536,6 +534,30 @@ export interface paths {
      * - license-policy:update
      */
     post: operations["updateOrgLicensePolicy"];
+  };
+  "/orgs/{org_slug}/alerts/historical": {
+    /**
+     * List historical alerts
+     * @description List historical alerts.
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - alerts:list
+     */
+    get: operations["historicalAlertsList"];
+  };
+  "/orgs/{org_slug}/alerts/historical/trend": {
+    /**
+     * Trend of historical alerts
+     * @description Trend analytics of historical alerts.
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - alerts:trend
+     */
+    get: operations["historicalAlertsTrend"];
   };
   "/analytics/org/{filter}": {
     /**
@@ -947,21 +969,8 @@ export interface components {
       diffType: components["schemas"]["SocketDiffArtifactType"];
       head?: components["schemas"]["SocketArtifactLink"][];
       base?: components["schemas"]["SocketArtifactLink"][];
-      qualifiers?: unknown;
-      capabilities?: {
-        /** @default false */
-        env: boolean;
-        /** @default false */
-        eval: boolean;
-        /** @default false */
-        fs: boolean;
-        /** @default false */
-        net: boolean;
-        /** @default false */
-        shell: boolean;
-        /** @default false */
-        unsafe: boolean;
-      };
+      qualifiers?: components["schemas"]["Qualifiers"];
+      capabilities?: components["schemas"]["Capabilities"];
       /** @default */
       license?: string;
       licenseDetails?: components["schemas"]["LicenseDetails"];
@@ -972,6 +981,68 @@ export interface components {
       score?: components["schemas"]["SocketScore"];
       alerts?: components["schemas"]["SocketAlert"][];
     };
+    Qualifiers: unknown;
+    Capabilities: {
+      /** @default false */
+      env: boolean;
+      /** @default false */
+      eval: boolean;
+      /** @default false */
+      fs: boolean;
+      /** @default false */
+      net: boolean;
+      /** @default false */
+      shell: boolean;
+      /** @default false */
+      unsafe: boolean;
+    };
+    LicenseDetails: {
+        /** @default */
+        spdxDisj: string;
+        /** @default */
+        provenance: string;
+        /** @default */
+        filepath: string;
+        /** @default 0 */
+        match_strength: number;
+      }[];
+    SAttrib1_N: {
+        /** @default */
+        attribText: string;
+        attribData: {
+            /** @default */
+            purl: string;
+            /** @default */
+            foundInFilepath: string;
+            /** @default */
+            spdxExpr: string;
+            foundAuthors: string[];
+          }[];
+      }[];
+    SocketScore: {
+      /** @default 0 */
+      supplyChain: number;
+      /** @default 0 */
+      quality: number;
+      /** @default 0 */
+      maintenance: number;
+      /** @default 0 */
+      vulnerability: number;
+      /** @default 0 */
+      license: number;
+      /** @default 0 */
+      overall: number;
+    };
+    SocketManifestReference: {
+      /** @default */
+      file: string;
+      /** @default 0 */
+      start?: number;
+      /** @default 0 */
+      end?: number;
+    };
+    /** @default */
+    SocketId: string;
     SocketReport: {
       /** @default */
       id: string;
@@ -1017,8 +1088,6 @@ export interface components {
       /** @default */
       release?: string;
     };
-    /** @default */
-    SocketId: string;
     SocketArtifactLink: {
       /** @default false */
       direct?: boolean;
@@ -1032,43 +1101,6 @@ export interface components {
       artifact?: components["schemas"]["SocketPURL"] & {
         id: components["schemas"]["SocketId"];
       };
-    };
-    LicenseDetails: {
-        /** @default */
-        spdxDisj: string;
-        /** @default */
-        provenance: string;
-        /** @default */
-        filepath: string;
-        /** @default 0 */
-        match_strength: number;
-      }[];
-    SAttrib1_N: {
-        /** @default */
-        attribText: string;
-        attribData: {
-            /** @default */
-            purl: string;
-            /** @default */
-            foundInFilepath: string;
-            /** @default */
-            spdxExpr: string;
-            foundAuthors: string[];
-          }[];
-      }[];
-    SocketScore: {
-      /** @default 0 */
-      supplyChain: number;
-      /** @default 0 */
-      quality: number;
-      /** @default 0 */
-      maintenance: number;
-      /** @default 0 */
-      vulnerability: number;
-      /** @default 0 */
-      license: number;
-      /** @default 0 */
-      overall: number;
     };
     SocketAlert: {
       /** @default */
@@ -2480,14 +2512,6 @@ export interface components {
      * @enum {string}
      */
     SocketPURL_Type: "unknown" | "npm" | "pypi" | "golang";
-    SocketManifestReference: {
-      /** @default */
-      file: string;
-      /** @default 0 */
-      start?: number;
-      /** @default 0 */
-      end?: number;
-    };
     /**
      * @default low
      * @enum {string}
@@ -4178,7 +4202,7 @@ export interface operations {
                  * @default api token
                  */
                 name: string;
-                scopes: ("report" | "report:list" | "report:read" | "report:write" | "repo" | "repo:list" | "repo:create" | "repo:update" | "repo:delete" | "full-scans" | "full-scans:list" | "full-scans:create" | "full-scans:delete" | "packages" | "packages:list" | "audit-log" | "audit-log:list" | "integration" | "integration:list" | "integration:create" | "integration:update" | "integration:delete" | "threat-feed" | "threat-feed:list" | "security-policy" | "security-policy:update" | "security-policy:read" | "license-policy" | "license-policy:update" | "license-policy:read" | "triage" | "triage:alerts-list" | "triage:alerts-update" | "api-tokens" | "api-tokens:create" | "api-tokens:update" | "api-tokens:revoke" | "api-tokens:rotate" | "api-tokens:list")[];
+                scopes: ("report" | "report:list" | "report:read" | "report:write" | "repo" | "repo:list" | "repo:create" | "repo:update" | "repo:delete" | "full-scans" | "full-scans:list" | "full-scans:create" | "full-scans:delete" | "packages" | "packages:list" | "audit-log" | "audit-log:list" | "integration" | "integration:list" | "integration:create" | "integration:update" | "integration:delete" | "threat-feed" | "threat-feed:list" | "security-policy" | "security-policy:update" | "security-policy:read" | "license-policy" | "license-policy:update" | "license-policy:read" | "triage" | "triage:alerts-list" | "triage:alerts-update" | "api-tokens" | "api-tokens:create" | "api-tokens:update" | "api-tokens:revoke" | "api-tokens:rotate" | "api-tokens:list" | "alerts" | "alerts:list" | "alerts:trend")[];
                 /** @default 1000 */
                 max_quota: number;
                 /**
@@ -4247,7 +4271,7 @@ export interface operations {
            * @default api token
            */
           name: string;
-          scopes: ("report" | "report:list" | "report:read" | "report:write" | "repo" | "repo:list" | "repo:create" | "repo:update" | "repo:delete" | "full-scans" | "full-scans:list" | "full-scans:create" | "full-scans:delete" | "packages" | "packages:list" | "audit-log" | "audit-log:list" | "integration" | "integration:list" | "integration:create" | "integration:update" | "integration:delete" | "threat-feed" | "threat-feed:list" | "security-policy" | "security-policy:update" | "security-policy:read" | "license-policy" | "license-policy:update" | "license-policy:read" | "triage" | "triage:alerts-list" | "triage:alerts-update" | "api-tokens" | "api-tokens:create" | "api-tokens:update" | "api-tokens:revoke" | "api-tokens:rotate" | "api-tokens:list")[];
+          scopes: ("report" | "report:list" | "report:read" | "report:write" | "repo" | "repo:list" | "repo:create" | "repo:update" | "repo:delete" | "full-scans" | "full-scans:list" | "full-scans:create" | "full-scans:delete" | "packages" | "packages:list" | "audit-log" | "audit-log:list" | "integration" | "integration:list" | "integration:create" | "integration:update" | "integration:delete" | "threat-feed" | "threat-feed:list" | "security-policy" | "security-policy:update" | "security-policy:read" | "license-policy" | "license-policy:update" | "license-policy:read" | "triage" | "triage:alerts-list" | "triage:alerts-update" | "api-tokens" | "api-tokens:create" | "api-tokens:update" | "api-tokens:revoke" | "api-tokens:rotate" | "api-tokens:list" | "alerts" | "alerts:list" | "alerts:trend")[];
           /** @default 1000 */
           max_quota: number;
           /**
@@ -4313,7 +4337,7 @@ export interface operations {
            * @default api token
            */
           name: string;
-          scopes: ("report" | "report:list" | "report:read" | "report:write" | "repo" | "repo:list" | "repo:create" | "repo:update" | "repo:delete" | "full-scans" | "full-scans:list" | "full-scans:create" | "full-scans:delete" | "packages" | "packages:list" | "audit-log" | "audit-log:list" | "integration" | "integration:list" | "integration:create" | "integration:update" | "integration:delete" | "threat-feed" | "threat-feed:list" | "security-policy" | "security-policy:update" | "security-policy:read" | "license-policy" | "license-policy:update" | "license-policy:read" | "triage" | "triage:alerts-list" | "triage:alerts-update" | "api-tokens" | "api-tokens:create" | "api-tokens:update" | "api-tokens:revoke" | "api-tokens:rotate" | "api-tokens:list")[];
+          scopes: ("report" | "report:list" | "report:read" | "report:write" | "repo" | "repo:list" | "repo:create" | "repo:update" | "repo:delete" | "full-scans" | "full-scans:list" | "full-scans:create" | "full-scans:delete" | "packages" | "packages:list" | "audit-log" | "audit-log:list" | "integration" | "integration:list" | "integration:create" | "integration:update" | "integration:delete" | "threat-feed" | "threat-feed:list" | "security-policy" | "security-policy:update" | "security-policy:read" | "license-policy" | "license-policy:update" | "license-policy:read" | "triage" | "triage:alerts-list" | "triage:alerts-update" | "api-tokens" | "api-tokens:create" | "api-tokens:update" | "api-tokens:revoke" | "api-tokens:rotate" | "api-tokens:list" | "alerts" | "alerts:list" | "alerts:trend")[];
           /** @default 1000 */
           max_quota: number;
           /**
@@ -4437,9 +4461,7 @@ export interface operations {
   };
   /**
    * Get integration events
-   * @description Retrieve events for integration.
-   *
-   * This endpoint consumes 1 unit of your quota.
+   * @description This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
    * - integration:list
@@ -41626,6 +41648,237 @@ export interface operations {
       401: components["responses"]["SocketUnauthorized"];
       403: components["responses"]["SocketForbidden"];
       404: components["responses"]["SocketNotFoundResponse"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * List historical alerts
+   * @description List historical alerts.
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - alerts:list
+   */
+  historicalAlertsList: {
+    parameters: {
+      query?: {
+        /** @description The UTC date in YYYY-MMM-DD format for which to fetch alerts */
+        date?: string;
+        /** @description The number of days of data to fetch as an offset from input date */
+        range?: string;
+        /** @description Specify the maximum number of results to return per page. */
+        per_page?: number;
+        /** @description The pagination cursor that was returned as the "endCursor" property in previous request */
+        startAfterCursor?: string;
+        /** @description Comma-separated list of alert actions that should be included */
+        "filters.alertAction"?: string;
+        /** @description Comma-separated list of alert categories that should be included */
+        "filters.alertCategory"?: string;
+        /** @description Comma-separated list of alert severities that should be included */
+        "filters.alertSeverity"?: string;
+        /** @description Comma-separated list of alert types that should be included */
+        "filters.alertType"?: string;
+        /** @description Comma-separated list of artifact types that should be included */
+        "filters.artifactType"?: string;
+        /** @description Comma-separated list of repo slugs that should be included */
+        "filters.repoSlug"?: string;
+      };
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+      };
+    };
+    responses: {
+      /** @description The paginated array of API tokens for the organization, and related metadata. */
+      200: {
+        content: {
+          "application/json": {
+            meta: {
+              /** @default */
+              organizationId: string;
+              /** @default 0 */
+              queryStartTimestamp: number;
+              /** @default */
+              startDateInclusive: string;
+              /** @default */
+              endDateInclusive: string;
+              filters: {
+                alertSeverity?: string[];
+                repoSlug?: string[];
+                alertType?: string[];
+                artifactType?: string[];
+                alertAction?: string[];
+                alertCategory?: string[];
+              };
+            };
+            items: ({
+                /** @default */
+                repoSlug: string;
+                /** @default */
+                branch: string;
+                /** @default false */
+                defaultBranch: boolean;
+                /** @default */
+                fullScanId: string;
+                /** @default */
+                scannedAt: string;
+                artifact: {
+                  /** @default */
+                  type: string;
+                  /** @default */
+                  namespace: string | null;
+                  /** @default */
+                  name: string;
+                  /** @default */
+                  id: string | null;
+                  /** @default */
+                  version: string;
+                  /** @default */
+                  license: string | null;
+                  /** @default */
+                  artifact_id?: string;
+                  /** @default */
+                  artifactId?: string;
+                  qualifiers?: components["schemas"]["Qualifiers"];
+                  /** @default */
+                  subpath?: string;
+                  /** @default */
+                  author?: string;
+                  capabilities?: components["schemas"]["Capabilities"];
+                  licenseDetails?: components["schemas"]["LicenseDetails"];
+                  licenseAttrib?: components["schemas"]["SAttrib1_N"];
+                  scores?: components["schemas"]["SocketScore"];
+                  /** @default 0 */
+                  size?: number;
+                };
+                alert: {
+                  /** @default */
+                  key: string;
+                  /** @default */
+                  type: string;
+                  /** @default 0 */
+                  severity: number;
+                  /** @default */
+                  severityName: string;
+                  /** @default */
+                  action: string;
+                  /** @default */
+                  category: string;
+                  /** @default */
+                  file?: string | null;
+                  /** @default null */
+                  props?: Record<string, unknown> | null;
+                  /** @default 0 */
+                  start?: number | null;
+                  /** @default 0 */
+                  end?: number | null;
+                };
+                dependency: {
+                  /** @default false */
+                  direct: boolean;
+                  /** @default false */
+                  dev: boolean;
+                  /** @default false */
+                  dead: boolean;
+                  manifestFiles?: components["schemas"]["SocketManifestReference"][];
+                  topLevelAncestors?: components["schemas"]["SocketId"][];
+                  dependencies?: components["schemas"]["SocketId"][];
+                };
+              })[];
+            /** @default */
+            endCursor: string | null;
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Trend of historical alerts
+   * @description Trend analytics of historical alerts.
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - alerts:trend
+   */
+  historicalAlertsTrend: {
+    parameters: {
+      query?: {
+        /** @description The UTC date in YYYY-MMM-DD format for which to fetch alerts */
+        date?: string;
+        /** @description The number of days of data to fetch as an offset from input date */
+        range?: string;
+        /** @description Comma-separated list of fields that should be used for count aggregation */
+        "aggregation.fields"?: string;
+        /** @description Comma-separated list of alert actions that should be included */
+        "filters.alertAction"?: string;
+        /** @description Comma-separated list of alert categories that should be included */
+        "filters.alertCategory"?: string;
+        /** @description Comma-separated list of alert severities that should be included */
+        "filters.alertSeverity"?: string;
+        /** @description Comma-separated list of alert types that should be included */
+        "filters.alertType"?: string;
+        /** @description Comma-separated list of artifact types that should be included */
+        "filters.artifactType"?: string;
+        /** @description Comma-separated list of repo slugs that should be included */
+        "filters.repoSlug"?: string;
+      };
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+      };
+    };
+    responses: {
+      /** @description The trend data */
+      200: {
+        content: {
+          "application/json": {
+            meta: {
+              /** @default */
+              organizationId: string;
+              /** @default */
+              startDateInclusive: string;
+              /** @default */
+              endDateInclusive: string;
+              /** @default */
+              interval: string;
+              aggregation: {
+                fields: string[];
+                groups: string[][];
+              };
+              filters: {
+                alertSeverity?: string[];
+                repoSlug?: string[];
+                alertType?: string[];
+                artifactType?: string[];
+                alertAction?: string[];
+                alertCategory?: string[];
+              };
+            };
+            items: {
+                /** @default */
+                date: string;
+                /** @default 0 */
+                startOfDayTimestamp: number;
+                dataPoints: {
+                    aggregationGroup: string[];
+                    /** @default 0 */
+                    count: number;
+                    /** @default 0 */
+                    countDelta: number;
+                  }[];
+              }[];
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
       429: components["responses"]["SocketTooManyRequestsResponse"];
     };
   };
