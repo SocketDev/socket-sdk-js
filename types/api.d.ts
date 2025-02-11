@@ -3045,7 +3045,7 @@ export interface operations {
     parameters: {
       query?: {
         /** @description Filter audit log events by type. Omit for all types. */
-        type?: "BookDemo" | "CancelInvitation" | "ChangeMemberRole" | "ChangePlanSubscriptionSeats" | "ContactForm" | "CreateApiToken" | "CreateUser" | "GithubAppInstallation" | "JoinOrganization" | "JoinOrganizationByVcs" | "LinkAccount" | "RemoveMember" | "ResetInvitationLink" | "ResetOrganizationSettingToDefault" | "RotateApiToken" | "SendInvitation" | "SignIn" | "SignOut" | "Subscribe" | "SyncOrganization" | "TransferOwnership" | "UpdateAlertTriage" | "UpdateApiTokenCommitter" | "UpdateApiTokenName" | "UpdateApiTokenScopes" | "UpdateApiTokenVisibility" | "UpdateOrganizationSetting" | "UpgradeOrganizationPlan" | "VerifiedEmail" | "DeleteRepository" | "DeleteReport";
+        type?: "BookDemo" | "CancelInvitation" | "ChangeMemberRole" | "ChangePlanSubscriptionSeats" | "ContactForm" | "CreateApiToken" | "CreateUser" | "GithubAppInstallation" | "JoinOrganization" | "JoinOrganizationByVcs" | "LinkAccount" | "RemoveMember" | "ResetInvitationLink" | "ResetOrganizationSettingToDefault" | "RotateApiToken" | "SendInvitation" | "SignIn" | "SignOut" | "Subscribe" | "SyncOrganization" | "TransferOwnership" | "UpdateAlertTriage" | "UpdateApiTokenCommitter" | "UpdateApiTokenName" | "UpdateApiTokenScopes" | "UpdateApiTokenVisibility" | "UpdateOrganizationSetting" | "UpgradeOrganizationPlan" | "VerifiedEmail" | "DeleteRepository" | "DeleteReport" | "DeleteLabel" | "CreateLabel" | "AssociateLabel" | "DisassociateLabel";
         /** @description Number of events per page */
         per_page?: number;
         /** @description Page token */
