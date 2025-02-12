@@ -41665,9 +41665,9 @@ export interface operations {
       query?: {
         /** @description The UTC date in YYYY-MMM-DD format for which to fetch alerts */
         date?: string;
-        /** @description The number of days of data to fetch as an offset from input date */
+        /** @description The number of days of data to fetch as an offset from input date (e.g. "-7d" or "7d") or use "latest" to query for latest alerts for each repo */
         range?: string;
-        /** @description Specify the maximum number of results to return per page. */
+        /** @description Specify the maximum number of results to return per page */
         per_page?: number;
         /** @description The pagination cursor that was returned as the "endCursor" property in previous request */
         startAfterCursor?: string;
@@ -41703,6 +41703,8 @@ export interface operations {
               startDateInclusive: string;
               /** @default */
               endDateInclusive: string;
+              /** @default false */
+              includeLatestAlertsOnly: boolean;
               filters: {
                 alertSeverity?: string[];
                 repoSlug?: string[];
