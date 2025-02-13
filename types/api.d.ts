@@ -41667,19 +41667,19 @@ export interface operations {
         date?: string;
         /** @description The number of days of data to fetch as an offset from input date (e.g. "-7d" or "7d") or use "latest" to query for latest alerts for each repo */
         range?: string;
-        /** @description Specify the maximum number of results to return per page */
+        /** @description Specify the maximum number of results to return per page (intermediate pages may have fewer than this limit and callers should always check "endCursor" in response body to know if there are more pages) */
         per_page?: number;
         /** @description The pagination cursor that was returned as the "endCursor" property in previous request */
         startAfterCursor?: string;
-        /** @description Comma-separated list of alert actions that should be included */
+        /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
         "filters.alertAction"?: string;
-        /** @description Comma-separated list of alert categories that should be included */
+        /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
         "filters.alertCategory"?: string;
-        /** @description Comma-separated list of alert severities that should be included */
+        /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
         "filters.alertSeverity"?: string;
-        /** @description Comma-separated list of alert types that should be included */
+        /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
         "filters.alertType"?: string;
-        /** @description Comma-separated list of artifact types that should be included */
+        /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
         "filters.artifactType"?: string;
         /** @description Comma-separated list of repo slugs that should be included */
         "filters.repoSlug"?: string;
