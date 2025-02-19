@@ -83,7 +83,7 @@ const client = new SocketSdk('yourApiKeyHere', {
 })
 ```
 
-Which results in the [HTTP `User-Agent` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent):
+Which results in [the HTTP `User-Agent` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent):
 
 ```
 User-Agent: example/1.2.3 (http://example.com/) socketsecurity-sdk/0.5.2 (https://github.com/SocketDev/socket-sdk-js)
