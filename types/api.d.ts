@@ -3045,7 +3045,7 @@ export interface operations {
     parameters: {
       query?: {
         /** @description Filter audit log events by type. Omit for all types. */
-        type?: "BookDemo" | "CancelInvitation" | "ChangeMemberRole" | "ChangePlanSubscriptionSeats" | "ContactForm" | "CreateApiToken" | "CreateUser" | "GithubAppInstallation" | "JoinOrganization" | "JoinOrganizationByVcs" | "LinkAccount" | "RemoveMember" | "ResetInvitationLink" | "ResetOrganizationSettingToDefault" | "RotateApiToken" | "SendInvitation" | "SignIn" | "SignOut" | "Subscribe" | "SyncOrganization" | "TransferOwnership" | "UpdateAlertTriage" | "UpdateApiTokenCommitter" | "UpdateApiTokenName" | "UpdateApiTokenScopes" | "UpdateApiTokenVisibility" | "UpdateOrganizationSetting" | "UpgradeOrganizationPlan" | "VerifiedEmail" | "DeleteRepository" | "DeleteReport" | "DeleteLabel" | "CreateLabel" | "AssociateLabel" | "DisassociateLabel";
+        type?: "BookDemo" | "CancelInvitation" | "ChangeMemberRole" | "ChangePlanSubscriptionSeats" | "ContactForm" | "CreateApiToken" | "CreateUser" | "GithubAppInstallation" | "JoinOrganization" | "JoinOrganizationByVcs" | "LinkAccount" | "RemoveMember" | "ResetInvitationLink" | "ResetOrganizationSettingToDefault" | "RotateApiToken" | "SendInvitation" | "SignIn" | "SignOut" | "Subscribe" | "SyncOrganization" | "TransferOwnership" | "UpdateAlertTriage" | "UpdateApiTokenCommitter" | "UpdateApiTokenName" | "UpdateApiTokenScopes" | "UpdateApiTokenVisibility" | "UpdateOrganizationSetting" | "UpgradeOrganizationPlan" | "VerifiedEmail" | "DeleteRepository" | "DeleteReport" | "DeleteLabel" | "CreateLabel" | "AssociateLabel" | "DisassociateLabel" | "UpdateLabelSetting" | "DeleteLabelSetting" | "SetLabelSettingToDefault";
         /** @description Number of events per page */
         per_page?: number;
         /** @description Page token */
@@ -3372,6 +3372,10 @@ export interface operations {
    */
   getOrgFullScan: {
     parameters: {
+      query?: {
+        /** @description Include license details in the response. This can increase the response size significantly. */
+        include_license_details?: boolean;
+      };
       path: {
         /** @description The slug of the organization */
         org_slug: string;
@@ -42386,6 +42390,8 @@ export interface operations {
         page?: string;
         /** @description Sort sort the threat feed by ID or createdAt attribute. */
         sort?: "id" | "created_at";
+        /** @description Filter results by discovery period */
+        discovery_period?: "6h" | "1d" | "7d" | "30d" | "90d" | "365d";
         /** @description Order asc or desc by the createdAt attribute. */
         direction?: "desc" | "asc";
         /** @description Filter what type of threats to return */
@@ -42397,7 +42403,7 @@ export interface operations {
         /** @description Only return threats which have been human-reviewed */
         is_human_reviewed?: boolean;
         /** @description Filter threats by package ecosystem type */
-        ecosystem?: "gem" | "golang" | "maven" | "npm" | "pypi" | "nuget";
+        ecosystem?: "golang" | "maven" | "npm" | "nuget" | "pypi" | "gem";
       };
     };
     responses: {
