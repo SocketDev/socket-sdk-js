@@ -766,7 +766,7 @@ export interface paths {
      * @description Get all the issues related with a particular npm package version.
      * This endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.
      *
-     * You can [see here](https://socket.dev/npm/issue) the full list of issues.
+     * You can [see here](https://socket.dev/alerts) the full list of issues.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -827,14 +827,14 @@ export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
     SocketArtifact: components["schemas"]["SocketPURL"] & components["schemas"]["SocketArtifactLink"] & {
-      id: components["schemas"]["SocketId"];
+      id?: components["schemas"]["SocketId"];
+      author?: string[];
+      /** @default 0 */
+      size?: number;
       /** @default */
       license?: string;
       licenseDetails?: components["schemas"]["LicenseDetails"];
       licenseAttrib?: components["schemas"]["SAttrib1_N"];
-      author?: string[];
-      /** @default 0 */
-      size?: number;
       score?: components["schemas"]["SocketScore"];
       alerts?: components["schemas"]["SocketAlert"][];
       /** @default 0 */
@@ -965,19 +965,19 @@ export interface components {
         }[];
     };
     SocketDiffArtifact: components["schemas"]["SocketPURL"] & {
-      id: components["schemas"]["SocketId"];
       diffType: components["schemas"]["SocketDiffArtifactType"];
-      head?: components["schemas"]["SocketArtifactLink"][];
+      id?: components["schemas"]["SocketId"];
+      author?: string[];
       base?: components["schemas"]["SocketArtifactLink"][];
-      qualifiers?: components["schemas"]["Qualifiers"];
       capabilities?: components["schemas"]["Capabilities"];
+      head?: components["schemas"]["SocketArtifactLink"][];
+      qualifiers?: components["schemas"]["Qualifiers"];
+      /** @default 0 */
+      size?: number;
       /** @default */
       license?: string;
       licenseDetails?: components["schemas"]["LicenseDetails"];
       licenseAttrib?: components["schemas"]["SAttrib1_N"];
-      author?: string[];
-      /** @default 0 */
-      size?: number;
       score?: components["schemas"]["SocketScore"];
       alerts?: components["schemas"]["SocketAlert"][];
     };
@@ -1021,17 +1021,17 @@ export interface components {
       }[];
     SocketScore: {
       /** @default 0 */
-      supplyChain: number;
-      /** @default 0 */
-      quality: number;
+      license: number;
       /** @default 0 */
       maintenance: number;
       /** @default 0 */
-      vulnerability: number;
-      /** @default 0 */
-      license: number;
-      /** @default 0 */
       overall: number;
+      /** @default 0 */
+      quality: number;
+      /** @default 0 */
+      supplyChain: number;
+      /** @default 0 */
+      vulnerability: number;
     };
     SocketManifestReference: {
       /** @default */
@@ -1080,13 +1080,33 @@ export interface components {
       /** @default */
       namespace?: string;
       /** @default */
-      name?: string;
+      name: string;
       /** @default */
       version?: string;
       /** @default */
       subpath?: string;
       /** @default */
       release?: string;
+    };
+    SocketAlert: {
+      /** @default */
+      key: string;
+      /** @default */
+      type: string;
+      severity?: components["schemas"]["SocketIssueSeverity"];
+      category?: components["schemas"]["SocketCategory"];
+      /** @default */
+      file?: string;
+      /** @default 0 */
+      start?: number;
+      /** @default 0 */
+      end?: number;
+      /** @default null */
+      props?: Record<string, never>;
+      /** @default */
+      action?: string;
+      /** @default 0 */
+      actionPolicyIndex?: number;
     };
     SocketArtifactLink: {
       /** @default false */
@@ -1101,26 +1121,6 @@ export interface components {
       artifact?: components["schemas"]["SocketPURL"] & {
         id: components["schemas"]["SocketId"];
       };
-    };
-    SocketAlert: {
-      /** @default */
-      key: string;
-      /** @default */
-      type: string;
-      severity: components["schemas"]["SocketIssueSeverity"];
-      category: components["schemas"]["SocketCategory"];
-      /** @default */
-      file?: string;
-      /** @default 0 */
-      start?: number;
-      /** @default 0 */
-      end?: number;
-      /** @default null */
-      props?: Record<string, never>;
-      /** @default */
-      action?: string;
-      /** @default 0 */
-      actionPolicyIndex?: number;
     };
     SocketBatchPURLRequest: {
       /** @default */
@@ -2511,7 +2511,7 @@ export interface components {
      * @default unknown
      * @enum {string}
      */
-    SocketPURL_Type: "unknown" | "npm" | "pypi" | "golang";
+    SocketPURL_Type: "unknown" | "golang" | "npm" | "pypi";
     /**
      * @default low
      * @enum {string}
@@ -2808,12 +2808,14 @@ export interface operations {
   batchPackageFetch: {
     parameters: {
       query?: {
-        /** @description Include detailed license information, including location and match strength, for each license datum. */
-        licensedetails?: boolean;
-        /** @description Include license attribution data, including license text and author information. Maps attribution/license text to a list of data objects to which that attribution info applies. */
-        licenseattrib?: boolean;
         /** @description Include alert metadata. */
         alerts?: boolean;
+        /** @description Compact metadata. */
+        compact?: boolean;
+        /** @description Include license attribution data, including license text and author information. Maps attribution/license text to a list of data objects to which that attribution info applies. */
+        licenseattrib?: boolean;
+        /** @description Include detailed license information, including location and match strength, for each license datum. */
+        licensedetails?: boolean;
       };
     };
     requestBody?: {
@@ -3503,9 +3505,9 @@ export interface operations {
     parameters: {
       query: {
         /** @description The base full scan ID */
-        before: string;
-        /** @description The base full scan ID */
         after: string;
+        /** @description The base full scan ID */
+        before: string;
       };
       path: {
         /** @description The slug of the organization */
@@ -42581,7 +42583,7 @@ export interface operations {
    * @description Get all the issues related with a particular npm package version.
    * This endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.
    *
-   * You can [see here](https://socket.dev/npm/issue) the full list of issues.
+   * You can [see here](https://socket.dev/alerts) the full list of issues.
    *
    * This endpoint consumes 1 unit of your quota.
    *
