@@ -209,10 +209,10 @@ class SocketSdk {
     }
   }
 
-  async getOrgFullScan (
+  async streamOrgFullScan (
     orgSlug: string,
     fullScanId: string,
-    file?: string
+    file?: string | false // When `false`, just .get rather than .stream
   ): Promise<SocketSdkResultType<'getOrgFullScan'>> {
     const orgSlugParam = encodeURIComponent(orgSlug)
     const fullScanIdParam = encodeURIComponent(fullScanId)
@@ -223,10 +223,35 @@ class SocketSdk {
           this.#getClient().stream(`orgs/${orgSlugParam}/full-scans/${fullScanIdParam}`),
           createWriteStream(file)
         )
-      } else {
+      } else if (file !== false) {
         readStream = this.#getClient().stream(`orgs/${orgSlugParam}/full-scans/${fullScanIdParam}`).pipe(process.stdout)
       }
       return this.#handleApiSuccess<'getOrgFullScan'>(readStream)
+    } catch (err) {
+      return this.#handleApiError<'getOrgFullScan'>(err)
+    }
+  }
+
+  /** @deprecated in favor of streamOrgFullScan */
+  async getOrgFullScan (
+    orgSlug: string,
+    fullScanId: string,
+    file?: string | false // When `false`, just .get rather than .stream
+  ) { return this.streamOrgFullScan(orgSlug, fullScanId, file) }
+
+  /**
+   * Name is "buffered" because getOrgFullScan was a previous api that streamed
+   * the contents and I don't want to risk version collisions.
+   */
+  async getOrgFullScanBuffered (
+    orgSlug: string,
+    fullScanId: string
+  ): Promise<SocketSdkResultType<'getOrgFullScan'>> {
+    const orgSlugParam = encodeURIComponent(orgSlug)
+    const fullScanIdParam = encodeURIComponent(fullScanId)
+    try {
+      const data = this.#getClient().get(`orgs/${orgSlugParam}/full-scans/${fullScanIdParam}`).json()
+      return this.#handleApiSuccess<'getOrgFullScan'>(data)
     } catch (err) {
       return this.#handleApiError<'getOrgFullScan'>(err)
     }
