@@ -4,15 +4,15 @@
     "@socketsecurity/eslint-config/jsdoc"
   ],
   "settings": {
-    "jsdoc": {
-      "mode": "typescript"
-    }
   },
   "parserOptions": {
-    "project": "./tsconfig.json"
+    "project": "./tsconfig.eslint.json"
   },
   "rules": {
     "@typescript-eslint/quotes": ["error", "single", { "avoidEscape": true, "allowTemplateLiterals": false }],
+    "jsdoc/require-param": "off",
+    "jsdoc/require-returns": "off",
+    "jsdoc/require-jsdoc": "off",
     "no-console": "warn"
   }
 }
