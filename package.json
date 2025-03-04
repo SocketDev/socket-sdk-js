@@ -13,12 +13,11 @@
     "type": "git",
     "url": "git://github.com/SocketDev/socket-sdk-js.git"
   },
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
-    "index.d.ts.map",
-    "index.d.ts",
-    "index.js",
+    "dist",
     "types/**/*.d.ts"
   ],
   "engines": {
@@ -64,7 +63,8 @@
   },
   "scripts": {
     "build:0": "run-s clean",
-    "build:1-declaration": "tsc -p declaration.tsconfig.json",
+    "build:1-declaration": "tsc",
+    "build:2-esm": "tsc -p tsconfig.esm.json",
     "build": "run-s build:*",
     "check:installed-check": "installed-check -i eslint-plugin-jsdoc",
     "check:lint": "eslint --report-unused-disable-directives .",
