@@ -1,18 +1,18 @@
 {
-  "extends": "@tsconfig/node16/tsconfig.json",
-  "files": [
-    "index.js"
-  ],
   "include": [
-    "build/**/*",
-    "test/**/*",
+    "src/**/*"
   ],
+  "exclude": ["node_modules", "dist"],
   "compilerOptions": {
-    "allowJs": true,
-    "checkJs": true,
-    "noEmit": true,
-    "resolveJsonModule": true,
-    "module": "es2022",
-    "moduleResolution": "node"
+    "target": "ES2020",
+    "module": "CommonJS",
+    "declaration": true,
+    "outDir": "./dist",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true
   }
 }
