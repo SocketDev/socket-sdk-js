@@ -236,7 +236,7 @@ class SocketSdk {
   async getOrgFullScan (
     orgSlug: string,
     fullScanId: string,
-    file?: string | false // When `false`, just .get rather than .stream
+    file?: string
   ) { return this.streamOrgFullScan(orgSlug, fullScanId, file) }
 
   /**
