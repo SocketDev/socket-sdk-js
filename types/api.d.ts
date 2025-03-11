@@ -535,29 +535,69 @@ export interface paths {
      */
     post: operations["updateOrgLicensePolicy"];
   };
-  "/orgs/{org_slug}/alerts/historical": {
+  "/orgs/{org_slug}/historical/alerts": {
     /**
-     * List historical alerts
+     * List historical alerts (Beta)
      * @description List historical alerts.
      *
      * This endpoint consumes 10 units of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - alerts:list
+     * - historical:alerts-list
      */
     get: operations["historicalAlertsList"];
   };
-  "/orgs/{org_slug}/alerts/historical/trend": {
+  "/orgs/{org_slug}/historical/alerts/trend": {
     /**
-     * Trend of historical alerts
+     * Trend of historical alerts (Beta)
      * @description Trend analytics of historical alerts.
      *
      * This endpoint consumes 10 units of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - alerts:trend
+     * - historical:alerts-trend
      */
     get: operations["historicalAlertsTrend"];
+  };
+  "/orgs/{org_slug}/historical/dependencies/trend": {
+    /**
+     * Trend of historical dependencies (Beta)
+     * @description Trend analytics of historical dependencies.
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - historical:dependencies-trend
+     */
+    get: operations["historicalDependenciesTrend"];
+  };
+  "/orgs/{org_slug}/historical/snapshots": {
+    /**
+     * List details of periodic historical data snapshots (Beta)
+     * @description This API endpoint is used to list the details of historical snapshots.
+     * Snapshots of organization data are taken periodically, and
+     * each historical snapshot record contains high-level overview metrics about the data
+     * that was collected. Other [Historical Data Endpoints](/reference/historical-data-endpoints)
+     * can be used to fetch the raw data associated with each snapshot.
+     *
+     * Historical snapshots contain details and raw data for the following resources:
+     *
+     * - Repositories
+     * - Alerts
+     * - Dependencies
+     * - Artifacts
+     * - Users
+     * - Settings
+     *
+     * Daily snapshot data is bucketed to the nearest day which is described in
+     * more detail at: [Historical Data Endpoints](/reference/historical-data-endpoints)
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - historical:snapshots-list
+     */
+    get: operations["historicalSnapshotsList"];
   };
   "/analytics/org/{filter}": {
     /**
@@ -591,7 +631,7 @@ export interface paths {
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - Any
+     * - None, but authentication is required
      */
     post: operations["searchDependencies"];
   };
@@ -705,6 +745,8 @@ export interface paths {
      * Get Threat Feed Items (Beta)
      * @description Paginated list of threat feed items.
      *
+     * This endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.
+     *
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
@@ -731,7 +773,7 @@ export interface paths {
      * This endpoint consumes 0 units of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - Any
+     * - None, but authentication is required
      */
     get: operations["getQuota"];
   };
@@ -743,7 +785,7 @@ export interface paths {
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - Any
+     * - None, but authentication is required
      */
     get: operations["getOrganizations"];
   };
@@ -755,7 +797,7 @@ export interface paths {
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - Any
+     * - None, but authentication is required
      */
     post: operations["postSettings"];
   };
@@ -771,7 +813,7 @@ export interface paths {
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - Any
+     * - None, but authentication is required
      */
     get: operations["getIssuesByNPMPackage"];
   };
@@ -816,7 +858,7 @@ export interface paths {
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - Any
+     * - None, but authentication is required
      */
     get: operations["getScoreByNPMPackage"];
   };
@@ -845,16 +887,28 @@ export interface components {
     };
     LicenseAllowListRequest: {
       components: components["schemas"]["SocketBatchPURLRequest"][];
-      license_allow_list: components["schemas"]["LicenseAllowList"];
+      allow: {
+        strings: string[];
+      } | null;
+      warn: {
+        strings: string[];
+      } | null;
+      license_allow_list: {
+        allowedApprovalSources: string[];
+        allowedFamilies: string[];
+        allowedTiers: string[];
+        allowedStrings: string[];
+        allowedPURLs: string[];
+        /** @default false */
+        focusAlertsHere: boolean;
+      } | null;
+    };
+    LicensePolicy: {
+      allow: components["schemas"]["LicenseAllowListElabbed"];
+      warn: components["schemas"]["LicenseAllowListElabbed"];
     };
     LicenseAllowList: {
-      allowedApprovalSources: string[];
-      allowedFamilies: string[];
-      allowedTiers: string[];
-      allowedStrings: string[];
-      allowedPURLs: string[];
-      /** @default false */
-      focusAlertsHere: boolean;
+      strings: string[];
     };
     CDXManifestSchema: {
       /** @default CycloneDX */
@@ -996,29 +1050,6 @@ export interface components {
       /** @default false */
       unsafe: boolean;
     };
-    LicenseDetails: {
-        /** @default */
-        spdxDisj: string;
-        /** @default */
-        provenance: string;
-        /** @default */
-        filepath: string;
-        /** @default 0 */
-        match_strength: number;
-      }[];
-    SAttrib1_N: {
-        /** @default */
-        attribText: string;
-        attribData: {
-            /** @default */
-            purl: string;
-            /** @default */
-            foundInFilepath: string;
-            /** @default */
-            spdxExpr: string;
-            foundAuthors: string[];
-          }[];
-      }[];
     SocketScore: {
       /** @default 0 */
       license: number;
@@ -1088,6 +1119,29 @@ export interface components {
       /** @default */
       release?: string;
     };
+    LicenseDetails: {
+        /** @default */
+        spdxDisj: string;
+        /** @default */
+        provenance: string;
+        /** @default */
+        filepath: string;
+        /** @default 0 */
+        match_strength: number;
+      }[];
+    SAttrib1_N: {
+        /** @default */
+        attribText: string;
+        attribData: {
+            /** @default */
+            purl: string;
+            /** @default */
+            foundInFilepath: string;
+            /** @default */
+            spdxExpr: string;
+            foundAuthors: string[];
+          }[];
+      }[];
     SocketAlert: {
       /** @default */
       key: string;
@@ -1125,6 +1179,12 @@ export interface components {
     SocketBatchPURLRequest: {
       /** @default */
       purl: string;
+    };
+    LicenseAllowListElabbed: {
+      strings: string[];
+      classes: string[];
+      packageURLs: string[];
+      disjs: string[];
     };
     CDXComponentSchema: {
       /** @default */
@@ -1527,6 +1587,7 @@ export interface components {
           /** @default */
           licenseScanResult: string;
           violationData: Record<string, never>[];
+          warnData: Record<string, never>[];
         };
         usage?: components["schemas"]["SocketUsageRef"];
       };
@@ -3016,14 +3077,24 @@ export interface operations {
   saturateLicensePolicy: {
     requestBody?: {
       content: {
-        "application/json": components["schemas"]["LicenseAllowList"];
+        "application/json": {
+          allow: components["schemas"]["LicenseAllowList"];
+          warn: components["schemas"]["LicenseAllowList"];
+          allowedApprovalSources: string[] | null;
+          allowedFamilies: string[] | null;
+          allowedTiers: string[] | null;
+          allowedStrings: string[] | null;
+          allowedPURLs: string[] | null;
+          /** @default false */
+          focusAlertsHere: boolean | null;
+        };
       };
     };
     responses: {
       /** @description Saturated License Allow List */
       200: {
         content: {
-          "application/json": components["schemas"]["LicenseAllowList"];
+          "application/json": components["schemas"]["LicensePolicy"];
         };
       };
       400: components["responses"]["SocketBadRequest"];
@@ -3096,7 +3167,7 @@ export interface operations {
                 organization_name?: string;
               }[];
             /** @default */
-            nextPage: string;
+            nextPage: string | null;
           };
         };
       };
@@ -3223,6 +3294,12 @@ export interface operations {
         from?: string;
         /** @description A repository slug to filter full-scans by. */
         repo?: string;
+        /** @description A branch name to filter full-scans by. */
+        branch?: string;
+        /** @description A PR number to filter full-scans by. */
+        pull_request?: string;
+        /** @description A commit hash to filter full-scans by. */
+        commit_hash?: string;
       };
       path: {
         /** @description The slug of the organization */
@@ -3262,7 +3339,7 @@ export interface operations {
                 html_report_url?: string;
               }[];
             /** @default 0 */
-            nextPage: number;
+            nextPage: number | null;
           };
         };
       };
@@ -3303,7 +3380,7 @@ export interface operations {
         integration_org_slug?: string;
         /** @description Set the default branch of the repository to the branch of this full-scan. A branch name is required with this option. */
         make_default_branch?: boolean;
-        /** @description Designate this full-scan as the latest scan of a given branch. Default branch head scans are included in org alerts. */
+        /** @description Designate this full-scan as the latest scan of a given branch. Default branch head scans are included in org alerts. This is only supported on the default branch. */
         set_as_pending_head?: boolean;
         /** @description Create a temporary full-scan that is not listed in the reports dashboard. */
         tmp?: boolean;
@@ -3508,6 +3585,8 @@ export interface operations {
         after: string;
         /** @description The base full scan ID */
         before: string;
+        /** @description Include license details in the response. This can increase the response size significantly. */
+        include_license_details?: boolean;
       };
       path: {
         /** @description The slug of the organization */
@@ -3523,7 +3602,9 @@ export interface operations {
               /** @default */
               repository_id: string;
               /** @default */
-              branch: string;
+              repository_slug: string;
+              /** @default */
+              branch: string | null;
               /** @default */
               id: string;
               /** @default */
@@ -3535,12 +3616,16 @@ export interface operations {
               committers: string[];
               /** @default */
               organization_id: string;
+              /** @default */
+              organization_slug: string;
             };
             after: {
               /** @default */
               repository_id: string;
               /** @default */
-              branch: string;
+              repository_slug: string;
+              /** @default */
+              branch: string | null;
               /** @default */
               id: string;
               /** @default */
@@ -3552,6 +3637,8 @@ export interface operations {
               committers: string[];
               /** @default */
               organization_id: string;
+              /** @default */
+              organization_slug: string;
             };
             artifacts: {
               added: components["schemas"]["SocketDiffArtifact"][];
@@ -3563,7 +3650,7 @@ export interface operations {
             /** @default false */
             directDependenciesChanged: boolean;
             /** @default */
-            diff_report_url: string;
+            diff_report_url: string | null;
           };
         };
       };
@@ -3660,7 +3747,7 @@ export interface operations {
                 default_branch?: string;
               })[];
             /** @default 0 */
-            nextPage: number;
+            nextPage: number | null;
           };
         };
       };
@@ -4108,7 +4195,7 @@ export interface operations {
                 state?: "block" | "ignore" | "inherit" | "monitor" | "warn";
               })[];
             /** @default 0 */
-            nextPage: number;
+            nextPage: number | null;
           };
         };
       };
@@ -4208,7 +4295,7 @@ export interface operations {
                  * @default api token
                  */
                 name: string;
-                scopes: ("report" | "report:list" | "report:read" | "report:write" | "repo" | "repo:list" | "repo:create" | "repo:update" | "repo:delete" | "full-scans" | "full-scans:list" | "full-scans:create" | "full-scans:delete" | "packages" | "packages:list" | "audit-log" | "audit-log:list" | "integration" | "integration:list" | "integration:create" | "integration:update" | "integration:delete" | "threat-feed" | "threat-feed:list" | "security-policy" | "security-policy:update" | "security-policy:read" | "license-policy" | "license-policy:update" | "license-policy:read" | "triage" | "triage:alerts-list" | "triage:alerts-update" | "api-tokens" | "api-tokens:create" | "api-tokens:update" | "api-tokens:revoke" | "api-tokens:rotate" | "api-tokens:list" | "alerts" | "alerts:list" | "alerts:trend")[];
+                scopes: ("report" | "report:list" | "report:read" | "report:write" | "repo" | "repo:list" | "repo:create" | "repo:update" | "repo:delete" | "full-scans" | "full-scans:list" | "full-scans:create" | "full-scans:delete" | "packages" | "packages:list" | "audit-log" | "audit-log:list" | "integration" | "integration:list" | "integration:create" | "integration:update" | "integration:delete" | "threat-feed" | "threat-feed:list" | "security-policy" | "security-policy:update" | "security-policy:read" | "license-policy" | "license-policy:update" | "license-policy:read" | "triage" | "triage:alerts-list" | "triage:alerts-update" | "api-tokens" | "api-tokens:create" | "api-tokens:update" | "api-tokens:revoke" | "api-tokens:rotate" | "api-tokens:list" | "alerts" | "alerts:list" | "alerts:trend" | "dependencies" | "dependencies:list" | "dependencies:trend" | "historical" | "historical:snapshots-list" | "historical:alerts-list" | "historical:alerts-trend" | "historical:dependencies-list" | "historical:dependencies-trend")[];
                 /** @default 1000 */
                 max_quota: number;
                 /**
@@ -4241,7 +4328,7 @@ export interface operations {
                   })[];
               })[];
             /** @default 0 */
-            nextPage: number;
+            nextPage: number | null;
           };
         };
       };
@@ -4277,7 +4364,7 @@ export interface operations {
            * @default api token
            */
           name: string;
-          scopes: ("report" | "report:list" | "report:read" | "report:write" | "repo" | "repo:list" | "repo:create" | "repo:update" | "repo:delete" | "full-scans" | "full-scans:list" | "full-scans:create" | "full-scans:delete" | "packages" | "packages:list" | "audit-log" | "audit-log:list" | "integration" | "integration:list" | "integration:create" | "integration:update" | "integration:delete" | "threat-feed" | "threat-feed:list" | "security-policy" | "security-policy:update" | "security-policy:read" | "license-policy" | "license-policy:update" | "license-policy:read" | "triage" | "triage:alerts-list" | "triage:alerts-update" | "api-tokens" | "api-tokens:create" | "api-tokens:update" | "api-tokens:revoke" | "api-tokens:rotate" | "api-tokens:list" | "alerts" | "alerts:list" | "alerts:trend")[];
+          scopes: ("report" | "report:list" | "report:read" | "report:write" | "repo" | "repo:list" | "repo:create" | "repo:update" | "repo:delete" | "full-scans" | "full-scans:list" | "full-scans:create" | "full-scans:delete" | "packages" | "packages:list" | "audit-log" | "audit-log:list" | "integration" | "integration:list" | "integration:create" | "integration:update" | "integration:delete" | "threat-feed" | "threat-feed:list" | "security-policy" | "security-policy:update" | "security-policy:read" | "license-policy" | "license-policy:update" | "license-policy:read" | "triage" | "triage:alerts-list" | "triage:alerts-update" | "api-tokens" | "api-tokens:create" | "api-tokens:update" | "api-tokens:revoke" | "api-tokens:rotate" | "api-tokens:list" | "alerts" | "alerts:list" | "alerts:trend" | "dependencies" | "dependencies:list" | "dependencies:trend" | "historical" | "historical:snapshots-list" | "historical:alerts-list" | "historical:alerts-trend" | "historical:dependencies-list" | "historical:dependencies-trend")[];
           /** @default 1000 */
           max_quota: number;
           /**
@@ -4343,7 +4430,7 @@ export interface operations {
            * @default api token
            */
           name: string;
-          scopes: ("report" | "report:list" | "report:read" | "report:write" | "repo" | "repo:list" | "repo:create" | "repo:update" | "repo:delete" | "full-scans" | "full-scans:list" | "full-scans:create" | "full-scans:delete" | "packages" | "packages:list" | "audit-log" | "audit-log:list" | "integration" | "integration:list" | "integration:create" | "integration:update" | "integration:delete" | "threat-feed" | "threat-feed:list" | "security-policy" | "security-policy:update" | "security-policy:read" | "license-policy" | "license-policy:update" | "license-policy:read" | "triage" | "triage:alerts-list" | "triage:alerts-update" | "api-tokens" | "api-tokens:create" | "api-tokens:update" | "api-tokens:revoke" | "api-tokens:rotate" | "api-tokens:list" | "alerts" | "alerts:list" | "alerts:trend")[];
+          scopes: ("report" | "report:list" | "report:read" | "report:write" | "repo" | "repo:list" | "repo:create" | "repo:update" | "repo:delete" | "full-scans" | "full-scans:list" | "full-scans:create" | "full-scans:delete" | "packages" | "packages:list" | "audit-log" | "audit-log:list" | "integration" | "integration:list" | "integration:create" | "integration:update" | "integration:delete" | "threat-feed" | "threat-feed:list" | "security-policy" | "security-policy:update" | "security-policy:read" | "license-policy" | "license-policy:update" | "license-policy:read" | "triage" | "triage:alerts-list" | "triage:alerts-update" | "api-tokens" | "api-tokens:create" | "api-tokens:update" | "api-tokens:revoke" | "api-tokens:rotate" | "api-tokens:list" | "alerts" | "alerts:list" | "alerts:trend" | "dependencies" | "dependencies:list" | "dependencies:trend" | "historical" | "historical:snapshots-list" | "historical:alerts-list" | "historical:alerts-trend" | "historical:dependencies-list" | "historical:dependencies-trend")[];
           /** @default 1000 */
           max_quota: number;
           /**
@@ -17247,10 +17334,1378 @@ export interface operations {
                 /** @default false */
                 isDeprecatedLicenseId?: boolean;
               };
+              "ms-api-code-pack-net"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-api-code-pack-net */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-asp-net-ajax-supplemental-terms"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-asp-net-ajax-supplemental-terms */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-asp-net-mvc3"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-asp-net-mvc3 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-asp-net-mvc4-extensions"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-asp-net-mvc4-extensions */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-asp-net-mvc4"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-asp-net-mvc4 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-asp-net-software"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-asp-net-software */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-asp-net-tools-pre-release"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-asp-net-tools-pre-release */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-asp-net-web-optimization-framework"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-asp-net-web-optimization-framework */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-asp-net-web-pages-2"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-asp-net-web-pages-2 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-asp-net-web-pages-templates"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-asp-net-web-pages-templates */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-azure-data-studio"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-azure-data-studio */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-azure-spatialanchors-2.9.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-azure-spatialanchors-2.9.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-capicom"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-capicom */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-cl"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-cl */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-cla"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-cla */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-container-eula"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-container-eula */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-control-spy-2.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-control-spy-2.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-data-tier-af-2022"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-data-tier-af-2022 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-developer-services-agreement-2018-06"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-developer-services-agreement-2018-06 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-developer-services-agreement"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-developer-services-agreement */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-device-emulator-3.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-device-emulator-3.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-direct3d-d3d120n7-1.1.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-direct3d-d3d120n7-1.1.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-directx-sdk-eula-2020"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-directx-sdk-eula-2020 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-directx-sdk-eula"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-directx-sdk-eula */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-dxsdk-d3dx-9.29.952.3"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-dxsdk-d3dx-9.29.952.3 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-edge-devtools-2022"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-edge-devtools-2022 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-edge-webview2-fixed"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-edge-webview2-fixed */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-edge-webview2"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-edge-webview2 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-entity-framework-4.1"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-entity-framework-4.1 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-entity-framework-5"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-entity-framework-5 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-eula-win-script-host"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-eula-win-script-host */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-exchange-server-2010-sp2-sdk"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-exchange-server-2010-sp2-sdk */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-iis-container-images-eula-2020"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-iis-container-images-eula-2020 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-ilmerge"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-ilmerge */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-invisible-eula-1.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-invisible-eula-1.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-jdbc-driver-40-sql-server"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-jdbc-driver-40-sql-server */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-jdbc-driver-41-sql-server"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-jdbc-driver-41-sql-server */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-jdbc-driver-60-sql-server"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-jdbc-driver-60-sql-server */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-kinext-win-sdk"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-kinext-win-sdk */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-limited-community"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-limited-community */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-limited-public"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-limited-public */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
               "MS-LPL"?: {
                 /** @default false */
                 allowed?: boolean;
                 /** @default MS-LPL */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-msn-webgrease"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-msn-webgrease */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-net-framework-4-supplemental-terms"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-net-framework-4-supplemental-terms */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-net-framework-deployment"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-net-framework-deployment */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-net-library-2016-05"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-net-library-2016-05 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-net-library-2018-11"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-net-library-2018-11 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-net-library-2019-06"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-net-library-2019-06 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-net-library-2020-09"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-net-library-2020-09 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-net-library"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-net-library */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-nt-resource-kit"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-nt-resource-kit */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-nuget-package-manager"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-nuget-package-manager */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-nuget"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-nuget */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-office-extensible-file"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-office-extensible-file */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-office-system-programs-eula"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-office-system-programs-eula */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-opus-patent-2012"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-opus-patent-2012 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-patent-promise-mono"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-patent-promise-mono */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-patent-promise"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-patent-promise */
                 licenseId?: string;
                 /** @default */
                 name?: string;
@@ -17295,10 +18750,1114 @@ export interface operations {
                 /** @default false */
                 isDeprecatedLicenseId?: boolean;
               };
+              "ms-platform-sdk"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-platform-sdk */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-pre-release-sla-2023"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-pre-release-sla-2023 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-programsynthesis-7.22.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-programsynthesis-7.22.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-python-vscode-pylance-2021"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-python-vscode-pylance-2021 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-reactive-extensions-eula"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-reactive-extensions-eula */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-remote-ndis-usb-kit"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-remote-ndis-usb-kit */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-research-shared-source"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-research-shared-source */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
               "MS-RL"?: {
                 /** @default false */
                 allowed?: boolean;
                 /** @default MS-RL */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-rndis"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-rndis */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-rsl"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-rsl */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-silverlight-3"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-silverlight-3 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-specification"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-specification */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-sql-server-compact-4.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-sql-server-compact-4.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-sql-server-data-tools"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-sql-server-data-tools */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-sspl"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-sspl */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-sysinternals-sla"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-sysinternals-sla */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-testplatform-17.0.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-testplatform-17.0.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-ttf-eula"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-ttf-eula */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-typescript-msbuild-4.1.4"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-typescript-msbuild-4.1.4 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-visual-2008-runtime"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-visual-2008-runtime */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-visual-2010-runtime"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-visual-2010-runtime */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-visual-2015-sdk"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-visual-2015-sdk */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-visual-cpp-2015-runtime"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-visual-cpp-2015-runtime */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-visual-studio-2017-tools"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-visual-studio-2017-tools */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-visual-studio-2017"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-visual-studio-2017 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-visual-studio-code-2018"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-visual-studio-code-2018 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-visual-studio-code-2022"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-visual-studio-code-2022 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-visual-studio-code"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-visual-studio-code */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-vs-addons-ext-17.2.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-vs-addons-ext-17.2.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-web-developer-tools-1.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-web-developer-tools-1.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-container-base-image-eula-2020"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-container-base-image-eula-2020 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-driver-kit"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-driver-kit */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-identity-foundation"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-identity-foundation */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-os-2018"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-os-2018 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-sdk-server-2008-net-3.5"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-sdk-server-2008-net-3.5 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-sdk-win10-net-6"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-sdk-win10-net-6 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-sdk-win10"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-sdk-win10 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-sdk-win7-net-4"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-sdk-win7-net-4 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-server-2003-ddk"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-server-2003-ddk */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-server-2003-sdk"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-server-2003-sdk */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-ws-routing-spec"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-ws-routing-spec */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-xamarin-uitest3.2.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-xamarin-uitest3.2.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-xml-core-4.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-xml-core-4.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "msdn-magazine-sample-code-2007"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default msdn-magazine-sample-code-2007 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "msj-sample-code"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default msj-sample-code */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              msntp?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default msntp */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              msppl?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default msppl */
                 licenseId?: string;
                 /** @default */
                 name?: string;
@@ -24366,11 +26925,217 @@ export interface operations {
             /** @default false */
             mplus?: boolean;
             /** @default false */
+            "ms-api-code-pack-net"?: boolean;
+            /** @default false */
+            "ms-asp-net-ajax-supplemental-terms"?: boolean;
+            /** @default false */
+            "ms-asp-net-mvc3"?: boolean;
+            /** @default false */
+            "ms-asp-net-mvc4-extensions"?: boolean;
+            /** @default false */
+            "ms-asp-net-mvc4"?: boolean;
+            /** @default false */
+            "ms-asp-net-software"?: boolean;
+            /** @default false */
+            "ms-asp-net-tools-pre-release"?: boolean;
+            /** @default false */
+            "ms-asp-net-web-optimization-framework"?: boolean;
+            /** @default false */
+            "ms-asp-net-web-pages-2"?: boolean;
+            /** @default false */
+            "ms-asp-net-web-pages-templates"?: boolean;
+            /** @default false */
+            "ms-azure-data-studio"?: boolean;
+            /** @default false */
+            "ms-azure-spatialanchors-2.9.0"?: boolean;
+            /** @default false */
+            "ms-capicom"?: boolean;
+            /** @default false */
+            "ms-cl"?: boolean;
+            /** @default false */
+            "ms-cla"?: boolean;
+            /** @default false */
+            "ms-container-eula"?: boolean;
+            /** @default false */
+            "ms-control-spy-2.0"?: boolean;
+            /** @default false */
+            "ms-data-tier-af-2022"?: boolean;
+            /** @default false */
+            "ms-developer-services-agreement-2018-06"?: boolean;
+            /** @default false */
+            "ms-developer-services-agreement"?: boolean;
+            /** @default false */
+            "ms-device-emulator-3.0"?: boolean;
+            /** @default false */
+            "ms-direct3d-d3d120n7-1.1.0"?: boolean;
+            /** @default false */
+            "ms-directx-sdk-eula-2020"?: boolean;
+            /** @default false */
+            "ms-directx-sdk-eula"?: boolean;
+            /** @default false */
+            "ms-dxsdk-d3dx-9.29.952.3"?: boolean;
+            /** @default false */
+            "ms-edge-devtools-2022"?: boolean;
+            /** @default false */
+            "ms-edge-webview2-fixed"?: boolean;
+            /** @default false */
+            "ms-edge-webview2"?: boolean;
+            /** @default false */
+            "ms-entity-framework-4.1"?: boolean;
+            /** @default false */
+            "ms-entity-framework-5"?: boolean;
+            /** @default false */
+            "ms-eula-win-script-host"?: boolean;
+            /** @default false */
+            "ms-exchange-server-2010-sp2-sdk"?: boolean;
+            /** @default false */
+            "ms-iis-container-images-eula-2020"?: boolean;
+            /** @default false */
+            "ms-ilmerge"?: boolean;
+            /** @default false */
+            "ms-invisible-eula-1.0"?: boolean;
+            /** @default false */
+            "ms-jdbc-driver-40-sql-server"?: boolean;
+            /** @default false */
+            "ms-jdbc-driver-41-sql-server"?: boolean;
+            /** @default false */
+            "ms-jdbc-driver-60-sql-server"?: boolean;
+            /** @default false */
+            "ms-kinext-win-sdk"?: boolean;
+            /** @default false */
+            "ms-limited-community"?: boolean;
+            /** @default false */
+            "ms-limited-public"?: boolean;
+            /** @default false */
             "MS-LPL"?: boolean;
+            /** @default false */
+            "ms-msn-webgrease"?: boolean;
+            /** @default false */
+            "ms-net-framework-4-supplemental-terms"?: boolean;
+            /** @default false */
+            "ms-net-framework-deployment"?: boolean;
+            /** @default false */
+            "ms-net-library-2016-05"?: boolean;
+            /** @default false */
+            "ms-net-library-2018-11"?: boolean;
+            /** @default false */
+            "ms-net-library-2019-06"?: boolean;
+            /** @default false */
+            "ms-net-library-2020-09"?: boolean;
+            /** @default false */
+            "ms-net-library"?: boolean;
+            /** @default false */
+            "ms-nt-resource-kit"?: boolean;
+            /** @default false */
+            "ms-nuget-package-manager"?: boolean;
+            /** @default false */
+            "ms-nuget"?: boolean;
+            /** @default false */
+            "ms-office-extensible-file"?: boolean;
+            /** @default false */
+            "ms-office-system-programs-eula"?: boolean;
+            /** @default false */
+            "ms-opus-patent-2012"?: boolean;
+            /** @default false */
+            "ms-patent-promise-mono"?: boolean;
+            /** @default false */
+            "ms-patent-promise"?: boolean;
             /** @default false */
             "MS-PL"?: boolean;
             /** @default false */
+            "ms-platform-sdk"?: boolean;
+            /** @default false */
+            "ms-pre-release-sla-2023"?: boolean;
+            /** @default false */
+            "ms-programsynthesis-7.22.0"?: boolean;
+            /** @default false */
+            "ms-python-vscode-pylance-2021"?: boolean;
+            /** @default false */
+            "ms-reactive-extensions-eula"?: boolean;
+            /** @default false */
+            "ms-remote-ndis-usb-kit"?: boolean;
+            /** @default false */
+            "ms-research-shared-source"?: boolean;
+            /** @default false */
             "MS-RL"?: boolean;
+            /** @default false */
+            "ms-rndis"?: boolean;
+            /** @default false */
+            "ms-rsl"?: boolean;
+            /** @default false */
+            "ms-silverlight-3"?: boolean;
+            /** @default false */
+            "ms-specification"?: boolean;
+            /** @default false */
+            "ms-sql-server-compact-4.0"?: boolean;
+            /** @default false */
+            "ms-sql-server-data-tools"?: boolean;
+            /** @default false */
+            "ms-sspl"?: boolean;
+            /** @default false */
+            "ms-sysinternals-sla"?: boolean;
+            /** @default false */
+            "ms-testplatform-17.0.0"?: boolean;
+            /** @default false */
+            "ms-ttf-eula"?: boolean;
+            /** @default false */
+            "ms-typescript-msbuild-4.1.4"?: boolean;
+            /** @default false */
+            "ms-visual-2008-runtime"?: boolean;
+            /** @default false */
+            "ms-visual-2010-runtime"?: boolean;
+            /** @default false */
+            "ms-visual-2015-sdk"?: boolean;
+            /** @default false */
+            "ms-visual-cpp-2015-runtime"?: boolean;
+            /** @default false */
+            "ms-visual-studio-2017-tools"?: boolean;
+            /** @default false */
+            "ms-visual-studio-2017"?: boolean;
+            /** @default false */
+            "ms-visual-studio-code-2018"?: boolean;
+            /** @default false */
+            "ms-visual-studio-code-2022"?: boolean;
+            /** @default false */
+            "ms-visual-studio-code"?: boolean;
+            /** @default false */
+            "ms-vs-addons-ext-17.2.0"?: boolean;
+            /** @default false */
+            "ms-web-developer-tools-1.0"?: boolean;
+            /** @default false */
+            "ms-windows-container-base-image-eula-2020"?: boolean;
+            /** @default false */
+            "ms-windows-driver-kit"?: boolean;
+            /** @default false */
+            "ms-windows-identity-foundation"?: boolean;
+            /** @default false */
+            "ms-windows-os-2018"?: boolean;
+            /** @default false */
+            "ms-windows-sdk-server-2008-net-3.5"?: boolean;
+            /** @default false */
+            "ms-windows-sdk-win10-net-6"?: boolean;
+            /** @default false */
+            "ms-windows-sdk-win10"?: boolean;
+            /** @default false */
+            "ms-windows-sdk-win7-net-4"?: boolean;
+            /** @default false */
+            "ms-windows-server-2003-ddk"?: boolean;
+            /** @default false */
+            "ms-windows-server-2003-sdk"?: boolean;
+            /** @default false */
+            "ms-ws-routing-spec"?: boolean;
+            /** @default false */
+            "ms-xamarin-uitest3.2.0"?: boolean;
+            /** @default false */
+            "ms-xml-core-4.0"?: boolean;
+            /** @default false */
+            "msdn-magazine-sample-code-2007"?: boolean;
+            /** @default false */
+            "msj-sample-code"?: boolean;
+            /** @default false */
+            msntp?: boolean;
+            /** @default false */
+            msppl?: boolean;
             /** @default false */
             MTLL?: boolean;
             /** @default false */
@@ -35454,10 +38219,1378 @@ export interface operations {
                 /** @default false */
                 isDeprecatedLicenseId?: boolean;
               };
+              "ms-api-code-pack-net"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-api-code-pack-net */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-asp-net-ajax-supplemental-terms"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-asp-net-ajax-supplemental-terms */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-asp-net-mvc3"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-asp-net-mvc3 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-asp-net-mvc4-extensions"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-asp-net-mvc4-extensions */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-asp-net-mvc4"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-asp-net-mvc4 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-asp-net-software"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-asp-net-software */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-asp-net-tools-pre-release"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-asp-net-tools-pre-release */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-asp-net-web-optimization-framework"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-asp-net-web-optimization-framework */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-asp-net-web-pages-2"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-asp-net-web-pages-2 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-asp-net-web-pages-templates"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-asp-net-web-pages-templates */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-azure-data-studio"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-azure-data-studio */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-azure-spatialanchors-2.9.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-azure-spatialanchors-2.9.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-capicom"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-capicom */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-cl"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-cl */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-cla"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-cla */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-container-eula"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-container-eula */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-control-spy-2.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-control-spy-2.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-data-tier-af-2022"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-data-tier-af-2022 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-developer-services-agreement-2018-06"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-developer-services-agreement-2018-06 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-developer-services-agreement"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-developer-services-agreement */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-device-emulator-3.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-device-emulator-3.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-direct3d-d3d120n7-1.1.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-direct3d-d3d120n7-1.1.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-directx-sdk-eula-2020"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-directx-sdk-eula-2020 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-directx-sdk-eula"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-directx-sdk-eula */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-dxsdk-d3dx-9.29.952.3"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-dxsdk-d3dx-9.29.952.3 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-edge-devtools-2022"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-edge-devtools-2022 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-edge-webview2-fixed"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-edge-webview2-fixed */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-edge-webview2"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-edge-webview2 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-entity-framework-4.1"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-entity-framework-4.1 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-entity-framework-5"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-entity-framework-5 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-eula-win-script-host"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-eula-win-script-host */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-exchange-server-2010-sp2-sdk"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-exchange-server-2010-sp2-sdk */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-iis-container-images-eula-2020"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-iis-container-images-eula-2020 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-ilmerge"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-ilmerge */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-invisible-eula-1.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-invisible-eula-1.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-jdbc-driver-40-sql-server"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-jdbc-driver-40-sql-server */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-jdbc-driver-41-sql-server"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-jdbc-driver-41-sql-server */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-jdbc-driver-60-sql-server"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-jdbc-driver-60-sql-server */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-kinext-win-sdk"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-kinext-win-sdk */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-limited-community"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-limited-community */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-limited-public"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-limited-public */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
               "MS-LPL"?: {
                 /** @default false */
                 allowed?: boolean;
                 /** @default MS-LPL */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-msn-webgrease"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-msn-webgrease */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-net-framework-4-supplemental-terms"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-net-framework-4-supplemental-terms */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-net-framework-deployment"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-net-framework-deployment */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-net-library-2016-05"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-net-library-2016-05 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-net-library-2018-11"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-net-library-2018-11 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-net-library-2019-06"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-net-library-2019-06 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-net-library-2020-09"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-net-library-2020-09 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-net-library"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-net-library */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-nt-resource-kit"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-nt-resource-kit */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-nuget-package-manager"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-nuget-package-manager */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-nuget"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-nuget */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-office-extensible-file"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-office-extensible-file */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-office-system-programs-eula"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-office-system-programs-eula */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-opus-patent-2012"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-opus-patent-2012 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-patent-promise-mono"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-patent-promise-mono */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-patent-promise"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-patent-promise */
                 licenseId?: string;
                 /** @default */
                 name?: string;
@@ -35502,10 +39635,1114 @@ export interface operations {
                 /** @default false */
                 isDeprecatedLicenseId?: boolean;
               };
+              "ms-platform-sdk"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-platform-sdk */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-pre-release-sla-2023"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-pre-release-sla-2023 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-programsynthesis-7.22.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-programsynthesis-7.22.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-python-vscode-pylance-2021"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-python-vscode-pylance-2021 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-reactive-extensions-eula"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-reactive-extensions-eula */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-remote-ndis-usb-kit"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-remote-ndis-usb-kit */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-research-shared-source"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-research-shared-source */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
               "MS-RL"?: {
                 /** @default false */
                 allowed?: boolean;
                 /** @default MS-RL */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-rndis"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-rndis */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-rsl"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-rsl */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-silverlight-3"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-silverlight-3 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-specification"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-specification */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-sql-server-compact-4.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-sql-server-compact-4.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-sql-server-data-tools"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-sql-server-data-tools */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-sspl"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-sspl */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-sysinternals-sla"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-sysinternals-sla */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-testplatform-17.0.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-testplatform-17.0.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-ttf-eula"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-ttf-eula */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-typescript-msbuild-4.1.4"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-typescript-msbuild-4.1.4 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-visual-2008-runtime"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-visual-2008-runtime */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-visual-2010-runtime"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-visual-2010-runtime */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-visual-2015-sdk"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-visual-2015-sdk */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-visual-cpp-2015-runtime"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-visual-cpp-2015-runtime */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-visual-studio-2017-tools"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-visual-studio-2017-tools */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-visual-studio-2017"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-visual-studio-2017 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-visual-studio-code-2018"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-visual-studio-code-2018 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-visual-studio-code-2022"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-visual-studio-code-2022 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-visual-studio-code"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-visual-studio-code */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-vs-addons-ext-17.2.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-vs-addons-ext-17.2.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-web-developer-tools-1.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-web-developer-tools-1.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-container-base-image-eula-2020"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-container-base-image-eula-2020 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-driver-kit"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-driver-kit */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-identity-foundation"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-identity-foundation */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-os-2018"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-os-2018 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-sdk-server-2008-net-3.5"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-sdk-server-2008-net-3.5 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-sdk-win10-net-6"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-sdk-win10-net-6 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-sdk-win10"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-sdk-win10 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-sdk-win7-net-4"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-sdk-win7-net-4 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-server-2003-ddk"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-server-2003-ddk */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-windows-server-2003-sdk"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-windows-server-2003-sdk */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-ws-routing-spec"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-ws-routing-spec */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-xamarin-uitest3.2.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-xamarin-uitest3.2.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "ms-xml-core-4.0"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default ms-xml-core-4.0 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "msdn-magazine-sample-code-2007"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default msdn-magazine-sample-code-2007 */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              "msj-sample-code"?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default msj-sample-code */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              msntp?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default msntp */
+                licenseId?: string;
+                /** @default */
+                name?: string;
+                /** @default false */
+                deprecated?: boolean;
+                /** @default false */
+                fsfLibre?: boolean;
+                /** @default false */
+                osiApproved?: boolean;
+                /** @default */
+                crossRef?: string;
+                /** @default */
+                blueOakTier?: string;
+                /** @default */
+                blueOakFamily?: string;
+                /** @default */
+                licenseExceptionId?: string;
+                /** @default false */
+                isDeprecatedLicenseId?: boolean;
+              };
+              msppl?: {
+                /** @default false */
+                allowed?: boolean;
+                /** @default msppl */
                 licenseId?: string;
                 /** @default */
                 name?: string;
@@ -41658,13 +46895,13 @@ export interface operations {
     };
   };
   /**
-   * List historical alerts
+   * List historical alerts (Beta)
    * @description List historical alerts.
    *
    * This endpoint consumes 10 units of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - alerts:list
+   * - historical:alerts-list
    */
   historicalAlertsList: {
     parameters: {
@@ -41723,6 +46960,8 @@ export interface operations {
             items: ({
                 /** @default */
                 repoSlug: string;
+                repoLabels: string[];
+                repoLabelIds: string[];
                 /** @default */
                 branch: string;
                 /** @default false */
@@ -41754,8 +46993,6 @@ export interface operations {
                   /** @default */
                   author?: string;
                   capabilities?: components["schemas"]["Capabilities"];
-                  licenseDetails?: components["schemas"]["LicenseDetails"];
-                  licenseAttrib?: components["schemas"]["SAttrib1_N"];
                   scores?: components["schemas"]["SocketScore"];
                   /** @default 0 */
                   size?: number;
@@ -41806,13 +47043,13 @@ export interface operations {
     };
   };
   /**
-   * Trend of historical alerts
+   * Trend of historical alerts (Beta)
    * @description Trend analytics of historical alerts.
    *
    * This endpoint consumes 10 units of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - alerts:trend
+   * - historical:alerts-trend
    */
   historicalAlertsTrend: {
     parameters: {
@@ -41821,17 +47058,17 @@ export interface operations {
         date?: string;
         /** @description The number of days of data to fetch as an offset from input date */
         range?: string;
-        /** @description Comma-separated list of fields that should be used for count aggregation */
+        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,alertType,artifactType,alertAction,alertCategory) */
         "aggregation.fields"?: string;
-        /** @description Comma-separated list of alert actions that should be included */
+        /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
         "filters.alertAction"?: string;
-        /** @description Comma-separated list of alert categories that should be included */
+        /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
         "filters.alertCategory"?: string;
-        /** @description Comma-separated list of alert severities that should be included */
+        /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
         "filters.alertSeverity"?: string;
-        /** @description Comma-separated list of alert types that should be included */
+        /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
         "filters.alertType"?: string;
-        /** @description Comma-separated list of artifact types that should be included */
+        /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
         "filters.artifactType"?: string;
         /** @description Comma-separated list of repo slugs that should be included */
         "filters.repoSlug"?: string;
@@ -41881,6 +47118,247 @@ export interface operations {
                     countDelta: number;
                   }[];
               }[];
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * Trend of historical dependencies (Beta)
+   * @description Trend analytics of historical dependencies.
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - historical:dependencies-trend
+   */
+  historicalDependenciesTrend: {
+    parameters: {
+      query?: {
+        /** @description The UTC date in YYYY-MMM-DD format for which to fetch dependencies */
+        date?: string;
+        /** @description The number of days of data to fetch as an offset from input date */
+        range?: string;
+        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: repoSlug,artifactType) */
+        "aggregation.fields"?: string;
+        /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
+        "filters.artifactType"?: string;
+        /** @description Comma-separated list of repo slugs that should be included */
+        "filters.repoSlug"?: string;
+      };
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+      };
+    };
+    responses: {
+      /** @description The trend data */
+      200: {
+        content: {
+          "application/json": {
+            meta: {
+              /** @default */
+              organizationId: string;
+              /** @default */
+              startDateInclusive: string;
+              /** @default */
+              endDateInclusive: string;
+              /** @default */
+              interval: string;
+              aggregation: {
+                fields: string[];
+                groups: string[][];
+              };
+              filters: {
+                repoSlug?: string[];
+                artifactType?: string[];
+              };
+            };
+            items: {
+                /** @default */
+                date: string;
+                /** @default 0 */
+                startOfDayTimestamp: number;
+                dataPoints: {
+                    aggregationGroup: string[];
+                    /** @default 0 */
+                    count: number;
+                    /** @default 0 */
+                    countDelta: number;
+                    /** @default 0 */
+                    countDirect: number;
+                    /** @default 0 */
+                    countDirectDelta: number;
+                    /** @default 0 */
+                    countIndirect: number;
+                    /** @default 0 */
+                    countIndirectDelta: number;
+                    countsBySeverity: {
+                      low: {
+                        /** @default 0 */
+                        count: number;
+                        /** @default 0 */
+                        countDelta: number;
+                        /** @default 0 */
+                        countDirect: number;
+                        /** @default 0 */
+                        countDirectDelta: number;
+                        /** @default 0 */
+                        countIndirect: number;
+                        /** @default 0 */
+                        countIndirectDelta: number;
+                      };
+                      medium: {
+                        /** @default 0 */
+                        count: number;
+                        /** @default 0 */
+                        countDelta: number;
+                        /** @default 0 */
+                        countDirect: number;
+                        /** @default 0 */
+                        countDirectDelta: number;
+                        /** @default 0 */
+                        countIndirect: number;
+                        /** @default 0 */
+                        countIndirectDelta: number;
+                      };
+                      high: {
+                        /** @default 0 */
+                        count: number;
+                        /** @default 0 */
+                        countDelta: number;
+                        /** @default 0 */
+                        countDirect: number;
+                        /** @default 0 */
+                        countDirectDelta: number;
+                        /** @default 0 */
+                        countIndirect: number;
+                        /** @default 0 */
+                        countIndirectDelta: number;
+                      };
+                      critical: {
+                        /** @default 0 */
+                        count: number;
+                        /** @default 0 */
+                        countDelta: number;
+                        /** @default 0 */
+                        countDirect: number;
+                        /** @default 0 */
+                        countDirectDelta: number;
+                        /** @default 0 */
+                        countIndirect: number;
+                        /** @default 0 */
+                        countIndirectDelta: number;
+                      };
+                    };
+                  }[];
+              }[];
+          };
+        };
+      };
+      400: components["responses"]["SocketBadRequest"];
+      401: components["responses"]["SocketUnauthorized"];
+      403: components["responses"]["SocketForbidden"];
+      429: components["responses"]["SocketTooManyRequestsResponse"];
+    };
+  };
+  /**
+   * List details of periodic historical data snapshots (Beta)
+   * @description This API endpoint is used to list the details of historical snapshots.
+   * Snapshots of organization data are taken periodically, and
+   * each historical snapshot record contains high-level overview metrics about the data
+   * that was collected. Other [Historical Data Endpoints](/reference/historical-data-endpoints)
+   * can be used to fetch the raw data associated with each snapshot.
+   *
+   * Historical snapshots contain details and raw data for the following resources:
+   *
+   * - Repositories
+   * - Alerts
+   * - Dependencies
+   * - Artifacts
+   * - Users
+   * - Settings
+   *
+   * Daily snapshot data is bucketed to the nearest day which is described in
+   * more detail at: [Historical Data Endpoints](/reference/historical-data-endpoints)
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - historical:snapshots-list
+   */
+  historicalSnapshotsList: {
+    parameters: {
+      query?: {
+        /** @description The UTC date in YYYY-MMM-DD format for which to fetch snapshots */
+        date?: string;
+        /** @description The number of days of data to fetch as an offset from input date (e.g. "-7d" or "7d") or use "latest" to query for latest snapshots for each repo */
+        range?: string;
+        /** @description Specify the maximum number of results to return per page (intermediate pages may have fewer than this limit and callers should always check "endCursor" in response body to know if there are more pages) */
+        per_page?: number;
+        /** @description The pagination cursor that was returned as the "endCursor" property in previous request */
+        startAfterCursor?: string;
+        /** @description Comma-separated list of historical snapshot statuses that should be included (allowed: "in-progress", "success", "failure", "timeout") */
+        "filters.status"?: string;
+      };
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string;
+      };
+    };
+    responses: {
+      /** @description The paginated array of API tokens for the organization, and related metadata. */
+      200: {
+        content: {
+          "application/json": {
+            meta: {
+              /** @default */
+              organizationId: string;
+              /** @default 0 */
+              queryStartTimestamp: number;
+              /** @default */
+              startDateInclusive: string;
+              /** @default */
+              endDateInclusive: string;
+            };
+            items: ({
+                /** @default */
+                id: string;
+                /** @default */
+                startedAt: string;
+                /** @default */
+                finishedAt: string | null;
+                /** @default 0 */
+                durationMs: number;
+                /** @default */
+                status: string;
+                /** @default 0 */
+                numReposScanned: number;
+                /** @default 0 */
+                numSbomsScanned: number;
+                /** @default 0 */
+                numLowAlerts: number;
+                /** @default 0 */
+                numHighAlerts: number;
+                /** @default 0 */
+                numMediumAlerts: number;
+                /** @default 0 */
+                numCriticalAlerts: number;
+                /** @default 0 */
+                numIgnoredLowAlerts: number;
+                /** @default 0 */
+                numIgnoredHighAlerts: number;
+                /** @default 0 */
+                numIgnoredMediumAlerts: number;
+                /** @default 0 */
+                numIgnoredCriticalAlerts: number;
+              })[];
+            /** @default */
+            endCursor: string | null;
           };
         };
       };
@@ -42029,7 +47507,7 @@ export interface operations {
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - Any
+   * - None, but authentication is required
    */
   searchDependencies: {
     requestBody?: {
@@ -42378,6 +47856,8 @@ export interface operations {
    * Get Threat Feed Items (Beta)
    * @description Paginated list of threat feed items.
    *
+   * This endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.
+   *
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
@@ -42432,7 +47912,7 @@ export interface operations {
                 threatType?: string;
               }[];
             /** @default */
-            nextPage: string;
+            nextPage: string | null;
           };
         };
       };
@@ -42469,7 +47949,7 @@ export interface operations {
    * This endpoint consumes 0 units of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - Any
+   * - None, but authentication is required
    */
   getQuota: {
     responses: {
@@ -42493,7 +47973,7 @@ export interface operations {
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - Any
+   * - None, but authentication is required
    */
   getOrganizations: {
     responses: {
@@ -42529,7 +48009,7 @@ export interface operations {
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - Any
+   * - None, but authentication is required
    */
   postSettings: {
     /** @description Array of organization selector objects (with `organization` field holding the organization ID) to get settings for */
@@ -42588,7 +48068,7 @@ export interface operations {
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - Any
+   * - None, but authentication is required
    */
   getIssuesByNPMPackage: {
     parameters: {
@@ -42651,7 +48131,7 @@ export interface operations {
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - Any
+   * - None, but authentication is required
    */
   getScoreByNPMPackage: {
     parameters: {
