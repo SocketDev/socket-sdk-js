@@ -466,6 +466,19 @@ class SocketSdk {
     }
   }
 
+  async getOrgLicensePolicy (
+    orgSlug: string
+  ): Promise<SocketSdkResultType<'getOrgLicensePolicy'>> {
+    const orgSlugParam = encodeURIComponent(orgSlug)
+
+    try {
+      const data = await this.#getClient().get(`orgs/${orgSlugParam}/settings/license-policy`).json()
+      return this.#handleApiSuccess<'getOrgLicensePolicy'>(data)
+    } catch (err) {
+      return this.#handleApiError<'getOrgLicensePolicy'>(err)
+    }
+  }
+
   #handleApiError<T extends SocketSdkOperations>(err: unknown): SocketSdkErrorType<T> {
     if (!(err instanceof HTTPError)) {
       throw new ErrorWithCause('Unexpected error when calling API', { cause: err })
