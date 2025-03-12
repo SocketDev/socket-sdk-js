@@ -255,6 +255,17 @@ export interface paths {
      * Export CycloneDX SBOM (Beta)
      * @description Export a Socket SBOM as a CycloneDX SBOM
      *
+     * Supported ecosystems:
+     *
+     * - go
+     * - maven
+     * - npm
+     * - pypi
+     * - spdx
+     * - cdx
+     *
+     * Unsupported ecosystems are filtered from the export.
+     *
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
@@ -266,6 +277,17 @@ export interface paths {
     /**
      * Export SPDX SBOM (Beta)
      * @description Export a Socket SBOM as a SPDX SBOM
+     *
+     * Supported ecosystems:
+     *
+     * - go
+     * - maven
+     * - npm
+     * - pypi
+     * - spdx
+     * - cdx
+     *
+     * Unsupported ecosystems are filtered from the export.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -3182,6 +3204,17 @@ export interface operations {
    * Export CycloneDX SBOM (Beta)
    * @description Export a Socket SBOM as a CycloneDX SBOM
    *
+   * Supported ecosystems:
+   *
+   * - go
+   * - maven
+   * - npm
+   * - pypi
+   * - spdx
+   * - cdx
+   *
+   * Unsupported ecosystems are filtered from the export.
+   *
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
@@ -3227,6 +3260,17 @@ export interface operations {
   /**
    * Export SPDX SBOM (Beta)
    * @description Export a Socket SBOM as a SPDX SBOM
+   *
+   * Supported ecosystems:
+   *
+   * - go
+   * - maven
+   * - npm
+   * - pypi
+   * - spdx
+   * - cdx
+   *
+   * Unsupported ecosystems are filtered from the export.
    *
    * This endpoint consumes 1 unit of your quota.
    *
