@@ -1144,6 +1144,9 @@ export interface components {
     LicenseDetails: {
         /** @default */
         spdxDisj: string;
+        authors: string[];
+        /** @default */
+        errorData: string;
         /** @default */
         provenance: string;
         /** @default */
@@ -1183,6 +1186,12 @@ export interface components {
       action?: string;
       /** @default 0 */
       actionPolicyIndex?: number;
+      fix?: {
+        /** @default */
+        type: string;
+        /** @default */
+        description: string;
+      };
     };
     SocketArtifactLink: {
       /** @default false */
@@ -2895,6 +2904,8 @@ export interface operations {
         alerts?: boolean;
         /** @description Compact metadata. */
         compact?: boolean;
+        /** @description Include only fixable alerts. */
+        fixable?: boolean;
         /** @description Include license attribution data, including license text and author information. Maps attribution/license text to a list of data objects to which that attribution info applies. */
         licenseattrib?: boolean;
         /** @description Include detailed license information, including location and match strength, for each license datum. */
@@ -47062,6 +47073,12 @@ export interface operations {
                   start?: number | null;
                   /** @default 0 */
                   end?: number | null;
+                  fix?: {
+                    /** @default */
+                    type: string;
+                    /** @default */
+                    description: string;
+                  } | null;
                 };
                 dependency: {
                   /** @default false */
