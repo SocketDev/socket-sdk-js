@@ -21,7 +21,7 @@
     "types/**/*.d.ts"
   ],
   "engines": {
-    "node": "^16.10.0 || >=18.0.0"
+    "node": "^18.20.7 || ^20.18.3 || >=22.14.0"
   },
   "dependencies": {
     "formdata-node": "^5.0.0",
