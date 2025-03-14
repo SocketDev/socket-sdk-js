@@ -1,16 +1,19 @@
-# Basic ones
-/coverage
-/coverage-ts
-/node_modules
+.DS_Store
+._.DS_Store
+Thumbs.db
+/.api
 /.env
-/.nyc_output
-/yarn.lock
-
-# Generated types
+/.nvm
+/.tap
+/.type-coverage
+/.vscode
+/coverage
+/npm-debug.log
+**/dist
+**/node_modules
+/*.tsbuildinfo
 *.d.ts
 *.d.ts.map
-!api*.d.ts
 
-# Library specific ones
-/.api
-/dist
+!/.vscode/extensions.json
+!api*.d.ts

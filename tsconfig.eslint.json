@@ -1,10 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "include": [
-    "src/**/*",
     "build/**/*",
-    "test/**/*",
     "index.js",
+    "src/**/*",
+    "test/**/*",
     "types/**/*"
   ]
 }

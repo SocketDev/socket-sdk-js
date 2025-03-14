@@ -10,9 +10,9 @@
   },
   "rules": {
     "@typescript-eslint/quotes": ["error", "single", { "avoidEscape": true, "allowTemplateLiterals": false }],
+    "jsdoc/require-jsdoc": "off",
     "jsdoc/require-param": "off",
     "jsdoc/require-returns": "off",
-    "jsdoc/require-jsdoc": "off",
     "no-console": "warn"
   }
 }
