@@ -3758,7 +3758,7 @@ export interface operations {
                  * @description The last update date of the repository
                  * @default
                  */
-                updated_at?: string;
+                updated_at?: string | null;
                 /**
                  * @description The slug of the repository
                  * @default
@@ -3768,7 +3768,7 @@ export interface operations {
                  * @description The ID of the head full scan of the repository
                  * @default
                  */
-                head_full_scan_id?: string;
+                head_full_scan_id?: string | null;
                 /**
                  * @description The name of the repository
                  * @default
@@ -3778,18 +3778,18 @@ export interface operations {
                  * @description The description of the repository
                  * @default
                  */
-                description?: string;
+                description?: string | null;
                 /**
                  * @description The homepage URL of the repository
                  * @default
                  */
-                homepage?: string;
+                homepage?: string | null;
                 /**
                  * @description The visibility of the repository
                  * @default private
-                 * @enum {string}
+                 * @enum {string|null}
                  */
-                visibility?: "public" | "private";
+                visibility?: "public" | "private" | null;
                 /**
                  * @description Whether the repository is archived or not
                  * @default false
@@ -3799,7 +3799,7 @@ export interface operations {
                  * @description The default branch of the repository
                  * @default main
                  */
-                default_branch?: string;
+                default_branch?: string | null;
               })[];
             /** @default 0 */
             nextPage: number | null;
@@ -3843,18 +3843,18 @@ export interface operations {
            * @description The description of the repository
            * @default
            */
-          description?: string;
+          description?: string | null;
           /**
            * @description The homepage URL of the repository
            * @default
            */
-          homepage?: string;
+          homepage?: string | null;
           /**
            * @description The visibility of the repository
            * @default private
-           * @enum {string}
+           * @enum {string|null}
            */
-          visibility?: "public" | "private";
+          visibility?: "public" | "private" | null;
           /**
            * @description Whether the repository is archived or not
            * @default false
@@ -3864,7 +3864,7 @@ export interface operations {
            * @description The default branch of the repository
            * @default main
            */
-          default_branch?: string;
+          default_branch?: string | null;
         };
       };
     };
@@ -3887,7 +3887,7 @@ export interface operations {
              * @description The last update date of the repository
              * @default
              */
-            updated_at?: string;
+            updated_at?: string | null;
             /**
              * @description The slug of the repository
              * @default
@@ -3897,7 +3897,7 @@ export interface operations {
              * @description The ID of the head full scan of the repository
              * @default
              */
-            head_full_scan_id?: string;
+            head_full_scan_id?: string | null;
             /**
              * @description The name of the repository
              * @default
@@ -3907,18 +3907,18 @@ export interface operations {
              * @description The description of the repository
              * @default
              */
-            description?: string;
+            description?: string | null;
             /**
              * @description The homepage URL of the repository
              * @default
              */
-            homepage?: string;
+            homepage?: string | null;
             /**
              * @description The visibility of the repository
              * @default private
-             * @enum {string}
+             * @enum {string|null}
              */
-            visibility?: "public" | "private";
+            visibility?: "public" | "private" | null;
             /**
              * @description Whether the repository is archived or not
              * @default false
@@ -3928,7 +3928,7 @@ export interface operations {
              * @description The default branch of the repository
              * @default main
              */
-            default_branch?: string;
+            default_branch?: string | null;
           };
         };
       };
@@ -3966,58 +3966,63 @@ export interface operations {
              * @description The ID of the repository
              * @default
              */
-            id?: string;
+            id: string;
             /**
              * @description The creation date of the repository
              * @default
              */
-            created_at?: string;
+            created_at: string;
             /**
              * @description The last update date of the repository
              * @default
              */
-            updated_at?: string;
+            updated_at: string | null;
             /**
              * @description The slug of the repository
              * @default
              */
-            slug?: string;
+            slug: string;
             /**
              * @description The ID of the head full scan of the repository
              * @default
              */
-            head_full_scan_id?: string;
+            head_full_scan_id: string | null;
             /**
              * @description The name of the repository
              * @default
              */
-            name?: string;
+            name: string;
             /**
              * @description The description of the repository
              * @default
              */
-            description?: string;
+            description: string | null;
             /**
              * @description The homepage URL of the repository
              * @default
              */
-            homepage?: string;
+            homepage: string | null;
             /**
              * @description The visibility of the repository
              * @default private
-             * @enum {string}
+             * @enum {string|null}
              */
-            visibility?: "public" | "private";
+            visibility: "public" | "private" | null;
             /**
              * @description Whether the repository is archived or not
              * @default false
              */
-            archived?: boolean;
+            archived: boolean;
             /**
              * @description The default branch of the repository
              * @default main
              */
-            default_branch?: string;
+            default_branch: string | null;
+            /**
+             * @description The slug of the repository. This typo is intentionally preserved for backwards compatibility reasons.
+             * @default
+             */
+            slig: string;
           };
         };
       };
@@ -4058,18 +4063,18 @@ export interface operations {
            * @description The description of the repository
            * @default
            */
-          description?: string;
+          description?: string | null;
           /**
            * @description The homepage URL of the repository
            * @default
            */
-          homepage?: string;
+          homepage?: string | null;
           /**
            * @description The visibility of the repository
            * @default private
-           * @enum {string}
+           * @enum {string|null}
            */
-          visibility?: "public" | "private";
+          visibility?: "public" | "private" | null;
           /**
            * @description Whether the repository is archived or not
            * @default false
@@ -4079,7 +4084,7 @@ export interface operations {
            * @description The default branch of the repository
            * @default main
            */
-          default_branch?: string;
+          default_branch?: string | null;
         };
       };
     };
@@ -4102,7 +4107,7 @@ export interface operations {
              * @description The last update date of the repository
              * @default
              */
-            updated_at?: string;
+            updated_at?: string | null;
             /**
              * @description The slug of the repository
              * @default
@@ -4112,7 +4117,7 @@ export interface operations {
              * @description The ID of the head full scan of the repository
              * @default
              */
-            head_full_scan_id?: string;
+            head_full_scan_id?: string | null;
             /**
              * @description The name of the repository
              * @default
@@ -4122,18 +4127,18 @@ export interface operations {
              * @description The description of the repository
              * @default
              */
-            description?: string;
+            description?: string | null;
             /**
              * @description The homepage URL of the repository
              * @default
              */
-            homepage?: string;
+            homepage?: string | null;
             /**
              * @description The visibility of the repository
              * @default private
-             * @enum {string}
+             * @enum {string|null}
              */
-            visibility?: "public" | "private";
+            visibility?: "public" | "private" | null;
             /**
              * @description Whether the repository is archived or not
              * @default false
@@ -4143,7 +4148,7 @@ export interface operations {
              * @description The default branch of the repository
              * @default main
              */
-            default_branch?: string;
+            default_branch?: string | null;
           };
         };
       };
@@ -4350,7 +4355,7 @@ export interface operations {
                  * @default api token
                  */
                 name: string;
-                scopes: ("report" | "report:list" | "report:read" | "report:write" | "repo" | "repo:list" | "repo:create" | "repo:update" | "repo:delete" | "full-scans" | "full-scans:list" | "full-scans:create" | "full-scans:delete" | "packages" | "packages:list" | "audit-log" | "audit-log:list" | "integration" | "integration:list" | "integration:create" | "integration:update" | "integration:delete" | "threat-feed" | "threat-feed:list" | "security-policy" | "security-policy:update" | "security-policy:read" | "license-policy" | "license-policy:update" | "license-policy:read" | "triage" | "triage:alerts-list" | "triage:alerts-update" | "api-tokens" | "api-tokens:create" | "api-tokens:update" | "api-tokens:revoke" | "api-tokens:rotate" | "api-tokens:list" | "alerts" | "alerts:list" | "alerts:trend" | "dependencies" | "dependencies:list" | "dependencies:trend" | "historical" | "historical:snapshots-list" | "historical:alerts-list" | "historical:alerts-trend" | "historical:dependencies-list" | "historical:dependencies-trend")[];
+                scopes: ("report" | "report:list" | "report:read" | "report:write" | "repo" | "repo:list" | "repo:create" | "repo:update" | "repo:delete" | "repo-label" | "repo-label:list" | "repo-label:create" | "repo-label:update" | "repo-label:delete" | "full-scans" | "full-scans:list" | "full-scans:create" | "full-scans:delete" | "packages" | "packages:list" | "audit-log" | "audit-log:list" | "integration" | "integration:list" | "integration:create" | "integration:update" | "integration:delete" | "threat-feed" | "threat-feed:list" | "security-policy" | "security-policy:update" | "security-policy:read" | "license-policy" | "license-policy:update" | "license-policy:read" | "triage" | "triage:alerts-list" | "triage:alerts-update" | "api-tokens" | "api-tokens:create" | "api-tokens:update" | "api-tokens:revoke" | "api-tokens:rotate" | "api-tokens:list" | "alerts" | "alerts:list" | "alerts:trend" | "dependencies" | "dependencies:list" | "dependencies:trend" | "historical" | "historical:snapshots-list" | "historical:alerts-list" | "historical:alerts-trend" | "historical:dependencies-list" | "historical:dependencies-trend")[];
                 /** @default 1000 */
                 max_quota: number;
                 /**
@@ -4419,7 +4424,7 @@ export interface operations {
            * @default api token
            */
           name: string;
-          scopes: ("report" | "report:list" | "report:read" | "report:write" | "repo" | "repo:list" | "repo:create" | "repo:update" | "repo:delete" | "full-scans" | "full-scans:list" | "full-scans:create" | "full-scans:delete" | "packages" | "packages:list" | "audit-log" | "audit-log:list" | "integration" | "integration:list" | "integration:create" | "integration:update" | "integration:delete" | "threat-feed" | "threat-feed:list" | "security-policy" | "security-policy:update" | "security-policy:read" | "license-policy" | "license-policy:update" | "license-policy:read" | "triage" | "triage:alerts-list" | "triage:alerts-update" | "api-tokens" | "api-tokens:create" | "api-tokens:update" | "api-tokens:revoke" | "api-tokens:rotate" | "api-tokens:list" | "alerts" | "alerts:list" | "alerts:trend" | "dependencies" | "dependencies:list" | "dependencies:trend" | "historical" | "historical:snapshots-list" | "historical:alerts-list" | "historical:alerts-trend" | "historical:dependencies-list" | "historical:dependencies-trend")[];
+          scopes: ("report" | "report:list" | "report:read" | "report:write" | "repo" | "repo:list" | "repo:create" | "repo:update" | "repo:delete" | "repo-label" | "repo-label:list" | "repo-label:create" | "repo-label:update" | "repo-label:delete" | "full-scans" | "full-scans:list" | "full-scans:create" | "full-scans:delete" | "packages" | "packages:list" | "audit-log" | "audit-log:list" | "integration" | "integration:list" | "integration:create" | "integration:update" | "integration:delete" | "threat-feed" | "threat-feed:list" | "security-policy" | "security-policy:update" | "security-policy:read" | "license-policy" | "license-policy:update" | "license-policy:read" | "triage" | "triage:alerts-list" | "triage:alerts-update" | "api-tokens" | "api-tokens:create" | "api-tokens:update" | "api-tokens:revoke" | "api-tokens:rotate" | "api-tokens:list" | "alerts" | "alerts:list" | "alerts:trend" | "dependencies" | "dependencies:list" | "dependencies:trend" | "historical" | "historical:snapshots-list" | "historical:alerts-list" | "historical:alerts-trend" | "historical:dependencies-list" | "historical:dependencies-trend")[];
           /** @default 1000 */
           max_quota: number;
           /**
@@ -4485,7 +4490,7 @@ export interface operations {
            * @default api token
            */
           name: string;
-          scopes: ("report" | "report:list" | "report:read" | "report:write" | "repo" | "repo:list" | "repo:create" | "repo:update" | "repo:delete" | "full-scans" | "full-scans:list" | "full-scans:create" | "full-scans:delete" | "packages" | "packages:list" | "audit-log" | "audit-log:list" | "integration" | "integration:list" | "integration:create" | "integration:update" | "integration:delete" | "threat-feed" | "threat-feed:list" | "security-policy" | "security-policy:update" | "security-policy:read" | "license-policy" | "license-policy:update" | "license-policy:read" | "triage" | "triage:alerts-list" | "triage:alerts-update" | "api-tokens" | "api-tokens:create" | "api-tokens:update" | "api-tokens:revoke" | "api-tokens:rotate" | "api-tokens:list" | "alerts" | "alerts:list" | "alerts:trend" | "dependencies" | "dependencies:list" | "dependencies:trend" | "historical" | "historical:snapshots-list" | "historical:alerts-list" | "historical:alerts-trend" | "historical:dependencies-list" | "historical:dependencies-trend")[];
+          scopes: ("report" | "report:list" | "report:read" | "report:write" | "repo" | "repo:list" | "repo:create" | "repo:update" | "repo:delete" | "repo-label" | "repo-label:list" | "repo-label:create" | "repo-label:update" | "repo-label:delete" | "full-scans" | "full-scans:list" | "full-scans:create" | "full-scans:delete" | "packages" | "packages:list" | "audit-log" | "audit-log:list" | "integration" | "integration:list" | "integration:create" | "integration:update" | "integration:delete" | "threat-feed" | "threat-feed:list" | "security-policy" | "security-policy:update" | "security-policy:read" | "license-policy" | "license-policy:update" | "license-policy:read" | "triage" | "triage:alerts-list" | "triage:alerts-update" | "api-tokens" | "api-tokens:create" | "api-tokens:update" | "api-tokens:revoke" | "api-tokens:rotate" | "api-tokens:list" | "alerts" | "alerts:list" | "alerts:trend" | "dependencies" | "dependencies:list" | "dependencies:trend" | "historical" | "historical:snapshots-list" | "historical:alerts-list" | "historical:alerts-trend" | "historical:dependencies-list" | "historical:dependencies-trend")[];
           /** @default 1000 */
           max_quota: number;
           /**
