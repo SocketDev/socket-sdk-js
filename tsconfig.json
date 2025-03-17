@@ -1,19 +1,42 @@
 {
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": ["node_modules", "dist"],
   "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "allowJs": false,
+    "composite": true,
     "declaration": true,
+    "declarationMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "target": "es2020",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "outDir": "./dist/cjs",
-    "rootDir": "src",
+    "incremental": true,
+    "isolatedModules": true,
+    "lib": ["esnext"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "noEmit": true,
+    "noEmitOnError": true,
+    "outDir": "dist/cjs",
     "resolveJsonModule": true,
+    "rootDir": "src",
     "skipLibCheck": true,
-    "strict": true
-  }
+    "sourceMap": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "target": "esnext",
+    "useUnknownInCatchVariables": true,
+
+    /* New checks being tried out */
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+
+    /* Additional checks */
+    "importsNotUsedAsValues": "remove",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "include": ["src/*.ts"],
+  "exclude": ["dist"]
 }
