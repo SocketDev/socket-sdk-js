@@ -1,14 +1,20 @@
 'use strict'
 
-const { readFile, writeFile } = require('node:fs/promises')
+const fs = require('node:fs/promises')
 const path = require('node:path')
 
-Promise.resolve().then(async () => {
-  const openApiData = await readFile(path.join(__dirname, '../openapi.json'), 'utf8')
-
-  await writeFile(path.join(__dirname, '../openapi.json'), JSON.stringify(JSON.parse(openApiData), undefined, 2))
-}).catch(err => {
-  // eslint-disable-next-line no-console
-  console.error('Failed with error:', err.stack)
-  process.exit(1)
-})
+void (async () => {
+  try {
+    const openApiData = await fs.readFile(
+      path.join(__dirname, '../openapi.json'),
+      'utf8'
+    )
+    await fs.writeFile(
+      path.join(__dirname, '../openapi.json'),
+      JSON.stringify(JSON.parse(openApiData), null, 2)
+    )
+  } catch (e) {
+    process.exitCode = 1
+    console.error('Failed with error:', e.stack)
+  }
+})()
