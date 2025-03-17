@@ -1,0 +1,5 @@
+{
+  "loglevel": "minimal",
+  "reject": ["eslint-plugin-unicorn"],
+  "upgrade": true
+}

@@ -1,0 +1,10 @@
+{
+  "entry": [
+    "eslint.config.js",
+    "build/**/*.js",
+    "src/**/*.ts",
+    "test/**/*.spec.ts"
+  ],
+  "project": ["build/**/*", "src/**/*", "test/**/*"],
+  "ignore": ["dist/**/*"]
+}
