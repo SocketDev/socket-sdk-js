@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["import", "promise", "typescript", "unicorn"],
+  "categories": {
+    "correctness": "warn",
+    "perf": "warn",
+    "suspicious": "warn"
+  },
+  "settings": {},
+  "rules": {
+    "@typescript-eslint/array-type": ["error", { "default": "array-simple" }],
+    "@typescript-eslint/no-misused-new": "error",
+    "@typescript-eslint/no-this-alias": [
+      "error",
+      { "allowDestructuring": true }
+    ],
+    "@typescript-eslint/return-await": ["error", "always"],
+    "no-control-regex": "off",
+    "no-new": "off",
+    "no-self-assign": "off",
+    "no-undef": "off",
+    "no-unused-vars": "off",
+    "no-var": "error",
+    "unicorn/no-empty-file": "off",
+    "unicorn/no-new-array": "off"
+  }
+}
