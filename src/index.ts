@@ -1,21 +1,14 @@
-import { createWriteStream } from 'node:fs'
+import events from 'node:events'
+import { createReadStream, createWriteStream } from 'node:fs'
+import https from 'node:https'
 import path from 'node:path'
-import stream from 'node:stream/promises'
-
-import { Blob, FormData } from 'formdata-node'
-import { fileFromPath } from 'formdata-node/file-from-path'
-// eslint-disable-next-line import-x/no-named-as-default
-import got, { HTTPError } from 'got'
-import { ErrorWithCause } from 'pony-cause'
+import readline from 'node:readline'
 
 import type { operations } from '../types/api'
 import type { OpErrorType, OpReturnType } from '../types/api-helpers'
-import type {
-  Got,
-  Agents as GotAgent,
-  ExtendOptions as GotExtendOptions
-} from 'got'
-import type { Readable } from 'node:stream'
+import type { ReadStream } from 'node:fs'
+import type { IncomingMessage } from 'node:http'
+import type { Agent, RequestOptions } from 'node:https'
 
 type SocketSdkOperations = keyof operations
 type SocketSdkReturnType<T extends SocketSdkOperations> = OpReturnType<
@@ -28,106 +21,232 @@ type SocketSdkResultType<T extends SocketSdkOperations> =
   | SocketSdkReturnType<T>
   | SocketSdkErrorType<T>
 
-interface SocketSdkOptions {
-  agent?: GotAgent | undefined
+export interface SocketSdkOptions {
+  agent?: Agent | undefined
   baseUrl?: string | undefined
   userAgent?: string | undefined
 }
 
-function ensureObject(value: unknown): value is Record<string, unknown> {
-  return !!(value && typeof value === 'object' && !Array.isArray(value))
+const rootPath = path.join(__dirname, '../..')
+const rootPkgJsonPath = path.join(rootPath, 'package.json')
+
+const defaultUserAgent = createUserAgentFromPkgJson(require(rootPkgJsonPath))
+
+class ResponseError extends Error {
+  response: IncomingMessage
+  constructor(response: IncomingMessage, message: string) {
+    super(`${message}: ${response.statusCode} - ${response.statusMessage}`)
+    this.response = response
+  }
+}
+
+async function createDeleteRequest(
+  baseUrl: string,
+  urlPath: string,
+  options?: RequestOptions | undefined
+) {
+  const req = https.request(`${baseUrl}${urlPath}`, {
+    method: 'DELETE',
+    ...options
+  })
+  const { 0: res } = await events.once(req, 'response')
+  if (!isResponseOk(res)) {
+    throw new ResponseError(res, 'Get request failed')
+  }
+  return await getResponseJson(res)
+}
+
+async function createGetRequest(
+  baseUrl: string,
+  urlPath: string,
+  options?: RequestOptions | undefined
+) {
+  const req = https
+    .request(`${baseUrl}${urlPath}`, {
+      method: 'GET',
+      ...options
+    })
+    .end()
+  const { 0: res } = await events.once(req, 'response')
+  if (!isResponseOk(res)) {
+    throw new ResponseError(res, 'Get request failed')
+  }
+  return await getResponseJson(res)
+}
+
+async function createPostRequest(
+  baseUrl: string,
+  urlPath: string,
+  postJson: any,
+  options?: RequestOptions | undefined
+) {
+  const req = https
+    .request(`${baseUrl}${urlPath}`, {
+      method: 'POST',
+      ...options
+    })
+    .end(JSON.stringify(postJson))
+  const { 0: res } = await events.once(req, 'response')
+  if (!isResponseOk(res)) {
+    throw new ResponseError(res, 'Post request failed')
+  }
+  return await getResponseJson(res)
+}
+
+function createRequestBodyForFilepaths(
+  filepaths: string[]
+): Array<string | ReadStream> {
+  const requestBody = []
+  for (const p of filepaths) {
+    // Multipart header for each file.
+    requestBody.push(
+      `Content-Disposition: form-data; name="file"; filename="${path.basename(p)}"\n`,
+      `Content-Type: application/octet-stream\n\n`,
+      createReadStream(p),
+      // New line after file content.
+      '\n'
+    )
+  }
+  return requestBody
+}
+
+function createRequestBodyForJson(
+  jsonData: any,
+  basename = 'data.json'
+): Array<string | ReadStream> {
+  const ext = path.extname(basename)
+  const name = path.basename(basename, ext)
+  return [
+    `Content-Disposition: form-data; name="${name}"; filename="${basename}"\n`,
+    'Content-Type: application/json\n\n',
+    JSON.stringify(jsonData),
+    // New line after file content.
+    '\n'
+  ]
+}
+
+async function createUploadRequest(
+  baseUrl: string,
+  urlPath: string,
+  requestBodyNoBoundaries: Array<string | ReadStream>,
+  options?: RequestOptions | undefined
+) {
+  // Generate a unique boundary for multipart encoding.
+  const boundary = `----NodeMultipartBoundary${Date.now()}`
+  const boundarySep = `--${boundary}\n`
+  // Create request body as a stream.
+  const requestBody = [
+    ...(requestBodyNoBoundaries.length
+      ? requestBodyNoBoundaries.flatMap(e => [boundarySep, e])
+      : [boundarySep]),
+    `--${boundary}--\n`
+  ]
+  const req = https.request(`${baseUrl}${urlPath}`, {
+    method: 'POST',
+    ...options,
+    headers: {
+      ...options?.headers,
+      'Content-Type': `multipart/form-data; boundary=${boundary}`
+    }
+  })
+  // Send the request body (headers + files).
+  for (const part of requestBody) {
+    if (typeof part === 'string') {
+      req.write(part)
+    } else {
+      part.pipe(req, { end: false })
+      // Wait for file streaming to complete.
+      // eslint-disable-next-line no-await-in-loop
+      await events.once(part, 'end')
+      // Ensure a new line after file content.
+      req.write('\n')
+    }
+  }
+  // Close request after writing all data.
+  req.end()
+
+  const { 0: res } = await events.once(req, 'response')
+  if (!isResponseOk(res)) {
+    throw new ResponseError(res, 'Upload failed')
+  }
+  return await getResponseJson(res)
+}
+
+async function getResponseJson(
+  response: IncomingMessage
+): Promise<ReturnType<typeof JSON.parse>> {
+  let data = ''
+  for await (const chunk of response) {
+    data += chunk
+  }
+  try {
+    return JSON.parse(data)
+  } catch {
+    throw new Error(`Invalid JSON response: ${data}`)
+  }
+}
+
+function isResponseOk(response: IncomingMessage): boolean {
+  const { statusCode } = response
+  return (
+    typeof statusCode === 'number' && statusCode >= 200 && statusCode <= 299
+  )
 }
 
 /**
  * Package.json data to base the User-Agent on
  */
-function createUserAgentFromPkgJson(pkgData: {
+export function createUserAgentFromPkgJson(pkgData: {
   name: string
   version: string
-  homepage?: string
+  homepage?: string | undefined
 }): string {
   const { homepage } = pkgData
-  return (
-    `${pkgData.name.replace('@', '').replace('/', '-')}/${pkgData.version}` +
-    (homepage ? ` (${homepage})` : '')
-  )
+  const name = pkgData.name.replace('@', '').replace('/', '-')
+  return `${name}/${pkgData.version}${homepage ? ` (${homepage})` : ''}`
 }
 
-class SocketSdk {
-  #client?: Got
-  readonly #gotOptions: GotExtendOptions
+export class SocketSdk {
+  readonly #baseUrl: string
+  readonly #reqOptions: RequestOptions
 
   /**
    * @throws {SocketSdkAuthError}
    */
-  constructor(apiKey: string, options?: SocketSdkOptions | undefined) {
+  constructor(apiToken: string, options?: SocketSdkOptions | undefined) {
     const {
       agent,
       baseUrl = 'https://api.socket.dev/v0/',
       userAgent
     } = { __proto__: null, ...options } as SocketSdkOptions
 
-    this.#gotOptions = {
-      prefixUrl: baseUrl,
-      retry: { limit: 0 },
-      username: apiKey,
-      // See https://github.com/sindresorhus/got/blob/main/documentation/2-options.md#enableunixsockets
-      enableUnixSockets: false,
+    this.#baseUrl = baseUrl
+    this.#reqOptions = {
+      ...(agent ? { agent } : {}),
       headers: {
-        'user-agent': `${userAgent ? `${userAgent} ` : ''}${createUserAgentFromPkgJson(require(path.join(__dirname, '../../package.json')))}`
-      },
-      ...(agent ? { agent } : {})
+        Authorization: `Basic ${btoa(`${apiToken}:`)}`,
+        'User-Agent': `${userAgent ? `${userAgent} ` : ''}${defaultUserAgent}`
+      }
     }
-  }
-
-  #getApiErrorDescription(err: HTTPError): Record<string, unknown> {
-    let rawBody: unknown
-
-    try {
-      rawBody = JSON.parse(err.response.body as string)
-    } catch (cause) {
-      throw new ErrorWithCause('Could not parse API error response', { cause })
-    }
-
-    const errorDescription = ensureObject(rawBody)
-      ? rawBody['error']
-      : undefined
-
-    if (!ensureObject(errorDescription)) {
-      throw new Error('Invalid body on API error response')
-    }
-
-    return errorDescription
-  }
-
-  #getClient(): Got {
-    if (!this.#client) {
-      this.#client = got.extend(this.#gotOptions)
-    }
-    return this.#client
   }
 
   #handleApiError<T extends SocketSdkOperations>(
-    err: unknown
+    error: unknown
   ): SocketSdkErrorType<T> {
-    if (!(err instanceof HTTPError)) {
-      throw new ErrorWithCause('Unexpected error when calling API', {
-        cause: err
+    if (!(error instanceof ResponseError)) {
+      throw new Error('Unexpected error when calling API', {
+        cause: error
       })
     }
-
-    if (err.response.statusCode >= 500) {
-      throw new ErrorWithCause('API returned an error', { cause: err })
+    const statusCode = error.response.statusCode
+    if (statusCode! >= 500) {
+      throw new Error('API returned an error', { cause: error })
     }
-
-    // First convert to unknown, then to the specific error type
-    const errorResponse = {
+    return {
       success: false as const,
-      status: err.response.statusCode,
-      error: this.#getApiErrorDescription(err)
-    }
-
-    return errorResponse as unknown as SocketSdkErrorType<T>
+      status: statusCode!,
+      error: error.message ?? ''
+    } as unknown as SocketSdkErrorType<T>
   }
 
   #handleApiSuccess<T extends SocketSdkOperations>(
@@ -142,59 +261,51 @@ class SocketSdk {
 
   async batchPackageFetch(
     queryParams: Record<string, string>,
-    components: { components: Array<{ purl: string }> }
+    componentsObj: { components: Array<{ purl: string }> }
   ): Promise<SocketSdkResultType<'batchPackageFetch'>> {
-    const formattedQueryParam = new URLSearchParams(queryParams)
-
-    try {
-      const response = await this.#getClient().post(
-        `purl?${formattedQueryParam}`,
-        { json: components }
+    const req = https
+      .request(`${this.#baseUrl}purl?${new URLSearchParams(queryParams)}`, {
+        method: 'POST',
+        ...this.#reqOptions
+      })
+      .end(JSON.stringify(componentsObj))
+    const { 0: res } = await events.once(req, 'response')
+    if (!isResponseOk(res)) {
+      this.#handleApiError<'batchPackageFetch'>(
+        new ResponseError(res, 'Post request failed')
       )
-
-      // Parse the ndjson response
-      const resp_json: Array<Record<string, unknown>> = []
-      const ndjson = response.body.split('\n')
-      ndjson.map(o => o && resp_json.push(JSON.parse(o)))
-
-      return this.#handleApiSuccess<'batchPackageFetch'>(resp_json)
-    } catch (err) {
-      return this.#handleApiError<'batchPackageFetch'>(err)
     }
+    // Parse the newline delimited JSON response.
+    const rl = readline.createInterface({
+      input: res,
+      crlfDelay: Infinity
+    })
+    const results: Array<Record<string, unknown>> = []
+    for await (const line of rl) {
+      if (line.trim()) {
+        results.push(JSON.parse(line))
+      }
+    }
+    return this.#handleApiSuccess<'batchPackageFetch'>(results)
   }
 
   async createDependenciesSnapshot(
     params: Record<string, string>,
     filepaths: string[],
-    pathsRelativeTo: string = '.'
+    pathsRelativeTo = '.'
   ): Promise<SocketSdkResultType<'createDependenciesSnapshot'>> {
     const basePath = path.join(process.cwd(), pathsRelativeTo)
-    const absFilepaths = filepaths.map(filePath =>
-      path.join(basePath, filePath)
-    )
-    const formattedQueryParams = new URLSearchParams(params)
-
-    const body = new FormData()
-
-    const files = await Promise.all(
-      absFilepaths.map(absFilepath => fileFromPath(absFilepath))
-    )
-
-    for (let i = 0, length = files.length; i < length; i++) {
-      const absFilepath = absFilepaths[i]
-      if (absFilepath) {
-        const relFilepath = path.relative(basePath, absFilepath)
-        body.set(relFilepath, files[i])
-      }
-    }
-
+    const absFilepaths = filepaths.map(p => path.join(basePath, p))
     try {
-      const data = await this.#getClient()
-        .post(`dependencies/upload?${formattedQueryParams}`, { body })
-        .json()
+      const data = await createUploadRequest(
+        this.#baseUrl,
+        `dependencies/upload?${new URLSearchParams(params)}`,
+        createRequestBodyForFilepaths(absFilepaths),
+        this.#reqOptions
+      )
       return this.#handleApiSuccess<'createDependenciesSnapshot'>(data)
-    } catch (err) {
-      return this.#handleApiError<'createDependenciesSnapshot'>(err)
+    } catch (e) {
+      return this.#handleApiError<'createDependenciesSnapshot'>(e)
     }
   }
 
@@ -205,35 +316,17 @@ class SocketSdk {
     pathsRelativeTo: string = '.'
   ): Promise<SocketSdkResultType<'CreateOrgFullScan'>> {
     const basePath = path.join(process.cwd(), pathsRelativeTo)
-    const absFilepaths = filepaths.map(filePath =>
-      path.join(basePath, filePath)
-    )
-    const orgSlugParam = encodeURIComponent(orgSlug)
-    const formattedQueryParams = new URLSearchParams(queryParams)
-
-    const body = new FormData()
-
-    const files = await Promise.all(
-      absFilepaths.map(absFilepath => fileFromPath(absFilepath))
-    )
-
-    for (let i = 0, length = files.length; i < length; i++) {
-      const absFilepath = absFilepaths[i]
-      if (absFilepath) {
-        const relFilepath = path.relative(basePath, absFilepath)
-        body.set(relFilepath, files[i])
-      }
-    }
-
+    const absFilepaths = filepaths.map(p => path.join(basePath, p))
     try {
-      const data = await this.#getClient()
-        .post(`orgs/${orgSlugParam}/full-scans?${formattedQueryParams}`, {
-          body
-        })
-        .json()
+      const data = await createUploadRequest(
+        this.#baseUrl,
+        `orgs/${encodeURIComponent(orgSlug)}/full-scans?${new URLSearchParams(queryParams)}`,
+        createRequestBodyForFilepaths(absFilepaths),
+        this.#reqOptions
+      )
       return this.#handleApiSuccess<'CreateOrgFullScan'>(data)
-    } catch (err) {
-      return this.#handleApiError<'CreateOrgFullScan'>(err)
+    } catch (e) {
+      return this.#handleApiError<'CreateOrgFullScan'>(e)
     }
   }
 
@@ -241,15 +334,16 @@ class SocketSdk {
     orgSlug: string,
     params: Record<string, string>
   ): Promise<SocketSdkResultType<'createOrgRepo'>> {
-    const orgSlugParam = encodeURIComponent(orgSlug)
-
     try {
-      const data = await this.#getClient()
-        .post(`orgs/${orgSlugParam}/repos`, { json: params })
-        .json()
+      const data = await createPostRequest(
+        this.#baseUrl,
+        `orgs/${encodeURIComponent(orgSlug)}/repos`,
+        { json: params },
+        this.#reqOptions
+      )
       return this.#handleApiSuccess<'createOrgRepo'>(data)
-    } catch (err) {
-      return this.#handleApiError<'createOrgRepo'>(err)
+    } catch (e) {
+      return this.#handleApiError<'createOrgRepo'>(e)
     }
   }
 
@@ -259,36 +353,25 @@ class SocketSdk {
     issueRules?: Record<string, boolean>
   ): Promise<SocketSdkResultType<'createReport'>> {
     const basePath = path.join(process.cwd(), pathsRelativeTo)
-    const absFilepaths = filepaths.map(filePath =>
-      path.join(basePath, filePath)
-    )
-
-    const body = new FormData()
-
-    if (issueRules) {
-      const issueRulesBlob = new Blob([JSON.stringify(issueRules)], {
-        type: 'application/json'
-      })
-      body.set('issueRules', issueRulesBlob, 'issueRules')
-    }
-
-    const files = await Promise.all(
-      absFilepaths.map(absFilepath => fileFromPath(absFilepath))
-    )
-
-    for (let i = 0, length = files.length; i < length; i++) {
-      const absFilepath = absFilepaths[i]
-      if (absFilepath) {
-        const relFilepath = path.relative(basePath, absFilepath)
-        body.set(relFilepath, files[i])
-      }
-    }
-
+    const absFilepaths = filepaths.map(p => path.join(basePath, p))
     try {
-      const data = await this.#getClient().put('report/upload', { body }).json()
+      const data = await createUploadRequest(
+        this.#baseUrl,
+        'report/upload',
+        [
+          ...createRequestBodyForFilepaths(absFilepaths),
+          ...(issueRules
+            ? createRequestBodyForJson(issueRules, 'issueRules.json')
+            : [])
+        ],
+        {
+          ...this.#reqOptions,
+          method: 'PUT'
+        }
+      )
       return this.#handleApiSuccess<'createReport'>(data)
-    } catch (err) {
-      return this.#handleApiError<'createReport'>(err)
+    } catch (e) {
+      return this.#handleApiError<'createReport'>(e)
     }
   }
 
@@ -296,16 +379,14 @@ class SocketSdk {
     orgSlug: string,
     fullScanId: string
   ): Promise<SocketSdkResultType<'deleteOrgFullScan'>> {
-    const orgSlugParam = encodeURIComponent(orgSlug)
-    const fullScanIdParam = encodeURIComponent(fullScanId)
-
     try {
-      const data = await this.#getClient()
-        .delete(`orgs/${orgSlugParam}/full-scans/${fullScanIdParam}`)
-        .json()
+      const data = await createDeleteRequest(
+        this.#baseUrl,
+        `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`
+      )
       return this.#handleApiSuccess<'deleteOrgFullScan'>(data)
-    } catch (err) {
-      return this.#handleApiError<'deleteOrgFullScan'>(err)
+    } catch (e) {
+      return this.#handleApiError<'deleteOrgFullScan'>(e)
     }
   }
 
@@ -313,16 +394,14 @@ class SocketSdk {
     orgSlug: string,
     repoSlug: string
   ): Promise<SocketSdkResultType<'deleteOrgRepo'>> {
-    const orgSlugParam = encodeURIComponent(orgSlug)
-    const repoSlugParam = encodeURIComponent(repoSlug)
-
     try {
-      const data = await this.#getClient()
-        .delete(`orgs/${orgSlugParam}/repos/${repoSlugParam}`)
-        .json()
+      const data = await createDeleteRequest(
+        this.#baseUrl,
+        `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`
+      )
       return this.#handleApiSuccess<'deleteOrgRepo'>(data)
-    } catch (err) {
-      return this.#handleApiError<'deleteOrgRepo'>(err)
+    } catch (e) {
+      return this.#handleApiError<'deleteOrgRepo'>(e)
     }
   }
 
@@ -330,16 +409,15 @@ class SocketSdk {
     orgSlug: string,
     queryParams: Record<string, string>
   ): Promise<SocketSdkResultType<'getAuditLogEvents'>> {
-    const orgSlugParam = encodeURIComponent(orgSlug)
-    const formattedQueryParam = new URLSearchParams(queryParams)
-
     try {
-      const data = await this.#getClient()
-        .get(`orgs/${orgSlugParam}/audit-log?${formattedQueryParam}`)
-        .json()
+      const data = await createGetRequest(
+        this.#baseUrl,
+        `orgs/${encodeURIComponent(orgSlug)}/audit-log?${new URLSearchParams(queryParams)}`,
+        this.#reqOptions
+      )
       return this.#handleApiSuccess<'getAuditLogEvents'>(data)
-    } catch (err) {
-      return this.#handleApiError<'getAuditLogEvents'>(err)
+    } catch (e) {
+      return this.#handleApiError<'getAuditLogEvents'>(e)
     }
   }
 
@@ -347,40 +425,43 @@ class SocketSdk {
     pkgName: string,
     version: string
   ): Promise<SocketSdkResultType<'getIssuesByNPMPackage'>> {
-    const pkgParam = encodeURIComponent(pkgName)
-    const versionParam = encodeURIComponent(version)
-
     try {
-      const data = await this.#getClient()
-        .get(`npm/${pkgParam}/${versionParam}/issues`)
-        .json()
+      const data = await createGetRequest(
+        this.#baseUrl,
+        `npm/${encodeURIComponent(pkgName)}/${encodeURIComponent(version)}/issues`,
+        this.#reqOptions
+      )
       return this.#handleApiSuccess<'getIssuesByNPMPackage'>(data)
-    } catch (err) {
-      return this.#handleApiError<'getIssuesByNPMPackage'>(err)
+    } catch (e) {
+      return this.#handleApiError<'getIssuesByNPMPackage'>(e)
     }
   }
 
   async getOrgAnalytics(
     time: string
   ): Promise<SocketSdkResultType<'getOrgAnalytics'>> {
-    const timeParam = encodeURIComponent(time)
-
     try {
-      const data = await this.#getClient()
-        .get(`analytics/org/${timeParam}`)
-        .json()
+      const data = await createGetRequest(
+        this.#baseUrl,
+        `analytics/org/${encodeURIComponent(time)}`,
+        this.#reqOptions
+      )
       return this.#handleApiSuccess<'getOrgAnalytics'>(data)
-    } catch (err) {
-      return this.#handleApiError<'getOrgAnalytics'>(err)
+    } catch (e) {
+      return this.#handleApiError<'getOrgAnalytics'>(e)
     }
   }
 
   async getOrganizations(): Promise<SocketSdkResultType<'getOrganizations'>> {
     try {
-      const data = await this.#getClient().get('organizations').json()
+      const data = await createGetRequest(
+        this.#baseUrl,
+        'organizations',
+        this.#reqOptions
+      )
       return this.#handleApiSuccess<'getOrganizations'>(data)
-    } catch (err) {
-      return this.#handleApiError<'getOrganizations'>(err)
+    } catch (e) {
+      return this.#handleApiError<'getOrganizations'>(e)
     }
   }
 
@@ -389,25 +470,26 @@ class SocketSdk {
     fullScanId: string,
     file?: string
   ): Promise<SocketSdkResultType<'getOrgFullScan'>> {
-    const orgSlugParam = encodeURIComponent(orgSlug)
-    const fullScanIdParam = encodeURIComponent(fullScanId)
     try {
-      let readStream: Readable | undefined
-      if (file) {
-        await stream.pipeline(
-          this.#getClient().stream(
-            `orgs/${orgSlugParam}/full-scans/${fullScanIdParam}`
-          ),
-          createWriteStream(file)
-        )
-      } else {
-        readStream = this.#getClient()
-          .stream(`orgs/${orgSlugParam}/full-scans/${fullScanIdParam}`)
-          .pipe(process.stdout)
+      const req = https.request(
+        `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`,
+        {
+          method: 'GET',
+          ...this.#reqOptions
+        }
+      )
+      const { 0: res } = await events.once(req, 'response')
+      if (!isResponseOk(res)) {
+        throw new ResponseError(res, 'Get request failed')
       }
-      return this.#handleApiSuccess<'getOrgFullScan'>(readStream)
-    } catch (err) {
-      return this.#handleApiError<'getOrgFullScan'>(err)
+      if (file) {
+        res.pipe(createWriteStream(file))
+      } else {
+        res.pipe(process.stdout)
+      }
+      return this.#handleApiSuccess<'getOrgFullScan'>(res)
+    } catch (e) {
+      return this.#handleApiError<'getOrgFullScan'>(e)
     }
   }
 
@@ -415,16 +497,15 @@ class SocketSdk {
     orgSlug: string,
     queryParams: Record<string, string>
   ): Promise<SocketSdkResultType<'getOrgFullScanList'>> {
-    const orgSlugParam = encodeURIComponent(orgSlug)
-    const formattedQueryParams = new URLSearchParams(queryParams)
-
     try {
-      const data = await this.#getClient()
-        .get(`orgs/${orgSlugParam}/full-scans?${formattedQueryParams}`)
-        .json()
+      const data = await createGetRequest(
+        this.#baseUrl,
+        `orgs/${encodeURIComponent(orgSlug)}/full-scans?${new URLSearchParams(queryParams)}`,
+        this.#reqOptions
+      )
       return this.#handleApiSuccess<'getOrgFullScanList'>(data)
-    } catch (err) {
-      return this.#handleApiError<'getOrgFullScanList'>(err)
+    } catch (e) {
+      return this.#handleApiError<'getOrgFullScanList'>(e)
     }
   }
 
@@ -432,31 +513,28 @@ class SocketSdk {
     orgSlug: string,
     fullScanId: string
   ): Promise<SocketSdkResultType<'getOrgFullScanMetadata'>> {
-    const orgSlugParam = encodeURIComponent(orgSlug)
-    const fullScanIdParam = encodeURIComponent(fullScanId)
-
     try {
-      const data = await this.#getClient()
-        .get(`orgs/${orgSlugParam}/full-scans/${fullScanIdParam}/metadata`)
-        .json()
+      const data = await createGetRequest(
+        this.#baseUrl,
+        `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/metadata`
+      )
       return this.#handleApiSuccess<'getOrgFullScanMetadata'>(data)
-    } catch (err) {
-      return this.#handleApiError<'getOrgFullScanMetadata'>(err)
+    } catch (e) {
+      return this.#handleApiError<'getOrgFullScanMetadata'>(e)
     }
   }
 
   async getOrgLicensePolicy(
     orgSlug: string
   ): Promise<SocketSdkResultType<'getOrgLicensePolicy'>> {
-    const orgSlugParam = encodeURIComponent(orgSlug)
-
     try {
-      const data = await this.#getClient()
-        .get(`orgs/${orgSlugParam}/settings/license-policy`)
-        .json()
+      const data = await createGetRequest(
+        this.#baseUrl,
+        `orgs/${encodeURIComponent(orgSlug)}/settings/license-policy`
+      )
       return this.#handleApiSuccess<'getOrgLicensePolicy'>(data)
-    } catch (err) {
-      return this.#handleApiError<'getOrgLicensePolicy'>(err)
+    } catch (e) {
+      return this.#handleApiError<'getOrgLicensePolicy'>(e)
     }
   }
 
@@ -468,12 +546,13 @@ class SocketSdk {
     const repoSlugParam = encodeURIComponent(repoSlug)
 
     try {
-      const data = await this.#getClient()
-        .get(`orgs/${orgSlugParam}/repos/${repoSlugParam}`)
-        .json()
+      const data = await createGetRequest(
+        this.#baseUrl,
+        `orgs/${orgSlugParam}/repos/${repoSlugParam}`
+      )
       return this.#handleApiSuccess<'getOrgRepo'>(data)
-    } catch (err) {
-      return this.#handleApiError<'getOrgRepo'>(err)
+    } catch (e) {
+      return this.#handleApiError<'getOrgRepo'>(e)
     }
   }
 
@@ -481,40 +560,42 @@ class SocketSdk {
     orgSlug: string,
     queryParams: Record<string, string>
   ): Promise<SocketSdkResultType<'getOrgRepoList'>> {
-    const orgSlugParam = encodeURIComponent(orgSlug)
-    const formattedQueryParam = new URLSearchParams(queryParams)
-
     try {
-      const data = await this.#getClient()
-        .get(`orgs/${orgSlugParam}/repos?${formattedQueryParam}`)
-        .json()
+      const data = await createGetRequest(
+        this.#baseUrl,
+        `orgs/${encodeURIComponent(orgSlug)}/repos?${new URLSearchParams(queryParams)}`
+      )
       return this.#handleApiSuccess<'getOrgRepoList'>(data)
-    } catch (err) {
-      return this.#handleApiError<'getOrgRepoList'>(err)
+    } catch (e) {
+      return this.#handleApiError<'getOrgRepoList'>(e)
     }
   }
 
   async getOrgSecurityPolicy(
     orgSlug: string
   ): Promise<SocketSdkResultType<'getOrgSecurityPolicy'>> {
-    const orgSlugParam = encodeURIComponent(orgSlug)
-
     try {
-      const data = await this.#getClient()
-        .get(`orgs/${orgSlugParam}/settings/security-policy`)
-        .json()
+      const data = await createGetRequest(
+        this.#baseUrl,
+        `orgs/${encodeURIComponent(orgSlug)}/settings/security-policy`,
+        this.#reqOptions
+      )
       return this.#handleApiSuccess<'getOrgSecurityPolicy'>(data)
-    } catch (err) {
-      return this.#handleApiError<'getOrgSecurityPolicy'>(err)
+    } catch (e) {
+      return this.#handleApiError<'getOrgSecurityPolicy'>(e)
     }
   }
 
   async getQuota(): Promise<SocketSdkResultType<'getQuota'>> {
     try {
-      const data = await this.#getClient().get('quota').json()
+      const data = await createGetRequest(
+        this.#baseUrl,
+        'quota',
+        this.#reqOptions
+      )
       return this.#handleApiSuccess<'getQuota'>(data)
-    } catch (err) {
-      return this.#handleApiError<'getQuota'>(err)
+    } catch (e) {
+      return this.#handleApiError<'getQuota'>(e)
     }
   }
 
@@ -522,36 +603,41 @@ class SocketSdk {
     repo: string,
     time: string
   ): Promise<SocketSdkResultType<'getRepoAnalytics'>> {
-    const timeParam = encodeURIComponent(time)
-    const repoParam = encodeURIComponent(repo)
-
     try {
-      const data = await this.#getClient()
-        .get(`analytics/repo/${repoParam}/${timeParam}`)
-        .json()
+      const data = await createGetRequest(
+        this.#baseUrl,
+        `analytics/repo/${encodeURIComponent(repo)}/${encodeURIComponent(time)}`,
+        this.#reqOptions
+      )
       return this.#handleApiSuccess<'getRepoAnalytics'>(data)
-    } catch (err) {
-      return this.#handleApiError<'getRepoAnalytics'>(err)
+    } catch (e) {
+      return this.#handleApiError<'getRepoAnalytics'>(e)
     }
   }
 
   async getReport(id: string): Promise<SocketSdkResultType<'getReport'>> {
-    const idParam = encodeURIComponent(id)
-
     try {
-      const data = await this.#getClient().get(`report/view/${idParam}`).json()
+      const data = await createGetRequest(
+        this.#baseUrl,
+        `report/view/${encodeURIComponent(id)}`,
+        this.#reqOptions
+      )
       return this.#handleApiSuccess<'getReport'>(data)
-    } catch (err) {
-      return this.#handleApiError<'getReport'>(err)
+    } catch (e) {
+      return this.#handleApiError<'getReport'>(e)
     }
   }
 
   async getReportList(): Promise<SocketSdkResultType<'getReportList'>> {
     try {
-      const data = await this.#getClient().get('report/list').json()
+      const data = await createGetRequest(
+        this.#baseUrl,
+        'report/list',
+        this.#reqOptions
+      )
       return this.#handleApiSuccess<'getReportList'>(data)
-    } catch (err) {
-      return this.#handleApiError<'getReportList'>(err)
+    } catch (e) {
+      return this.#handleApiError<'getReportList'>(e)
     }
   }
 
@@ -559,10 +645,14 @@ class SocketSdk {
     SocketSdkResultType<'getReportSupportedFiles'>
   > {
     try {
-      const data = await this.#getClient().get('report/supported').json()
+      const data = await createGetRequest(
+        this.#baseUrl,
+        'report/supported',
+        this.#reqOptions
+      )
       return this.#handleApiSuccess<'getReportSupportedFiles'>(data)
-    } catch (err) {
-      return this.#handleApiError<'getReportSupportedFiles'>(err)
+    } catch (e) {
+      return this.#handleApiError<'getReportSupportedFiles'>(e)
     }
   }
 
@@ -570,16 +660,15 @@ class SocketSdk {
     pkgName: string,
     version: string
   ): Promise<SocketSdkResultType<'getScoreByNPMPackage'>> {
-    const pkgParam = encodeURIComponent(pkgName)
-    const versionParam = encodeURIComponent(version)
-
     try {
-      const data = await this.#getClient()
-        .get(`npm/${pkgParam}/${versionParam}/score`)
-        .json()
+      const data = await createGetRequest(
+        this.#baseUrl,
+        `npm/${encodeURIComponent(pkgName)}/${encodeURIComponent(version)}/score`,
+        this.#reqOptions
+      )
       return this.#handleApiSuccess<'getScoreByNPMPackage'>(data)
-    } catch (err) {
-      return this.#handleApiError<'getScoreByNPMPackage'>(err)
+    } catch (e) {
+      return this.#handleApiError<'getScoreByNPMPackage'>(e)
     }
   }
 
@@ -587,12 +676,15 @@ class SocketSdk {
     selectors: Array<{ organization?: string }>
   ): Promise<SocketSdkResultType<'postSettings'>> {
     try {
-      const data = await this.#getClient()
-        .post('settings', { json: selectors })
-        .json()
+      const data = await createPostRequest(
+        this.#baseUrl,
+        'settings',
+        { json: selectors },
+        this.#reqOptions
+      )
       return this.#handleApiSuccess<'postSettings'>(data)
-    } catch (err) {
-      return this.#handleApiError<'postSettings'>(err)
+    } catch (e) {
+      return this.#handleApiError<'postSettings'>(e)
     }
   }
 
@@ -600,12 +692,15 @@ class SocketSdk {
     params: Record<string, number>
   ): Promise<SocketSdkResultType<'searchDependencies'>> {
     try {
-      const data = await this.#getClient()
-        .post('dependencies/search', { json: params })
-        .json()
+      const data = await createPostRequest(
+        this.#baseUrl,
+        'dependencies/search',
+        { json: params },
+        this.#reqOptions
+      )
       return this.#handleApiSuccess<'searchDependencies'>(data)
-    } catch (err) {
-      return this.#handleApiError<'searchDependencies'>(err)
+    } catch (e) {
+      return this.#handleApiError<'searchDependencies'>(e)
     }
   }
 
@@ -614,20 +709,20 @@ class SocketSdk {
     repoSlug: string,
     params: Record<string, string>
   ): Promise<SocketSdkResultType<'updateOrgRepo'>> {
-    const orgSlugParam = encodeURIComponent(orgSlug)
-
     try {
-      const data = await this.#getClient()
-        .post(`orgs/${orgSlugParam}/repos/${repoSlug}`, { json: params })
-        .json()
+      const data = await createPostRequest(
+        this.#baseUrl,
+        `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`,
+        { json: params },
+        this.#reqOptions
+      )
       return this.#handleApiSuccess<'updateOrgRepo'>(data)
-    } catch (err) {
-      return this.#handleApiError<'updateOrgRepo'>(err)
+    } catch (e) {
+      return this.#handleApiError<'updateOrgRepo'>(e)
     }
   }
 }
 
-console.log(Object.getOwnPropertyDescriptors(SocketSdk.prototype))
 // Add alias to preserve backwards compatibility.
 Object.defineProperty(SocketSdk.prototype, 'createReportFromFilePaths', {
   __proto__: null,
@@ -636,5 +731,3 @@ Object.defineProperty(SocketSdk.prototype, 'createReportFromFilePaths', {
   value: SocketSdk.prototype.createReportFromFilepaths,
   writable: true
 } as PropertyDescriptor)
-
-export { type SocketSdkOptions, createUserAgentFromPkgJson, SocketSdk }
