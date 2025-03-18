@@ -1,42 +1,9 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "allowImportingTsExtensions": true,
-    "allowJs": false,
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "incremental": true,
-    "isolatedModules": true,
-    "lib": ["esnext"],
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "noEmit": true,
-    "noEmitOnError": true,
+    "module": "commonjs",
     "outDir": "dist/cjs",
-    "resolveJsonModule": true,
-    "rootDir": "src",
-    "skipLibCheck": true,
-    "sourceMap": true,
-    "strict": true,
-    "strictNullChecks": true,
-    "target": "esnext",
-    "useUnknownInCatchVariables": true,
-
-    /* New checks being tried out */
-    "exactOptionalPropertyTypes": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noUncheckedIndexedAccess": true,
-
-    /* Additional checks */
-    "importsNotUsedAsValues": "remove",
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noUncheckedSideEffectImports": true
+    "rootDir": "src"
   },
-  "include": ["src/*.ts"],
-  "exclude": ["dist"]
+  "include": ["src/*.ts"]
 }
