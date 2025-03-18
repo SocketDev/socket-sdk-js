@@ -22,7 +22,14 @@ type SocketSdkResultType<T extends SocketSdkOperations> =
   | SocketSdkErrorType<T>
 
 export interface SocketSdkOptions {
-  agent?: Agent | undefined
+  agent?:
+    | Agent
+    | {
+        http?: Agent | undefined
+        https?: Agent | undefined
+        http2?: Agent | undefined
+      }
+    | undefined
   baseUrl?: string | undefined
   userAgent?: string | undefined
 }
@@ -206,6 +213,9 @@ export function createUserAgentFromPkgJson(pkgData: {
   return `${name}/${pkgData.version}${homepage ? ` (${homepage})` : ''}`
 }
 
+// https://github.com/sindresorhus/got/blob/v14.4.6/documentation/2-options.md#agent
+const agentNames = new Set(['http', 'https', 'http2'])
+
 export class SocketSdk {
   readonly #baseUrl: string
   readonly #reqOptions: RequestOptions
@@ -215,11 +225,16 @@ export class SocketSdk {
    */
   constructor(apiToken: string, options?: SocketSdkOptions | undefined) {
     const {
-      agent,
+      agent: agentOrObj,
       baseUrl = 'https://api.socket.dev/v0/',
       userAgent
     } = { __proto__: null, ...options } as SocketSdkOptions
-
+    const agentKeys = agentOrObj ? Object.keys(agentOrObj) : []
+    const agent = (
+      agentKeys.length && agentKeys.every(k => agentNames.has(k))
+        ? (agentOrObj as any).https
+        : agentOrObj
+    ) as Agent | undefined
     this.#baseUrl = baseUrl
     this.#reqOptions = {
       ...(agent ? { agent } : {}),
