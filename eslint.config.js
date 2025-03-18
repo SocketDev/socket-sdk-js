@@ -171,7 +171,7 @@ module.exports = [
             ?.parserOptions?.projectService,
           ...jsdocPlugin.configs['flat/recommended'].languageOptions
             ?.parserOptions?.projectService,
-          allowDefaultProject: ['test/*.ts', 'types/*.ts'],
+          allowDefaultProject: ['test/*.ts', 'types/*.ts', 'vitest.config.mts'],
           defaultProject: 'tsconfig.json',
           tsconfigRootDir: rootPath,
           // Need this to glob test files in src.

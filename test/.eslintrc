@@ -1,9 +1,0 @@
-{
-  "env": {
-    "mocha": true
-  },
-  "rules": {
-    "@typescript-eslint/no-unused-expressions": 0,
-    "node/no-unpublished-require": 0
-  }
-}
