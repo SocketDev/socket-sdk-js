@@ -10,14 +10,14 @@ import type { ReadStream } from 'node:fs'
 import type { IncomingMessage } from 'node:http'
 import type { Agent, RequestOptions } from 'node:https'
 
-type SocketSdkOperations = keyof operations
-type SocketSdkReturnType<T extends SocketSdkOperations> = OpReturnType<
+export type SocketSdkOperations = keyof operations
+export type SocketSdkReturnType<T extends SocketSdkOperations> = OpReturnType<
   operations[T]
 >
-type SocketSdkErrorType<T extends SocketSdkOperations> = OpErrorType<
+export type SocketSdkErrorType<T extends SocketSdkOperations> = OpErrorType<
   operations[T]
 >
-type SocketSdkResultType<T extends SocketSdkOperations> =
+export type SocketSdkResultType<T extends SocketSdkOperations> =
   | SocketSdkReturnType<T>
   | SocketSdkErrorType<T>
 
@@ -390,6 +390,19 @@ export class SocketSdk {
     }
   }
 
+  // Alias to preserve backwards compatibility.
+  async createReportFromFilePaths(
+    filepaths: string[],
+    pathsRelativeTo: string = '.',
+    issueRules?: Record<string, boolean>
+  ): Promise<SocketSdkResultType<'createReport'>> {
+    return await this.createReportFromFilepaths(
+      filepaths,
+      pathsRelativeTo,
+      issueRules
+    )
+  }
+
   async deleteOrgFullScan(
     orgSlug: string,
     fullScanId: string
@@ -737,12 +750,3 @@ export class SocketSdk {
     }
   }
 }
-
-// Add alias to preserve backwards compatibility.
-Object.defineProperty(SocketSdk.prototype, 'createReportFromFilePaths', {
-  __proto__: null,
-  configurable: true,
-  enumerable: false,
-  value: SocketSdk.prototype.createReportFromFilepaths,
-  writable: true
-} as PropertyDescriptor)
