@@ -18,5 +18,5 @@ jobs:
     uses: SocketDev/workflows/.github/workflows/type-check.yml@master
     with:
       no-lockfile: true
-      ts-versions: ${{ github.event.schedule && 'next' || '5.6,next' }}
+      ts-versions: '5.8'
       ts-libs: 'esnext'
