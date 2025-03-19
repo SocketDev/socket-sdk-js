@@ -945,15 +945,13 @@ export interface components {
         /** @default */
         timestamp: string
         tools: {
-          components: Array<
-            components['schemas']['CDXComponentSchema'] & {
-              /** @default Socket */
-              author?: string
-              authors?: string[]
-              /** @default Socket */
-              publisher?: string
-            }
-          >
+          components: Array<components['schemas']['CDXComponentSchema'] & {
+            /** @default Socket */
+            author?: string
+            authors?: string[]
+            /** @default Socket */
+            publisher?: string
+          }>
         }
         authors: Array<{
           /** @default Socket */
@@ -4507,8 +4505,7 @@ export interface operations {
                * @default api token
                */
               name: string
-              scopes: Array<
-                | 'report'
+              scopes: Array<| 'report'
                 | 'report:list'
                 | 'report:read'
                 | 'report:write'
@@ -4563,8 +4560,7 @@ export interface operations {
                 | 'historical:alerts-list'
                 | 'historical:alerts-trend'
                 | 'historical:dependencies-list'
-                | 'historical:dependencies-trend'
-              >
+                | 'historical:dependencies-trend'>
               /** @default 1000 */
               max_quota: number
               /**
@@ -4633,8 +4629,7 @@ export interface operations {
            * @default api token
            */
           name: string
-          scopes: Array<
-            | 'report'
+          scopes: Array<| 'report'
             | 'report:list'
             | 'report:read'
             | 'report:write'
@@ -4689,8 +4684,7 @@ export interface operations {
             | 'historical:alerts-list'
             | 'historical:alerts-trend'
             | 'historical:dependencies-list'
-            | 'historical:dependencies-trend'
-          >
+            | 'historical:dependencies-trend'>
           /** @default 1000 */
           max_quota: number
           /**
@@ -4756,8 +4750,7 @@ export interface operations {
            * @default api token
            */
           name: string
-          scopes: Array<
-            | 'report'
+          scopes: Array<| 'report'
             | 'report:list'
             | 'report:read'
             | 'report:write'
@@ -4812,8 +4805,7 @@ export interface operations {
             | 'historical:alerts-list'
             | 'historical:alerts-trend'
             | 'historical:dependencies-list'
-            | 'historical:dependencies-trend'
-          >
+            | 'historical:dependencies-trend'>
           /** @default 1000 */
           max_quota: number
           /**
@@ -47415,9 +47407,7 @@ export interface operations {
                 dev: boolean
                 /** @default false */
                 dead: boolean
-                manifestFiles?: Array<
-                  components['schemas']['SocketManifestReference']
-                >
+                manifestFiles?: Array<components['schemas']['SocketManifestReference']>
                 topLevelAncestors?: Array<components['schemas']['SocketId']>
                 dependencies?: Array<components['schemas']['SocketId']>
               }
