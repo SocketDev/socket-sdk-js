@@ -27,5 +27,5 @@ jobs:
     name: "Tests"
     uses: SocketDev/workflows/.github/workflows/reusable-base.yml@master
     with:
-      npm-test-script: 'ci-test'
-      node-versions: '16,18,19'
+      npm-test-script: 'test-ci'
+      node-versions: '18,20,22,23'

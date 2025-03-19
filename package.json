@@ -52,7 +52,6 @@
     "coverage": "run-s coverage:*",
     "coverage:test": "run-s test:prepare test:unit:coverage",
     "coverage:type": "type-coverage --detail",
-    "ci-test": "run-s build test:*",
     "clean": "run-p clean:*",
     "clean:dist": "del-cli 'dist'",
     "clean:declarations": "del-cli '*.d.ts' '!api*.d.ts'",
@@ -74,6 +73,7 @@
     "test:unit": "vitest --run",
     "test:unit:update": "vitest --run --update",
     "test:unit:coverage": "vitest run --coverage",
+    "test-ci": "run-s build test:*",
     "update": "run-p --aggregate-output update:**",
     "update:deps": "npx --yes npm-check-updates"
   },
