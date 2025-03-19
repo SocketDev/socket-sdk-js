@@ -10,6 +10,7 @@
     "isolatedModules": true,
     "lib": ["esnext"],
     "noEmitOnError": true,
+    "resolveJsonModule": true,
     "rootDir": "src",
     "skipLibCheck": true,
     "sourceMap": true,
