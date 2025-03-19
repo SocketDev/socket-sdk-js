@@ -37,7 +37,9 @@
     },
     "./dist/index.d.cts": "./dist/index.d.cts",
     "./dist/index.d.mts": "./dist/index.d.mts",
+    "./types/api-helpers": "./types/api-helpers.d.ts",
     "./types/api-helpers.d.ts": "./types/api-helpers.d.ts",
+    "./types/api": "./types/api.d.ts",
     "./types/api.d.ts": "./types/api.d.ts",
     "./package.json": "./package.json"
   },
