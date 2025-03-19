@@ -1,23 +1,28 @@
-'use strict'
+import { createRequire } from 'node:module'
+import path from 'node:path'
+import url from 'node:url'
 
-const path = require('node:path')
-
-const {
+import {
   convertIgnorePatternToMinimatch,
   includeIgnoreFile
-} = require('@eslint/compat')
-const jsPlugin = require('@eslint/js')
-const tsParser = require('@typescript-eslint/parser')
-const { createOxcImportResolver } = require('eslint-import-resolver-oxc')
-const importXPlugin = require('eslint-plugin-import-x')
-const jsdocPlugin = require('eslint-plugin-jsdoc')
-const nodePlugin = require('eslint-plugin-n')
-const sortDestructureKeysPlugin = require('eslint-plugin-sort-destructure-keys')
-const unicornPlugin = require('eslint-plugin-unicorn')
-const globals = require('globals')
-const tsEslint = require('typescript-eslint')
+} from '@eslint/compat'
+import jsPlugin from '@eslint/js'
+import tsParser from '@typescript-eslint/parser'
+import { createOxcImportResolver } from 'eslint-import-resolver-oxc'
+import importXPlugin from 'eslint-plugin-import-x'
+import jsdocPlugin from 'eslint-plugin-jsdoc'
+import nodePlugin from 'eslint-plugin-n'
+import sortDestructureKeysPlugin from 'eslint-plugin-sort-destructure-keys'
+import unicornPlugin from 'eslint-plugin-unicorn'
+import globals from 'globals'
+import tsEslint from 'typescript-eslint'
 
-const constants = require('@socketsecurity/registry/lib/constants')
+import constants from '@socketsecurity/registry/lib/constants'
+
+const __filename = url.fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const require = createRequire(import.meta.url)
+
 const { BIOME_JSON, GITIGNORE, LATEST, TSCONFIG_JSON } = constants
 
 const { flatConfigs: origImportXFlatConfigs } = importXPlugin
@@ -141,7 +146,7 @@ function getImportXFlatConfigs(isEsm) {
 const importFlatConfigsForScript = getImportXFlatConfigs(false)
 const importFlatConfigsForModule = getImportXFlatConfigs(true)
 
-module.exports = [
+export default [
   includeIgnoreFile(gitignorePath),
   {
     name: 'Imported biome.json ignore patterns',

@@ -34,7 +34,7 @@ export interface SocketSdkOptions {
   userAgent?: string | undefined
 }
 
-const rootPath = path.join(__dirname, '../..')
+const rootPath = path.join(__dirname, '..')
 const rootPkgJsonPath = path.join(rootPath, 'package.json')
 
 const defaultUserAgent = createUserAgentFromPkgJson(require(rootPkgJsonPath))
