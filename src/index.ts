@@ -4,6 +4,9 @@ import https from 'node:https'
 import path from 'node:path'
 import readline from 'node:readline'
 
+// @ts-ignore
+import rootPkgJson from '../package.json' with { type: 'json' }
+
 import type { operations } from '../types/api'
 import type { OpErrorType, OpReturnType } from '../types/api-helpers'
 import type { ReadStream } from 'node:fs'
@@ -34,10 +37,7 @@ export interface SocketSdkOptions {
   userAgent?: string | undefined
 }
 
-const rootPath = path.join(__dirname, '..')
-const rootPkgJsonPath = path.join(rootPath, 'package.json')
-
-const defaultUserAgent = createUserAgentFromPkgJson(require(rootPkgJsonPath))
+const defaultUserAgent = createUserAgentFromPkgJson(rootPkgJson)
 
 class ResponseError extends Error {
   response: IncomingMessage
