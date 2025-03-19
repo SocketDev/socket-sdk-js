@@ -13,13 +13,38 @@
     "type": "git",
     "url": "git://github.com/SocketDev/socket-sdk-js.git"
   },
-  "main": "./dist/index.js",
-  "module": "./dist/esm/index.js",
-  "types": "./dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "node": {
+        "module-sync": {
+          "types": "./dist/index.d.mts",
+          "default": "./dist/index.js"
+        },
+        "default": {
+          "types": "./dist/index.d.cts",
+          "default": "./dist/index.cjs"
+        }
+      },
+      "default": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./dist/index.cjs": {
+      "types": "./dist/index.d.cts",
+      "default": "./dist/index.cjs"
+    },
+    "./dist/index.d.cts": "./dist/index.d.cts",
+    "./dist/index.d.mts": "./dist/index.d.mts",
+    "./package.json": "./package.json"
+  },
   "scripts": {
-    "build": "npm run clean && run-p -c --aggregate-output build:*",
+    "build": "npm run clean && run-p -c --aggregate-output build:* && run-p -c --aggregate-output build:clean:*",
     "build:cjs": "tsc",
     "build:esm": "tsc -p tsconfig.esm.json",
+    "build:clean:cjs": "node scripts/rename-dist-cjs-files.mjs",
+    "build:clean:esm": "node scripts/rename-dist-esm-files.mjs",
     "check": "run-p -c --aggregate-output check:*",
     "check:lint": "eslint --report-unused-disable-directives .",
     "check:lint:fix": "npm run check:lint -- --fix",
@@ -29,10 +54,11 @@
     "coverage:type": "type-coverage --detail",
     "ci-test": "run-s build test:*",
     "clean": "run-p clean:*",
+    "clean:dist": "del-cli 'dist'",
     "clean:declarations": "del-cli '*.d.ts' '!api*.d.ts'",
     "fix": "run-s lint:fix check:lint:fix",
-    "generate-sdk:0-prettify": "node scripts/prettify-base-json.js",
-    "generate-sdk:1-generate": "node scripts/generate-types.js > types/api.d.ts",
+    "generate-sdk:0-prettify": "node scripts/prettify-base-json.mjs",
+    "generate-sdk:1-generate": "node scripts/generate-types.mjs > types/api.d.ts",
     "generate-sdk": "run-s generate-sdk:*",
     "knip:dependencies": "knip --dependencies",
     "knip:exports": "knip --include exports,duplicates",

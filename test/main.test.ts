@@ -1,7 +1,7 @@
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../dist/esm/index.js'
+import { SocketSdk } from '../dist/index.js'
 
 process.on('unhandledRejection', cause => {
   throw new Error('Unhandled rejection', { cause })
