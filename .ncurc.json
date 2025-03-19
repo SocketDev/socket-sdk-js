@@ -1,5 +1,5 @@
 {
   "loglevel": "minimal",
-  "reject": ["eslint-plugin-unicorn"],
+  "reject": ["eslint-plugin-unicorn", "openapi-typescript"],
   "upgrade": true
 }
