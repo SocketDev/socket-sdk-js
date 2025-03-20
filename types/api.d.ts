@@ -6,7 +6,7 @@
 export interface paths {
   '/purl': {
     /**
-     * Get Packages (Beta)
+     * Get Packages by PURL
      * @description Batch retrieval of package metadata and alerts by PURL strings. Compatible witch CycloneDX reports.
      *
      * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
@@ -309,6 +309,8 @@ export interface paths {
     /**
      * Create full scan
      * @description Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.
+     *
+     * To get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getSupportedFiles) endpoint.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -620,6 +622,22 @@ export interface paths {
      */
     get: operations['historicalSnapshotsList']
   }
+  '/orgs/{org_slug}/supported-files': {
+    /**
+     * Get supported file types
+     * @description Get a list of supported files for full scan generation.
+     * Files are categorized first by environment (e.g. NPM or PyPI), then by name.
+     *
+     * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
+     * Examples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - No Scopes Required, but authentication is required
+     */
+    get: operations['getSupportedFiles']
+  }
   '/analytics/org/{filter}': {
     /**
      * Get organization analytics (unstable)
@@ -652,7 +670,7 @@ export interface paths {
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - None, but authentication is required
+     * - No Scopes Required, but authentication is required
      */
     post: operations['searchDependencies']
   }
@@ -677,7 +695,10 @@ export interface paths {
   '/report/supported': {
     /**
      * Get supported files for report
-     * @description Get a list of supported files for project report generation.
+     * @deprecated
+     * @description This route has been moved to the `full-scans/supported` endpoint.
+     *
+     * Get a list of supported files for project report generation.
      * Files are categorized first by environment (e.g. NPM or PyPI), then by name.
      *
      * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
@@ -794,7 +815,7 @@ export interface paths {
      * This endpoint consumes 0 units of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - None, but authentication is required
+     * - No Scopes Required, but authentication is required
      */
     get: operations['getQuota']
   }
@@ -806,19 +827,20 @@ export interface paths {
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - None, but authentication is required
+     * - No Scopes Required, but authentication is required
      */
     get: operations['getOrganizations']
   }
   '/settings': {
     /**
      * Calculate settings
+     * @deprecated
      * @description Get current settings for the requested organizations and default settings to allow deferrals.
      *
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - None, but authentication is required
+     * - No Scopes Required, but authentication is required
      */
     post: operations['postSettings']
   }
@@ -834,7 +856,7 @@ export interface paths {
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - None, but authentication is required
+     * - No Scopes Required, but authentication is required
      */
     get: operations['getIssuesByNPMPackage']
   }
@@ -879,7 +901,7 @@ export interface paths {
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - None, but authentication is required
+     * - No Scopes Required, but authentication is required
      */
     get: operations['getScoreByNPMPackage']
   }
@@ -945,15 +967,13 @@ export interface components {
         /** @default */
         timestamp: string
         tools: {
-          components: Array<
-            components['schemas']['CDXComponentSchema'] & {
-              /** @default Socket */
-              author?: string
-              authors?: string[]
-              /** @default Socket */
-              publisher?: string
-            }
-          >
+          components: Array<components['schemas']['CDXComponentSchema'] & {
+            /** @default Socket */
+            author?: string
+            authors?: string[]
+            /** @default Socket */
+            publisher?: string
+          }>
         }
         authors: Array<{
           /** @default Socket */
@@ -2935,7 +2955,7 @@ export type external = Record<string, never>
 
 export interface operations {
   /**
-   * Get Packages (Beta)
+   * Get Packages by PURL
    * @description Batch retrieval of package metadata and alerts by PURL strings. Compatible witch CycloneDX reports.
    *
    * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
@@ -3561,6 +3581,8 @@ export interface operations {
    * Create full scan
    * @description Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.
    *
+   * To get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getSupportedFiles) endpoint.
+   *
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
@@ -3910,7 +3932,7 @@ export interface operations {
                * @description The last update date of the repository
                * @default
                */
-              updated_at?: string | null
+              updated_at?: string
               /**
                * @description The slug of the repository
                * @default
@@ -3939,9 +3961,9 @@ export interface operations {
               /**
                * @description The visibility of the repository
                * @default private
-               * @enum {string|null}
+               * @enum {string}
                */
-              visibility?: 'public' | 'private' | null
+              visibility?: 'public' | 'private'
               /**
                * @description Whether the repository is archived or not
                * @default false
@@ -4004,9 +4026,9 @@ export interface operations {
           /**
            * @description The visibility of the repository
            * @default private
-           * @enum {string|null}
+           * @enum {string}
            */
-          visibility?: 'public' | 'private' | null
+          visibility?: 'public' | 'private'
           /**
            * @description Whether the repository is archived or not
            * @default false
@@ -4039,7 +4061,7 @@ export interface operations {
              * @description The last update date of the repository
              * @default
              */
-            updated_at?: string | null
+            updated_at?: string
             /**
              * @description The slug of the repository
              * @default
@@ -4068,9 +4090,9 @@ export interface operations {
             /**
              * @description The visibility of the repository
              * @default private
-             * @enum {string|null}
+             * @enum {string}
              */
-            visibility?: 'public' | 'private' | null
+            visibility?: 'public' | 'private'
             /**
              * @description Whether the repository is archived or not
              * @default false
@@ -4128,7 +4150,7 @@ export interface operations {
              * @description The last update date of the repository
              * @default
              */
-            updated_at: string | null
+            updated_at: string
             /**
              * @description The slug of the repository
              * @default
@@ -4157,9 +4179,9 @@ export interface operations {
             /**
              * @description The visibility of the repository
              * @default private
-             * @enum {string|null}
+             * @enum {string}
              */
-            visibility: 'public' | 'private' | null
+            visibility: 'public' | 'private'
             /**
              * @description Whether the repository is archived or not
              * @default false
@@ -4224,9 +4246,9 @@ export interface operations {
           /**
            * @description The visibility of the repository
            * @default private
-           * @enum {string|null}
+           * @enum {string}
            */
-          visibility?: 'public' | 'private' | null
+          visibility?: 'public' | 'private'
           /**
            * @description Whether the repository is archived or not
            * @default false
@@ -4259,7 +4281,7 @@ export interface operations {
              * @description The last update date of the repository
              * @default
              */
-            updated_at?: string | null
+            updated_at?: string
             /**
              * @description The slug of the repository
              * @default
@@ -4288,9 +4310,9 @@ export interface operations {
             /**
              * @description The visibility of the repository
              * @default private
-             * @enum {string|null}
+             * @enum {string}
              */
-            visibility?: 'public' | 'private' | null
+            visibility?: 'public' | 'private'
             /**
              * @description Whether the repository is archived or not
              * @default false
@@ -4507,8 +4529,7 @@ export interface operations {
                * @default api token
                */
               name: string
-              scopes: Array<
-                | 'report'
+              scopes: Array<| 'report'
                 | 'report:list'
                 | 'report:read'
                 | 'report:write'
@@ -4563,8 +4584,7 @@ export interface operations {
                 | 'historical:alerts-list'
                 | 'historical:alerts-trend'
                 | 'historical:dependencies-list'
-                | 'historical:dependencies-trend'
-              >
+                | 'historical:dependencies-trend'>
               /** @default 1000 */
               max_quota: number
               /**
@@ -4633,8 +4653,7 @@ export interface operations {
            * @default api token
            */
           name: string
-          scopes: Array<
-            | 'report'
+          scopes: Array<| 'report'
             | 'report:list'
             | 'report:read'
             | 'report:write'
@@ -4689,8 +4708,7 @@ export interface operations {
             | 'historical:alerts-list'
             | 'historical:alerts-trend'
             | 'historical:dependencies-list'
-            | 'historical:dependencies-trend'
-          >
+            | 'historical:dependencies-trend'>
           /** @default 1000 */
           max_quota: number
           /**
@@ -4756,8 +4774,7 @@ export interface operations {
            * @default api token
            */
           name: string
-          scopes: Array<
-            | 'report'
+          scopes: Array<| 'report'
             | 'report:list'
             | 'report:read'
             | 'report:write'
@@ -4812,8 +4829,7 @@ export interface operations {
             | 'historical:alerts-list'
             | 'historical:alerts-trend'
             | 'historical:dependencies-list'
-            | 'historical:dependencies-trend'
-          >
+            | 'historical:dependencies-trend'>
           /** @default 1000 */
           max_quota: number
           /**
@@ -47415,9 +47431,7 @@ export interface operations {
                 dev: boolean
                 /** @default false */
                 dead: boolean
-                manifestFiles?: Array<
-                  components['schemas']['SocketManifestReference']
-                >
+                manifestFiles?: Array<components['schemas']['SocketManifestReference']>
                 topLevelAncestors?: Array<components['schemas']['SocketId']>
                 dependencies?: Array<components['schemas']['SocketId']>
               }
@@ -47760,6 +47774,44 @@ export interface operations {
     }
   }
   /**
+   * Get supported file types
+   * @description Get a list of supported files for full scan generation.
+   * Files are categorized first by environment (e.g. NPM or PyPI), then by name.
+   *
+   * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
+   * Examples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - No Scopes Required, but authentication is required
+   */
+  getSupportedFiles: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    responses: {
+      /** @description Glob patterns used to match supported files */
+      200: {
+        content: {
+          'application/json': {
+            [key: string]: {
+              [key: string]: {
+                /** @default */
+                pattern: string
+              }
+            }
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
    * Get organization analytics (unstable)
    * @description Get analytics data regarding the number of alerts found across all active repositories.
    *
@@ -47898,7 +47950,7 @@ export interface operations {
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - None, but authentication is required
+   * - No Scopes Required, but authentication is required
    */
   searchDependencies: {
     requestBody?: {
@@ -47999,7 +48051,10 @@ export interface operations {
   }
   /**
    * Get supported files for report
-   * @description Get a list of supported files for project report generation.
+   * @deprecated
+   * @description This route has been moved to the `full-scans/supported` endpoint.
+   *
+   * Get a list of supported files for project report generation.
    * Files are categorized first by environment (e.g. NPM or PyPI), then by name.
    *
    * Files whose names match the patterns returned by this endpoint can be uploaded for report generation.
@@ -48351,7 +48406,7 @@ export interface operations {
    * This endpoint consumes 0 units of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - None, but authentication is required
+   * - No Scopes Required, but authentication is required
    */
   getQuota: {
     responses: {
@@ -48375,7 +48430,7 @@ export interface operations {
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - None, but authentication is required
+   * - No Scopes Required, but authentication is required
    */
   getOrganizations: {
     responses: {
@@ -48406,12 +48461,13 @@ export interface operations {
   }
   /**
    * Calculate settings
+   * @deprecated
    * @description Get current settings for the requested organizations and default settings to allow deferrals.
    *
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - None, but authentication is required
+   * - No Scopes Required, but authentication is required
    */
   postSettings: {
     /** @description Array of organization selector objects (with `organization` field holding the organization ID) to get settings for */
@@ -48470,7 +48526,7 @@ export interface operations {
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - None, but authentication is required
+   * - No Scopes Required, but authentication is required
    */
   getIssuesByNPMPackage: {
     parameters: {
@@ -48533,7 +48589,7 @@ export interface operations {
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - None, but authentication is required
+   * - No Scopes Required, but authentication is required
    */
   getScoreByNPMPackage: {
     parameters: {
