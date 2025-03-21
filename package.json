@@ -63,7 +63,7 @@
     "generate-sdk": "run-p -c --aggregate-output generate-sdk:* && run-p -c --aggregate-output generate-sdk:clean:*",
     "generate-sdk:prettify": "node scripts/prettify-base-json.mjs",
     "generate-sdk:generate": "node scripts/generate-types.mjs > types/api.d.ts",
-    "generate-sdk:clean:api": "npm run fix",
+    "generate-sdk:clean:api": "npm run fix && npm run fix",
     "knip:dependencies": "knip --dependencies",
     "knip:exports": "knip --include exports,duplicates",
     "lint": "oxlint -c=./.oxlintrc.json --ignore-path=./.oxlintignore --tsconfig=./tsconfig.json .",
