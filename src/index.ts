@@ -18,12 +18,18 @@ import type { Agent, RequestOptions } from 'node:https'
 type BatchPackageFetchResultType = SocketSdkResultType<'batchPackageFetch'>
 
 export type SocketSdkOperations = keyof operations
+
 export type SocketSdkReturnType<T extends SocketSdkOperations> = OpReturnType<
   operations[T]
 >
-export type SocketSdkErrorType<T extends SocketSdkOperations> = OpErrorType<
-  operations[T]
->
+
+export type SocketSdkErrorType<T extends SocketSdkOperations> = Omit<
+  OpErrorType<operations[T]>,
+  'error'
+> & {
+  error: string
+}
+
 export type SocketSdkResultType<T extends SocketSdkOperations> =
   | SocketSdkReturnType<T>
   | SocketSdkErrorType<T>
