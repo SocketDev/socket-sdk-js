@@ -17,6 +17,11 @@ import type { Agent, RequestOptions } from 'node:https'
 
 type BatchPackageFetchResultType = SocketSdkResultType<'batchPackageFetch'>
 
+type BatchPackageStreamOptions = {
+  chunkSize: number
+  concurrencyLimit: number
+}
+
 export type SocketSdkOperations = keyof operations
 
 export type SocketSdkReturnType<T extends SocketSdkOperations> = OpReturnType<
@@ -356,7 +361,7 @@ export class SocketSdk {
   async *batchPackageStream(
     queryParams: Record<string, string> | null | undefined,
     componentsObj: { components: Array<{ purl: string }> },
-    concurrencyLimit = 50
+    options?: BatchPackageStreamOptions | undefined
   ): AsyncGenerator<BatchPackageFetchResultType> {
     type GeneratorStep = {
       generator: AsyncGenerator<BatchPackageFetchResultType>
@@ -368,6 +373,10 @@ export class SocketSdk {
     }
     type ResolveFn = (value: GeneratorStep) => void
 
+    const { chunkSize = 5, concurrencyLimit = 10 } = {
+      __proto__: null,
+      ...options
+    } as BatchPackageStreamOptions
     // The createBatchPurlGenerator method will add 2 'abort' event listeners to
     // abortSignal so we multiply the concurrencyLimit by 2.
     const neededMaxListeners = concurrencyLimit * 2
@@ -389,10 +398,10 @@ export class SocketSdk {
       }
       const generator = this.#createBatchPurlGenerator(queryParams, {
         // Chunk components.
-        components: components.slice(index, index + 25)
+        components: components.slice(index, index + chunkSize)
       })
       continueGen(generator)
-      index += 25
+      index += chunkSize
     }
     const continueGen = (
       generator: AsyncGenerator<BatchPackageFetchResultType>
