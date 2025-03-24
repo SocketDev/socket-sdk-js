@@ -65,7 +65,7 @@ class ResponseError extends Error {
 async function createDeleteRequest(
   baseUrl: string,
   urlPath: string,
-  options?: RequestOptions | undefined
+  options: RequestOptions
 ): Promise<IncomingMessage> {
   const req = https.request(`${baseUrl}${urlPath}`, {
     method: 'DELETE',
@@ -81,7 +81,7 @@ async function createDeleteRequest(
 async function createGetRequest(
   baseUrl: string,
   urlPath: string,
-  options?: RequestOptions | undefined
+  options: RequestOptions
 ): Promise<IncomingMessage> {
   const req = https
     .request(`${baseUrl}${urlPath}`, {
@@ -100,7 +100,7 @@ async function createPostRequest(
   baseUrl: string,
   urlPath: string,
   postJson: any,
-  options?: RequestOptions | undefined
+  options: RequestOptions
 ): Promise<IncomingMessage> {
   const req = https
     .request(`${baseUrl}${urlPath}`, {
@@ -151,7 +151,7 @@ async function createUploadRequest(
   baseUrl: string,
   urlPath: string,
   requestBodyNoBoundaries: Array<string | ReadStream>,
-  options?: RequestOptions | undefined
+  options: RequestOptions
 ): Promise<IncomingMessage> {
   // Generate a unique boundary for multipart encoding.
   const boundary = `----NodeMultipartBoundary${Date.now()}`
@@ -557,7 +557,8 @@ export class SocketSdk {
       const data = await getResponseJson(
         await createDeleteRequest(
           this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`
+          `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`,
+          this.#reqOptions
         )
       )
       return this.#handleApiSuccess<'deleteOrgFullScan'>(data)
@@ -574,7 +575,8 @@ export class SocketSdk {
       const data = await getResponseJson(
         await createDeleteRequest(
           this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`
+          `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`,
+          this.#reqOptions
         )
       )
       return this.#handleApiSuccess<'deleteOrgRepo'>(data)
@@ -701,7 +703,8 @@ export class SocketSdk {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/metadata`
+          `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/metadata`,
+          this.#reqOptions
         )
       )
       return this.#handleApiSuccess<'getOrgFullScanMetadata'>(data)
@@ -717,7 +720,8 @@ export class SocketSdk {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/settings/license-policy`
+          `orgs/${encodeURIComponent(orgSlug)}/settings/license-policy`,
+          this.#reqOptions
         )
       )
       return this.#handleApiSuccess<'getOrgLicensePolicy'>(data)
@@ -737,7 +741,8 @@ export class SocketSdk {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
-          `orgs/${orgSlugParam}/repos/${repoSlugParam}`
+          `orgs/${orgSlugParam}/repos/${repoSlugParam}`,
+          this.#reqOptions
         )
       )
       return this.#handleApiSuccess<'getOrgRepo'>(data)
@@ -754,7 +759,8 @@ export class SocketSdk {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/repos?${new URLSearchParams(queryParams ?? '')}`
+          `orgs/${encodeURIComponent(orgSlug)}/repos?${new URLSearchParams(queryParams ?? '')}`,
+          this.#reqOptions
         )
       )
       return this.#handleApiSuccess<'getOrgRepoList'>(data)
