@@ -621,6 +621,31 @@ export interface paths {
      * - historical:snapshots-list
      */
     get: operations['historicalSnapshotsList']
+    /**
+     * Start historical data snapshot job (Beta)
+     * @description This API endpoint is used to start a historical snapshot job. While
+     * snapshots are typically taken at least once a day, this endpoint can
+     * be used to start an "on demand" snapshot job to ensure the latest
+     * data is collected and stored for historical purposes.
+     *
+     * An historical snapshot will contain details and raw data for the following resources:
+     *
+     * - Repositories
+     * - Alerts
+     * - Dependencies
+     * - Artifacts
+     * - Users
+     * - Settings
+     *
+     * Historical snapshot data is bucketed to the nearest day which is described in
+     * more detail at: [Historical Data Endpoints](/reference/historical-data-endpoints)
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - historical:snapshots-start
+     */
+    post: operations['historicalSnapshotsStart']
   }
   '/orgs/{org_slug}/supported-files': {
     /**
@@ -917,14 +942,14 @@ export interface components {
         author?: string[]
         /** @default 0 */
         size?: number
+        alerts?: Array<components['schemas']['SocketAlert']>
+        score?: components['schemas']['SocketScore']
+        /** @default 0 */
+        batchIndex?: number
         /** @default */
         license?: string
         licenseDetails?: components['schemas']['LicenseDetails']
         licenseAttrib?: components['schemas']['SAttrib1_N']
-        score?: components['schemas']['SocketScore']
-        alerts?: Array<components['schemas']['SocketAlert']>
-        /** @default 0 */
-        batchIndex?: number
       }
     SocketBatchPURLFetch: {
       components: Array<components['schemas']['SocketBatchPURLRequest']>
@@ -1081,7 +1106,6 @@ export interface components {
       score?: components['schemas']['SocketScore']
       alerts?: Array<components['schemas']['SocketAlert']>
     }
-    Qualifiers: unknown
     Capabilities: {
       /** @default false */
       env: boolean
@@ -1096,6 +1120,7 @@ export interface components {
       /** @default false */
       unsafe: boolean
     }
+    Qualifiers: unknown
     SocketScore: {
       /** @default 0 */
       license: number
@@ -1165,32 +1190,6 @@ export interface components {
       /** @default */
       release?: string
     }
-    LicenseDetails: Array<{
-      /** @default */
-      spdxDisj: string
-      authors: string[]
-      /** @default */
-      errorData: string
-      /** @default */
-      provenance: string
-      /** @default */
-      filepath: string
-      /** @default 0 */
-      match_strength: number
-    }>
-    SAttrib1_N: Array<{
-      /** @default */
-      attribText: string
-      attribData: Array<{
-        /** @default */
-        purl: string
-        /** @default */
-        foundInFilepath: string
-        /** @default */
-        spdxExpr: string
-        foundAuthors: string[]
-      }>
-    }>
     SocketAlert: {
       /** @default */
       key: string
@@ -1217,6 +1216,32 @@ export interface components {
         description: string
       }
     }
+    LicenseDetails: Array<{
+      /** @default */
+      spdxDisj: string
+      authors: string[]
+      /** @default */
+      errorData: string
+      /** @default */
+      provenance: string
+      /** @default */
+      filepath: string
+      /** @default 0 */
+      match_strength: number
+    }>
+    SAttrib1_N: Array<{
+      /** @default */
+      attribText: string
+      attribData: Array<{
+        /** @default */
+        purl: string
+        /** @default */
+        foundInFilepath: string
+        /** @default */
+        spdxExpr: string
+        foundAuthors: string[]
+      }>
+    }>
     SocketArtifactLink: {
       /** @default false */
       direct?: boolean
@@ -1227,6 +1252,34 @@ export interface components {
       manifestFiles?: Array<components['schemas']['SocketManifestReference']>
       topLevelAncestors?: Array<components['schemas']['SocketId']>
       dependencies?: Array<components['schemas']['SocketId']>
+      alertPriorities?: {
+        [key: string]: {
+          /** @default 0 */
+          result: number
+          components?: {
+            isFixable: {
+              /** @default 0 */
+              result: number
+              /** @default false */
+              value: boolean
+            }
+            isReachable: {
+              /** @default 0 */
+              result: number
+              /** @default false */
+              value: boolean
+            }
+            severity: {
+              /** @default 0 */
+              result: number
+              /** @default 0 */
+              value: number
+            }
+          }
+          /** @default */
+          formula?: string
+        }
+      }
       artifact?: components['schemas']['SocketPURL'] & {
         id: components['schemas']['SocketId']
       }
@@ -3683,6 +3736,10 @@ export interface operations {
   getOrgFullScan: {
     parameters: {
       query?: {
+        /** @description Control which alert priority fields to include in the response. Set to "true" to include all fields, "false" to exclude all fields, or specify individual fields like "components,formula" to include only those fields. */
+        include_alert_priority_details?:
+          | boolean
+          | Array<'component' | 'formula'>
         /** @description Include license details in the response. This can increase the response size significantly. */
         include_license_details?: boolean
       }
@@ -4524,14 +4581,49 @@ export interface operations {
         content: {
           'application/json': {
             tokens: Array<{
-              /** @default */
-              token: string
+              /** @default 1000 */
+              max_quota: number
               /**
                * @description Name for the API Token
                * @default api token
                */
-              name: string
+              name: string | null
               scopes: Array<
+                | 'alerts'
+                | 'alerts:list'
+                | 'alerts:trend'
+                | 'api-tokens'
+                | 'api-tokens:create'
+                | 'api-tokens:update'
+                | 'api-tokens:revoke'
+                | 'api-tokens:rotate'
+                | 'api-tokens:list'
+                | 'audit-log'
+                | 'audit-log:list'
+                | 'dependencies'
+                | 'dependencies:list'
+                | 'dependencies:trend'
+                | 'full-scans'
+                | 'full-scans:list'
+                | 'full-scans:create'
+                | 'full-scans:delete'
+                | 'historical'
+                | 'historical:snapshots-list'
+                | 'historical:snapshots-start'
+                | 'historical:alerts-list'
+                | 'historical:alerts-trend'
+                | 'historical:dependencies-list'
+                | 'historical:dependencies-trend'
+                | 'integration'
+                | 'integration:list'
+                | 'integration:create'
+                | 'integration:update'
+                | 'integration:delete'
+                | 'license-policy'
+                | 'license-policy:update'
+                | 'license-policy:read'
+                | 'packages'
+                | 'packages:list'
                 | 'report'
                 | 'report:list'
                 | 'report:read'
@@ -4546,66 +4638,22 @@ export interface operations {
                 | 'repo-label:create'
                 | 'repo-label:update'
                 | 'repo-label:delete'
-                | 'full-scans'
-                | 'full-scans:list'
-                | 'full-scans:create'
-                | 'full-scans:delete'
-                | 'packages'
-                | 'packages:list'
-                | 'audit-log'
-                | 'audit-log:list'
-                | 'integration'
-                | 'integration:list'
-                | 'integration:create'
-                | 'integration:update'
-                | 'integration:delete'
-                | 'threat-feed'
-                | 'threat-feed:list'
                 | 'security-policy'
                 | 'security-policy:update'
                 | 'security-policy:read'
-                | 'license-policy'
-                | 'license-policy:update'
-                | 'license-policy:read'
+                | 'threat-feed'
+                | 'threat-feed:list'
                 | 'triage'
                 | 'triage:alerts-list'
                 | 'triage:alerts-update'
-                | 'api-tokens'
-                | 'api-tokens:create'
-                | 'api-tokens:update'
-                | 'api-tokens:revoke'
-                | 'api-tokens:rotate'
-                | 'api-tokens:list'
-                | 'alerts'
-                | 'alerts:list'
-                | 'alerts:trend'
-                | 'dependencies'
-                | 'dependencies:list'
-                | 'dependencies:trend'
-                | 'historical'
-                | 'historical:snapshots-list'
-                | 'historical:alerts-list'
-                | 'historical:alerts-trend'
-                | 'historical:dependencies-list'
-                | 'historical:dependencies-trend'
               >
-              /** @default 1000 */
-              max_quota: number
+              /** @default */
+              token: string
               /**
                * @default organization
                * @enum {string}
                */
               visibility: 'admin' | 'organization'
-              /**
-               * Format: date
-               * @default
-               */
-              last_used_at: string
-              /**
-               * Format: date
-               * @default
-               */
-              created_at: string
               committers: Array<{
                 /** @default */
                 email?: string
@@ -4619,6 +4667,16 @@ export interface operations {
                 /** @default */
                 providerUserId?: string
               }>
+              /**
+               * Format: date
+               * @default
+               */
+              created_at: string
+              /**
+               * Format: date
+               * @default
+               */
+              last_used_at: string
             }>
             /** @default 0 */
             nextPage: number | null
@@ -4650,14 +4708,44 @@ export interface operations {
     requestBody?: {
       content: {
         'application/json': {
-          /** @default */
-          token: string
-          /**
-           * @description Name for the API Token
-           * @default api token
-           */
-          name: string
+          /** @default 1000 */
+          max_quota: number
           scopes: Array<
+            | 'alerts'
+            | 'alerts:list'
+            | 'alerts:trend'
+            | 'api-tokens'
+            | 'api-tokens:create'
+            | 'api-tokens:update'
+            | 'api-tokens:revoke'
+            | 'api-tokens:rotate'
+            | 'api-tokens:list'
+            | 'audit-log'
+            | 'audit-log:list'
+            | 'dependencies'
+            | 'dependencies:list'
+            | 'dependencies:trend'
+            | 'full-scans'
+            | 'full-scans:list'
+            | 'full-scans:create'
+            | 'full-scans:delete'
+            | 'historical'
+            | 'historical:snapshots-list'
+            | 'historical:snapshots-start'
+            | 'historical:alerts-list'
+            | 'historical:alerts-trend'
+            | 'historical:dependencies-list'
+            | 'historical:dependencies-trend'
+            | 'integration'
+            | 'integration:list'
+            | 'integration:create'
+            | 'integration:update'
+            | 'integration:delete'
+            | 'license-policy'
+            | 'license-policy:update'
+            | 'license-policy:read'
+            | 'packages'
+            | 'packages:list'
             | 'report'
             | 'report:list'
             | 'report:read'
@@ -4672,51 +4760,17 @@ export interface operations {
             | 'repo-label:create'
             | 'repo-label:update'
             | 'repo-label:delete'
-            | 'full-scans'
-            | 'full-scans:list'
-            | 'full-scans:create'
-            | 'full-scans:delete'
-            | 'packages'
-            | 'packages:list'
-            | 'audit-log'
-            | 'audit-log:list'
-            | 'integration'
-            | 'integration:list'
-            | 'integration:create'
-            | 'integration:update'
-            | 'integration:delete'
-            | 'threat-feed'
-            | 'threat-feed:list'
             | 'security-policy'
             | 'security-policy:update'
             | 'security-policy:read'
-            | 'license-policy'
-            | 'license-policy:update'
-            | 'license-policy:read'
+            | 'threat-feed'
+            | 'threat-feed:list'
             | 'triage'
             | 'triage:alerts-list'
             | 'triage:alerts-update'
-            | 'api-tokens'
-            | 'api-tokens:create'
-            | 'api-tokens:update'
-            | 'api-tokens:revoke'
-            | 'api-tokens:rotate'
-            | 'api-tokens:list'
-            | 'alerts'
-            | 'alerts:list'
-            | 'alerts:trend'
-            | 'dependencies'
-            | 'dependencies:list'
-            | 'dependencies:trend'
-            | 'historical'
-            | 'historical:snapshots-list'
-            | 'historical:alerts-list'
-            | 'historical:alerts-trend'
-            | 'historical:dependencies-list'
-            | 'historical:dependencies-trend'
           >
-          /** @default 1000 */
-          max_quota: number
+          /** @default */
+          token: string
           /**
            * @default organization
            * @enum {string}
@@ -4735,6 +4789,11 @@ export interface operations {
             /** @default */
             providerUserId?: string
           }
+          /**
+           * @description Name for the API Token
+           * @default api token
+           */
+          name?: string
         }
       }
     }
@@ -4773,14 +4832,44 @@ export interface operations {
     requestBody?: {
       content: {
         'application/json': {
-          /** @default */
-          token: string
-          /**
-           * @description Name for the API Token
-           * @default api token
-           */
-          name: string
+          /** @default 1000 */
+          max_quota: number
           scopes: Array<
+            | 'alerts'
+            | 'alerts:list'
+            | 'alerts:trend'
+            | 'api-tokens'
+            | 'api-tokens:create'
+            | 'api-tokens:update'
+            | 'api-tokens:revoke'
+            | 'api-tokens:rotate'
+            | 'api-tokens:list'
+            | 'audit-log'
+            | 'audit-log:list'
+            | 'dependencies'
+            | 'dependencies:list'
+            | 'dependencies:trend'
+            | 'full-scans'
+            | 'full-scans:list'
+            | 'full-scans:create'
+            | 'full-scans:delete'
+            | 'historical'
+            | 'historical:snapshots-list'
+            | 'historical:snapshots-start'
+            | 'historical:alerts-list'
+            | 'historical:alerts-trend'
+            | 'historical:dependencies-list'
+            | 'historical:dependencies-trend'
+            | 'integration'
+            | 'integration:list'
+            | 'integration:create'
+            | 'integration:update'
+            | 'integration:delete'
+            | 'license-policy'
+            | 'license-policy:update'
+            | 'license-policy:read'
+            | 'packages'
+            | 'packages:list'
             | 'report'
             | 'report:list'
             | 'report:read'
@@ -4795,51 +4884,17 @@ export interface operations {
             | 'repo-label:create'
             | 'repo-label:update'
             | 'repo-label:delete'
-            | 'full-scans'
-            | 'full-scans:list'
-            | 'full-scans:create'
-            | 'full-scans:delete'
-            | 'packages'
-            | 'packages:list'
-            | 'audit-log'
-            | 'audit-log:list'
-            | 'integration'
-            | 'integration:list'
-            | 'integration:create'
-            | 'integration:update'
-            | 'integration:delete'
-            | 'threat-feed'
-            | 'threat-feed:list'
             | 'security-policy'
             | 'security-policy:update'
             | 'security-policy:read'
-            | 'license-policy'
-            | 'license-policy:update'
-            | 'license-policy:read'
+            | 'threat-feed'
+            | 'threat-feed:list'
             | 'triage'
             | 'triage:alerts-list'
             | 'triage:alerts-update'
-            | 'api-tokens'
-            | 'api-tokens:create'
-            | 'api-tokens:update'
-            | 'api-tokens:revoke'
-            | 'api-tokens:rotate'
-            | 'api-tokens:list'
-            | 'alerts'
-            | 'alerts:list'
-            | 'alerts:trend'
-            | 'dependencies'
-            | 'dependencies:list'
-            | 'dependencies:trend'
-            | 'historical'
-            | 'historical:snapshots-list'
-            | 'historical:alerts-list'
-            | 'historical:alerts-trend'
-            | 'historical:dependencies-list'
-            | 'historical:dependencies-trend'
           >
-          /** @default 1000 */
-          max_quota: number
+          /** @default */
+          token: string
           /**
            * @default organization
            * @enum {string}
@@ -4858,6 +4913,11 @@ export interface operations {
             /** @default */
             providerUserId?: string
           }
+          /**
+           * @description Name for the API Token
+           * @default api token
+           */
+          name?: string
         }
       }
     }
@@ -47344,26 +47404,8 @@ export interface operations {
       200: {
         content: {
           'application/json': {
-            meta: {
-              /** @default */
-              organizationId: string
-              /** @default 0 */
-              queryStartTimestamp: number
-              /** @default */
-              startDateInclusive: string
-              /** @default */
-              endDateInclusive: string
-              /** @default false */
-              includeLatestAlertsOnly: boolean
-              filters: {
-                alertSeverity?: string[]
-                repoSlug?: string[]
-                alertType?: string[]
-                artifactType?: string[]
-                alertAction?: string[]
-                alertCategory?: string[]
-              }
-            }
+            /** @default */
+            endCursor: string | null
             items: Array<{
               /** @default */
               repoSlug: string
@@ -47379,30 +47421,30 @@ export interface operations {
               scannedAt: string
               artifact: {
                 /** @default */
-                type: string
+                id: string | null
                 /** @default */
-                namespace: string | null
+                license: string | null
                 /** @default */
                 name: string
                 /** @default */
-                id: string | null
+                namespace: string | null
+                /** @default */
+                type: string
                 /** @default */
                 version: string
-                /** @default */
-                license: string | null
                 /** @default */
                 artifact_id?: string
                 /** @default */
                 artifactId?: string
-                qualifiers?: components['schemas']['Qualifiers']
-                /** @default */
-                subpath?: string
                 /** @default */
                 author?: string
                 capabilities?: components['schemas']['Capabilities']
+                qualifiers?: components['schemas']['Qualifiers']
                 scores?: components['schemas']['SocketScore']
                 /** @default 0 */
                 size?: number
+                /** @default */
+                subpath?: string
               }
               alert: {
                 /** @default */
@@ -47446,8 +47488,26 @@ export interface operations {
                 dependencies?: Array<components['schemas']['SocketId']>
               }
             }>
-            /** @default */
-            endCursor: string | null
+            meta: {
+              /** @default */
+              organizationId: string
+              /** @default 0 */
+              queryStartTimestamp: number
+              /** @default */
+              startDateInclusive: string
+              /** @default */
+              endDateInclusive: string
+              /** @default false */
+              includeLatestAlertsOnly: boolean
+              filters: {
+                alertSeverity?: string[]
+                repoSlug?: string[]
+                alertType?: string[]
+                artifactType?: string[]
+                alertAction?: string[]
+                alertCategory?: string[]
+              }
+            }
           }
         }
       }
@@ -47726,7 +47786,7 @@ export interface operations {
       }
     }
     responses: {
-      /** @description The paginated array of API tokens for the organization, and related metadata. */
+      /** @description The historical snapshots. */
       200: {
         content: {
           'application/json': {
@@ -47774,6 +47834,57 @@ export interface operations {
             }>
             /** @default */
             endCursor: string | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Start historical data snapshot job (Beta)
+   * @description This API endpoint is used to start a historical snapshot job. While
+   * snapshots are typically taken at least once a day, this endpoint can
+   * be used to start an "on demand" snapshot job to ensure the latest
+   * data is collected and stored for historical purposes.
+   *
+   * An historical snapshot will contain details and raw data for the following resources:
+   *
+   * - Repositories
+   * - Alerts
+   * - Dependencies
+   * - Artifacts
+   * - Users
+   * - Settings
+   *
+   * Historical snapshot data is bucketed to the nearest day which is described in
+   * more detail at: [Historical Data Endpoints](/reference/historical-data-endpoints)
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - historical:snapshots-start
+   */
+  historicalSnapshotsStart: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    responses: {
+      /** @description The details of the snapshot job request. */
+      200: {
+        content: {
+          'application/json': {
+            /** @default */
+            requestId: string
+            /** @default */
+            requestedBy: string
+            /** @default */
+            requestedAt: string
           }
         }
       }
@@ -47994,13 +48105,13 @@ export interface operations {
               /** @default */
               name: string
               /** @default */
-              namespace: string
-              /** @default */
               repository: string
               /** @default */
               type: string
               /** @default */
-              version: string
+              namespace?: string
+              /** @default */
+              version?: string
             }>
           }
         }
@@ -48276,21 +48387,21 @@ export interface operations {
           'application/json': {
             results: Array<{
               /** @default */
-              id?: string
+              id: string
               /** @default */
-              created_at?: string
+              created_at: string
               /** @default */
-              updated_at?: string
+              updated_at: string
               /** @default */
-              github_install_id?: string
+              github_install_id: string
               /** @default */
-              github_repo_id?: string
+              github_repo_id: string
               /** @default */
-              name?: string
+              name: string
               /** @default */
-              github_full_name?: string
+              github_full_name: string
               /** @default */
-              organization_id?: string
+              organization_id: string | null
               latest_project_report?: {
                 /** @default */
                 id: string
@@ -48374,7 +48485,7 @@ export interface operations {
               /** @default */
               purl?: string
               /** @default */
-              removedAt?: string
+              removedAt?: string | null
               /** @default */
               threatType?: string
             }>
@@ -48453,9 +48564,9 @@ export interface operations {
                 /** @default */
                 id: string
                 /** @default */
-                name: string
+                name: string | null
                 /** @default */
-                image: string
+                image: string | null
                 /** @default */
                 plan: string
                 /** @default */
