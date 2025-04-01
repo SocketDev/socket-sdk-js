@@ -191,8 +191,9 @@ async function getResponse(req: ClientRequest): Promise<IncomingMessage> {
       throw new ResponseError(res, `${req.method} request failed`)
     }
     return res
-  } finally {
+  } catch (e) {
     req.destroy()
+    throw e
   }
 }
 
