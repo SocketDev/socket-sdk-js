@@ -9,7 +9,7 @@ import {
 import jsPlugin from '@eslint/js'
 import tsParser from '@typescript-eslint/parser'
 import { createOxcImportResolver } from 'eslint-import-resolver-oxc'
-import importXPlugin from 'eslint-plugin-import-x'
+import { flatConfigs as origImportXFlatConfigs } from 'eslint-plugin-import-x'
 import jsdocPlugin from 'eslint-plugin-jsdoc'
 import nodePlugin from 'eslint-plugin-n'
 import sortDestructureKeysPlugin from 'eslint-plugin-sort-destructure-keys'
@@ -24,8 +24,6 @@ const __dirname = path.dirname(__filename)
 const require = createRequire(import.meta.url)
 
 const { BIOME_JSON, GITIGNORE, LATEST, TSCONFIG_JSON } = constants
-
-const { flatConfigs: origImportXFlatConfigs } = importXPlugin
 
 const rootPath = __dirname
 const rootTsConfigPath = path.join(rootPath, TSCONFIG_JSON)
