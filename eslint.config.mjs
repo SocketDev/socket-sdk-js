@@ -56,7 +56,7 @@ const sharedRules = {
     {
       ignores: ['test', 'test.describe'],
       // Lazily access constants.maintainedNodeVersions.
-      version: constants.maintainedNodeVersions.last
+      version: constants.maintainedNodeVersions.current
     }
   ],
   'n/prefer-node-protocol': 'error',
