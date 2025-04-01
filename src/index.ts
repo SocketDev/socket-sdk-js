@@ -161,21 +161,24 @@ async function createUploadRequest(
       'Content-Type': `multipart/form-data; boundary=${boundary}`
     }
   })
-  // Send the request body (headers + files).
-  for (const part of requestBody) {
-    if (typeof part === 'string') {
-      req.write(part)
-    } else {
-      part.pipe(req, { end: false })
-      // Wait for file streaming to complete.
-      // eslint-disable-next-line no-await-in-loop
-      await events.once(part, 'end')
-      // Ensure a new line after file content.
-      req.write('\n')
+  try {
+    // Send the request body (headers + files).
+    for (const part of requestBody) {
+      if (typeof part === 'string') {
+        req.write(part)
+      } else {
+        part.pipe(req, { end: false })
+        // Wait for file streaming to complete.
+        // eslint-disable-next-line no-await-in-loop
+        await events.once(part, 'end')
+        // Ensure a new line after file content.
+        req.write('\n')
+      }
     }
+  } finally {
+    // Close request after writing all data.
+    req.end()
   }
-  // Close request after writing all data.
-  req.end()
   return await getResponse(req)
 }
 
@@ -647,13 +650,15 @@ export class SocketSdk {
     file?: string
   ): Promise<SocketSdkResultType<'getOrgFullScan'>> {
     try {
-      const req = https.request(
-        `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`,
-        {
-          method: 'GET',
-          ...this.#reqOptions
-        }
-      )
+      const req = https
+        .request(
+          `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`,
+          {
+            method: 'GET',
+            ...this.#reqOptions
+          }
+        )
+        .end()
       const res = await getResponse(req)
       if (file) {
         res.pipe(createWriteStream(file))
