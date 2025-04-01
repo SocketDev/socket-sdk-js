@@ -12,7 +12,7 @@ import rootPkgJson from '../package.json' with { type: 'json' }
 import type { operations } from '../types/api'
 import type { OpErrorType, OpReturnType } from '../types/api-helpers'
 import type { ReadStream } from 'node:fs'
-import type { IncomingMessage } from 'node:http'
+import type { ClientRequest, IncomingMessage } from 'node:http'
 import type { Agent, RequestOptions } from 'node:https'
 
 type BatchPackageFetchResultType = SocketSdkResultType<'batchPackageFetch'>
@@ -67,16 +67,13 @@ async function createDeleteRequest(
   urlPath: string,
   options: RequestOptions
 ): Promise<IncomingMessage> {
-  const req = https.request(`${baseUrl}${urlPath}`, {
-    method: 'DELETE',
-    ...options
-  })
-  const { 0: res } = (await events.once(req, 'response')) as [IncomingMessage]
-  if (!isResponseOk(res)) {
-    req.destroy()
-    throw new ResponseError(res, 'Delete request failed')
-  }
-  return res
+  const req = https
+    .request(`${baseUrl}${urlPath}`, {
+      method: 'DELETE',
+      ...options
+    })
+    .end()
+  return await getResponse(req)
 }
 
 async function createGetRequest(
@@ -90,12 +87,7 @@ async function createGetRequest(
       ...options
     })
     .end()
-  const { 0: res } = (await events.once(req, 'response')) as [IncomingMessage]
-  if (!isResponseOk(res)) {
-    req.destroy()
-    throw new ResponseError(res, 'Get request failed')
-  }
-  return res
+  return await getResponse(req)
 }
 
 async function createPostRequest(
@@ -110,12 +102,7 @@ async function createPostRequest(
       ...options
     })
     .end(JSON.stringify(postJson))
-  const { 0: res } = (await events.once(req, 'response')) as [IncomingMessage]
-  if (!isResponseOk(res)) {
-    req.destroy()
-    throw new ResponseError(res, 'Post request failed')
-  }
-  return res
+  return await getResponse(req)
 }
 
 function createRequestBodyForFilepaths(
@@ -189,12 +176,21 @@ async function createUploadRequest(
   }
   // Close request after writing all data.
   req.end()
+  return await getResponse(req)
+}
 
-  const { 0: res } = (await events.once(req, 'response')) as [IncomingMessage]
-  if (!isResponseOk(res)) {
-    throw new ResponseError(res, 'Upload failed')
+async function getResponse(req: ClientRequest): Promise<IncomingMessage> {
+  try {
+    const { 0: res } = (await events.once(req, 'response', {
+      signal: abortSignal
+    })) as [IncomingMessage]
+    if (!isResponseOk(res)) {
+      throw new ResponseError(res, `${req.method} request failed`)
+    }
+    return res
+  } finally {
+    req.destroy()
   }
-  return res
 }
 
 async function getResponseJson(
@@ -278,14 +274,7 @@ export class SocketSdk {
         }
       )
       .end(JSON.stringify(componentsObj))
-    // Adds the second 'abort' listener to abortSignal.
-    const { 0: res } = (await events.once(req, 'response', {
-      signal: abortSignal
-    })) as [IncomingMessage]
-    if (!isResponseOk(res)) {
-      throw new ResponseError(res, 'Batch purl request failed')
-    }
-    return res
+    return await getResponse(req)
   }
 
   async *#createBatchPurlGenerator(
@@ -665,10 +654,7 @@ export class SocketSdk {
           ...this.#reqOptions
         }
       )
-      const { 0: res } = await events.once(req, 'response')
-      if (!isResponseOk(res)) {
-        throw new ResponseError(res, 'Get request failed')
-      }
+      const res = await getResponse(req)
       if (file) {
         res.pipe(createWriteStream(file))
       } else {
