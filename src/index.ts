@@ -52,7 +52,7 @@ export interface SocketSdkOptions {
   userAgent?: string | undefined
 }
 
-const defaultUserAgent = createUserAgentFromPkgJson(rootPkgJson)
+const DEFAULT_USER_AGENT = createUserAgentFromPkgJson(rootPkgJson)
 
 class ResponseError extends Error {
   response: IncomingMessage
@@ -258,7 +258,7 @@ export class SocketSdk {
       ...(agent ? { agent } : {}),
       headers: {
         Authorization: `Basic ${btoa(`${apiToken}:`)}`,
-        'User-Agent': `${userAgent ? `${userAgent} ` : ''}${defaultUserAgent}`
+        'User-Agent': userAgent ?? DEFAULT_USER_AGENT
       },
       signal: abortSignal
     }
