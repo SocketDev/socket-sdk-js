@@ -37,11 +37,30 @@ const nodeGlobalsConfig = Object.fromEntries(
 )
 
 const sharedPlugins = {
+  ...nodePlugin.configs['flat/recommended-script'].plugins,
   'sort-destructure-keys': sortDestructureKeysPlugin,
   unicorn: unicornPlugin
 }
 
 const sharedRules = {
+  'n/exports-style': ['error', 'module.exports'],
+  'n/no-missing-require': ['off'],
+  // The n/no-unpublished-bin rule does does not support non-trivial glob
+  // patterns used in package.json "files" fields. In those cases we simplify
+  // the glob patterns used.
+  'n/no-unpublished-bin': 'error',
+  'n/no-unsupported-features/es-builtins': 'error',
+  'n/no-unsupported-features/es-syntax': 'error',
+  'n/no-unsupported-features/node-builtins': [
+    'error',
+    {
+      ignores: ['test', 'test.describe'],
+      // Lazily access constants.maintainedNodeVersions.
+      version: constants.maintainedNodeVersions.last
+    }
+  ],
+  'n/prefer-node-protocol': 'error',
+  'unicorn/consistent-function-scoping': 'error',
   curly: 'error',
   'no-await-in-loop': 'error',
   'no-control-regex': 'error',
@@ -61,8 +80,7 @@ const sharedRules = {
   'no-warning-comments': ['warn', { terms: ['fixme'] }],
   'prefer-const': 'error',
   'sort-destructure-keys/sort-destructure-keys': 'error',
-  'sort-imports': ['error', { ignoreDeclarationSort: true }],
-  'unicorn/consistent-function-scoping': 'error'
+  'sort-imports': ['error', { ignoreDeclarationSort: true }]
 }
 
 const sharedRulesForImportX = {
@@ -243,31 +261,13 @@ export default [
     plugins: {
       ...jsPlugin.configs.recommended.plugins,
       ...importFlatConfigsForScript.recommended.plugins,
-      ...nodePlugin.configs['flat/recommended-script'].plugins,
       ...sharedPlugins
     },
     rules: {
       ...jsPlugin.configs.recommended.rules,
       ...importFlatConfigsForScript.recommended.rules,
       ...nodePlugin.configs['flat/recommended-script'].rules,
-      ...sharedRules,
-      'n/exports-style': ['error', 'module.exports'],
-      'n/no-missing-require': ['off'],
-      // The n/no-unpublished-bin rule does does not support non-trivial glob
-      // patterns used in package.json "files" fields. In those cases we simplify
-      // the glob patterns used.
-      'n/no-unpublished-bin': 'error',
-      'n/no-unsupported-features/es-builtins': 'error',
-      'n/no-unsupported-features/es-syntax': 'error',
-      'n/no-unsupported-features/node-builtins': [
-        'error',
-        {
-          ignores: ['test', 'test.describe'],
-          // Lazily access constants.maintainedNodeVersions.
-          version: constants.maintainedNodeVersions.last
-        }
-      ],
-      'n/prefer-node-protocol': 'error'
+      ...sharedRules
     }
   },
   {
