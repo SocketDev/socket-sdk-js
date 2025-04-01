@@ -73,6 +73,7 @@ async function createDeleteRequest(
   })
   const { 0: res } = (await events.once(req, 'response')) as [IncomingMessage]
   if (!isResponseOk(res)) {
+    req.destroy()
     throw new ResponseError(res, 'Delete request failed')
   }
   return res
@@ -91,6 +92,7 @@ async function createGetRequest(
     .end()
   const { 0: res } = (await events.once(req, 'response')) as [IncomingMessage]
   if (!isResponseOk(res)) {
+    req.destroy()
     throw new ResponseError(res, 'Get request failed')
   }
   return res
@@ -110,6 +112,7 @@ async function createPostRequest(
     .end(JSON.stringify(postJson))
   const { 0: res } = (await events.once(req, 'response')) as [IncomingMessage]
   if (!isResponseOk(res)) {
+    req.destroy()
     throw new ResponseError(res, 'Post request failed')
   }
   return res
