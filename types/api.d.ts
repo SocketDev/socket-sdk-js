@@ -87,78 +87,119 @@ export interface paths {
   '/license-policy': {
     /**
      * License Policy (Beta)
-     * @description Compare the license data found for a list of packages (as PURL strings) with a configurable license allow list,
-     * returning information about license data which does not comply with the license allow list.
+     * @description Compare the license data found for a list of packages (given as PURL strings) with the contents of a configurable license policy,
+     *     returning information about license data which does not comply with the license allow list.
      *
-     * ## Allow List Schema
-     *
-     * ```json
-     * {
-     *   allowedApprovalSources?: Array<"fsf" | "osi">,
-     *   allowedFamilies?: Array<"copyleft" | "permissive">,
-     *   allowedTiers?: Array<PermissiveTier | CopyleftTier>,
-     *   allowedStrings?: Array<string>
-     *   allowedPURLs?: Array<string>
-     *   focusAlertsHere?: boolean
-     * }
-     * ```
-     *
-     * where
-     *
-     * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" | "lead"
-     * CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong copyleft" | "weak copyleft"
-     *
-     * readers can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
-     *
-     * ## Return value
-     *
-     * For each requested PURL, an array is returned. Each array contains a list of license policy violations
-     * detected for the requested PURL.
-     *
-     * Violations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,
-     * a message describing why the license data is believed to be incompatible with the license policy, and a list
-     * of locations (by filepath or other provenance information) where the offending license data may be found.
-     *
-     * ```json
-     * Array<
-     *   Array<{
-     *     purl: string,
-     *     spdxAtomOrExtraData: string,
-     *     violationExplanation: string,
-     *     filepathOrProvenance: Array<string>
-     *   }>
-     * >
-     * ```
-     *
-     * ### Example request bodies:
-     * ```json
-     * {
-     *   "components": [
+     *      ## Example request body:
+     *     ```json
      *     {
-     *       "purl": "pkg:pypi/alt-aiohttp-cors@0.7.1?artifact_id=tar-gz"
-     *     },
-     *     {
-     *       "purl": "pkg:npm/express@4.19.2"
+     *       "components": [
+     *         {
+     *           "purl": "pkg:npm/lodash@4.17.21"
+     *         },
+     *         {
+     *           "purl": "pkg:npm/lodash@4.14.1"
+     *         }
+     *       ],
+     *       "allow": [
+     *         "permissive",
+     *         "pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*"
+     *       ],
+     *       "warn": [
+     *         "copyleft",
+     *         "pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*"
+     *       ],
+     *       "options": ["toplevelOnly"]
      *     }
-     *   ],
-     *   "license_allow_list": {
-     *     "allowedApprovalSources: ["fsf", "osi"],
-     *     "allowedFamilies": ["permissive"],
-     *     "allowedStrings": ["License :: OSI Approved :: BSD License", "UniqueLicense-2.0"]
-     *   }
+     *     ```
+     *
+     *
+     *     ## Return value
+     *
+     *     For each requested PURL, an array is returned. Each array contains a list of license policy violations
+     *     detected for the requested PURL.
+     *
+     *     Violations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,
+     *     a message describing why the license data is believed to be incompatible with the license policy, and a list
+     *     of locations (by filepath or other provenance information) where the offending license data may be found.
+     *
+     *     ```json
+     *     Array<
+     *       Array<{
+     *         purl: string,
+     *         spdxAtomOrExtraData: string,
+     *         violationExplanation: string,
+     *         filepathOrProvenance: Array<string>
+     *         level: "warning" | "violation"
+     *       }>
+     *     >
+     *     ```
+     *
+     *     ## License policy schema
+     *
+     * ```json
+     * {
+     *   allow?: Array<string>
+     *   warn?: Array<string>
+     *   options?: Array<string>
      * }
      * ```
+     *
+     * Elements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in pacakge which not present in either array will produce a license violation (effectively a "hard" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings "Apache-2.0" and "MIT" to the `allow` array. Strings appearing in these arrays are generally "what you see is what you get", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.
+     *
+     * ## License Classes
+     *
+     * Strings which are license classes will expand to a list of licenses known to be in that particular license class. Recognized license classes are:
+     *   'permissive',
+     *   'permissive (model)',
+     *   'permissive (gold)',
+     *   'permissive (silver)',
+     *   'permissive (bronze)',
+     *   'permissive (lead)',
+     *   'copyleft',
+     *   'maximal copyleft',
+     *   'network copyleft',
+     *   'strong copyleft',
+     *   'weak copyleft',
+     *   'contributor license agreement',
+     *   'public domain',
+     *   'proprietary free',
+     *   'source available',
+     *   'proprietary',
+     *   'commercial',
+     *   'patent'
+     *
+     * Users can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+     *
+     *
+     * ## PURLs
+     *
+     * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.
+     *
+     * purl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).
+     *
+     * ### Examples:
+     * Allow all license data found in a specific version of a package 4.14.1: `pkg:npm/lodash@4.14.1`
+     * Allow all license data found in a version range of a package: `pkg:npm/lodash?version_glob=15.*`
+     * Allow all license data in the test directory of a given package for certain version ranges: `pkg:npm/lodash@15.*.*?file_name=lodash/test/*`
+     * Allow all license data taken from the package registry for a package and version range: `pkg:npm/lodash?version_glob=*&license_provenance=registry_metadata`
+     *
+     * ## Available options
+     *
+     * `toplevelOnly`: only apply the license policy to "top level" license data in a package, which includes registry metadata, LICENSE files, and manifest files which are closest to the root of the package.
      *
      * This endpoint consumes 100 units of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - packages:list
+     *       - packages:list
+     * - license-policy:read
      */
     post: operations['licensePolicy']
   }
   '/saturate-license-policy': {
     /**
-     * Saturate License Policy (Beta)
+     * Saturate License Policy (Legacy)
+     * @deprecated
      * @description Get the "saturated" version of a license policy's allow list, filling in the entire set of allowed
      * license data. For example, the saturated form of a license allow list which only specifies that
      * licenses in the tier "maximal copyleft" are allowed is shown below (note the expanded `allowedStrings` property):
@@ -539,6 +580,7 @@ export interface paths {
   '/orgs/{org_slug}/settings/license-policy': {
     /**
      * Get Organization License Policy
+     * @deprecated
      * @description Retrieve the license policy of an organization.
      *
      * This endpoint consumes 1 unit of your quota.
@@ -549,7 +591,60 @@ export interface paths {
     get: operations['getOrgLicensePolicy']
     /**
      * Update License Policy
-     * @description Update the license policy of an organization.
+     * @description Set the organization's license policy
+     *
+     *       ## License policy schema
+     *
+     * ```json
+     * {
+     *   allow?: Array<string>
+     *   warn?: Array<string>
+     *   options?: Array<string>
+     * }
+     * ```
+     *
+     * Elements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in pacakge which not present in either array will produce a license violation (effectively a "hard" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings "Apache-2.0" and "MIT" to the `allow` array. Strings appearing in these arrays are generally "what you see is what you get", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.
+     *
+     * ## License Classes
+     *
+     * Strings which are license classes will expand to a list of licenses known to be in that particular license class. Recognized license classes are:
+     *   'permissive',
+     *   'permissive (model)',
+     *   'permissive (gold)',
+     *   'permissive (silver)',
+     *   'permissive (bronze)',
+     *   'permissive (lead)',
+     *   'copyleft',
+     *   'maximal copyleft',
+     *   'network copyleft',
+     *   'strong copyleft',
+     *   'weak copyleft',
+     *   'contributor license agreement',
+     *   'public domain',
+     *   'proprietary free',
+     *   'source available',
+     *   'proprietary',
+     *   'commercial',
+     *   'patent'
+     *
+     * Users can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+     *
+     *
+     * ## PURLs
+     *
+     * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.
+     *
+     * purl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).
+     *
+     * ### Examples:
+     * Allow all license data found in a specific version of a package 4.14.1: `pkg:npm/lodash@4.14.1`
+     * Allow all license data found in a version range of a package: `pkg:npm/lodash?version_glob=15.*`
+     * Allow all license data in the test directory of a given package for certain version ranges: `pkg:npm/lodash@15.*.*?file_name=lodash/test/*`
+     * Allow all license data taken from the package registry for a package and version range: `pkg:npm/lodash?version_glob=*&license_provenance=registry_metadata`
+     *
+     * ## Available options
+     *
+     * `toplevelOnly`: only apply the license policy to "top level" license data in a package, which includes registry metadata, LICENSE files, and manifest files which are closest to the root of the package.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -557,6 +652,18 @@ export interface paths {
      * - license-policy:update
      */
     post: operations['updateOrgLicensePolicy']
+  }
+  '/orgs/{org_slug}/settings/license-policy/view': {
+    /**
+     * Get License Policy (Beta)
+     * @description Returns an organization's license policy
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - license-policy:read
+     */
+    get: operations['viewLicensePolicy']
   }
   '/orgs/{org_slug}/historical/alerts': {
     /**
@@ -956,12 +1063,9 @@ export interface components {
     }
     LicenseAllowListRequest: {
       components: Array<components['schemas']['SocketBatchPURLRequest']>
-      allow: {
-        strings: string[]
-      } | null
-      warn: {
-        strings: string[]
-      } | null
+      allow: string[] | null
+      warn: string[] | null
+      options: string[] | null
       license_allow_list: {
         allowedApprovalSources: string[]
         allowedFamilies: string[]
@@ -1105,6 +1209,11 @@ export interface components {
       licenseAttrib?: components['schemas']['SAttrib1_N']
       score?: components['schemas']['SocketScore']
       alerts?: Array<components['schemas']['SocketAlert']>
+    }
+    SStoredLicensePolicy: {
+      allow: string[] | null
+      warn: string[] | null
+      options: string[] | null
     }
     Capabilities: {
       /** @default false */
@@ -2920,6 +3029,8 @@ export interface components {
           error: {
             /** @default */
             message: string
+            /** @default null */
+            details: Record<string, unknown> | null
           }
         }
       }
@@ -2931,6 +3042,8 @@ export interface components {
           error: {
             /** @default */
             message: string
+            /** @default null */
+            details: Record<string, unknown> | null
           }
         }
       }
@@ -2942,6 +3055,8 @@ export interface components {
           error: {
             /** @default */
             message: string
+            /** @default null */
+            details: Record<string, unknown> | null
           }
         }
       }
@@ -2953,6 +3068,8 @@ export interface components {
           error: {
             /** @default */
             message: string
+            /** @default null */
+            details: Record<string, unknown> | null
           }
         }
       }
@@ -2971,6 +3088,8 @@ export interface components {
           error: {
             /** @default */
             message: string
+            /** @default null */
+            details: Record<string, unknown> | null
           }
         }
       }
@@ -2982,6 +3101,8 @@ export interface components {
           error: {
             /** @default */
             message: string
+            /** @default null */
+            details: Record<string, unknown> | null
           }
         }
       }
@@ -2993,6 +3114,8 @@ export interface components {
           error: {
             /** @default */
             message: string
+            /** @default null */
+            details: Record<string, unknown> | null
           }
         }
       }
@@ -3122,72 +3245,112 @@ export interface operations {
   }
   /**
    * License Policy (Beta)
-   * @description Compare the license data found for a list of packages (as PURL strings) with a configurable license allow list,
-   * returning information about license data which does not comply with the license allow list.
+   * @description Compare the license data found for a list of packages (given as PURL strings) with the contents of a configurable license policy,
+   *     returning information about license data which does not comply with the license allow list.
    *
-   * ## Allow List Schema
-   *
-   * ```json
-   * {
-   *   allowedApprovalSources?: Array<"fsf" | "osi">,
-   *   allowedFamilies?: Array<"copyleft" | "permissive">,
-   *   allowedTiers?: Array<PermissiveTier | CopyleftTier>,
-   *   allowedStrings?: Array<string>
-   *   allowedPURLs?: Array<string>
-   *   focusAlertsHere?: boolean
-   * }
-   * ```
-   *
-   * where
-   *
-   * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" | "lead"
-   * CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong copyleft" | "weak copyleft"
-   *
-   * readers can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
-   *
-   * ## Return value
-   *
-   * For each requested PURL, an array is returned. Each array contains a list of license policy violations
-   * detected for the requested PURL.
-   *
-   * Violations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,
-   * a message describing why the license data is believed to be incompatible with the license policy, and a list
-   * of locations (by filepath or other provenance information) where the offending license data may be found.
-   *
-   * ```json
-   * Array<
-   *   Array<{
-   *     purl: string,
-   *     spdxAtomOrExtraData: string,
-   *     violationExplanation: string,
-   *     filepathOrProvenance: Array<string>
-   *   }>
-   * >
-   * ```
-   *
-   * ### Example request bodies:
-   * ```json
-   * {
-   *   "components": [
+   *      ## Example request body:
+   *     ```json
    *     {
-   *       "purl": "pkg:pypi/alt-aiohttp-cors@0.7.1?artifact_id=tar-gz"
-   *     },
-   *     {
-   *       "purl": "pkg:npm/express@4.19.2"
+   *       "components": [
+   *         {
+   *           "purl": "pkg:npm/lodash@4.17.21"
+   *         },
+   *         {
+   *           "purl": "pkg:npm/lodash@4.14.1"
+   *         }
+   *       ],
+   *       "allow": [
+   *         "permissive",
+   *         "pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*"
+   *       ],
+   *       "warn": [
+   *         "copyleft",
+   *         "pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*"
+   *       ],
+   *       "options": ["toplevelOnly"]
    *     }
-   *   ],
-   *   "license_allow_list": {
-   *     "allowedApprovalSources: ["fsf", "osi"],
-   *     "allowedFamilies": ["permissive"],
-   *     "allowedStrings": ["License :: OSI Approved :: BSD License", "UniqueLicense-2.0"]
-   *   }
+   *     ```
+   *
+   *
+   *     ## Return value
+   *
+   *     For each requested PURL, an array is returned. Each array contains a list of license policy violations
+   *     detected for the requested PURL.
+   *
+   *     Violations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,
+   *     a message describing why the license data is believed to be incompatible with the license policy, and a list
+   *     of locations (by filepath or other provenance information) where the offending license data may be found.
+   *
+   *     ```json
+   *     Array<
+   *       Array<{
+   *         purl: string,
+   *         spdxAtomOrExtraData: string,
+   *         violationExplanation: string,
+   *         filepathOrProvenance: Array<string>
+   *         level: "warning" | "violation"
+   *       }>
+   *     >
+   *     ```
+   *
+   *     ## License policy schema
+   *
+   * ```json
+   * {
+   *   allow?: Array<string>
+   *   warn?: Array<string>
+   *   options?: Array<string>
    * }
    * ```
+   *
+   * Elements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in pacakge which not present in either array will produce a license violation (effectively a "hard" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings "Apache-2.0" and "MIT" to the `allow` array. Strings appearing in these arrays are generally "what you see is what you get", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.
+   *
+   * ## License Classes
+   *
+   * Strings which are license classes will expand to a list of licenses known to be in that particular license class. Recognized license classes are:
+   *   'permissive',
+   *   'permissive (model)',
+   *   'permissive (gold)',
+   *   'permissive (silver)',
+   *   'permissive (bronze)',
+   *   'permissive (lead)',
+   *   'copyleft',
+   *   'maximal copyleft',
+   *   'network copyleft',
+   *   'strong copyleft',
+   *   'weak copyleft',
+   *   'contributor license agreement',
+   *   'public domain',
+   *   'proprietary free',
+   *   'source available',
+   *   'proprietary',
+   *   'commercial',
+   *   'patent'
+   *
+   * Users can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+   *
+   *
+   * ## PURLs
+   *
+   * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.
+   *
+   * purl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).
+   *
+   * ### Examples:
+   * Allow all license data found in a specific version of a package 4.14.1: `pkg:npm/lodash@4.14.1`
+   * Allow all license data found in a version range of a package: `pkg:npm/lodash?version_glob=15.*`
+   * Allow all license data in the test directory of a given package for certain version ranges: `pkg:npm/lodash@15.*.*?file_name=lodash/test/*`
+   * Allow all license data taken from the package registry for a package and version range: `pkg:npm/lodash?version_glob=*&license_provenance=registry_metadata`
+   *
+   * ## Available options
+   *
+   * `toplevelOnly`: only apply the license policy to "top level" license data in a package, which includes registry metadata, LICENSE files, and manifest files which are closest to the root of the package.
    *
    * This endpoint consumes 100 units of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - packages:list
+   *       - packages:list
+   * - license-policy:read
    */
   licensePolicy: {
     requestBody?: {
@@ -3196,7 +3359,7 @@ export interface operations {
       }
     }
     responses: {
-      /** @description Socket issue lists and scores for all packages */
+      /** @description Data about license policy violations, if any exist */
       200: {
         content: {
           'application/x-ndjson': Array<{
@@ -3207,6 +3370,8 @@ export interface operations {
             /** @default */
             purl: string
             filepathOrProvenance: string[]
+            /** @default */
+            level: string
           }>
         }
       }
@@ -3219,7 +3384,8 @@ export interface operations {
     }
   }
   /**
-   * Saturate License Policy (Beta)
+   * Saturate License Policy (Legacy)
+   * @deprecated
    * @description Get the "saturated" version of a license policy's allow list, filling in the entire set of allowed
    * license data. For example, the saturated form of a license allow list which only specifies that
    * licenses in the tier "maximal copyleft" are allowed is shown below (note the expanded `allowedStrings` property):
@@ -7218,6 +7384,7 @@ export interface operations {
   }
   /**
    * Get Organization License Policy
+   * @deprecated
    * @description Retrieve the license policy of an organization.
    *
    * This endpoint consumes 1 unit of your quota.
@@ -26466,6 +26633,9 @@ export interface operations {
                 isDeprecatedLicenseId?: boolean
               }
             }
+            allow?: string[]
+            warn?: string[]
+            options?: string[]
           }
         }
       }
@@ -26478,7 +26648,60 @@ export interface operations {
   }
   /**
    * Update License Policy
-   * @description Update the license policy of an organization.
+   * @description Set the organization's license policy
+   *
+   *       ## License policy schema
+   *
+   * ```json
+   * {
+   *   allow?: Array<string>
+   *   warn?: Array<string>
+   *   options?: Array<string>
+   * }
+   * ```
+   *
+   * Elements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in pacakge which not present in either array will produce a license violation (effectively a "hard" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings "Apache-2.0" and "MIT" to the `allow` array. Strings appearing in these arrays are generally "what you see is what you get", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.
+   *
+   * ## License Classes
+   *
+   * Strings which are license classes will expand to a list of licenses known to be in that particular license class. Recognized license classes are:
+   *   'permissive',
+   *   'permissive (model)',
+   *   'permissive (gold)',
+   *   'permissive (silver)',
+   *   'permissive (bronze)',
+   *   'permissive (lead)',
+   *   'copyleft',
+   *   'maximal copyleft',
+   *   'network copyleft',
+   *   'strong copyleft',
+   *   'weak copyleft',
+   *   'contributor license agreement',
+   *   'public domain',
+   *   'proprietary free',
+   *   'source available',
+   *   'proprietary',
+   *   'commercial',
+   *   'patent'
+   *
+   * Users can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+   *
+   *
+   * ## PURLs
+   *
+   * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.
+   *
+   * purl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).
+   *
+   * ### Examples:
+   * Allow all license data found in a specific version of a package 4.14.1: `pkg:npm/lodash@4.14.1`
+   * Allow all license data found in a version range of a package: `pkg:npm/lodash?version_glob=15.*`
+   * Allow all license data in the test directory of a given package for certain version ranges: `pkg:npm/lodash@15.*.*?file_name=lodash/test/*`
+   * Allow all license data taken from the package registry for a package and version range: `pkg:npm/lodash?version_glob=*&license_provenance=registry_metadata`
+   *
+   * ## Available options
+   *
+   * `toplevelOnly`: only apply the license policy to "top level" license data in a package, which includes registry metadata, LICENSE files, and manifest files which are closest to the root of the package.
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -28114,6 +28337,9 @@ export interface operations {
             /** @default false */
             'ZPL-2.1'?: boolean
           }
+          allow?: string[]
+          warn?: string[]
+          options?: string[]
         }
       }
     }
@@ -47351,6 +47577,9 @@ export interface operations {
                 isDeprecatedLicenseId?: boolean
               }
             }
+            allow?: string[]
+            warn?: string[]
+            options?: string[]
           }
         }
       }
@@ -47359,6 +47588,37 @@ export interface operations {
       403: components['responses']['SocketForbidden']
       404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Get License Policy (Beta)
+   * @description Returns an organization's license policy
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - license-policy:read
+   */
+  viewLicensePolicy: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    responses: {
+      /** @description Saturated License Allow List */
+      200: {
+        content: {
+          'application/json': components['schemas']['SStoredLicensePolicy']
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+      500: components['responses']['SocketInternalServerError']
     }
   }
   /**
@@ -47779,6 +48039,8 @@ export interface operations {
         startAfterCursor?: string
         /** @description Comma-separated list of historical snapshot statuses that should be included (allowed: "in-progress", "success", "failure", "timeout") */
         'filters.status'?: string
+        /** @description Comma-separated list of requestId values that were used to start the historical snapshot job */
+        'filters.requestId'?: string
       }
       path: {
         /** @description The slug of the organization */
@@ -47803,6 +48065,12 @@ export interface operations {
             items: Array<{
               /** @default */
               id: string
+              /** @default */
+              requestId: string
+              /** @default */
+              requestedBy: string
+              /** @default */
+              requestedAt: string
               /** @default */
               startedAt: string
               /** @default */
