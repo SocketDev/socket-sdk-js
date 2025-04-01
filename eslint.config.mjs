@@ -235,8 +235,7 @@ export default [
       // we want), and it's nice to await before returning anyways, since you get
       // a slightly more comprehensive stack trace upon promise rejection.
       '@typescript-eslint/return-await': ['error', 'always'],
-      // Disable no-redeclare and no-unused-vars rule because they don't play
-      // well with TypeScript.
+      // Disable the following rules because they don't play well with TypeScript.
       'no-redeclare': 'off',
       'no-unused-vars': 'off'
     }
