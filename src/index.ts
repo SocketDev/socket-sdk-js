@@ -218,6 +218,14 @@ function isResponseOk(response: IncomingMessage): boolean {
   )
 }
 
+function resolveBasePath(pathsRelativeTo = '.'): string {
+  // Node's path.resolve will process path segments from right to left until
+  // it creates a valid absolute path. So if `pathsRelativeTo` is an absolute
+  // path, process.cwd() is not used, which is the common expectation. If none
+  // of the paths resolve then it defaults to process.cwd().
+  return path.resolve(process.cwd(), pathsRelativeTo)
+}
+
 /**
  * Package.json data to base the User-Agent on
  */
@@ -445,7 +453,7 @@ export class SocketSdk {
     filepaths: string[],
     pathsRelativeTo = '.'
   ): Promise<SocketSdkResultType<'createDependenciesSnapshot'>> {
-    const basePath = path.join(process.cwd(), pathsRelativeTo)
+    const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = filepaths.map(p => path.join(basePath, p))
     try {
       const data = await getResponseJson(
@@ -468,11 +476,7 @@ export class SocketSdk {
     filepaths: string[],
     pathsRelativeTo: string = '.'
   ): Promise<SocketSdkResultType<'CreateOrgFullScan'>> {
-    // Resolve will process path segments until it creates a valid absolute
-    // path. So if the given pathsRelativeTo is an absolute path, the cwd()
-    // is not used, which is the common expectation. If none of the paths
-    // resolve then it defaults to process.cwd()
-    const basePath = path.resolve(process.cwd(), pathsRelativeTo)
+    const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = filepaths.map(p => path.join(basePath, p))
     try {
       const data = await getResponseJson(
@@ -513,7 +517,7 @@ export class SocketSdk {
     pathsRelativeTo: string = '.',
     issueRules?: Record<string, boolean>
   ): Promise<SocketSdkResultType<'createReport'>> {
-    const basePath = path.join(process.cwd(), pathsRelativeTo)
+    const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = filepaths.map(p => path.join(basePath, p))
     try {
       const data = await createUploadRequest(
