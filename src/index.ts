@@ -58,10 +58,10 @@ const DEFAULT_USER_AGENT = createUserAgentFromPkgJson(rootPkgJson)
 class ResponseError extends Error {
   response: IncomingMessage
   constructor(response: IncomingMessage, message: string = '') {
-    const statusCode = response.statusCode ?? 'Unknown'
+    const statusCode = response.statusCode ?? 'unknown'
     const statusMessage = response.statusMessage ?? 'No status message'
     super(
-      `Socket API - ${message || 'Request failed'}: ${statusCode} - ${statusMessage}`
+      `Socket API ${message || 'Request failed'} (${statusCode}): ${statusMessage}`
     )
     this.name = 'ResponseError'
     this.response = response
@@ -226,7 +226,7 @@ async function getResponseJson(
   try {
     return JSON.parse(data)
   } catch (e) {
-    throw new Error(
+    throw new SyntaxError(
       `Socket API - Invalid JSON response:\n${data}\n→ ${(e as Error)?.message || 'Unknown error'}`,
       { cause: e }
     )
