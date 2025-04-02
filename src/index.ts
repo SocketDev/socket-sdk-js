@@ -107,17 +107,17 @@ async function createPostRequest(
 }
 
 function createRequestBodyForFilepaths(
-  filepaths: string[]
+  filepaths: string[],
+  basePath: string
 ): Array<string | ReadStream> {
   const requestBody = []
-  for (const p of filepaths) {
-    // Multipart header for each file.
+  for (const absPath of filepaths) {
+    const relPath = path.relative(basePath, absPath)
+    const filename = path.basename(absPath)
     requestBody.push(
-      `Content-Disposition: form-data; name="file"; filename="${path.basename(p)}"\n`,
-      `Content-Type: application/octet-stream\n\n`,
-      createReadStream(p),
-      // New line after file content.
-      '\n'
+      `Content-Disposition: form-data; name="${relPath}"; filename="${filename}"\r\n`,
+      `Content-Type: application/octet-stream\r\n\r\n`,
+      createReadStream(absPath)
     )
   }
   return requestBody
@@ -130,29 +130,32 @@ function createRequestBodyForJson(
   const ext = path.extname(basename)
   const name = path.basename(basename, ext)
   return [
-    `Content-Disposition: form-data; name="${name}"; filename="${basename}"\n`,
-    'Content-Type: application/json\n\n',
+    `Content-Disposition: form-data; name="${name}"; filename="${basename}"\r\n`,
+    'Content-Type: application/json\r\n\r\n',
     JSON.stringify(jsonData),
     // New line after file content.
-    '\n'
+    '\r\n'
   ]
 }
 
 async function createUploadRequest(
   baseUrl: string,
   urlPath: string,
-  requestBodyNoBoundaries: Array<string | ReadStream>,
+  requestBodyNoBoundaries: Array<
+    string | ReadStream | Array<string | ReadStream>
+  >,
   options: RequestOptions
 ): Promise<IncomingMessage> {
   // Generate a unique boundary for multipart encoding.
-  const boundary = `----NodeMultipartBoundary${Date.now()}`
-  const boundarySep = `--${boundary}\n`
-  // Create request body as a stream.
+  const boundary = `NodeMultipartBoundary${Date.now()}`
+  const boundarySep = `--${boundary}\r\n`
+  const finalBoundary = `--${boundary}--\r\n`
   const requestBody = [
-    ...(requestBodyNoBoundaries.length
-      ? requestBodyNoBoundaries.flatMap(e => [boundarySep, e])
-      : [boundarySep]),
-    `--${boundary}--\n`
+    ...requestBodyNoBoundaries.flatMap(part => [
+      boundarySep,
+      ...(Array.isArray(part) ? part : [part])
+    ]),
+    finalBoundary
   ]
   const req = getHttpModule(baseUrl).request(`${baseUrl}${urlPath}`, {
     method: 'POST',
@@ -167,13 +170,15 @@ async function createUploadRequest(
     for (const part of requestBody) {
       if (typeof part === 'string') {
         req.write(part)
-      } else {
+      } else if (typeof part?.pipe === 'function') {
         part.pipe(req, { end: false })
         // Wait for file streaming to complete.
         // eslint-disable-next-line no-await-in-loop
         await events.once(part, 'end')
         // Ensure a new line after file content.
-        req.write('\n')
+        req.write('\r\n')
+      } else {
+        throw new TypeError('Invalid multipart part: expected string or stream')
       }
     }
   } finally {
@@ -224,13 +229,24 @@ function isResponseOk(response: IncomingMessage): boolean {
   )
 }
 
-function resolveAbsPaths(filepaths: string[], pathsRelativeTo = '.'): string[] {
+function resolveAbsPaths(
+  filepaths: string[],
+  pathsRelativeTo?: string
+): string[] {
+  const basePath = resolveBasePath(pathsRelativeTo)
   // Node's path.resolve will process path segments from right to left until
   // it creates a valid absolute path. So if `pathsRelativeTo` is an absolute
   // path, process.cwd() is not used, which is the common expectation. If none
   // of the paths resolve then it defaults to process.cwd().
-  const basePath = path.resolve(process.cwd(), pathsRelativeTo)
   return filepaths.map(p => path.resolve(basePath, p))
+}
+
+function resolveBasePath(pathsRelativeTo = '.'): string {
+  // Node's path.resolve will process path segments from right to left until
+  // it creates a valid absolute path. So if `pathsRelativeTo` is an absolute
+  // path, process.cwd() is not used, which is the common expectation. If none
+  // of the paths resolve then it defaults to process.cwd().
+  return path.resolve(process.cwd(), pathsRelativeTo)
 }
 
 /**
@@ -460,13 +476,14 @@ export class SocketSdk {
     filepaths: string[],
     pathsRelativeTo = '.'
   ): Promise<SocketSdkResultType<'createDependenciesSnapshot'>> {
-    const absFilepaths = resolveAbsPaths(filepaths, pathsRelativeTo)
+    const basePath = resolveBasePath(pathsRelativeTo)
+    const absFilepaths = resolveAbsPaths(filepaths, basePath)
     try {
       const data = await getResponseJson(
         await createUploadRequest(
           this.#baseUrl,
           `dependencies/upload?${new URLSearchParams(params)}`,
-          createRequestBodyForFilepaths(absFilepaths),
+          createRequestBodyForFilepaths(absFilepaths, basePath),
           this.#reqOptions
         )
       )
@@ -482,13 +499,14 @@ export class SocketSdk {
     filepaths: string[],
     pathsRelativeTo: string = '.'
   ): Promise<SocketSdkResultType<'CreateOrgFullScan'>> {
-    const absFilepaths = resolveAbsPaths(filepaths, pathsRelativeTo)
+    const basePath = resolveBasePath(pathsRelativeTo)
+    const absFilepaths = resolveAbsPaths(filepaths, basePath)
     try {
       const data = await getResponseJson(
         await createUploadRequest(
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/full-scans?${new URLSearchParams(queryParams ?? '')}`,
-          createRequestBodyForFilepaths(absFilepaths),
+          createRequestBodyForFilepaths(absFilepaths, basePath),
           this.#reqOptions
         )
       )
@@ -522,15 +540,16 @@ export class SocketSdk {
     pathsRelativeTo: string = '.',
     issueRules?: Record<string, boolean>
   ): Promise<SocketSdkResultType<'createReport'>> {
-    const absFilepaths = resolveAbsPaths(filepaths, pathsRelativeTo)
+    const basePath = resolveBasePath(pathsRelativeTo)
+    const absFilepaths = resolveAbsPaths(filepaths, basePath)
     try {
       const data = await createUploadRequest(
         this.#baseUrl,
         'report/upload',
         [
-          ...createRequestBodyForFilepaths(absFilepaths),
+          ...createRequestBodyForFilepaths(absFilepaths, basePath),
           ...(issueRules
-            ? createRequestBodyForJson(issueRules, 'issueRules.json')
+            ? createRequestBodyForJson(issueRules, 'issueRules')
             : [])
         ],
         {
