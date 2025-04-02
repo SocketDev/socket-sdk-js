@@ -468,7 +468,11 @@ export class SocketSdk {
     filepaths: string[],
     pathsRelativeTo: string = '.'
   ): Promise<SocketSdkResultType<'CreateOrgFullScan'>> {
-    const basePath = path.join(process.cwd(), pathsRelativeTo)
+    // Resolve will process path segments until it creates a valid absolute
+    // path. So if the given pathsRelativeTo is an absolute path, the cwd()
+    // is not used, which is the common expectation. If none of the paths
+    // resolve then it defaults to process.cwd()
+    const basePath = path.resolve(process.cwd(), pathsRelativeTo)
     const absFilepaths = filepaths.map(p => path.join(basePath, p))
     try {
       const data = await getResponseJson(
