@@ -218,7 +218,7 @@ async function getResponseJson(
   try {
     return JSON.parse(data)
   } catch {
-    throw new Error(`Invalid JSON response: ${data}`)
+    throw new Error(`Socket API returned an invalid JSON response: ${data}`)
   }
 }
 
@@ -336,13 +336,13 @@ export class SocketSdk {
     error: unknown
   ): SocketSdkErrorType<T> {
     if (!(error instanceof ResponseError)) {
-      throw new Error('Unexpected error when calling API', {
+      throw new Error('Unexpected Socket API error', {
         cause: error
       })
     }
     const statusCode = error.response.statusCode
     if (statusCode! >= 500) {
-      throw new Error('API returned an error', { cause: error })
+      throw new Error('Socket API returned an error', { cause: error })
     }
     return {
       success: false as const,
