@@ -58,10 +58,14 @@ const DEFAULT_USER_AGENT = createUserAgentFromPkgJson(rootPkgJson)
 class ResponseError extends Error {
   response: IncomingMessage
   constructor(response: IncomingMessage, message: string = '') {
+    const statusCode = response.statusCode ?? 'Unknown'
+    const statusMessage = response.statusMessage ?? 'No status message'
     super(
-      `Socket API ${message || 'request failed'}: ${response.statusCode} - ${response.statusMessage}`
+      `Socket API - ${message || 'Request failed'}: ${statusCode} - ${statusMessage}`
     )
+    this.name = 'ResponseError'
     this.response = response
+    Error.captureStackTrace(this, ResponseError)
   }
 }
 
@@ -180,7 +184,9 @@ async function createUploadRequest(
         // Ensure a new line after file content.
         req.write('\r\n')
       } else {
-        throw new TypeError('Invalid multipart part: expected string or stream')
+        throw new TypeError(
+          'Socket API - Invalid multipart part, expected string or stream'
+        )
       }
     }
   } finally {
@@ -219,8 +225,11 @@ async function getResponseJson(
   }
   try {
     return JSON.parse(data)
-  } catch {
-    throw new Error(`Socket API returned an invalid JSON response: ${data}`)
+  } catch (e) {
+    throw new Error(
+      `Socket API - Invalid JSON response:\n${data}\n→ ${(e as Error)?.message || 'Unknown error'}`,
+      { cause: e }
+    )
   }
 }
 
@@ -344,7 +353,9 @@ export class SocketSdk {
     }
     const statusCode = error.response.statusCode
     if (statusCode! >= 500) {
-      throw new Error('Socket API returned an error', { cause: error })
+      throw new Error(`Socket API server error (${statusCode})`, {
+        cause: error
+      })
     }
     return {
       success: false as const,
