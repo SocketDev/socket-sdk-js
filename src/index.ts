@@ -57,8 +57,10 @@ const DEFAULT_USER_AGENT = createUserAgentFromPkgJson(rootPkgJson)
 
 class ResponseError extends Error {
   response: IncomingMessage
-  constructor(response: IncomingMessage, message: string) {
-    super(`${message}: ${response.statusCode} - ${response.statusMessage}`)
+  constructor(response: IncomingMessage, message: string = '') {
+    super(
+      `Socket API ${message || 'request failed'}: ${response.statusCode} - ${response.statusMessage}`
+    )
     this.response = response
   }
 }
