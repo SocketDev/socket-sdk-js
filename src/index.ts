@@ -1,5 +1,6 @@
 import events from 'node:events'
 import { createReadStream, createWriteStream } from 'node:fs'
+import http from 'node:http'
 import https from 'node:https'
 import path from 'node:path'
 import readline from 'node:readline'
@@ -67,7 +68,7 @@ async function createDeleteRequest(
   urlPath: string,
   options: RequestOptions
 ): Promise<IncomingMessage> {
-  const req = https
+  const req = getHttpModule(baseUrl)
     .request(`${baseUrl}${urlPath}`, {
       method: 'DELETE',
       ...options
@@ -81,7 +82,7 @@ async function createGetRequest(
   urlPath: string,
   options: RequestOptions
 ): Promise<IncomingMessage> {
-  const req = https
+  const req = getHttpModule(baseUrl)
     .request(`${baseUrl}${urlPath}`, {
       method: 'GET',
       ...options
@@ -96,7 +97,7 @@ async function createPostRequest(
   postJson: any,
   options: RequestOptions
 ): Promise<IncomingMessage> {
-  const req = https
+  const req = getHttpModule(baseUrl)
     .request(`${baseUrl}${urlPath}`, {
       method: 'POST',
       ...options
@@ -153,7 +154,7 @@ async function createUploadRequest(
       : [boundarySep]),
     `--${boundary}--\n`
   ]
-  const req = https.request(`${baseUrl}${urlPath}`, {
+  const req = getHttpModule(baseUrl).request(`${baseUrl}${urlPath}`, {
     method: 'POST',
     ...options,
     headers: {
@@ -180,6 +181,11 @@ async function createUploadRequest(
     req.end()
   }
   return await getResponse(req)
+}
+
+function getHttpModule(baseUrl: string): typeof http | typeof https {
+  const { protocol } = new URL(baseUrl)
+  return protocol === 'https:' ? https : http
 }
 
 async function getResponse(req: ClientRequest): Promise<IncomingMessage> {
@@ -277,7 +283,7 @@ export class SocketSdk {
     componentsObj: { components: Array<{ purl: string }> }
   ): Promise<IncomingMessage> {
     // Adds the first 'abort' listener to abortSignal.
-    const req = https
+    const req = getHttpModule(this.#baseUrl)
       .request(
         `${this.#baseUrl}purl?${new URLSearchParams(queryParams ?? '')}`,
         {
@@ -659,7 +665,7 @@ export class SocketSdk {
     file?: string
   ): Promise<SocketSdkResultType<'getOrgFullScan'>> {
     try {
-      const req = https
+      const req = getHttpModule(this.#baseUrl)
         .request(
           `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`,
           {
