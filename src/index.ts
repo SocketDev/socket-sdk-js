@@ -224,12 +224,13 @@ function isResponseOk(response: IncomingMessage): boolean {
   )
 }
 
-function resolveBasePath(pathsRelativeTo = '.'): string {
+function resolveAbsPaths(filepaths: string[], pathsRelativeTo = '.'): string[] {
   // Node's path.resolve will process path segments from right to left until
   // it creates a valid absolute path. So if `pathsRelativeTo` is an absolute
   // path, process.cwd() is not used, which is the common expectation. If none
   // of the paths resolve then it defaults to process.cwd().
-  return path.resolve(process.cwd(), pathsRelativeTo)
+  const basePath = path.resolve(process.cwd(), pathsRelativeTo)
+  return filepaths.map(p => path.resolve(basePath, p))
 }
 
 /**
@@ -459,8 +460,7 @@ export class SocketSdk {
     filepaths: string[],
     pathsRelativeTo = '.'
   ): Promise<SocketSdkResultType<'createDependenciesSnapshot'>> {
-    const basePath = resolveBasePath(pathsRelativeTo)
-    const absFilepaths = filepaths.map(p => path.join(basePath, p))
+    const absFilepaths = resolveAbsPaths(filepaths, pathsRelativeTo)
     try {
       const data = await getResponseJson(
         await createUploadRequest(
@@ -482,8 +482,7 @@ export class SocketSdk {
     filepaths: string[],
     pathsRelativeTo: string = '.'
   ): Promise<SocketSdkResultType<'CreateOrgFullScan'>> {
-    const basePath = resolveBasePath(pathsRelativeTo)
-    const absFilepaths = filepaths.map(p => path.join(basePath, p))
+    const absFilepaths = resolveAbsPaths(filepaths, pathsRelativeTo)
     try {
       const data = await getResponseJson(
         await createUploadRequest(
@@ -523,8 +522,7 @@ export class SocketSdk {
     pathsRelativeTo: string = '.',
     issueRules?: Record<string, boolean>
   ): Promise<SocketSdkResultType<'createReport'>> {
-    const basePath = resolveBasePath(pathsRelativeTo)
-    const absFilepaths = filepaths.map(p => path.join(basePath, p))
+    const absFilepaths = resolveAbsPaths(filepaths, pathsRelativeTo)
     try {
       const data = await createUploadRequest(
         this.#baseUrl,
