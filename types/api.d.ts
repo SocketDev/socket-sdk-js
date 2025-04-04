@@ -88,54 +88,56 @@ export interface paths {
     /**
      * License Policy (Beta)
      * @description Compare the license data found for a list of packages (given as PURL strings) with the contents of a configurable license policy,
-     *     returning information about license data which does not comply with the license allow list.
+     * returning information about license data which does not comply with the license allow list.
      *
-     *      ## Example request body:
-     *     ```json
+     * ## Example request body:
+     *
+     * ```json
+     * {
+     *   "components": [
      *     {
-     *       "components": [
-     *         {
-     *           "purl": "pkg:npm/lodash@4.17.21"
-     *         },
-     *         {
-     *           "purl": "pkg:npm/lodash@4.14.1"
-     *         }
-     *       ],
-     *       "allow": [
-     *         "permissive",
-     *         "pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*"
-     *       ],
-     *       "warn": [
-     *         "copyleft",
-     *         "pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*"
-     *       ],
-     *       "options": ["toplevelOnly"]
+     *       "purl": "pkg:npm/lodash@4.17.21"
+     *     },
+     *     {
+     *       "purl": "pkg:npm/lodash@4.14.1"
      *     }
-     *     ```
+     *   ],
+     *   "allow": [
+     *     "permissive",
+     *     "pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*"
+     *   ],
+     *   "warn": [
+     *     "copyleft",
+     *     "pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*"
+     *   ],
+     *   "options": ["toplevelOnly"]
+     * }
+     * ```
      *
      *
-     *     ## Return value
+     * ## Return value
      *
-     *     For each requested PURL, an array is returned. Each array contains a list of license policy violations
-     *     detected for the requested PURL.
+     * For each requested PURL, an array is returned. Each array contains a list of license policy violations
+     * detected for the requested PURL.
      *
-     *     Violations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,
-     *     a message describing why the license data is believed to be incompatible with the license policy, and a list
-     *     of locations (by filepath or other provenance information) where the offending license data may be found.
+     * Violations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,
+     * a message describing why the license data is believed to be incompatible with the license policy, and a list
+     * of locations (by filepath or other provenance information) where the offending license data may be found.
      *
-     *     ```json
-     *     Array<
-     *       Array<{
-     *         purl: string,
-     *         spdxAtomOrExtraData: string,
-     *         violationExplanation: string,
-     *         filepathOrProvenance: Array<string>
-     *         level: "warning" | "violation"
-     *       }>
-     *     >
-     *     ```
+     * ```json
+     * Array<
+     *   Array<{
+     *     purl: string,
+     *     spdxAtomOrExtraData: string,
+     *     violationExplanation: string,
+     *     filepathOrProvenance: Array<string>
+     *     level: "warning" | "violation"
+     *   }>
+     * >
+     * ```
      *
-     *     ## License policy schema
+     *
+     * ## License policy schema
      *
      * ```json
      * {
@@ -351,7 +353,7 @@ export interface paths {
      * Create full scan
      * @description Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.
      *
-     * To get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getSupportedFiles) endpoint.
+     * To get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getsupportedfiles) endpoint.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -593,7 +595,8 @@ export interface paths {
      * Update License Policy
      * @description Set the organization's license policy
      *
-     *       ## License policy schema
+     *
+     * ## License policy schema
      *
      * ```json
      * {
@@ -3246,54 +3249,56 @@ export interface operations {
   /**
    * License Policy (Beta)
    * @description Compare the license data found for a list of packages (given as PURL strings) with the contents of a configurable license policy,
-   *     returning information about license data which does not comply with the license allow list.
+   * returning information about license data which does not comply with the license allow list.
    *
-   *      ## Example request body:
-   *     ```json
+   * ## Example request body:
+   *
+   * ```json
+   * {
+   *   "components": [
    *     {
-   *       "components": [
-   *         {
-   *           "purl": "pkg:npm/lodash@4.17.21"
-   *         },
-   *         {
-   *           "purl": "pkg:npm/lodash@4.14.1"
-   *         }
-   *       ],
-   *       "allow": [
-   *         "permissive",
-   *         "pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*"
-   *       ],
-   *       "warn": [
-   *         "copyleft",
-   *         "pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*"
-   *       ],
-   *       "options": ["toplevelOnly"]
+   *       "purl": "pkg:npm/lodash@4.17.21"
+   *     },
+   *     {
+   *       "purl": "pkg:npm/lodash@4.14.1"
    *     }
-   *     ```
+   *   ],
+   *   "allow": [
+   *     "permissive",
+   *     "pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*"
+   *   ],
+   *   "warn": [
+   *     "copyleft",
+   *     "pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*"
+   *   ],
+   *   "options": ["toplevelOnly"]
+   * }
+   * ```
    *
    *
-   *     ## Return value
+   * ## Return value
    *
-   *     For each requested PURL, an array is returned. Each array contains a list of license policy violations
-   *     detected for the requested PURL.
+   * For each requested PURL, an array is returned. Each array contains a list of license policy violations
+   * detected for the requested PURL.
    *
-   *     Violations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,
-   *     a message describing why the license data is believed to be incompatible with the license policy, and a list
-   *     of locations (by filepath or other provenance information) where the offending license data may be found.
+   * Violations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,
+   * a message describing why the license data is believed to be incompatible with the license policy, and a list
+   * of locations (by filepath or other provenance information) where the offending license data may be found.
    *
-   *     ```json
-   *     Array<
-   *       Array<{
-   *         purl: string,
-   *         spdxAtomOrExtraData: string,
-   *         violationExplanation: string,
-   *         filepathOrProvenance: Array<string>
-   *         level: "warning" | "violation"
-   *       }>
-   *     >
-   *     ```
+   * ```json
+   * Array<
+   *   Array<{
+   *     purl: string,
+   *     spdxAtomOrExtraData: string,
+   *     violationExplanation: string,
+   *     filepathOrProvenance: Array<string>
+   *     level: "warning" | "violation"
+   *   }>
+   * >
+   * ```
    *
-   *     ## License policy schema
+   *
+   * ## License policy schema
    *
    * ```json
    * {
@@ -3802,7 +3807,7 @@ export interface operations {
    * Create full scan
    * @description Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.
    *
-   * To get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getSupportedFiles) endpoint.
+   * To get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getsupportedfiles) endpoint.
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -7404,6 +7409,9 @@ export interface operations {
       200: {
         content: {
           'application/json': {
+            allow?: string[]
+            warn?: string[]
+            options?: string[]
             /** @default */
             license_policy_org_id?: string
             /** @description License policy for a given licenseId */
@@ -26633,9 +26641,6 @@ export interface operations {
                 isDeprecatedLicenseId?: boolean
               }
             }
-            allow?: string[]
-            warn?: string[]
-            options?: string[]
           }
         }
       }
@@ -26650,7 +26655,8 @@ export interface operations {
    * Update License Policy
    * @description Set the organization's license policy
    *
-   *       ## License policy schema
+   *
+   * ## License policy schema
    *
    * ```json
    * {
@@ -26722,6 +26728,9 @@ export interface operations {
     requestBody?: {
       content: {
         'application/json': {
+          allow?: string[]
+          warn?: string[]
+          options?: string[]
           quick_setup?: {
             /** @default false */
             permissive?: boolean
@@ -28337,9 +28346,6 @@ export interface operations {
             /** @default false */
             'ZPL-2.1'?: boolean
           }
-          allow?: string[]
-          warn?: string[]
-          options?: string[]
         }
       }
     }
@@ -28348,6 +28354,9 @@ export interface operations {
       200: {
         content: {
           'application/json': {
+            allow?: string[]
+            warn?: string[]
+            options?: string[]
             /** @default */
             license_policy_org_id?: string
             /** @description License policy for a given licenseId */
@@ -47577,9 +47586,6 @@ export interface operations {
                 isDeprecatedLicenseId?: boolean
               }
             }
-            allow?: string[]
-            warn?: string[]
-            options?: string[]
           }
         }
       }
