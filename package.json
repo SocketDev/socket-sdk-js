@@ -83,18 +83,18 @@
     "update:deps": "npx --yes npm-check-updates"
   },
   "dependencies": {
-    "@socketsecurity/registry": "1.0.137"
+    "@socketsecurity/registry": "1.0.138"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@eslint/compat": "^1.2.7",
-    "@eslint/js": "^9.23.0",
-    "@types/node": "^22.13.17",
+    "@eslint/compat": "^1.2.8",
+    "@eslint/js": "^9.24.0",
+    "@types/node": "^22.14.0",
     "@typescript-eslint/parser": "^8.29.0",
     "@vitest/coverage-v8": "3.1.1",
     "cross-env": "^7.0.3",
     "del-cli": "^6.0.0",
-    "eslint": "^9.23.0",
+    "eslint": "^9.24.0",
     "eslint-import-resolver-oxc": "^0.13.1",
     "eslint-plugin-import-x": "^4.10.0",
     "eslint-plugin-jsdoc": "^50.6.9",
@@ -103,19 +103,19 @@
     "eslint-plugin-unicorn": "^56.0.1",
     "globals": "^16.0.0",
     "husky": "^9.1.7",
-    "knip": "^5.46.4",
+    "knip": "^5.46.5",
     "lint-staged": "^15.5.0",
     "nock": "^14.0.2",
     "npm-run-all2": "^7.0.2",
     "openapi-typescript": "^6.7.6",
     "oxlint": "0.16.4",
     "type-coverage": "^2.29.7",
-    "typescript": "~5.8.2",
+    "typescript": "~5.8.3",
     "typescript-eslint": "^8.29.0",
     "vitest": "3.1.1"
   },
   "overrides": {
-    "vite": "^6.2.4"
+    "vite": "^6.2.5"
   },
   "engines": {
     "node": "^18.20.7 || ^20.18.3 || >=22.14.0"
