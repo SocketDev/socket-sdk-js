@@ -34,6 +34,7 @@ export type SocketSdkErrorType<T extends SocketSdkOperations> = Omit<
   'error'
 > & {
   error: string
+  cause?: unknown
 }
 
 export type SocketSdkResultType<T extends SocketSdkOperations> =
@@ -331,7 +332,7 @@ export class SocketSdk {
     try {
       res = await this.#createBatchPurlRequest(queryParams, componentsObj)
     } catch (e) {
-      return this.#handleApiError<'batchPackageFetch'>(e)
+      return await this.#handleApiError<'batchPackageFetch'>(e)
     }
     const rli = readline.createInterface({
       input: res,
@@ -343,9 +344,9 @@ export class SocketSdk {
     }
   }
 
-  #handleApiError<T extends SocketSdkOperations>(
+  async #handleApiError<T extends SocketSdkOperations>(
     error: unknown
-  ): SocketSdkErrorType<T> {
+  ): Promise<SocketSdkErrorType<T>> {
     if (!(error instanceof ResponseError)) {
       throw new Error('Unexpected Socket API error', {
         cause: error
@@ -357,10 +358,34 @@ export class SocketSdk {
         cause: error
       })
     }
+
+    // The error payload may give a meaningful hint as to what went wrong.
+
+    const bodyStr = await new Promise((resolve) => {
+      const chunks: Buffer[] = [];
+      error.response.on('data', (chunk:Buffer) => chunks.push(chunk));
+      error.response.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+      error.response.on('error', () => resolve('(there was an error reading the body content)'));
+    });
+
+    // Try to parse the body as JSON, fallback to treating it as plaintext
+
+    let body
+    try {
+      body = JSON.parse(String(bodyStr || '')) as any
+      // A 400 should return an actionable message
+      if (body?.error?.message) {
+        body = body.error.message
+      }
+    } catch {
+      body = bodyStr
+    }
+
     return {
       success: false as const,
       status: statusCode!,
-      error: error.message ?? ''
+      error: error.message ?? '',
+      cause: body
     } as unknown as SocketSdkErrorType<T>
   }
 
@@ -382,7 +407,7 @@ export class SocketSdk {
     try {
       res = await this.#createBatchPurlRequest(queryParams, componentsObj)
     } catch (e) {
-      return this.#handleApiError<'batchPackageFetch'>(e)
+      return await this.#handleApiError<'batchPackageFetch'>(e)
     }
     // Parse the newline delimited JSON response.
     const rl = readline.createInterface({
@@ -502,7 +527,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'createDependenciesSnapshot'>(data)
     } catch (e) {
-      return this.#handleApiError<'createDependenciesSnapshot'>(e)
+      return await this.#handleApiError<'createDependenciesSnapshot'>(e)
     }
   }
 
@@ -525,7 +550,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'CreateOrgFullScan'>(data)
     } catch (e) {
-      return this.#handleApiError<'CreateOrgFullScan'>(e)
+      return await this.#handleApiError<'CreateOrgFullScan'>(e)
     }
   }
 
@@ -544,7 +569,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'createOrgRepo'>(data)
     } catch (e) {
-      return this.#handleApiError<'createOrgRepo'>(e)
+      return await this.#handleApiError<'createOrgRepo'>(e)
     }
   }
 
@@ -572,7 +597,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'createReport'>(data)
     } catch (e) {
-      return this.#handleApiError<'createReport'>(e)
+      return await this.#handleApiError<'createReport'>(e)
     }
   }
 
@@ -603,7 +628,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'deleteOrgFullScan'>(data)
     } catch (e) {
-      return this.#handleApiError<'deleteOrgFullScan'>(e)
+      return await this.#handleApiError<'deleteOrgFullScan'>(e)
     }
   }
 
@@ -621,7 +646,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'deleteOrgRepo'>(data)
     } catch (e) {
-      return this.#handleApiError<'deleteOrgRepo'>(e)
+      return await this.#handleApiError<'deleteOrgRepo'>(e)
     }
   }
 
@@ -639,7 +664,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'getAuditLogEvents'>(data)
     } catch (e) {
-      return this.#handleApiError<'getAuditLogEvents'>(e)
+      return await this.#handleApiError<'getAuditLogEvents'>(e)
     }
   }
 
@@ -657,7 +682,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'getIssuesByNPMPackage'>(data)
     } catch (e) {
-      return this.#handleApiError<'getIssuesByNPMPackage'>(e)
+      return await this.#handleApiError<'getIssuesByNPMPackage'>(e)
     }
   }
 
@@ -674,7 +699,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'getOrgAnalytics'>(data)
     } catch (e) {
-      return this.#handleApiError<'getOrgAnalytics'>(e)
+      return await this.#handleApiError<'getOrgAnalytics'>(e)
     }
   }
 
@@ -685,7 +710,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'getOrganizations'>(data)
     } catch (e) {
-      return this.#handleApiError<'getOrganizations'>(e)
+      return await this.#handleApiError<'getOrganizations'>(e)
     }
   }
 
@@ -712,7 +737,7 @@ export class SocketSdk {
       }
       return this.#handleApiSuccess<'getOrgFullScan'>(res)
     } catch (e) {
-      return this.#handleApiError<'getOrgFullScan'>(e)
+      return await this.#handleApiError<'getOrgFullScan'>(e)
     }
   }
 
@@ -730,7 +755,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'getOrgFullScanList'>(data)
     } catch (e) {
-      return this.#handleApiError<'getOrgFullScanList'>(e)
+      return await this.#handleApiError<'getOrgFullScanList'>(e)
     }
   }
 
@@ -748,7 +773,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'getOrgFullScanMetadata'>(data)
     } catch (e) {
-      return this.#handleApiError<'getOrgFullScanMetadata'>(e)
+      return await this.#handleApiError<'getOrgFullScanMetadata'>(e)
     }
   }
 
@@ -765,7 +790,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'getOrgLicensePolicy'>(data)
     } catch (e) {
-      return this.#handleApiError<'getOrgLicensePolicy'>(e)
+      return await this.#handleApiError<'getOrgLicensePolicy'>(e)
     }
   }
 
@@ -786,7 +811,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'getOrgRepo'>(data)
     } catch (e) {
-      return this.#handleApiError<'getOrgRepo'>(e)
+      return await this.#handleApiError<'getOrgRepo'>(e)
     }
   }
 
@@ -804,7 +829,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'getOrgRepoList'>(data)
     } catch (e) {
-      return this.#handleApiError<'getOrgRepoList'>(e)
+      return await this.#handleApiError<'getOrgRepoList'>(e)
     }
   }
 
@@ -821,7 +846,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'getOrgSecurityPolicy'>(data)
     } catch (e) {
-      return this.#handleApiError<'getOrgSecurityPolicy'>(e)
+      return await this.#handleApiError<'getOrgSecurityPolicy'>(e)
     }
   }
 
@@ -832,7 +857,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'getQuota'>(data)
     } catch (e) {
-      return this.#handleApiError<'getQuota'>(e)
+      return await this.#handleApiError<'getQuota'>(e)
     }
   }
 
@@ -850,7 +875,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'getRepoAnalytics'>(data)
     } catch (e) {
-      return this.#handleApiError<'getRepoAnalytics'>(e)
+      return await this.#handleApiError<'getRepoAnalytics'>(e)
     }
   }
 
@@ -865,7 +890,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'getReport'>(data)
     } catch (e) {
-      return this.#handleApiError<'getReport'>(e)
+      return await this.#handleApiError<'getReport'>(e)
     }
   }
 
@@ -876,7 +901,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'getReportList'>(data)
     } catch (e) {
-      return this.#handleApiError<'getReportList'>(e)
+      return await this.#handleApiError<'getReportList'>(e)
     }
   }
 
@@ -893,7 +918,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'getReportSupportedFiles'>(data)
     } catch (e) {
-      return this.#handleApiError<'getReportSupportedFiles'>(e)
+      return await this.#handleApiError<'getReportSupportedFiles'>(e)
     }
   }
 
@@ -911,7 +936,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'getScoreByNPMPackage'>(data)
     } catch (e) {
-      return this.#handleApiError<'getScoreByNPMPackage'>(e)
+      return await this.#handleApiError<'getScoreByNPMPackage'>(e)
     }
   }
 
@@ -929,7 +954,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'postSettings'>(data)
     } catch (e) {
-      return this.#handleApiError<'postSettings'>(e)
+      return await this.#handleApiError<'postSettings'>(e)
     }
   }
 
@@ -947,7 +972,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'searchDependencies'>(data)
     } catch (e) {
-      return this.#handleApiError<'searchDependencies'>(e)
+      return await this.#handleApiError<'searchDependencies'>(e)
     }
   }
 
@@ -967,7 +992,7 @@ export class SocketSdk {
       )
       return this.#handleApiSuccess<'updateOrgRepo'>(data)
     } catch (e) {
-      return this.#handleApiError<'updateOrgRepo'>(e)
+      return await this.#handleApiError<'updateOrgRepo'>(e)
     }
   }
 }
