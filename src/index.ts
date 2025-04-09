@@ -197,6 +197,19 @@ async function createUploadRequest(
   return await getResponse(req)
 }
 
+async function getErrorResponseBody(
+  response: IncomingMessage
+): Promise<string> {
+  const chunks: Buffer[] = []
+  response.on('data', (chunk: Buffer) => chunks.push(chunk))
+  try {
+    await events.once(response, 'end')
+    return Buffer.concat(chunks).toString('utf8')
+  } catch {
+    return '(there was an error reading the body content)'
+  }
+}
+
 function getHttpModule(baseUrl: string): typeof http | typeof https {
   const { protocol } = new URL(baseUrl)
   return protocol === 'https:' ? https : http
@@ -358,29 +371,20 @@ export class SocketSdk {
         cause: error
       })
     }
-
     // The error payload may give a meaningful hint as to what went wrong.
-
-    const bodyStr = await new Promise((resolve) => {
-      const chunks: Buffer[] = [];
-      error.response.on('data', (chunk:Buffer) => chunks.push(chunk));
-      error.response.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-      error.response.on('error', () => resolve('(there was an error reading the body content)'));
-    });
-
-    // Try to parse the body as JSON, fallback to treating it as plaintext
-
+    const bodyStr = await getErrorResponseBody(error.response)
+    // Try to parse the body as JSON, fallback to treating as plain text.
     let body
     try {
-      body = JSON.parse(String(bodyStr || '')) as any
-      // A 400 should return an actionable message
-      if (body?.error?.message) {
-        body = body.error.message
+      const parsed = JSON.parse(bodyStr)
+      // A 400 should return an actionable message.
+      // TODO: Do we care about the body.error.details object?
+      if (typeof parsed?.error?.message === 'string') {
+        body = parsed.error.message
       }
     } catch {
       body = bodyStr
     }
-
     return {
       success: false as const,
       status: statusCode!,
