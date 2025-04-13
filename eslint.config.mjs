@@ -8,7 +8,7 @@ import {
 } from '@eslint/compat'
 import jsPlugin from '@eslint/js'
 import tsParser from '@typescript-eslint/parser'
-import { createOxcImportResolver } from 'eslint-import-resolver-oxc'
+import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript'
 import { flatConfigs as origImportXFlatConfigs } from 'eslint-plugin-import-x'
 import jsdocPlugin from 'eslint-plugin-jsdoc'
 import nodePlugin from 'eslint-plugin-n'
@@ -140,11 +140,8 @@ function getImportXFlatConfigs(isEsm) {
       settings: {
         ...origImportXFlatConfigs.typescript.settings,
         'import-x/resolver-next': [
-          createOxcImportResolver({
-            tsConfig: {
-              configFile: rootTsConfigPath,
-              references: 'auto'
-            }
+          createTypeScriptImportResolver({
+            project: rootTsConfigPath
           })
         ]
       },
