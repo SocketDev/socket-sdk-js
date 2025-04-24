@@ -567,7 +567,7 @@ export class SocketSdk {
         await createPostRequest(
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/repos`,
-          { json: params },
+          params,
           this.#reqOptions
         )
       )
@@ -970,7 +970,7 @@ export class SocketSdk {
         await createPostRequest(
           this.#baseUrl,
           'dependencies/search',
-          { json: params },
+          params,
           this.#reqOptions
         )
       )
@@ -990,7 +990,7 @@ export class SocketSdk {
         await createPostRequest(
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`,
-          { json: params },
+          params,
           this.#reqOptions
         )
       )
