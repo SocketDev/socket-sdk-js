@@ -83,7 +83,7 @@
     "update:deps": "npx --yes npm-check-updates"
   },
   "dependencies": {
-    "@socketsecurity/registry": "1.0.157"
+    "@socketsecurity/registry": "1.0.159"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -103,7 +103,7 @@
     "eslint-plugin-unicorn": "56.0.1",
     "globals": "16.0.0",
     "husky": "9.1.7",
-    "knip": "5.51.1",
+    "knip": "5.52.0",
     "lint-staged": "15.5.1",
     "nock": "14.0.4",
     "npm-run-all2": "7.0.2",
