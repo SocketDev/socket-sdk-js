@@ -8424,45 +8424,35 @@
             "schema": {
               "type": "string",
               "enum": [
-                "BookDemo",
+                "AssociateLabel",
                 "CancelInvitation",
                 "ChangeMemberRole",
                 "ChangePlanSubscriptionSeats",
-                "ContactForm",
                 "CreateApiToken",
-                "CreateUser",
-                "GithubAppInstallation",
+                "CreateLabel",
+                "DeleteLabel",
+                "DeleteLabelSetting",
+                "DeleteReport",
+                "DeleteRepository",
+                "DisassociateLabel",
                 "JoinOrganization",
-                "JoinOrganizationByVcs",
-                "LinkAccount",
                 "RemoveMember",
                 "ResetInvitationLink",
                 "ResetOrganizationSettingToDefault",
                 "RotateApiToken",
                 "SendInvitation",
-                "SignIn",
-                "SignOut",
-                "Subscribe",
+                "SetLabelSettingToDefault",
                 "SyncOrganization",
                 "TransferOwnership",
                 "UpdateAlertTriage",
                 "UpdateApiTokenCommitter",
+                "UpdateApiTokenMaxQuota",
                 "UpdateApiTokenName",
                 "UpdateApiTokenScopes",
                 "UpdateApiTokenVisibility",
-                "UpdateOrganizationSetting",
-                "UpgradeOrganizationPlan",
-                "VerifiedEmail",
-                "DeleteRepository",
-                "DeleteReport",
-                "DeleteLabel",
-                "CreateLabel",
-                "AssociateLabel",
-                "DisassociateLabel",
                 "UpdateLabelSetting",
-                "DeleteLabelSetting",
-                "SetLabelSettingToDefault",
-                "UpdateApiTokenMaxQuota"
+                "UpdateOrganizationSetting",
+                "UpgradeOrganizationPlan"
               ]
             }
           },
@@ -8544,27 +8534,32 @@
                           "country_code": {
                             "type": "string",
                             "description": "",
-                            "default": ""
+                            "default": "",
+                            "nullable": true
                           },
                           "organization_id": {
                             "type": "string",
                             "description": "",
-                            "default": ""
+                            "default": "",
+                            "nullable": true
                           },
                           "ip_address": {
                             "type": "string",
                             "description": "",
-                            "default": ""
+                            "default": "",
+                            "nullable": true
                           },
                           "payload": {
                             "type": "object",
                             "description": "",
-                            "default": null
+                            "default": null,
+                            "nullable": true
                           },
                           "status_code": {
                             "type": "integer",
                             "description": "",
-                            "default": 0
+                            "default": 0,
+                            "nullable": true
                           },
                           "type": {
                             "type": "string",
@@ -8574,12 +8569,14 @@
                           "user_agent": {
                             "type": "string",
                             "description": "",
-                            "default": ""
+                            "default": "",
+                            "nullable": true
                           },
                           "user_id": {
                             "type": "string",
                             "description": "",
-                            "default": ""
+                            "default": "",
+                            "nullable": true
                           },
                           "user_email": {
                             "type": "string",
@@ -9733,7 +9730,7 @@
             "name": "after",
             "in": "query",
             "required": true,
-            "description": "The base full scan ID",
+            "description": "The full scan ID of the base/target of the diff (older)",
             "schema": {
               "type": "string"
             }
@@ -9742,7 +9739,7 @@
             "name": "before",
             "in": "query",
             "required": true,
-            "description": "The base full scan ID",
+            "description": "The full scan ID of the head/changed side of the diff (newer)",
             "schema": {
               "type": "string"
             }
