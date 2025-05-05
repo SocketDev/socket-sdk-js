@@ -3908,45 +3908,35 @@ export interface operations {
       query?: {
         /** @description Filter audit log events by type. Omit for all types. */
         type?:
-          | 'BookDemo'
+          | 'AssociateLabel'
           | 'CancelInvitation'
           | 'ChangeMemberRole'
           | 'ChangePlanSubscriptionSeats'
-          | 'ContactForm'
           | 'CreateApiToken'
-          | 'CreateUser'
-          | 'GithubAppInstallation'
+          | 'CreateLabel'
+          | 'DeleteLabel'
+          | 'DeleteLabelSetting'
+          | 'DeleteReport'
+          | 'DeleteRepository'
+          | 'DisassociateLabel'
           | 'JoinOrganization'
-          | 'JoinOrganizationByVcs'
-          | 'LinkAccount'
           | 'RemoveMember'
           | 'ResetInvitationLink'
           | 'ResetOrganizationSettingToDefault'
           | 'RotateApiToken'
           | 'SendInvitation'
-          | 'SignIn'
-          | 'SignOut'
-          | 'Subscribe'
+          | 'SetLabelSettingToDefault'
           | 'SyncOrganization'
           | 'TransferOwnership'
           | 'UpdateAlertTriage'
           | 'UpdateApiTokenCommitter'
+          | 'UpdateApiTokenMaxQuota'
           | 'UpdateApiTokenName'
           | 'UpdateApiTokenScopes'
           | 'UpdateApiTokenVisibility'
+          | 'UpdateLabelSetting'
           | 'UpdateOrganizationSetting'
           | 'UpgradeOrganizationPlan'
-          | 'VerifiedEmail'
-          | 'DeleteRepository'
-          | 'DeleteReport'
-          | 'DeleteLabel'
-          | 'CreateLabel'
-          | 'AssociateLabel'
-          | 'DisassociateLabel'
-          | 'UpdateLabelSetting'
-          | 'DeleteLabelSetting'
-          | 'SetLabelSettingToDefault'
-          | 'UpdateApiTokenMaxQuota'
         /** @description Number of events per page */
         per_page?: number
         /** @description Page token */
@@ -3972,21 +3962,21 @@ export interface operations {
               /** @default */
               updated_at?: string
               /** @default */
-              country_code?: string
+              country_code?: string | null
               /** @default */
-              organization_id?: string
+              organization_id?: string | null
               /** @default */
-              ip_address?: string
+              ip_address?: string | null
               /** @default null */
-              payload?: Record<string, never>
+              payload?: Record<string, unknown> | null
               /** @default 0 */
-              status_code?: number
+              status_code?: number | null
               /** @default */
               type?: string
               /** @default */
-              user_agent?: string
+              user_agent?: string | null
               /** @default */
-              user_id?: string
+              user_id?: string | null
               /** @default */
               user_email?: string
               /** @default */
@@ -4437,9 +4427,9 @@ export interface operations {
   GetOrgDiffScan: {
     parameters: {
       query: {
-        /** @description The base full scan ID */
+        /** @description The full scan ID of the base/target of the diff (older) */
         after: string
-        /** @description The base full scan ID */
+        /** @description The full scan ID of the head/changed side of the diff (newer) */
         before: string
         /** @description Include license details in the response. This can increase the response size significantly. */
         include_license_details?: boolean
