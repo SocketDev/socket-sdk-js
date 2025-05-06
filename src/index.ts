@@ -171,8 +171,7 @@ async function createUploadRequest(
     headers: {
       ...options?.headers,
       'Content-Type': `multipart/form-data; boundary=${boundary}`
-    },
-    signal: options.signal
+    }
   })
   let aborted = false
   req.on('error', _err => {
@@ -204,11 +203,12 @@ async function createUploadRequest(
         )
       }
     }
-  } catch (err) {
-    req.destroy(err as Error)
-    throw err
+  } catch (e) {
+    req.destroy(e as Error)
+    throw e
   } finally {
     if (!aborted) {
+      // Close request after writing all data.
       req.end()
     }
   }
