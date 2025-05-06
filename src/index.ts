@@ -164,17 +164,29 @@ async function createUploadRequest(
     ]),
     finalBoundary
   ]
-  const req = getHttpModule(baseUrl).request(`${baseUrl}${urlPath}`, {
+  const url = new URL(urlPath, baseUrl)
+  const req: ClientRequest = getHttpModule(baseUrl).request(url, {
     method: 'POST',
     ...options,
     headers: {
       ...options?.headers,
       'Content-Type': `multipart/form-data; boundary=${boundary}`
-    }
+    },
+    signal: options.signal
+  })
+  let aborted = false
+  req.on('error', _err => {
+    aborted = true
+  })
+  req.on('close', () => {
+    aborted = true
   })
   try {
     // Send the request body (headers + files).
     for (const part of requestBody) {
+      if (aborted) {
+        break
+      }
       if (typeof part === 'string') {
         req.write(part)
       } else if (typeof part?.pipe === 'function') {
@@ -182,17 +194,23 @@ async function createUploadRequest(
         // Wait for file streaming to complete.
         // eslint-disable-next-line no-await-in-loop
         await events.once(part, 'end')
-        // Ensure a new line after file content.
-        req.write('\r\n')
+        if (!aborted) {
+          // Ensure a new line after file content.
+          req.write('\r\n')
+        }
       } else {
         throw new TypeError(
           'Socket API - Invalid multipart part, expected string or stream'
         )
       }
     }
+  } catch (err) {
+    req.destroy(err as Error)
+    throw err
   } finally {
-    // Close request after writing all data.
-    req.end()
+    if (!aborted) {
+      req.end()
+    }
   }
   return await getResponse(req)
 }
