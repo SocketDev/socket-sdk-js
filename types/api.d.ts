@@ -532,6 +532,18 @@ export interface paths {
      */
     get: operations['GetOrgDiffScan']
   }
+  '/orgs/{org_slug}/full-scans/diff/gfm': {
+    /**
+     * SCM Comment for Scan Diff
+     * @description Get the dependency overview and dependency alert comments in GitHub flavored markdown between the diff between two existing full scans.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - full-scans:list
+     */
+    get: operations['GetOrgFullScanDiffGfm']
+  }
   '/orgs/{org_slug}/repos': {
     /**
      * List repositories
@@ -1026,7 +1038,10 @@ export interface paths {
   '/analytics/org/{filter}': {
     /**
      * Get organization analytics (unstable)
-     * @description Get analytics data regarding the number of alerts found across all active repositories.
+     * @deprecated
+     * @description This endpoint is deprecated. Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
+     *
+     * Get analytics data regarding the number of alerts found across all active repositories.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -1038,7 +1053,10 @@ export interface paths {
   '/analytics/repo/{name}/{filter}': {
     /**
      * Get repository analytics
-     * @description Get analytics data regarding the number of alerts found in a single repository.
+     * @deprecated
+     * @description This endpoint is deprecated. Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
+     *
+     * Get analytics data regarding the number of alerts found in a single repository.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -4492,6 +4510,95 @@ export interface operations {
               unchanged: Array<components['schemas']['SocketDiffArtifact']>
               replaced: Array<components['schemas']['SocketDiffArtifact']>
               updated: Array<components['schemas']['SocketDiffArtifact']>
+            }
+            /** @default false */
+            directDependenciesChanged: boolean
+            /** @default */
+            diff_report_url: string | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * SCM Comment for Scan Diff
+   * @description Get the dependency overview and dependency alert comments in GitHub flavored markdown between the diff between two existing full scans.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:list
+   */
+  GetOrgFullScanDiffGfm: {
+    parameters: {
+      query: {
+        /** @description The head full scan ID (newer) */
+        after: string
+        /** @description The base full scan ID (older) */
+        before: string
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    responses: {
+      /** @description Metadata about the full scans and the dependency overview and dependency alert comment. Can be used in a pull request context. */
+      200: {
+        content: {
+          'application/json': {
+            before: {
+              /** @default */
+              repository_id: string
+              /** @default */
+              repository_slug: string
+              /** @default */
+              branch: string | null
+              /** @default */
+              id: string
+              /** @default */
+              commit_message: string | null
+              /** @default */
+              commit_hash: string | null
+              /** @default 0 */
+              pull_request: number | null
+              committers: string[]
+              /** @default */
+              organization_id: string
+              /** @default */
+              organization_slug: string
+            }
+            after: {
+              /** @default */
+              repository_id: string
+              /** @default */
+              repository_slug: string
+              /** @default */
+              branch: string | null
+              /** @default */
+              id: string
+              /** @default */
+              commit_message: string | null
+              /** @default */
+              commit_hash: string | null
+              /** @default 0 */
+              pull_request: number | null
+              committers: string[]
+              /** @default */
+              organization_id: string
+              /** @default */
+              organization_slug: string
+            }
+            comments: {
+              /** @default */
+              overview: string
+              /** @default */
+              alerts: string
             }
             /** @default false */
             directDependenciesChanged: boolean
@@ -10410,7 +10517,10 @@ export interface operations {
   }
   /**
    * Get organization analytics (unstable)
-   * @description Get analytics data regarding the number of alerts found across all active repositories.
+   * @deprecated
+   * @description This endpoint is deprecated. Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
+   *
+   * Get analytics data regarding the number of alerts found across all active repositories.
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -10475,7 +10585,10 @@ export interface operations {
   }
   /**
    * Get repository analytics
-   * @description Get analytics data regarding the number of alerts found in a single repository.
+   * @deprecated
+   * @description This endpoint is deprecated. Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
+   *
+   * Get analytics data regarding the number of alerts found in a single repository.
    *
    * This endpoint consumes 1 unit of your quota.
    *
