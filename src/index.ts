@@ -7,7 +7,7 @@ import readline from 'node:readline'
 
 import abortSignal from '@socketsecurity/registry/lib/constants/abort-signal'
 
-// @ts-ignore
+// @ts-ignore: Avoid TS import attributes error.
 import rootPkgJson from '../package.json' with { type: 'json' }
 
 import type { operations } from '../types/api'
@@ -192,7 +192,10 @@ async function createUploadRequest(
         part.pipe(req, { end: false })
         // Wait for file streaming to complete.
         // eslint-disable-next-line no-await-in-loop
-        await events.once(part, 'end')
+        await new Promise<void>((resolve, reject) => {
+          part.once('end', resolve)
+          part.once('error', reject)
+        })
         if (!aborted) {
           // Ensure a new line after file content.
           req.write('\r\n')
@@ -221,7 +224,10 @@ async function getErrorResponseBody(
   const chunks: Buffer[] = []
   response.on('data', (chunk: Buffer) => chunks.push(chunk))
   try {
-    await events.once(response, 'end')
+    await new Promise<void>((resolve, reject) => {
+      response.once('end', resolve)
+      response.once('error', reject)
+    })
     return Buffer.concat(chunks).toString('utf8')
   } catch {
     return '(there was an error reading the body content)'
@@ -235,9 +241,29 @@ function getHttpModule(baseUrl: string): typeof http | typeof https {
 
 async function getResponse(req: ClientRequest): Promise<IncomingMessage> {
   try {
-    const { 0: res } = (await events.once(req, 'response', {
-      signal: abortSignal
-    })) as [IncomingMessage]
+    const res = await new Promise<IncomingMessage>((resolve, reject) => {
+      const cleanup = () => {
+        req.off('response', onResponse)
+        req.off('error', onError)
+        abortSignal?.removeEventListener('abort', onAbort)
+      }
+      const onAbort = () => {
+        cleanup()
+        req.destroy()
+        reject(new Error('Request aborted by signal'))
+      }
+      const onError = (e: Error) => {
+        cleanup()
+        reject(e)
+      }
+      const onResponse = (res: IncomingMessage) => {
+        cleanup()
+        resolve(res)
+      }
+      req.on('response', onResponse)
+      req.on('error', onError)
+      abortSignal?.addEventListener('abort', onAbort)
+    })
     if (!isResponseOk(res)) {
       throw new ResponseError(res, `${req.method} request failed`)
     }
