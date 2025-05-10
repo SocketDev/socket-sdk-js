@@ -8132,7 +8132,7 @@
             ]
           }
         ],
-        "description": "Compare the license data found for a list of packages (given as PURL strings) with the contents of a configurable license policy,\nreturning information about license data which does not comply with the license allow list.\n  \n## Example request body:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/lodash@4.17.21\"\n    },\n    {\n      \"purl\": \"pkg:npm/lodash@4.14.1\"\n    }\n  ],\n  \"allow\": [\n    \"permissive\", \n    \"pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*\"\n  ],\n  \"warn\": [\n    \"copyleft\",\n    \"pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*\"\n  ],\n  \"options\": [\"toplevelOnly\"]\n}\n```\n \n\n## Return value\n\nFor each requested PURL, an array is returned. Each array contains a list of license policy violations\ndetected for the requested PURL.\n\nViolations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,\na message describing why the license data is believed to be incompatible with the license policy, and a list\nof locations (by filepath or other provenance information) where the offending license data may be found.\n\n```json\nArray<\n  Array<{\n    purl: string,\n    spdxAtomOrExtraData: string,\n    violationExplanation: string,\n    filepathOrProvenance: Array<string>\n    level: \"warning\" | \"violation\"\n  }>\n>\n```\n\n\n## License policy schema\n\n```json\n{\n  allow?: Array<string>\n  warn?: Array<string>\n  options?: Array<string>\n}\n```\n\nElements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in pacakge which not present in either array will produce a license violation (effectively a \"hard\" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings \"Apache-2.0\" and \"MIT\" to the `allow` array. Strings appearing in these arrays are generally \"what you see is what you get\", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.\n  \n## License Classes\n  \nStrings which are license classes will expand to a list of licenses known to be in that particular license class. Recognized license classes are: \n  'permissive',\n  'permissive (model)',\n  'permissive (gold)',\n  'permissive (silver)',\n  'permissive (bronze)',\n  'permissive (lead)',\n  'copyleft',\n  'maximal copyleft',\n  'network copyleft',\n  'strong copyleft',\n  'weak copyleft',\n  'contributor license agreement',\n  'public domain',\n  'proprietary free',\n  'source available',\n  'proprietary',\n  'commercial',\n  'patent'\n\nUsers can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.\n \n\n## PURLs\n\nUsers may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.\n\npurl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).\n\n### Examples:\nAllow all license data found in a specific version of a package 4.14.1: `pkg:npm/lodash@4.14.1`\nAllow all license data found in a version range of a package: `pkg:npm/lodash?version_glob=15.*`\nAllow all license data in the test directory of a given package for certain version ranges: `pkg:npm/lodash@15.*.*?file_name=lodash/test/*`\nAllow all license data taken from the package registry for a package and version range: `pkg:npm/lodash?version_glob=*&license_provenance=registry_metadata`\n    \n## Available options\n\n`toplevelOnly`: only apply the license policy to \"top level\" license data in a package, which includes registry metadata, LICENSE files, and manifest files which are closest to the root of the package.\n\n`applyToUnidentified`: Apply license policy to found but unidentified license data. If enabled, the license policy will be applied to license data which could not be affirmatively identified as a known license (this will effectively merge the license policy violation and unidentified license alerts). If disabled, license policy alerts will only be shown for license data which is positively identified as something not allowed or set to warn by the license policy.\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n      - packages:list\n- license-policy:read",
+        "description": "Compare the license data found for a list of packages (given as PURL strings) with the contents of a configurable license policy,\nreturning information about license data which does not comply with the license allow list.\n\n## Example request body:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/lodash@4.17.21\"\n    },\n    {\n      \"purl\": \"pkg:npm/lodash@4.14.1\"\n    }\n  ],\n  \"allow\": [\n    \"permissive\",\n    \"pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*\"\n  ],\n  \"warn\": [\n    \"copyleft\",\n    \"pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*\"\n  ],\n  \"options\": [\"toplevelOnly\"]\n}\n```\n\n\n## Return value\n\nFor each requested PURL, an array is returned. Each array contains a list of license policy violations\ndetected for the requested PURL.\n\nViolations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,\na message describing why the license data is believed to be incompatible with the license policy, and a list\nof locations (by filepath or other provenance information) where the offending license data may be found.\n\n```json\nArray<\n  Array<{\n    purl: string,\n    spdxAtomOrExtraData: string,\n    violationExplanation: string,\n    filepathOrProvenance: Array<string>\n    level: \"warning\" | \"violation\"\n  }>\n>\n```\n\n\n## License policy schema\n\n```json\n{\n  allow?: Array<string>\n  warn?: Array<string>\n  options?: Array<string>\n}\n```\n\nElements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in pacakge which not present in either array will produce a license violation (effectively a \"hard\" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings \"Apache-2.0\" and \"MIT\" to the `allow` array. Strings appearing in these arrays are generally \"what you see is what you get\", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.\n  \n## License Classes\n  \nStrings which are license classes will expand to a list of licenses known to be in that particular license class. Recognized license classes are: \n  'permissive',\n  'permissive (model)',\n  'permissive (gold)',\n  'permissive (silver)',\n  'permissive (bronze)',\n  'permissive (lead)',\n  'copyleft',\n  'maximal copyleft',\n  'network copyleft',\n  'strong copyleft',\n  'weak copyleft',\n  'contributor license agreement',\n  'public domain',\n  'proprietary free',\n  'source available',\n  'proprietary',\n  'commercial',\n  'patent'\n\nUsers can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.\n \n\n## PURLs\n\nUsers may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.\n\npurl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).\n\n### Examples:\nAllow all license data found in a specific version of a package 4.14.1: `pkg:npm/lodash@4.14.1`\nAllow all license data found in a version range of a package: `pkg:npm/lodash?version_glob=15.*`\nAllow all license data in the test directory of a given package for certain version ranges: `pkg:npm/lodash@15.*.*?file_name=lodash/test/*`\nAllow all license data taken from the package registry for a package and version range: `pkg:npm/lodash?version_glob=*&license_provenance=registry_metadata`\n    \n## Available options\n\n`toplevelOnly`: only apply the license policy to \"top level\" license data in a package, which includes registry metadata, LICENSE files, and manifest files which are closest to the root of the package.\n\n`applyToUnidentified`: Apply license policy to found but unidentified license data. If enabled, the license policy will be applied to license data which could not be affirmatively identified as a known license (this will effectively merge the license policy violation and unidentified license alerts). If disabled, license policy alerts will only be shown for license data which is positively identified as something not allowed or set to warn by the license policy.\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n      - packages:list\n- license-policy:read",
         "responses": {
           "200": {
             "content": {
@@ -10003,6 +10003,282 @@
               }
             },
             "description": "The difference between the two provided Full Scans."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/full-scans/diff/gfm": {
+      "get": {
+        "tags": [
+          "Full Scans"
+        ],
+        "summary": "SCM Comment for Scan Diff",
+        "operationId": "GetOrgFullScanDiffGfm",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": true,
+            "description": "The head full scan ID (newer)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": true,
+            "description": "The base full scan ID (older)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [
+              "full-scans:list"
+            ]
+          },
+          {
+            "basicAuth": [
+              "full-scans:list"
+            ]
+          }
+        ],
+        "description": "Get the dependency overview and dependency alert comments in GitHub flavored markdown between the diff between two existing full scans.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "before": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "repository_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "repository_slug": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "branch": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "commit_message": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "commit_hash": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "pull_request": {
+                          "type": "integer",
+                          "description": "",
+                          "default": 0,
+                          "nullable": true
+                        },
+                        "committers": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "description": ""
+                        },
+                        "organization_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "organization_slug": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        }
+                      },
+                      "required": [
+                        "branch",
+                        "commit_hash",
+                        "commit_message",
+                        "committers",
+                        "id",
+                        "organization_id",
+                        "organization_slug",
+                        "pull_request",
+                        "repository_id",
+                        "repository_slug"
+                      ]
+                    },
+                    "after": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "repository_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "repository_slug": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "branch": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "commit_message": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "commit_hash": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "pull_request": {
+                          "type": "integer",
+                          "description": "",
+                          "default": 0,
+                          "nullable": true
+                        },
+                        "committers": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "description": ""
+                        },
+                        "organization_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "organization_slug": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        }
+                      },
+                      "required": [
+                        "branch",
+                        "commit_hash",
+                        "commit_message",
+                        "committers",
+                        "id",
+                        "organization_id",
+                        "organization_slug",
+                        "pull_request",
+                        "repository_id",
+                        "repository_slug"
+                      ]
+                    },
+                    "comments": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "overview": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "alerts": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        }
+                      },
+                      "required": [
+                        "alerts",
+                        "overview"
+                      ]
+                    },
+                    "directDependenciesChanged": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": ""
+                    },
+                    "diff_report_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "after",
+                    "before",
+                    "comments",
+                    "diff_report_url",
+                    "directDependenciesChanged"
+                  ]
+                }
+              }
+            },
+            "description": "Metadata about the full scans and the dependency overview and dependency alert comment. Can be used in a pull request context."
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -25761,9 +26037,10 @@
     "/analytics/org/{filter}": {
       "get": {
         "tags": [
-          "Analytics"
+          "Deprecated"
         ],
         "summary": "Get organization analytics (unstable)",
+        "deprecated": true,
         "operationId": "getOrgAnalytics",
         "parameters": [
           {
@@ -25788,7 +26065,7 @@
             ]
           }
         ],
-        "description": "Get analytics data regarding the number of alerts found across all active repositories.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
+        "description": "This endpoint is deprecated. Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.\n\nGet analytics data regarding the number of alerts found across all active repositories.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
         "responses": {
           "200": {
             "content": {
@@ -25937,9 +26214,10 @@
     "/analytics/repo/{name}/{filter}": {
       "get": {
         "tags": [
-          "Analytics"
+          "Deprecated"
         ],
         "summary": "Get repository analytics",
+        "deprecated": true,
         "operationId": "getRepoAnalytics",
         "parameters": [
           {
@@ -25973,7 +26251,7 @@
             ]
           }
         ],
-        "description": "Get analytics data regarding the number of alerts found in a single repository.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
+        "description": "This endpoint is deprecated. Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.\n\nGet analytics data regarding the number of alerts found in a single repository.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
         "responses": {
           "200": {
             "content": {
