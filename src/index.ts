@@ -193,8 +193,20 @@ async function createUploadRequest(
         // Wait for file streaming to complete.
         // eslint-disable-next-line no-await-in-loop
         await new Promise<void>((resolve, reject) => {
-          part.once('end', resolve)
-          part.once('error', reject)
+          const cleanup = () => {
+            part.off('end', onEnd)
+            part.off('error', onError)
+          }
+          const onEnd = () => {
+            cleanup()
+            resolve()
+          }
+          const onError = (e: Error) => {
+            cleanup()
+            reject(e)
+          }
+          part.on('end', onEnd)
+          part.on('error', onError)
         })
         if (!aborted) {
           // Ensure a new line after file content.
@@ -225,8 +237,20 @@ async function getErrorResponseBody(
   response.on('data', (chunk: Buffer) => chunks.push(chunk))
   try {
     await new Promise<void>((resolve, reject) => {
-      response.once('end', resolve)
-      response.once('error', reject)
+      const cleanup = () => {
+        response.off('end', onEnd)
+        response.off('error', onError)
+      }
+      const onEnd = () => {
+        cleanup()
+        resolve()
+      }
+      const onError = (e: Error) => {
+        cleanup()
+        reject(e)
+      }
+      response.on('end', onEnd)
+      response.on('error', onError)
     })
     return Buffer.concat(chunks).toString('utf8')
   } catch {
