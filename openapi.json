@@ -26034,6 +26034,268 @@
         "x-readme": {}
       }
     },
+    "/threat-feed": {
+      "get": {
+        "tags": [
+          "Threat Feed"
+        ],
+        "summary": "Get Threat Feed Items (Beta)",
+        "operationId": "getThreatFeedItems",
+        "parameters": [
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "Number of items per page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 30
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Page token",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Sort sort the threat feed by ID or createdAt attribute.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id",
+                "created_at"
+              ],
+              "default": "id"
+            }
+          },
+          {
+            "name": "discovery_period",
+            "in": "query",
+            "required": false,
+            "description": "Filter results by discovery period",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1h",
+                "6h",
+                "1d",
+                "7d",
+                "30d",
+                "90d",
+                "365d"
+              ]
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "description": "Order asc or desc by the createdAt attribute.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "desc",
+                "asc"
+              ],
+              "default": "desc"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "description": "Filter what type of threats to return",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "u",
+                "c",
+                "fp",
+                "tp",
+                "mal",
+                "vuln",
+                "anom",
+                "joke",
+                "spy",
+                "typo",
+                "secret"
+              ],
+              "default": "mal"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "description": "Filter threats by package name",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "description": "Filter threats by package version",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "is_human_reviewed",
+            "in": "query",
+            "required": false,
+            "description": "Only return threats which have been human-reviewed",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "ecosystem",
+            "in": "query",
+            "required": false,
+            "description": "Filter threats by package ecosystem type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "github",
+                "golang",
+                "maven",
+                "npm",
+                "nuget",
+                "pypi",
+                "gem"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [
+              "threat-feed:list"
+            ]
+          },
+          {
+            "basicAuth": [
+              "threat-feed:list"
+            ]
+          }
+        ],
+        "description": "Paginated list of threat feed items.\n\nThis endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- threat-feed:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "createdAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "id": {
+                            "type": "integer",
+                            "description": "",
+                            "default": 0
+                          },
+                          "locationHtmlUrl": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "packageHtmlUrl": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "purl": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "removedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "threatType": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "needsHumanReview": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "Whether the threat still is in need of human review by the threat research team"
+                          }
+                        },
+                        "description": ""
+                      },
+                      "description": ""
+                    },
+                    "nextPage": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "nextPage",
+                    "results"
+                  ]
+                }
+              }
+            },
+            "description": "The paginated list of items in the threat feed and the next page querystring token."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
     "/analytics/org/{filter}": {
       "get": {
         "tags": [
@@ -27219,267 +27481,6 @@
               }
             },
             "description": "List of GitHub repositories associated with the organization."
-          },
-          "400": {
-            "$ref": "#/components/responses/SocketBadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/SocketUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/SocketForbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/SocketNotFoundResponse"
-          },
-          "429": {
-            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
-          }
-        },
-        "x-readme": {}
-      }
-    },
-    "/threat-feed": {
-      "get": {
-        "tags": [
-          "Threat Feed"
-        ],
-        "summary": "Get Threat Feed Items (Beta)",
-        "operationId": "getThreatFeedItems",
-        "parameters": [
-          {
-            "name": "per_page",
-            "in": "query",
-            "required": false,
-            "description": "Number of items per page",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 30
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "description": "Page token",
-            "schema": {
-              "type": "string",
-              "default": "1"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "description": "Sort sort the threat feed by ID or createdAt attribute.",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "id",
-                "created_at"
-              ],
-              "default": "id"
-            }
-          },
-          {
-            "name": "discovery_period",
-            "in": "query",
-            "required": false,
-            "description": "Filter results by discovery period",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "6h",
-                "1d",
-                "7d",
-                "30d",
-                "90d",
-                "365d"
-              ]
-            }
-          },
-          {
-            "name": "direction",
-            "in": "query",
-            "required": false,
-            "description": "Order asc or desc by the createdAt attribute.",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "desc",
-                "asc"
-              ],
-              "default": "desc"
-            }
-          },
-          {
-            "name": "filter",
-            "in": "query",
-            "required": false,
-            "description": "Filter what type of threats to return",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "u",
-                "c",
-                "fp",
-                "tp",
-                "mal",
-                "vuln",
-                "anom",
-                "joke",
-                "spy",
-                "typo",
-                "secret"
-              ],
-              "default": "mal"
-            }
-          },
-          {
-            "name": "name",
-            "in": "query",
-            "required": false,
-            "description": "Filter threats by package name",
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "version",
-            "in": "query",
-            "required": false,
-            "description": "Filter threats by package version",
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "is_human_reviewed",
-            "in": "query",
-            "required": false,
-            "description": "Only return threats which have been human-reviewed",
-            "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          },
-          {
-            "name": "ecosystem",
-            "in": "query",
-            "required": false,
-            "description": "Filter threats by package ecosystem type",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "github",
-                "golang",
-                "maven",
-                "npm",
-                "nuget",
-                "pypi",
-                "gem"
-              ]
-            }
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": [
-              "threat-feed:list"
-            ]
-          },
-          {
-            "basicAuth": [
-              "threat-feed:list"
-            ]
-          }
-        ],
-        "description": "Paginated list of threat feed items.\n\nThis endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- threat-feed:list",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "createdAt": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "description": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "id": {
-                            "type": "integer",
-                            "description": "",
-                            "default": 0
-                          },
-                          "locationHtmlUrl": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "packageHtmlUrl": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "purl": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "removedAt": {
-                            "type": "string",
-                            "description": "",
-                            "default": "",
-                            "nullable": true
-                          },
-                          "threatType": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "needsHumanReview": {
-                            "type": "boolean",
-                            "default": false,
-                            "description": "Whether the threat still is in need of human review by the threat research team"
-                          }
-                        },
-                        "description": ""
-                      },
-                      "description": ""
-                    },
-                    "nextPage": {
-                      "type": "string",
-                      "description": "",
-                      "default": "",
-                      "nullable": true
-                    }
-                  },
-                  "required": [
-                    "nextPage",
-                    "results"
-                  ]
-                }
-              }
-            },
-            "description": "The paginated list of items in the threat feed and the next page querystring token."
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
