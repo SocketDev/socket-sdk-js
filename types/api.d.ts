@@ -1035,6 +1035,20 @@ export interface paths {
      */
     get: operations['getSupportedFiles']
   }
+  '/threat-feed': {
+    /**
+     * Get Threat Feed Items (Beta)
+     * @description Paginated list of threat feed items.
+     *
+     * This endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - threat-feed:list
+     */
+    get: operations['getThreatFeedItems']
+  }
   '/analytics/org/{filter}': {
     /**
      * Get organization analytics (unstable)
@@ -1184,20 +1198,6 @@ export interface paths {
      * - repo:list
      */
     get: operations['getRepoList']
-  }
-  '/threat-feed': {
-    /**
-     * Get Threat Feed Items (Beta)
-     * @description Paginated list of threat feed items.
-     *
-     * This endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.
-     *
-     * This endpoint consumes 1 unit of your quota.
-     *
-     * This endpoint requires the following org token scopes:
-     * - threat-feed:list
-     */
-    get: operations['getThreatFeedItems']
   }
   '/openapi': {
     /**
@@ -10516,6 +10516,100 @@ export interface operations {
     }
   }
   /**
+   * Get Threat Feed Items (Beta)
+   * @description Paginated list of threat feed items.
+   *
+   * This endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - threat-feed:list
+   */
+  getThreatFeedItems: {
+    parameters: {
+      query?: {
+        /** @description Number of items per page */
+        per_page?: number
+        /** @description Page token */
+        page?: string
+        /** @description Sort sort the threat feed by ID or createdAt attribute. */
+        sort?: 'id' | 'created_at'
+        /** @description Filter results by discovery period */
+        discovery_period?: '1h' | '6h' | '1d' | '7d' | '30d' | '90d' | '365d'
+        /** @description Order asc or desc by the createdAt attribute. */
+        direction?: 'desc' | 'asc'
+        /** @description Filter what type of threats to return */
+        filter?:
+          | 'u'
+          | 'c'
+          | 'fp'
+          | 'tp'
+          | 'mal'
+          | 'vuln'
+          | 'anom'
+          | 'joke'
+          | 'spy'
+          | 'typo'
+          | 'secret'
+        /** @description Filter threats by package name */
+        name?: string
+        /** @description Filter threats by package version */
+        version?: string
+        /** @description Only return threats which have been human-reviewed */
+        is_human_reviewed?: boolean
+        /** @description Filter threats by package ecosystem type */
+        ecosystem?:
+          | 'github'
+          | 'golang'
+          | 'maven'
+          | 'npm'
+          | 'nuget'
+          | 'pypi'
+          | 'gem'
+      }
+    }
+    responses: {
+      /** @description The paginated list of items in the threat feed and the next page querystring token. */
+      200: {
+        content: {
+          'application/json': {
+            results: Array<{
+              /** @default */
+              createdAt?: string
+              /** @default */
+              description?: string
+              /** @default 0 */
+              id?: number
+              /** @default */
+              locationHtmlUrl?: string
+              /** @default */
+              packageHtmlUrl?: string
+              /** @default */
+              purl?: string
+              /** @default */
+              removedAt?: string | null
+              /** @default */
+              threatType?: string
+              /**
+               * @description Whether the threat still is in need of human review by the threat research team
+               * @default false
+               */
+              needsHumanReview?: boolean
+            }>
+            /** @default */
+            nextPage: string | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
    * Get organization analytics (unstable)
    * @deprecated
    * @description This endpoint is deprecated. Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
@@ -10998,100 +11092,6 @@ export interface operations {
                 created_at: string
               }
             }>
-          }
-        }
-      }
-      400: components['responses']['SocketBadRequest']
-      401: components['responses']['SocketUnauthorized']
-      403: components['responses']['SocketForbidden']
-      404: components['responses']['SocketNotFoundResponse']
-      429: components['responses']['SocketTooManyRequestsResponse']
-    }
-  }
-  /**
-   * Get Threat Feed Items (Beta)
-   * @description Paginated list of threat feed items.
-   *
-   * This endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.
-   *
-   * This endpoint consumes 1 unit of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - threat-feed:list
-   */
-  getThreatFeedItems: {
-    parameters: {
-      query?: {
-        /** @description Number of items per page */
-        per_page?: number
-        /** @description Page token */
-        page?: string
-        /** @description Sort sort the threat feed by ID or createdAt attribute. */
-        sort?: 'id' | 'created_at'
-        /** @description Filter results by discovery period */
-        discovery_period?: '6h' | '1d' | '7d' | '30d' | '90d' | '365d'
-        /** @description Order asc or desc by the createdAt attribute. */
-        direction?: 'desc' | 'asc'
-        /** @description Filter what type of threats to return */
-        filter?:
-          | 'u'
-          | 'c'
-          | 'fp'
-          | 'tp'
-          | 'mal'
-          | 'vuln'
-          | 'anom'
-          | 'joke'
-          | 'spy'
-          | 'typo'
-          | 'secret'
-        /** @description Filter threats by package name */
-        name?: string
-        /** @description Filter threats by package version */
-        version?: string
-        /** @description Only return threats which have been human-reviewed */
-        is_human_reviewed?: boolean
-        /** @description Filter threats by package ecosystem type */
-        ecosystem?:
-          | 'github'
-          | 'golang'
-          | 'maven'
-          | 'npm'
-          | 'nuget'
-          | 'pypi'
-          | 'gem'
-      }
-    }
-    responses: {
-      /** @description The paginated list of items in the threat feed and the next page querystring token. */
-      200: {
-        content: {
-          'application/json': {
-            results: Array<{
-              /** @default */
-              createdAt?: string
-              /** @default */
-              description?: string
-              /** @default 0 */
-              id?: number
-              /** @default */
-              locationHtmlUrl?: string
-              /** @default */
-              packageHtmlUrl?: string
-              /** @default */
-              purl?: string
-              /** @default */
-              removedAt?: string | null
-              /** @default */
-              threatType?: string
-              /**
-               * @description Whether the threat still is in need of human review by the threat research team
-               * @default false
-               */
-              needsHumanReview?: boolean
-            }>
-            /** @default */
-            nextPage: string | null
           }
         }
       }
