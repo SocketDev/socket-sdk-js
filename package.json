@@ -106,7 +106,7 @@
     "knip": "5.56.0",
     "lint-staged": "16.0.0",
     "nock": "14.0.4",
-    "npm-run-all2": "8.0.2",
+    "npm-run-all2": "8.0.3",
     "openapi-typescript": "6.7.6",
     "oxlint": "0.16.11",
     "type-coverage": "2.29.7",
