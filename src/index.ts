@@ -6,6 +6,7 @@ import path from 'node:path'
 import readline from 'node:readline'
 
 import abortSignal from '@socketsecurity/registry/lib/constants/abort-signal'
+import { pRetry } from '@socketsecurity/registry/lib/promises'
 
 // @ts-ignore: Avoid TS import attributes error.
 import rootPkgJson from '../package.json' with { type: 'json' }
@@ -411,7 +412,12 @@ export class SocketSdk {
   ): AsyncGenerator<BatchPackageFetchResultType> {
     let res: IncomingMessage | undefined
     try {
-      res = await this.#createBatchPurlRequest(queryParams, componentsObj)
+      res = await pRetry(
+        () => this.#createBatchPurlRequest(queryParams, componentsObj),
+        {
+          retries: 4
+        }
+      )
     } catch (e) {
       return await this.#handleApiError<'batchPackageFetch'>(e)
     }
