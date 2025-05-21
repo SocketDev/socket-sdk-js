@@ -1037,8 +1037,11 @@ export interface paths {
   }
   '/threat-feed': {
     /**
-     * Get Threat Feed Items (Beta)
-     * @description Paginated list of threat feed items.
+     * Get Threat Feed Items (Deprecated)
+     * @deprecated
+     * @description This endpoint has been deprecated for a more efficient and feature rich endpoint, [Organization Threat Feed](/reference/getOrgThreatFeedItems).
+     *
+     * Paginated list of threat feed items.
      *
      * This endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.
      *
@@ -7084,6 +7087,34 @@ export interface operations {
         content: {
           'application/json': {
             tokens: Array<{
+              committers: Array<{
+                /** @default */
+                email?: string
+                /**
+                 * @default api
+                 * @enum {string}
+                 */
+                provider?: 'api' | 'azure' | 'bitbucket' | 'github' | 'gitlab'
+                /** @default */
+                providerLoginName?: string
+                /** @default */
+                providerUserId?: string
+              }>
+              /**
+               * Format: date
+               * @default
+               */
+              created_at: string
+              /**
+               * @description The ID of the API Token
+               * @default
+               */
+              id: string
+              /**
+               * Format: date
+               * @default
+               */
+              last_used_at: string
               /** @default 1000 */
               max_quota: number
               /**
@@ -7150,36 +7181,16 @@ export interface operations {
                 | 'triage:alerts-list'
                 | 'triage:alerts-update'
               >
-              /** @default */
+              /**
+               * @description The obfuscated token of the API Token
+               * @default
+               */
               token: string
               /**
                * @default organization
                * @enum {string}
                */
               visibility: 'admin' | 'organization'
-              committers: Array<{
-                /** @default */
-                email?: string
-                /**
-                 * @default api
-                 * @enum {string}
-                 */
-                provider?: 'api' | 'azure' | 'bitbucket' | 'github' | 'gitlab'
-                /** @default */
-                providerLoginName?: string
-                /** @default */
-                providerUserId?: string
-              }>
-              /**
-               * Format: date
-               * @default
-               */
-              created_at: string
-              /**
-               * Format: date
-               * @default
-               */
-              last_used_at: string
             }>
             /** @default 0 */
             nextPage: number | null
@@ -9897,25 +9908,69 @@ export interface operations {
         /** @description The pagination cursor that was returned as the "endCursor" property in previous request */
         startAfterCursor?: string
         /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
-        alertSeverity?: string
+        'filters.alertSeverity'?: string
+        /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
+        'filters.alertSeverity.notIn'?: string
         /** @description Comma-separated list of repo slugs that should be included */
-        repoSlug?: string
+        'filters.repoSlug'?: string
+        /** @description Comma-separated list of repo slugs that should be included */
+        'filters.repoSlug.notIn'?: string
         /** @description Comma-separated list of repo labels that should be included */
-        repoLabels?: string
+        'filters.repoLabels'?: string
+        /** @description Comma-separated list of repo labels that should be included */
+        'filters.repoLabels.notIn'?: string
         /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
-        alertType?: string
+        'filters.alertType'?: string
+        /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
+        'filters.alertType.notIn'?: string
+        /** @description Name of artifact */
+        'filters.artifactName'?: string
+        /** @description Name of artifact */
+        'filters.artifactName.notIn'?: string
         /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
-        artifactType?: string
+        'filters.artifactType'?: string
+        /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
+        'filters.artifactType.notIn'?: string
         /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
-        alertAction?: string
+        'filters.alertAction'?: string
+        /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
+        'filters.alertAction.notIn'?: string
         /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
-        alertCategory?: string
+        'filters.alertCategory'?: string
+        /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
+        'filters.alertCategory.notIn'?: string
+        /** @description CVE ID */
+        'filters.alertCveId'?: string
+        /** @description CVE ID */
+        'filters.alertCveId.notIn'?: string
+        /** @description CVE title */
+        'filters.alertCveTitle'?: string
+        /** @description CVE title */
+        'filters.alertCveTitle.notIn'?: string
+        /** @description CWE ID */
+        'filters.alertCweId'?: string
+        /** @description CWE ID */
+        'filters.alertCweId.notIn'?: string
+        /** @description CWE name */
+        'filters.alertCweName'?: string
+        /** @description CWE name */
+        'filters.alertCweName.notIn'?: string
+        /** @description Alert priority ("low", "medium", or "high") */
+        'filters.alertPriority'?: string
+        /** @description Alert priority ("low", "medium", or "high") */
+        'filters.alertPriority.notIn'?: string
         /** @description Direct/transitive dependency filter flag */
-        dependencyDirect?: boolean
+        'filters.dependencyDirect'?: boolean
+        /** @description Direct/transitive dependency filter flag */
+        'filters.dependencyDirect.notIn'?: boolean
         /** @description Development/production dependency filter flag */
-        dependencyDev?: boolean
+        'filters.dependencyDev'?: boolean
+        /** @description Development/production dependency filter flag */
+        'filters.dependencyDev.notIn'?: boolean
         /** @description Dead/reachable dependency filter flag */
-        dependencyDead?: boolean
+        'filters.dependencyDead'?: boolean
+        /** @description Dead/reachable dependency filter flag */
+        'filters.dependencyDead.notIn'?: boolean
       }
       path: {
         /** @description The slug of the organization */
@@ -10031,12 +10086,24 @@ export interface operations {
                 repoLabels?: string[]
                 /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
                 alertType?: string[]
+                /** @description Name of artifact */
+                artifactName?: string[]
                 /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
                 artifactType?: string[]
                 /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
                 alertAction?: string[]
                 /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
                 alertCategory?: string[]
+                /** @description CVE ID */
+                alertCveId?: string[]
+                /** @description CVE title */
+                alertCveTitle?: string[]
+                /** @description CWE ID */
+                alertCweId?: string[]
+                /** @description CWE name */
+                alertCweName?: string[]
+                /** @description Alert priority ("low", "medium", or "high") */
+                alertPriority?: string[]
                 /** @description Direct/transitive dependency filter flag */
                 dependencyDirect?: boolean[]
                 /** @description Development/production dependency filter flag */
@@ -10073,25 +10140,69 @@ export interface operations {
         /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,dependencyDirect,dependencyDev,dependencyDead) */
         'aggregation.fields'?: string
         /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
-        alertSeverity?: string
+        'filters.alertSeverity'?: string
+        /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
+        'filters.alertSeverity.notIn'?: string
         /** @description Comma-separated list of repo slugs that should be included */
-        repoSlug?: string
+        'filters.repoSlug'?: string
+        /** @description Comma-separated list of repo slugs that should be included */
+        'filters.repoSlug.notIn'?: string
         /** @description Comma-separated list of repo labels that should be included */
-        repoLabels?: string
+        'filters.repoLabels'?: string
+        /** @description Comma-separated list of repo labels that should be included */
+        'filters.repoLabels.notIn'?: string
         /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
-        alertType?: string
+        'filters.alertType'?: string
+        /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
+        'filters.alertType.notIn'?: string
+        /** @description Name of artifact */
+        'filters.artifactName'?: string
+        /** @description Name of artifact */
+        'filters.artifactName.notIn'?: string
         /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
-        artifactType?: string
+        'filters.artifactType'?: string
+        /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
+        'filters.artifactType.notIn'?: string
         /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
-        alertAction?: string
+        'filters.alertAction'?: string
+        /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
+        'filters.alertAction.notIn'?: string
         /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
-        alertCategory?: string
+        'filters.alertCategory'?: string
+        /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
+        'filters.alertCategory.notIn'?: string
+        /** @description CVE ID */
+        'filters.alertCveId'?: string
+        /** @description CVE ID */
+        'filters.alertCveId.notIn'?: string
+        /** @description CVE title */
+        'filters.alertCveTitle'?: string
+        /** @description CVE title */
+        'filters.alertCveTitle.notIn'?: string
+        /** @description CWE ID */
+        'filters.alertCweId'?: string
+        /** @description CWE ID */
+        'filters.alertCweId.notIn'?: string
+        /** @description CWE name */
+        'filters.alertCweName'?: string
+        /** @description CWE name */
+        'filters.alertCweName.notIn'?: string
+        /** @description Alert priority ("low", "medium", or "high") */
+        'filters.alertPriority'?: string
+        /** @description Alert priority ("low", "medium", or "high") */
+        'filters.alertPriority.notIn'?: string
         /** @description Direct/transitive dependency filter flag */
-        dependencyDirect?: boolean
+        'filters.dependencyDirect'?: boolean
+        /** @description Direct/transitive dependency filter flag */
+        'filters.dependencyDirect.notIn'?: boolean
         /** @description Development/production dependency filter flag */
-        dependencyDev?: boolean
+        'filters.dependencyDev'?: boolean
+        /** @description Development/production dependency filter flag */
+        'filters.dependencyDev.notIn'?: boolean
         /** @description Dead/reachable dependency filter flag */
-        dependencyDead?: boolean
+        'filters.dependencyDead'?: boolean
+        /** @description Dead/reachable dependency filter flag */
+        'filters.dependencyDead.notIn'?: boolean
       }
       path: {
         /** @description The slug of the organization */
@@ -10125,12 +10236,24 @@ export interface operations {
                 repoLabels?: string[]
                 /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
                 alertType?: string[]
+                /** @description Name of artifact */
+                artifactName?: string[]
                 /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
                 artifactType?: string[]
                 /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
                 alertAction?: string[]
                 /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
                 alertCategory?: string[]
+                /** @description CVE ID */
+                alertCveId?: string[]
+                /** @description CVE title */
+                alertCveTitle?: string[]
+                /** @description CWE ID */
+                alertCweId?: string[]
+                /** @description CWE name */
+                alertCweName?: string[]
+                /** @description Alert priority ("low", "medium", or "high") */
+                alertPriority?: string[]
                 /** @description Direct/transitive dependency filter flag */
                 dependencyDirect?: boolean[]
                 /** @description Development/production dependency filter flag */
@@ -10516,8 +10639,11 @@ export interface operations {
     }
   }
   /**
-   * Get Threat Feed Items (Beta)
-   * @description Paginated list of threat feed items.
+   * Get Threat Feed Items (Deprecated)
+   * @deprecated
+   * @description This endpoint has been deprecated for a more efficient and feature rich endpoint, [Organization Threat Feed](/reference/getOrgThreatFeedItems).
+   *
+   * Paginated list of threat feed items.
    *
    * This endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.
    *
@@ -10529,7 +10655,7 @@ export interface operations {
   getThreatFeedItems: {
     parameters: {
       query?: {
-        /** @description Number of items per page */
+        /** @description Number of threats per page */
         per_page?: number
         /** @description Page token */
         page?: string
@@ -10537,7 +10663,7 @@ export interface operations {
         sort?: 'id' | 'created_at'
         /** @description Filter results by discovery period */
         discovery_period?: '1h' | '6h' | '1d' | '7d' | '30d' | '90d' | '365d'
-        /** @description Order asc or desc by the createdAt attribute. */
+        /** @description Ordering direction of the sort attribute */
         direction?: 'desc' | 'asc'
         /** @description Filter what type of threats to return */
         filter?:
@@ -10570,7 +10696,7 @@ export interface operations {
       }
     }
     responses: {
-      /** @description The paginated list of items in the threat feed and the next page querystring token. */
+      /** @description The paginated list of threats in the feed and the next page querystring token. */
       200: {
         content: {
           'application/json': {
