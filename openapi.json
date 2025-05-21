@@ -16709,6 +16709,61 @@
                         "additionalProperties": false,
                         "description": "",
                         "properties": {
+                          "committers": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "email": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                },
+                                "provider": {
+                                  "type": "string",
+                                  "enum": [
+                                    "api",
+                                    "azure",
+                                    "bitbucket",
+                                    "github",
+                                    "gitlab"
+                                  ],
+                                  "description": "",
+                                  "default": "api"
+                                },
+                                "providerLoginName": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                },
+                                "providerUserId": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                }
+                              },
+                              "description": ""
+                            },
+                            "description": ""
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "format": "date"
+                          },
+                          "id": {
+                            "type": "string",
+                            "description": "The ID of the API Token",
+                            "default": ""
+                          },
+                          "last_used_at": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "format": "date"
+                          },
                           "max_quota": {
                             "type": "integer",
                             "description": "",
@@ -16790,7 +16845,7 @@
                           },
                           "token": {
                             "type": "string",
-                            "description": "",
+                            "description": "The obfuscated token of the API Token",
                             "default": ""
                           },
                           "visibility": {
@@ -16801,61 +16856,12 @@
                             ],
                             "description": "",
                             "default": "organization"
-                          },
-                          "committers": {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "additionalProperties": false,
-                              "properties": {
-                                "email": {
-                                  "type": "string",
-                                  "description": "",
-                                  "default": ""
-                                },
-                                "provider": {
-                                  "type": "string",
-                                  "enum": [
-                                    "api",
-                                    "azure",
-                                    "bitbucket",
-                                    "github",
-                                    "gitlab"
-                                  ],
-                                  "description": "",
-                                  "default": "api"
-                                },
-                                "providerLoginName": {
-                                  "type": "string",
-                                  "description": "",
-                                  "default": ""
-                                },
-                                "providerUserId": {
-                                  "type": "string",
-                                  "description": "",
-                                  "default": ""
-                                }
-                              },
-                              "description": ""
-                            },
-                            "description": ""
-                          },
-                          "created_at": {
-                            "type": "string",
-                            "description": "",
-                            "default": "",
-                            "format": "date"
-                          },
-                          "last_used_at": {
-                            "type": "string",
-                            "description": "",
-                            "default": "",
-                            "format": "date"
                           }
                         },
                         "required": [
                           "committers",
                           "created_at",
+                          "id",
                           "last_used_at",
                           "max_quota",
                           "name",
@@ -24059,7 +24065,7 @@
             }
           },
           {
-            "name": "alertSeverity",
+            "name": "filters.alertSeverity",
             "in": "query",
             "required": false,
             "description": "Comma-separated list of alert severities (\"low\", \"medium\", \"high\", or \"critical\") that should be included",
@@ -24068,7 +24074,16 @@
             }
           },
           {
-            "name": "repoSlug",
+            "name": "filters.alertSeverity.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert severities (\"low\", \"medium\", \"high\", or \"critical\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoSlug",
             "in": "query",
             "required": false,
             "description": "Comma-separated list of repo slugs that should be included",
@@ -24077,7 +24092,16 @@
             }
           },
           {
-            "name": "repoLabels",
+            "name": "filters.repoSlug.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo slugs that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoLabels",
             "in": "query",
             "required": false,
             "description": "Comma-separated list of repo labels that should be included",
@@ -24086,7 +24110,16 @@
             }
           },
           {
-            "name": "alertType",
+            "name": "filters.repoLabels.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo labels that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertType",
             "in": "query",
             "required": false,
             "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be included",
@@ -24095,7 +24128,34 @@
             }
           },
           {
-            "name": "artifactType",
+            "name": "filters.alertType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactName",
+            "in": "query",
+            "required": false,
+            "description": "Name of artifact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactName.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Name of artifact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactType",
             "in": "query",
             "required": false,
             "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be included",
@@ -24104,7 +24164,16 @@
             }
           },
           {
-            "name": "alertAction",
+            "name": "filters.artifactType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertAction",
             "in": "query",
             "required": false,
             "description": "Comma-separated list of alert actions (\"error\", \"warn\", \"monitor\", or \"ignore) that should be included",
@@ -24113,7 +24182,16 @@
             }
           },
           {
-            "name": "alertCategory",
+            "name": "filters.alertAction.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert actions (\"error\", \"warn\", \"monitor\", or \"ignore) that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCategory",
             "in": "query",
             "required": false,
             "description": "Comma-separated list of alert categories (\"supplyChainRisk\", \"maintenance\", \"quality\", \"license\", or \"vulnerability\") that should be included",
@@ -24122,7 +24200,106 @@
             }
           },
           {
-            "name": "dependencyDirect",
+            "name": "filters.alertCategory.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert categories (\"supplyChainRisk\", \"maintenance\", \"quality\", \"license\", or \"vulnerability\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCveId",
+            "in": "query",
+            "required": false,
+            "description": "CVE ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCveId.notIn",
+            "in": "query",
+            "required": false,
+            "description": "CVE ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCveTitle",
+            "in": "query",
+            "required": false,
+            "description": "CVE title",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCveTitle.notIn",
+            "in": "query",
+            "required": false,
+            "description": "CVE title",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCweId",
+            "in": "query",
+            "required": false,
+            "description": "CWE ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCweId.notIn",
+            "in": "query",
+            "required": false,
+            "description": "CWE ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCweName",
+            "in": "query",
+            "required": false,
+            "description": "CWE name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCweName.notIn",
+            "in": "query",
+            "required": false,
+            "description": "CWE name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertPriority",
+            "in": "query",
+            "required": false,
+            "description": "Alert priority (\"low\", \"medium\", or \"high\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertPriority.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Alert priority (\"low\", \"medium\", or \"high\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.dependencyDirect",
             "in": "query",
             "required": false,
             "description": "Direct/transitive dependency filter flag",
@@ -24132,7 +24309,17 @@
             }
           },
           {
-            "name": "dependencyDev",
+            "name": "filters.dependencyDirect.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Direct/transitive dependency filter flag",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "filters.dependencyDev",
             "in": "query",
             "required": false,
             "description": "Development/production dependency filter flag",
@@ -24142,7 +24329,27 @@
             }
           },
           {
-            "name": "dependencyDead",
+            "name": "filters.dependencyDev.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Development/production dependency filter flag",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "filters.dependencyDead",
+            "in": "query",
+            "required": false,
+            "description": "Dead/reachable dependency filter flag",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "filters.dependencyDead.notIn",
             "in": "query",
             "required": false,
             "description": "Dead/reachable dependency filter flag",
@@ -24534,6 +24741,15 @@
                               },
                               "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be included"
                             },
+                            "artifactName": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Name of artifact"
+                            },
                             "artifactType": {
                               "type": "array",
                               "items": {
@@ -24560,6 +24776,51 @@
                                 "default": ""
                               },
                               "description": "Comma-separated list of alert categories (\"supplyChainRisk\", \"maintenance\", \"quality\", \"license\", or \"vulnerability\") that should be included"
+                            },
+                            "alertCveId": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "CVE ID"
+                            },
+                            "alertCveTitle": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "CVE title"
+                            },
+                            "alertCweId": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "CWE ID"
+                            },
+                            "alertCweName": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "CWE name"
+                            },
+                            "alertPriority": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert priority (\"low\", \"medium\", or \"high\")"
                             },
                             "dependencyDirect": {
                               "type": "array",
@@ -24676,7 +24937,7 @@
             }
           },
           {
-            "name": "alertSeverity",
+            "name": "filters.alertSeverity",
             "in": "query",
             "required": false,
             "description": "Comma-separated list of alert severities (\"low\", \"medium\", \"high\", or \"critical\") that should be included",
@@ -24685,7 +24946,16 @@
             }
           },
           {
-            "name": "repoSlug",
+            "name": "filters.alertSeverity.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert severities (\"low\", \"medium\", \"high\", or \"critical\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoSlug",
             "in": "query",
             "required": false,
             "description": "Comma-separated list of repo slugs that should be included",
@@ -24694,7 +24964,16 @@
             }
           },
           {
-            "name": "repoLabels",
+            "name": "filters.repoSlug.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo slugs that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoLabels",
             "in": "query",
             "required": false,
             "description": "Comma-separated list of repo labels that should be included",
@@ -24703,7 +24982,16 @@
             }
           },
           {
-            "name": "alertType",
+            "name": "filters.repoLabels.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo labels that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertType",
             "in": "query",
             "required": false,
             "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be included",
@@ -24712,7 +25000,34 @@
             }
           },
           {
-            "name": "artifactType",
+            "name": "filters.alertType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactName",
+            "in": "query",
+            "required": false,
+            "description": "Name of artifact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactName.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Name of artifact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactType",
             "in": "query",
             "required": false,
             "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be included",
@@ -24721,7 +25036,16 @@
             }
           },
           {
-            "name": "alertAction",
+            "name": "filters.artifactType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertAction",
             "in": "query",
             "required": false,
             "description": "Comma-separated list of alert actions (\"error\", \"warn\", \"monitor\", or \"ignore) that should be included",
@@ -24730,7 +25054,16 @@
             }
           },
           {
-            "name": "alertCategory",
+            "name": "filters.alertAction.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert actions (\"error\", \"warn\", \"monitor\", or \"ignore) that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCategory",
             "in": "query",
             "required": false,
             "description": "Comma-separated list of alert categories (\"supplyChainRisk\", \"maintenance\", \"quality\", \"license\", or \"vulnerability\") that should be included",
@@ -24739,7 +25072,106 @@
             }
           },
           {
-            "name": "dependencyDirect",
+            "name": "filters.alertCategory.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert categories (\"supplyChainRisk\", \"maintenance\", \"quality\", \"license\", or \"vulnerability\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCveId",
+            "in": "query",
+            "required": false,
+            "description": "CVE ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCveId.notIn",
+            "in": "query",
+            "required": false,
+            "description": "CVE ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCveTitle",
+            "in": "query",
+            "required": false,
+            "description": "CVE title",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCveTitle.notIn",
+            "in": "query",
+            "required": false,
+            "description": "CVE title",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCweId",
+            "in": "query",
+            "required": false,
+            "description": "CWE ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCweId.notIn",
+            "in": "query",
+            "required": false,
+            "description": "CWE ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCweName",
+            "in": "query",
+            "required": false,
+            "description": "CWE name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCweName.notIn",
+            "in": "query",
+            "required": false,
+            "description": "CWE name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertPriority",
+            "in": "query",
+            "required": false,
+            "description": "Alert priority (\"low\", \"medium\", or \"high\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertPriority.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Alert priority (\"low\", \"medium\", or \"high\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.dependencyDirect",
             "in": "query",
             "required": false,
             "description": "Direct/transitive dependency filter flag",
@@ -24749,7 +25181,17 @@
             }
           },
           {
-            "name": "dependencyDev",
+            "name": "filters.dependencyDirect.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Direct/transitive dependency filter flag",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "filters.dependencyDev",
             "in": "query",
             "required": false,
             "description": "Development/production dependency filter flag",
@@ -24759,7 +25201,27 @@
             }
           },
           {
-            "name": "dependencyDead",
+            "name": "filters.dependencyDev.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Development/production dependency filter flag",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "filters.dependencyDead",
+            "in": "query",
+            "required": false,
+            "description": "Dead/reachable dependency filter flag",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "filters.dependencyDead.notIn",
             "in": "query",
             "required": false,
             "description": "Dead/reachable dependency filter flag",
@@ -24889,6 +25351,15 @@
                               },
                               "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be included"
                             },
+                            "artifactName": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Name of artifact"
+                            },
                             "artifactType": {
                               "type": "array",
                               "items": {
@@ -24915,6 +25386,51 @@
                                 "default": ""
                               },
                               "description": "Comma-separated list of alert categories (\"supplyChainRisk\", \"maintenance\", \"quality\", \"license\", or \"vulnerability\") that should be included"
+                            },
+                            "alertCveId": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "CVE ID"
+                            },
+                            "alertCveTitle": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "CVE title"
+                            },
+                            "alertCweId": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "CWE ID"
+                            },
+                            "alertCweName": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "CWE name"
+                            },
+                            "alertPriority": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert priority (\"low\", \"medium\", or \"high\")"
                             },
                             "dependencyDirect": {
                               "type": "array",
@@ -26039,14 +26555,15 @@
         "tags": [
           "Threat Feed"
         ],
-        "summary": "Get Threat Feed Items (Beta)",
+        "summary": "Get Threat Feed Items (Deprecated)",
+        "deprecated": true,
         "operationId": "getThreatFeedItems",
         "parameters": [
           {
             "name": "per_page",
             "in": "query",
             "required": false,
-            "description": "Number of items per page",
+            "description": "Number of threats per page",
             "schema": {
               "type": "integer",
               "minimum": 1,
@@ -26100,7 +26617,7 @@
             "name": "direction",
             "in": "query",
             "required": false,
-            "description": "Order asc or desc by the createdAt attribute.",
+            "description": "Ordering direction of the sort attribute",
             "schema": {
               "type": "string",
               "enum": [
@@ -26194,7 +26711,7 @@
             ]
           }
         ],
-        "description": "Paginated list of threat feed items.\n\nThis endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- threat-feed:list",
+        "description": "This endpoint has been deprecated for a more efficient and feature rich endpoint, [Organization Threat Feed](/reference/getOrgThreatFeedItems).\n\nPaginated list of threat feed items.\n\nThis endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- threat-feed:list",
         "responses": {
           "200": {
             "content": {
@@ -26275,7 +26792,7 @@
                 }
               }
             },
-            "description": "The paginated list of items in the threat feed and the next page querystring token."
+            "description": "The paginated list of threats in the feed and the next page querystring token."
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
