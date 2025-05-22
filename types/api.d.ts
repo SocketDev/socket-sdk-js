@@ -10137,7 +10137,7 @@ export interface operations {
         date?: string
         /** @description The number of days of data to fetch as an offset from input date */
         range?: string
-        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,dependencyDirect,dependencyDev,dependencyDead) */
+        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertPriority,dependencyDirect,dependencyDev,dependencyDead) */
         'aggregation.fields'?: string
         /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
         'filters.alertSeverity'?: string
@@ -10703,6 +10703,8 @@ export interface operations {
             results: Array<{
               /** @default */
               createdAt?: string
+              /** @default */
+              updatedAt?: string
               /** @default */
               description?: string
               /** @default 0 */
