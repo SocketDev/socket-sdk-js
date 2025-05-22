@@ -24930,7 +24930,7 @@
             "name": "aggregation.fields",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,dependencyDirect,dependencyDev,dependencyDead)",
+            "description": "Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertPriority,dependencyDirect,dependencyDev,dependencyDead)",
             "schema": {
               "type": "string",
               "default": ""
@@ -26728,6 +26728,11 @@
                         "additionalProperties": false,
                         "properties": {
                           "createdAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "updatedAt": {
                             "type": "string",
                             "description": "",
                             "default": ""
