@@ -1052,6 +1052,20 @@ export interface paths {
      */
     get: operations['getThreatFeedItems']
   }
+  '/orgs/{org_slug}/threat-feed': {
+    /**
+     * Get Threat Feed Items (Beta)
+     * @description Paginated list of threats, sorted by updated_at by default. Set updated_after to the unix timestamp of your last sync while sorting by updated_at to synchronize all new or updated threats in the feed.
+     *
+     * This endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - threat-feed:list
+     */
+    get: operations['getOrgThreatFeedItems']
+  }
   '/analytics/org/{filter}': {
     /**
      * Get organization analytics (unstable)
@@ -10727,6 +10741,108 @@ export interface operations {
             }>
             /** @default */
             nextPage: string | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Get Threat Feed Items (Beta)
+   * @description Paginated list of threats, sorted by updated_at by default. Set updated_after to the unix timestamp of your last sync while sorting by updated_at to synchronize all new or updated threats in the feed.
+   *
+   * This endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - threat-feed:list
+   */
+  getOrgThreatFeedItems: {
+    parameters: {
+      query?: {
+        /** @description Number of threats per page */
+        per_page?: number
+        /** @description Page cursor token. Pass the returned nextPageCursor to this query string to fetch the next page of the threat feed. */
+        page_cursor?: string
+        /** @description Set the sort order for the threat feed items. Default is descending order by updated_at, which includes all new and updated threat feed items. */
+        sort?: 'id' | 'created_at' | 'updated_at'
+        /** @description A Unix timestamp in seconds that filters results to items only updated after the timestamp. */
+        updated_after?: string
+        /** @description A Unix timestamp in seconds that filters results to items only created after the date. */
+        created_after?: string
+        /** @description Order direction of the provided sort field. */
+        direction?: 'desc' | 'asc'
+        /** @description Filter what type of threats to return */
+        filter?:
+          | 'u'
+          | 'c'
+          | 'fp'
+          | 'tp'
+          | 'mal'
+          | 'vuln'
+          | 'anom'
+          | 'joke'
+          | 'spy'
+          | 'typo'
+          | 'secret'
+        /** @description Filter threats by package name */
+        name?: string
+        /** @description Filter threats by package version. */
+        version?: string
+        /** @description Only return threats which have been human-reviewed */
+        is_human_reviewed?: boolean
+        /** @description Filter threats by package ecosystem type */
+        ecosystem?:
+          | 'github'
+          | 'golang'
+          | 'maven'
+          | 'npm'
+          | 'nuget'
+          | 'pypi'
+          | 'gem'
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    responses: {
+      /** @description The paginated list of items in the threat feed and the next page cursor. */
+      200: {
+        content: {
+          'application/json': {
+            results: Array<{
+              /** @default */
+              createdAt?: string
+              /** @default */
+              updatedAt?: string
+              /** @default */
+              description?: string
+              /** @default 0 */
+              id?: number
+              /** @default */
+              locationHtmlUrl?: string
+              /** @default */
+              packageHtmlUrl?: string
+              /** @default */
+              purl?: string
+              /** @default */
+              removedAt?: string | null
+              /** @default */
+              threatType?: string
+              /**
+               * @description Whether the threat still is in need of human review by the threat research team
+               * @default false
+               */
+              needsHumanReview?: boolean
+            }>
+            /** @default */
+            nextPageCursor: string | null
           }
         }
       }
