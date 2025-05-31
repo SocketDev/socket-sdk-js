@@ -2532,6 +2532,79 @@
                             "type": "string",
                             "description": "",
                             "default": ""
+                          },
+                          "kevs": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "description": "",
+                              "properties": {
+                                "vulnerabilityName": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                },
+                                "shortDescription": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "requiredAction": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "dateAdded": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                },
+                                "dueDate": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "knownRansomwareCampaignUse": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "notes": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "vendorProject": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                },
+                                "product": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                }
+                              },
+                              "required": [
+                                "dateAdded",
+                                "dueDate",
+                                "knownRansomwareCampaignUse",
+                                "notes",
+                                "product",
+                                "requiredAction",
+                                "shortDescription",
+                                "vendorProject",
+                                "vulnerabilityName"
+                              ]
+                            },
+                            "description": "",
+                            "nullable": true
                           }
                         },
                         "required": [
@@ -2541,6 +2614,7 @@
                           "description",
                           "firstPatchedVersionIdentifier",
                           "ghsaId",
+                          "kevs",
                           "severity",
                           "title",
                           "url",
@@ -2680,6 +2754,79 @@
                             "type": "string",
                             "description": "",
                             "default": ""
+                          },
+                          "kevs": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "description": "",
+                              "properties": {
+                                "vulnerabilityName": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                },
+                                "shortDescription": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "requiredAction": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "dateAdded": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                },
+                                "dueDate": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "knownRansomwareCampaignUse": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "notes": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "vendorProject": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                },
+                                "product": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                }
+                              },
+                              "required": [
+                                "dateAdded",
+                                "dueDate",
+                                "knownRansomwareCampaignUse",
+                                "notes",
+                                "product",
+                                "requiredAction",
+                                "shortDescription",
+                                "vendorProject",
+                                "vulnerabilityName"
+                              ]
+                            },
+                            "description": "",
+                            "nullable": true
                           }
                         },
                         "required": [
@@ -2689,6 +2836,7 @@
                           "description",
                           "firstPatchedVersionIdentifier",
                           "ghsaId",
+                          "kevs",
                           "severity",
                           "title",
                           "url",
@@ -2828,6 +2976,79 @@
                             "type": "string",
                             "description": "",
                             "default": ""
+                          },
+                          "kevs": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "description": "",
+                              "properties": {
+                                "vulnerabilityName": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                },
+                                "shortDescription": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "requiredAction": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "dateAdded": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                },
+                                "dueDate": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "knownRansomwareCampaignUse": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "notes": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "vendorProject": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                },
+                                "product": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                }
+                              },
+                              "required": [
+                                "dateAdded",
+                                "dueDate",
+                                "knownRansomwareCampaignUse",
+                                "notes",
+                                "product",
+                                "requiredAction",
+                                "shortDescription",
+                                "vendorProject",
+                                "vulnerabilityName"
+                              ]
+                            },
+                            "description": "",
+                            "nullable": true
                           }
                         },
                         "required": [
@@ -2837,6 +3058,7 @@
                           "description",
                           "firstPatchedVersionIdentifier",
                           "ghsaId",
+                          "kevs",
                           "severity",
                           "title",
                           "url",
@@ -2976,6 +3198,79 @@
                             "type": "string",
                             "description": "",
                             "default": ""
+                          },
+                          "kevs": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "description": "",
+                              "properties": {
+                                "vulnerabilityName": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                },
+                                "shortDescription": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "requiredAction": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "dateAdded": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                },
+                                "dueDate": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "knownRansomwareCampaignUse": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "notes": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "vendorProject": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                },
+                                "product": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                }
+                              },
+                              "required": [
+                                "dateAdded",
+                                "dueDate",
+                                "knownRansomwareCampaignUse",
+                                "notes",
+                                "product",
+                                "requiredAction",
+                                "shortDescription",
+                                "vendorProject",
+                                "vulnerabilityName"
+                              ]
+                            },
+                            "description": "",
+                            "nullable": true
                           }
                         },
                         "required": [
@@ -2985,6 +3280,7 @@
                           "description",
                           "firstPatchedVersionIdentifier",
                           "ghsaId",
+                          "kevs",
                           "severity",
                           "title",
                           "url",
@@ -8316,7 +8612,7 @@
             ]
           }
         ],
-        "description": "Get the \"saturated\" version of a license policy's allow list, filling in the entire set of allowed\nlicense data. For example, the saturated form of a license allow list which only specifies that\nlicenses in the tier \"maximal copyleft\" are allowed is shown below (note the expanded `allowedStrings` property):\n\n```json\n{\n  \"allowedApprovalSources\": [],\n  \"allowedFamilies\": [],\n  \"allowedTiers\": [\n    \"maximal copyleft\"\n  ],\n  \"allowedStrings\": [\n    \"Parity-6.0.0\",\n    \"QPL-1.0-INRIA-2004\",\n    \"QPL-1.0\",\n    \"RPL-1.1\",\n    \"RPL-1.5\"\n  ],\n  \"allowedPURLs\": [],\n  \"focusAlertsHere\": false\n}\n```\n\nThis may be helpful for users who want to compose more complex sets of allowed license data via\nthe \"allowedStrings\" property, or for users who want to know more about the contents of a particular\nlicense group (family, tier, or approval source).\n\n## Allow List Schema\n\n```json\n```\n\nwhere\n\nPermissiveTier ::= \"model permissive\" | \"gold\" | \"silver\" | \"bronze\" | \"lead\"\nCopyleftTier ::= \"maximal copyleft\" | \"network copyleft\" | \"strong copyleft\" | \"weak copyleft\"\n\n## Return Value\n\nThe returned value has the same shape as a license allow list:\n\n```json\n{\n  allowedApprovalSources?: Array<\"fsf\" | \"osi\">,\n  allowedFamilies?: Array<\"copyleft\" | \"permissive\">,\n  allowedTiers?: Array<PermissiveTier | CopyleftTier>,\n  allowedStrings?: Array<string>\n  allowedPURLs?: Array<string>\n  focusAlertsHere?: boolean\n}\n```\n\nwhere\n\nPermissiveTier ::= \"model permissive\" | \"gold\" | \"silver\" | \"bronze\" | \"lead\"\nCopyleftTier ::= \"maximal copyleft\" | \"network copyleft\" | \"strong copyleft\" | \"weak copyleft\"\n\nreaders can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.\n\n### Example request bodies:\n```json\n{\n  \"allowedApprovalSources\": [\"fsf\"],\n  \"allowedPURLs\": [],\n  \"allowedFamilies\": [\"copyleft\"],\n  \"allowedTiers\": [\"model permissive\"],\n  \"allowedStrings\": [\"License :: OSI Approved :: BSD License\"],\n  \"focusAlertsHere\": false\n}\n```\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- packages:list",
+        "description": "**This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/updateorglicensepolicy) for more information. Use the [successor version](/v0/orgs/{org_slug}/settings/license-policy) instead.\n\nGet the \"saturated\" version of a license policy's allow list, filling in the entire set of allowed\nlicense data. For example, the saturated form of a license allow list which only specifies that\nlicenses in the tier \"maximal copyleft\" are allowed is shown below (note the expanded `allowedStrings` property):\n\n```json\n{\n  \"allowedApprovalSources\": [],\n  \"allowedFamilies\": [],\n  \"allowedTiers\": [\n    \"maximal copyleft\"\n  ],\n  \"allowedStrings\": [\n    \"Parity-6.0.0\",\n    \"QPL-1.0-INRIA-2004\",\n    \"QPL-1.0\",\n    \"RPL-1.1\",\n    \"RPL-1.5\"\n  ],\n  \"allowedPURLs\": [],\n  \"focusAlertsHere\": false\n}\n```\n\nThis may be helpful for users who want to compose more complex sets of allowed license data via\nthe \"allowedStrings\" property, or for users who want to know more about the contents of a particular\nlicense group (family, tier, or approval source).\n\n## Allow List Schema\n\n```json\n```\n\nwhere\n\nPermissiveTier ::= \"model permissive\" | \"gold\" | \"silver\" | \"bronze\" | \"lead\"\nCopyleftTier ::= \"maximal copyleft\" | \"network copyleft\" | \"strong copyleft\" | \"weak copyleft\"\n\n## Return Value\n\nThe returned value has the same shape as a license allow list:\n\n```json\n{\n  allowedApprovalSources?: Array<\"fsf\" | \"osi\">,\n  allowedFamilies?: Array<\"copyleft\" | \"permissive\">,\n  allowedTiers?: Array<PermissiveTier | CopyleftTier>,\n  allowedStrings?: Array<string>\n  allowedPURLs?: Array<string>\n  focusAlertsHere?: boolean\n}\n```\n\nwhere\n\nPermissiveTier ::= \"model permissive\" | \"gold\" | \"silver\" | \"bronze\" | \"lead\"\nCopyleftTier ::= \"maximal copyleft\" | \"network copyleft\" | \"strong copyleft\" | \"weak copyleft\"\n\nreaders can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.\n\n### Example request bodies:\n```json\n{\n  \"allowedApprovalSources\": [\"fsf\"],\n  \"allowedPURLs\": [],\n  \"allowedFamilies\": [\"copyleft\"],\n  \"allowedTiers\": [\"model permissive\"],\n  \"allowedStrings\": [\"License :: OSI Approved :: BSD License\"],\n  \"focusAlertsHere\": false\n}\n```\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- packages:list",
         "responses": {
           "200": {
             "content": {
@@ -9077,6 +9373,47 @@
                             "type": "string",
                             "description": "",
                             "default": ""
+                          },
+                          "integration_type": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "integration_repo_url": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "integration_branch_url": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "integration_commit_url": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "integration_pull_request_url": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "scan_state": {
+                            "type": "string",
+                            "enum": [
+                              "pending",
+                              "precrawl",
+                              "resolve",
+                              "scan"
+                            ],
+                            "description": "The current processing status of the SBOM",
+                            "default": "pending",
+                            "nullable": true
                           }
                         },
                         "description": ""
@@ -9354,6 +9691,47 @@
                       "type": "string",
                       "description": "",
                       "default": ""
+                    },
+                    "integration_type": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "integration_repo_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "integration_branch_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "integration_commit_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "integration_pull_request_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "scan_state": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "precrawl",
+                        "resolve",
+                        "scan"
+                      ],
+                      "description": "The current processing status of the SBOM",
+                      "default": "pending",
+                      "nullable": true
                     }
                   },
                   "description": ""
@@ -9682,6 +10060,47 @@
                       "type": "string",
                       "description": "",
                       "default": ""
+                    },
+                    "integration_type": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "integration_repo_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "integration_branch_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "integration_commit_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "integration_pull_request_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "scan_state": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "precrawl",
+                        "resolve",
+                        "scan"
+                      ],
+                      "description": "The current processing status of the SBOM",
+                      "default": "pending",
+                      "nullable": true
                     }
                   },
                   "description": ""
@@ -16509,7 +16928,7 @@
                       "admin",
                       "organization"
                     ],
-                    "description": "",
+                    "description": "The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.",
                     "default": "organization"
                   },
                   "committer": {
@@ -16854,7 +17273,7 @@
                               "admin",
                               "organization"
                             ],
-                            "description": "",
+                            "description": "The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.",
                             "default": "organization"
                           }
                         },
@@ -17010,7 +17429,7 @@
                       "admin",
                       "organization"
                     ],
-                    "description": "",
+                    "description": "The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.",
                     "default": "organization"
                   },
                   "committer": {
@@ -23825,7 +24244,7 @@
             ]
           }
         ],
-        "description": "Retrieve the license policy of an organization.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- license-policy:read",
+        "description": "**This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/viewlicensepolicy) for more information. Use the [successor version](/v0/orgs/{org_slug}/settings/license-policy/view) instead.\n\nRetrieve the license policy of an organization.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- license-policy:read",
         "responses": {
           "200": {
             "content": {
@@ -26711,7 +27130,7 @@
             ]
           }
         ],
-        "description": "This endpoint has been deprecated for a more efficient and feature rich endpoint, [Organization Threat Feed](/reference/getOrgThreatFeedItems).\n\nPaginated list of threat feed items.\n\nThis endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- threat-feed:list",
+        "description": "**This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/getorgthreatfeeditems) for more information. Use the [successor version](/v0/orgs/{org_slug}/threat-feed) instead.\n\nPaginated list of threat feed items.\n\nThis endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- threat-feed:list",
         "responses": {
           "200": {
             "content": {
@@ -27125,7 +27544,7 @@
             ]
           }
         ],
-        "description": "This endpoint is deprecated. Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.\n\nGet analytics data regarding the number of alerts found across all active repositories.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
+        "description": "**This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/historicalalertstrend) for more information. Use the [successor version](/v0/orgs/{org_slug}/historical/alerts/trend) instead.\n\nPlease implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.\n\nGet analytics data regarding the number of alerts found across all active repositories.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
         "responses": {
           "200": {
             "content": {
@@ -27311,7 +27730,7 @@
             ]
           }
         ],
-        "description": "This endpoint is deprecated. Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.\n\nGet analytics data regarding the number of alerts found in a single repository.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
+        "description": "**This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/historicalalertstrend) for more information. Use the [successor version](/v0/orgs/{org_slug}/historical/alerts/trend) instead.\n\nPlease implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.\n\nGet analytics data regarding the number of alerts found in a single repository.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
         "responses": {
           "200": {
             "content": {
@@ -27694,7 +28113,7 @@
             ]
           }
         ],
-        "description": "Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: \"requirements.txt\", \"package.json\", \"folder/package.json\", and \"deep/nested/folder/package.json\".\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
+        "description": "**This endpoint is deprecated.**\n\nUpload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: \"requirements.txt\", \"package.json\", \"folder/package.json\", and \"deep/nested/folder/package.json\".\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
         "responses": {
           "200": {
             "content": {
@@ -27737,7 +28156,7 @@
         "deprecated": true,
         "operationId": "getReportSupportedFiles",
         "security": [],
-        "description": "This route has been moved to the `full-scans/supported` endpoint.\n\nGet a list of supported files for project report generation.\nFiles are categorized first by environment (e.g. NPM or PyPI), then by name.\n\nFiles whose names match the patterns returned by this endpoint can be uploaded for report generation.\nExamples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:",
+        "description": "**This endpoint is deprecated.** Deprecated since 2023-01-15. See [deprecation documentation](https://docs.socket.dev/reference/getsupportedfiles) for more information. Use the [successor version](/v0/orgs/{org_slug}/supported-files) instead.\n\nThis route has been moved to the `orgs/{org_slug}/supported-files` endpoint.\n\nGet a list of supported files for project report generation.\nFiles are categorized first by environment (e.g. NPM or PyPI), then by name.\n\nFiles whose names match the patterns returned by this endpoint can be uploaded for report generation.\nExamples of supported filenames include `package.json`, `package-lock.json`, and `yarn.lock`.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:",
         "responses": {
           "200": {
             "content": {
@@ -27812,7 +28231,7 @@
             ]
           }
         ],
-        "description": "Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Delete a specific project report generated with the GitHub app.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
+        "description": "**This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference) for more information. Use the [successor version](/v0/orgs/{org_slug}/full-scans) instead.\n\nDeprecated: Use `/orgs/{org_slug}/full-scans` instead. Delete a specific project report generated with the GitHub app.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
         "responses": {
           "200": {
             "content": {
@@ -27895,7 +28314,7 @@
             ]
           }
         ],
-        "description": "Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all your project reports generated with the GitHub app.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:list",
+        "description": "**This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference) for more information. Use the [successor version](/v0/orgs/{org_slug}/full-scans) instead.\n\nDeprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all your project reports generated with the GitHub app.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:list",
         "responses": {
           "200": {
             "content": {
@@ -28036,7 +28455,7 @@
             ]
           }
         ],
-        "description": "Deprecated: Use `/orgs/{org_slug}/full-scans` instead.\n\nUpload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
+        "description": "**This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/createorgfullscan) for more information. Use the [successor version](/v0/orgs/{org_slug}/full-scans) instead.\n\nDeprecated: Use `/orgs/{org_slug}/full-scans` instead.\n\nUpload a lockfile to get your project analyzed by Socket.\nYou can upload multiple lockfiles in the same request, but each filename must be unique.\n\nThe name of the file must be in the supported list.\n\nFor example, these are valid filenames: `package.json`, `folder/package.json` and `deep/nested/folder/package.json`.\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:write",
         "responses": {
           "200": {
             "content": {
@@ -28113,7 +28532,7 @@
             ]
           }
         ],
-        "description": "Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all the issues, packages, and scores related to an specific project report.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:read",
+        "description": "**This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/getorgfullscan) for more information. Use the [successor version](/v0/orgs/{org_slug}/full-scans/{full_scan_id}) instead.\n\nDeprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all the issues, packages, and scores related to an specific project report.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:read",
         "responses": {
           "200": {
             "content": {
@@ -28179,7 +28598,7 @@
             ]
           }
         ],
-        "description": "Deprecated: Use `/orgs/{org_slug}/repos` instead. Get all GitHub repositories associated with a Socket org.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- repo:list",
+        "description": "**This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/getorgrepolist) for more information. Use the [successor version](/v0/orgs/{org_slug}/repos) instead.\n\nDeprecated: Use `/orgs/{org_slug}/repos` instead. Get all GitHub repositories associated with a Socket org.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- repo:list",
         "responses": {
           "200": {
             "content": {
@@ -28502,7 +28921,7 @@
             "basicAuth": []
           }
         ],
-        "description": "Get current settings for the requested organizations and default settings to allow deferrals.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- No Scopes Required, but authentication is required",
+        "description": "**This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/updateorgsecuritypolicy) for more information. Use the [successor version](/v0/orgs/{org_slug}/settings/security-policy) instead.\n\nGet current settings for the requested organizations and default settings to allow deferrals.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- No Scopes Required, but authentication is required",
         "responses": {
           "200": {
             "content": {
@@ -28656,7 +29075,7 @@
             "basicAuth": []
           }
         ],
-        "description": "Get all the issues related with a particular npm package version.\nThis endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.\n\nYou can [see here](https://socket.dev/alerts) the full list of issues.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- No Scopes Required, but authentication is required",
+        "description": "**This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference) for more information. Use the [successor version](/v0/purl/{purl}/issues) instead.\n\nGet all the issues related with a particular npm package version.\nThis endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.\n\nYou can [see here](https://socket.dev/alerts) the full list of issues.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- No Scopes Required, but authentication is required",
         "responses": {
           "200": {
             "content": {
@@ -28722,7 +29141,7 @@
             "basicAuth": []
           }
         ],
-        "description": "Get all the scores and metrics by category that are used to evaluate the package version.\n\nThis endpoint is deprecated. Use the batched \"Get Packages\" endpoint instead.\n\n- depscore: The average of all score factors. (0-1)\n- supplyChainRisk: Score factors relating to supply chain security (0-1)\n- downloadCount: The number of downloads for the package. Higher downloads contribute to a higher score.\n- supplyChainRiskIssueLow/Mid/High/Critical: The number of supply chain risk issues of varying severity. Lower numbers contribute to a higher score.\n- dependencyCount: The number of production dependencies. Lower count contributes to a higher score.\n- devDependencyCount: The number of development dependencies. Lower count contributes to a higher score.\n- transitiveDependencyCount: The number of transitive dependencies. Lower count contributes to a higher score.\n- totalDependencyCount: The total number of dependencies (production + development + transitive). Lower count contributes to a higher score.\n- quality: Score factors relating to code quality (0-1)\n- qualityIssueLow/Mid/High/Critical: The number of code quality issues of varying severity. Lower numbers contribute to a higher score.\n- linesOfCode: The number of lines of code in the package. Lower count contributes to a higher score.\n- readmeLength: The length of the package's README file. Longer READMEs contribute to a higher score.\n- maintenance: Score factors relating to package maintenance (0-1)\n- maintainerCount: The number of maintainers for the package. More maintainers contribute to a higher score.\n- versionsLastWeek/Month/TwoMonths/Year: The number of versions released in different time periods. More recent releases contribute to a higher score.\n- versionCount: The total number of versions released. Higher count contributes to a higher score.\n- maintenanceIssueLow/Mid/High/Critical: The number of maintenance issues of varying severity. Lower numbers contribute to a higher score.\n- vulnerability: Score factors relating to package vulnerabilities (0-1)\n- vulnerabilityIssueLow/Mid/High/Critical: The number of vulnerability issues of varying severity. Lower numbers contribute to a higher score.\n- dependencyVulnerabilityCount: The number of vulnerabilities in the package's dependencies. Lower count contributes to a higher score.\n- vulnerabilityCount: The number of vulnerabilities in the package itself. Lower count contributes to a higher score.\n- license: Score factors relating to package licensing (0-1)\n- licenseIssueLow/Mid/High/Critical: The number of license issues of varying severity. Lower numbers contribute to a higher score.\n- licenseQuality: A score indicating the quality/permissiveness of the package's license. Higher quality contributes to a higher score.\n- miscellaneous: Miscellaneous metadata about the package version.\n- versionAuthorName/Email: The name and email of the version author.\n- fileCount: The number of files in the package.\n- byteCount: The total size in bytes of the package.\n- typeModule: Whether the package declares a \"type\": \"module\" field.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- No Scopes Required, but authentication is required",
+        "description": "**This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/batchpackagefetch) for more information. Use the [successor version](/v0/purl) instead.\n\nGet all the scores and metrics by category that are used to evaluate the package version.\n\n- depscore: The average of all score factors. (0-1)\n- supplyChainRisk: Score factors relating to supply chain security (0-1)\n- downloadCount: The number of downloads for the package. Higher downloads contribute to a higher score.\n- supplyChainRiskIssueLow/Mid/High/Critical: The number of supply chain risk issues of varying severity. Lower numbers contribute to a higher score.\n- dependencyCount: The number of production dependencies. Lower count contributes to a higher score.\n- devDependencyCount: The number of development dependencies. Lower count contributes to a higher score.\n- transitiveDependencyCount: The number of transitive dependencies. Lower count contributes to a higher score.\n- totalDependencyCount: The total number of dependencies (production + development + transitive). Lower count contributes to a higher score.\n- quality: Score factors relating to code quality (0-1)\n- qualityIssueLow/Mid/High/Critical: The number of code quality issues of varying severity. Lower numbers contribute to a higher score.\n- linesOfCode: The number of lines of code in the package. Lower count contributes to a higher score.\n- readmeLength: The length of the package's README file. Longer READMEs contribute to a higher score.\n- maintenance: Score factors relating to package maintenance (0-1)\n- maintainerCount: The number of maintainers for the package. More maintainers contribute to a higher score.\n- versionsLastWeek/Month/TwoMonths/Year: The number of versions released in different time periods. More recent releases contribute to a higher score.\n- versionCount: The total number of versions released. Higher count contributes to a higher score.\n- maintenanceIssueLow/Mid/High/Critical: The number of maintenance issues of varying severity. Lower numbers contribute to a higher score.\n- vulnerability: Score factors relating to package vulnerabilities (0-1)\n- vulnerabilityIssueLow/Mid/High/Critical: The number of vulnerability issues of varying severity. Lower numbers contribute to a higher score.\n- dependencyVulnerabilityCount: The number of vulnerabilities in the package's dependencies. Lower count contributes to a higher score.\n- vulnerabilityCount: The number of vulnerabilities in the package itself. Lower count contributes to a higher score.\n- license: Score factors relating to package licensing (0-1)\n- licenseIssueLow/Mid/High/Critical: The number of license issues of varying severity. Lower numbers contribute to a higher score.\n- licenseQuality: A score indicating the quality/permissiveness of the package's license. Higher quality contributes to a higher score.\n- miscellaneous: Miscellaneous metadata about the package version.\n- versionAuthorName/Email: The name and email of the version author.\n- fileCount: The number of files in the package.\n- byteCount: The total size in bytes of the package.\n- typeModule: Whether the package declares a \"type\": \"module\" field.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- No Scopes Required, but authentication is required",
         "responses": {
           "200": {
             "content": {
