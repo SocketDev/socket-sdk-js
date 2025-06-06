@@ -8428,7 +8428,7 @@
             ]
           }
         ],
-        "description": "Compare the license data found for a list of packages (given as PURL strings) with the contents of a configurable license policy,\nreturning information about license data which does not comply with the license allow list.\n\n## Example request body:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/lodash@4.17.21\"\n    },\n    {\n      \"purl\": \"pkg:npm/lodash@4.14.1\"\n    }\n  ],\n  \"allow\": [\n    \"permissive\",\n    \"pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*\"\n  ],\n  \"warn\": [\n    \"copyleft\",\n    \"pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*\"\n  ],\n  \"options\": [\"toplevelOnly\"]\n}\n```\n\n\n## Return value\n\nFor each requested PURL, an array is returned. Each array contains a list of license policy violations\ndetected for the requested PURL.\n\nViolations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,\na message describing why the license data is believed to be incompatible with the license policy, and a list\nof locations (by filepath or other provenance information) where the offending license data may be found.\n\n```json\nArray<\n  Array<{\n    purl: string,\n    spdxAtomOrExtraData: string,\n    violationExplanation: string,\n    filepathOrProvenance: Array<string>\n    level: \"warning\" | \"violation\"\n  }>\n>\n```\n\n\n## License policy schema\n\n```json\n{\n  allow?: Array<string>\n  warn?: Array<string>\n  options?: Array<string>\n}\n```\n\nElements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in pacakge which not present in either array will produce a license violation (effectively a \"hard\" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings \"Apache-2.0\" and \"MIT\" to the `allow` array. Strings appearing in these arrays are generally \"what you see is what you get\", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.\n  \n## License Classes\n  \nStrings which are license classes will expand to a list of licenses known to be in that particular license class. Recognized license classes are: \n  'permissive',\n  'permissive (model)',\n  'permissive (gold)',\n  'permissive (silver)',\n  'permissive (bronze)',\n  'permissive (lead)',\n  'copyleft',\n  'maximal copyleft',\n  'network copyleft',\n  'strong copyleft',\n  'weak copyleft',\n  'contributor license agreement',\n  'public domain',\n  'proprietary free',\n  'source available',\n  'proprietary',\n  'commercial',\n  'patent'\n\nUsers can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.\n \n\n## PURLs\n\nUsers may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.\n\npurl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).\n\n### Examples:\nAllow all license data found in a specific version of a package 4.14.1: `pkg:npm/lodash@4.14.1`\nAllow all license data found in a version range of a package: `pkg:npm/lodash?version_glob=15.*`\nAllow all license data in the test directory of a given package for certain version ranges: `pkg:npm/lodash@15.*.*?file_name=lodash/test/*`\nAllow all license data taken from the package registry for a package and version range: `pkg:npm/lodash?version_glob=*&license_provenance=registry_metadata`\n    \n## Available options\n\n`toplevelOnly`: only apply the license policy to \"top level\" license data in a package, which includes registry metadata, LICENSE files, and manifest files which are closest to the root of the package.\n\n`applyToUnidentified`: Apply license policy to found but unidentified license data. If enabled, the license policy will be applied to license data which could not be affirmatively identified as a known license (this will effectively merge the license policy violation and unidentified license alerts). If disabled, license policy alerts will only be shown for license data which is positively identified as something not allowed or set to warn by the license policy.\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n      - packages:list\n- license-policy:read",
+        "description": "Compare the license data found for a list of packages (given as PURL strings) with the contents of a configurable license policy,\nreturning information about license data which does not comply with the license allow list.\n\n## Example request body:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/lodash@4.17.21\"\n    },\n    {\n      \"purl\": \"pkg:npm/lodash@4.14.1\"\n    }\n  ],\n  \"allow\": [\n    \"permissive\",\n    \"pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*\"\n  ],\n  \"warn\": [\n    \"copyleft\",\n    \"pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*\"\n  ],\n  \"options\": [\"toplevelOnly\"]\n}\n```\n\n\n## Return value\n\nFor each requested PURL, an array is returned. Each array contains a list of license policy violations\ndetected for the requested PURL.\n\nViolations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,\na message describing why the license data is believed to be incompatible with the license policy, and a list\nof locations (by filepath or other provenance information) where the offending license data may be found.\n\n```json\nArray<\n  Array<{\n    filepathOrProvenance: Array<string>,\n    level: \"warning\" | \"violation\",\n    purl: string,\n    spdxAtomOrExtraData: string,\n    violationExplanation: string\n  }>\n>\n```\n\n\n## License policy schema\n\n```json\n{\n  allow?: Array<string>\n  warn?: Array<string>\n  options?: Array<string>\n}\n```\n\nElements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in pacakge which not present in either array will produce a license violation (effectively a \"hard\" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings \"Apache-2.0\" and \"MIT\" to the `allow` array. Strings appearing in these arrays are generally \"what you see is what you get\", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.\n  \n## License Classes\n  \nStrings which are license classes will expand to a list of licenses known to be in that particular license class. Recognized license classes are: \n  'permissive',\n  'permissive (model)',\n  'permissive (gold)',\n  'permissive (silver)',\n  'permissive (bronze)',\n  'permissive (lead)',\n  'copyleft',\n  'maximal copyleft',\n  'network copyleft',\n  'strong copyleft',\n  'weak copyleft',\n  'contributor license agreement',\n  'public domain',\n  'proprietary free',\n  'source available',\n  'proprietary',\n  'commercial',\n  'patent'\n\nUsers can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.\n \n\n## PURLs\n\nUsers may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.\n\npurl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).\n\n### Examples:\nAllow all license data found in a specific version of a package 4.14.1: `pkg:npm/lodash@4.14.1`\nAllow all license data found in a version range of a package: `pkg:npm/lodash?version_glob=15.*`\nAllow all license data in the test directory of a given package for certain version ranges: `pkg:npm/lodash@15.*.*?file_name=lodash/test/*`\nAllow all license data taken from the package registry for a package and version range: `pkg:npm/lodash?version_glob=*&license_provenance=registry_metadata`\n    \n## Available options\n\n`toplevelOnly`: only apply the license policy to \"top level\" license data in a package, which includes registry metadata, LICENSE files, and manifest files which are closest to the root of the package.\n\n`applyToUnidentified`: Apply license policy to found but unidentified license data. If enabled, the license policy will be applied to license data which could not be affirmatively identified as a known license (this will effectively merge the license policy violation and unidentified license alerts). If disabled, license policy alerts will only be shown for license data which is positively identified as something not allowed or set to warn by the license policy.\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n      - packages:list\n- license-policy:read",
         "responses": {
           "200": {
             "content": {
@@ -8440,21 +8440,6 @@
                     "additionalProperties": false,
                     "description": "",
                     "properties": {
-                      "spdxAtomOrExtraData": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "violationExplanation": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
-                      "purl": {
-                        "type": "string",
-                        "description": "",
-                        "default": ""
-                      },
                       "filepathOrProvenance": {
                         "type": "array",
                         "items": {
@@ -8465,6 +8450,21 @@
                         "description": ""
                       },
                       "level": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "purl": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "spdxAtomOrExtraData": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "violationExplanation": {
                         "type": "string",
                         "description": "",
                         "default": ""
@@ -8746,6 +8746,7 @@
                 "UpdateApiTokenName",
                 "UpdateApiTokenScopes",
                 "UpdateApiTokenVisibility",
+                "UpdateLabel",
                 "UpdateLabelSetting",
                 "UpdateOrganizationSetting",
                 "UpgradeOrganizationPlan"
@@ -11647,7 +11648,7 @@
               }
             }
           },
-          "required": false
+          "required": true
         },
         "security": [
           {
@@ -11717,6 +11718,45 @@
           },
           "404": {
             "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "details": {
+                          "type": "object",
+                          "description": "",
+                          "default": null,
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "details",
+                        "message"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            },
+            "description": "Conflict"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -12039,6 +12079,169 @@
           },
           "404": {
             "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      },
+      "put": {
+        "tags": [
+          "Repositories",
+          "Labels"
+        ],
+        "summary": "Update repository label (beta)",
+        "operationId": "updateOrgRepoLabel",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "label_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the label",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the label",
+                    "default": ""
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "repo-label:update"
+            ]
+          },
+          {
+            "basicAuth": [
+              "repo-label:update"
+            ]
+          }
+        ],
+        "description": "Update a repository label name.\n\nLabels can be used to group and organize repositories and to apply security/license policies.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- repo-label:update",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The ID of the label",
+                      "default": ""
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the label",
+                      "default": ""
+                    },
+                    "repository_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "Repository ID",
+                        "default": ""
+                      },
+                      "description": "The IDs of repositories this label is associated with"
+                    },
+                    "has_security_policy": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Whether the label has a security policy"
+                    },
+                    "has_license_policy": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Whether the label has a license policy"
+                    }
+                  },
+                  "description": ""
+                }
+              }
+            },
+            "description": "Updates an existing repository label for the specified organization. The authenticated user must be a member of the organization. Label names must be non-empty and less than 1000 characters."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "details": {
+                          "type": "object",
+                          "description": "",
+                          "default": null,
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "details",
+                        "message"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            },
+            "description": "Conflict"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -24610,6 +24813,24 @@
             }
           },
           {
+            "name": "filters.alertActionSourceType",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert action source types (\"triage\", \"org-policy\", \"repo-label-policy\", \"socket-yml\", or \"fallback\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertActionSourceType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert action source types (\"triage\", \"org-policy\", \"repo-label-policy\", \"socket-yml\", or \"fallback\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "filters.alertCategory",
             "in": "query",
             "required": false,
@@ -25187,6 +25408,15 @@
                               },
                               "description": "Comma-separated list of alert actions (\"error\", \"warn\", \"monitor\", or \"ignore) that should be included"
                             },
+                            "alertActionSourceType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert action source types (\"triage\", \"org-policy\", \"repo-label-policy\", \"socket-yml\", or \"fallback\") that should be included"
+                            },
                             "alertCategory": {
                               "type": "array",
                               "items": {
@@ -25349,7 +25579,7 @@
             "name": "aggregation.fields",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertPriority,dependencyDirect,dependencyDev,dependencyDead)",
+            "description": "Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertPriority,dependencyDirect,dependencyDev,dependencyDead)",
             "schema": {
               "type": "string",
               "default": ""
@@ -25477,6 +25707,24 @@
             "in": "query",
             "required": false,
             "description": "Comma-separated list of alert actions (\"error\", \"warn\", \"monitor\", or \"ignore) that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertActionSourceType",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert action source types (\"triage\", \"org-policy\", \"repo-label-policy\", \"socket-yml\", or \"fallback\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertActionSourceType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert action source types (\"triage\", \"org-policy\", \"repo-label-policy\", \"socket-yml\", or \"fallback\") that should be included",
             "schema": {
               "type": "string"
             }
@@ -25796,6 +26044,15 @@
                                 "default": ""
                               },
                               "description": "Comma-separated list of alert actions (\"error\", \"warn\", \"monitor\", or \"ignore) that should be included"
+                            },
+                            "alertActionSourceType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert action source types (\"triage\", \"org-policy\", \"repo-label-policy\", \"socket-yml\", or \"fallback\") that should be included"
                             },
                             "alertCategory": {
                               "type": "array",
