@@ -127,11 +127,11 @@ export interface paths {
      * ```json
      * Array<
      *   Array<{
+     *     filepathOrProvenance: Array<string>,
+     *     level: "warning" | "violation",
      *     purl: string,
      *     spdxAtomOrExtraData: string,
-     *     violationExplanation: string,
-     *     filepathOrProvenance: Array<string>
-     *     level: "warning" | "violation"
+     *     violationExplanation: string
      *   }>
      * >
      * ```
@@ -651,6 +651,18 @@ export interface paths {
      * - repo-label:list
      */
     get: operations['getOrgRepoLabel']
+    /**
+     * Update repository label (beta)
+     * @description Update a repository label name.
+     *
+     * Labels can be used to group and organize repositories and to apply security/license policies.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - repo-label:update
+     */
+    put: operations['updateOrgRepoLabel']
     /**
      * Delete repository label (beta)
      * @description Delete a repository label and all of its associations (repositories, security policy, license policy, etc.).
@@ -3685,11 +3697,11 @@ export interface operations {
    * ```json
    * Array<
    *   Array<{
+   *     filepathOrProvenance: Array<string>,
+   *     level: "warning" | "violation",
    *     purl: string,
    *     spdxAtomOrExtraData: string,
-   *     violationExplanation: string,
-   *     filepathOrProvenance: Array<string>
-   *     level: "warning" | "violation"
+   *     violationExplanation: string
    *   }>
    * >
    * ```
@@ -3767,15 +3779,15 @@ export interface operations {
       200: {
         content: {
           'application/x-ndjson': Array<{
+            filepathOrProvenance: string[]
+            /** @default */
+            level: string
+            /** @default */
+            purl: string
             /** @default */
             spdxAtomOrExtraData: string
             /** @default */
             violationExplanation: string
-            /** @default */
-            purl: string
-            filepathOrProvenance: string[]
-            /** @default */
-            level: string
           }>
         }
       }
@@ -4077,6 +4089,7 @@ export interface operations {
           | 'UpdateApiTokenName'
           | 'UpdateApiTokenScopes'
           | 'UpdateApiTokenVisibility'
+          | 'UpdateLabel'
           | 'UpdateLabelSetting'
           | 'UpdateOrganizationSetting'
           | 'UpgradeOrganizationPlan'
@@ -5395,7 +5408,7 @@ export interface operations {
         org_slug: string
       }
     }
-    requestBody?: {
+    requestBody: {
       content: {
         'application/json': {
           /**
@@ -5440,6 +5453,19 @@ export interface operations {
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
       404: components['responses']['SocketNotFoundResponse']
+      /** @description Conflict */
+      409: {
+        content: {
+          'application/json': {
+            error: {
+              /** @default */
+              message: string
+              /** @default null */
+              details: Record<string, unknown> | null
+            }
+          }
+        }
+      }
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -5495,6 +5521,87 @@ export interface operations {
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
       404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Update repository label (beta)
+   * @description Update a repository label name.
+   *
+   * Labels can be used to group and organize repositories and to apply security/license policies.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - repo-label:update
+   */
+  updateOrgRepoLabel: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The ID of the label */
+        label_id: string
+      }
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          /**
+           * @description The name of the label
+           * @default
+           */
+          name: string
+        }
+      }
+    }
+    responses: {
+      /** @description Updates an existing repository label for the specified organization. The authenticated user must be a member of the organization. Label names must be non-empty and less than 1000 characters. */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * @description The ID of the label
+             * @default
+             */
+            id?: string
+            /**
+             * @description The name of the label
+             * @default
+             */
+            name?: string
+            /** @description The IDs of repositories this label is associated with */
+            repository_ids?: string[]
+            /**
+             * @description Whether the label has a security policy
+             * @default false
+             */
+            has_security_policy?: boolean
+            /**
+             * @description Whether the label has a license policy
+             * @default false
+             */
+            has_license_policy?: boolean
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      /** @description Conflict */
+      409: {
+        content: {
+          'application/json': {
+            error: {
+              /** @default */
+              message: string
+              /** @default null */
+              details: Record<string, unknown> | null
+            }
+          }
+        }
+      }
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -10110,6 +10217,10 @@ export interface operations {
         'filters.alertAction'?: string
         /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
         'filters.alertAction.notIn'?: string
+        /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be included */
+        'filters.alertActionSourceType'?: string
+        /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be included */
+        'filters.alertActionSourceType.notIn'?: string
         /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
         'filters.alertCategory'?: string
         /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
@@ -10267,6 +10378,8 @@ export interface operations {
                 artifactType?: string[]
                 /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
                 alertAction?: string[]
+                /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be included */
+                alertActionSourceType?: string[]
                 /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
                 alertCategory?: string[]
                 /** @description CVE ID */
@@ -10312,7 +10425,7 @@ export interface operations {
         date?: string
         /** @description The number of days of data to fetch as an offset from input date */
         range?: string
-        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertPriority,dependencyDirect,dependencyDev,dependencyDead) */
+        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertPriority,dependencyDirect,dependencyDev,dependencyDead) */
         'aggregation.fields'?: string
         /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
         'filters.alertSeverity'?: string
@@ -10342,6 +10455,10 @@ export interface operations {
         'filters.alertAction'?: string
         /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
         'filters.alertAction.notIn'?: string
+        /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be included */
+        'filters.alertActionSourceType'?: string
+        /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be included */
+        'filters.alertActionSourceType.notIn'?: string
         /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
         'filters.alertCategory'?: string
         /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
@@ -10417,6 +10534,8 @@ export interface operations {
                 artifactType?: string[]
                 /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
                 alertAction?: string[]
+                /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be included */
+                alertActionSourceType?: string[]
                 /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
                 alertCategory?: string[]
                 /** @description CVE ID */
