@@ -387,10 +387,14 @@
           },
           "warn": {
             "$ref": "#/components/schemas/LicenseAllowListElabbed"
+          },
+          "monitor": {
+            "$ref": "#/components/schemas/LicenseAllowListElabbed"
           }
         },
         "required": [
           "allow",
+          "monitor",
           "warn"
         ]
       },
@@ -964,6 +968,16 @@
             "description": "",
             "nullable": true
           },
+          "monitor": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            },
+            "description": "",
+            "nullable": true
+          },
           "options": {
             "type": "array",
             "items": {
@@ -977,6 +991,7 @@
         },
         "required": [
           "allow",
+          "monitor",
           "options",
           "warn"
         ]
@@ -3537,10 +3552,20 @@
                               "default": null
                             },
                             "description": ""
+                          },
+                          "monitorData": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "description": "",
+                              "default": null
+                            },
+                            "description": ""
                           }
                         },
                         "required": [
                           "licenseScanResult",
+                          "monitorData",
                           "spdxDisj",
                           "violationData",
                           "warnData"
@@ -7844,10 +7869,35 @@
       "SocketPURL_Type": {
         "type": "string",
         "enum": [
-          "unknown",
+          "apk",
+          "bitbucket",
+          "cocoapods",
+          "cargo",
+          "composer",
+          "conan",
+          "conda",
+          "cran",
+          "deb",
+          "docker",
+          "gem",
+          "generic",
+          "github",
           "golang",
+          "hackage",
+          "hex",
+          "huggingface",
+          "maven",
+          "mlflow",
           "npm",
-          "pypi"
+          "nuget",
+          "qpkg",
+          "oci",
+          "pub",
+          "pypi",
+          "rpm",
+          "swid",
+          "swift",
+          "unknown"
         ],
         "description": "",
         "default": "unknown"
@@ -8528,6 +8578,9 @@
                   "warn": {
                     "$ref": "#/components/schemas/LicenseAllowList"
                   },
+                  "monitor": {
+                    "$ref": "#/components/schemas/LicenseAllowList"
+                  },
                   "allowedApprovalSources": {
                     "type": "array",
                     "items": {
@@ -8593,6 +8646,7 @@
                   "allowedStrings",
                   "allowedTiers",
                   "focusAlertsHere",
+                  "monitor",
                   "warn"
                 ]
               }
