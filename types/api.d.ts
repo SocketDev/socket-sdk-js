@@ -1392,6 +1392,7 @@ export interface components {
     LicensePolicy: {
       allow: components['schemas']['LicenseAllowListElabbed']
       warn: components['schemas']['LicenseAllowListElabbed']
+      monitor: components['schemas']['LicenseAllowListElabbed']
     }
     LicenseAllowList: {
       strings: string[]
@@ -1530,6 +1531,7 @@ export interface components {
     SStoredLicensePolicy: {
       allow: string[] | null
       warn: string[] | null
+      monitor: string[] | null
       options: string[] | null
     }
     Capabilities: {
@@ -2223,6 +2225,7 @@ export interface components {
               licenseScanResult: string
               violationData: Array<Record<string, never>>
               warnData: Array<Record<string, never>>
+              monitorData: Array<Record<string, never>>
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -3301,7 +3304,36 @@ export interface components {
      * @default unknown
      * @enum {string}
      */
-    SocketPURL_Type: 'unknown' | 'golang' | 'npm' | 'pypi'
+    SocketPURL_Type:
+      | 'apk'
+      | 'bitbucket'
+      | 'cocoapods'
+      | 'cargo'
+      | 'composer'
+      | 'conan'
+      | 'conda'
+      | 'cran'
+      | 'deb'
+      | 'docker'
+      | 'gem'
+      | 'generic'
+      | 'github'
+      | 'golang'
+      | 'hackage'
+      | 'hex'
+      | 'huggingface'
+      | 'maven'
+      | 'mlflow'
+      | 'npm'
+      | 'nuget'
+      | 'qpkg'
+      | 'oci'
+      | 'pub'
+      | 'pypi'
+      | 'rpm'
+      | 'swid'
+      | 'swift'
+      | 'unknown'
     /**
      * @default low
      * @enum {string}
@@ -3886,6 +3918,7 @@ export interface operations {
         'application/json': {
           allow: components['schemas']['LicenseAllowList']
           warn: components['schemas']['LicenseAllowList']
+          monitor: components['schemas']['LicenseAllowList']
           allowedApprovalSources: string[] | null
           allowedFamilies: string[] | null
           allowedTiers: string[] | null
