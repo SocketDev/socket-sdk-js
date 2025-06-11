@@ -10305,6 +10305,8 @@ export interface operations {
             endCursor: string | null
             items: Array<{
               /** @default */
+              repoId: string | null
+              /** @default */
               repoSlug: string
               repoLabels: string[]
               repoLabelIds: string[]
