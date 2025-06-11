@@ -25088,6 +25088,12 @@
                         "additionalProperties": false,
                         "description": "",
                         "properties": {
+                          "repoId": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
                           "repoSlug": {
                             "type": "string",
                             "description": "",
@@ -25357,6 +25363,7 @@
                           "defaultBranch",
                           "dependency",
                           "fullScanId",
+                          "repoId",
                           "repoLabelIds",
                           "repoLabels",
                           "repoSlug",
