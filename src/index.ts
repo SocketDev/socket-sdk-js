@@ -154,81 +154,121 @@ async function createUploadRequest(
   >,
   options: RequestOptions
 ): Promise<IncomingMessage> {
-  // Generate a unique boundary for multipart encoding.
-  const boundary = `NodeMultipartBoundary${Date.now()}`
-  const boundarySep = `--${boundary}\r\n`
-  const finalBoundary = `--${boundary}--\r\n`
-  const requestBody = [
-    ...requestBodyNoBoundaries.flatMap(part => [
-      boundarySep,
-      ...(Array.isArray(part) ? part : [part])
-    ]),
-    finalBoundary
-  ]
-  const url = new URL(urlPath, baseUrl)
-  const req: ClientRequest = getHttpModule(baseUrl).request(url, {
-    method: 'POST',
-    ...options,
-    headers: {
-      ...options?.headers,
-      'Content-Type': `multipart/form-data; boundary=${boundary}`
-    }
-  })
-  let aborted = false
-  req.on('error', _err => {
-    aborted = true
-  })
-  req.on('close', () => {
-    aborted = true
-  })
-  try {
-    // Send the request body (headers + files).
-    for (const part of requestBody) {
-      if (aborted) {
-        break
+
+  // Note: this will create a regular http request and stream in the file content
+  //       implicitly. The outgoing buffer is (implicitly) flushed periodically
+  //       by node. When this happens first it will send the headers to the server
+  //       which may decide to reject the request, immediately send a response and
+  //       then cut the connection (EPIPE or ECONNRESET errors may follow while
+  //       writing the files).
+  //       We have to make sure to guard for sudden reject responses because if we
+  //       don't then the file streaming will fail with random errors and it gets
+  //       hard to debug what's going on why.
+  //       Example : `socket scan create --org badorg` should fail gracefully.
+
+  return new Promise(async (pass, fail) => {
+
+    // Generate a unique boundary for multipart encoding.
+    const boundary = `NodeMultipartBoundary${Date.now()}`
+    const boundarySep = `--${boundary}\r\n`
+    const finalBoundary = `--${boundary}--\r\n`
+    const requestBody = [
+      ...requestBodyNoBoundaries.flatMap(part => [
+        boundarySep,
+        ...(Array.isArray(part) ? part : [part])
+      ]),
+      finalBoundary
+    ]
+    const url = new URL(urlPath, baseUrl)
+    const req: ClientRequest = getHttpModule(baseUrl).request(url, {
+      method: 'POST',
+      ...options,
+      headers: {
+        ...options?.headers,
+        'Content-Type': `multipart/form-data; boundary=${boundary}`
       }
-      if (typeof part === 'string') {
-        req.write(part)
-      } else if (typeof part?.pipe === 'function') {
-        part.pipe(req, { end: false })
-        // Wait for file streaming to complete.
-        // eslint-disable-next-line no-await-in-loop
-        await new Promise<void>((resolve, reject) => {
-          const cleanup = () => {
-            part.off('end', onEnd)
-            part.off('error', onError)
-          }
-          const onEnd = () => {
-            cleanup()
-            resolve()
-          }
-          const onError = (e: Error) => {
-            cleanup()
-            reject(e)
-          }
-          part.on('end', onEnd)
-          part.on('error', onError)
-        })
-        if (!aborted) {
-          // Ensure a new line after file content.
-          req.write('\r\n')
+    })
+
+    // Send the headers now. If the server would reject this request, it should
+    // do so asap. This prevents us from sending more data to it then necessary.
+    // If it will reject we could just await the `req.on(response` now but if it
+    // accepts the request then the response will not come until after the final
+    // file. So we can't await the response at this time. Just proceed, carefully.
+    req.flushHeaders()
+
+
+    // Wait for the response. It may arrive at any point during the request or
+    // afterwards. Node will flush the output buffer at some point, initiating
+    // the request, and the server can decide to reject the request immediately
+    // or at any point later (ike a timeout). We should handle those cases.
+    getResponse(req).then(res => {
+      // Note: this returns the response to the caller to createUploadRequest
+      pass(res)
+    }, async (err) => {
+      // Note: this will throw an error for the caller to createUploadRequest
+      if (err.response && !isResponseOk(err.response)) {
+        fail(new ResponseError(err.response, `${err.method} request failed`))
+      }
+      fail(err)
+    })
+
+    let aborted = false
+    req.on('error', _err => {
+      aborted = true
+    })
+    req.on('close', () => {
+      aborted = true
+    })
+    try {
+      // Send the request body (headers + files).
+      for (const part of requestBody) {
+        if (aborted) {
+          break
         }
-      } else {
-        throw new TypeError(
-          'Socket API - Invalid multipart part, expected string or stream'
-        )
+        if (typeof part === 'string') {
+          req.write(part)
+        } else if (typeof part?.pipe === 'function') {
+          part.pipe(req, { end: false })
+          // Wait for file streaming to complete.
+          // eslint-disable-next-line no-await-in-loop
+          await new Promise<void>((resolve, reject) => {
+            const cleanup = () => {
+              part.off('end', onEnd)
+              part.off('error', onError)
+            }
+            const onEnd = () => {
+              cleanup()
+              resolve()
+            }
+            const onError = (e: Error) => {
+              cleanup()
+              reject(e)
+            }
+            part.on('end', onEnd)
+            part.on('error', onError)
+          })
+          if (!aborted) {
+            // Ensure a new line after file content.
+            req.write('\r\n')
+          }
+        } else {
+          throw new TypeError(
+            'Socket API - Invalid multipart part, expected string or stream'
+          )
+        }
+      }
+    } catch (e) {
+      req.destroy(e as Error)
+      fail(e)
+    } finally {
+      if (!aborted) {
+        // Close request after writing all data.
+        req.end()
       }
     }
-  } catch (e) {
-    req.destroy(e as Error)
-    throw e
-  } finally {
-    if (!aborted) {
-      // Close request after writing all data.
-      req.end()
-    }
-  }
-  return await getResponse(req)
+
+    pass(getResponse(req))
+  })
 }
 
 async function getErrorResponseBody(
@@ -265,8 +305,9 @@ function getHttpModule(baseUrl: string): typeof http | typeof https {
 }
 
 async function getResponse(req: ClientRequest): Promise<IncomingMessage> {
+  let res;
   try {
-    const res = await new Promise<IncomingMessage>((resolve, reject) => {
+    res = await new Promise<IncomingMessage>((resolve, reject) => {
       const cleanup = () => {
         req.off('response', onResponse)
         req.off('error', onError)
@@ -289,14 +330,16 @@ async function getResponse(req: ClientRequest): Promise<IncomingMessage> {
       req.on('error', onError)
       abortSignal?.addEventListener('abort', onAbort)
     })
-    if (!isResponseOk(res)) {
-      throw new ResponseError(res, `${req.method} request failed`)
-    }
-    return res
   } catch (e) {
-    req.destroy()
+    // Note: Calling req.destroy here can lead to silent nodejs crashes.
+    // req.destroy();
     throw e
   }
+
+  if (!isResponseOk(res)) {
+    throw new ResponseError(res, `${req.method} request failed`)
+  }
+  return res
 }
 
 async function getResponseJson(
