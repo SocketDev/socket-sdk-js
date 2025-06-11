@@ -154,7 +154,6 @@ async function createUploadRequest(
   >,
   options: RequestOptions
 ): Promise<IncomingMessage> {
-
   // Note: this will create a regular http request and stream in the file content
   //       implicitly. The outgoing buffer is (implicitly) flushed periodically
   //       by node. When this happens first it will send the headers to the server
@@ -166,8 +165,8 @@ async function createUploadRequest(
   //       hard to debug what's going on why.
   //       Example : `socket scan create --org badorg` should fail gracefully.
 
-  return new Promise(async (pass, fail) => {
-
+  // eslint-disable-next-line no-async-promise-executor
+  return await new Promise(async (pass, fail) => {
     // Generate a unique boundary for multipart encoding.
     const boundary = `NodeMultipartBoundary${Date.now()}`
     const boundarySep = `--${boundary}\r\n`
@@ -196,21 +195,23 @@ async function createUploadRequest(
     // file. So we can't await the response at this time. Just proceed, carefully.
     req.flushHeaders()
 
-
     // Wait for the response. It may arrive at any point during the request or
     // afterwards. Node will flush the output buffer at some point, initiating
     // the request, and the server can decide to reject the request immediately
     // or at any point later (ike a timeout). We should handle those cases.
-    getResponse(req).then(res => {
-      // Note: this returns the response to the caller to createUploadRequest
-      pass(res)
-    }, async (err) => {
-      // Note: this will throw an error for the caller to createUploadRequest
-      if (err.response && !isResponseOk(err.response)) {
-        fail(new ResponseError(err.response, `${err.method} request failed`))
+    getResponse(req).then(
+      res => {
+        // Note: this returns the response to the caller to createUploadRequest
+        pass(res)
+      },
+      async err => {
+        // Note: this will throw an error for the caller to createUploadRequest
+        if (err.response && !isResponseOk(err.response)) {
+          fail(new ResponseError(err.response, `${err.method} request failed`))
+        }
+        fail(err)
       }
-      fail(err)
-    })
+    )
 
     let aborted = false
     req.on('error', _err => {
@@ -305,36 +306,29 @@ function getHttpModule(baseUrl: string): typeof http | typeof https {
 }
 
 async function getResponse(req: ClientRequest): Promise<IncomingMessage> {
-  let res;
-  try {
-    res = await new Promise<IncomingMessage>((resolve, reject) => {
-      const cleanup = () => {
-        req.off('response', onResponse)
-        req.off('error', onError)
-        abortSignal?.removeEventListener('abort', onAbort)
-      }
-      const onAbort = () => {
-        cleanup()
-        req.destroy()
-        reject(new Error('Request aborted by signal'))
-      }
-      const onError = (e: Error) => {
-        cleanup()
-        reject(e)
-      }
-      const onResponse = (res: IncomingMessage) => {
-        cleanup()
-        resolve(res)
-      }
-      req.on('response', onResponse)
-      req.on('error', onError)
-      abortSignal?.addEventListener('abort', onAbort)
-    })
-  } catch (e) {
-    // Note: Calling req.destroy here can lead to silent nodejs crashes.
-    // req.destroy();
-    throw e
-  }
+  const res = await new Promise<IncomingMessage>((resolve, reject) => {
+    const cleanup = () => {
+      req.off('response', onResponse)
+      req.off('error', onError)
+      abortSignal?.removeEventListener('abort', onAbort)
+    }
+    const onAbort = () => {
+      cleanup()
+      req.destroy()
+      reject(new Error('Request aborted by signal'))
+    }
+    const onError = (e: Error) => {
+      cleanup()
+      reject(e)
+    }
+    const onResponse = (res: IncomingMessage) => {
+      cleanup()
+      resolve(res)
+    }
+    req.on('response', onResponse)
+    req.on('error', onError)
+    abortSignal?.addEventListener('abort', onAbort)
+  })
 
   if (!isResponseOk(res)) {
     throw new ResponseError(res, `${req.method} request failed`)
