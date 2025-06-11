@@ -87,7 +87,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@dotenvx/dotenvx": "1.44.1",
+    "@dotenvx/dotenvx": "1.44.2",
     "@eslint/compat": "1.2.9",
     "@eslint/js": "9.28.0",
     "@types/node": "24.0.0",
@@ -97,7 +97,7 @@
     "eslint": "9.28.0",
     "eslint-import-resolver-typescript": "4.4.3",
     "eslint-plugin-import-x": "4.15.1",
-    "eslint-plugin-jsdoc": "50.7.1",
+    "eslint-plugin-jsdoc": "50.8.0",
     "eslint-plugin-n": "17.19.0",
     "eslint-plugin-sort-destructure-keys": "2.0.0",
     "eslint-plugin-unicorn": "56.0.1",
