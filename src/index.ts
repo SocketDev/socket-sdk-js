@@ -400,9 +400,6 @@ export class SocketSdk {
   readonly #baseUrl: string
   readonly #reqOptions: RequestOptions
 
-  /**
-   * @throws {SocketSdkAuthError}
-   */
   constructor(apiToken: string, options?: SocketSdkOptions | undefined) {
     const {
       agent: agentOrObj,
@@ -452,7 +449,17 @@ export class SocketSdk {
       res = await pRetry(
         () => this.#createBatchPurlRequest(queryParams, componentsObj),
         {
-          retries: 4
+          retries: 4,
+          onRetryRethrow: true,
+          onRetry(_attempt, error) {
+            if (!(error instanceof ResponseError)) {
+              return
+            }
+            const { statusCode } = error.response
+            if (statusCode === 401 || statusCode === 403) {
+              throw error
+            }
+          }
         }
       )
     } catch (e) {
@@ -476,7 +483,7 @@ export class SocketSdk {
         cause: error
       })
     }
-    const statusCode = error.response.statusCode
+    const { statusCode } = error.response
     if (statusCode! >= 500) {
       throw new Error(`Socket API server error (${statusCode})`, {
         cause: error
