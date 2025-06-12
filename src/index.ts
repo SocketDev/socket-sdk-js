@@ -553,7 +553,7 @@ export class SocketSdk {
     }
     type ResolveFn = (value: GeneratorStep) => void
 
-    const { chunkSize = 5, concurrencyLimit = 10 } = {
+    const { chunkSize = 500, concurrencyLimit = 10 } = {
       __proto__: null,
       ...options
     } as BatchPackageStreamOptions
