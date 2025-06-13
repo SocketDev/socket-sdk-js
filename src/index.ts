@@ -558,7 +558,6 @@ export class SocketSdk {
       generator: AsyncGenerator<BatchPackageFetchResultType>
       promise: Promise<GeneratorStep>
     }
-    type ResolveFn = (value: GeneratorStep) => void
 
     const { chunkSize = 500, concurrencyLimit = 10 } = {
       __proto__: null,
@@ -593,14 +592,21 @@ export class SocketSdk {
     const continueGen = (
       generator: AsyncGenerator<BatchPackageFetchResultType>
     ) => {
-      let resolveFn: ResolveFn
+      const {
+        promise,
+        resolve: resolveFn,
+        reject:rejectFn
+      } = promiseWithResolvers<GeneratorStep>();
       running.push({
         generator,
-        promise: new Promise<GeneratorStep>(resolve => (resolveFn = resolve))
+        promise
       })
       void generator
         .next()
-        .then(iteratorResult => resolveFn!({ generator, iteratorResult }))
+        .then(
+          iteratorResult => resolveFn({ generator, iteratorResult }),
+          rejectFn
+        )
     }
     // Start initial batch of generators.
     while (running.length < concurrencyLimit && index < componentsCount) {
@@ -616,11 +622,14 @@ export class SocketSdk {
         running.findIndex(entry => entry.generator === generator),
         1
       )
+      // Yield the value if one is given, even when done:true
+      if (iteratorResult.value) {
+        yield iteratorResult.value
+      }
       if (iteratorResult.done) {
         // Start a new generator if available.
         enqueueGen()
       } else {
-        yield iteratorResult.value
         // Keep fetching values from this generator.
         continueGen(generator)
       }
@@ -1117,4 +1126,16 @@ export class SocketSdk {
       return await this.#handleApiError<'updateOrgRepo'>(e)
     }
   }
+}
+
+function promiseWithResolvers<T>(): ReturnType<typeof Promise.withResolvers<T>> {
+  if (Promise.withResolvers) {
+    return Promise.withResolvers<T>();
+  }
+
+  // This is what the above does but it's not available in node 20 (it is in node 22)
+  // @ts-ignore -- sigh.
+  const obj: ReturnType<typeof Promise.withResolvers<T>> = {};
+  obj.promise = new Promise<T>((resolver, reject) => { obj.resolve = resolver; obj.reject = reject; });
+  return obj;
 }
