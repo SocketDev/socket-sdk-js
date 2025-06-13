@@ -50,7 +50,14 @@ const sharedRules = {
   // the glob patterns used.
   'n/no-unpublished-bin': 'error',
   'n/no-unsupported-features/es-builtins': 'error',
-  'n/no-unsupported-features/es-syntax': 'error',
+  'n/no-unsupported-features/es-syntax': [
+    'error',
+    {
+      ignores: ['promise-withresolvers'],
+      // Lazily access constants.maintainedNodeVersions.
+      version: constants.maintainedNodeVersions.current
+    }
+  ],
   'n/no-unsupported-features/node-builtins': [
     'error',
     {

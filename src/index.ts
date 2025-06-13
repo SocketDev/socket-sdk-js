@@ -594,9 +594,9 @@ export class SocketSdk {
     ) => {
       const {
         promise,
-        resolve: resolveFn,
-        reject:rejectFn
-      } = promiseWithResolvers<GeneratorStep>();
+        reject: rejectFn,
+        resolve: resolveFn
+      } = promiseWithResolvers<GeneratorStep>()
       running.push({
         generator,
         promise
@@ -1128,14 +1128,19 @@ export class SocketSdk {
   }
 }
 
-function promiseWithResolvers<T>(): ReturnType<typeof Promise.withResolvers<T>> {
+function promiseWithResolvers<T>(): ReturnType<
+  typeof Promise.withResolvers<T>
+> {
   if (Promise.withResolvers) {
-    return Promise.withResolvers<T>();
+    return Promise.withResolvers<T>()
   }
 
   // This is what the above does but it's not available in node 20 (it is in node 22)
   // @ts-ignore -- sigh.
-  const obj: ReturnType<typeof Promise.withResolvers<T>> = {};
-  obj.promise = new Promise<T>((resolver, reject) => { obj.resolve = resolver; obj.reject = reject; });
-  return obj;
+  const obj: ReturnType<typeof Promise.withResolvers<T>> = {}
+  obj.promise = new Promise<T>((resolver, reject) => {
+    obj.resolve = resolver
+    obj.reject = reject
+  })
+  return obj
 }
