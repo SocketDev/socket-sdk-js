@@ -1316,6 +1316,59 @@
             "description": "",
             "default": ""
           },
+          "actionSource": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "",
+                "default": ""
+              },
+              "candidates": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "action": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "actionPolicyIndex": {
+                      "type": "integer",
+                      "description": "",
+                      "default": 0
+                    },
+                    "repoLabelId": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "action",
+                    "actionPolicyIndex",
+                    "repoLabelId",
+                    "type"
+                  ]
+                },
+                "description": ""
+              }
+            },
+            "required": [
+              "candidates",
+              "type"
+            ]
+          },
           "actionPolicyIndex": {
             "type": "integer",
             "description": "",
@@ -9390,6 +9443,35 @@
                             "description": "",
                             "default": ""
                           },
+                          "repository_slug": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "branch": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "commit_message": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "commit_hash": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "pull_request": {
+                            "type": "integer",
+                            "description": "",
+                            "default": 0,
+                            "nullable": true
+                          },
                           "committers": {
                             "type": "array",
                             "items": {
@@ -9399,30 +9481,22 @@
                             },
                             "description": ""
                           },
+                          "html_url": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "api_url": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
                           "repo": {
                             "type": "string",
                             "description": "",
                             "default": ""
-                          },
-                          "branch": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "commit_message": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "commit_hash": {
-                            "type": "string",
-                            "description": "",
-                            "default": ""
-                          },
-                          "pull_request": {
-                            "type": "integer",
-                            "description": "",
-                            "default": 0
                           },
                           "html_report_url": {
                             "type": "string",
@@ -9708,6 +9782,35 @@
                       "description": "",
                       "default": ""
                     },
+                    "repository_slug": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "branch": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "commit_message": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "commit_hash": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "pull_request": {
+                      "type": "integer",
+                      "description": "",
+                      "default": 0,
+                      "nullable": true
+                    },
                     "committers": {
                       "type": "array",
                       "items": {
@@ -9717,30 +9820,22 @@
                       },
                       "description": ""
                     },
+                    "html_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "api_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
                     "repo": {
                       "type": "string",
                       "description": "",
                       "default": ""
-                    },
-                    "branch": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "commit_message": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "commit_hash": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "pull_request": {
-                      "type": "integer",
-                      "description": "",
-                      "default": 0
                     },
                     "html_report_url": {
                       "type": "string",
@@ -9787,13 +9882,22 @@
                       "description": "The current processing status of the SBOM",
                       "default": "pending",
                       "nullable": true
+                    },
+                    "unmatchedFiles": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "description": ""
                     }
                   },
                   "description": ""
                 }
               }
             },
-            "description": "Upload manifest files to create a full scan in an org's repo"
+            "description": "The details of the created full scan."
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -9868,7 +9972,7 @@
           {
             "name": "include_license_details",
             "in": "query",
-            "required": false,
+            "required": true,
             "description": "Include license details in the response. This can increase the response size significantly.",
             "schema": {
               "type": "boolean",
@@ -10077,6 +10181,35 @@
                       "description": "",
                       "default": ""
                     },
+                    "repository_slug": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "branch": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "commit_message": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "commit_hash": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "pull_request": {
+                      "type": "integer",
+                      "description": "",
+                      "default": 0,
+                      "nullable": true
+                    },
                     "committers": {
                       "type": "array",
                       "items": {
@@ -10086,30 +10219,22 @@
                       },
                       "description": ""
                     },
+                    "html_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "api_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
                     "repo": {
                       "type": "string",
                       "description": "",
                       "default": ""
-                    },
-                    "branch": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "commit_message": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "commit_hash": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "pull_request": {
-                      "type": "integer",
-                      "description": "",
-                      "default": 0
                     },
                     "html_report_url": {
                       "type": "string",
@@ -10186,9 +10311,10 @@
     "/orgs/{org_slug}/full-scans/diff": {
       "get": {
         "tags": [
-          "Full Scans"
+          "Deprecated"
         ],
         "summary": "Diff Full Scans",
+        "deprecated": true,
         "operationId": "GetOrgDiffScan",
         "parameters": [
           {
@@ -10241,7 +10367,7 @@
             ]
           }
         ],
-        "description": "Get the difference between two Full Scans.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
+        "description": "**This endpoint is deprecated.**\n\nGet the difference between two existing Full Scans. The results are not persisted.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
         "responses": {
           "200": {
             "content": {
@@ -10256,6 +10382,31 @@
                       "additionalProperties": false,
                       "description": "",
                       "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "organization_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "organization_slug": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
                         "repository_id": {
                           "type": "string",
                           "description": "",
@@ -10271,11 +10422,6 @@
                           "description": "",
                           "default": "",
                           "nullable": true
-                        },
-                        "id": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
                         },
                         "commit_message": {
                           "type": "string",
@@ -10304,28 +10450,34 @@
                           },
                           "description": ""
                         },
-                        "organization_id": {
+                        "html_url": {
                           "type": "string",
                           "description": "",
-                          "default": ""
+                          "default": "",
+                          "nullable": true
                         },
-                        "organization_slug": {
+                        "api_url": {
                           "type": "string",
                           "description": "",
-                          "default": ""
+                          "default": "",
+                          "nullable": true
                         }
                       },
                       "required": [
+                        "api_url",
                         "branch",
                         "commit_hash",
                         "commit_message",
                         "committers",
+                        "created_at",
+                        "html_url",
                         "id",
                         "organization_id",
                         "organization_slug",
                         "pull_request",
                         "repository_id",
-                        "repository_slug"
+                        "repository_slug",
+                        "updated_at"
                       ]
                     },
                     "after": {
@@ -10333,6 +10485,31 @@
                       "additionalProperties": false,
                       "description": "",
                       "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "organization_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "organization_slug": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
                         "repository_id": {
                           "type": "string",
                           "description": "",
@@ -10348,11 +10525,6 @@
                           "description": "",
                           "default": "",
                           "nullable": true
-                        },
-                        "id": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
                         },
                         "commit_message": {
                           "type": "string",
@@ -10381,28 +10553,34 @@
                           },
                           "description": ""
                         },
-                        "organization_id": {
+                        "html_url": {
                           "type": "string",
                           "description": "",
-                          "default": ""
+                          "default": "",
+                          "nullable": true
                         },
-                        "organization_slug": {
+                        "api_url": {
                           "type": "string",
                           "description": "",
-                          "default": ""
+                          "default": "",
+                          "nullable": true
                         }
                       },
                       "required": [
+                        "api_url",
                         "branch",
                         "commit_hash",
                         "commit_message",
                         "committers",
+                        "created_at",
+                        "html_url",
                         "id",
                         "organization_id",
                         "organization_slug",
                         "pull_request",
                         "repository_id",
-                        "repository_slug"
+                        "repository_slug",
+                        "updated_at"
                       ]
                     },
                     "artifacts": {
@@ -10500,9 +10678,10 @@
     "/orgs/{org_slug}/full-scans/diff/gfm": {
       "get": {
         "tags": [
-          "Full Scans"
+          "Deprecated"
         ],
         "summary": "SCM Comment for Scan Diff",
+        "deprecated": true,
         "operationId": "GetOrgFullScanDiffGfm",
         "parameters": [
           {
@@ -10545,7 +10724,7 @@
             ]
           }
         ],
-        "description": "Get the dependency overview and dependency alert comments in GitHub flavored markdown between the diff between two existing full scans.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
+        "description": "**This endpoint is deprecated.**\n\nGet the dependency overview and dependency alert comments in GitHub flavored markdown between the diff between two existing full scans.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
         "responses": {
           "200": {
             "content": {
@@ -10560,6 +10739,31 @@
                       "additionalProperties": false,
                       "description": "",
                       "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "organization_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "organization_slug": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
                         "repository_id": {
                           "type": "string",
                           "description": "",
@@ -10575,11 +10779,6 @@
                           "description": "",
                           "default": "",
                           "nullable": true
-                        },
-                        "id": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
                         },
                         "commit_message": {
                           "type": "string",
@@ -10608,28 +10807,34 @@
                           },
                           "description": ""
                         },
-                        "organization_id": {
+                        "html_url": {
                           "type": "string",
                           "description": "",
-                          "default": ""
+                          "default": "",
+                          "nullable": true
                         },
-                        "organization_slug": {
+                        "api_url": {
                           "type": "string",
                           "description": "",
-                          "default": ""
+                          "default": "",
+                          "nullable": true
                         }
                       },
                       "required": [
+                        "api_url",
                         "branch",
                         "commit_hash",
                         "commit_message",
                         "committers",
+                        "created_at",
+                        "html_url",
                         "id",
                         "organization_id",
                         "organization_slug",
                         "pull_request",
                         "repository_id",
-                        "repository_slug"
+                        "repository_slug",
+                        "updated_at"
                       ]
                     },
                     "after": {
@@ -10637,6 +10842,31 @@
                       "additionalProperties": false,
                       "description": "",
                       "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "organization_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "organization_slug": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
                         "repository_id": {
                           "type": "string",
                           "description": "",
@@ -10652,11 +10882,6 @@
                           "description": "",
                           "default": "",
                           "nullable": true
-                        },
-                        "id": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
                         },
                         "commit_message": {
                           "type": "string",
@@ -10685,28 +10910,34 @@
                           },
                           "description": ""
                         },
-                        "organization_id": {
+                        "html_url": {
                           "type": "string",
                           "description": "",
-                          "default": ""
+                          "default": "",
+                          "nullable": true
                         },
-                        "organization_slug": {
+                        "api_url": {
                           "type": "string",
                           "description": "",
-                          "default": ""
+                          "default": "",
+                          "nullable": true
                         }
                       },
                       "required": [
+                        "api_url",
                         "branch",
                         "commit_hash",
                         "commit_message",
                         "committers",
+                        "created_at",
+                        "html_url",
                         "id",
                         "organization_id",
                         "organization_slug",
                         "pull_request",
                         "repository_id",
-                        "repository_slug"
+                        "repository_slug",
+                        "updated_at"
                       ]
                     },
                     "comments": {
@@ -10753,6 +10984,2023 @@
               }
             },
             "description": "Metadata about the full scans and the dependency overview and dependency alert comment. Can be used in a pull request context."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/diff-scans": {
+      "get": {
+        "tags": [
+          "Diff Scans"
+        ],
+        "summary": "List diff scans",
+        "operationId": "listOrgDiffScans",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Specify sort field.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at"
+              ],
+              "default": "created_at"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "description": "Specify sort direction.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "Specify the maximum number of results to return per page.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Cursor for pagination. Use the next_cursor or prev_cursor from previous responses.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repository_id",
+            "in": "query",
+            "required": false,
+            "description": "Filter by repository ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "before_full_scan_id",
+            "in": "query",
+            "required": false,
+            "description": "Filter by before full scan ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "after_full_scan_id",
+            "in": "query",
+            "required": false,
+            "description": "Filter by after full scan ID.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [
+              "diff-scans:list"
+            ]
+          },
+          {
+            "basicAuth": [
+              "diff-scans:list"
+            ]
+          }
+        ],
+        "description": "Returns a paginated list of all diff scans in an organization.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- diff-scans:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "organization_id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "repository_id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "before_full_scan_id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "after_full_scan_id": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "external_href": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "merge": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": ""
+                          },
+                          "html_url": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "api_url": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "after_full_scan_id",
+                          "api_url",
+                          "before_full_scan_id",
+                          "created_at",
+                          "description",
+                          "external_href",
+                          "html_url",
+                          "id",
+                          "merge",
+                          "organization_id",
+                          "repository_id",
+                          "updated_at"
+                        ]
+                      },
+                      "description": ""
+                    },
+                    "next_page_href": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "next_cursor": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "next_cursor",
+                    "next_page_href",
+                    "results"
+                  ]
+                }
+              }
+            },
+            "description": "Lists diff scans for the specified organization."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/diff-scans/{diff_scan_id}": {
+      "get": {
+        "tags": [
+          "Diff Scans"
+        ],
+        "summary": "Get diff scan",
+        "operationId": "getDiffScanById",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "diff_scan_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the diff scan",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "omit_license_details",
+            "in": "query",
+            "required": false,
+            "description": "Omit license details in the response. This can reduce the size of the response significantly, but will not include license information for the artifacts.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [
+              "diff-scans:list"
+            ]
+          },
+          {
+            "basicAuth": [
+              "diff-scans:list"
+            ]
+          }
+        ],
+        "description": "Get the difference between two full scans from an existing diff scan resource.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- diff-scans:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "diff_scan": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "organization_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "repository_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "before_full_scan": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "branch": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_message": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_hash": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "pull_request": {
+                              "type": "integer",
+                              "description": "",
+                              "default": 0,
+                              "nullable": true
+                            },
+                            "committers": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": ""
+                            },
+                            "html_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "api_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "api_url",
+                            "branch",
+                            "commit_hash",
+                            "commit_message",
+                            "committers",
+                            "created_at",
+                            "html_url",
+                            "id",
+                            "organization_id",
+                            "organization_slug",
+                            "pull_request",
+                            "repository_id",
+                            "repository_slug",
+                            "updated_at"
+                          ]
+                        },
+                        "after_full_scan": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "branch": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_message": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_hash": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "pull_request": {
+                              "type": "integer",
+                              "description": "",
+                              "default": 0,
+                              "nullable": true
+                            },
+                            "committers": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": ""
+                            },
+                            "html_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "api_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "api_url",
+                            "branch",
+                            "commit_hash",
+                            "commit_message",
+                            "committers",
+                            "created_at",
+                            "html_url",
+                            "id",
+                            "organization_id",
+                            "organization_slug",
+                            "pull_request",
+                            "repository_id",
+                            "repository_slug",
+                            "updated_at"
+                          ]
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "external_href": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "merge": {
+                          "type": "boolean",
+                          "default": false,
+                          "description": ""
+                        },
+                        "html_url": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "api_url": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "artifacts": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "added": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/SocketDiffArtifact"
+                              },
+                              "description": ""
+                            },
+                            "removed": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/SocketDiffArtifact"
+                              },
+                              "description": ""
+                            },
+                            "unchanged": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/SocketDiffArtifact"
+                              },
+                              "description": ""
+                            },
+                            "replaced": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/SocketDiffArtifact"
+                              },
+                              "description": ""
+                            },
+                            "updated": {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/components/schemas/SocketDiffArtifact"
+                              },
+                              "description": ""
+                            }
+                          },
+                          "required": [
+                            "added",
+                            "removed",
+                            "replaced",
+                            "unchanged",
+                            "updated"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "after_full_scan",
+                        "api_url",
+                        "artifacts",
+                        "before_full_scan",
+                        "created_at",
+                        "description",
+                        "external_href",
+                        "html_url",
+                        "id",
+                        "merge",
+                        "organization_id",
+                        "repository_id",
+                        "updated_at"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "diff_scan"
+                  ]
+                }
+              }
+            },
+            "description": "The difference between the two Full Scans in the diff scan."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      },
+      "delete": {
+        "tags": [
+          "Diff Scans"
+        ],
+        "summary": "Delete diff scan",
+        "operationId": "deleteOrgDiffScan",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "diff_scan_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the diff scan",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [
+              "diff-scans:delete"
+            ]
+          },
+          {
+            "basicAuth": [
+              "diff-scans:delete"
+            ]
+          }
+        ],
+        "description": "Delete an existing diff scan.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- diff-scans:delete",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "",
+                      "default": "ok"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/diff-scans/{diff_scan_id}/gfm": {
+      "get": {
+        "tags": [
+          "Diff Scans"
+        ],
+        "summary": "SCM Comment for Diff Scan",
+        "operationId": "GetDiffScanGfm",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "diff_scan_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the diff scan",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [
+              "diff-scans:list"
+            ]
+          },
+          {
+            "basicAuth": [
+              "diff-scans:list"
+            ]
+          }
+        ],
+        "description": "Get the dependency overview and dependency alert comments in GitHub flavored markdown for an existing diff scan.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- diff-scans:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "diff_scan": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "organization_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "repository_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "before_full_scan": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "branch": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_message": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_hash": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "pull_request": {
+                              "type": "integer",
+                              "description": "",
+                              "default": 0,
+                              "nullable": true
+                            },
+                            "committers": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": ""
+                            },
+                            "html_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "api_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "api_url",
+                            "branch",
+                            "commit_hash",
+                            "commit_message",
+                            "committers",
+                            "created_at",
+                            "html_url",
+                            "id",
+                            "organization_id",
+                            "organization_slug",
+                            "pull_request",
+                            "repository_id",
+                            "repository_slug",
+                            "updated_at"
+                          ]
+                        },
+                        "after_full_scan": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "branch": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_message": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_hash": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "pull_request": {
+                              "type": "integer",
+                              "description": "",
+                              "default": 0,
+                              "nullable": true
+                            },
+                            "committers": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": ""
+                            },
+                            "html_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "api_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "api_url",
+                            "branch",
+                            "commit_hash",
+                            "commit_message",
+                            "committers",
+                            "created_at",
+                            "html_url",
+                            "id",
+                            "organization_id",
+                            "organization_slug",
+                            "pull_request",
+                            "repository_id",
+                            "repository_slug",
+                            "updated_at"
+                          ]
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "external_href": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "merge": {
+                          "type": "boolean",
+                          "default": false,
+                          "description": ""
+                        },
+                        "html_url": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "api_url": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "gfm": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "overview": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "alerts": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            }
+                          },
+                          "required": [
+                            "alerts",
+                            "overview"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "after_full_scan",
+                        "api_url",
+                        "before_full_scan",
+                        "created_at",
+                        "description",
+                        "external_href",
+                        "gfm",
+                        "html_url",
+                        "id",
+                        "merge",
+                        "organization_id",
+                        "repository_id",
+                        "updated_at"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "diff_scan"
+                  ]
+                }
+              }
+            },
+            "description": "Metadata about the full scans and the dependency overview and dependency alert comment. Can be used in a pull request context."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/diff-scans/from-repo/{repo_slug}": {
+      "post": {
+        "tags": [
+          "Diff Scans"
+        ],
+        "summary": "Create diff scan from repository HEAD full-scan",
+        "operationId": "createOrgRepoDiff",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repo_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the repository",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "required": false,
+            "description": "A description of the diff scan. This will be used in the diff report and can be used to provide context for the changes made.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "external_href",
+            "in": "query",
+            "required": false,
+            "description": "An external URL to associate with the diff scan. This can be a link to a pull request, issue, or any other relevant resource.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "branch",
+            "in": "query",
+            "required": false,
+            "description": "The branch name to associate the new full-scan with. Branch names must follow Git branch name rules: be 1–255 characters long; cannot be exactly @;  cannot begin or end with /, ., or .lock; cannot contain \"//\", \"..\", or \"@{\"; and cannot include control characters, spaces, or any of ~^:?*[.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "commit_message",
+            "in": "query",
+            "required": false,
+            "description": "The commit message to associate the new full-scan with.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "commit_hash",
+            "in": "query",
+            "required": false,
+            "description": "The commit hash to associate the full-scan with.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pull_request",
+            "in": "query",
+            "required": false,
+            "description": "The pull request number to associate the new full-scan with.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "committers",
+            "in": "query",
+            "required": false,
+            "description": "The committers to associate the new full-scan with. Set query more than once to set multiple committers.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "integration_type",
+            "in": "query",
+            "required": false,
+            "description": "The integration type to associate the new full-scan with. Defaults to \"api\" if omitted.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "api",
+                "github",
+                "gitlab",
+                "bitbucket",
+                "azure"
+              ]
+            }
+          },
+          {
+            "name": "integration_org_slug",
+            "in": "query",
+            "required": false,
+            "description": "The integration org slug to associate the new full-scan with. If omitted, the Socket org name will be used. This is used to generate links and badges.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "merge",
+            "in": "query",
+            "required": false,
+            "description": "Set to true when running a diff between a merged commit and its parent commit in the same branch. Set to false when running diffs in an open PR between unmerged commits.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string",
+                  "default": {
+                    "type": "Buffer",
+                    "data": []
+                  },
+                  "format": "binary",
+                  "description": ""
+                },
+                "properties": {},
+                "description": ""
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "repo:list",
+              "diff-scans:create",
+              "full-scans:create"
+            ]
+          },
+          {
+            "basicAuth": [
+              "repo:list",
+              "diff-scans:create",
+              "full-scans:create"
+            ]
+          }
+        ],
+        "description": "Create a diff scan between the repository's current HEAD full scan and a new full scan from uploaded manifest files.\nReturns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from\nthe [api_url](/reference/getDiffScanById) URL to get the contents of the diff.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n      - repo:list\n- diff-scans:create\n- full-scans:create",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "diff_scan": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "organization_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "repository_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "before_full_scan": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "branch": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_message": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_hash": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "pull_request": {
+                              "type": "integer",
+                              "description": "",
+                              "default": 0,
+                              "nullable": true
+                            },
+                            "committers": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": ""
+                            },
+                            "html_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "api_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "api_url",
+                            "branch",
+                            "commit_hash",
+                            "commit_message",
+                            "committers",
+                            "created_at",
+                            "html_url",
+                            "id",
+                            "organization_id",
+                            "organization_slug",
+                            "pull_request",
+                            "repository_id",
+                            "repository_slug",
+                            "updated_at"
+                          ]
+                        },
+                        "after_full_scan": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "branch": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_message": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_hash": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "pull_request": {
+                              "type": "integer",
+                              "description": "",
+                              "default": 0,
+                              "nullable": true
+                            },
+                            "committers": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": ""
+                            },
+                            "html_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "api_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "api_url",
+                            "branch",
+                            "commit_hash",
+                            "commit_message",
+                            "committers",
+                            "created_at",
+                            "html_url",
+                            "id",
+                            "organization_id",
+                            "organization_slug",
+                            "pull_request",
+                            "repository_id",
+                            "repository_slug",
+                            "updated_at"
+                          ]
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "external_href": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "merge": {
+                          "type": "boolean",
+                          "default": false,
+                          "description": ""
+                        },
+                        "html_url": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "api_url": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "after_full_scan",
+                        "api_url",
+                        "before_full_scan",
+                        "created_at",
+                        "description",
+                        "external_href",
+                        "html_url",
+                        "id",
+                        "merge",
+                        "organization_id",
+                        "repository_id",
+                        "updated_at"
+                      ]
+                    },
+                    "unmatchedAfterFiles": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "description": ""
+                    }
+                  },
+                  "required": [
+                    "diff_scan",
+                    "unmatchedAfterFiles"
+                  ]
+                }
+              }
+            },
+            "description": "The details of the new full scan and diff scan between the two scans."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/diff-scans/from-ids": {
+      "post": {
+        "tags": [
+          "Diff Scans"
+        ],
+        "summary": "Create diff scan from full scan IDs",
+        "operationId": "createOrgDiffScanFromIds",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": true,
+            "description": "The ID of the before/base full scan (older)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": true,
+            "description": "The ID of the after/head full scan (newer)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "required": false,
+            "description": "A description of the diff scan. This will be used in the diff report and can be used to provide context for the changes made.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "external_href",
+            "in": "query",
+            "required": false,
+            "description": "An external URL to associate with the diff scan. This can be a link to a pull request, issue, or any other relevant resource.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "merge",
+            "in": "query",
+            "required": false,
+            "description": "Set to true when running a diff between a merged commit and its parent commit in the same branch. Set to false when running diffs in an open PR between unmerged commits.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [
+              "diff-scans:create",
+              "full-scans:list"
+            ]
+          },
+          {
+            "basicAuth": [
+              "diff-scans:create",
+              "full-scans:list"
+            ]
+          }
+        ],
+        "description": "Create a diff scan from two existing full scan IDs. The full scans must be in the same repository.\nReturns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from\nthe [api_url](/reference/getDiffScanById) URL to get the contents of the diff.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n      - diff-scans:create\n- full-scans:list",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "diff_scan": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "organization_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "repository_id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "before_full_scan": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "branch": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_message": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_hash": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "pull_request": {
+                              "type": "integer",
+                              "description": "",
+                              "default": 0,
+                              "nullable": true
+                            },
+                            "committers": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": ""
+                            },
+                            "html_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "api_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "api_url",
+                            "branch",
+                            "commit_hash",
+                            "commit_message",
+                            "committers",
+                            "created_at",
+                            "html_url",
+                            "id",
+                            "organization_id",
+                            "organization_slug",
+                            "pull_request",
+                            "repository_id",
+                            "repository_slug",
+                            "updated_at"
+                          ]
+                        },
+                        "after_full_scan": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "branch": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_message": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_hash": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "pull_request": {
+                              "type": "integer",
+                              "description": "",
+                              "default": 0,
+                              "nullable": true
+                            },
+                            "committers": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": ""
+                            },
+                            "html_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "api_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "api_url",
+                            "branch",
+                            "commit_hash",
+                            "commit_message",
+                            "committers",
+                            "created_at",
+                            "html_url",
+                            "id",
+                            "organization_id",
+                            "organization_slug",
+                            "pull_request",
+                            "repository_id",
+                            "repository_slug",
+                            "updated_at"
+                          ]
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "external_href": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "merge": {
+                          "type": "boolean",
+                          "default": false,
+                          "description": ""
+                        },
+                        "html_url": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "api_url": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "after_full_scan",
+                        "api_url",
+                        "before_full_scan",
+                        "created_at",
+                        "description",
+                        "external_href",
+                        "html_url",
+                        "id",
+                        "merge",
+                        "organization_id",
+                        "repository_id",
+                        "updated_at"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "diff_scan"
+                  ]
+                }
+              }
+            },
+            "description": "The details of the created diff scan."
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -17129,6 +19377,10 @@
                         "full-scans:list",
                         "full-scans:create",
                         "full-scans:delete",
+                        "diff-scans",
+                        "diff-scans:list",
+                        "diff-scans:create",
+                        "diff-scans:delete",
                         "historical",
                         "historical:snapshots-list",
                         "historical:snapshots-start",
@@ -17474,6 +19726,10 @@
                                 "full-scans:list",
                                 "full-scans:create",
                                 "full-scans:delete",
+                                "diff-scans",
+                                "diff-scans:list",
+                                "diff-scans:create",
+                                "diff-scans:delete",
                                 "historical",
                                 "historical:snapshots-list",
                                 "historical:snapshots-start",
@@ -17630,6 +19886,10 @@
                         "full-scans:list",
                         "full-scans:create",
                         "full-scans:delete",
+                        "diff-scans",
+                        "diff-scans:list",
+                        "diff-scans:create",
+                        "diff-scans:delete",
                         "historical",
                         "historical:snapshots-list",
                         "historical:snapshots-start",
@@ -27426,6 +29686,7 @@
               "type": "string",
               "enum": [
                 "github",
+                "cargo",
                 "golang",
                 "maven",
                 "npm",
@@ -27702,6 +29963,7 @@
               "type": "string",
               "enum": [
                 "github",
+                "cargo",
                 "golang",
                 "maven",
                 "npm",
