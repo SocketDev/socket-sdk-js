@@ -171,7 +171,9 @@ export default [
   includeIgnoreFile(gitignorePath),
   {
     name: 'Imported biome.json ignore patterns',
-    ignores: biomeConfig.files.ignore.map(convertIgnorePatternToMinimatch)
+    ignores: biomeConfig.files.includes
+      .filter(p => p.startsWith('!'))
+      .map(p => convertIgnorePatternToMinimatch(p.slice(1)))
   },
   {
     files: ['**/*.{cts,mts,ts}'],
