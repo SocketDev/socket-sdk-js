@@ -559,7 +559,7 @@ export class SocketSdk {
       promise: Promise<GeneratorStep>
     }
 
-    const { chunkSize = 500, concurrencyLimit = 10 } = {
+    const { chunkSize = 100, concurrencyLimit = 10 } = {
       __proto__: null,
       ...options
     } as BatchPackageStreamOptions
