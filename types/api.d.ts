@@ -525,7 +525,10 @@ export interface paths {
   '/orgs/{org_slug}/full-scans/diff': {
     /**
      * Diff Full Scans
-     * @description Get the difference between two Full Scans.
+     * @deprecated
+     * @description **This endpoint is deprecated.**
+     *
+     * Get the difference between two existing Full Scans. The results are not persisted.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -537,7 +540,10 @@ export interface paths {
   '/orgs/{org_slug}/full-scans/diff/gfm': {
     /**
      * SCM Comment for Scan Diff
-     * @description Get the dependency overview and dependency alert comments in GitHub flavored markdown between the diff between two existing full scans.
+     * @deprecated
+     * @description **This endpoint is deprecated.**
+     *
+     * Get the dependency overview and dependency alert comments in GitHub flavored markdown between the diff between two existing full scans.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -545,6 +551,83 @@ export interface paths {
      * - full-scans:list
      */
     get: operations['GetOrgFullScanDiffGfm']
+  }
+  '/orgs/{org_slug}/diff-scans': {
+    /**
+     * List diff scans
+     * @description Returns a paginated list of all diff scans in an organization.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - diff-scans:list
+     */
+    get: operations['listOrgDiffScans']
+  }
+  '/orgs/{org_slug}/diff-scans/{diff_scan_id}': {
+    /**
+     * Get diff scan
+     * @description Get the difference between two full scans from an existing diff scan resource.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - diff-scans:list
+     */
+    get: operations['getDiffScanById']
+    /**
+     * Delete diff scan
+     * @description Delete an existing diff scan.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - diff-scans:delete
+     */
+    delete: operations['deleteOrgDiffScan']
+  }
+  '/orgs/{org_slug}/diff-scans/{diff_scan_id}/gfm': {
+    /**
+     * SCM Comment for Diff Scan
+     * @description Get the dependency overview and dependency alert comments in GitHub flavored markdown for an existing diff scan.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - diff-scans:list
+     */
+    get: operations['GetDiffScanGfm']
+  }
+  '/orgs/{org_slug}/diff-scans/from-repo/{repo_slug}': {
+    /**
+     * Create diff scan from repository HEAD full-scan
+     * @description Create a diff scan between the repository's current HEAD full scan and a new full scan from uploaded manifest files.
+     * Returns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from
+     * the [api_url](/reference/getDiffScanById) URL to get the contents of the diff.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     *       - repo:list
+     * - diff-scans:create
+     * - full-scans:create
+     */
+    post: operations['createOrgRepoDiff']
+  }
+  '/orgs/{org_slug}/diff-scans/from-ids': {
+    /**
+     * Create diff scan from full scan IDs
+     * @description Create a diff scan from two existing full scan IDs. The full scans must be in the same repository.
+     * Returns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from
+     * the [api_url](/reference/getDiffScanById) URL to get the contents of the diff.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     *       - diff-scans:create
+     * - full-scans:list
+     */
+    post: operations['createOrgDiffScanFromIds']
   }
   '/orgs/{org_slug}/repos': {
     /**
@@ -1635,6 +1718,20 @@ export interface components {
       props?: Record<string, never>
       /** @default */
       action?: string
+      actionSource?: {
+        /** @default */
+        type: string
+        candidates: Array<{
+          /** @default */
+          type: string
+          /** @default */
+          action: string
+          /** @default 0 */
+          actionPolicyIndex: number
+          /** @default */
+          repoLabelId: string
+        }>
+      }
       /** @default 0 */
       actionPolicyIndex?: number
       fix?: {
@@ -4353,17 +4450,23 @@ export interface operations {
               organization_slug?: string
               /** @default */
               repository_id?: string
+              /** @default */
+              repository_slug?: string
+              /** @default */
+              branch?: string | null
+              /** @default */
+              commit_message?: string | null
+              /** @default */
+              commit_hash?: string | null
+              /** @default 0 */
+              pull_request?: number | null
               committers?: string[]
               /** @default */
+              html_url?: string | null
+              /** @default */
+              api_url?: string | null
+              /** @default */
               repo?: string
-              /** @default */
-              branch?: string
-              /** @default */
-              commit_message?: string
-              /** @default */
-              commit_hash?: string
-              /** @default 0 */
-              pull_request?: number
               /** @default */
               html_report_url?: string
               /** @default */
@@ -4445,7 +4548,7 @@ export interface operations {
       }
     }
     responses: {
-      /** @description Upload manifest files to create a full scan in an org's repo */
+      /** @description The details of the created full scan. */
       201: {
         content: {
           'application/json': {
@@ -4461,17 +4564,23 @@ export interface operations {
             organization_slug?: string
             /** @default */
             repository_id?: string
+            /** @default */
+            repository_slug?: string
+            /** @default */
+            branch?: string | null
+            /** @default */
+            commit_message?: string | null
+            /** @default */
+            commit_hash?: string | null
+            /** @default 0 */
+            pull_request?: number | null
             committers?: string[]
             /** @default */
+            html_url?: string | null
+            /** @default */
+            api_url?: string | null
+            /** @default */
             repo?: string
-            /** @default */
-            branch?: string
-            /** @default */
-            commit_message?: string
-            /** @default */
-            commit_hash?: string
-            /** @default 0 */
-            pull_request?: number
             /** @default */
             html_report_url?: string
             /** @default */
@@ -4490,6 +4599,7 @@ export interface operations {
              * @enum {string|null}
              */
             scan_state?: 'pending' | 'precrawl' | 'resolve' | 'scan' | null
+            unmatchedFiles?: string[]
           }
         }
       }
@@ -4514,13 +4624,13 @@ export interface operations {
    */
   getOrgFullScan: {
     parameters: {
-      query?: {
+      query: {
         /** @description Control which alert priority fields to include in the response. Set to "true" to include all fields, "false" to exclude all fields, or specify individual fields like "components,formula" to include only those fields. */
         include_alert_priority_details?:
           | boolean
           | Array<'component' | 'formula'>
         /** @description Include license details in the response. This can increase the response size significantly. */
-        include_license_details?: boolean
+        include_license_details: boolean
       }
       path: {
         /** @description The slug of the organization */
@@ -4613,17 +4723,23 @@ export interface operations {
             organization_slug?: string
             /** @default */
             repository_id?: string
+            /** @default */
+            repository_slug?: string
+            /** @default */
+            branch?: string | null
+            /** @default */
+            commit_message?: string | null
+            /** @default */
+            commit_hash?: string | null
+            /** @default 0 */
+            pull_request?: number | null
             committers?: string[]
             /** @default */
+            html_url?: string | null
+            /** @default */
+            api_url?: string | null
+            /** @default */
             repo?: string
-            /** @default */
-            branch?: string
-            /** @default */
-            commit_message?: string
-            /** @default */
-            commit_hash?: string
-            /** @default 0 */
-            pull_request?: number
             /** @default */
             html_report_url?: string
             /** @default */
@@ -4654,7 +4770,10 @@ export interface operations {
   }
   /**
    * Diff Full Scans
-   * @description Get the difference between two Full Scans.
+   * @deprecated
+   * @description **This endpoint is deprecated.**
+   *
+   * Get the difference between two existing Full Scans. The results are not persisted.
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -4683,13 +4802,21 @@ export interface operations {
           'application/json': {
             before: {
               /** @default */
+              id: string
+              /** @default */
+              created_at: string
+              /** @default */
+              updated_at: string
+              /** @default */
+              organization_id: string
+              /** @default */
+              organization_slug: string
+              /** @default */
               repository_id: string
               /** @default */
               repository_slug: string
               /** @default */
               branch: string | null
-              /** @default */
-              id: string
               /** @default */
               commit_message: string | null
               /** @default */
@@ -4698,19 +4825,27 @@ export interface operations {
               pull_request: number | null
               committers: string[]
               /** @default */
-              organization_id: string
+              html_url: string | null
               /** @default */
-              organization_slug: string
+              api_url: string | null
             }
             after: {
               /** @default */
+              id: string
+              /** @default */
+              created_at: string
+              /** @default */
+              updated_at: string
+              /** @default */
+              organization_id: string
+              /** @default */
+              organization_slug: string
+              /** @default */
               repository_id: string
               /** @default */
               repository_slug: string
               /** @default */
               branch: string | null
-              /** @default */
-              id: string
               /** @default */
               commit_message: string | null
               /** @default */
@@ -4719,9 +4854,9 @@ export interface operations {
               pull_request: number | null
               committers: string[]
               /** @default */
-              organization_id: string
+              html_url: string | null
               /** @default */
-              organization_slug: string
+              api_url: string | null
             }
             artifacts: {
               added: Array<components['schemas']['SocketDiffArtifact']>
@@ -4746,7 +4881,10 @@ export interface operations {
   }
   /**
    * SCM Comment for Scan Diff
-   * @description Get the dependency overview and dependency alert comments in GitHub flavored markdown between the diff between two existing full scans.
+   * @deprecated
+   * @description **This endpoint is deprecated.**
+   *
+   * Get the dependency overview and dependency alert comments in GitHub flavored markdown between the diff between two existing full scans.
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -4773,13 +4911,21 @@ export interface operations {
           'application/json': {
             before: {
               /** @default */
+              id: string
+              /** @default */
+              created_at: string
+              /** @default */
+              updated_at: string
+              /** @default */
+              organization_id: string
+              /** @default */
+              organization_slug: string
+              /** @default */
               repository_id: string
               /** @default */
               repository_slug: string
               /** @default */
               branch: string | null
-              /** @default */
-              id: string
               /** @default */
               commit_message: string | null
               /** @default */
@@ -4788,19 +4934,27 @@ export interface operations {
               pull_request: number | null
               committers: string[]
               /** @default */
-              organization_id: string
+              html_url: string | null
               /** @default */
-              organization_slug: string
+              api_url: string | null
             }
             after: {
               /** @default */
+              id: string
+              /** @default */
+              created_at: string
+              /** @default */
+              updated_at: string
+              /** @default */
+              organization_id: string
+              /** @default */
+              organization_slug: string
+              /** @default */
               repository_id: string
               /** @default */
               repository_slug: string
               /** @default */
               branch: string | null
-              /** @default */
-              id: string
               /** @default */
               commit_message: string | null
               /** @default */
@@ -4809,9 +4963,9 @@ export interface operations {
               pull_request: number | null
               committers: string[]
               /** @default */
-              organization_id: string
+              html_url: string | null
               /** @default */
-              organization_slug: string
+              api_url: string | null
             }
             comments: {
               /** @default */
@@ -4823,6 +4977,634 @@ export interface operations {
             directDependenciesChanged: boolean
             /** @default */
             diff_report_url: string | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * List diff scans
+   * @description Returns a paginated list of all diff scans in an organization.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - diff-scans:list
+   */
+  listOrgDiffScans: {
+    parameters: {
+      query?: {
+        /** @description Specify sort field. */
+        sort?: 'created_at' | 'updated_at'
+        /** @description Specify sort direction. */
+        direction?: 'asc' | 'desc'
+        /** @description Specify the maximum number of results to return per page. */
+        per_page?: number
+        /** @description Cursor for pagination. Use the next_cursor or prev_cursor from previous responses. */
+        cursor?: string
+        /** @description Filter by repository ID. */
+        repository_id?: string
+        /** @description Filter by before full scan ID. */
+        before_full_scan_id?: string
+        /** @description Filter by after full scan ID. */
+        after_full_scan_id?: string
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    responses: {
+      /** @description Lists diff scans for the specified organization. */
+      200: {
+        content: {
+          'application/json': {
+            results: Array<{
+              /** @default */
+              id: string
+              /** @default */
+              organization_id: string
+              /** @default */
+              repository_id: string
+              /** @default */
+              created_at: string
+              /** @default */
+              updated_at: string
+              /** @default */
+              before_full_scan_id: string
+              /** @default */
+              after_full_scan_id: string
+              /** @default */
+              description: string | null
+              /** @default */
+              external_href: string | null
+              /** @default false */
+              merge: boolean
+              /** @default */
+              html_url: string | null
+              /** @default */
+              api_url: string | null
+            }>
+            /** @default */
+            next_page_href: string | null
+            /** @default */
+            next_cursor: string | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Get diff scan
+   * @description Get the difference between two full scans from an existing diff scan resource.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - diff-scans:list
+   */
+  getDiffScanById: {
+    parameters: {
+      query?: {
+        /** @description Omit license details in the response. This can reduce the size of the response significantly, but will not include license information for the artifacts. */
+        omit_license_details?: boolean
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The ID of the diff scan */
+        diff_scan_id: string
+      }
+    }
+    responses: {
+      /** @description The difference between the two Full Scans in the diff scan. */
+      200: {
+        content: {
+          'application/json': {
+            diff_scan: {
+              /** @default */
+              id: string
+              /** @default */
+              organization_id: string
+              /** @default */
+              repository_id: string
+              /** @default */
+              created_at: string
+              /** @default */
+              updated_at: string
+              before_full_scan: {
+                /** @default */
+                id: string
+                /** @default */
+                created_at: string
+                /** @default */
+                updated_at: string
+                /** @default */
+                organization_id: string
+                /** @default */
+                organization_slug: string
+                /** @default */
+                repository_id: string
+                /** @default */
+                repository_slug: string
+                /** @default */
+                branch: string | null
+                /** @default */
+                commit_message: string | null
+                /** @default */
+                commit_hash: string | null
+                /** @default 0 */
+                pull_request: number | null
+                committers: string[]
+                /** @default */
+                html_url: string | null
+                /** @default */
+                api_url: string | null
+              }
+              after_full_scan: {
+                /** @default */
+                id: string
+                /** @default */
+                created_at: string
+                /** @default */
+                updated_at: string
+                /** @default */
+                organization_id: string
+                /** @default */
+                organization_slug: string
+                /** @default */
+                repository_id: string
+                /** @default */
+                repository_slug: string
+                /** @default */
+                branch: string | null
+                /** @default */
+                commit_message: string | null
+                /** @default */
+                commit_hash: string | null
+                /** @default 0 */
+                pull_request: number | null
+                committers: string[]
+                /** @default */
+                html_url: string | null
+                /** @default */
+                api_url: string | null
+              }
+              /** @default */
+              description: string | null
+              /** @default */
+              external_href: string | null
+              /** @default false */
+              merge: boolean
+              /** @default */
+              html_url: string | null
+              /** @default */
+              api_url: string | null
+              artifacts: {
+                added: Array<components['schemas']['SocketDiffArtifact']>
+                removed: Array<components['schemas']['SocketDiffArtifact']>
+                unchanged: Array<components['schemas']['SocketDiffArtifact']>
+                replaced: Array<components['schemas']['SocketDiffArtifact']>
+                updated: Array<components['schemas']['SocketDiffArtifact']>
+              }
+            }
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Delete diff scan
+   * @description Delete an existing diff scan.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - diff-scans:delete
+   */
+  deleteOrgDiffScan: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The ID of the diff scan */
+        diff_scan_id: string
+      }
+    }
+    responses: {
+      /** @description Success */
+      200: {
+        content: {
+          'application/json': {
+            /** @default ok */
+            status: string
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * SCM Comment for Diff Scan
+   * @description Get the dependency overview and dependency alert comments in GitHub flavored markdown for an existing diff scan.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - diff-scans:list
+   */
+  GetDiffScanGfm: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The ID of the diff scan */
+        diff_scan_id: string
+      }
+    }
+    responses: {
+      /** @description Metadata about the full scans and the dependency overview and dependency alert comment. Can be used in a pull request context. */
+      200: {
+        content: {
+          'application/json': {
+            diff_scan: {
+              /** @default */
+              id: string
+              /** @default */
+              organization_id: string
+              /** @default */
+              repository_id: string
+              /** @default */
+              created_at: string
+              /** @default */
+              updated_at: string
+              before_full_scan: {
+                /** @default */
+                id: string
+                /** @default */
+                created_at: string
+                /** @default */
+                updated_at: string
+                /** @default */
+                organization_id: string
+                /** @default */
+                organization_slug: string
+                /** @default */
+                repository_id: string
+                /** @default */
+                repository_slug: string
+                /** @default */
+                branch: string | null
+                /** @default */
+                commit_message: string | null
+                /** @default */
+                commit_hash: string | null
+                /** @default 0 */
+                pull_request: number | null
+                committers: string[]
+                /** @default */
+                html_url: string | null
+                /** @default */
+                api_url: string | null
+              }
+              after_full_scan: {
+                /** @default */
+                id: string
+                /** @default */
+                created_at: string
+                /** @default */
+                updated_at: string
+                /** @default */
+                organization_id: string
+                /** @default */
+                organization_slug: string
+                /** @default */
+                repository_id: string
+                /** @default */
+                repository_slug: string
+                /** @default */
+                branch: string | null
+                /** @default */
+                commit_message: string | null
+                /** @default */
+                commit_hash: string | null
+                /** @default 0 */
+                pull_request: number | null
+                committers: string[]
+                /** @default */
+                html_url: string | null
+                /** @default */
+                api_url: string | null
+              }
+              /** @default */
+              description: string | null
+              /** @default */
+              external_href: string | null
+              /** @default false */
+              merge: boolean
+              /** @default */
+              html_url: string | null
+              /** @default */
+              api_url: string | null
+              gfm: {
+                /** @default */
+                overview: string
+                /** @default */
+                alerts: string
+              }
+            }
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Create diff scan from repository HEAD full-scan
+   * @description Create a diff scan between the repository's current HEAD full scan and a new full scan from uploaded manifest files.
+   * Returns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from
+   * the [api_url](/reference/getDiffScanById) URL to get the contents of the diff.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   *       - repo:list
+   * - diff-scans:create
+   * - full-scans:create
+   */
+  createOrgRepoDiff: {
+    parameters: {
+      query?: {
+        /** @description A description of the diff scan. This will be used in the diff report and can be used to provide context for the changes made. */
+        description?: string
+        /** @description An external URL to associate with the diff scan. This can be a link to a pull request, issue, or any other relevant resource. */
+        external_href?: string
+        /** @description The branch name to associate the new full-scan with. Branch names must follow Git branch name rules: be 1–255 characters long; cannot be exactly @;  cannot begin or end with /, ., or .lock; cannot contain "//", "..", or "@{"; and cannot include control characters, spaces, or any of ~^:?*[. */
+        branch?: string
+        /** @description The commit message to associate the new full-scan with. */
+        commit_message?: string
+        /** @description The commit hash to associate the full-scan with. */
+        commit_hash?: string
+        /** @description The pull request number to associate the new full-scan with. */
+        pull_request?: number
+        /** @description The committers to associate the new full-scan with. Set query more than once to set multiple committers. */
+        committers?: string
+        /** @description The integration type to associate the new full-scan with. Defaults to "api" if omitted. */
+        integration_type?: 'api' | 'github' | 'gitlab' | 'bitbucket' | 'azure'
+        /** @description The integration org slug to associate the new full-scan with. If omitted, the Socket org name will be used. This is used to generate links and badges. */
+        integration_org_slug?: string
+        /** @description Set to true when running a diff between a merged commit and its parent commit in the same branch. Set to false when running diffs in an open PR between unmerged commits. */
+        merge?: boolean
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The slug of the repository */
+        repo_slug: string
+      }
+    }
+    requestBody?: {
+      content: {
+        'multipart/form-data': {
+          [key: string]: never
+        }
+      }
+    }
+    responses: {
+      /** @description The details of the new full scan and diff scan between the two scans. */
+      201: {
+        content: {
+          'application/json': {
+            diff_scan: {
+              /** @default */
+              id: string
+              /** @default */
+              organization_id: string
+              /** @default */
+              repository_id: string
+              /** @default */
+              created_at: string
+              /** @default */
+              updated_at: string
+              before_full_scan: {
+                /** @default */
+                id: string
+                /** @default */
+                created_at: string
+                /** @default */
+                updated_at: string
+                /** @default */
+                organization_id: string
+                /** @default */
+                organization_slug: string
+                /** @default */
+                repository_id: string
+                /** @default */
+                repository_slug: string
+                /** @default */
+                branch: string | null
+                /** @default */
+                commit_message: string | null
+                /** @default */
+                commit_hash: string | null
+                /** @default 0 */
+                pull_request: number | null
+                committers: string[]
+                /** @default */
+                html_url: string | null
+                /** @default */
+                api_url: string | null
+              }
+              after_full_scan: {
+                /** @default */
+                id: string
+                /** @default */
+                created_at: string
+                /** @default */
+                updated_at: string
+                /** @default */
+                organization_id: string
+                /** @default */
+                organization_slug: string
+                /** @default */
+                repository_id: string
+                /** @default */
+                repository_slug: string
+                /** @default */
+                branch: string | null
+                /** @default */
+                commit_message: string | null
+                /** @default */
+                commit_hash: string | null
+                /** @default 0 */
+                pull_request: number | null
+                committers: string[]
+                /** @default */
+                html_url: string | null
+                /** @default */
+                api_url: string | null
+              }
+              /** @default */
+              description: string | null
+              /** @default */
+              external_href: string | null
+              /** @default false */
+              merge: boolean
+              /** @default */
+              html_url: string | null
+              /** @default */
+              api_url: string | null
+            }
+            unmatchedAfterFiles: string[]
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Create diff scan from full scan IDs
+   * @description Create a diff scan from two existing full scan IDs. The full scans must be in the same repository.
+   * Returns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from
+   * the [api_url](/reference/getDiffScanById) URL to get the contents of the diff.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   *       - diff-scans:create
+   * - full-scans:list
+   */
+  createOrgDiffScanFromIds: {
+    parameters: {
+      query: {
+        /** @description The ID of the before/base full scan (older) */
+        before: string
+        /** @description The ID of the after/head full scan (newer) */
+        after: string
+        /** @description A description of the diff scan. This will be used in the diff report and can be used to provide context for the changes made. */
+        description?: string
+        /** @description An external URL to associate with the diff scan. This can be a link to a pull request, issue, or any other relevant resource. */
+        external_href?: string
+        /** @description Set to true when running a diff between a merged commit and its parent commit in the same branch. Set to false when running diffs in an open PR between unmerged commits. */
+        merge?: boolean
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    responses: {
+      /** @description The details of the created diff scan. */
+      201: {
+        content: {
+          'application/json': {
+            diff_scan: {
+              /** @default */
+              id: string
+              /** @default */
+              organization_id: string
+              /** @default */
+              repository_id: string
+              /** @default */
+              created_at: string
+              /** @default */
+              updated_at: string
+              before_full_scan: {
+                /** @default */
+                id: string
+                /** @default */
+                created_at: string
+                /** @default */
+                updated_at: string
+                /** @default */
+                organization_id: string
+                /** @default */
+                organization_slug: string
+                /** @default */
+                repository_id: string
+                /** @default */
+                repository_slug: string
+                /** @default */
+                branch: string | null
+                /** @default */
+                commit_message: string | null
+                /** @default */
+                commit_hash: string | null
+                /** @default 0 */
+                pull_request: number | null
+                committers: string[]
+                /** @default */
+                html_url: string | null
+                /** @default */
+                api_url: string | null
+              }
+              after_full_scan: {
+                /** @default */
+                id: string
+                /** @default */
+                created_at: string
+                /** @default */
+                updated_at: string
+                /** @default */
+                organization_id: string
+                /** @default */
+                organization_slug: string
+                /** @default */
+                repository_id: string
+                /** @default */
+                repository_slug: string
+                /** @default */
+                branch: string | null
+                /** @default */
+                commit_message: string | null
+                /** @default */
+                commit_hash: string | null
+                /** @default 0 */
+                pull_request: number | null
+                committers: string[]
+                /** @default */
+                html_url: string | null
+                /** @default */
+                api_url: string | null
+              }
+              /** @default */
+              description: string | null
+              /** @default */
+              external_href: string | null
+              /** @default false */
+              merge: boolean
+              /** @default */
+              html_url: string | null
+              /** @default */
+              api_url: string | null
+            }
           }
         }
       }
@@ -7451,6 +8233,10 @@ export interface operations {
                 | 'full-scans:list'
                 | 'full-scans:create'
                 | 'full-scans:delete'
+                | 'diff-scans'
+                | 'diff-scans:list'
+                | 'diff-scans:create'
+                | 'diff-scans:delete'
                 | 'historical'
                 | 'historical:snapshots-list'
                 | 'historical:snapshots-start'
@@ -7554,6 +8340,10 @@ export interface operations {
             | 'full-scans:list'
             | 'full-scans:create'
             | 'full-scans:delete'
+            | 'diff-scans'
+            | 'diff-scans:list'
+            | 'diff-scans:create'
+            | 'diff-scans:delete'
             | 'historical'
             | 'historical:snapshots-list'
             | 'historical:snapshots-start'
@@ -7679,6 +8469,10 @@ export interface operations {
             | 'full-scans:list'
             | 'full-scans:create'
             | 'full-scans:delete'
+            | 'diff-scans'
+            | 'diff-scans:list'
+            | 'diff-scans:create'
+            | 'diff-scans:delete'
             | 'historical'
             | 'historical:snapshots-list'
             | 'historical:snapshots-start'
@@ -11016,6 +11810,7 @@ export interface operations {
         /** @description Filter threats by package ecosystem type */
         ecosystem?:
           | 'github'
+          | 'cargo'
           | 'golang'
           | 'maven'
           | 'npm'
@@ -11114,6 +11909,7 @@ export interface operations {
         /** @description Filter threats by package ecosystem type */
         ecosystem?:
           | 'github'
+          | 'cargo'
           | 'golang'
           | 'maven'
           | 'npm'
