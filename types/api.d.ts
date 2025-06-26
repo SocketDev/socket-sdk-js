@@ -11149,6 +11149,10 @@ export interface operations {
         'filters.alertActionSourceType'?: string
         /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be included */
         'filters.alertActionSourceType.notIn'?: string
+        /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
+        'filters.alertFixType'?: string
+        /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
+        'filters.alertFixType.notIn'?: string
         /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
         'filters.alertCategory'?: string
         /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
@@ -11310,6 +11314,8 @@ export interface operations {
                 alertAction?: string[]
                 /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be included */
                 alertActionSourceType?: string[]
+                /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
+                alertFixType?: string[]
                 /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
                 alertCategory?: string[]
                 /** @description CVE ID */
@@ -11355,7 +11361,7 @@ export interface operations {
         date?: string
         /** @description The number of days of data to fetch as an offset from input date */
         range?: string
-        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertPriority,dependencyDirect,dependencyDev,dependencyDead) */
+        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertPriority,dependencyDirect,dependencyDev,dependencyDead) */
         'aggregation.fields'?: string
         /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
         'filters.alertSeverity'?: string
@@ -11389,6 +11395,10 @@ export interface operations {
         'filters.alertActionSourceType'?: string
         /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be included */
         'filters.alertActionSourceType.notIn'?: string
+        /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
+        'filters.alertFixType'?: string
+        /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
+        'filters.alertFixType.notIn'?: string
         /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
         'filters.alertCategory'?: string
         /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
@@ -11466,6 +11476,8 @@ export interface operations {
                 alertAction?: string[]
                 /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be included */
                 alertActionSourceType?: string[]
+                /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
+                alertFixType?: string[]
                 /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
                 alertCategory?: string[]
                 /** @description CVE ID */
