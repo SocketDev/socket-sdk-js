@@ -403,6 +403,38 @@ export interface paths {
      */
     post: operations['licenseMetadata']
   }
+  '/alert-types': {
+    /**
+     * Alert Types Metadata
+     * @description For an array of alert type identifiers, returns metadata for each alert type. Optionally, specify a language via the 'language' query parameter (default: 'en-US').
+     *
+     * ## Query parameter
+     * - language: string (optional, default: 'en-US')
+     *
+     * Example request body:
+     * [
+     *   "badEncoding",
+     *   "badSemver"
+     * ]
+     *
+     * Example response:
+     * [
+     *   {
+     *     "type": "badEncoding",
+     *     "title": "Bad text encoding",
+     *     "description": "Source files are encoded using a non-standard text encoding.",
+     *     "suggestion": "Ensure all published files are encoded using a standard encoding such as UTF8, UTF16, UTF32, SHIFT-JIS, etc.",
+     *     "emoji": "⚠️",
+     *     "nextStepTitle": "What is bad text encoding?"
+     *   }
+     * ]
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     */
+    post: operations['alertTypes']
+  }
   '/orgs/{org_slug}/audit-log': {
     /**
      * Get Audit Log Events
@@ -1793,6 +1825,8 @@ export interface components {
               result: number
               /** @default false */
               value: boolean
+              /** @default */
+              specificValue: string
             }
             severity: {
               /** @default 0 */
@@ -4174,6 +4208,73 @@ export interface operations {
       200: {
         content: {
           'application/json': components['schemas']['SLicenseMetaRes']
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+    }
+  }
+  /**
+   * Alert Types Metadata
+   * @description For an array of alert type identifiers, returns metadata for each alert type. Optionally, specify a language via the 'language' query parameter (default: 'en-US').
+   *
+   * ## Query parameter
+   * - language: string (optional, default: 'en-US')
+   *
+   * Example request body:
+   * [
+   *   "badEncoding",
+   *   "badSemver"
+   * ]
+   *
+   * Example response:
+   * [
+   *   {
+   *     "type": "badEncoding",
+   *     "title": "Bad text encoding",
+   *     "description": "Source files are encoded using a non-standard text encoding.",
+   *     "suggestion": "Ensure all published files are encoded using a standard encoding such as UTF8, UTF16, UTF32, SHIFT-JIS, etc.",
+   *     "emoji": "⚠️",
+   *     "nextStepTitle": "What is bad text encoding?"
+   *   }
+   * ]
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   */
+  alertTypes: {
+    parameters: {
+      query?: {
+        /** @description Language for alert metadata (default: en-US) */
+        language?: 'ach-UG' | 'de-DE' | 'en-US' | 'es-ES' | 'fr-FR' | 'it-IT'
+      }
+    }
+    requestBody?: {
+      content: {
+        'application/json': string[]
+      }
+    }
+    responses: {
+      /** @description Metadata for the requested alert types */
+      200: {
+        content: {
+          'application/json': Array<{
+            /** @default */
+            type: string
+            /** @default */
+            title: string
+            /** @default */
+            description: string
+            /** @default */
+            suggestion: string
+            /** @default */
+            emoji: string
+            /** @default */
+            nextStepTitle: string
+            props: {
+              [key: string]: string
+            } | null
+          }>
         }
       }
       400: components['responses']['SocketBadRequest']
