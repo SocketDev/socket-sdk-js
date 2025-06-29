@@ -8820,7 +8820,7 @@
             "name": "language",
             "in": "query",
             "required": false,
-            "description": "Language for alert metadata (default: en-US)",
+            "description": "Language for alert metadata",
             "schema": {
               "type": "string",
               "enum": [
@@ -8852,7 +8852,7 @@
           "required": false
         },
         "security": [],
-        "description": "For an array of alert type identifiers, returns metadata for each alert type. Optionally, specify a language via the 'language' query parameter (default: 'en-US').\n\n## Query parameter\n- language: string (optional, default: 'en-US')\n\nExample request body:\n[\n  \"badEncoding\",\n  \"badSemver\"\n]\n\nExample response:\n[\n  {\n    \"type\": \"badEncoding\",\n    \"title\": \"Bad text encoding\",\n    \"description\": \"Source files are encoded using a non-standard text encoding.\",\n    \"suggestion\": \"Ensure all published files are encoded using a standard encoding such as UTF8, UTF16, UTF32, SHIFT-JIS, etc.\",\n    \"emoji\": \"⚠️\",\n    \"nextStepTitle\": \"What is bad text encoding?\"\n  }\n]\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:",
+        "description": "For an array of alert type identifiers, returns metadata for each alert type. Optionally, specify a language via the 'language' query parameter.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:",
         "responses": {
           "200": {
             "content": {
@@ -30660,7 +30660,7 @@
                     "description": "",
                     "default": 50,
                     "minimum": 1,
-                    "maximum": 1000
+                    "maximum": 100
                   },
                   "offset": {
                     "type": "integer",
