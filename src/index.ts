@@ -13,16 +13,40 @@ import rootPkgJson from '../package.json' with { type: 'json' }
 
 import type { operations } from '../types/api'
 import type { OpErrorType, OpReturnType } from '../types/api-helpers'
+import type { ClientHttp2Session } from 'http2-wrapper'
 import type { ReadStream } from 'node:fs'
-import type { ClientRequest, IncomingMessage } from 'node:http'
-import type { Agent, RequestOptions } from 'node:https'
+import type {
+  ClientRequest,
+  Agent as HttpAgent,
+  RequestOptions as HttpRequestOptions,
+  IncomingMessage
+} from 'node:http'
+import type { ClientSessionRequestOptions } from 'node:http2'
+import type {
+  Agent as HttpsAgent,
+  RequestOptions as HttpsRequestOptions
+} from 'node:https'
 
-type BatchPackageFetchResultType = SocketSdkResultType<'batchPackageFetch'>
+export type Agent = HttpsAgent | HttpAgent | ClientHttp2Session
 
-type BatchPackageStreamOptions = {
+export type BatchPackageFetchResultType =
+  SocketSdkResultType<'batchPackageFetch'>
+
+export type BatchPackageStreamOptions = {
   chunkSize: number
   concurrencyLimit: number
 }
+
+export type GotOptions = {
+  http?: HttpAgent | undefined
+  https?: HttpsAgent | undefined
+  http2?: ClientHttp2Session | undefined
+}
+
+export type RequestOptions =
+  | HttpsRequestOptions
+  | HttpRequestOptions
+  | ClientSessionRequestOptions
 
 export type SocketSdkOperations = keyof operations
 
@@ -43,14 +67,7 @@ export type SocketSdkResultType<T extends SocketSdkOperations> =
   | SocketSdkErrorType<T>
 
 export interface SocketSdkOptions {
-  agent?:
-    | Agent
-    | {
-        http?: Agent | undefined
-        https?: Agent | undefined
-        http2?: Agent | undefined
-      }
-    | undefined
+  agent?: Agent | GotOptions | undefined
   baseUrl?: string | undefined
   userAgent?: string | undefined
 }
@@ -183,7 +200,7 @@ async function createUploadRequest(
       method: 'POST',
       ...options,
       headers: {
-        ...options?.headers,
+        ...(options as HttpsRequestOptions)?.headers,
         'Content-Type': `multipart/form-data; boundary=${boundary}`
       }
     })
@@ -407,9 +424,12 @@ export class SocketSdk {
       userAgent
     } = { __proto__: null, ...options } as SocketSdkOptions
     const agentKeys = agentOrObj ? Object.keys(agentOrObj) : []
+    const agentAsGotOptions = agentOrObj as GotOptions
     const agent = (
       agentKeys.length && agentKeys.every(k => agentNames.has(k))
-        ? (agentOrObj as any).https
+        ? agentAsGotOptions.https ||
+          agentAsGotOptions.http ||
+          agentAsGotOptions.http2
         : agentOrObj
     ) as Agent | undefined
     this.#baseUrl = baseUrl
