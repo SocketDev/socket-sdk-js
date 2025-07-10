@@ -1394,6 +1394,19 @@
               "description",
               "type"
             ]
+          },
+          "reachability": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "head": {
+                "$ref": "#/components/schemas/ReachabilityResult"
+              },
+              "base": {
+                "$ref": "#/components/schemas/ReachabilityResult"
+              }
+            },
+            "description": ""
           }
         },
         "required": [
@@ -7985,6 +7998,33 @@
         "description": "",
         "default": "miscellaneous"
       },
+      "ReachabilityResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "precomputed",
+              "full-scan"
+            ],
+            "description": "",
+            "default": "precomputed"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReachabilityResultItem"
+            },
+            "description": ""
+          }
+        },
+        "required": [
+          "results",
+          "type"
+        ]
+      },
       "SocketIssueBasics": {
         "type": "object",
         "additionalProperties": false,
@@ -8062,6 +8102,88 @@
           "value"
         ]
       },
+      "ReachabilityResultItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ReachabilityType"
+          },
+          "truncated": {
+            "type": "boolean",
+            "default": false,
+            "description": ""
+          },
+          "error": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "matches": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "function-level"
+                    ]
+                  },
+                  "value": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CallStackItem"
+                      },
+                      "description": ""
+                    },
+                    "description": ""
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "class-level"
+                    ]
+                  },
+                  "value": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ClassStackItem"
+                      },
+                      "description": ""
+                    },
+                    "description": ""
+                  }
+                }
+              }
+            ]
+          },
+          "workspacePath": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "subprojectPath": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
       "SocketRefList": {
         "type": "array",
         "items": {
@@ -8088,6 +8210,64 @@
         "required": [
           "path"
         ]
+      },
+      "ReachabilityType": {
+        "type": "string",
+        "enum": [
+          "missing_support",
+          "undeterminable_reachability",
+          "pending",
+          "unreachable",
+          "unknown",
+          "direct_dependency",
+          "error",
+          "maybe_reachable",
+          "reachable"
+        ],
+        "description": "",
+        "default": "unknown"
+      },
+      "CallStackItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "purl": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "sourceLocation": {
+            "$ref": "#/components/schemas/SourceLocation"
+          },
+          "confidence": {
+            "type": "number",
+            "description": "",
+            "default": 0
+          }
+        },
+        "description": ""
+      },
+      "ClassStackItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "purl": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "class": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "confidence": {
+            "type": "number",
+            "description": "",
+            "default": 0
+          }
+        },
+        "description": ""
       },
       "SocketRef": {
         "anyOf": [
@@ -8237,6 +8417,78 @@
         },
         "required": [
           "end",
+          "start"
+        ]
+      },
+      "SourceLocation": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "start": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "",
+            "properties": {
+              "line": {
+                "type": "integer",
+                "description": "",
+                "default": 0
+              },
+              "column": {
+                "type": "integer",
+                "description": "",
+                "default": 0
+              },
+              "byteOffset": {
+                "type": "integer",
+                "description": "",
+                "default": 0
+              }
+            },
+            "required": [
+              "byteOffset",
+              "column",
+              "line"
+            ]
+          },
+          "end": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "line": {
+                "type": "integer",
+                "description": "",
+                "default": 0
+              },
+              "column": {
+                "type": "integer",
+                "description": "",
+                "default": 0
+              },
+              "byteOffset": {
+                "type": "integer",
+                "description": "",
+                "default": 0
+              }
+            },
+            "description": ""
+          },
+          "filename": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "fileHash": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          }
+        },
+        "required": [
+          "end",
+          "fileHash",
+          "filename",
           "start"
         ]
       },
@@ -8980,6 +9232,7 @@
                 "UpdateApiTokenName",
                 "UpdateApiTokenScopes",
                 "UpdateApiTokenVisibility",
+                "UpdateAutopatchCurated",
                 "UpdateLabel",
                 "UpdateLabelSetting",
                 "UpdateOrganizationSetting",
@@ -29823,7 +30076,8 @@
                 "joke",
                 "spy",
                 "typo",
-                "secret"
+                "secret",
+                "obf"
               ],
               "default": "mal"
             }
@@ -30100,7 +30354,8 @@
                 "joke",
                 "spy",
                 "typo",
-                "secret"
+                "secret",
+                "obf"
               ],
               "default": "mal"
             }
