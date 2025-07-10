@@ -1751,6 +1751,10 @@ export interface components {
         /** @default */
         description: string
       }
+      reachability?: {
+        head?: components['schemas']['ReachabilityResult']
+        base?: components['schemas']['ReachabilityResult']
+      }
     }
     LicenseDetails: Array<{
       /** @default */
@@ -3460,6 +3464,14 @@ export interface components {
       | 'vulnerability'
       | 'license'
       | 'miscellaneous'
+    ReachabilityResult: {
+      /**
+       * @default precomputed
+       * @enum {string}
+       */
+      type: 'precomputed' | 'full-scan'
+      results: Array<components['schemas']['ReachabilityResultItem']>
+    }
     SocketIssueBasics: {
       severity: components['schemas']['SocketIssueSeverity']
       category: components['schemas']['SocketCategory']
@@ -3481,12 +3493,63 @@ export interface components {
       /** @default null */
       value: Record<string, never>
     }
+    ReachabilityResultItem: {
+      type: components['schemas']['ReachabilityType']
+      /** @default false */
+      truncated?: boolean
+      /** @default */
+      error?: string
+      matches?:
+        | {
+            /** @enum {string} */
+            type?: 'function-level'
+            value?: Array<Array<components['schemas']['CallStackItem']>>
+          }
+        | {
+            /** @enum {string} */
+            type?: 'class-level'
+            value?: Array<Array<components['schemas']['ClassStackItem']>>
+          }
+      /** @default */
+      workspacePath?: string
+      /** @default */
+      subprojectPath?: string
+    }
     SocketRefList: Array<components['schemas']['SocketRef']>
     SocketRefFile: {
       /** @default */
       path: string
       range?: components['schemas']['SocketRefTextRange']
       bytes?: components['schemas']['SocketRefByteRange']
+    }
+    /**
+     * @default unknown
+     * @enum {string}
+     */
+    ReachabilityType:
+      | 'missing_support'
+      | 'undeterminable_reachability'
+      | 'pending'
+      | 'unreachable'
+      | 'unknown'
+      | 'direct_dependency'
+      | 'error'
+      | 'maybe_reachable'
+      | 'reachable'
+    CallStackItem: {
+      /** @default */
+      purl?: string
+      sourceLocation?: components['schemas']['SourceLocation']
+      /** @default 0 */
+      confidence?: number
+    }
+    ClassStackItem: {
+      /** @default */
+      purl?: string
+      /** @default */
+      class?: string
+      /** @default 0 */
+      confidence?: number
     }
     SocketRef:
       | {
@@ -3534,6 +3597,28 @@ export interface components {
       start: number
       /** @default 0 */
       end: number
+    }
+    SourceLocation: {
+      start: {
+        /** @default 0 */
+        line: number
+        /** @default 0 */
+        column: number
+        /** @default 0 */
+        byteOffset: number
+      }
+      end: {
+        /** @default 0 */
+        line?: number
+        /** @default 0 */
+        column?: number
+        /** @default 0 */
+        byteOffset?: number
+      }
+      /** @default */
+      filename: string
+      /** @default */
+      fileHash: string
     }
     SocketRefNPM: {
       /** @default */
@@ -4278,6 +4363,7 @@ export interface operations {
           | 'UpdateApiTokenName'
           | 'UpdateApiTokenScopes'
           | 'UpdateApiTokenVisibility'
+          | 'UpdateAutopatchCurated'
           | 'UpdateLabel'
           | 'UpdateLabelSetting'
           | 'UpdateOrganizationSetting'
@@ -11872,6 +11958,7 @@ export interface operations {
           | 'spy'
           | 'typo'
           | 'secret'
+          | 'obf'
         /** @description Filter threats by package name */
         name?: string
         /** @description Filter threats by package version */
@@ -11971,6 +12058,7 @@ export interface operations {
           | 'spy'
           | 'typo'
           | 'secret'
+          | 'obf'
         /** @description Filter threats by package name */
         name?: string
         /** @description Filter threats by package version. */
