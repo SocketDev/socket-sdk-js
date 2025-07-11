@@ -2096,6 +2096,12 @@ export interface components {
                 /** @default */
                 product: string
               }> | null
+              epss: {
+                /** @default 0 */
+                score: number
+                /** @default 0 */
+                percentile: number
+              } | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -2157,6 +2163,12 @@ export interface components {
                 /** @default */
                 product: string
               }> | null
+              epss: {
+                /** @default 0 */
+                score: number
+                /** @default 0 */
+                percentile: number
+              } | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -2218,6 +2230,12 @@ export interface components {
                 /** @default */
                 product: string
               }> | null
+              epss: {
+                /** @default 0 */
+                score: number
+                /** @default 0 */
+                percentile: number
+              } | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -2279,6 +2297,12 @@ export interface components {
                 /** @default */
                 product: string
               }> | null
+              epss: {
+                /** @default 0 */
+                score: number
+                /** @default 0 */
+                percentile: number
+              } | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4337,6 +4361,7 @@ export interface operations {
       query?: {
         /** @description Filter audit log events by type. Omit for all types. */
         type?:
+          | 'AddLicenseOverlayNote'
           | 'AssociateLabel'
           | 'CancelInvitation'
           | 'ChangeMemberRole'
@@ -4349,9 +4374,11 @@ export interface operations {
           | 'DeleteRepository'
           | 'DisassociateLabel'
           | 'JoinOrganization'
+          | 'RemoveLicenseOverlay'
           | 'RemoveMember'
           | 'ResetInvitationLink'
           | 'ResetOrganizationSettingToDefault'
+          | 'RevokeApiToken'
           | 'RotateApiToken'
           | 'SendInvitation'
           | 'SetLabelSettingToDefault'
