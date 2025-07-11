@@ -2692,6 +2692,28 @@
                             },
                             "description": "",
                             "nullable": true
+                          },
+                          "epss": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "description": "",
+                            "properties": {
+                              "score": {
+                                "type": "number",
+                                "description": "",
+                                "default": 0
+                              },
+                              "percentile": {
+                                "type": "number",
+                                "description": "",
+                                "default": 0
+                              }
+                            },
+                            "required": [
+                              "percentile",
+                              "score"
+                            ],
+                            "nullable": true
                           }
                         },
                         "required": [
@@ -2699,6 +2721,7 @@
                           "cvss",
                           "cwes",
                           "description",
+                          "epss",
                           "firstPatchedVersionIdentifier",
                           "ghsaId",
                           "kevs",
@@ -2914,6 +2937,28 @@
                             },
                             "description": "",
                             "nullable": true
+                          },
+                          "epss": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "description": "",
+                            "properties": {
+                              "score": {
+                                "type": "number",
+                                "description": "",
+                                "default": 0
+                              },
+                              "percentile": {
+                                "type": "number",
+                                "description": "",
+                                "default": 0
+                              }
+                            },
+                            "required": [
+                              "percentile",
+                              "score"
+                            ],
+                            "nullable": true
                           }
                         },
                         "required": [
@@ -2921,6 +2966,7 @@
                           "cvss",
                           "cwes",
                           "description",
+                          "epss",
                           "firstPatchedVersionIdentifier",
                           "ghsaId",
                           "kevs",
@@ -3136,6 +3182,28 @@
                             },
                             "description": "",
                             "nullable": true
+                          },
+                          "epss": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "description": "",
+                            "properties": {
+                              "score": {
+                                "type": "number",
+                                "description": "",
+                                "default": 0
+                              },
+                              "percentile": {
+                                "type": "number",
+                                "description": "",
+                                "default": 0
+                              }
+                            },
+                            "required": [
+                              "percentile",
+                              "score"
+                            ],
+                            "nullable": true
                           }
                         },
                         "required": [
@@ -3143,6 +3211,7 @@
                           "cvss",
                           "cwes",
                           "description",
+                          "epss",
                           "firstPatchedVersionIdentifier",
                           "ghsaId",
                           "kevs",
@@ -3358,6 +3427,28 @@
                             },
                             "description": "",
                             "nullable": true
+                          },
+                          "epss": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "description": "",
+                            "properties": {
+                              "score": {
+                                "type": "number",
+                                "description": "",
+                                "default": 0
+                              },
+                              "percentile": {
+                                "type": "number",
+                                "description": "",
+                                "default": 0
+                              }
+                            },
+                            "required": [
+                              "percentile",
+                              "score"
+                            ],
+                            "nullable": true
                           }
                         },
                         "required": [
@@ -3365,6 +3456,7 @@
                           "cvss",
                           "cwes",
                           "description",
+                          "epss",
                           "firstPatchedVersionIdentifier",
                           "ghsaId",
                           "kevs",
@@ -9206,6 +9298,7 @@
             "schema": {
               "type": "string",
               "enum": [
+                "AddLicenseOverlayNote",
                 "AssociateLabel",
                 "CancelInvitation",
                 "ChangeMemberRole",
@@ -9218,9 +9311,11 @@
                 "DeleteRepository",
                 "DisassociateLabel",
                 "JoinOrganization",
+                "RemoveLicenseOverlay",
                 "RemoveMember",
                 "ResetInvitationLink",
                 "ResetOrganizationSettingToDefault",
+                "RevokeApiToken",
                 "RotateApiToken",
                 "SendInvitation",
                 "SetLabelSettingToDefault",
