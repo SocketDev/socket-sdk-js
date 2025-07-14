@@ -2530,7 +2530,7 @@
                         "properties": {
                           "cveId": {
                             "type": "string",
-                            "description": "",
+                            "description": "Common Vulnerabilities and Exposures identifier (e.g., CVE-2021-44228)",
                             "default": ""
                           },
                           "cwes": {
@@ -2547,7 +2547,7 @@
                                 },
                                 "id": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "Common Weakness Enumeration identifier (e.g., CWE-79)",
                                   "default": ""
                                 },
                                 "name": {
@@ -2567,16 +2567,16 @@
                           "cvss": {
                             "type": "object",
                             "additionalProperties": false,
-                            "description": "",
+                            "description": "Common Vulnerability Scoring System metrics",
                             "properties": {
                               "score": {
                                 "type": "number",
-                                "description": "",
+                                "description": "CVSS base score ranging from 0.0 to 10.0",
                                 "default": 0
                               },
                               "vectorString": {
                                 "type": "string",
-                                "description": "",
+                                "description": "CVSS vector string (e.g., CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H)",
                                 "default": ""
                               }
                             },
@@ -2592,12 +2592,12 @@
                           },
                           "firstPatchedVersionIdentifier": {
                             "type": "string",
-                            "description": "",
+                            "description": "The first version that includes a patch for this vulnerability",
                             "default": ""
                           },
                           "ghsaId": {
                             "type": "string",
-                            "description": "",
+                            "description": "GitHub Security Advisory identifier (e.g., GHSA-1234-5678-9abc)",
                             "default": ""
                           },
                           "severity": {
@@ -2617,7 +2617,7 @@
                           },
                           "vulnerableVersionRange": {
                             "type": "string",
-                            "description": "",
+                            "description": "Version range affected by this vulnerability (e.g., >= 2.0.0, < 2.17.1)",
                             "default": ""
                           },
                           "kevs": {
@@ -2646,18 +2646,18 @@
                                 },
                                 "dateAdded": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "Date when added to CISA KEV catalog (ISO 8601 format)",
                                   "default": ""
                                 },
                                 "dueDate": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "Remediation deadline for federal agencies (ISO 8601 format)",
                                   "default": "",
                                   "nullable": true
                                 },
                                 "knownRansomwareCampaignUse": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "Known, Unknown, or specific ransomware campaign names",
                                   "default": "",
                                   "nullable": true
                                 },
@@ -2696,7 +2696,7 @@
                           "epss": {
                             "type": "object",
                             "additionalProperties": false,
-                            "description": "",
+                            "description": "Exploit Prediction Scoring System https://www.first.org/epss/",
                             "properties": {
                               "score": {
                                 "type": "number",
@@ -2775,7 +2775,7 @@
                         "properties": {
                           "cveId": {
                             "type": "string",
-                            "description": "",
+                            "description": "Common Vulnerabilities and Exposures identifier (e.g., CVE-2021-44228)",
                             "default": ""
                           },
                           "cwes": {
@@ -2792,7 +2792,7 @@
                                 },
                                 "id": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "Common Weakness Enumeration identifier (e.g., CWE-79)",
                                   "default": ""
                                 },
                                 "name": {
@@ -2812,16 +2812,16 @@
                           "cvss": {
                             "type": "object",
                             "additionalProperties": false,
-                            "description": "",
+                            "description": "Common Vulnerability Scoring System metrics",
                             "properties": {
                               "score": {
                                 "type": "number",
-                                "description": "",
+                                "description": "CVSS base score ranging from 0.0 to 10.0",
                                 "default": 0
                               },
                               "vectorString": {
                                 "type": "string",
-                                "description": "",
+                                "description": "CVSS vector string (e.g., CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H)",
                                 "default": ""
                               }
                             },
@@ -2837,12 +2837,12 @@
                           },
                           "firstPatchedVersionIdentifier": {
                             "type": "string",
-                            "description": "",
+                            "description": "The first version that includes a patch for this vulnerability",
                             "default": ""
                           },
                           "ghsaId": {
                             "type": "string",
-                            "description": "",
+                            "description": "GitHub Security Advisory identifier (e.g., GHSA-1234-5678-9abc)",
                             "default": ""
                           },
                           "severity": {
@@ -2862,7 +2862,7 @@
                           },
                           "vulnerableVersionRange": {
                             "type": "string",
-                            "description": "",
+                            "description": "Version range affected by this vulnerability (e.g., >= 2.0.0, < 2.17.1)",
                             "default": ""
                           },
                           "kevs": {
@@ -2891,18 +2891,18 @@
                                 },
                                 "dateAdded": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "Date when added to CISA KEV catalog (ISO 8601 format)",
                                   "default": ""
                                 },
                                 "dueDate": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "Remediation deadline for federal agencies (ISO 8601 format)",
                                   "default": "",
                                   "nullable": true
                                 },
                                 "knownRansomwareCampaignUse": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "Known, Unknown, or specific ransomware campaign names",
                                   "default": "",
                                   "nullable": true
                                 },
@@ -2941,7 +2941,7 @@
                           "epss": {
                             "type": "object",
                             "additionalProperties": false,
-                            "description": "",
+                            "description": "Exploit Prediction Scoring System https://www.first.org/epss/",
                             "properties": {
                               "score": {
                                 "type": "number",
@@ -3020,7 +3020,7 @@
                         "properties": {
                           "cveId": {
                             "type": "string",
-                            "description": "",
+                            "description": "Common Vulnerabilities and Exposures identifier (e.g., CVE-2021-44228)",
                             "default": ""
                           },
                           "cwes": {
@@ -3037,7 +3037,7 @@
                                 },
                                 "id": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "Common Weakness Enumeration identifier (e.g., CWE-79)",
                                   "default": ""
                                 },
                                 "name": {
@@ -3057,16 +3057,16 @@
                           "cvss": {
                             "type": "object",
                             "additionalProperties": false,
-                            "description": "",
+                            "description": "Common Vulnerability Scoring System metrics",
                             "properties": {
                               "score": {
                                 "type": "number",
-                                "description": "",
+                                "description": "CVSS base score ranging from 0.0 to 10.0",
                                 "default": 0
                               },
                               "vectorString": {
                                 "type": "string",
-                                "description": "",
+                                "description": "CVSS vector string (e.g., CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H)",
                                 "default": ""
                               }
                             },
@@ -3082,12 +3082,12 @@
                           },
                           "firstPatchedVersionIdentifier": {
                             "type": "string",
-                            "description": "",
+                            "description": "The first version that includes a patch for this vulnerability",
                             "default": ""
                           },
                           "ghsaId": {
                             "type": "string",
-                            "description": "",
+                            "description": "GitHub Security Advisory identifier (e.g., GHSA-1234-5678-9abc)",
                             "default": ""
                           },
                           "severity": {
@@ -3107,7 +3107,7 @@
                           },
                           "vulnerableVersionRange": {
                             "type": "string",
-                            "description": "",
+                            "description": "Version range affected by this vulnerability (e.g., >= 2.0.0, < 2.17.1)",
                             "default": ""
                           },
                           "kevs": {
@@ -3136,18 +3136,18 @@
                                 },
                                 "dateAdded": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "Date when added to CISA KEV catalog (ISO 8601 format)",
                                   "default": ""
                                 },
                                 "dueDate": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "Remediation deadline for federal agencies (ISO 8601 format)",
                                   "default": "",
                                   "nullable": true
                                 },
                                 "knownRansomwareCampaignUse": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "Known, Unknown, or specific ransomware campaign names",
                                   "default": "",
                                   "nullable": true
                                 },
@@ -3186,7 +3186,7 @@
                           "epss": {
                             "type": "object",
                             "additionalProperties": false,
-                            "description": "",
+                            "description": "Exploit Prediction Scoring System https://www.first.org/epss/",
                             "properties": {
                               "score": {
                                 "type": "number",
@@ -3265,7 +3265,7 @@
                         "properties": {
                           "cveId": {
                             "type": "string",
-                            "description": "",
+                            "description": "Common Vulnerabilities and Exposures identifier (e.g., CVE-2021-44228)",
                             "default": ""
                           },
                           "cwes": {
@@ -3282,7 +3282,7 @@
                                 },
                                 "id": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "Common Weakness Enumeration identifier (e.g., CWE-79)",
                                   "default": ""
                                 },
                                 "name": {
@@ -3302,16 +3302,16 @@
                           "cvss": {
                             "type": "object",
                             "additionalProperties": false,
-                            "description": "",
+                            "description": "Common Vulnerability Scoring System metrics",
                             "properties": {
                               "score": {
                                 "type": "number",
-                                "description": "",
+                                "description": "CVSS base score ranging from 0.0 to 10.0",
                                 "default": 0
                               },
                               "vectorString": {
                                 "type": "string",
-                                "description": "",
+                                "description": "CVSS vector string (e.g., CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H)",
                                 "default": ""
                               }
                             },
@@ -3327,12 +3327,12 @@
                           },
                           "firstPatchedVersionIdentifier": {
                             "type": "string",
-                            "description": "",
+                            "description": "The first version that includes a patch for this vulnerability",
                             "default": ""
                           },
                           "ghsaId": {
                             "type": "string",
-                            "description": "",
+                            "description": "GitHub Security Advisory identifier (e.g., GHSA-1234-5678-9abc)",
                             "default": ""
                           },
                           "severity": {
@@ -3352,7 +3352,7 @@
                           },
                           "vulnerableVersionRange": {
                             "type": "string",
-                            "description": "",
+                            "description": "Version range affected by this vulnerability (e.g., >= 2.0.0, < 2.17.1)",
                             "default": ""
                           },
                           "kevs": {
@@ -3381,18 +3381,18 @@
                                 },
                                 "dateAdded": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "Date when added to CISA KEV catalog (ISO 8601 format)",
                                   "default": ""
                                 },
                                 "dueDate": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "Remediation deadline for federal agencies (ISO 8601 format)",
                                   "default": "",
                                   "nullable": true
                                 },
                                 "knownRansomwareCampaignUse": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "Known, Unknown, or specific ransomware campaign names",
                                   "default": "",
                                   "nullable": true
                                 },
@@ -3431,7 +3431,7 @@
                           "epss": {
                             "type": "object",
                             "additionalProperties": false,
-                            "description": "",
+                            "description": "Exploit Prediction Scoring System https://www.first.org/epss/",
                             "properties": {
                               "score": {
                                 "type": "number",
