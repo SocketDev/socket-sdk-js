@@ -2046,27 +2046,46 @@ export interface components {
             /** @default */
             description: string
             props: {
-              /** @default */
+              /**
+               * @description Common Vulnerabilities and Exposures identifier (e.g., CVE-2021-44228)
+               * @default
+               */
               cveId: string
               cwes: Array<{
                 /** @default */
                 description: string
-                /** @default */
+                /**
+                 * @description Common Weakness Enumeration identifier (e.g., CWE-79)
+                 * @default
+                 */
                 id: string
                 /** @default */
                 name: string
               }>
+              /** @description Common Vulnerability Scoring System metrics */
               cvss: {
-                /** @default 0 */
+                /**
+                 * @description CVSS base score ranging from 0.0 to 10.0
+                 * @default 0
+                 */
                 score: number
-                /** @default */
+                /**
+                 * @description CVSS vector string (e.g., CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H)
+                 * @default
+                 */
                 vectorString: string
               }
               /** @default */
               description: string
-              /** @default */
+              /**
+               * @description The first version that includes a patch for this vulnerability
+               * @default
+               */
               firstPatchedVersionIdentifier: string
-              /** @default */
+              /**
+               * @description GitHub Security Advisory identifier (e.g., GHSA-1234-5678-9abc)
+               * @default
+               */
               ghsaId: string
               /** @default critical */
               severity: string
@@ -2074,7 +2093,10 @@ export interface components {
               title: string
               /** @default */
               url: string
-              /** @default */
+              /**
+               * @description Version range affected by this vulnerability (e.g., >= 2.0.0, < 2.17.1)
+               * @default
+               */
               vulnerableVersionRange: string
               kevs: Array<{
                 /** @default */
@@ -2083,11 +2105,20 @@ export interface components {
                 shortDescription: string | null
                 /** @default */
                 requiredAction: string | null
-                /** @default */
+                /**
+                 * @description Date when added to CISA KEV catalog (ISO 8601 format)
+                 * @default
+                 */
                 dateAdded: string
-                /** @default */
+                /**
+                 * @description Remediation deadline for federal agencies (ISO 8601 format)
+                 * @default
+                 */
                 dueDate: string | null
-                /** @default */
+                /**
+                 * @description Known, Unknown, or specific ransomware campaign names
+                 * @default
+                 */
                 knownRansomwareCampaignUse: string | null
                 /** @default */
                 notes: string | null
@@ -2096,6 +2127,7 @@ export interface components {
                 /** @default */
                 product: string
               }> | null
+              /** @description Exploit Prediction Scoring System https://www.first.org/epss/ */
               epss: {
                 /** @default 0 */
                 score: number
@@ -2113,27 +2145,46 @@ export interface components {
             /** @default */
             description: string
             props: {
-              /** @default */
+              /**
+               * @description Common Vulnerabilities and Exposures identifier (e.g., CVE-2021-44228)
+               * @default
+               */
               cveId: string
               cwes: Array<{
                 /** @default */
                 description: string
-                /** @default */
+                /**
+                 * @description Common Weakness Enumeration identifier (e.g., CWE-79)
+                 * @default
+                 */
                 id: string
                 /** @default */
                 name: string
               }>
+              /** @description Common Vulnerability Scoring System metrics */
               cvss: {
-                /** @default 0 */
+                /**
+                 * @description CVSS base score ranging from 0.0 to 10.0
+                 * @default 0
+                 */
                 score: number
-                /** @default */
+                /**
+                 * @description CVSS vector string (e.g., CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H)
+                 * @default
+                 */
                 vectorString: string
               }
               /** @default */
               description: string
-              /** @default */
+              /**
+               * @description The first version that includes a patch for this vulnerability
+               * @default
+               */
               firstPatchedVersionIdentifier: string
-              /** @default */
+              /**
+               * @description GitHub Security Advisory identifier (e.g., GHSA-1234-5678-9abc)
+               * @default
+               */
               ghsaId: string
               /** @default critical */
               severity: string
@@ -2141,7 +2192,10 @@ export interface components {
               title: string
               /** @default */
               url: string
-              /** @default */
+              /**
+               * @description Version range affected by this vulnerability (e.g., >= 2.0.0, < 2.17.1)
+               * @default
+               */
               vulnerableVersionRange: string
               kevs: Array<{
                 /** @default */
@@ -2150,11 +2204,20 @@ export interface components {
                 shortDescription: string | null
                 /** @default */
                 requiredAction: string | null
-                /** @default */
+                /**
+                 * @description Date when added to CISA KEV catalog (ISO 8601 format)
+                 * @default
+                 */
                 dateAdded: string
-                /** @default */
+                /**
+                 * @description Remediation deadline for federal agencies (ISO 8601 format)
+                 * @default
+                 */
                 dueDate: string | null
-                /** @default */
+                /**
+                 * @description Known, Unknown, or specific ransomware campaign names
+                 * @default
+                 */
                 knownRansomwareCampaignUse: string | null
                 /** @default */
                 notes: string | null
@@ -2163,6 +2226,7 @@ export interface components {
                 /** @default */
                 product: string
               }> | null
+              /** @description Exploit Prediction Scoring System https://www.first.org/epss/ */
               epss: {
                 /** @default 0 */
                 score: number
@@ -2180,27 +2244,46 @@ export interface components {
             /** @default */
             description: string
             props: {
-              /** @default */
+              /**
+               * @description Common Vulnerabilities and Exposures identifier (e.g., CVE-2021-44228)
+               * @default
+               */
               cveId: string
               cwes: Array<{
                 /** @default */
                 description: string
-                /** @default */
+                /**
+                 * @description Common Weakness Enumeration identifier (e.g., CWE-79)
+                 * @default
+                 */
                 id: string
                 /** @default */
                 name: string
               }>
+              /** @description Common Vulnerability Scoring System metrics */
               cvss: {
-                /** @default 0 */
+                /**
+                 * @description CVSS base score ranging from 0.0 to 10.0
+                 * @default 0
+                 */
                 score: number
-                /** @default */
+                /**
+                 * @description CVSS vector string (e.g., CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H)
+                 * @default
+                 */
                 vectorString: string
               }
               /** @default */
               description: string
-              /** @default */
+              /**
+               * @description The first version that includes a patch for this vulnerability
+               * @default
+               */
               firstPatchedVersionIdentifier: string
-              /** @default */
+              /**
+               * @description GitHub Security Advisory identifier (e.g., GHSA-1234-5678-9abc)
+               * @default
+               */
               ghsaId: string
               /** @default critical */
               severity: string
@@ -2208,7 +2291,10 @@ export interface components {
               title: string
               /** @default */
               url: string
-              /** @default */
+              /**
+               * @description Version range affected by this vulnerability (e.g., >= 2.0.0, < 2.17.1)
+               * @default
+               */
               vulnerableVersionRange: string
               kevs: Array<{
                 /** @default */
@@ -2217,11 +2303,20 @@ export interface components {
                 shortDescription: string | null
                 /** @default */
                 requiredAction: string | null
-                /** @default */
+                /**
+                 * @description Date when added to CISA KEV catalog (ISO 8601 format)
+                 * @default
+                 */
                 dateAdded: string
-                /** @default */
+                /**
+                 * @description Remediation deadline for federal agencies (ISO 8601 format)
+                 * @default
+                 */
                 dueDate: string | null
-                /** @default */
+                /**
+                 * @description Known, Unknown, or specific ransomware campaign names
+                 * @default
+                 */
                 knownRansomwareCampaignUse: string | null
                 /** @default */
                 notes: string | null
@@ -2230,6 +2325,7 @@ export interface components {
                 /** @default */
                 product: string
               }> | null
+              /** @description Exploit Prediction Scoring System https://www.first.org/epss/ */
               epss: {
                 /** @default 0 */
                 score: number
@@ -2247,27 +2343,46 @@ export interface components {
             /** @default */
             description: string
             props: {
-              /** @default */
+              /**
+               * @description Common Vulnerabilities and Exposures identifier (e.g., CVE-2021-44228)
+               * @default
+               */
               cveId: string
               cwes: Array<{
                 /** @default */
                 description: string
-                /** @default */
+                /**
+                 * @description Common Weakness Enumeration identifier (e.g., CWE-79)
+                 * @default
+                 */
                 id: string
                 /** @default */
                 name: string
               }>
+              /** @description Common Vulnerability Scoring System metrics */
               cvss: {
-                /** @default 0 */
+                /**
+                 * @description CVSS base score ranging from 0.0 to 10.0
+                 * @default 0
+                 */
                 score: number
-                /** @default */
+                /**
+                 * @description CVSS vector string (e.g., CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H)
+                 * @default
+                 */
                 vectorString: string
               }
               /** @default */
               description: string
-              /** @default */
+              /**
+               * @description The first version that includes a patch for this vulnerability
+               * @default
+               */
               firstPatchedVersionIdentifier: string
-              /** @default */
+              /**
+               * @description GitHub Security Advisory identifier (e.g., GHSA-1234-5678-9abc)
+               * @default
+               */
               ghsaId: string
               /** @default critical */
               severity: string
@@ -2275,7 +2390,10 @@ export interface components {
               title: string
               /** @default */
               url: string
-              /** @default */
+              /**
+               * @description Version range affected by this vulnerability (e.g., >= 2.0.0, < 2.17.1)
+               * @default
+               */
               vulnerableVersionRange: string
               kevs: Array<{
                 /** @default */
@@ -2284,11 +2402,20 @@ export interface components {
                 shortDescription: string | null
                 /** @default */
                 requiredAction: string | null
-                /** @default */
+                /**
+                 * @description Date when added to CISA KEV catalog (ISO 8601 format)
+                 * @default
+                 */
                 dateAdded: string
-                /** @default */
+                /**
+                 * @description Remediation deadline for federal agencies (ISO 8601 format)
+                 * @default
+                 */
                 dueDate: string | null
-                /** @default */
+                /**
+                 * @description Known, Unknown, or specific ransomware campaign names
+                 * @default
+                 */
                 knownRansomwareCampaignUse: string | null
                 /** @default */
                 notes: string | null
@@ -2297,6 +2424,7 @@ export interface components {
                 /** @default */
                 product: string
               }> | null
+              /** @description Exploit Prediction Scoring System https://www.first.org/epss/ */
               epss: {
                 /** @default 0 */
                 score: number
