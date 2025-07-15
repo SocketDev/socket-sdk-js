@@ -3575,6 +3575,7 @@ export interface components {
       | 'bitbucket'
       | 'cocoapods'
       | 'cargo'
+      | 'chrome'
       | 'composer'
       | 'conan'
       | 'conda'
@@ -12124,6 +12125,7 @@ export interface operations {
         ecosystem?:
           | 'github'
           | 'cargo'
+          | 'chrome'
           | 'golang'
           | 'maven'
           | 'npm'
@@ -12224,6 +12226,7 @@ export interface operations {
         ecosystem?:
           | 'github'
           | 'cargo'
+          | 'chrome'
           | 'golang'
           | 'maven'
           | 'npm'

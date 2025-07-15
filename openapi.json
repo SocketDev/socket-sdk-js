@@ -8037,6 +8037,7 @@
           "bitbucket",
           "cocoapods",
           "cargo",
+          "chrome",
           "composer",
           "conan",
           "conda",
@@ -30217,6 +30218,7 @@
               "enum": [
                 "github",
                 "cargo",
+                "chrome",
                 "golang",
                 "maven",
                 "npm",
@@ -30495,6 +30497,7 @@
               "enum": [
                 "github",
                 "cargo",
+                "chrome",
                 "golang",
                 "maven",
                 "npm",
