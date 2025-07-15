@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/sdk",
-  "version": "1.4.54",
+  "version": "1.4.55",
   "license": "MIT",
   "description": "SDK for the Socket API client",
   "author": {
@@ -83,7 +83,7 @@
     "update:deps": "npx --yes npm-check-updates"
   },
   "dependencies": {
-    "@socketsecurity/registry": "1.0.237"
+    "@socketsecurity/registry": "1.0.238"
   },
   "devDependencies": {
     "@biomejs/biome": "2.1.1",
