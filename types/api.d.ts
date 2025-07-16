@@ -11319,19 +11319,19 @@ export interface operations {
         startAfterCursor?: string
         /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
         'filters.alertSeverity'?: string
-        /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
+        /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be excluded */
         'filters.alertSeverity.notIn'?: string
         /** @description Comma-separated list of repo slugs that should be included */
         'filters.repoSlug'?: string
-        /** @description Comma-separated list of repo slugs that should be included */
+        /** @description Comma-separated list of repo slugs that should be excluded */
         'filters.repoSlug.notIn'?: string
         /** @description Comma-separated list of repo labels that should be included */
         'filters.repoLabels'?: string
-        /** @description Comma-separated list of repo labels that should be included */
+        /** @description Comma-separated list of repo labels that should be excluded */
         'filters.repoLabels.notIn'?: string
         /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
         'filters.alertType'?: string
-        /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
+        /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be excluded */
         'filters.alertType.notIn'?: string
         /** @description Name of artifact */
         'filters.artifactName'?: string
@@ -11339,23 +11339,23 @@ export interface operations {
         'filters.artifactName.notIn'?: string
         /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
         'filters.artifactType'?: string
-        /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
+        /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
         'filters.artifactType.notIn'?: string
         /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
         'filters.alertAction'?: string
-        /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
+        /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
         'filters.alertAction.notIn'?: string
         /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be included */
         'filters.alertActionSourceType'?: string
-        /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be included */
+        /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be excluded */
         'filters.alertActionSourceType.notIn'?: string
         /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
         'filters.alertFixType'?: string
-        /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
+        /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be excluded */
         'filters.alertFixType.notIn'?: string
         /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
         'filters.alertCategory'?: string
-        /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
+        /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be excluded */
         'filters.alertCategory.notIn'?: string
         /** @description CVE ID */
         'filters.alertCveId'?: string
@@ -11373,6 +11373,10 @@ export interface operations {
         'filters.alertCweName'?: string
         /** @description CWE name */
         'filters.alertCweName.notIn'?: string
+        /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be included */
+        'filters.alertReachabilityType'?: string
+        /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
+        'filters.alertReachabilityType.notIn'?: string
         /** @description Alert priority ("low", "medium", or "high") */
         'filters.alertPriority'?: string
         /** @description Alert priority ("low", "medium", or "high") */
@@ -11498,25 +11502,25 @@ export interface operations {
               /** @default false */
               includeLatestAlertsOnly: boolean
               filters: {
-                /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
+                /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be excluded */
                 alertSeverity?: string[]
-                /** @description Comma-separated list of repo slugs that should be included */
+                /** @description Comma-separated list of repo slugs that should be excluded */
                 repoSlug?: string[]
-                /** @description Comma-separated list of repo labels that should be included */
+                /** @description Comma-separated list of repo labels that should be excluded */
                 repoLabels?: string[]
-                /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
+                /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be excluded */
                 alertType?: string[]
                 /** @description Name of artifact */
                 artifactName?: string[]
-                /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
+                /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
                 artifactType?: string[]
-                /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
+                /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
                 alertAction?: string[]
-                /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be included */
+                /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be excluded */
                 alertActionSourceType?: string[]
-                /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
+                /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be excluded */
                 alertFixType?: string[]
-                /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
+                /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be excluded */
                 alertCategory?: string[]
                 /** @description CVE ID */
                 alertCveId?: string[]
@@ -11526,6 +11530,8 @@ export interface operations {
                 alertCweId?: string[]
                 /** @description CWE name */
                 alertCweName?: string[]
+                /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
+                alertReachabilityType?: string[]
                 /** @description Alert priority ("low", "medium", or "high") */
                 alertPriority?: string[]
                 /** @description Direct/transitive dependency filter flag */
@@ -11561,23 +11567,23 @@ export interface operations {
         date?: string
         /** @description The number of days of data to fetch as an offset from input date */
         range?: string
-        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertPriority,dependencyDirect,dependencyDev,dependencyDead) */
+        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,alertPriority,dependencyDirect,dependencyDev,dependencyDead) */
         'aggregation.fields'?: string
         /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
         'filters.alertSeverity'?: string
-        /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
+        /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be excluded */
         'filters.alertSeverity.notIn'?: string
         /** @description Comma-separated list of repo slugs that should be included */
         'filters.repoSlug'?: string
-        /** @description Comma-separated list of repo slugs that should be included */
+        /** @description Comma-separated list of repo slugs that should be excluded */
         'filters.repoSlug.notIn'?: string
         /** @description Comma-separated list of repo labels that should be included */
         'filters.repoLabels'?: string
-        /** @description Comma-separated list of repo labels that should be included */
+        /** @description Comma-separated list of repo labels that should be excluded */
         'filters.repoLabels.notIn'?: string
         /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
         'filters.alertType'?: string
-        /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
+        /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be excluded */
         'filters.alertType.notIn'?: string
         /** @description Name of artifact */
         'filters.artifactName'?: string
@@ -11585,23 +11591,23 @@ export interface operations {
         'filters.artifactName.notIn'?: string
         /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
         'filters.artifactType'?: string
-        /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
+        /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
         'filters.artifactType.notIn'?: string
         /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
         'filters.alertAction'?: string
-        /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
+        /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
         'filters.alertAction.notIn'?: string
         /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be included */
         'filters.alertActionSourceType'?: string
-        /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be included */
+        /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be excluded */
         'filters.alertActionSourceType.notIn'?: string
         /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
         'filters.alertFixType'?: string
-        /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
+        /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be excluded */
         'filters.alertFixType.notIn'?: string
         /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
         'filters.alertCategory'?: string
-        /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
+        /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be excluded */
         'filters.alertCategory.notIn'?: string
         /** @description CVE ID */
         'filters.alertCveId'?: string
@@ -11619,6 +11625,10 @@ export interface operations {
         'filters.alertCweName'?: string
         /** @description CWE name */
         'filters.alertCweName.notIn'?: string
+        /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be included */
+        'filters.alertReachabilityType'?: string
+        /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
+        'filters.alertReachabilityType.notIn'?: string
         /** @description Alert priority ("low", "medium", or "high") */
         'filters.alertPriority'?: string
         /** @description Alert priority ("low", "medium", or "high") */
@@ -11660,25 +11670,25 @@ export interface operations {
                 groups: string[][]
               }
               filters: {
-                /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
+                /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be excluded */
                 alertSeverity?: string[]
-                /** @description Comma-separated list of repo slugs that should be included */
+                /** @description Comma-separated list of repo slugs that should be excluded */
                 repoSlug?: string[]
-                /** @description Comma-separated list of repo labels that should be included */
+                /** @description Comma-separated list of repo labels that should be excluded */
                 repoLabels?: string[]
-                /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
+                /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be excluded */
                 alertType?: string[]
                 /** @description Name of artifact */
                 artifactName?: string[]
-                /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
+                /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
                 artifactType?: string[]
-                /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
+                /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
                 alertAction?: string[]
-                /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be included */
+                /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be excluded */
                 alertActionSourceType?: string[]
-                /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
+                /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be excluded */
                 alertFixType?: string[]
-                /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
+                /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be excluded */
                 alertCategory?: string[]
                 /** @description CVE ID */
                 alertCveId?: string[]
@@ -11688,6 +11698,8 @@ export interface operations {
                 alertCweId?: string[]
                 /** @description CWE name */
                 alertCweName?: string[]
+                /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
+                alertReachabilityType?: string[]
                 /** @description Alert priority ("low", "medium", or "high") */
                 alertPriority?: string[]
                 /** @description Direct/transitive dependency filter flag */
