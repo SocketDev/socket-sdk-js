@@ -319,11 +319,11 @@
                   "description": "",
                   "default": ""
                 },
-                "description": ""
+                "description": "List of package authors or maintainers"
               },
               "size": {
                 "type": "number",
-                "description": "",
+                "description": "Total size of the package artifact in bytes",
                 "default": 0
               },
               "alerts": {
@@ -338,7 +338,7 @@
               },
               "batchIndex": {
                 "type": "integer",
-                "description": "",
+                "description": "Index position of this artifact within its processing batch, used for ordering and pagination",
                 "default": 0
               },
               "license": {
@@ -430,7 +430,6 @@
       "CDXManifestSchema": {
         "type": "object",
         "additionalProperties": false,
-        "description": "",
         "properties": {
           "bomFormat": {
             "type": "string",
@@ -616,6 +615,237 @@
                 }
               },
               "required": [
+                "ref"
+              ]
+            },
+            "description": ""
+          },
+          "vulnerabilities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "ref": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "id": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "source": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "url": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "description": ""
+                },
+                "ratings": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "source": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "url": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          }
+                        },
+                        "description": ""
+                      },
+                      "score": {
+                        "type": "number",
+                        "description": "",
+                        "default": 0
+                      },
+                      "severity": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "method": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "vector": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      }
+                    },
+                    "description": ""
+                  },
+                  "description": ""
+                },
+                "cwes": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "description": "",
+                    "default": 0
+                  },
+                  "description": ""
+                },
+                "description": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "detail": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "recommendation": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "advisories": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "title": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      }
+                    },
+                    "required": [
+                      "url"
+                    ]
+                  },
+                  "description": ""
+                },
+                "created": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "published": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "updated": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "affects": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "ref": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "versions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "version": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "status": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            }
+                          },
+                          "description": ""
+                        },
+                        "description": ""
+                      }
+                    },
+                    "required": [
+                      "ref"
+                    ]
+                  },
+                  "description": ""
+                },
+                "analysis": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "state": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "justification": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "response": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "description": ""
+                    },
+                    "detail": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "firstIssued": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "lastUpdated": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "description": ""
+                }
+              },
+              "required": [
+                "id",
                 "ref"
               ]
             },
@@ -888,14 +1118,14 @@
                   "description": "",
                   "default": ""
                 },
-                "description": ""
+                "description": "List of package authors or maintainers"
               },
               "base": {
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/SocketArtifactLink"
                 },
-                "description": ""
+                "description": "Artifact links from the base/before state"
               },
               "capabilities": {
                 "$ref": "#/components/schemas/Capabilities"
@@ -905,14 +1135,14 @@
                 "items": {
                   "$ref": "#/components/schemas/SocketArtifactLink"
                 },
-                "description": ""
+                "description": "Artifact links from the head/after state"
               },
               "qualifiers": {
                 "$ref": "#/components/schemas/Qualifiers"
               },
               "size": {
                 "type": "number",
-                "description": "",
+                "description": "Total size of the package artifact in bytes",
                 "default": 0
               },
               "license": {
@@ -1004,32 +1234,32 @@
           "env": {
             "type": "boolean",
             "default": false,
-            "description": ""
+            "description": "Package can read or modify environment variables"
           },
           "eval": {
             "type": "boolean",
             "default": false,
-            "description": ""
+            "description": "Package uses dynamic code evaluation (eval, Function constructor, etc.)"
           },
           "fs": {
             "type": "boolean",
             "default": false,
-            "description": ""
+            "description": "Package can read or write to the file system"
           },
           "net": {
             "type": "boolean",
             "default": false,
-            "description": ""
+            "description": "Package can make network requests or create servers"
           },
           "shell": {
             "type": "boolean",
             "default": false,
-            "description": ""
+            "description": "Package can execute shell commands or spawn processes"
           },
           "unsafe": {
             "type": "boolean",
             "default": false,
-            "description": ""
+            "description": "Package uses unsafe or dangerous operations that could compromise security"
           }
         },
         "required": [
@@ -1049,32 +1279,32 @@
         "properties": {
           "license": {
             "type": "number",
-            "description": "",
+            "description": "Score from 0.0 to 1.0 evaluating license permissiveness and compatibility",
             "default": 0
           },
           "maintenance": {
             "type": "number",
-            "description": "",
+            "description": "Score from 0.0 to 1.0 evaluating project maintenance health and activity",
             "default": 0
           },
           "overall": {
             "type": "number",
-            "description": "",
+            "description": "Combined score from 0.0 to 1.0 representing overall package health and safety",
             "default": 0
           },
           "quality": {
             "type": "number",
-            "description": "",
+            "description": "Score from 0.0 to 1.0 evaluating code quality, testing, and documentation",
             "default": 0
           },
           "supplyChain": {
             "type": "number",
-            "description": "",
+            "description": "Score from 0.0 to 1.0 evaluating supply chain security and provenance",
             "default": 0
           },
           "vulnerability": {
             "type": "number",
-            "description": "",
+            "description": "Score from 0.0 to 1.0 based on known vulnerabilities and their severity",
             "default": 0
           }
         },
@@ -1093,17 +1323,17 @@
         "properties": {
           "file": {
             "type": "string",
-            "description": "",
+            "description": "Path to the manifest file (e.g., package.json, pom.xml)",
             "default": ""
           },
           "start": {
             "type": "integer",
-            "description": "",
+            "description": "Starting line or position in the manifest file",
             "default": 0
           },
           "end": {
             "type": "integer",
-            "description": "",
+            "description": "Ending line or position in the manifest file",
             "default": 0
           }
         },
@@ -1242,32 +1472,31 @@
           },
           "namespace": {
             "type": "string",
-            "description": "",
+            "description": "Package namespace or scope, such as npm organizations (@angular), Maven groupIds, or Docker image owners",
             "default": ""
           },
           "name": {
             "type": "string",
-            "description": "",
+            "description": "Package name within its ecosystem",
             "default": ""
           },
           "version": {
             "type": "string",
-            "description": "",
+            "description": "Package version string",
             "default": ""
           },
           "subpath": {
             "type": "string",
-            "description": "",
+            "description": "Path within the package to a specific file or directory, used to reference nested components",
             "default": ""
           },
           "release": {
             "type": "string",
-            "description": "",
+            "description": "Package-specific release identifier, such as PyPI's artifact ID or the specific build/release version",
             "default": ""
           }
         },
         "required": [
-          "name",
           "type"
         ]
       },
@@ -1277,12 +1506,12 @@
         "properties": {
           "key": {
             "type": "string",
-            "description": "",
+            "description": "Unique identifier for this alert instance, used for deduplication and tracking across scans",
             "default": ""
           },
           "type": {
             "type": "string",
-            "description": "",
+            "description": "Alert type identifier referencing the alert type definition",
             "default": ""
           },
           "severity": {
@@ -1293,27 +1522,27 @@
           },
           "file": {
             "type": "string",
-            "description": "",
+            "description": "File path where this alert was detected",
             "default": ""
           },
           "start": {
             "type": "integer",
-            "description": "",
+            "description": "Starting position of the alert in the file",
             "default": 0
           },
           "end": {
             "type": "integer",
-            "description": "",
+            "description": "Ending position of the alert in the file",
             "default": 0
           },
           "props": {
             "type": "object",
-            "description": "",
+            "description": "Additional alert-specific properties and metadata that vary by alert type",
             "default": null
           },
           "action": {
             "type": "string",
-            "description": "",
+            "description": "Action to take for this alert (e.g., error, warn, ignore)",
             "default": ""
           },
           "actionSource": {
@@ -1323,7 +1552,7 @@
             "properties": {
               "type": {
                 "type": "string",
-                "description": "",
+                "description": "Type of action source (e.g., policy, override)",
                 "default": ""
               },
               "candidates": {
@@ -1335,22 +1564,22 @@
                   "properties": {
                     "type": {
                       "type": "string",
-                      "description": "",
+                      "description": "Type of action candidate",
                       "default": ""
                     },
                     "action": {
                       "type": "string",
-                      "description": "",
+                      "description": "Proposed action for this candidate",
                       "default": ""
                     },
                     "actionPolicyIndex": {
                       "type": "integer",
-                      "description": "",
+                      "description": "Index of the policy rule for this candidate",
                       "default": 0
                     },
                     "repoLabelId": {
                       "type": "string",
-                      "description": "",
+                      "description": "Repository label ID associated with this candidate",
                       "default": ""
                     }
                   },
@@ -1371,7 +1600,7 @@
           },
           "actionPolicyIndex": {
             "type": "integer",
-            "description": "",
+            "description": "Index of the policy rule that triggered this action, for traceability to security policies",
             "default": 0
           },
           "fix": {
@@ -1381,12 +1610,12 @@
             "properties": {
               "type": {
                 "type": "string",
-                "description": "",
+                "description": "Type of fix available (e.g., upgrade, remove, cve)",
                 "default": ""
               },
               "description": {
                 "type": "string",
-                "description": "",
+                "description": "Human-readable description of how to fix this issue",
                 "default": ""
               }
             },
@@ -1423,7 +1652,7 @@
           "properties": {
             "spdxDisj": {
               "type": "string",
-              "description": "",
+              "description": "SPDX license expression in disjunctive normal form (e.g., '(MIT OR Apache-2.0)')",
               "default": ""
             },
             "authors": {
@@ -1433,26 +1662,26 @@
                 "description": "",
                 "default": ""
               },
-              "description": ""
+              "description": "List of authors found in the license text"
             },
             "errorData": {
               "type": "string",
-              "description": "",
+              "description": "Error details if license parsing failed",
               "default": ""
             },
             "provenance": {
               "type": "string",
-              "description": "",
+              "description": "Source where this license information was detected (e.g., 'package.json', 'LICENSE file', 'README')",
               "default": ""
             },
             "filepath": {
               "type": "string",
-              "description": "",
+              "description": "Path to the file containing this license information",
               "default": ""
             },
             "match_strength": {
               "type": "number",
-              "description": "",
+              "description": "Confidence score from 0.0 to 1.0 indicating how well the detected license matches the source text",
               "default": 0
             }
           },
@@ -1476,7 +1705,7 @@
           "properties": {
             "attribText": {
               "type": "string",
-              "description": "",
+              "description": "Full text of the license attribution or copyright notice found in the package",
               "default": ""
             },
             "attribData": {
@@ -1488,17 +1717,17 @@
                 "properties": {
                   "purl": {
                     "type": "string",
-                    "description": "",
+                    "description": "Package URL this attribution applies to",
                     "default": ""
                   },
                   "foundInFilepath": {
                     "type": "string",
-                    "description": "",
+                    "description": "File path where this attribution was found",
                     "default": ""
                   },
                   "spdxExpr": {
                     "type": "string",
-                    "description": "",
+                    "description": "SPDX license expression parsed from the attribution text",
                     "default": ""
                   },
                   "foundAuthors": {
@@ -1508,7 +1737,7 @@
                       "description": "",
                       "default": ""
                     },
-                    "description": ""
+                    "description": "Authors mentioned in this attribution"
                   }
                 },
                 "required": [
@@ -1535,17 +1764,17 @@
           "direct": {
             "type": "boolean",
             "default": false,
-            "description": ""
+            "description": "Indicates if this is a direct dependency (not transitive)"
           },
           "dev": {
             "type": "boolean",
             "default": false,
-            "description": ""
+            "description": "Indicates if this is a development-only dependency not used in production"
           },
           "dead": {
             "type": "boolean",
             "default": false,
-            "description": ""
+            "description": "Indicates if this package is deprecated, abandoned, or no longer maintained"
           },
           "manifestFiles": {
             "type": "array",
@@ -1559,14 +1788,14 @@
             "items": {
               "$ref": "#/components/schemas/SocketId"
             },
-            "description": ""
+            "description": "IDs of the root-level packages in the dependency tree that depend on this package"
           },
           "dependencies": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SocketId"
             },
-            "description": ""
+            "description": "IDs of packages that this package directly depends on"
           },
           "alertPriorities": {
             "type": "object",
@@ -1576,7 +1805,7 @@
               "properties": {
                 "result": {
                   "type": "integer",
-                  "description": "",
+                  "description": "Computed priority score for this alert",
                   "default": 0
                 },
                 "components": {
@@ -1591,13 +1820,13 @@
                       "properties": {
                         "result": {
                           "type": "number",
-                          "description": "",
+                          "description": "Contribution of fixability to the priority score",
                           "default": 0
                         },
                         "value": {
                           "type": "boolean",
                           "default": false,
-                          "description": ""
+                          "description": "Whether a fix is available for this alert"
                         }
                       },
                       "required": [
@@ -1612,17 +1841,17 @@
                       "properties": {
                         "result": {
                           "type": "number",
-                          "description": "",
+                          "description": "Contribution of reachability to the priority score",
                           "default": 0
                         },
                         "value": {
                           "type": "boolean",
                           "default": false,
-                          "description": ""
+                          "description": "Whether the vulnerable code is reachable"
                         },
                         "specificValue": {
                           "type": "string",
-                          "description": "",
+                          "description": "Specific reachability type value such as 'unreachable', 'maybe_reachable', or 'reachable'",
                           "default": ""
                         }
                       },
@@ -1639,12 +1868,12 @@
                       "properties": {
                         "result": {
                           "type": "number",
-                          "description": "",
+                          "description": "Contribution of severity to the priority score",
                           "default": 0
                         },
                         "value": {
                           "type": "integer",
-                          "description": "",
+                          "description": "Numeric severity level",
                           "default": 0
                         }
                       },
@@ -1662,7 +1891,7 @@
                 },
                 "formula": {
                   "type": "string",
-                  "description": "",
+                  "description": "Formula used to calculate the priority score",
                   "default": ""
                 }
               },
@@ -1671,7 +1900,7 @@
               ]
             },
             "properties": {},
-            "description": ""
+            "description": "Computed priority scores for each alert type based on severity, reachability, and fixability factors"
           },
           "artifact": {
             "allOf": [
@@ -1691,6 +1920,50 @@
                 ]
               }
             ]
+          },
+          "alertKeysToReachabilityTypes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "description": "",
+                "default": ""
+              },
+              "description": ""
+            },
+            "properties": {},
+            "description": "Mapping of alert keys to arrays of reachability types found across different manifest files or code locations. Each type indicates whether the vulnerable code is actually used: \"reachable\" (definitely used), \"maybe_reachable\" (potentially used), \"unreachable\" (not used), \"unknown\" (cannot determine), etc. Multiple types per alert can occur when the same vulnerability appears in different contexts."
+          },
+          "alertKeysToReachabilitySummaries": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "",
+                    "default": ""
+                  },
+                  "hash": {
+                    "type": "string",
+                    "description": "",
+                    "default": ""
+                  }
+                },
+                "required": [
+                  "hash",
+                  "type"
+                ]
+              },
+              "description": ""
+            },
+            "properties": {},
+            "description": "Mapping of alert keys to arrays of reachability summaries. Each summary contains a reachability type and a hash pointing to detailed analysis data (call stacks, file locations, confidence scores). Used for efficient storage and retrieval of comprehensive reachability analysis results without duplicating large analysis payloads."
           }
         },
         "description": ""
@@ -2083,7 +2356,7 @@
           "replaced",
           "unchanged"
         ],
-        "description": "",
+        "description": "Type of change detected for this artifact in the diff",
         "default": "unchanged"
       },
       "SocketIssue": {
@@ -8064,7 +8337,7 @@
           "swift",
           "unknown"
         ],
-        "description": "",
+        "description": "Package ecosystem type identifier based on the PURL specification",
         "default": "unknown"
       },
       "SocketIssueSeverity": {
@@ -8102,7 +8375,7 @@
               "precomputed",
               "full-scan"
             ],
-            "description": "",
+            "description": "Type of reachability analysis performed",
             "default": "precomputed"
           },
           "results": {
@@ -8110,7 +8383,7 @@
             "items": {
               "$ref": "#/components/schemas/ReachabilityResultItem"
             },
-            "description": ""
+            "description": "Reachability analysis results for each vulnerability"
           }
         },
         "required": [
@@ -8205,11 +8478,11 @@
           "truncated": {
             "type": "boolean",
             "default": false,
-            "description": ""
+            "description": "Indicates if the reachability analysis was stopped early due to depth or complexity limits"
           },
           "error": {
             "type": "string",
-            "description": "",
+            "description": "Error message if reachability analysis failed",
             "default": ""
           },
           "matches": {
@@ -8264,12 +8537,12 @@
           },
           "workspacePath": {
             "type": "string",
-            "description": "",
+            "description": "Path to the workspace root for multi-workspace projects",
             "default": ""
           },
           "subprojectPath": {
             "type": "string",
-            "description": "",
+            "description": "Path to the subproject within the workspace",
             "default": ""
           }
         },
@@ -8317,7 +8590,7 @@
           "maybe_reachable",
           "reachable"
         ],
-        "description": "",
+        "description": "Status of reachability analysis for vulnerable code paths",
         "default": "unknown"
       },
       "CallStackItem": {
@@ -8326,7 +8599,7 @@
         "properties": {
           "purl": {
             "type": "string",
-            "description": "",
+            "description": "Package URL (PURL) of the dependency containing this code",
             "default": ""
           },
           "sourceLocation": {
@@ -8334,7 +8607,7 @@
           },
           "confidence": {
             "type": "number",
-            "description": "",
+            "description": "Confidence score from 0.0 to 1.0 indicating how certain the reachability analysis is about this result",
             "default": 0
           }
         },
@@ -8346,17 +8619,17 @@
         "properties": {
           "purl": {
             "type": "string",
-            "description": "",
+            "description": "Package URL (PURL) of the dependency containing this class",
             "default": ""
           },
           "class": {
             "type": "string",
-            "description": "",
+            "description": "Name of the class in the dependency",
             "default": ""
           },
           "confidence": {
             "type": "number",
-            "description": "",
+            "description": "Confidence score from 0.0 to 1.0 indicating how certain the reachability analysis is about this result",
             "default": 0
           }
         },
@@ -8525,17 +8798,17 @@
             "properties": {
               "line": {
                 "type": "integer",
-                "description": "",
+                "description": "Line number in the source file",
                 "default": 0
               },
               "column": {
                 "type": "integer",
-                "description": "",
+                "description": "Column number in the source file",
                 "default": 0
               },
               "byteOffset": {
                 "type": "integer",
-                "description": "",
+                "description": "Absolute byte position from the beginning of the file, used for precise location tracking",
                 "default": 0
               }
             },
@@ -8551,17 +8824,17 @@
             "properties": {
               "line": {
                 "type": "integer",
-                "description": "",
+                "description": "Line number in the source file",
                 "default": 0
               },
               "column": {
                 "type": "integer",
-                "description": "",
+                "description": "Column number in the source file",
                 "default": 0
               },
               "byteOffset": {
                 "type": "integer",
-                "description": "",
+                "description": "Absolute byte position from the beginning of the file, used for precise location tracking",
                 "default": 0
               }
             },
@@ -8569,12 +8842,12 @@
           },
           "filename": {
             "type": "string",
-            "description": "",
+            "description": "Path to the source file",
             "default": ""
           },
           "fileHash": {
             "type": "string",
-            "description": "",
+            "description": "Hash of the source file for integrity verification",
             "default": ""
           }
         },
@@ -9588,6 +9861,16 @@
               "type": "string",
               "default": ""
             }
+          },
+          {
+            "name": "include_vulnerabilities",
+            "in": "query",
+            "required": false,
+            "description": "Include vulnerability information in the SBOM. Also includes reachability/VEX if available",
+            "schema": {
+              "type": "string",
+              "default": "false"
+            }
           }
         ],
         "security": [
@@ -9704,6 +9987,16 @@
             "schema": {
               "type": "string",
               "default": ""
+            }
+          },
+          {
+            "name": "include_vulnerabilities",
+            "in": "query",
+            "required": false,
+            "description": "Include vulnerability information in the SBOM. Also includes reachability/VEX if available",
+            "schema": {
+              "type": "string",
+              "default": "false"
             }
           }
         ],

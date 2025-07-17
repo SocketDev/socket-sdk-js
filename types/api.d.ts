@@ -1466,12 +1466,19 @@ export interface components {
     SocketArtifact: components['schemas']['SocketPURL'] &
       components['schemas']['SocketArtifactLink'] & {
         id?: components['schemas']['SocketId']
+        /** @description List of package authors or maintainers */
         author?: string[]
-        /** @default 0 */
+        /**
+         * @description Total size of the package artifact in bytes
+         * @default 0
+         */
         size?: number
         alerts?: Array<components['schemas']['SocketAlert']>
         score?: components['schemas']['SocketScore']
-        /** @default 0 */
+        /**
+         * @description Index position of this artifact within its processing batch, used for ordering and pagination
+         * @default 0
+         */
         batchIndex?: number
         /** @default */
         license?: string
@@ -1542,6 +1549,76 @@ export interface components {
         ref: string
         dependsOn?: string[]
       }>
+      vulnerabilities?: Array<{
+        /** @default */
+        ref: string
+        /** @default */
+        id: string
+        source?: {
+          /** @default */
+          name?: string
+          /** @default */
+          url?: string
+        }
+        ratings?: Array<{
+          source?: {
+            /** @default */
+            name?: string
+            /** @default */
+            url?: string
+          }
+          /** @default 0 */
+          score?: number
+          /** @default */
+          severity?: string
+          /** @default */
+          method?: string
+          /** @default */
+          vector?: string
+        }>
+        cwes?: number[]
+        /** @default */
+        description?: string
+        /** @default */
+        detail?: string
+        /** @default */
+        recommendation?: string
+        advisories?: Array<{
+          /** @default */
+          url: string
+          /** @default */
+          title?: string
+        }>
+        /** @default */
+        created?: string
+        /** @default */
+        published?: string
+        /** @default */
+        updated?: string
+        affects?: Array<{
+          /** @default */
+          ref: string
+          versions?: Array<{
+            /** @default */
+            version?: string
+            /** @default */
+            status?: string
+          }>
+        }>
+        analysis?: {
+          /** @default */
+          state?: string
+          /** @default */
+          justification?: string
+          response?: string[]
+          /** @default */
+          detail?: string
+          /** @default */
+          firstIssued?: string
+          /** @default */
+          lastUpdated?: string
+        }
+      }>
     }
     SPDXManifestSchema: {
       /** @default SPDX-2.3 */
@@ -1608,12 +1685,18 @@ export interface components {
     SocketDiffArtifact: components['schemas']['SocketPURL'] & {
       diffType: components['schemas']['SocketDiffArtifactType']
       id?: components['schemas']['SocketId']
+      /** @description List of package authors or maintainers */
       author?: string[]
+      /** @description Artifact links from the base/before state */
       base?: Array<components['schemas']['SocketArtifactLink']>
       capabilities?: components['schemas']['Capabilities']
+      /** @description Artifact links from the head/after state */
       head?: Array<components['schemas']['SocketArtifactLink']>
       qualifiers?: components['schemas']['Qualifiers']
-      /** @default 0 */
+      /**
+       * @description Total size of the package artifact in bytes
+       * @default 0
+       */
       size?: number
       /** @default */
       license?: string
@@ -1629,40 +1712,85 @@ export interface components {
       options: string[] | null
     }
     Capabilities: {
-      /** @default false */
+      /**
+       * @description Package can read or modify environment variables
+       * @default false
+       */
       env: boolean
-      /** @default false */
+      /**
+       * @description Package uses dynamic code evaluation (eval, Function constructor, etc.)
+       * @default false
+       */
       eval: boolean
-      /** @default false */
+      /**
+       * @description Package can read or write to the file system
+       * @default false
+       */
       fs: boolean
-      /** @default false */
+      /**
+       * @description Package can make network requests or create servers
+       * @default false
+       */
       net: boolean
-      /** @default false */
+      /**
+       * @description Package can execute shell commands or spawn processes
+       * @default false
+       */
       shell: boolean
-      /** @default false */
+      /**
+       * @description Package uses unsafe or dangerous operations that could compromise security
+       * @default false
+       */
       unsafe: boolean
     }
     Qualifiers: unknown
     SocketScore: {
-      /** @default 0 */
+      /**
+       * @description Score from 0.0 to 1.0 evaluating license permissiveness and compatibility
+       * @default 0
+       */
       license: number
-      /** @default 0 */
+      /**
+       * @description Score from 0.0 to 1.0 evaluating project maintenance health and activity
+       * @default 0
+       */
       maintenance: number
-      /** @default 0 */
+      /**
+       * @description Combined score from 0.0 to 1.0 representing overall package health and safety
+       * @default 0
+       */
       overall: number
-      /** @default 0 */
+      /**
+       * @description Score from 0.0 to 1.0 evaluating code quality, testing, and documentation
+       * @default 0
+       */
       quality: number
-      /** @default 0 */
+      /**
+       * @description Score from 0.0 to 1.0 evaluating supply chain security and provenance
+       * @default 0
+       */
       supplyChain: number
-      /** @default 0 */
+      /**
+       * @description Score from 0.0 to 1.0 based on known vulnerabilities and their severity
+       * @default 0
+       */
       vulnerability: number
     }
     SocketManifestReference: {
-      /** @default */
+      /**
+       * @description Path to the manifest file (e.g., package.json, pom.xml)
+       * @default
+       */
       file: string
-      /** @default 0 */
+      /**
+       * @description Starting line or position in the manifest file
+       * @default 0
+       */
       start?: number
-      /** @default 0 */
+      /**
+       * @description Ending line or position in the manifest file
+       * @default 0
+       */
       end?: number
     }
     /** @default */
@@ -1701,54 +1829,114 @@ export interface components {
     }
     SocketPURL: {
       type: components['schemas']['SocketPURL_Type']
-      /** @default */
+      /**
+       * @description Package namespace or scope, such as npm organizations (@angular), Maven groupIds, or Docker image owners
+       * @default
+       */
       namespace?: string
-      /** @default */
-      name: string
-      /** @default */
+      /**
+       * @description Package name within its ecosystem
+       * @default
+       */
+      name?: string
+      /**
+       * @description Package version string
+       * @default
+       */
       version?: string
-      /** @default */
+      /**
+       * @description Path within the package to a specific file or directory, used to reference nested components
+       * @default
+       */
       subpath?: string
-      /** @default */
+      /**
+       * @description Package-specific release identifier, such as PyPI's artifact ID or the specific build/release version
+       * @default
+       */
       release?: string
     }
     SocketAlert: {
-      /** @default */
+      /**
+       * @description Unique identifier for this alert instance, used for deduplication and tracking across scans
+       * @default
+       */
       key: string
-      /** @default */
+      /**
+       * @description Alert type identifier referencing the alert type definition
+       * @default
+       */
       type: string
       severity?: components['schemas']['SocketIssueSeverity']
       category?: components['schemas']['SocketCategory']
-      /** @default */
+      /**
+       * @description File path where this alert was detected
+       * @default
+       */
       file?: string
-      /** @default 0 */
+      /**
+       * @description Starting position of the alert in the file
+       * @default 0
+       */
       start?: number
-      /** @default 0 */
+      /**
+       * @description Ending position of the alert in the file
+       * @default 0
+       */
       end?: number
-      /** @default null */
+      /**
+       * @description Additional alert-specific properties and metadata that vary by alert type
+       * @default null
+       */
       props?: Record<string, never>
-      /** @default */
+      /**
+       * @description Action to take for this alert (e.g., error, warn, ignore)
+       * @default
+       */
       action?: string
       actionSource?: {
-        /** @default */
+        /**
+         * @description Type of action source (e.g., policy, override)
+         * @default
+         */
         type: string
         candidates: Array<{
-          /** @default */
+          /**
+           * @description Type of action candidate
+           * @default
+           */
           type: string
-          /** @default */
+          /**
+           * @description Proposed action for this candidate
+           * @default
+           */
           action: string
-          /** @default 0 */
+          /**
+           * @description Index of the policy rule for this candidate
+           * @default 0
+           */
           actionPolicyIndex: number
-          /** @default */
+          /**
+           * @description Repository label ID associated with this candidate
+           * @default
+           */
           repoLabelId: string
         }>
       }
-      /** @default 0 */
+      /**
+       * @description Index of the policy rule that triggered this action, for traceability to security policies
+       * @default 0
+       */
       actionPolicyIndex?: number
       fix?: {
-        /** @default */
+        /**
+         * @description Type of fix available (e.g., upgrade, remove, cve)
+         * @default
+         */
         type: string
-        /** @default */
+        /**
+         * @description Human-readable description of how to fix this issue
+         * @default
+         */
         description: string
       }
       reachability?: {
@@ -1757,73 +1945,154 @@ export interface components {
       }
     }
     LicenseDetails: Array<{
-      /** @default */
+      /**
+       * @description SPDX license expression in disjunctive normal form (e.g., '(MIT OR Apache-2.0)')
+       * @default
+       */
       spdxDisj: string
+      /** @description List of authors found in the license text */
       authors: string[]
-      /** @default */
+      /**
+       * @description Error details if license parsing failed
+       * @default
+       */
       errorData: string
-      /** @default */
+      /**
+       * @description Source where this license information was detected (e.g., 'package.json', 'LICENSE file', 'README')
+       * @default
+       */
       provenance: string
-      /** @default */
+      /**
+       * @description Path to the file containing this license information
+       * @default
+       */
       filepath: string
-      /** @default 0 */
+      /**
+       * @description Confidence score from 0.0 to 1.0 indicating how well the detected license matches the source text
+       * @default 0
+       */
       match_strength: number
     }>
     SAttrib1_N: Array<{
-      /** @default */
+      /**
+       * @description Full text of the license attribution or copyright notice found in the package
+       * @default
+       */
       attribText: string
       attribData: Array<{
-        /** @default */
+        /**
+         * @description Package URL this attribution applies to
+         * @default
+         */
         purl: string
-        /** @default */
+        /**
+         * @description File path where this attribution was found
+         * @default
+         */
         foundInFilepath: string
-        /** @default */
+        /**
+         * @description SPDX license expression parsed from the attribution text
+         * @default
+         */
         spdxExpr: string
+        /** @description Authors mentioned in this attribution */
         foundAuthors: string[]
       }>
     }>
     SocketArtifactLink: {
-      /** @default false */
+      /**
+       * @description Indicates if this is a direct dependency (not transitive)
+       * @default false
+       */
       direct?: boolean
-      /** @default false */
+      /**
+       * @description Indicates if this is a development-only dependency not used in production
+       * @default false
+       */
       dev?: boolean
-      /** @default false */
+      /**
+       * @description Indicates if this package is deprecated, abandoned, or no longer maintained
+       * @default false
+       */
       dead?: boolean
       manifestFiles?: Array<components['schemas']['SocketManifestReference']>
+      /** @description IDs of the root-level packages in the dependency tree that depend on this package */
       topLevelAncestors?: Array<components['schemas']['SocketId']>
+      /** @description IDs of packages that this package directly depends on */
       dependencies?: Array<components['schemas']['SocketId']>
+      /** @description Computed priority scores for each alert type based on severity, reachability, and fixability factors */
       alertPriorities?: {
         [key: string]: {
-          /** @default 0 */
+          /**
+           * @description Computed priority score for this alert
+           * @default 0
+           */
           result: number
           components?: {
             isFixable: {
-              /** @default 0 */
+              /**
+               * @description Contribution of fixability to the priority score
+               * @default 0
+               */
               result: number
-              /** @default false */
+              /**
+               * @description Whether a fix is available for this alert
+               * @default false
+               */
               value: boolean
             }
             isReachable: {
-              /** @default 0 */
+              /**
+               * @description Contribution of reachability to the priority score
+               * @default 0
+               */
               result: number
-              /** @default false */
+              /**
+               * @description Whether the vulnerable code is reachable
+               * @default false
+               */
               value: boolean
-              /** @default */
+              /**
+               * @description Specific reachability type value such as 'unreachable', 'maybe_reachable', or 'reachable'
+               * @default
+               */
               specificValue: string
             }
             severity: {
-              /** @default 0 */
+              /**
+               * @description Contribution of severity to the priority score
+               * @default 0
+               */
               result: number
-              /** @default 0 */
+              /**
+               * @description Numeric severity level
+               * @default 0
+               */
               value: number
             }
           }
-          /** @default */
+          /**
+           * @description Formula used to calculate the priority score
+           * @default
+           */
           formula?: string
         }
       }
       artifact?: components['schemas']['SocketPURL'] & {
         id: components['schemas']['SocketId']
+      }
+      /** @description Mapping of alert keys to arrays of reachability types found across different manifest files or code locations. Each type indicates whether the vulnerable code is actually used: "reachable" (definitely used), "maybe_reachable" (potentially used), "unreachable" (not used), "unknown" (cannot determine), etc. Multiple types per alert can occur when the same vulnerability appears in different contexts. */
+      alertKeysToReachabilityTypes?: {
+        [key: string]: string[]
+      }
+      /** @description Mapping of alert keys to arrays of reachability summaries. Each summary contains a reachability type and a hash pointing to detailed analysis data (call stacks, file locations, confidence scores). Used for efficient storage and retrieval of comprehensive reachability analysis results without duplicating large analysis payloads. */
+      alertKeysToReachabilitySummaries?: {
+        [key: string]: Array<{
+          /** @default */
+          type: string
+          /** @default */
+          hash: string
+        }>
       }
     }
     SocketBatchPURLRequest: {
@@ -1921,6 +2190,7 @@ export interface components {
       components?: Array<components['schemas']['CDXComponentSchema']>
     }
     /**
+     * @description Type of change detected for this artifact in the diff
      * @default unchanged
      * @enum {string}
      */
@@ -3567,6 +3837,7 @@ export interface components {
       limitingMetric?: string
     }
     /**
+     * @description Package ecosystem type identifier based on the PURL specification
      * @default unknown
      * @enum {string}
      */
@@ -3619,10 +3890,12 @@ export interface components {
       | 'miscellaneous'
     ReachabilityResult: {
       /**
+       * @description Type of reachability analysis performed
        * @default precomputed
        * @enum {string}
        */
       type: 'precomputed' | 'full-scan'
+      /** @description Reachability analysis results for each vulnerability */
       results: Array<components['schemas']['ReachabilityResultItem']>
     }
     SocketIssueBasics: {
@@ -3648,9 +3921,15 @@ export interface components {
     }
     ReachabilityResultItem: {
       type: components['schemas']['ReachabilityType']
-      /** @default false */
+      /**
+       * @description Indicates if the reachability analysis was stopped early due to depth or complexity limits
+       * @default false
+       */
       truncated?: boolean
-      /** @default */
+      /**
+       * @description Error message if reachability analysis failed
+       * @default
+       */
       error?: string
       matches?:
         | {
@@ -3663,9 +3942,15 @@ export interface components {
             type?: 'class-level'
             value?: Array<Array<components['schemas']['ClassStackItem']>>
           }
-      /** @default */
+      /**
+       * @description Path to the workspace root for multi-workspace projects
+       * @default
+       */
       workspacePath?: string
-      /** @default */
+      /**
+       * @description Path to the subproject within the workspace
+       * @default
+       */
       subprojectPath?: string
     }
     SocketRefList: Array<components['schemas']['SocketRef']>
@@ -3676,6 +3961,7 @@ export interface components {
       bytes?: components['schemas']['SocketRefByteRange']
     }
     /**
+     * @description Status of reachability analysis for vulnerable code paths
      * @default unknown
      * @enum {string}
      */
@@ -3690,18 +3976,33 @@ export interface components {
       | 'maybe_reachable'
       | 'reachable'
     CallStackItem: {
-      /** @default */
+      /**
+       * @description Package URL (PURL) of the dependency containing this code
+       * @default
+       */
       purl?: string
       sourceLocation?: components['schemas']['SourceLocation']
-      /** @default 0 */
+      /**
+       * @description Confidence score from 0.0 to 1.0 indicating how certain the reachability analysis is about this result
+       * @default 0
+       */
       confidence?: number
     }
     ClassStackItem: {
-      /** @default */
+      /**
+       * @description Package URL (PURL) of the dependency containing this class
+       * @default
+       */
       purl?: string
-      /** @default */
+      /**
+       * @description Name of the class in the dependency
+       * @default
+       */
       class?: string
-      /** @default 0 */
+      /**
+       * @description Confidence score from 0.0 to 1.0 indicating how certain the reachability analysis is about this result
+       * @default 0
+       */
       confidence?: number
     }
     SocketRef:
@@ -3753,24 +4054,48 @@ export interface components {
     }
     SourceLocation: {
       start: {
-        /** @default 0 */
+        /**
+         * @description Line number in the source file
+         * @default 0
+         */
         line: number
-        /** @default 0 */
+        /**
+         * @description Column number in the source file
+         * @default 0
+         */
         column: number
-        /** @default 0 */
+        /**
+         * @description Absolute byte position from the beginning of the file, used for precise location tracking
+         * @default 0
+         */
         byteOffset: number
       }
       end: {
-        /** @default 0 */
+        /**
+         * @description Line number in the source file
+         * @default 0
+         */
         line?: number
-        /** @default 0 */
+        /**
+         * @description Column number in the source file
+         * @default 0
+         */
         column?: number
-        /** @default 0 */
+        /**
+         * @description Absolute byte position from the beginning of the file, used for precise location tracking
+         * @default 0
+         */
         byteOffset?: number
       }
-      /** @default */
+      /**
+       * @description Path to the source file
+       * @default
+       */
       filename: string
-      /** @default */
+      /**
+       * @description Hash of the source file for integrity verification
+       * @default
+       */
       fileHash: string
     }
     SocketRefNPM: {
@@ -4619,6 +4944,8 @@ export interface operations {
         project_version?: string
         /** @description Dependency track project id. Either provide the id or the project name and version together */
         project_id?: string
+        /** @description Include vulnerability information in the SBOM. Also includes reachability/VEX if available */
+        include_vulnerabilities?: string
       }
       path: {
         /** @description The slug of the organization */
@@ -4676,6 +5003,8 @@ export interface operations {
         project_version?: string
         /** @description Dependency track project id. Either provide the id or the project name and version together */
         project_id?: string
+        /** @description Include vulnerability information in the SBOM. Also includes reachability/VEX if available */
+        include_vulnerabilities?: string
       }
       path: {
         /** @description The slug of the organization */
