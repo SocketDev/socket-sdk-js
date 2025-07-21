@@ -3,8 +3,10 @@ declare type ValueOf<
   ValueType extends keyof ObjectType = keyof ObjectType
 > = ObjectType[ValueType]
 
-// Copied and adapted from "openapi-typescript-fetch"
-
+// Based on openapi-typescript-fetch.
+// https://socket.dev/npm/package/openapi-typescript-fetch/overview/2.2.1
+// MIT License
+// Copyright 2021 Ajai Shankar
 declare type Coalesce<T, D> = [T] extends [never] ? D : T
 
 declare type OpResponseTypes<OP> = OP extends {
