@@ -1204,6 +1204,16 @@ export class SocketSdk {
     }
   }
 }
+
+export interface SocketSdk {
+  createReportFromFilepaths: SocketSdk['createScanFromFilepaths']
+  createReportFromFilePaths: SocketSdk['createScanFromFilepaths']
+  getReport: SocketSdk['getScan']
+  getReportList: SocketSdk['getScanList']
+  getReportSupportedFiles: SocketSdk['getSupportedScanFiles']
+  getScoreByNPMPackage: SocketSdk['getScoreByNpmPackage']
+}
+
 // Add aliases.
 Object.defineProperties(SocketSdk.prototype, {
   createReportFromFilepaths: desc(SocketSdk.prototype.createScanFromFilepaths),
