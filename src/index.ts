@@ -72,6 +72,24 @@ export interface SocketSdkOptions {
   userAgent?: string | undefined
 }
 
+export type UploadManifestFilesResponse = {
+  tarHash: string
+  unmatchedFiles: string[]
+}
+
+export type UploadManifestFilesReturnType = {
+  success: true
+  status: 200
+  data: UploadManifestFilesResponse
+}
+
+export type UploadManifestFilesError = {
+  success: false
+  status: number
+  error: string
+  cause: string | undefined
+}
+
 const DEFAULT_USER_AGENT = createUserAgentFromPkgJson(rootPkgJson)
 
 class ResponseError extends Error {
@@ -317,6 +335,15 @@ async function getErrorResponseBody(
   }
 }
 
+function desc(value: any) {
+  return {
+    __proto__: null,
+    configurable: true,
+    value,
+    writable: true
+  } as PropertyDescriptor
+}
+
 function getHttpModule(baseUrl: string): typeof http | typeof https {
   const { protocol } = new URL(baseUrl)
   return protocol === 'https:' ? https : http
@@ -375,6 +402,23 @@ function isResponseOk(response: IncomingMessage): boolean {
   return (
     typeof statusCode === 'number' && statusCode >= 200 && statusCode <= 299
   )
+}
+
+function promiseWithResolvers<T>(): ReturnType<
+  typeof Promise.withResolvers<T>
+> {
+  if (Promise.withResolvers) {
+    return Promise.withResolvers<T>()
+  }
+
+  // This is what the above does but it's not available in node 20 (it is in node 22)
+  // @ts-ignore -- sigh.
+  const obj: ReturnType<typeof Promise.withResolvers<T>> = {}
+  obj.promise = new Promise<T>((resolver, reject) => {
+    obj.resolve = resolver
+    obj.reject = reject
+  })
+  return obj
 }
 
 function resolveAbsPaths(
@@ -512,7 +556,7 @@ export class SocketSdk {
     // The error payload may give a meaningful hint as to what went wrong.
     const bodyStr = await getErrorResponseBody(error.response)
     // Try to parse the body as JSON, fallback to treating as plain text.
-    let body
+    let body: string | undefined
     try {
       const parsed = JSON.parse(bodyStr)
       // A 400 should return an actionable message.
@@ -724,7 +768,7 @@ export class SocketSdk {
     }
   }
 
-  async createReportFromFilepaths(
+  async createScanFromFilepaths(
     filepaths: string[],
     pathsRelativeTo: string = '.',
     issueRules?: Record<string, boolean>
@@ -750,19 +794,6 @@ export class SocketSdk {
     } catch (e) {
       return await this.#handleApiError<'createReport'>(e)
     }
-  }
-
-  // Alias to preserve backwards compatibility.
-  async createReportFromFilePaths(
-    filepaths: string[],
-    pathsRelativeTo: string = '.',
-    issueRules?: Record<string, boolean>
-  ): Promise<SocketSdkResultType<'createReport'>> {
-    return await this.createReportFromFilepaths(
-      filepaths,
-      pathsRelativeTo,
-      issueRules
-    )
   }
 
   async deleteOrgFullScan(
@@ -1030,7 +1061,7 @@ export class SocketSdk {
     }
   }
 
-  async getReport(id: string): Promise<SocketSdkResultType<'getReport'>> {
+  async getScan(id: string): Promise<SocketSdkResultType<'getReport'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
@@ -1045,7 +1076,7 @@ export class SocketSdk {
     }
   }
 
-  async getReportList(): Promise<SocketSdkResultType<'getReportList'>> {
+  async getScanList(): Promise<SocketSdkResultType<'getReportList'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(this.#baseUrl, 'report/list', this.#reqOptions)
@@ -1056,7 +1087,7 @@ export class SocketSdk {
     }
   }
 
-  async getReportSupportedFiles(): Promise<
+  async getSupportedScanFiles(): Promise<
     SocketSdkResultType<'getReportSupportedFiles'>
   > {
     try {
@@ -1073,7 +1104,7 @@ export class SocketSdk {
     }
   }
 
-  async getScoreByNPMPackage(
+  async getScoreByNpmPackage(
     pkgName: string,
     version: string
   ): Promise<SocketSdkResultType<'getScoreByNPMPackage'>> {
@@ -1146,21 +1177,39 @@ export class SocketSdk {
       return await this.#handleApiError<'updateOrgRepo'>(e)
     }
   }
-}
 
-function promiseWithResolvers<T>(): ReturnType<
-  typeof Promise.withResolvers<T>
-> {
-  if (Promise.withResolvers) {
-    return Promise.withResolvers<T>()
+  async uploadManifestFiles(
+    orgSlug: string,
+    filepaths: string[],
+    pathsRelativeTo: string = '.'
+  ): Promise<UploadManifestFilesReturnType | UploadManifestFilesError> {
+    const basePath = resolveBasePath(pathsRelativeTo)
+    const absFilepaths = resolveAbsPaths(filepaths, basePath)
+    try {
+      const data = await getResponseJson(
+        await createUploadRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/upload-manifest-files`,
+          createRequestBodyForFilepaths(absFilepaths, basePath),
+          this.#reqOptions
+        )
+      )
+      return this.#handleApiSuccess<any>(
+        data
+      ) as unknown as UploadManifestFilesReturnType
+    } catch (e) {
+      return (await this.#handleApiError<any>(
+        e
+      )) as unknown as UploadManifestFilesError
+    }
   }
-
-  // This is what the above does but it's not available in node 20 (it is in node 22)
-  // @ts-ignore -- sigh.
-  const obj: ReturnType<typeof Promise.withResolvers<T>> = {}
-  obj.promise = new Promise<T>((resolver, reject) => {
-    obj.resolve = resolver
-    obj.reject = reject
-  })
-  return obj
 }
+// Add aliases.
+Object.defineProperties(SocketSdk.prototype, {
+  createReportFromFilepaths: desc(SocketSdk.prototype.createScanFromFilepaths),
+  createReportFromFilePaths: desc(SocketSdk.prototype.createScanFromFilepaths),
+  getReport: desc(SocketSdk.prototype.getScan),
+  getReportList: desc(SocketSdk.prototype.getScanList),
+  getReportSupportedFiles: desc(SocketSdk.prototype.getSupportedScanFiles),
+  getScoreByNPMPackage: desc(SocketSdk.prototype.getScoreByNpmPackage)
+})
