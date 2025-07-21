@@ -29,8 +29,7 @@ import type {
 
 export type Agent = HttpsAgent | HttpAgent | ClientHttp2Session
 
-export type BatchPackageFetchResultType =
-  SocketSdkResultType<'batchPackageFetch'>
+export type BatchPackageFetchResultType = SocketSdkResult<'batchPackageFetch'>
 
 export type BatchPackageStreamOptions = {
   chunkSize: number
@@ -50,21 +49,20 @@ export type RequestOptions =
 
 export type SocketSdkOperations = keyof operations
 
-export type SocketSdkReturnType<T extends SocketSdkOperations> = OpReturnType<
-  operations[T]
->
+export type SocketSdkSuccessResult<T extends SocketSdkOperations> =
+  OpReturnType<operations[T]>
 
-export type SocketSdkErrorType<T extends SocketSdkOperations> = Omit<
+export type SocketSdkErrorResult<T extends SocketSdkOperations> = Omit<
   OpErrorType<operations[T]>,
   'error'
 > & {
   error: string
-  cause?: unknown
+  cause?: string | undefined
 }
 
-export type SocketSdkResultType<T extends SocketSdkOperations> =
-  | SocketSdkReturnType<T>
-  | SocketSdkErrorType<T>
+export type SocketSdkResult<T extends SocketSdkOperations> =
+  | SocketSdkSuccessResult<T>
+  | SocketSdkErrorResult<T>
 
 export interface SocketSdkOptions {
   agent?: Agent | GotOptions | undefined
@@ -541,7 +539,7 @@ export class SocketSdk {
 
   async #handleApiError<T extends SocketSdkOperations>(
     error: unknown
-  ): Promise<SocketSdkErrorType<T>> {
+  ): Promise<SocketSdkErrorResult<T>> {
     if (!(error instanceof ResponseError)) {
       throw new Error('Unexpected Socket API error', {
         cause: error
@@ -568,21 +566,21 @@ export class SocketSdk {
       body = bodyStr
     }
     return {
-      success: false as const,
+      success: false,
       status: statusCode!,
       error: error.message ?? '',
       cause: body
-    } as unknown as SocketSdkErrorType<T>
+    } as SocketSdkErrorResult<T>
   }
 
   #handleApiSuccess<T extends SocketSdkOperations>(
     data: unknown
-  ): SocketSdkReturnType<T> {
+  ): SocketSdkSuccessResult<T> {
     return {
       success: true,
       status: 200,
-      data: data as SocketSdkReturnType<T>['data']
-    } satisfies SocketSdkReturnType<T>
+      data: data as SocketSdkSuccessResult<T>['data']
+    } satisfies SocketSdkSuccessResult<T>
   }
 
   async batchPackageFetch(
@@ -708,7 +706,7 @@ export class SocketSdk {
     params: Record<string, string>,
     filepaths: string[],
     pathsRelativeTo = '.'
-  ): Promise<SocketSdkResultType<'createDependenciesSnapshot'>> {
+  ): Promise<SocketSdkResult<'createDependenciesSnapshot'>> {
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
     try {
@@ -731,7 +729,7 @@ export class SocketSdk {
     queryParams: Record<string, string> | null | undefined,
     filepaths: string[],
     pathsRelativeTo: string = '.'
-  ): Promise<SocketSdkResultType<'CreateOrgFullScan'>> {
+  ): Promise<SocketSdkResult<'CreateOrgFullScan'>> {
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
     try {
@@ -752,7 +750,7 @@ export class SocketSdk {
   async createOrgRepo(
     orgSlug: string,
     params: Record<string, string>
-  ): Promise<SocketSdkResultType<'createOrgRepo'>> {
+  ): Promise<SocketSdkResult<'createOrgRepo'>> {
     try {
       const data = await getResponseJson(
         await createPostRequest(
@@ -772,7 +770,7 @@ export class SocketSdk {
     filepaths: string[],
     pathsRelativeTo: string = '.',
     issueRules?: Record<string, boolean>
-  ): Promise<SocketSdkResultType<'createReport'>> {
+  ): Promise<SocketSdkResult<'createReport'>> {
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
     try {
@@ -799,7 +797,7 @@ export class SocketSdk {
   async deleteOrgFullScan(
     orgSlug: string,
     fullScanId: string
-  ): Promise<SocketSdkResultType<'deleteOrgFullScan'>> {
+  ): Promise<SocketSdkResult<'deleteOrgFullScan'>> {
     try {
       const data = await getResponseJson(
         await createDeleteRequest(
@@ -817,7 +815,7 @@ export class SocketSdk {
   async deleteOrgRepo(
     orgSlug: string,
     repoSlug: string
-  ): Promise<SocketSdkResultType<'deleteOrgRepo'>> {
+  ): Promise<SocketSdkResult<'deleteOrgRepo'>> {
     try {
       const data = await getResponseJson(
         await createDeleteRequest(
@@ -835,7 +833,7 @@ export class SocketSdk {
   async getAuditLogEvents(
     orgSlug: string,
     queryParams?: Record<string, string> | null | undefined
-  ): Promise<SocketSdkResultType<'getAuditLogEvents'>> {
+  ): Promise<SocketSdkResult<'getAuditLogEvents'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
@@ -853,7 +851,7 @@ export class SocketSdk {
   async getIssuesByNPMPackage(
     pkgName: string,
     version: string
-  ): Promise<SocketSdkResultType<'getIssuesByNPMPackage'>> {
+  ): Promise<SocketSdkResult<'getIssuesByNPMPackage'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
@@ -870,7 +868,7 @@ export class SocketSdk {
 
   async getOrgAnalytics(
     time: string
-  ): Promise<SocketSdkResultType<'getOrgAnalytics'>> {
+  ): Promise<SocketSdkResult<'getOrgAnalytics'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
@@ -885,7 +883,7 @@ export class SocketSdk {
     }
   }
 
-  async getOrganizations(): Promise<SocketSdkResultType<'getOrganizations'>> {
+  async getOrganizations(): Promise<SocketSdkResult<'getOrganizations'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(this.#baseUrl, 'organizations', this.#reqOptions)
@@ -900,7 +898,7 @@ export class SocketSdk {
     orgSlug: string,
     fullScanId: string,
     file?: string
-  ): Promise<SocketSdkResultType<'getOrgFullScan'>> {
+  ): Promise<SocketSdkResult<'getOrgFullScan'>> {
     try {
       const req = getHttpModule(this.#baseUrl)
         .request(
@@ -926,7 +924,7 @@ export class SocketSdk {
   async getOrgFullScanList(
     orgSlug: string,
     queryParams?: Record<string, string> | null | undefined
-  ): Promise<SocketSdkResultType<'getOrgFullScanList'>> {
+  ): Promise<SocketSdkResult<'getOrgFullScanList'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
@@ -944,7 +942,7 @@ export class SocketSdk {
   async getOrgFullScanMetadata(
     orgSlug: string,
     fullScanId: string
-  ): Promise<SocketSdkResultType<'getOrgFullScanMetadata'>> {
+  ): Promise<SocketSdkResult<'getOrgFullScanMetadata'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
@@ -961,7 +959,7 @@ export class SocketSdk {
 
   async getOrgLicensePolicy(
     orgSlug: string
-  ): Promise<SocketSdkResultType<'getOrgLicensePolicy'>> {
+  ): Promise<SocketSdkResult<'getOrgLicensePolicy'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
@@ -979,7 +977,7 @@ export class SocketSdk {
   async getOrgRepo(
     orgSlug: string,
     repoSlug: string
-  ): Promise<SocketSdkResultType<'getOrgRepo'>> {
+  ): Promise<SocketSdkResult<'getOrgRepo'>> {
     const orgSlugParam = encodeURIComponent(orgSlug)
     const repoSlugParam = encodeURIComponent(repoSlug)
 
@@ -1000,7 +998,7 @@ export class SocketSdk {
   async getOrgRepoList(
     orgSlug: string,
     queryParams?: Record<string, string> | null | undefined
-  ): Promise<SocketSdkResultType<'getOrgRepoList'>> {
+  ): Promise<SocketSdkResult<'getOrgRepoList'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
@@ -1017,7 +1015,7 @@ export class SocketSdk {
 
   async getOrgSecurityPolicy(
     orgSlug: string
-  ): Promise<SocketSdkResultType<'getOrgSecurityPolicy'>> {
+  ): Promise<SocketSdkResult<'getOrgSecurityPolicy'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
@@ -1032,7 +1030,7 @@ export class SocketSdk {
     }
   }
 
-  async getQuota(): Promise<SocketSdkResultType<'getQuota'>> {
+  async getQuota(): Promise<SocketSdkResult<'getQuota'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(this.#baseUrl, 'quota', this.#reqOptions)
@@ -1046,7 +1044,7 @@ export class SocketSdk {
   async getRepoAnalytics(
     repo: string,
     time: string
-  ): Promise<SocketSdkResultType<'getRepoAnalytics'>> {
+  ): Promise<SocketSdkResult<'getRepoAnalytics'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
@@ -1061,7 +1059,7 @@ export class SocketSdk {
     }
   }
 
-  async getScan(id: string): Promise<SocketSdkResultType<'getReport'>> {
+  async getScan(id: string): Promise<SocketSdkResult<'getReport'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
@@ -1076,7 +1074,7 @@ export class SocketSdk {
     }
   }
 
-  async getScanList(): Promise<SocketSdkResultType<'getReportList'>> {
+  async getScanList(): Promise<SocketSdkResult<'getReportList'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(this.#baseUrl, 'report/list', this.#reqOptions)
@@ -1088,7 +1086,7 @@ export class SocketSdk {
   }
 
   async getSupportedScanFiles(): Promise<
-    SocketSdkResultType<'getReportSupportedFiles'>
+    SocketSdkResult<'getReportSupportedFiles'>
   > {
     try {
       const data = await getResponseJson(
@@ -1107,7 +1105,7 @@ export class SocketSdk {
   async getScoreByNpmPackage(
     pkgName: string,
     version: string
-  ): Promise<SocketSdkResultType<'getScoreByNPMPackage'>> {
+  ): Promise<SocketSdkResult<'getScoreByNPMPackage'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
@@ -1124,7 +1122,7 @@ export class SocketSdk {
 
   async postSettings(
     selectors: Array<{ organization?: string }>
-  ): Promise<SocketSdkResultType<'postSettings'>> {
+  ): Promise<SocketSdkResult<'postSettings'>> {
     try {
       const data = await getResponseJson(
         await createPostRequest(
@@ -1142,7 +1140,7 @@ export class SocketSdk {
 
   async searchDependencies(
     params: Record<string, number>
-  ): Promise<SocketSdkResultType<'searchDependencies'>> {
+  ): Promise<SocketSdkResult<'searchDependencies'>> {
     try {
       const data = await getResponseJson(
         await createPostRequest(
@@ -1162,7 +1160,7 @@ export class SocketSdk {
     orgSlug: string,
     repoSlug: string,
     params: Record<string, string>
-  ): Promise<SocketSdkResultType<'updateOrgRepo'>> {
+  ): Promise<SocketSdkResult<'updateOrgRepo'>> {
     try {
       const data = await getResponseJson(
         await createPostRequest(
