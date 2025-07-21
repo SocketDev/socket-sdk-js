@@ -419,6 +419,30 @@ function promiseWithResolvers<T>(): ReturnType<
   return obj
 }
 
+function queryToSearchParams(
+  init?:
+    | URLSearchParams
+    | string
+    | Record<string, string | readonly string[]>
+    | Iterable<[string, string]>
+    | ReadonlyArray<[string, string]>
+    | null
+    | undefined
+): URLSearchParams {
+  const params = new URLSearchParams(init ?? '')
+  const normalized: Record<string, string> = {}
+  for (const entry of params.entries()) {
+    let key = entry[0]
+    if (key === 'defaultBranch') {
+      key = 'default_branch'
+    } else if (key === 'perPage') {
+      key = 'per_page'
+    }
+    normalized[key] = entry[1]
+  }
+  return new URLSearchParams(normalized)
+}
+
 function resolveAbsPaths(
   filepaths: string[],
   pathsRelativeTo?: string
@@ -491,13 +515,10 @@ export class SocketSdk {
   ): Promise<IncomingMessage> {
     // Adds the first 'abort' listener to abortSignal.
     const req = getHttpModule(this.#baseUrl)
-      .request(
-        `${this.#baseUrl}purl?${new URLSearchParams(queryParams ?? '')}`,
-        {
-          method: 'POST',
-          ...this.#reqOptions
-        }
-      )
+      .request(`${this.#baseUrl}purl?${queryToSearchParams(queryParams)}`, {
+        method: 'POST',
+        ...this.#reqOptions
+      })
       .end(JSON.stringify(componentsObj))
     return await getResponse(req)
   }
@@ -703,7 +724,7 @@ export class SocketSdk {
   }
 
   async createDependenciesSnapshot(
-    params: Record<string, string>,
+    queryParams: Record<string, string>,
     filepaths: string[],
     pathsRelativeTo = '.'
   ): Promise<SocketSdkResult<'createDependenciesSnapshot'>> {
@@ -713,7 +734,7 @@ export class SocketSdk {
       const data = await getResponseJson(
         await createUploadRequest(
           this.#baseUrl,
-          `dependencies/upload?${new URLSearchParams(params)}`,
+          `dependencies/upload?${queryToSearchParams(queryParams)}`,
           createRequestBodyForFilepaths(absFilepaths, basePath),
           this.#reqOptions
         )
@@ -736,7 +757,7 @@ export class SocketSdk {
       const data = await getResponseJson(
         await createUploadRequest(
           this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/full-scans?${new URLSearchParams(queryParams ?? '')}`,
+          `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(queryParams)}`,
           createRequestBodyForFilepaths(absFilepaths, basePath),
           this.#reqOptions
         )
@@ -749,14 +770,14 @@ export class SocketSdk {
 
   async createOrgRepo(
     orgSlug: string,
-    params: Record<string, string>
+    queryParams: Record<string, string>
   ): Promise<SocketSdkResult<'createOrgRepo'>> {
     try {
       const data = await getResponseJson(
         await createPostRequest(
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/repos`,
-          params,
+          queryParams,
           this.#reqOptions
         )
       )
@@ -838,7 +859,7 @@ export class SocketSdk {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/audit-log?${new URLSearchParams(queryParams ?? '')}`,
+          `orgs/${encodeURIComponent(orgSlug)}/audit-log?${queryToSearchParams(queryParams)}`,
           this.#reqOptions
         )
       )
@@ -929,7 +950,7 @@ export class SocketSdk {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/full-scans?${new URLSearchParams(queryParams ?? '')}`,
+          `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(queryParams)}`,
           this.#reqOptions
         )
       )
@@ -1003,7 +1024,7 @@ export class SocketSdk {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/repos?${new URLSearchParams(queryParams ?? '')}`,
+          `orgs/${encodeURIComponent(orgSlug)}/repos?${queryToSearchParams(queryParams)}`,
           this.#reqOptions
         )
       )
@@ -1139,14 +1160,14 @@ export class SocketSdk {
   }
 
   async searchDependencies(
-    params: Record<string, number>
+    queryParams: Record<string, number>
   ): Promise<SocketSdkResult<'searchDependencies'>> {
     try {
       const data = await getResponseJson(
         await createPostRequest(
           this.#baseUrl,
           'dependencies/search',
-          params,
+          queryParams,
           this.#reqOptions
         )
       )
@@ -1159,14 +1180,14 @@ export class SocketSdk {
   async updateOrgRepo(
     orgSlug: string,
     repoSlug: string,
-    params: Record<string, string>
+    queryParams: Record<string, string>
   ): Promise<SocketSdkResult<'updateOrgRepo'>> {
     try {
       const data = await getResponseJson(
         await createPostRequest(
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`,
-          params,
+          queryParams,
           this.#reqOptions
         )
       )
