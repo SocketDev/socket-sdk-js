@@ -6,6 +6,7 @@ import path from 'node:path'
 import readline from 'node:readline'
 
 import abortSignal from '@socketsecurity/registry/lib/constants/abort-signal'
+import { hasOwn, isObjectObject } from '@socketsecurity/registry/lib/objects'
 import { pRetry } from '@socketsecurity/registry/lib/promises'
 
 // @ts-ignore: Avoid TS import attributes error.
@@ -32,8 +33,9 @@ export type Agent = HttpsAgent | HttpAgent | ClientHttp2Session
 export type BatchPackageFetchResultType = SocketSdkResult<'batchPackageFetch'>
 
 export type BatchPackageStreamOptions = {
-  chunkSize: number
-  concurrencyLimit: number
+  chunkSize?: number | undefined
+  concurrencyLimit?: number | undefined
+  queryParams?: QueryParams | undefined
 }
 
 export type GotOptions = {
@@ -41,6 +43,8 @@ export type GotOptions = {
   https?: HttpsAgent | undefined
   http2?: ClientHttp2Session | undefined
 }
+
+export type QueryParams = Record<string, any>
 
 export type RequestOptions =
   | HttpsRequestOptions
@@ -423,14 +427,14 @@ function queryToSearchParams(
   init?:
     | URLSearchParams
     | string
-    | Record<string, any>
+    | QueryParams
     | Iterable<[string, any]>
     | ReadonlyArray<[string, any]>
     | null
     | undefined
 ): URLSearchParams {
   const params = new URLSearchParams(init ?? '')
-  const normalized = { __proto__: null } as unknown as Record<string, string>
+  const normalized = { __proto__: null } as unknown as QueryParams
   const entries: Iterable<[string, any]> = params.entries()
   for (const entry of entries) {
     let key = entry[0]
@@ -514,8 +518,8 @@ export class SocketSdk {
   }
 
   async #createBatchPurlRequest(
-    queryParams: Record<string, string> | null | undefined,
-    componentsObj: { components: Array<{ purl: string }> }
+    componentsObj: { components: Array<{ purl: string }> },
+    queryParams?: QueryParams | undefined
   ): Promise<IncomingMessage> {
     // Adds the first 'abort' listener to abortSignal.
     const req = getHttpModule(this.#baseUrl)
@@ -528,13 +532,13 @@ export class SocketSdk {
   }
 
   async *#createBatchPurlGenerator(
-    queryParams: Record<string, string> | null | undefined,
-    componentsObj: { components: Array<{ purl: string }> }
+    componentsObj: { components: Array<{ purl: string }> },
+    queryParams?: QueryParams | undefined
   ): AsyncGenerator<BatchPackageFetchResultType> {
     let res: IncomingMessage | undefined
     try {
       res = await pRetry(
-        () => this.#createBatchPurlRequest(queryParams, componentsObj),
+        () => this.#createBatchPurlRequest(componentsObj, queryParams),
         {
           retries: 4,
           onRetryRethrow: true,
@@ -609,12 +613,19 @@ export class SocketSdk {
   }
 
   async batchPackageFetch(
-    queryParams: Record<string, string> | null | undefined,
-    componentsObj: { components: Array<{ purl: string }> }
+    componentsObj: { components: Array<{ purl: string }> },
+    queryParams?: QueryParams | undefined
   ): Promise<BatchPackageFetchResultType> {
+    // Support previous argument signature.
+    if (isObjectObject(componentsObj) && !hasOwn(componentsObj, 'components')) {
+      const oldParam1 = componentsObj
+      const oldParam2 = queryParams
+      queryParams = oldParam1 as typeof oldParam2
+      componentsObj = oldParam2 as unknown as typeof oldParam1
+    }
     let res: IncomingMessage | undefined
     try {
-      res = await this.#createBatchPurlRequest(queryParams, componentsObj)
+      res = await this.#createBatchPurlRequest(componentsObj, queryParams)
     } catch (e) {
       return await this.#handleApiError<'batchPackageFetch'>(e)
     }
@@ -633,10 +644,29 @@ export class SocketSdk {
   }
 
   async *batchPackageStream(
-    queryParams: Record<string, string> | null | undefined,
     componentsObj: { components: Array<{ purl: string }> },
     options?: BatchPackageStreamOptions | undefined
   ): AsyncGenerator<BatchPackageFetchResultType> {
+    // Support previous argument signature.
+    if (isObjectObject(componentsObj) && !hasOwn(componentsObj, 'components')) {
+      const oldParam1 = componentsObj
+      const oldParam2 = options
+      componentsObj = oldParam2 as unknown as typeof oldParam1
+      options = {
+        queryParams: oldParam1 as QueryParams,
+        ...arguments[2]
+      } as BatchPackageStreamOptions
+    }
+
+    const {
+      chunkSize = 100,
+      concurrencyLimit = 10,
+      queryParams
+    } = {
+      __proto__: null,
+      ...options
+    } as BatchPackageStreamOptions
+
     type GeneratorStep = {
       generator: AsyncGenerator<BatchPackageFetchResultType>
       iteratorResult: IteratorResult<BatchPackageFetchResultType>
@@ -646,10 +676,6 @@ export class SocketSdk {
       promise: Promise<GeneratorStep>
     }
 
-    const { chunkSize = 100, concurrencyLimit = 10 } = {
-      __proto__: null,
-      ...options
-    } as BatchPackageStreamOptions
     // The createBatchPurlGenerator method will add 2 'abort' event listeners to
     // abortSignal so we multiply the concurrencyLimit by 2.
     const neededMaxListeners = concurrencyLimit * 2
@@ -669,10 +695,13 @@ export class SocketSdk {
         // No more work to do.
         return
       }
-      const generator = this.#createBatchPurlGenerator(queryParams, {
-        // Chunk components.
-        components: components.slice(index, index + chunkSize)
-      })
+      const generator = this.#createBatchPurlGenerator(
+        {
+          // Chunk components.
+          components: components.slice(index, index + chunkSize)
+        },
+        queryParams
+      )
       continueGen(generator)
       index += chunkSize
     }
@@ -728,10 +757,19 @@ export class SocketSdk {
   }
 
   async createDependenciesSnapshot(
-    queryParams: Record<string, string>,
     filepaths: string[],
-    pathsRelativeTo = '.'
+    pathsRelativeTo = '.',
+    queryParams?: QueryParams | undefined
   ): Promise<SocketSdkResult<'createDependenciesSnapshot'>> {
+    // Support previous argument signature.
+    if (isObjectObject(filepaths)) {
+      const oldParam1 = filepaths
+      const oldParam2 = pathsRelativeTo
+      const oldParam3 = queryParams
+      queryParams = oldParam1 as typeof oldParam3
+      filepaths = oldParam2 as unknown as typeof oldParam1
+      pathsRelativeTo = oldParam3 as unknown as typeof oldParam2
+    }
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
     try {
@@ -751,10 +789,19 @@ export class SocketSdk {
 
   async createOrgFullScan(
     orgSlug: string,
-    queryParams: Record<string, string> | null | undefined,
     filepaths: string[],
-    pathsRelativeTo: string = '.'
+    pathsRelativeTo: string = '.',
+    queryParams?: QueryParams | undefined
   ): Promise<SocketSdkResult<'CreateOrgFullScan'>> {
+    // Support previous argument signature.
+    if (isObjectObject(filepaths)) {
+      const oldParam2 = filepaths
+      const oldParam3 = pathsRelativeTo
+      const oldParam4 = queryParams
+      queryParams = oldParam2 as typeof oldParam4
+      filepaths = oldParam3 as unknown as typeof oldParam2
+      pathsRelativeTo = oldParam4 as unknown as typeof oldParam3
+    }
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
     try {
@@ -774,7 +821,7 @@ export class SocketSdk {
 
   async createOrgRepo(
     orgSlug: string,
-    queryParams: Record<string, string>
+    queryParams?: QueryParams | undefined
   ): Promise<SocketSdkResult<'createOrgRepo'>> {
     try {
       const data = await getResponseJson(
@@ -857,7 +904,7 @@ export class SocketSdk {
 
   async getAuditLogEvents(
     orgSlug: string,
-    queryParams?: Record<string, string> | null | undefined
+    queryParams?: QueryParams | undefined
   ): Promise<SocketSdkResult<'getAuditLogEvents'>> {
     try {
       const data = await getResponseJson(
@@ -948,7 +995,7 @@ export class SocketSdk {
 
   async getOrgFullScanList(
     orgSlug: string,
-    queryParams?: Record<string, string> | null | undefined
+    queryParams?: QueryParams | undefined
   ): Promise<SocketSdkResult<'getOrgFullScanList'>> {
     try {
       const data = await getResponseJson(
@@ -1022,7 +1069,7 @@ export class SocketSdk {
 
   async getOrgRepoList(
     orgSlug: string,
-    queryParams?: Record<string, string> | null | undefined
+    queryParams?: QueryParams | undefined
   ): Promise<SocketSdkResult<'getOrgRepoList'>> {
     try {
       const data = await getResponseJson(
@@ -1164,7 +1211,7 @@ export class SocketSdk {
   }
 
   async searchDependencies(
-    queryParams: Record<string, number>
+    queryParams?: QueryParams | undefined
   ): Promise<SocketSdkResult<'searchDependencies'>> {
     try {
       const data = await getResponseJson(
@@ -1184,7 +1231,7 @@ export class SocketSdk {
   async updateOrgRepo(
     orgSlug: string,
     repoSlug: string,
-    queryParams: Record<string, string>
+    queryParams?: QueryParams | undefined
   ): Promise<SocketSdkResult<'updateOrgRepo'>> {
     try {
       const data = await getResponseJson(
