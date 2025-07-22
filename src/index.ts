@@ -423,22 +423,26 @@ function queryToSearchParams(
   init?:
     | URLSearchParams
     | string
-    | Record<string, string | readonly string[]>
-    | Iterable<[string, string]>
-    | ReadonlyArray<[string, string]>
+    | Record<string, any>
+    | Iterable<[string, any]>
+    | ReadonlyArray<[string, any]>
     | null
     | undefined
 ): URLSearchParams {
   const params = new URLSearchParams(init ?? '')
-  const normalized: Record<string, string> = {}
-  for (const entry of params.entries()) {
+  const normalized = { __proto__: null } as unknown as Record<string, string>
+  const entries: Iterable<[string, any]> = params.entries()
+  for (const entry of entries) {
     let key = entry[0]
+    const value = entry[1]
     if (key === 'defaultBranch') {
       key = 'default_branch'
     } else if (key === 'perPage') {
       key = 'per_page'
     }
-    normalized[key] = entry[1]
+    if (value || value === 0) {
+      normalized[key] = value
+    }
   }
   return new URLSearchParams(normalized)
 }
