@@ -489,6 +489,8 @@ export interface paths {
      *
      * To get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getsupportedfiles) endpoint.
      *
+     * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 16.8 MB.
+     *
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
@@ -615,6 +617,8 @@ export interface paths {
      * @description Create a diff scan between the repository's current HEAD full scan and a new full scan from uploaded manifest files.
      * Returns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from
      * the [api_url](/reference/getDiffScanById) URL to get the contents of the diff.
+     *
+     * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 16.8 MB.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -2311,6 +2315,68 @@ export interface components {
         }
       | {
           /** @enum {string} */
+          type?: 'chromePermission'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              permission: string
+              /** @default */
+              permissionType: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'chromeHostPermission'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              host: string
+              /** @default */
+              permissionType: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'chromeWildcardHostPermission'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              host: string
+              /** @default */
+              permissionType: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'chromeContentScript'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              scriptFile: string
+              /** @default */
+              matches: string
+              /** @default */
+              runAt: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
           type?: 'criticalCVE'
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
@@ -2368,35 +2434,37 @@ export interface components {
                * @default
                */
               vulnerableVersionRange: string
-              kevs: Array<{
-                /** @default */
-                vulnerabilityName: string
-                /** @default */
-                shortDescription: string | null
-                /** @default */
-                requiredAction: string | null
-                /**
-                 * @description Date when added to CISA KEV catalog (ISO 8601 format)
-                 * @default
-                 */
-                dateAdded: string
-                /**
-                 * @description Remediation deadline for federal agencies (ISO 8601 format)
-                 * @default
-                 */
-                dueDate: string | null
-                /**
-                 * @description Known, Unknown, or specific ransomware campaign names
-                 * @default
-                 */
-                knownRansomwareCampaignUse: string | null
-                /** @default */
-                notes: string | null
-                /** @default */
-                vendorProject: string
-                /** @default */
-                product: string
-              }> | null
+              kevs:
+                | Array<{
+                    /** @default */
+                    vulnerabilityName: string
+                    /** @default */
+                    shortDescription: string | null
+                    /** @default */
+                    requiredAction: string | null
+                    /**
+                     * @description Date when added to CISA KEV catalog (ISO 8601 format)
+                     * @default
+                     */
+                    dateAdded: string
+                    /**
+                     * @description Remediation deadline for federal agencies (ISO 8601 format)
+                     * @default
+                     */
+                    dueDate: string | null
+                    /**
+                     * @description Known, Unknown, or specific ransomware campaign names
+                     * @default
+                     */
+                    knownRansomwareCampaignUse: string | null
+                    /** @default */
+                    notes: string | null
+                    /** @default */
+                    vendorProject: string
+                    /** @default */
+                    product: string
+                  }>
+                | null
               /** @description Exploit Prediction Scoring System https://www.first.org/epss/ */
               epss: {
                 /** @default 0 */
@@ -2467,35 +2535,37 @@ export interface components {
                * @default
                */
               vulnerableVersionRange: string
-              kevs: Array<{
-                /** @default */
-                vulnerabilityName: string
-                /** @default */
-                shortDescription: string | null
-                /** @default */
-                requiredAction: string | null
-                /**
-                 * @description Date when added to CISA KEV catalog (ISO 8601 format)
-                 * @default
-                 */
-                dateAdded: string
-                /**
-                 * @description Remediation deadline for federal agencies (ISO 8601 format)
-                 * @default
-                 */
-                dueDate: string | null
-                /**
-                 * @description Known, Unknown, or specific ransomware campaign names
-                 * @default
-                 */
-                knownRansomwareCampaignUse: string | null
-                /** @default */
-                notes: string | null
-                /** @default */
-                vendorProject: string
-                /** @default */
-                product: string
-              }> | null
+              kevs:
+                | Array<{
+                    /** @default */
+                    vulnerabilityName: string
+                    /** @default */
+                    shortDescription: string | null
+                    /** @default */
+                    requiredAction: string | null
+                    /**
+                     * @description Date when added to CISA KEV catalog (ISO 8601 format)
+                     * @default
+                     */
+                    dateAdded: string
+                    /**
+                     * @description Remediation deadline for federal agencies (ISO 8601 format)
+                     * @default
+                     */
+                    dueDate: string | null
+                    /**
+                     * @description Known, Unknown, or specific ransomware campaign names
+                     * @default
+                     */
+                    knownRansomwareCampaignUse: string | null
+                    /** @default */
+                    notes: string | null
+                    /** @default */
+                    vendorProject: string
+                    /** @default */
+                    product: string
+                  }>
+                | null
               /** @description Exploit Prediction Scoring System https://www.first.org/epss/ */
               epss: {
                 /** @default 0 */
@@ -2566,35 +2636,37 @@ export interface components {
                * @default
                */
               vulnerableVersionRange: string
-              kevs: Array<{
-                /** @default */
-                vulnerabilityName: string
-                /** @default */
-                shortDescription: string | null
-                /** @default */
-                requiredAction: string | null
-                /**
-                 * @description Date when added to CISA KEV catalog (ISO 8601 format)
-                 * @default
-                 */
-                dateAdded: string
-                /**
-                 * @description Remediation deadline for federal agencies (ISO 8601 format)
-                 * @default
-                 */
-                dueDate: string | null
-                /**
-                 * @description Known, Unknown, or specific ransomware campaign names
-                 * @default
-                 */
-                knownRansomwareCampaignUse: string | null
-                /** @default */
-                notes: string | null
-                /** @default */
-                vendorProject: string
-                /** @default */
-                product: string
-              }> | null
+              kevs:
+                | Array<{
+                    /** @default */
+                    vulnerabilityName: string
+                    /** @default */
+                    shortDescription: string | null
+                    /** @default */
+                    requiredAction: string | null
+                    /**
+                     * @description Date when added to CISA KEV catalog (ISO 8601 format)
+                     * @default
+                     */
+                    dateAdded: string
+                    /**
+                     * @description Remediation deadline for federal agencies (ISO 8601 format)
+                     * @default
+                     */
+                    dueDate: string | null
+                    /**
+                     * @description Known, Unknown, or specific ransomware campaign names
+                     * @default
+                     */
+                    knownRansomwareCampaignUse: string | null
+                    /** @default */
+                    notes: string | null
+                    /** @default */
+                    vendorProject: string
+                    /** @default */
+                    product: string
+                  }>
+                | null
               /** @description Exploit Prediction Scoring System https://www.first.org/epss/ */
               epss: {
                 /** @default 0 */
@@ -2665,35 +2737,37 @@ export interface components {
                * @default
                */
               vulnerableVersionRange: string
-              kevs: Array<{
-                /** @default */
-                vulnerabilityName: string
-                /** @default */
-                shortDescription: string | null
-                /** @default */
-                requiredAction: string | null
-                /**
-                 * @description Date when added to CISA KEV catalog (ISO 8601 format)
-                 * @default
-                 */
-                dateAdded: string
-                /**
-                 * @description Remediation deadline for federal agencies (ISO 8601 format)
-                 * @default
-                 */
-                dueDate: string | null
-                /**
-                 * @description Known, Unknown, or specific ransomware campaign names
-                 * @default
-                 */
-                knownRansomwareCampaignUse: string | null
-                /** @default */
-                notes: string | null
-                /** @default */
-                vendorProject: string
-                /** @default */
-                product: string
-              }> | null
+              kevs:
+                | Array<{
+                    /** @default */
+                    vulnerabilityName: string
+                    /** @default */
+                    shortDescription: string | null
+                    /** @default */
+                    requiredAction: string | null
+                    /**
+                     * @description Date when added to CISA KEV catalog (ISO 8601 format)
+                     * @default
+                     */
+                    dateAdded: string
+                    /**
+                     * @description Remediation deadline for federal agencies (ISO 8601 format)
+                     * @default
+                     */
+                    dueDate: string | null
+                    /**
+                     * @description Known, Unknown, or specific ransomware campaign names
+                     * @default
+                     */
+                    knownRansomwareCampaignUse: string | null
+                    /** @default */
+                    notes: string | null
+                    /** @default */
+                    vendorProject: string
+                    /** @default */
+                    product: string
+                  }>
+                | null
               /** @description Exploit Prediction Scoring System https://www.first.org/epss/ */
               epss: {
                 /** @default 0 */
@@ -5134,6 +5208,8 @@ export interface operations {
    *
    * To get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getsupportedfiles) endpoint.
    *
+   * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 16.8 MB.
+   *
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
@@ -5256,9 +5332,7 @@ export interface operations {
     parameters: {
       query: {
         /** @description Control which alert priority fields to include in the response. Set to "true" to include all fields, "false" to exclude all fields, or specify individual fields like "components,formula" to include only those fields. */
-        include_alert_priority_details?:
-          | boolean
-          | Array<'component' | 'formula'>
+        include_alert_priority_details?: boolean | Array<'component' | 'formula'>
         /** @description Include license details in the response. This can increase the response size significantly. */
         include_license_details: boolean
       }
@@ -5977,6 +6051,8 @@ export interface operations {
    * @description Create a diff scan between the repository's current HEAD full scan and a new full scan from uploaded manifest files.
    * Returns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from
    * the [api_url](/reference/getDiffScanById) URL to get the contents of the diff.
+   *
+   * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 16.8 MB.
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -7169,6 +7245,34 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              chromePermission?: {
+                /**
+                 * @description The action to take for chromePermission issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              chromeHostPermission?: {
+                /**
+                 * @description The action to take for chromeHostPermission issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              chromeWildcardHostPermission?: {
+                /**
+                 * @description The action to take for chromeWildcardHostPermission issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              chromeContentScript?: {
+                /**
+                 * @description The action to take for chromeContentScript issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               criticalCVE?: {
                 /**
                  * @description The action to take for criticalCVE issues.
@@ -7897,6 +8001,34 @@ export interface operations {
             debugAccess?: {
               /**
                * @description The action to take for debugAccess issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            chromePermission?: {
+              /**
+               * @description The action to take for chromePermission issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            chromeHostPermission?: {
+              /**
+               * @description The action to take for chromeHostPermission issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            chromeWildcardHostPermission?: {
+              /**
+               * @description The action to take for chromeWildcardHostPermission issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            chromeContentScript?: {
+              /**
+               * @description The action to take for chromeContentScript issues.
                * @enum {string}
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -9401,6 +9533,34 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              chromePermission?: {
+                /**
+                 * @description The action to take for chromePermission issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              chromeHostPermission?: {
+                /**
+                 * @description The action to take for chromeHostPermission issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              chromeWildcardHostPermission?: {
+                /**
+                 * @description The action to take for chromeWildcardHostPermission issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              chromeContentScript?: {
+                /**
+                 * @description The action to take for chromeContentScript issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               criticalCVE?: {
                 /**
                  * @description The action to take for criticalCVE issues.
@@ -10126,6 +10286,34 @@ export interface operations {
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
             }
+            chromePermission?: {
+              /**
+               * @description The action to take for chromePermission issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            chromeHostPermission?: {
+              /**
+               * @description The action to take for chromeHostPermission issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            chromeWildcardHostPermission?: {
+              /**
+               * @description The action to take for chromeWildcardHostPermission issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            chromeContentScript?: {
+              /**
+               * @description The action to take for chromeContentScript issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
             criticalCVE?: {
               /**
                * @description The action to take for criticalCVE issues.
@@ -10816,6 +11004,34 @@ export interface operations {
               debugAccess?: {
                 /**
                  * @description The action to take for debugAccess issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              chromePermission?: {
+                /**
+                 * @description The action to take for chromePermission issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              chromeHostPermission?: {
+                /**
+                 * @description The action to take for chromeHostPermission issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              chromeWildcardHostPermission?: {
+                /**
+                 * @description The action to take for chromeWildcardHostPermission issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              chromeContentScript?: {
+                /**
+                 * @description The action to take for chromeContentScript issues.
                  * @enum {string}
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -11674,9 +11890,9 @@ export interface operations {
         'filters.alertAction'?: string
         /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
         'filters.alertAction.notIn'?: string
-        /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be included */
+        /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be included */
         'filters.alertActionSourceType'?: string
-        /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be excluded */
+        /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
         'filters.alertActionSourceType.notIn'?: string
         /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
         'filters.alertFixType'?: string
@@ -11845,7 +12061,7 @@ export interface operations {
                 artifactType?: string[]
                 /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
                 alertAction?: string[]
-                /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be excluded */
+                /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
                 alertActionSourceType?: string[]
                 /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be excluded */
                 alertFixType?: string[]
@@ -11926,9 +12142,9 @@ export interface operations {
         'filters.alertAction'?: string
         /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
         'filters.alertAction.notIn'?: string
-        /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be included */
+        /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be included */
         'filters.alertActionSourceType'?: string
-        /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be excluded */
+        /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
         'filters.alertActionSourceType.notIn'?: string
         /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
         'filters.alertFixType'?: string
@@ -12013,7 +12229,7 @@ export interface operations {
                 artifactType?: string[]
                 /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
                 alertAction?: string[]
-                /** @description Comma-separated list of alert action source types ("triage", "org-policy", "repo-label-policy", "socket-yml", or "fallback") that should be excluded */
+                /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
                 alertActionSourceType?: string[]
                 /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be excluded */
                 alertFixType?: string[]

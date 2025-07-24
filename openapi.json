@@ -2779,6 +2779,244 @@
               "type": {
                 "type": "string",
                 "enum": [
+                  "chromePermission"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "permission": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "permissionType": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          }
+                        },
+                        "required": [
+                          "permission",
+                          "permissionType"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "chromeHostPermission"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "host": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "permissionType": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          }
+                        },
+                        "required": [
+                          "host",
+                          "permissionType"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "chromeWildcardHostPermission"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "host": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "permissionType": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          }
+                        },
+                        "required": [
+                          "host",
+                          "permissionType"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "chromeContentScript"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "scriptFile": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "matches": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "runAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          }
+                        },
+                        "required": [
+                          "matches",
+                          "runAt",
+                          "scriptFile"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
                   "criticalCVE"
                 ]
               },
@@ -10512,7 +10750,7 @@
             ]
           }
         ],
-        "description": "Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.\n\nTo get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getsupportedfiles) endpoint.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:create",
+        "description": "Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.\n\nTo get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getsupportedfiles) endpoint.\n\nThe maximum number of files you can upload at a time is 5000 and each file can be no bigger than 16.8 MB.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:create",
         "responses": {
           "201": {
             "content": {
@@ -13064,7 +13302,7 @@
             ]
           }
         ],
-        "description": "Create a diff scan between the repository's current HEAD full scan and a new full scan from uploaded manifest files.\nReturns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from\nthe [api_url](/reference/getDiffScanById) URL to get the contents of the diff.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n      - repo:list\n- diff-scans:create\n- full-scans:create",
+        "description": "Create a diff scan between the repository's current HEAD full scan and a new full scan from uploaded manifest files.\nReturns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from\nthe [api_url](/reference/getDiffScanById) URL to get the contents of the diff.\n\nThe maximum number of files you can upload at a time is 5000 and each file can be no bigger than 16.8 MB.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n      - repo:list\n- diff-scans:create\n- full-scans:create",
         "responses": {
           "201": {
             "content": {
@@ -15620,6 +15858,90 @@
                             "action"
                           ]
                         },
+                        "chromePermission": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for chromePermission issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "chromeHostPermission": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for chromeHostPermission issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "chromeWildcardHostPermission": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for chromeWildcardHostPermission issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "chromeContentScript": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for chromeContentScript issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "criticalCVE": {
                           "type": "object",
                           "additionalProperties": false,
@@ -17736,6 +18058,90 @@
                               "ignore"
                             ],
                             "description": "The action to take for debugAccess issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "chromePermission": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for chromePermission issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "chromeHostPermission": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for chromeHostPermission issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "chromeWildcardHostPermission": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for chromeWildcardHostPermission issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "chromeContentScript": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for chromeContentScript issues."
                           }
                         },
                         "required": [
@@ -21368,6 +21774,90 @@
                             "action"
                           ]
                         },
+                        "chromePermission": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for chromePermission issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "chromeHostPermission": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for chromeHostPermission issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "chromeWildcardHostPermission": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for chromeWildcardHostPermission issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "chromeContentScript": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for chromeContentScript issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "criticalCVE": {
                           "type": "object",
                           "additionalProperties": false,
@@ -23492,6 +23982,90 @@
                           "action"
                         ]
                       },
+                      "chromePermission": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for chromePermission issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "chromeHostPermission": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for chromeHostPermission issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "chromeWildcardHostPermission": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for chromeWildcardHostPermission issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "chromeContentScript": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for chromeContentScript issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
                       "criticalCVE": {
                         "type": "object",
                         "additionalProperties": false,
@@ -25563,6 +26137,90 @@
                                 "ignore"
                               ],
                               "description": "The action to take for debugAccess issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "chromePermission": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for chromePermission issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "chromeHostPermission": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for chromeHostPermission issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "chromeWildcardHostPermission": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for chromeWildcardHostPermission issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "chromeContentScript": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for chromeContentScript issues."
                             }
                           },
                           "required": [
@@ -27899,7 +28557,7 @@
             "name": "filters.alertActionSourceType",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert action source types (\"triage\", \"org-policy\", \"repo-label-policy\", \"socket-yml\", or \"fallback\") that should be included",
+            "description": "Comma-separated list of alert action source types (\"fallback\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included",
             "schema": {
               "type": "string"
             }
@@ -27908,7 +28566,7 @@
             "name": "filters.alertActionSourceType.notIn",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert action source types (\"triage\", \"org-policy\", \"repo-label-policy\", \"socket-yml\", or \"fallback\") that should be excluded",
+            "description": "Comma-separated list of alert action source types (\"fallback\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded",
             "schema": {
               "type": "string"
             }
@@ -28541,7 +29199,7 @@
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Comma-separated list of alert action source types (\"triage\", \"org-policy\", \"repo-label-policy\", \"socket-yml\", or \"fallback\") that should be excluded"
+                              "description": "Comma-separated list of alert action source types (\"fallback\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded"
                             },
                             "alertFixType": {
                               "type": "array",
@@ -28859,7 +29517,7 @@
             "name": "filters.alertActionSourceType",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert action source types (\"triage\", \"org-policy\", \"repo-label-policy\", \"socket-yml\", or \"fallback\") that should be included",
+            "description": "Comma-separated list of alert action source types (\"fallback\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included",
             "schema": {
               "type": "string"
             }
@@ -28868,7 +29526,7 @@
             "name": "filters.alertActionSourceType.notIn",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert action source types (\"triage\", \"org-policy\", \"repo-label-policy\", \"socket-yml\", or \"fallback\") that should be excluded",
+            "description": "Comma-separated list of alert action source types (\"fallback\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded",
             "schema": {
               "type": "string"
             }
@@ -29232,7 +29890,7 @@
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Comma-separated list of alert action source types (\"triage\", \"org-policy\", \"repo-label-policy\", \"socket-yml\", or \"fallback\") that should be excluded"
+                              "description": "Comma-separated list of alert action source types (\"fallback\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded"
                             },
                             "alertFixType": {
                               "type": "array",
