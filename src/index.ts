@@ -228,9 +228,10 @@ async function createUploadRequest(
 
     // Send the headers now. If the server would reject this request, it should
     // do so asap. This prevents us from sending more data to it then necessary.
-    // If it will reject we could just await the `req.on(response` now but if it
-    // accepts the request then the response will not come until after the final
-    // file. So we can't await the response at this time. Just proceed, carefully.
+    // If it will reject we could just await the `req.on(response, ...` now but
+    // if it accepts the request then the response will not come until after the
+    // final file. So we can't await the response at this time. Just proceed,
+    // carefully.
     req.flushHeaders()
 
     // Wait for the response. It may arrive at any point during the request or
@@ -238,10 +239,8 @@ async function createUploadRequest(
     // the request, and the server can decide to reject the request immediately
     // or at any point later (ike a timeout). We should handle those cases.
     getResponse(req).then(
-      res => {
-        // Note: this returns the response to the caller to createUploadRequest
-        pass(res)
-      },
+      // Note: this returns the response to the caller to createUploadRequest.
+      pass,
       async err => {
         // Note: this will throw an error for the caller to createUploadRequest
         if (err.response && !isResponseOk(err.response)) {
@@ -305,8 +304,6 @@ async function createUploadRequest(
         req.end()
       }
     }
-
-    pass(getResponse(req))
   })
 }
 
