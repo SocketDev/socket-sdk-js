@@ -162,7 +162,8 @@ function createRequestBodyForFilepaths(
     requestBody.push(
       `Content-Disposition: form-data; name="${relPath}"; filename="${filename}"\r\n`,
       `Content-Type: application/octet-stream\r\n\r\n`,
-      createReadStream(absPath)
+      createReadStream(absPath),
+      '\r\n'
     )
   }
   return requestBody
