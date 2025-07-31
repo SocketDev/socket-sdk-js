@@ -4,8 +4,10 @@ import http from 'node:http'
 import https from 'node:https'
 import path from 'node:path'
 import readline from 'node:readline'
+import { Readable } from 'node:stream'
 
 import abortSignal from '@socketsecurity/registry/lib/constants/abort-signal'
+import { debugLog, isDebug } from '@socketsecurity/registry/lib/debug'
 import { hasOwn, isObjectObject } from '@socketsecurity/registry/lib/objects'
 import { pRetry } from '@socketsecurity/registry/lib/promises'
 
@@ -162,7 +164,7 @@ function createRequestBodyForFilepaths(
     requestBody.push(
       `Content-Disposition: form-data; name="${relPath}"; filename="${filename}"\r\n`,
       `Content-Type: application/octet-stream\r\n\r\n`,
-      createReadStream(absPath)
+      createReadStream(absPath, { highWaterMark: 1024 * 1024 })
     )
   }
   return requestBody
@@ -171,14 +173,13 @@ function createRequestBodyForFilepaths(
 function createRequestBodyForJson(
   jsonData: any,
   basename = 'data.json'
-): Array<string | ReadStream> {
+): Array<string | Readable> {
   const ext = path.extname(basename)
   const name = path.basename(basename, ext)
   return [
-    `Content-Disposition: form-data; name="${name}"; filename="${basename}"\r\n`,
-    'Content-Type: application/json\r\n\r\n',
-    JSON.stringify(jsonData),
-    // New line after file content.
+    `Content-Disposition: form-data; name="${name}"; filename="${basename}"\r\n` +
+      `Content-Type: application/json\r\n\r\n`,
+    Readable.from(JSON.stringify(jsonData), { highWaterMark: 1024 * 1024 }),
     '\r\n'
   ]
 }
@@ -186,28 +187,31 @@ function createRequestBodyForJson(
 async function createUploadRequest(
   baseUrl: string,
   urlPath: string,
-  requestBodyNoBoundaries: Array<
-    string | ReadStream | Array<string | ReadStream>
-  >,
+  requestBodyNoBoundaries: Array<string | Readable | Array<string | Readable>>,
   options: RequestOptions
 ): Promise<IncomingMessage> {
-  // Note: this will create a regular http request and stream in the file content
-  //       implicitly. The outgoing buffer is (implicitly) flushed periodically
-  //       by node. When this happens first it will send the headers to the server
-  //       which may decide to reject the request, immediately send a response and
-  //       then cut the connection (EPIPE or ECONNRESET errors may follow while
-  //       writing the files).
-  //       We have to make sure to guard for sudden reject responses because if we
-  //       don't then the file streaming will fail with random errors and it gets
-  //       hard to debug what's going on why.
-  //       Example : `socket scan create --org badorg` should fail gracefully.
+  // This function constructs and sends a multipart/form-data HTTP POST request
+  // where each part is streamed to the server. It supports string payloads
+  // and readable streams (e.g., large file uploads).
+
+  // The body is streamed manually with proper backpressure support to avoid
+  // overwhelming Node.js memory (i.e., avoiding out-of-memory crashes for large inputs).
+
+  // We call `flushHeaders()` early to ensure headers are sent before body transmission
+  // begins. If the server rejects the request (e.g., bad org or auth), it will likely
+  // respond immediately. We listen for that response while still streaming the body.
+  //
+  // This protects against cases where the server closes the connection (EPIPE/ECONNRESET)
+  // mid-stream, which would otherwise cause hard-to-diagnose failures during file upload.
+  //
+  // Example failure this mitigates: `socket scan create --org badorg`
 
   // eslint-disable-next-line no-async-promise-executor
   return await new Promise(async (pass, fail) => {
-    // Generate a unique boundary for multipart encoding.
     const boundary = `NodeMultipartBoundary${Date.now()}`
     const boundarySep = `--${boundary}\r\n`
     const finalBoundary = `--${boundary}--\r\n`
+
     const requestBody = [
       ...requestBodyNoBoundaries.flatMap(part => [
         boundarySep,
@@ -215,6 +219,7 @@ async function createUploadRequest(
       ]),
       finalBoundary
     ]
+
     const url = new URL(urlPath, baseUrl)
     const req: ClientRequest = getHttpModule(baseUrl).request(url, {
       method: 'POST',
@@ -225,73 +230,55 @@ async function createUploadRequest(
       }
     })
 
-    // Send the headers now. If the server would reject this request, it should
-    // do so asap. This prevents us from sending more data to it then necessary.
-    // If it will reject we could just await the `req.on(response, ...` now but
-    // if it accepts the request then the response will not come until after the
-    // final file. So we can't await the response at this time. Just proceed,
-    // carefully.
+    // Send headers early to prompt server validation (auth, URL, quota, etc.).
     req.flushHeaders()
 
-    // Wait for the response. It may arrive at any point during the request or
-    // afterwards. Node will flush the output buffer at some point, initiating
-    // the request, and the server can decide to reject the request immediately
-    // or at any point later (ike a timeout). We should handle those cases.
-    getResponse(req).then(
-      // Note: this returns the response to the caller to createUploadRequest.
-      pass,
-      async err => {
-        // Note: this will throw an error for the caller to createUploadRequest
-        if (err.response && !isResponseOk(err.response)) {
-          fail(new ResponseError(err.response, `${err.method} request failed`))
-        }
-        fail(err)
+    // Concurrently wait for response while we stream body.
+    getResponse(req).then(pass, async err => {
+      if (err.response && !isResponseOk(err.response)) {
+        fail(new ResponseError(err.response, `${err.method} request failed`))
       }
-    )
+      fail(err)
+    })
 
     let aborted = false
-    req.on('error', _err => {
-      aborted = true
-    })
-    req.on('close', () => {
-      aborted = true
-    })
+    req.on('error', () => (aborted = true))
+    req.on('close', () => (aborted = true))
+
     try {
-      // Send the request body (headers + files).
       for (const part of requestBody) {
         if (aborted) {
           break
         }
         if (typeof part === 'string') {
-          req.write(part)
+          if (!req.write(part)) {
+            // Wait for 'drain' if backpressure is signaled.
+            // eslint-disable-next-line no-await-in-loop
+            await events.once(req, 'drain')
+          }
         } else if (typeof part?.pipe === 'function') {
-          part.pipe(req, { end: false })
-          // Wait for file streaming to complete.
+          // Stream data chunk-by-chunk with backpressure support
+          const stream = part as Readable
           // eslint-disable-next-line no-await-in-loop
-          await new Promise<void>((resolve, reject) => {
-            const cleanup = () => {
-              part.off('end', onEnd)
-              part.off('error', onError)
+          for await (const chunk of stream) {
+            if (aborted) {
+              break
             }
-            const onEnd = () => {
-              cleanup()
-              resolve()
+            if (!req.write(chunk)) {
+              await events.once(req, 'drain')
             }
-            const onError = (e: Error) => {
-              cleanup()
-              reject(e)
-            }
-            part.on('end', onEnd)
-            part.on('error', onError)
-          })
-          if (!aborted) {
-            // Ensure a new line after file content.
-            req.write('\r\n')
+          }
+          // Ensure trailing CRLF after file part.
+          if (!aborted && !req.write('\r\n')) {
+            // eslint-disable-next-line no-await-in-loop
+            await events.once(req, 'drain')
+          }
+          // Cleanup stream to free memory buffers/
+          if (typeof part.destroy === 'function') {
+            part.destroy()
           }
         } else {
-          throw new TypeError(
-            'Socket API - Invalid multipart part, expected string or stream'
-          )
+          throw new TypeError('Expected string or stream')
         }
       }
     } catch (e) {
@@ -299,7 +286,6 @@ async function createUploadRequest(
       fail(e)
     } finally {
       if (!aborted) {
-        // Close request after writing all data.
         req.end()
       }
     }
@@ -310,28 +296,36 @@ async function getErrorResponseBody(
   response: IncomingMessage
 ): Promise<string> {
   const chunks: Buffer[] = []
-  response.on('data', (chunk: Buffer) => chunks.push(chunk))
-  try {
-    await new Promise<void>((resolve, reject) => {
-      const cleanup = () => {
-        response.off('end', onEnd)
-        response.off('error', onError)
-      }
-      const onEnd = () => {
+  let size = 0
+  const MAX = 5 * 1024 * 1024
+  return await new Promise<string>((resolve, reject) => {
+    const cleanup = () => {
+      response.off('end', onEnd)
+      response.off('error', onError)
+      response.off('data', onData)
+    }
+    const onData = (chunk: Buffer) => {
+      size += chunk.length
+      if (size > MAX) {
+        response.destroy()
         cleanup()
-        resolve()
+        reject(new Error('Response body too large'))
+      } else {
+        chunks.push(chunk)
       }
-      const onError = (e: Error) => {
-        cleanup()
-        reject(e)
-      }
-      response.on('end', onEnd)
-      response.on('error', onError)
-    })
-    return Buffer.concat(chunks).toString('utf8')
-  } catch {
-    return '(there was an error reading the body content)'
-  }
+    }
+    const onEnd = () => {
+      cleanup()
+      resolve(Buffer.concat(chunks).toString('utf8'))
+    }
+    const onError = (e: unknown) => {
+      cleanup()
+      reject(e)
+    }
+    response.on('data', onData)
+    response.on('end', onEnd)
+    response.on('error', onError)
+  })
 }
 
 function desc(value: any) {
@@ -345,7 +339,7 @@ function desc(value: any) {
 
 function getHttpModule(baseUrl: string): typeof http | typeof https {
   const { protocol } = new URL(baseUrl)
-  return protocol === 'https:' ? https : http
+  return protocol === 'https:' ? require('node:https') : require('node:http')
 }
 
 async function getResponse(req: ClientRequest): Promise<IncomingMessage> {
@@ -379,18 +373,24 @@ async function getResponse(req: ClientRequest): Promise<IncomingMessage> {
   return res
 }
 
-async function getResponseJson(
-  response: IncomingMessage
-): Promise<ReturnType<typeof JSON.parse>> {
-  let data = ''
+async function getResponseJson(response: IncomingMessage) {
+  const chunks = []
+  let size = 0
+  const MAX = 50 * 1024 * 1024
   for await (const chunk of response) {
-    data += chunk
+    size += chunk.length
+    if (size > MAX) {
+      throw new Error('JSON body too large')
+    }
+    chunks.push(chunk)
   }
+  const data = Buffer.concat(chunks).toString('utf8')
   try {
     return JSON.parse(data)
   } catch (e) {
+    const message = (e as Error)?.['message'] || 'Unknown error'
     throw new SyntaxError(
-      `Socket API - Invalid JSON response:\n${data}\n→ ${(e as Error)?.message || 'Unknown error'}`,
+      `Socket API - Invalid JSON response:\n${data}\n→ ${message}`,
       { cause: e }
     )
   }
@@ -1290,3 +1290,9 @@ Object.defineProperties(SocketSdk.prototype, {
   getReportSupportedFiles: desc(SocketSdk.prototype.getSupportedScanFiles),
   getScoreByNPMPackage: desc(SocketSdk.prototype.getScoreByNpmPackage)
 })
+
+// Optional live heap trace.
+if (isDebug('heap')) {
+  const used = process.memoryUsage()
+  debugLog('heap', `heap used: ${Math.round(used.heapUsed / 1024 / 1024)}MB`)
+}
