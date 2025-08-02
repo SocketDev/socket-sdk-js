@@ -83,7 +83,7 @@
     "update:deps": "npx --yes npm-check-updates"
   },
   "dependencies": {
-    "@socketsecurity/registry": "1.0.257"
+    "@socketsecurity/registry": "1.0.259"
   },
   "devDependencies": {
     "@biomejs/biome": "2.1.3",
