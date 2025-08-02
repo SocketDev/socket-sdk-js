@@ -257,7 +257,7 @@ async function createUploadRequest(
             await events.once(req, 'drain')
           }
         } else if (typeof part?.pipe === 'function') {
-          // Stream data chunk-by-chunk with backpressure support
+          // Stream data chunk-by-chunk with backpressure support.
           const stream = part as Readable
           // eslint-disable-next-line no-await-in-loop
           for await (const chunk of stream) {
@@ -273,7 +273,7 @@ async function createUploadRequest(
             // eslint-disable-next-line no-await-in-loop
             await events.once(req, 'drain')
           }
-          // Cleanup stream to free memory buffers/
+          // Cleanup stream to free memory buffers.
           if (typeof part.destroy === 'function') {
             part.destroy()
           }
@@ -410,9 +410,7 @@ function promiseWithResolvers<T>(): ReturnType<
     return Promise.withResolvers<T>()
   }
 
-  // This is what the above does but it's not available in node 20 (it is in node 22)
-  // @ts-ignore -- sigh.
-  const obj: ReturnType<typeof Promise.withResolvers<T>> = {}
+  const obj = {} as ReturnType<typeof Promise.withResolvers<T>>
   obj.promise = new Promise<T>((resolver, reject) => {
     obj.resolve = resolver
     obj.reject = reject
@@ -735,7 +733,7 @@ export class SocketSdk {
         running.findIndex(entry => entry.generator === generator),
         1
       )
-      // Yield the value if one is given, even when done:true
+      // Yield the value if one is given, even when done:true.
       if (iteratorResult.value) {
         yield iteratorResult.value
       }
