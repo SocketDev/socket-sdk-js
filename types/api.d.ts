@@ -1477,10 +1477,20 @@ export interface components {
          * @default 0
          */
         size?: number
+        /**
+         * @description Hugging Face model, dataset, or space type
+         * @default
+         */
+        repositoryType?: string
         alerts?: Array<components['schemas']['SocketAlert']>
         score?: components['schemas']['SocketScore']
         /**
-         * @description Index position of this artifact within its processing batch, used for ordering and pagination
+         * @description Original unmodified PURL input string before normalization
+         * @default
+         */
+        inputPurl?: string
+        /**
+         * @description Deprecated: Always 0. Previously used for batch ordering but replaced by inputPurl for better tracking.
          * @default 0
          */
         batchIndex?: number
@@ -12486,6 +12496,10 @@ export interface operations {
               startDateInclusive: string
               /** @default */
               endDateInclusive: string
+              filters: {
+                status?: string[]
+                requestId?: string[]
+              }
             }
             items: Array<{
               /** @default */
@@ -12678,6 +12692,7 @@ export interface operations {
           | 'cargo'
           | 'chrome'
           | 'golang'
+          | 'huggingface'
           | 'maven'
           | 'npm'
           | 'nuget'
@@ -12779,6 +12794,7 @@ export interface operations {
           | 'cargo'
           | 'chrome'
           | 'golang'
+          | 'huggingface'
           | 'maven'
           | 'npm'
           | 'nuget'
@@ -12991,6 +13007,7 @@ export interface operations {
           limit: number
           /** @default 0 */
           offset: number
+          purls?: string[]
         }
       }
     }
@@ -13005,6 +13022,10 @@ export interface operations {
             limit: number
             /** @default 0 */
             offset: number
+            purlFilters: {
+              valid: string[]
+              invalid: string[]
+            }
             rows: Array<{
               /** @default */
               branch: string

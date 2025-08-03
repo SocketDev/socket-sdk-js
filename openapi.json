@@ -326,6 +326,11 @@
                 "description": "Total size of the package artifact in bytes",
                 "default": 0
               },
+              "repositoryType": {
+                "type": "string",
+                "description": "Hugging Face model, dataset, or space type",
+                "default": ""
+              },
               "alerts": {
                 "type": "array",
                 "items": {
@@ -336,9 +341,14 @@
               "score": {
                 "$ref": "#/components/schemas/SocketScore"
               },
+              "inputPurl": {
+                "type": "string",
+                "description": "Original unmodified PURL input string before normalization",
+                "default": ""
+              },
               "batchIndex": {
                 "type": "integer",
-                "description": "Index position of this artifact within its processing batch, used for ordering and pagination",
+                "description": "Deprecated: Always 0. Previously used for batch ordering but replaced by inputPurl for better tracking.",
                 "default": 0
               },
               "license": {
@@ -30768,10 +30778,36 @@
                           "type": "string",
                           "description": "",
                           "default": ""
+                        },
+                        "filters": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "status": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": ""
+                            },
+                            "requestId": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": ""
+                            }
+                          },
+                          "description": ""
                         }
                       },
                       "required": [
                         "endDateInclusive",
+                        "filters",
                         "organizationId",
                         "queryStartTimestamp",
                         "startDateInclusive"
@@ -31225,6 +31261,7 @@
                 "cargo",
                 "chrome",
                 "golang",
+                "huggingface",
                 "maven",
                 "npm",
                 "nuget",
@@ -31504,6 +31541,7 @@
                 "cargo",
                 "chrome",
                 "golang",
+                "huggingface",
                 "maven",
                 "npm",
                 "nuget",
@@ -32011,7 +32049,6 @@
               "schema": {
                 "type": "object",
                 "additionalProperties": false,
-                "description": "",
                 "properties": {
                   "limit": {
                     "type": "integer",
@@ -32025,6 +32062,15 @@
                     "description": "",
                     "default": 0,
                     "minimum": 0
+                  },
+                  "purls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "PURLs to filter results with",
+                      "default": ""
+                    },
+                    "description": ""
                   }
                 },
                 "required": [
@@ -32068,6 +32114,35 @@
                       "type": "integer",
                       "description": "",
                       "default": 0
+                    },
+                    "purlFilters": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "valid": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "description": "Successfully parsed PURLs",
+                            "default": ""
+                          },
+                          "description": ""
+                        },
+                        "invalid": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "description": "PURLs that could not be parsed",
+                            "default": ""
+                          },
+                          "description": ""
+                        }
+                      },
+                      "required": [
+                        "invalid",
+                        "valid"
+                      ]
                     },
                     "rows": {
                       "type": "array",
@@ -32132,6 +32207,7 @@
                     "end",
                     "limit",
                     "offset",
+                    "purlFilters",
                     "rows"
                   ]
                 }
