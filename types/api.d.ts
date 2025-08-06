@@ -2095,7 +2095,7 @@ export interface components {
       artifact?: components['schemas']['SocketPURL'] & {
         id: components['schemas']['SocketId']
       }
-      /** @description Mapping of alert keys to arrays of reachability types found across different manifest files or code locations. Each type indicates whether the vulnerable code is actually used: "reachable" (definitely used), "maybe_reachable" (potentially used), "unreachable" (not used), "unknown" (cannot determine), etc. Multiple types per alert can occur when the same vulnerability appears in different contexts. */
+      /** @description Deprecated: mapping of alert keys to arrays of reachability types found across different manifest files or code locations. This field is derived from alertKeysToReachabilitySummaries for backward compatibility; use that property instead. */
       alertKeysToReachabilityTypes?: {
         [key: string]: string[]
       }
