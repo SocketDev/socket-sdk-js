@@ -3952,7 +3952,7 @@ export interface components {
       | 'pub'
       | 'pypi'
       | 'rpm'
-      | 'rubygem'
+      | 'rubygems'
       | 'swid'
       | 'swift'
       | 'unknown'
