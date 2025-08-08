@@ -433,10 +433,13 @@ export interface paths {
      *
      * Supported ecosystems:
      *
+     * - crates
      * - go
      * - maven
      * - npm
+     * - nuget
      * - pypi
+     * - rubygems
      * - spdx
      * - cdx
      *
@@ -456,10 +459,13 @@ export interface paths {
      *
      * Supported ecosystems:
      *
+     * - crates
      * - go
      * - maven
      * - npm
+     * - nuget
      * - pypi
+     * - rubygems
      * - spdx
      * - cdx
      *
@@ -4990,10 +4996,13 @@ export interface operations {
    *
    * Supported ecosystems:
    *
+   * - crates
    * - go
    * - maven
    * - npm
+   * - nuget
    * - pypi
+   * - rubygems
    * - spdx
    * - cdx
    *
@@ -5049,10 +5058,13 @@ export interface operations {
    *
    * Supported ecosystems:
    *
+   * - crates
    * - go
    * - maven
    * - npm
+   * - nuget
    * - pypi
+   * - rubygems
    * - spdx
    * - cdx
    *
