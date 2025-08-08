@@ -10133,7 +10133,7 @@
             ]
           }
         ],
-        "description": "Export a Socket SBOM as a CycloneDX SBOM\n\nSupported ecosystems:\n\n- go\n- maven\n- npm\n- pypi\n- spdx\n- cdx\n\nUnsupported ecosystems are filtered from the export.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:read",
+        "description": "Export a Socket SBOM as a CycloneDX SBOM\n\nSupported ecosystems:\n\n- crates\n- go\n- maven\n- npm\n- nuget\n- pypi\n- rubygems\n- spdx\n- cdx\n\nUnsupported ecosystems are filtered from the export.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:read",
         "responses": {
           "200": {
             "content": {
@@ -10260,7 +10260,7 @@
             ]
           }
         ],
-        "description": "Export a Socket SBOM as a SPDX SBOM\n\nSupported ecosystems:\n\n- go\n- maven\n- npm\n- pypi\n- spdx\n- cdx\n\nUnsupported ecosystems are filtered from the export.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:read",
+        "description": "Export a Socket SBOM as a SPDX SBOM\n\nSupported ecosystems:\n\n- crates\n- go\n- maven\n- npm\n- nuget\n- pypi\n- rubygems\n- spdx\n- cdx\n\nUnsupported ecosystems are filtered from the export.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:read",
         "responses": {
           "200": {
             "content": {
