@@ -3933,7 +3933,7 @@ export interface components {
       | 'conan'
       | 'conda'
       | 'cran'
-      | 'crate'
+      | 'crates'
       | 'deb'
       | 'docker'
       | 'gem'

@@ -8563,7 +8563,7 @@
           "conan",
           "conda",
           "cran",
-          "crate",
+          "crates",
           "deb",
           "docker",
           "gem",
