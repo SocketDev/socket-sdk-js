@@ -8563,7 +8563,6 @@
           "conan",
           "conda",
           "cran",
-          "crates",
           "deb",
           "docker",
           "gem",
@@ -8582,7 +8581,6 @@
           "pub",
           "pypi",
           "rpm",
-          "rubygems",
           "swid",
           "swift",
           "unknown"
