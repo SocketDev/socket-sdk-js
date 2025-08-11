@@ -11,6 +11,7 @@ export default defineConfig({
         '**/virtual:*',
         'coverage/**',
         'dist/**',
+        'scripts/**',
         'types/**/*.ts',
         'test/**'
       ]

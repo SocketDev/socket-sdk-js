@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
+    "allowImportingTsExtensions": false,
     "allowJs": false,
     "composite": true,
     "declaration": true,
     "declarationMap": true,
+    "erasableSyntaxOnly": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
