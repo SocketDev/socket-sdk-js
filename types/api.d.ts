@@ -8686,6 +8686,7 @@ export interface operations {
            * @enum {string}
            */
           issueRulesPolicyDefault?: 'default' | 'low' | 'medium' | 'high'
+          licensePolicy?: components['schemas']['LicenseAllowListRequest']
         }
       }
     }

@@ -20061,6 +20061,9 @@
                     ],
                     "description": "The default security policy for the repository label",
                     "default": "medium"
+                  },
+                  "licensePolicy": {
+                    "$ref": "#/components/schemas/LicenseAllowListRequest"
                   }
                 },
                 "description": ""
