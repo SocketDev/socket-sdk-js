@@ -8686,6 +8686,7 @@ export interface operations {
            * @enum {string}
            */
           issueRulesPolicyDefault?: 'default' | 'low' | 'medium' | 'high'
+          licensePolicy?: components['schemas']['LicenseAllowListRequest']
         }
       }
     }
@@ -9162,8 +9163,6 @@ export interface operations {
             | 'triage:alerts-list'
             | 'triage:alerts-update'
           >
-          /** @default */
-          token: string
           /**
            * @description The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.
            * @default organization

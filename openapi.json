@@ -20061,6 +20061,9 @@
                     ],
                     "description": "The default security policy for the repository label",
                     "default": "medium"
+                  },
+                  "licensePolicy": {
+                    "$ref": "#/components/schemas/LicenseAllowListRequest"
                   }
                 },
                 "description": ""
@@ -20611,11 +20614,6 @@
                     },
                     "description": ""
                   },
-                  "token": {
-                    "type": "string",
-                    "description": "",
-                    "default": ""
-                  },
                   "visibility": {
                     "type": "string",
                     "enum": [
@@ -20669,7 +20667,6 @@
                   "committer",
                   "max_quota",
                   "scopes",
-                  "token",
                   "visibility"
                 ]
               }
