@@ -9163,8 +9163,6 @@ export interface operations {
             | 'triage:alerts-list'
             | 'triage:alerts-update'
           >
-          /** @default */
-          token: string
           /**
            * @description The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.
            * @default organization
