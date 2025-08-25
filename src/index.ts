@@ -48,10 +48,11 @@ export type GotOptions = {
 
 export type QueryParams = Record<string, any>
 
-export type RequestOptions =
+export type RequestOptions = (
   | HttpsRequestOptions
   | HttpRequestOptions
   | ClientSessionRequestOptions
+) & { timeout?: number | undefined }
 
 export type SocketSdkOperations = keyof operations
 
@@ -73,6 +74,7 @@ export type SocketSdkResult<T extends SocketSdkOperations> =
 export interface SocketSdkOptions {
   agent?: Agent | GotOptions | undefined
   baseUrl?: string | undefined
+  timeout?: number | undefined
   userAgent?: string | undefined
 }
 
@@ -347,6 +349,7 @@ async function getResponse(req: ClientRequest): Promise<IncomingMessage> {
     const cleanup = () => {
       req.off('response', onResponse)
       req.off('error', onError)
+      req.off('timeout', onTimeout)
       abortSignal?.removeEventListener('abort', onAbort)
     }
     const onAbort = () => {
@@ -362,8 +365,14 @@ async function getResponse(req: ClientRequest): Promise<IncomingMessage> {
       cleanup()
       resolve(res)
     }
+    const onTimeout = () => {
+      cleanup()
+      req.destroy()
+      reject(new Error('Request timeout'))
+    }
     req.on('response', onResponse)
     req.on('error', onError)
+    req.on('timeout', onTimeout)
     abortSignal?.addEventListener('abort', onAbort)
   })
 
@@ -490,6 +499,7 @@ export class SocketSdk {
     const {
       agent: agentOrObj,
       baseUrl = 'https://api.socket.dev/v0/',
+      timeout,
       userAgent
     } = { __proto__: null, ...options } as SocketSdkOptions
     const agentKeys = agentOrObj ? Object.keys(agentOrObj) : []
@@ -508,7 +518,8 @@ export class SocketSdk {
         Authorization: `Basic ${btoa(`${apiToken}:`)}`,
         'User-Agent': userAgent ?? DEFAULT_USER_AGENT
       },
-      signal: abortSignal
+      signal: abortSignal,
+      ...(timeout ? { timeout } : {})
     }
   }
 
