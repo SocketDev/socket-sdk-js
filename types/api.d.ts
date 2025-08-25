@@ -204,7 +204,7 @@ export interface paths {
     /**
      * Saturate License Policy (Legacy)
      * @deprecated
-     * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/updateorglicensepolicy) for more information. Use the [successor version](/v0/orgs/{org_slug}/settings/license-policy) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/updateorglicensepolicy) instead.
      *
      * Get the "saturated" version of a license policy's allow list, filling in the entire set of allowed
      * license data. For example, the saturated form of a license allow list which only specifies that
@@ -961,7 +961,7 @@ export interface paths {
     /**
      * Get Organization License Policy
      * @deprecated
-     * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/viewlicensepolicy) for more information. Use the [successor version](/v0/orgs/{org_slug}/settings/license-policy/view) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/viewlicensepolicy) instead.
      *
      * Retrieve the license policy of an organization.
      *
@@ -1159,7 +1159,7 @@ export interface paths {
     /**
      * Get Threat Feed Items (Deprecated)
      * @deprecated
-     * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/getorgthreatfeeditems) for more information. Use the [successor version](/v0/orgs/{org_slug}/threat-feed) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/getorgthreatfeeditems) instead.
      *
      * Paginated list of threat feed items.
      *
@@ -1190,7 +1190,7 @@ export interface paths {
     /**
      * Get organization analytics (unstable)
      * @deprecated
-     * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/historicalalertstrend) for more information. Use the [successor version](/v0/orgs/{org_slug}/historical/alerts/trend) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/historicalalertstrend) instead.
      *
      * Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
      *
@@ -1207,7 +1207,7 @@ export interface paths {
     /**
      * Get repository analytics
      * @deprecated
-     * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/historicalalertstrend) for more information. Use the [successor version](/v0/orgs/{org_slug}/historical/alerts/trend) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/historicalalertstrend) instead.
      *
      * Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
      *
@@ -1256,7 +1256,7 @@ export interface paths {
     /**
      * Get supported files for report
      * @deprecated
-     * @description **This endpoint is deprecated.** Deprecated since 2023-01-15. See [deprecation documentation](https://docs.socket.dev/reference/getsupportedfiles) for more information. Use the [successor version](/v0/orgs/{org_slug}/supported-files) instead.
+     * @description **This endpoint is deprecated.** Deprecated since 2023-01-15. Use the [successor version](https://docs.socket.dev/reference/getsupportedfiles) instead.
      *
      * This route has been moved to the `orgs/{org_slug}/supported-files` endpoint.
      *
@@ -1276,7 +1276,7 @@ export interface paths {
     /**
      * Delete a report
      * @deprecated
-     * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference) for more information. Use the [successor version](/v0/orgs/{org_slug}/full-scans) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference) instead.
      *
      * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Delete a specific project report generated with the GitHub app.
      *
@@ -1291,7 +1291,7 @@ export interface paths {
     /**
      * Get list of reports
      * @deprecated
-     * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference) for more information. Use the [successor version](/v0/orgs/{org_slug}/full-scans) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference) instead.
      *
      * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all your project reports generated with the GitHub app.
      *
@@ -1306,7 +1306,7 @@ export interface paths {
     /**
      * Create a report
      * @deprecated
-     * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/createorgfullscan) for more information. Use the [successor version](/v0/orgs/{org_slug}/full-scans) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/createorgfullscan) instead.
      *
      * Deprecated: Use `/orgs/{org_slug}/full-scans` instead.
      *
@@ -1328,7 +1328,7 @@ export interface paths {
     /**
      * View a report
      * @deprecated
-     * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/getorgfullscan) for more information. Use the [successor version](/v0/orgs/{org_slug}/full-scans/{full_scan_id}) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/getorgfullscan) instead.
      *
      * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all the issues, packages, and scores related to an specific project report.
      *
@@ -1343,7 +1343,7 @@ export interface paths {
     /**
      * List GitHub repositories
      * @deprecated
-     * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/getorgrepolist) for more information. Use the [successor version](/v0/orgs/{org_slug}/repos) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/getorgrepolist) instead.
      *
      * Deprecated: Use `/orgs/{org_slug}/repos` instead. Get all GitHub repositories associated with a Socket org.
      *
@@ -1393,7 +1393,7 @@ export interface paths {
     /**
      * Calculate settings
      * @deprecated
-     * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/updateorgsecuritypolicy) for more information. Use the [successor version](/v0/orgs/{org_slug}/settings/security-policy) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/updateorgsecuritypolicy) instead.
      *
      * Get current settings for the requested organizations and default settings to allow deferrals.
      *
@@ -1408,7 +1408,7 @@ export interface paths {
     /**
      * Get issues by package
      * @deprecated
-     * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference) for more information. Use the [successor version](/v0/purl/{purl}/issues) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference) instead.
      *
      * Get all the issues related with a particular npm package version.
      * This endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.
@@ -1426,7 +1426,7 @@ export interface paths {
     /**
      * Get score by package
      * @deprecated
-     * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/batchpackagefetch) for more information. Use the [successor version](/v0/purl) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/batchpackagefetch) instead.
      *
      * Get all the scores and metrics by category that are used to evaluate the package version.
      *
@@ -4589,7 +4589,7 @@ export interface operations {
   /**
    * Saturate License Policy (Legacy)
    * @deprecated
-   * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/updateorglicensepolicy) for more information. Use the [successor version](/v0/orgs/{org_slug}/settings/license-policy) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/updateorglicensepolicy) instead.
    *
    * Get the "saturated" version of a license policy's allow list, filling in the entire set of allowed
    * license data. For example, the saturated form of a license allow list which only specifies that
@@ -11701,7 +11701,7 @@ export interface operations {
   /**
    * Get Organization License Policy
    * @deprecated
-   * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/viewlicensepolicy) for more information. Use the [successor version](/v0/orgs/{org_slug}/settings/license-policy/view) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/viewlicensepolicy) instead.
    *
    * Retrieve the license policy of an organization.
    *
@@ -12653,7 +12653,7 @@ export interface operations {
   /**
    * Get Threat Feed Items (Deprecated)
    * @deprecated
-   * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/getorgthreatfeeditems) for more information. Use the [successor version](/v0/orgs/{org_slug}/threat-feed) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/getorgthreatfeeditems) instead.
    *
    * Paginated list of threat feed items.
    *
@@ -12862,7 +12862,7 @@ export interface operations {
   /**
    * Get organization analytics (unstable)
    * @deprecated
-   * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/historicalalertstrend) for more information. Use the [successor version](/v0/orgs/{org_slug}/historical/alerts/trend) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/historicalalertstrend) instead.
    *
    * Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
    *
@@ -12932,7 +12932,7 @@ export interface operations {
   /**
    * Get repository analytics
    * @deprecated
-   * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/historicalalertstrend) for more information. Use the [successor version](/v0/orgs/{org_slug}/historical/alerts/trend) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/historicalalertstrend) instead.
    *
    * Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
    *
@@ -13117,7 +13117,7 @@ export interface operations {
   /**
    * Get supported files for report
    * @deprecated
-   * @description **This endpoint is deprecated.** Deprecated since 2023-01-15. See [deprecation documentation](https://docs.socket.dev/reference/getsupportedfiles) for more information. Use the [successor version](/v0/orgs/{org_slug}/supported-files) instead.
+   * @description **This endpoint is deprecated.** Deprecated since 2023-01-15. Use the [successor version](https://docs.socket.dev/reference/getsupportedfiles) instead.
    *
    * This route has been moved to the `orgs/{org_slug}/supported-files` endpoint.
    *
@@ -13153,7 +13153,7 @@ export interface operations {
   /**
    * Delete a report
    * @deprecated
-   * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference) for more information. Use the [successor version](/v0/orgs/{org_slug}/full-scans) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference) instead.
    *
    * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Delete a specific project report generated with the GitHub app.
    *
@@ -13188,7 +13188,7 @@ export interface operations {
   /**
    * Get list of reports
    * @deprecated
-   * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference) for more information. Use the [successor version](/v0/orgs/{org_slug}/full-scans) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference) instead.
    *
    * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all your project reports generated with the GitHub app.
    *
@@ -13240,7 +13240,7 @@ export interface operations {
   /**
    * Create a report
    * @deprecated
-   * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/createorgfullscan) for more information. Use the [successor version](/v0/orgs/{org_slug}/full-scans) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/createorgfullscan) instead.
    *
    * Deprecated: Use `/orgs/{org_slug}/full-scans` instead.
    *
@@ -13288,7 +13288,7 @@ export interface operations {
   /**
    * View a report
    * @deprecated
-   * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/getorgfullscan) for more information. Use the [successor version](/v0/orgs/{org_slug}/full-scans/{full_scan_id}) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/getorgfullscan) instead.
    *
    * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all the issues, packages, and scores related to an specific project report.
    *
@@ -13321,7 +13321,7 @@ export interface operations {
   /**
    * List GitHub repositories
    * @deprecated
-   * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/getorgrepolist) for more information. Use the [successor version](/v0/orgs/{org_slug}/repos) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/getorgrepolist) instead.
    *
    * Deprecated: Use `/orgs/{org_slug}/repos` instead. Get all GitHub repositories associated with a Socket org.
    *
@@ -13457,7 +13457,7 @@ export interface operations {
   /**
    * Calculate settings
    * @deprecated
-   * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/updateorgsecuritypolicy) for more information. Use the [successor version](/v0/orgs/{org_slug}/settings/security-policy) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/updateorgsecuritypolicy) instead.
    *
    * Get current settings for the requested organizations and default settings to allow deferrals.
    *
@@ -13515,7 +13515,7 @@ export interface operations {
   /**
    * Get issues by package
    * @deprecated
-   * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference) for more information. Use the [successor version](/v0/purl/{purl}/issues) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference) instead.
    *
    * Get all the issues related with a particular npm package version.
    * This endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.
@@ -13551,7 +13551,7 @@ export interface operations {
   /**
    * Get score by package
    * @deprecated
-   * @description **This endpoint is deprecated.** See [deprecation documentation](https://docs.socket.dev/reference/batchpackagefetch) for more information. Use the [successor version](/v0/purl) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/batchpackagefetch) instead.
    *
    * Get all the scores and metrics by category that are used to evaluate the package version.
    *
