@@ -11370,6 +11370,16 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "name": "omit_unchanged",
+            "in": "query",
+            "required": false,
+            "description": "Omit unchanged artifacts from the response. When set to true, the unchanged field will be set to null.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "security": [
@@ -11624,7 +11634,8 @@
                           "items": {
                             "$ref": "#/components/schemas/SocketDiffArtifact"
                           },
-                          "description": ""
+                          "description": "",
+                          "nullable": true
                         },
                         "replaced": {
                           "type": "array",
@@ -12304,6 +12315,16 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "name": "omit_unchanged",
+            "in": "query",
+            "required": false,
+            "description": "Omit unchanged artifacts from the response. When set to true, the unchanged field will be set to null.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "security": [
@@ -12617,7 +12638,8 @@
                               "items": {
                                 "$ref": "#/components/schemas/SocketDiffArtifact"
                               },
-                              "description": ""
+                              "description": "",
+                              "nullable": true
                             },
                             "replaced": {
                               "type": "array",
