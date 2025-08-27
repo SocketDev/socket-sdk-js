@@ -5509,6 +5509,8 @@ export interface operations {
         before: string
         /** @description Include license details in the response. This can increase the response size significantly. */
         include_license_details?: boolean
+        /** @description Omit unchanged artifacts from the response. When set to true, the unchanged field will be set to null. */
+        omit_unchanged?: boolean
       }
       path: {
         /** @description The slug of the organization */
@@ -5581,7 +5583,9 @@ export interface operations {
             artifacts: {
               added: Array<components['schemas']['SocketDiffArtifact']>
               removed: Array<components['schemas']['SocketDiffArtifact']>
-              unchanged: Array<components['schemas']['SocketDiffArtifact']>
+              unchanged: Array<
+                components['schemas']['SocketDiffArtifact']
+              > | null
               replaced: Array<components['schemas']['SocketDiffArtifact']>
               updated: Array<components['schemas']['SocketDiffArtifact']>
             }
@@ -5798,6 +5802,8 @@ export interface operations {
       query?: {
         /** @description Omit license details in the response. This can reduce the size of the response significantly, but will not include license information for the artifacts. */
         omit_license_details?: boolean
+        /** @description Omit unchanged artifacts from the response. When set to true, the unchanged field will be set to null. */
+        omit_unchanged?: boolean
       }
       path: {
         /** @description The slug of the organization */
@@ -5893,7 +5899,9 @@ export interface operations {
               artifacts: {
                 added: Array<components['schemas']['SocketDiffArtifact']>
                 removed: Array<components['schemas']['SocketDiffArtifact']>
-                unchanged: Array<components['schemas']['SocketDiffArtifact']>
+                unchanged: Array<
+                  components['schemas']['SocketDiffArtifact']
+                > | null
                 replaced: Array<components['schemas']['SocketDiffArtifact']>
                 updated: Array<components['schemas']['SocketDiffArtifact']>
               }
