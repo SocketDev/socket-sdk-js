@@ -6361,6 +6361,8 @@ export interface operations {
         direction?: string
         per_page?: number
         page?: number
+        /** @description Include archived repositories in the results */
+        include_archived?: boolean
       }
       path: {
         /** @description The slug of the organization */
@@ -13062,6 +13064,8 @@ export interface operations {
               namespace?: string
               /** @default */
               version?: string
+              /** @default */
+              release?: string
             }>
           }
         }
