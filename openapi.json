@@ -14119,6 +14119,16 @@
               "minimum": 1,
               "default": 1
             }
+          },
+          {
+            "name": "include_archived",
+            "in": "query",
+            "required": false,
+            "description": "Include archived repositories in the results",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "security": [
@@ -32205,6 +32215,11 @@
                             "default": ""
                           },
                           "version": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "release": {
                             "type": "string",
                             "description": "",
                             "default": ""
