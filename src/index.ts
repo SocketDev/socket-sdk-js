@@ -341,7 +341,7 @@ function desc(value: any) {
 
 function getHttpModule(baseUrl: string): typeof http | typeof https {
   const { protocol } = new URL(baseUrl)
-  return protocol === 'https:' ? require('node:https') : require('node:http')
+  return protocol === 'https:' ? https : http
 }
 
 async function getResponse(req: ClientRequest): Promise<IncomingMessage> {
