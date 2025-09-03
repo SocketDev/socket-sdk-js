@@ -459,6 +459,15 @@ async function createUploadRequest(
   })
 }
 
+function desc(value: any) {
+  return {
+    __proto__: null,
+    configurable: true,
+    value,
+    writable: true
+  } as PropertyDescriptor
+}
+
 async function getErrorResponseBody(
   response: IncomingMessage
 ): Promise<string> {
@@ -493,15 +502,6 @@ async function getErrorResponseBody(
     response.on('end', onEnd)
     response.on('error', onError)
   })
-}
-
-function desc(value: any) {
-  return {
-    __proto__: null,
-    configurable: true,
-    value,
-    writable: true
-  } as PropertyDescriptor
 }
 
 function getHttpModule(baseUrl: string): typeof http | typeof https {
