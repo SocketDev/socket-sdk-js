@@ -495,7 +495,7 @@ export interface paths {
      *
      * To get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getsupportedfiles) endpoint.
      *
-     * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 16.8 MB.
+     * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 67 MB.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -624,7 +624,7 @@ export interface paths {
      * Returns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from
      * the [api_url](/reference/getDiffScanById) URL to get the contents of the diff.
      *
-     * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 16.8 MB.
+     * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 67 MB.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -5222,7 +5222,7 @@ export interface operations {
    *
    * To get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getsupportedfiles) endpoint.
    *
-   * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 16.8 MB.
+   * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 67 MB.
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -6076,7 +6076,7 @@ export interface operations {
    * Returns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from
    * the [api_url](/reference/getDiffScanById) URL to get the contents of the diff.
    *
-   * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 16.8 MB.
+   * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 67 MB.
    *
    * This endpoint consumes 1 unit of your quota.
    *
