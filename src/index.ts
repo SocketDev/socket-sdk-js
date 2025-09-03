@@ -15,7 +15,10 @@ import {
   isObjectObject
 } from '@socketsecurity/registry/lib/objects'
 import { pRetry } from '@socketsecurity/registry/lib/promises'
-import { urlSearchParamAsBoolean } from '@socketsecurity/registry/lib/url'
+import {
+  urlSearchParamAsArray,
+  urlSearchParamAsBoolean
+} from '@socketsecurity/registry/lib/url'
 
 // @ts-ignore: Avoid TS import attributes error.
 import rootPkgJson from '../package.json' with { type: 'json' }
@@ -622,17 +625,26 @@ function queryToSearchParams(
 
 function reshapeArtifactForPublicPolicy<
   T extends SocketArtifact | CompactSocketArtifact
->(artifact: T): T {
+>(artifact: T, queryParams?: QueryParams | undefined): T {
   const alerts = artifact.alerts as SocketArtifactAlert[]
   if (Array.isArray(alerts)) {
+    const allowedActions = urlSearchParamAsArray(getOwn(queryParams, 'actions'))
+    const filteredAlerts = []
+    const shouldFilterByAction = allowedActions.length > 0
     for (const alert of alerts) {
       if (isObjectObject(alert)) {
-        const action = publicPolicy.get(alert.type)
-        if (action) {
-          alert.action = action
+        const publicAction = publicPolicy.get(alert.type)
+        const alertAction = publicAction ?? (alert.action as ALERT_ACTION)
+        if (shouldFilterByAction && !allowedActions.includes(alertAction)) {
+          continue
         }
+        if (publicAction) {
+          alert.action = publicAction
+        }
+        filteredAlerts.push(alert)
       }
     }
+    artifact.alerts = filteredAlerts
   }
   return artifact
 }
@@ -758,7 +770,9 @@ export class SocketSdk {
       const artifact = trimmed ? (JSON.parse(line) as SocketArtifact) : null
       if (isObjectObject(artifact)) {
         yield this.#handleApiSuccess<'batchPackageFetch'>(
-          isPublicToken ? reshapeArtifactForPublicPolicy(artifact) : artifact
+          isPublicToken
+            ? reshapeArtifactForPublicPolicy(artifact, queryParams)
+            : artifact
         )
       }
     }
@@ -840,7 +854,9 @@ export class SocketSdk {
       const artifact = trimmed ? (JSON.parse(line) as SocketArtifact) : null
       if (isObjectObject(artifact)) {
         results.push(
-          isPublicToken ? reshapeArtifactForPublicPolicy(artifact) : artifact
+          isPublicToken
+            ? reshapeArtifactForPublicPolicy(artifact, queryParams)
+            : artifact
         )
       }
     }
