@@ -7,15 +7,22 @@ import readline from 'node:readline'
 import { Readable } from 'node:stream'
 
 import abortSignal from '@socketsecurity/registry/lib/constants/abort-signal'
+import SOCKET_PUBLIC_API_TOKEN from '@socketsecurity/registry/lib/constants/socket-public-api-token'
 import { debugLog, isDebug } from '@socketsecurity/registry/lib/debug'
-import { hasOwn, isObjectObject } from '@socketsecurity/registry/lib/objects'
+import {
+  getOwn,
+  hasOwn,
+  isObjectObject
+} from '@socketsecurity/registry/lib/objects'
 import { pRetry } from '@socketsecurity/registry/lib/promises'
+import { urlSearchParamAsBoolean } from '@socketsecurity/registry/lib/url'
 
 // @ts-ignore: Avoid TS import attributes error.
 import rootPkgJson from '../package.json' with { type: 'json' }
 
-import type { operations } from '../types/api'
+import type { components, operations } from '../types/api'
 import type { OpErrorType, OpReturnType } from '../types/api-helpers'
+import type { Remap } from '@socketsecurity/registry/lib/objects'
 import type { ClientHttp2Session } from 'http2-wrapper'
 import type { ReadStream } from 'node:fs'
 import type {
@@ -30,6 +37,12 @@ import type {
   RequestOptions as HttpsRequestOptions
 } from 'node:https'
 
+export type ALERT_ACTION = 'error' | 'monitor' | 'warn' | 'ignore'
+
+export type ALERT_TYPE = keyof NonNullable<
+  operations['getOrgSecurityPolicy']['responses']['200']['content']['application/json']['securityPolicyRules']
+>
+
 export type Agent = HttpsAgent | HttpAgent | ClientHttp2Session
 
 export type BatchPackageFetchResultType = SocketSdkResult<'batchPackageFetch'>
@@ -39,6 +52,35 @@ export type BatchPackageStreamOptions = {
   concurrencyLimit?: number | undefined
   queryParams?: QueryParams | undefined
 }
+
+export type CompactSocketArtifactAlert = Remap<
+  Omit<
+    SocketArtifactAlert,
+    'actionSource' | 'category' | 'end' | 'file' | 'start'
+  >
+>
+
+export type CompactSocketArtifact = Remap<
+  Omit<
+    SocketArtifact,
+    | 'alerts'
+    | 'alertKeysToReachabilitySummaries'
+    | 'alertKeysToReachabilityTypes'
+    | 'artifact'
+    | 'batchIndex'
+    | 'dead'
+    | 'dependencies'
+    | 'dev'
+    | 'direct'
+    | 'inputPurl'
+    | 'manifestFiles'
+    | 'score'
+    | 'size'
+    | 'topLevelAncestors'
+  > & {
+    alerts: CompactSocketArtifactAlert[]
+  }
+>
 
 export type GotOptions = {
   http?: HttpAgent | undefined
@@ -53,6 +95,20 @@ export type RequestOptions = (
   | HttpRequestOptions
   | ClientSessionRequestOptions
 ) & { timeout?: number | undefined }
+
+export type SocketArtifact = Remap<
+  Omit<components['schemas']['SocketArtifact'], 'alerts'> & {
+    alerts?: SocketArtifactAlert[]
+  }
+>
+
+export type SocketArtifactAlert = Remap<
+  Omit<components['schemas']['SocketAlert'], 'action' | 'props' | 'type'> & {
+    type: ALERT_TYPE
+    action?: ALERT_ACTION
+    props?: any | undefined
+  }
+>
 
 export type SocketSdkOperations = keyof operations
 
@@ -97,6 +153,115 @@ export type UploadManifestFilesError = {
 }
 
 const DEFAULT_USER_AGENT = createUserAgentFromPkgJson(rootPkgJson)
+
+// Public security policy.
+const publicPolicy = new Map<ALERT_TYPE, ALERT_ACTION>([
+  // error (1):
+  ['malware', 'error'],
+  // warn (7):
+  ['criticalCVE', 'warn'],
+  ['didYouMean', 'warn'],
+  ['gitDependency', 'warn'],
+  ['httpDependency', 'warn'],
+  ['licenseSpdxDisj', 'warn'],
+  ['obfuscatedFile', 'warn'],
+  ['troll', 'warn'],
+  // monitor (7):
+  ['deprecated', 'monitor'],
+  ['mediumCVE', 'monitor'],
+  ['mildCVE', 'monitor'],
+  ['shrinkwrap', 'monitor'],
+  ['telemetry', 'monitor'],
+  ['unpopularPackage', 'monitor'],
+  ['unstableOwnership', 'monitor'],
+  // ignore (85):
+  ['ambiguousClassifier', 'ignore'],
+  ['badEncoding', 'ignore'],
+  ['badSemver', 'ignore'],
+  ['badSemverDependency', 'ignore'],
+  ['bidi', 'ignore'],
+  ['binScriptConfusion', 'ignore'],
+  ['chromeContentScript', 'ignore'],
+  ['chromeHostPermission', 'ignore'],
+  ['chromePermission', 'ignore'],
+  ['chromeWildcardHostPermission', 'ignore'],
+  ['chronoAnomaly', 'ignore'],
+  ['compromisedSSHKey', 'ignore'],
+  ['copyleftLicense', 'ignore'],
+  ['cve', 'ignore'],
+  ['debugAccess', 'ignore'],
+  ['deprecatedLicense', 'ignore'],
+  ['deprecatedException', 'ignore'],
+  ['dynamicRequire', 'ignore'],
+  ['emptyPackage', 'ignore'],
+  ['envVars', 'ignore'],
+  ['explicitlyUnlicensedItem', 'ignore'],
+  ['extraneousDependency', 'ignore'],
+  ['fileDependency', 'ignore'],
+  ['filesystemAccess', 'ignore'],
+  ['floatingDependency', 'ignore'],
+  ['gitHubDependency', 'ignore'],
+  ['gptAnomaly', 'ignore'],
+  ['gptDidYouMean', 'ignore'],
+  ['gptMalware', 'ignore'],
+  ['gptSecurity', 'ignore'],
+  ['hasNativeCode', 'ignore'],
+  ['highEntropyStrings', 'ignore'],
+  ['homoglyphs', 'ignore'],
+  ['installScripts', 'ignore'],
+  ['invalidPackageJSON', 'ignore'],
+  ['invisibleChars', 'ignore'],
+  ['licenseChange', 'ignore'],
+  ['licenseException', 'ignore'],
+  ['longStrings', 'ignore'],
+  ['majorRefactor', 'ignore'],
+  ['manifestConfusion', 'ignore'],
+  ['minifiedFile', 'ignore'],
+  ['miscLicenseIssues', 'ignore'],
+  ['missingAuthor', 'ignore'],
+  ['missingDependency', 'ignore'],
+  ['missingLicense', 'ignore'],
+  ['missingTarball', 'ignore'],
+  ['mixedLicense', 'ignore'],
+  ['modifiedException', 'ignore'],
+  ['modifiedLicense', 'ignore'],
+  ['networkAccess', 'ignore'],
+  ['newAuthor', 'ignore'],
+  ['noAuthorData', 'ignore'],
+  ['noBugTracker', 'ignore'],
+  ['noLicenseFound', 'ignore'],
+  ['noREADME', 'ignore'],
+  ['noRepository', 'ignore'],
+  ['noTests', 'ignore'],
+  ['noV1', 'ignore'],
+  ['noWebsite', 'ignore'],
+  ['nonOSILicense', 'ignore'],
+  ['nonSPDXLicense', 'ignore'],
+  ['nonpermissiveLicense', 'ignore'],
+  ['notice', 'ignore'],
+  ['obfuscatedRequire', 'ignore'],
+  ['peerDependency', 'ignore'],
+  ['potentialVulnerability', 'ignore'],
+  ['semverAnomaly', 'ignore'],
+  ['shellAccess', 'ignore'],
+  ['shellScriptOverride', 'ignore'],
+  ['socketUpgradeAvailable', 'ignore'],
+  ['suspiciousStarActivity', 'ignore'],
+  ['suspiciousString', 'ignore'],
+  ['trivialPackage', 'ignore'],
+  ['typeModuleCompatibility', 'ignore'],
+  ['uncaughtOptionalDependency', 'ignore'],
+  ['unclearLicense', 'ignore'],
+  ['unidentifiedLicense', 'ignore'],
+  ['unmaintained', 'ignore'],
+  ['unpublished', 'ignore'],
+  ['unresolvedRequire', 'ignore'],
+  ['unsafeCopyright', 'ignore'],
+  ['unusedDependency', 'ignore'],
+  ['urlStrings', 'ignore'],
+  ['usesEval', 'ignore'],
+  ['zeroWidth', 'ignore']
+])
 
 class ResponseError extends Error {
   response: IncomingMessage
@@ -492,6 +657,7 @@ export function createUserAgentFromPkgJson(pkgData: {
 const agentNames = new Set(['http', 'https', 'http2'])
 
 export class SocketSdk {
+  readonly #apiToken: string
   readonly #baseUrl: string
   readonly #reqOptions: RequestOptions
 
@@ -511,6 +677,7 @@ export class SocketSdk {
           agentAsGotOptions.http2
         : agentOrObj
     ) as Agent | undefined
+    this.#apiToken = apiToken
     this.#baseUrl = baseUrl
     this.#reqOptions = {
       ...(agent ? { agent } : {}),
@@ -640,13 +807,30 @@ export class SocketSdk {
       input: res,
       crlfDelay: Infinity
     })
-    const results: Array<Record<string, unknown>> = []
+    const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
+    const results: SocketArtifact[] = []
     for await (const line of rl) {
-      if (line.trim()) {
-        results.push(JSON.parse(line))
+      const trimmed = line.trim()
+      const artifact = trimmed ? (JSON.parse(line) as SocketArtifact) : null
+      if (isObjectObject(artifact)) {
+        const alerts = artifact.alerts as SocketArtifactAlert[]
+        if (isPublicToken && Array.isArray(alerts)) {
+          for (const alert of alerts) {
+            if (isObjectObject(alert)) {
+              const action = publicPolicy.get(alert.type)
+              if (action) {
+                alert.action = action
+              }
+            }
+          }
+        }
+        results.push(artifact)
       }
     }
-    return this.#handleApiSuccess<'batchPackageFetch'>(results)
+    const compact = urlSearchParamAsBoolean(getOwn(queryParams, 'compact'))
+    return this.#handleApiSuccess<'batchPackageFetch'>(
+      compact ? (results as CompactSocketArtifact[]) : results
+    )
   }
 
   async *batchPackageStream(
