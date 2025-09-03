@@ -620,6 +620,23 @@ function queryToSearchParams(
   return new URLSearchParams(normalized)
 }
 
+function reshapeArtifactForPublicPolicy<
+  T extends SocketArtifact | CompactSocketArtifact
+>(artifact: T): T {
+  const alerts = artifact.alerts as SocketArtifactAlert[]
+  if (Array.isArray(alerts)) {
+    for (const alert of alerts) {
+      if (isObjectObject(alert)) {
+        const action = publicPolicy.get(alert.type)
+        if (action) {
+          alert.action = action
+        }
+      }
+    }
+  }
+  return artifact
+}
+
 function resolveAbsPaths(
   filepaths: string[],
   pathsRelativeTo?: string
@@ -729,13 +746,21 @@ export class SocketSdk {
     } catch (e) {
       return await this.#handleApiError<'batchPackageFetch'>(e)
     }
+    // Parse the newline delimited JSON response.
     const rli = readline.createInterface({
       input: res,
       crlfDelay: Infinity,
       signal: abortSignal
     })
+    const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
     for await (const line of rli) {
-      yield this.#handleApiSuccess<'batchPackageFetch'>(JSON.parse(line))
+      const trimmed = line.trim()
+      const artifact = trimmed ? (JSON.parse(line) as SocketArtifact) : null
+      if (isObjectObject(artifact)) {
+        yield this.#handleApiSuccess<'batchPackageFetch'>(
+          isPublicToken ? reshapeArtifactForPublicPolicy(artifact) : artifact
+        )
+      }
     }
   }
 
@@ -803,28 +828,20 @@ export class SocketSdk {
       return await this.#handleApiError<'batchPackageFetch'>(e)
     }
     // Parse the newline delimited JSON response.
-    const rl = readline.createInterface({
+    const rli = readline.createInterface({
       input: res,
-      crlfDelay: Infinity
+      crlfDelay: Infinity,
+      signal: abortSignal
     })
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
     const results: SocketArtifact[] = []
-    for await (const line of rl) {
+    for await (const line of rli) {
       const trimmed = line.trim()
       const artifact = trimmed ? (JSON.parse(line) as SocketArtifact) : null
       if (isObjectObject(artifact)) {
-        const alerts = artifact.alerts as SocketArtifactAlert[]
-        if (isPublicToken && Array.isArray(alerts)) {
-          for (const alert of alerts) {
-            if (isObjectObject(alert)) {
-              const action = publicPolicy.get(alert.type)
-              if (action) {
-                alert.action = action
-              }
-            }
-          }
-        }
-        results.push(artifact)
+        results.push(
+          isPublicToken ? reshapeArtifactForPublicPolicy(artifact) : artifact
+        )
       }
     }
     const compact = urlSearchParamAsBoolean(getOwn(queryParams, 'compact'))
