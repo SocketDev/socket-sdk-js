@@ -107,7 +107,7 @@
     "globals": "16.3.0",
     "http2-wrapper": "2.2.1",
     "husky": "9.1.7",
-    "knip": "5.63.0",
+    "knip": "5.63.1",
     "lint-staged": "16.1.6",
     "nock": "14.0.10",
     "npm-run-all2": "8.0.4",
