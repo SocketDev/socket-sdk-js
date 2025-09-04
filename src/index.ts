@@ -9,6 +9,7 @@ import { Readable } from 'node:stream'
 import abortSignal from '@socketsecurity/registry/lib/constants/abort-signal'
 import SOCKET_PUBLIC_API_TOKEN from '@socketsecurity/registry/lib/constants/socket-public-api-token'
 import { debugLog, isDebug } from '@socketsecurity/registry/lib/debug'
+import { jsonParse } from '@socketsecurity/registry/lib/json'
 import {
   getOwn,
   hasOwn,
@@ -767,7 +768,9 @@ export class SocketSdk {
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
     for await (const line of rli) {
       const trimmed = line.trim()
-      const artifact = trimmed ? (JSON.parse(line) as SocketArtifact) : null
+      const artifact = trimmed
+        ? (jsonParse(line, { throws: false }) as SocketArtifact)
+        : null
       if (isObjectObject(artifact)) {
         yield this.#handleApiSuccess<'batchPackageFetch'>(
           isPublicToken
@@ -851,7 +854,9 @@ export class SocketSdk {
     const results: SocketArtifact[] = []
     for await (const line of rli) {
       const trimmed = line.trim()
-      const artifact = trimmed ? (JSON.parse(line) as SocketArtifact) : null
+      const artifact = trimmed
+        ? (jsonParse(line, { throws: false }) as SocketArtifact)
+        : null
       if (isObjectObject(artifact)) {
         results.push(
           isPublicToken
