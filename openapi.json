@@ -4188,6 +4188,64 @@
               "type": {
                 "type": "string",
                 "enum": [
+                  "generic"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "title": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          }
+                        },
+                        "required": [
+                          "description",
+                          "title"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
                   "licenseSpdxDisj"
                 ]
               },
@@ -8607,10 +8665,10 @@
           "maintenance",
           "vulnerability",
           "license",
-          "miscellaneous"
+          "other"
         ],
         "description": "",
-        "default": "miscellaneous"
+        "default": "other"
       },
       "ReachabilityResult": {
         "type": "object",
@@ -16152,6 +16210,27 @@
                             "action"
                           ]
                         },
+                        "generic": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for generic issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "licenseSpdxDisj": {
                           "type": "object",
                           "additionalProperties": false,
@@ -18352,6 +18431,27 @@
                               "ignore"
                             ],
                             "description": "The action to take for shrinkwrap issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "generic": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for generic issues."
                           }
                         },
                         "required": [
@@ -22065,6 +22165,27 @@
                             "action"
                           ]
                         },
+                        "generic": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for generic issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "licenseSpdxDisj": {
                           "type": "object",
                           "additionalProperties": false,
@@ -24273,6 +24394,27 @@
                           "action"
                         ]
                       },
+                      "generic": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for generic issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
                       "licenseSpdxDisj": {
                         "type": "object",
                         "additionalProperties": false,
@@ -26428,6 +26570,27 @@
                                 "ignore"
                               ],
                               "description": "The action to take for shrinkwrap issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "generic": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for generic issues."
                             }
                           },
                           "required": [
@@ -30744,7 +30907,7 @@
             "name": "filters.status",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of historical snapshot statuses that should be included (allowed: \"in-progress\", \"success\", \"failure\", \"timeout\")",
+            "description": "Comma-separated list of historical snapshot statuses that should be included (allowed: \"in-progress\", \"success\", \"failure\", \"timeout\", \"skipped\")",
             "schema": {
               "type": "string",
               "default": ""
