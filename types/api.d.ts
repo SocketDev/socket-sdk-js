@@ -2832,6 +2832,21 @@ export interface components {
         }
       | {
           /** @enum {string} */
+          type?: 'generic'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              title: string
+              /** @default */
+              description: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
           type?: 'licenseSpdxDisj'
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
@@ -3960,7 +3975,7 @@ export interface components {
      */
     SocketIssueSeverity: 'low' | 'middle' | 'high' | 'critical'
     /**
-     * @default miscellaneous
+     * @default other
      * @enum {string}
      */
     SocketCategory:
@@ -3969,7 +3984,7 @@ export interface components {
       | 'maintenance'
       | 'vulnerability'
       | 'license'
-      | 'miscellaneous'
+      | 'other'
     ReachabilityResult: {
       /**
        * @description Type of reachability analysis performed
@@ -7355,6 +7370,13 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              generic?: {
+                /**
+                 * @description The action to take for generic issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               licenseSpdxDisj?: {
                 /**
                  * @description The action to take for licenseSpdxDisj issues.
@@ -8111,6 +8133,13 @@ export interface operations {
             shrinkwrap?: {
               /**
                * @description The action to take for shrinkwrap issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            generic?: {
+              /**
+               * @description The action to take for generic issues.
                * @enum {string}
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -9642,6 +9671,13 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              generic?: {
+                /**
+                 * @description The action to take for generic issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               licenseSpdxDisj?: {
                 /**
                  * @description The action to take for licenseSpdxDisj issues.
@@ -10395,6 +10431,13 @@ export interface operations {
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
             }
+            generic?: {
+              /**
+               * @description The action to take for generic issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
             licenseSpdxDisj?: {
               /**
                * @description The action to take for licenseSpdxDisj issues.
@@ -11113,6 +11156,13 @@ export interface operations {
               shrinkwrap?: {
                 /**
                  * @description The action to take for shrinkwrap issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              generic?: {
+                /**
+                 * @description The action to take for generic issues.
                  * @enum {string}
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -12493,7 +12543,7 @@ export interface operations {
         per_page?: number
         /** @description The pagination cursor that was returned as the "endCursor" property in previous request */
         startAfterCursor?: string
-        /** @description Comma-separated list of historical snapshot statuses that should be included (allowed: "in-progress", "success", "failure", "timeout") */
+        /** @description Comma-separated list of historical snapshot statuses that should be included (allowed: "in-progress", "success", "failure", "timeout", "skipped") */
         'filters.status'?: string
         /** @description Comma-separated list of requestId values that were used to start the historical snapshot job */
         'filters.requestId'?: string
