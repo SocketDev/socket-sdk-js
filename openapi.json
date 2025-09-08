@@ -297,72 +297,29 @@
       }
     },
     "schemas": {
-      "SocketArtifact": {
-        "allOf": [
+      "BatchPurlStreamSchema": {
+        "anyOf": [
           {
-            "$ref": "#/components/schemas/SocketPURL"
-          },
-          {
-            "$ref": "#/components/schemas/SocketArtifactLink"
+            "$ref": "#/components/schemas/SocketArtifact"
           },
           {
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "id": {
-                "$ref": "#/components/schemas/SocketId"
-              },
-              "author": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "description": "",
-                  "default": ""
-                },
-                "description": "List of package authors or maintainers"
-              },
-              "size": {
-                "type": "number",
-                "description": "Total size of the package artifact in bytes",
-                "default": 0
-              },
-              "repositoryType": {
+              "_type": {
                 "type": "string",
-                "description": "Hugging Face model, dataset, or space type",
-                "default": ""
+                "enum": [
+                  "purlError"
+                ]
               },
-              "alerts": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/SocketAlert"
-                },
-                "description": ""
-              },
-              "score": {
-                "$ref": "#/components/schemas/SocketScore"
-              },
-              "inputPurl": {
-                "type": "string",
-                "description": "Original unmodified PURL input string before normalization",
-                "default": ""
-              },
-              "batchIndex": {
-                "type": "integer",
-                "description": "Deprecated: Always 0. Previously used for batch ordering but replaced by inputPurl for better tracking.",
-                "default": 0
-              },
-              "license": {
-                "type": "string",
-                "description": "",
-                "default": ""
-              },
-              "licenseDetails": {
-                "$ref": "#/components/schemas/LicenseDetails"
-              },
-              "licenseAttrib": {
-                "$ref": "#/components/schemas/SAttrib1_N"
+              "value": {
+                "$ref": "#/components/schemas/PurlErrorSchema"
               }
-            }
+            },
+            "required": [
+              "_type",
+              "value"
+            ]
           }
         ]
       },
@@ -1106,6 +1063,75 @@
           "spdxVersion"
         ]
       },
+      "SocketArtifact": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SocketPURL"
+          },
+          {
+            "$ref": "#/components/schemas/SocketArtifactLink"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/SocketId"
+              },
+              "author": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "description": "List of package authors or maintainers"
+              },
+              "size": {
+                "type": "number",
+                "description": "Total size of the package artifact in bytes",
+                "default": 0
+              },
+              "repositoryType": {
+                "type": "string",
+                "description": "Hugging Face model, dataset, or space type",
+                "default": ""
+              },
+              "alerts": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SocketAlert"
+                },
+                "description": ""
+              },
+              "score": {
+                "$ref": "#/components/schemas/SocketScore"
+              },
+              "inputPurl": {
+                "type": "string",
+                "description": "Original unmodified PURL input string before normalization",
+                "default": ""
+              },
+              "batchIndex": {
+                "type": "integer",
+                "description": "Deprecated: Always 0. Previously used for batch ordering but replaced by inputPurl for better tracking.",
+                "default": 0
+              },
+              "license": {
+                "type": "string",
+                "description": "",
+                "default": ""
+              },
+              "licenseDetails": {
+                "$ref": "#/components/schemas/LicenseDetails"
+              },
+              "licenseAttrib": {
+                "$ref": "#/components/schemas/SAttrib1_N"
+              }
+            }
+          }
+        ]
+      },
       "SocketDiffArtifact": {
         "allOf": [
           {
@@ -1471,6 +1497,406 @@
           "quality",
           "supplyChainRisk",
           "vulnerability"
+        ]
+      },
+      "PurlErrorSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "inputPurl": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          }
+        },
+        "required": [
+          "error",
+          "inputPurl"
+        ]
+      },
+      "SocketBatchPURLRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "purl": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          }
+        },
+        "required": [
+          "purl"
+        ]
+      },
+      "LicenseAllowListElabbed": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "strings": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            },
+            "description": ""
+          },
+          "classes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            },
+            "description": ""
+          },
+          "packageURLs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            },
+            "description": ""
+          },
+          "disjs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            },
+            "description": ""
+          }
+        },
+        "required": [
+          "classes",
+          "disjs",
+          "packageURLs",
+          "strings"
+        ]
+      },
+      "CDXComponentSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "author": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "publisher": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "group": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "name": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "version": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "scope": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "hashes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "",
+              "properties": {
+                "alg": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "content": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                }
+              },
+              "required": [
+                "alg",
+                "content"
+              ]
+            },
+            "description": ""
+          },
+          "licenses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "expression": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "license": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "url": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "description": ""
+                }
+              },
+              "description": ""
+            },
+            "description": ""
+          },
+          "purl": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "externalReferences": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "url": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                }
+              },
+              "required": [
+                "type",
+                "url"
+              ]
+            },
+            "description": ""
+          },
+          "type": {
+            "type": "string",
+            "description": "",
+            "default": "application"
+          },
+          "bom-ref": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "evidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "identity": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "",
+                "properties": {
+                  "field": {
+                    "type": "string",
+                    "description": "",
+                    "default": ""
+                  },
+                  "confidence": {
+                    "type": "number",
+                    "description": "",
+                    "default": 0
+                  },
+                  "methods": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "technique": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "confidence": {
+                          "type": "number",
+                          "description": "",
+                          "default": 0
+                        },
+                        "value": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        }
+                      },
+                      "required": [
+                        "confidence",
+                        "technique",
+                        "value"
+                      ]
+                    },
+                    "description": ""
+                  }
+                },
+                "required": [
+                  "confidence",
+                  "field",
+                  "methods"
+                ]
+              },
+              "occurrences": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "location": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "location"
+                  ]
+                },
+                "description": ""
+              }
+            },
+            "required": [
+              "identity"
+            ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            },
+            "description": ""
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "value": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                }
+              },
+              "required": [
+                "name",
+                "value"
+              ]
+            },
+            "description": ""
+          },
+          "cryptoProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "",
+              "properties": {
+                "assetType": {
+                  "type": "string",
+                  "description": "",
+                  "default": ""
+                },
+                "algorithmProperties": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "executionEnvironment": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "implementationPlatform": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "executionEnvironment",
+                    "implementationPlatform"
+                  ]
+                }
+              },
+              "required": [
+                "algorithmProperties",
+                "assetType"
+              ]
+            },
+            "description": ""
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CDXComponentSchema"
+            },
+            "description": ""
+          }
+        },
+        "required": [
+          "bom-ref",
+          "group",
+          "name",
+          "purl",
+          "type",
+          "version"
         ]
       },
       "SocketPURL": {
@@ -1977,385 +2403,6 @@
           }
         },
         "description": ""
-      },
-      "SocketBatchPURLRequest": {
-        "type": "object",
-        "additionalProperties": false,
-        "description": "",
-        "properties": {
-          "purl": {
-            "type": "string",
-            "description": "",
-            "default": ""
-          }
-        },
-        "required": [
-          "purl"
-        ]
-      },
-      "LicenseAllowListElabbed": {
-        "type": "object",
-        "additionalProperties": false,
-        "description": "",
-        "properties": {
-          "strings": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "",
-              "default": ""
-            },
-            "description": ""
-          },
-          "classes": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "",
-              "default": ""
-            },
-            "description": ""
-          },
-          "packageURLs": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "",
-              "default": ""
-            },
-            "description": ""
-          },
-          "disjs": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "",
-              "default": ""
-            },
-            "description": ""
-          }
-        },
-        "required": [
-          "classes",
-          "disjs",
-          "packageURLs",
-          "strings"
-        ]
-      },
-      "CDXComponentSchema": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "author": {
-            "type": "string",
-            "description": "",
-            "default": ""
-          },
-          "publisher": {
-            "type": "string",
-            "description": "",
-            "default": ""
-          },
-          "group": {
-            "type": "string",
-            "description": "",
-            "default": ""
-          },
-          "name": {
-            "type": "string",
-            "description": "",
-            "default": ""
-          },
-          "version": {
-            "type": "string",
-            "description": "",
-            "default": ""
-          },
-          "description": {
-            "type": "string",
-            "description": "",
-            "default": ""
-          },
-          "scope": {
-            "type": "string",
-            "description": "",
-            "default": ""
-          },
-          "hashes": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "description": "",
-              "properties": {
-                "alg": {
-                  "type": "string",
-                  "description": "",
-                  "default": ""
-                },
-                "content": {
-                  "type": "string",
-                  "description": "",
-                  "default": ""
-                }
-              },
-              "required": [
-                "alg",
-                "content"
-              ]
-            },
-            "description": ""
-          },
-          "licenses": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "expression": {
-                  "type": "string",
-                  "description": "",
-                  "default": ""
-                },
-                "license": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "url": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    }
-                  },
-                  "description": ""
-                }
-              },
-              "description": ""
-            },
-            "description": ""
-          },
-          "purl": {
-            "type": "string",
-            "description": "",
-            "default": ""
-          },
-          "externalReferences": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "description": "",
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "description": "",
-                  "default": ""
-                },
-                "url": {
-                  "type": "string",
-                  "description": "",
-                  "default": ""
-                }
-              },
-              "required": [
-                "type",
-                "url"
-              ]
-            },
-            "description": ""
-          },
-          "type": {
-            "type": "string",
-            "description": "",
-            "default": "application"
-          },
-          "bom-ref": {
-            "type": "string",
-            "description": "",
-            "default": ""
-          },
-          "evidence": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "identity": {
-                "type": "object",
-                "additionalProperties": false,
-                "description": "",
-                "properties": {
-                  "field": {
-                    "type": "string",
-                    "description": "",
-                    "default": ""
-                  },
-                  "confidence": {
-                    "type": "number",
-                    "description": "",
-                    "default": 0
-                  },
-                  "methods": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "description": "",
-                      "properties": {
-                        "technique": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        },
-                        "confidence": {
-                          "type": "number",
-                          "description": "",
-                          "default": 0
-                        },
-                        "value": {
-                          "type": "string",
-                          "description": "",
-                          "default": ""
-                        }
-                      },
-                      "required": [
-                        "confidence",
-                        "technique",
-                        "value"
-                      ]
-                    },
-                    "description": ""
-                  }
-                },
-                "required": [
-                  "confidence",
-                  "field",
-                  "methods"
-                ]
-              },
-              "occurrences": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "location": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    }
-                  },
-                  "required": [
-                    "location"
-                  ]
-                },
-                "description": ""
-              }
-            },
-            "required": [
-              "identity"
-            ]
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "",
-              "default": ""
-            },
-            "description": ""
-          },
-          "properties": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "description": "",
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "description": "",
-                  "default": ""
-                },
-                "value": {
-                  "type": "string",
-                  "description": "",
-                  "default": ""
-                }
-              },
-              "required": [
-                "name",
-                "value"
-              ]
-            },
-            "description": ""
-          },
-          "cryptoProperties": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "description": "",
-              "properties": {
-                "assetType": {
-                  "type": "string",
-                  "description": "",
-                  "default": ""
-                },
-                "algorithmProperties": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "",
-                  "properties": {
-                    "executionEnvironment": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    },
-                    "implementationPlatform": {
-                      "type": "string",
-                      "description": "",
-                      "default": ""
-                    }
-                  },
-                  "required": [
-                    "executionEnvironment",
-                    "implementationPlatform"
-                  ]
-                }
-              },
-              "required": [
-                "algorithmProperties",
-                "assetType"
-              ]
-            },
-            "description": ""
-          },
-          "components": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CDXComponentSchema"
-            },
-            "description": ""
-          }
-        },
-        "required": [
-          "bom-ref",
-          "group",
-          "name",
-          "purl",
-          "type",
-          "version"
-        ]
       },
       "SocketDiffArtifactType": {
         "type": "string",
@@ -9375,6 +9422,16 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "name": "purlErrors",
+            "in": "query",
+            "required": false,
+            "description": "Return errors found with handling PURLs as error objects in the stream.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "requestBody": {
@@ -9405,11 +9462,11 @@
             "content": {
               "application/x-ndjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/SocketArtifact"
+                  "$ref": "#/components/schemas/BatchPurlStreamSchema"
                 }
               }
             },
-            "description": "Socket issue lists and scores for all packages"
+            "description": "Socket issue lists and scores for all packages, and optional metadata objects"
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -20735,6 +20792,8 @@
                         "security-policy",
                         "security-policy:update",
                         "security-policy:read",
+                        "socket-basics",
+                        "socket-basics:read",
                         "threat-feed",
                         "threat-feed:list",
                         "triage",
@@ -21078,6 +21137,8 @@
                                 "security-policy",
                                 "security-policy:update",
                                 "security-policy:read",
+                                "socket-basics",
+                                "socket-basics:read",
                                 "threat-feed",
                                 "threat-feed:list",
                                 "triage",
@@ -21238,6 +21299,8 @@
                         "security-policy",
                         "security-policy:update",
                         "security-policy:read",
+                        "socket-basics",
+                        "socket-basics:read",
                         "threat-feed",
                         "threat-feed:list",
                         "triage",
@@ -28565,6 +28628,106 @@
           },
           "500": {
             "$ref": "#/components/responses/SocketInternalServerError"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/settings/socket-basics": {
+      "get": {
+        "tags": [
+          "Organizations",
+          "Socket Basics"
+        ],
+        "summary": "Get Socket Basics configuration, including toggles for the various tools it supports.",
+        "operationId": "getSocketBasicsConfig",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [
+              "socket-basics:read"
+            ]
+          },
+          {
+            "basicAuth": [
+              "socket-basics:read"
+            ]
+          }
+        ],
+        "description": "Socket Basics is a CI/CD security scanning suite that runs on your source code, designed to complement Socket SCA and provide full coverage.\n\n- **SAST** - Find issues and risks with your code via static analysis using best in class Open Source tools\n- **Secret Scanning** - Detected potentially leaked secrets and credentials within your code\n- **Container Security** - Docker image and Dockerfile vulnerability scanning\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- socket-basics:read",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "pythonSastEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run a SAST Scan on your source code as part of the Socket Basics scan"
+                    },
+                    "golangSastEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run a SAST Scan on your source code as part of the Socket Basics scan"
+                    },
+                    "javascriptSastEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run a SAST Scan on your source code as part of the Socket Basics scan"
+                    },
+                    "secretScanningEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Scan for hardcoded secrets and credentials in your code as part of the Socket Basics scan"
+                    },
+                    "trivyImageEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run a vulnerability scan on your Docker images as part of the Socket Basics scan"
+                    },
+                    "trivyDockerfileEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run a vulnerability scan on your Dockerfiles as part of the Socket Basics scan"
+                    },
+                    "socketScanningEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Scan dependencies for security vulnerabilities and issues as part of the Socket Basics scan"
+                    },
+                    "socketScaEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Enables or disable running a Socket SCA Scan as part of the Socket Basics scan. If you have Socket already enabled via the Github App this is not needed. Socket SCA provides 0 day protection of Open Source Supply Chain packages, CVE Reachability, and operational risk of packages."
+                    },
+                    "additionalParameters": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "format": "Additional configuration for Socket Basics, includes support for experimental and custom tooling."
+                    }
+                  },
+                  "description": ""
+                }
+              }
+            },
+            "description": "Socket Basics settings"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
         },
         "x-readme": {}
