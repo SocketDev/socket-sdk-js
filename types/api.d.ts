@@ -1050,6 +1050,22 @@ export interface paths {
      */
     get: operations['viewLicensePolicy']
   }
+  '/orgs/{org_slug}/settings/socket-basics': {
+    /**
+     * Get Socket Basics configuration, including toggles for the various tools it supports.
+     * @description Socket Basics is a CI/CD security scanning suite that runs on your source code, designed to complement Socket SCA and provide full coverage.
+     *
+     * - **SAST** - Find issues and risks with your code via static analysis using best in class Open Source tools
+     * - **Secret Scanning** - Detected potentially leaked secrets and credentials within your code
+     * - **Container Security** - Docker image and Dockerfile vulnerability scanning
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - socket-basics:read
+     */
+    get: operations['getSocketBasicsConfig']
+  }
   '/orgs/{org_slug}/historical/alerts': {
     /**
      * List historical alerts (Beta)
@@ -1473,38 +1489,13 @@ export type webhooks = Record<string, never>
 
 export interface components {
   schemas: {
-    SocketArtifact: components['schemas']['SocketPURL'] &
-      components['schemas']['SocketArtifactLink'] & {
-        id?: components['schemas']['SocketId']
-        /** @description List of package authors or maintainers */
-        author?: string[]
-        /**
-         * @description Total size of the package artifact in bytes
-         * @default 0
-         */
-        size?: number
-        /**
-         * @description Hugging Face model, dataset, or space type
-         * @default
-         */
-        repositoryType?: string
-        alerts?: Array<components['schemas']['SocketAlert']>
-        score?: components['schemas']['SocketScore']
-        /**
-         * @description Original unmodified PURL input string before normalization
-         * @default
-         */
-        inputPurl?: string
-        /**
-         * @description Deprecated: Always 0. Previously used for batch ordering but replaced by inputPurl for better tracking.
-         * @default 0
-         */
-        batchIndex?: number
-        /** @default */
-        license?: string
-        licenseDetails?: components['schemas']['LicenseDetails']
-        licenseAttrib?: components['schemas']['SAttrib1_N']
-      }
+    BatchPurlStreamSchema:
+      | components['schemas']['SocketArtifact']
+      | {
+          /** @enum {string} */
+          _type: 'purlError'
+          value: components['schemas']['PurlErrorSchema']
+        }
     SocketBatchPURLFetch: {
       components: Array<components['schemas']['SocketBatchPURLRequest']>
     }
@@ -1702,6 +1693,38 @@ export interface components {
         relationshipType: string
       }>
     }
+    SocketArtifact: components['schemas']['SocketPURL'] &
+      components['schemas']['SocketArtifactLink'] & {
+        id?: components['schemas']['SocketId']
+        /** @description List of package authors or maintainers */
+        author?: string[]
+        /**
+         * @description Total size of the package artifact in bytes
+         * @default 0
+         */
+        size?: number
+        /**
+         * @description Hugging Face model, dataset, or space type
+         * @default
+         */
+        repositoryType?: string
+        alerts?: Array<components['schemas']['SocketAlert']>
+        score?: components['schemas']['SocketScore']
+        /**
+         * @description Original unmodified PURL input string before normalization
+         * @default
+         */
+        inputPurl?: string
+        /**
+         * @description Deprecated: Always 0. Previously used for batch ordering but replaced by inputPurl for better tracking.
+         * @default 0
+         */
+        batchIndex?: number
+        /** @default */
+        license?: string
+        licenseDetails?: components['schemas']['LicenseDetails']
+        licenseAttrib?: components['schemas']['SAttrib1_N']
+      }
     SocketDiffArtifact: components['schemas']['SocketPURL'] & {
       diffType: components['schemas']['SocketDiffArtifactType']
       id?: components['schemas']['SocketId']
@@ -1846,6 +1869,106 @@ export interface components {
       miscellaneous: components['schemas']['SocketMetricSchema']
       /** @default 0 */
       depscore: number
+    }
+    PurlErrorSchema: {
+      /** @default */
+      error: string
+      /** @default */
+      inputPurl: string
+    }
+    SocketBatchPURLRequest: {
+      /** @default */
+      purl: string
+    }
+    LicenseAllowListElabbed: {
+      strings: string[]
+      classes: string[]
+      packageURLs: string[]
+      disjs: string[]
+    }
+    CDXComponentSchema: {
+      /** @default */
+      author?: string
+      /** @default */
+      publisher?: string
+      /** @default */
+      group: string
+      /** @default */
+      name: string
+      /** @default */
+      version: string
+      /** @default */
+      description?: string
+      /** @default */
+      scope?: string
+      hashes?: Array<{
+        /** @default */
+        alg: string
+        /** @default */
+        content: string
+      }>
+      licenses?: Array<{
+        /** @default */
+        expression?: string
+        license?: {
+          /** @default */
+          id?: string
+          /** @default */
+          name?: string
+          /** @default */
+          url?: string
+        }
+      }>
+      /** @default */
+      purl: string
+      externalReferences?: Array<{
+        /** @default */
+        type: string
+        /** @default */
+        url: string
+      }>
+      /** @default application */
+      type: string
+      /** @default */
+      'bom-ref': string
+      evidence?: {
+        identity: {
+          /** @default */
+          field: string
+          /** @default 0 */
+          confidence: number
+          methods: Array<{
+            /** @default */
+            technique: string
+            /** @default 0 */
+            confidence: number
+            /** @default */
+            value: string
+          }>
+        }
+        occurrences?: Array<{
+          /** @default */
+          location: string
+        }>
+      }
+      tags?: string[]
+      properties?: Array<{
+        /** @default */
+        name: string
+        /** @default */
+        value: string
+      }>
+      cryptoProperties?: Array<{
+        /** @default */
+        assetType: string
+        algorithmProperties: {
+          /** @default */
+          executionEnvironment: string
+          /** @default */
+          implementationPlatform: string
+        }
+      }>
+      components?: Array<components['schemas']['CDXComponentSchema']>
     }
     SocketPURL: {
       type: components['schemas']['SocketPURL_Type']
@@ -2114,100 +2237,6 @@ export interface components {
           hash: string
         }>
       }
-    }
-    SocketBatchPURLRequest: {
-      /** @default */
-      purl: string
-    }
-    LicenseAllowListElabbed: {
-      strings: string[]
-      classes: string[]
-      packageURLs: string[]
-      disjs: string[]
-    }
-    CDXComponentSchema: {
-      /** @default */
-      author?: string
-      /** @default */
-      publisher?: string
-      /** @default */
-      group: string
-      /** @default */
-      name: string
-      /** @default */
-      version: string
-      /** @default */
-      description?: string
-      /** @default */
-      scope?: string
-      hashes?: Array<{
-        /** @default */
-        alg: string
-        /** @default */
-        content: string
-      }>
-      licenses?: Array<{
-        /** @default */
-        expression?: string
-        license?: {
-          /** @default */
-          id?: string
-          /** @default */
-          name?: string
-          /** @default */
-          url?: string
-        }
-      }>
-      /** @default */
-      purl: string
-      externalReferences?: Array<{
-        /** @default */
-        type: string
-        /** @default */
-        url: string
-      }>
-      /** @default application */
-      type: string
-      /** @default */
-      'bom-ref': string
-      evidence?: {
-        identity: {
-          /** @default */
-          field: string
-          /** @default 0 */
-          confidence: number
-          methods: Array<{
-            /** @default */
-            technique: string
-            /** @default 0 */
-            confidence: number
-            /** @default */
-            value: string
-          }>
-        }
-        occurrences?: Array<{
-          /** @default */
-          location: string
-        }>
-      }
-      tags?: string[]
-      properties?: Array<{
-        /** @default */
-        name: string
-        /** @default */
-        value: string
-      }>
-      cryptoProperties?: Array<{
-        /** @default */
-        assetType: string
-        algorithmProperties: {
-          /** @default */
-          executionEnvironment: string
-          /** @default */
-          implementationPlatform: string
-        }
-      }>
-      components?: Array<components['schemas']['CDXComponentSchema']>
     }
     /**
      * @description Type of change detected for this artifact in the diff
@@ -4436,6 +4465,8 @@ export interface operations {
         licenseattrib?: boolean
         /** @description Include detailed license information, including location and match strength, for each license datum. */
         licensedetails?: boolean
+        /** @description Return errors found with handling PURLs as error objects in the stream. */
+        purlErrors?: boolean
       }
     }
     requestBody?: {
@@ -4444,10 +4475,10 @@ export interface operations {
       }
     }
     responses: {
-      /** @description Socket issue lists and scores for all packages */
+      /** @description Socket issue lists and scores for all packages, and optional metadata objects */
       200: {
         content: {
-          'application/x-ndjson': components['schemas']['SocketArtifact']
+          'application/x-ndjson': components['schemas']['BatchPurlStreamSchema']
         }
       }
       400: components['responses']['SocketBadRequest']
@@ -9089,6 +9120,8 @@ export interface operations {
                 | 'security-policy'
                 | 'security-policy:update'
                 | 'security-policy:read'
+                | 'socket-basics'
+                | 'socket-basics:read'
                 | 'threat-feed'
                 | 'threat-feed:list'
                 | 'triage'
@@ -9196,6 +9229,8 @@ export interface operations {
             | 'security-policy'
             | 'security-policy:update'
             | 'security-policy:read'
+            | 'socket-basics'
+            | 'socket-basics:read'
             | 'threat-feed'
             | 'threat-feed:list'
             | 'triage'
@@ -9323,6 +9358,8 @@ export interface operations {
             | 'security-policy'
             | 'security-policy:update'
             | 'security-policy:read'
+            | 'socket-basics'
+            | 'socket-basics:read'
             | 'threat-feed'
             | 'threat-feed:list'
             | 'triage'
@@ -11915,6 +11952,82 @@ export interface operations {
       404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
       500: components['responses']['SocketInternalServerError']
+    }
+  }
+  /**
+   * Get Socket Basics configuration, including toggles for the various tools it supports.
+   * @description Socket Basics is a CI/CD security scanning suite that runs on your source code, designed to complement Socket SCA and provide full coverage.
+   *
+   * - **SAST** - Find issues and risks with your code via static analysis using best in class Open Source tools
+   * - **Secret Scanning** - Detected potentially leaked secrets and credentials within your code
+   * - **Container Security** - Docker image and Dockerfile vulnerability scanning
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - socket-basics:read
+   */
+  getSocketBasicsConfig: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    responses: {
+      /** @description Socket Basics settings */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * @description Run a SAST Scan on your source code as part of the Socket Basics scan
+             * @default false
+             */
+            pythonSastEnabled?: boolean
+            /**
+             * @description Run a SAST Scan on your source code as part of the Socket Basics scan
+             * @default false
+             */
+            golangSastEnabled?: boolean
+            /**
+             * @description Run a SAST Scan on your source code as part of the Socket Basics scan
+             * @default false
+             */
+            javascriptSastEnabled?: boolean
+            /**
+             * @description Scan for hardcoded secrets and credentials in your code as part of the Socket Basics scan
+             * @default false
+             */
+            secretScanningEnabled?: boolean
+            /**
+             * @description Run a vulnerability scan on your Docker images as part of the Socket Basics scan
+             * @default false
+             */
+            trivyImageEnabled?: boolean
+            /**
+             * @description Run a vulnerability scan on your Dockerfiles as part of the Socket Basics scan
+             * @default false
+             */
+            trivyDockerfileEnabled?: boolean
+            /**
+             * @description Scan dependencies for security vulnerabilities and issues as part of the Socket Basics scan
+             * @default false
+             */
+            socketScanningEnabled?: boolean
+            /**
+             * @description Enables or disable running a Socket SCA Scan as part of the Socket Basics scan. If you have Socket already enabled via the Github App this is not needed. Socket SCA provides 0 day protection of Open Source Supply Chain packages, CVE Reachability, and operational risk of packages.
+             * @default false
+             */
+            socketScaEnabled?: boolean
+            /**
+             * Format: Additional configuration for Socket Basics, includes support for experimental and custom tooling.
+             * @default
+             */
+            additionalParameters?: string
+          }
+        }
+      }
+      429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
   /**
