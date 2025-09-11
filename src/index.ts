@@ -21,6 +21,8 @@ import {
   urlSearchParamAsBoolean
 } from '@socketsecurity/registry/lib/url'
 
+// Import attributes are only supported when the '--module' option is set to
+// 'esnext', 'node18', 'node20', 'nodenext', or 'preserve'.
 // @ts-ignore: Avoid TS import attributes error.
 import rootPkgJson from '../package.json' with { type: 'json' }
 
@@ -405,12 +407,7 @@ async function createUploadRequest(
     req.flushHeaders()
 
     // Concurrently wait for response while we stream body.
-    getResponse(req).then(pass, async err => {
-      if (err.response && !isResponseOk(err.response)) {
-        fail(new ResponseError(err.response, `${err.method} request failed`))
-      }
-      fail(err)
-    })
+    getResponse(req).then(pass, fail)
 
     let aborted = false
     req.on('error', () => (aborted = true))
@@ -790,7 +787,7 @@ export class SocketSdk {
       })
     }
     const { statusCode } = error.response
-    if (statusCode! >= 500) {
+    if (statusCode && statusCode >= 500) {
       throw new Error(`Socket API server error (${statusCode})`, {
         cause: error
       })
@@ -811,8 +808,8 @@ export class SocketSdk {
     }
     return {
       success: false,
-      status: statusCode!,
-      error: error.message ?? '',
+      status: statusCode ?? 0,
+      error: error.message ?? 'Unknown error',
       cause: body
     } as SocketSdkErrorResult<T>
   }
