@@ -28732,6 +28732,9 @@
             },
             "description": "Socket Basics settings"
           },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
