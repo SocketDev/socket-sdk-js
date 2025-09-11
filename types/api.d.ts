@@ -12033,6 +12033,7 @@ export interface operations {
           }
         }
       }
+      403: components['responses']['SocketForbidden']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
