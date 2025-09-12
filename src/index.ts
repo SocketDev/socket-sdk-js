@@ -17,6 +17,7 @@ import {
 } from '@socketsecurity/registry/lib/objects'
 import { pRetry } from '@socketsecurity/registry/lib/promises'
 import {
+  parseUrl,
   urlSearchParamAsArray,
   urlSearchParamAsBoolean
 } from '@socketsecurity/registry/lib/url'
@@ -505,9 +506,9 @@ async function getErrorResponseBody(
   })
 }
 
-function getHttpModule(baseUrl: string): typeof http | typeof https {
-  const { protocol } = new URL(baseUrl)
-  return protocol === 'https:' ? https : http
+function getHttpModule(url: string): typeof http | typeof https {
+  const urlObj = parseUrl(url)
+  return urlObj?.protocol === 'http:' ? http : https
 }
 
 async function getResponse(req: ClientRequest): Promise<IncomingMessage> {
