@@ -84,399 +84,37 @@ export interface paths {
      */
     post: operations['batchPackageFetch']
   }
-  '/license-policy': {
+  '/dependencies/search': {
     /**
-     * License Policy (Beta)
-     * @description Compare the license data found for a list of packages (given as PURL strings) with the contents of a configurable license policy,
-     * returning information about license data which does not comply with the license allow list.
+     * Search dependencies
+     * @description Search for any dependency that is being used in your organization.
      *
-     * ## Example request body:
-     *
-     * ```json
-     * {
-     *   "components": [
-     *     {
-     *       "purl": "pkg:npm/lodash@4.17.21"
-     *     },
-     *     {
-     *       "purl": "pkg:npm/lodash@4.14.1"
-     *     }
-     *   ],
-     *   "allow": [
-     *     "permissive",
-     *     "pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*"
-     *   ],
-     *   "warn": [
-     *     "copyleft",
-     *     "pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*"
-     *   ],
-     *   "options": ["toplevelOnly"]
-     * }
-     * ```
-     *
-     *
-     * ## Return value
-     *
-     * For each requested PURL, an array is returned. Each array contains a list of license policy violations
-     * detected for the requested PURL.
-     *
-     * Violations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,
-     * a message describing why the license data is believed to be incompatible with the license policy, and a list
-     * of locations (by filepath or other provenance information) where the offending license data may be found.
-     *
-     * ```json
-     * Array<
-     *   Array<{
-     *     filepathOrProvenance: Array<string>,
-     *     level: "warning" | "violation",
-     *     purl: string,
-     *     spdxAtomOrExtraData: string,
-     *     violationExplanation: string
-     *   }>
-     * >
-     * ```
-     *
-     *
-     * ## License policy schema
-     *
-     * ```json
-     * {
-     *   allow?: Array<string>
-     *   warn?: Array<string>
-     *   options?: Array<string>
-     * }
-     * ```
-     *
-     * Elements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in pacakge which not present in either array will produce a license violation (effectively a "hard" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings "Apache-2.0" and "MIT" to the `allow` array. Strings appearing in these arrays are generally "what you see is what you get", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.
-     *
-     * ## License Classes
-     *
-     * Strings which are license classes will expand to a list of licenses known to be in that particular license class. Recognized license classes are:
-     *   'permissive',
-     *   'permissive (model)',
-     *   'permissive (gold)',
-     *   'permissive (silver)',
-     *   'permissive (bronze)',
-     *   'permissive (lead)',
-     *   'copyleft',
-     *   'maximal copyleft',
-     *   'network copyleft',
-     *   'strong copyleft',
-     *   'weak copyleft',
-     *   'contributor license agreement',
-     *   'public domain',
-     *   'proprietary free',
-     *   'source available',
-     *   'proprietary',
-     *   'commercial',
-     *   'patent'
-     *
-     * Users can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
-     *
-     *
-     * ## PURLs
-     *
-     * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.
-     *
-     * purl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).
-     *
-     * ### Examples:
-     * Allow all license data found in a specific version of a package 4.14.1: `pkg:npm/lodash@4.14.1`
-     * Allow all license data found in a version range of a package: `pkg:npm/lodash?version_glob=15.*`
-     * Allow all license data in the test directory of a given package for certain version ranges: `pkg:npm/lodash@15.*.*?file_name=lodash/test/*`
-     * Allow all license data taken from the package registry for a package and version range: `pkg:npm/lodash?version_glob=*&license_provenance=registry_metadata`
-     *
-     * ## Available options
-     *
-     * `toplevelOnly`: only apply the license policy to "top level" license data in a package, which includes registry metadata, LICENSE files, and manifest files which are closest to the root of the package.
-     *
-     * `applyToUnidentified`: Apply license policy to found but unidentified license data. If enabled, the license policy will be applied to license data which could not be affirmatively identified as a known license (this will effectively merge the license policy violation and unidentified license alerts). If disabled, license policy alerts will only be shown for license data which is positively identified as something not allowed or set to warn by the license policy.
-     *
-     * This endpoint consumes 100 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
-     *       - packages:list
-     * - license-policy:read
+     * - No Scopes Required, but authentication is required
      */
-    post: operations['licensePolicy']
+    post: operations['searchDependencies']
   }
-  '/saturate-license-policy': {
+  '/dependencies/upload': {
     /**
-     * Saturate License Policy (Legacy)
+     * Create a snapshot of all dependencies from manifest information
      * @deprecated
-     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/updateorglicensepolicy) instead.
+     * @description **This endpoint is deprecated.**
      *
-     * Get the "saturated" version of a license policy's allow list, filling in the entire set of allowed
-     * license data. For example, the saturated form of a license allow list which only specifies that
-     * licenses in the tier "maximal copyleft" are allowed is shown below (note the expanded `allowedStrings` property):
+     * Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.
+     * You can upload multiple lockfiles in the same request, but each filename must be unique.
      *
-     * ```json
-     * {
-     *   "allowedApprovalSources": [],
-     *   "allowedFamilies": [],
-     *   "allowedTiers": [
-     *     "maximal copyleft"
-     *   ],
-     *   "allowedStrings": [
-     *     "Parity-6.0.0",
-     *     "QPL-1.0-INRIA-2004",
-     *     "QPL-1.0",
-     *     "RPL-1.1",
-     *     "RPL-1.5"
-     *   ],
-     *   "allowedPURLs": [],
-     *   "focusAlertsHere": false
-     * }
-     * ```
+     * The name of the file must be in the supported list.
      *
-     * This may be helpful for users who want to compose more complex sets of allowed license data via
-     * the "allowedStrings" property, or for users who want to know more about the contents of a particular
-     * license group (family, tier, or approval source).
-     *
-     * ## Allow List Schema
-     *
-     * ```json
-     * ```
-     *
-     * where
-     *
-     * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" | "lead"
-     * CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong copyleft" | "weak copyleft"
-     *
-     * ## Return Value
-     *
-     * The returned value has the same shape as a license allow list:
-     *
-     * ```json
-     * {
-     *   allowedApprovalSources?: Array<"fsf" | "osi">,
-     *   allowedFamilies?: Array<"copyleft" | "permissive">,
-     *   allowedTiers?: Array<PermissiveTier | CopyleftTier>,
-     *   allowedStrings?: Array<string>
-     *   allowedPURLs?: Array<string>
-     *   focusAlertsHere?: boolean
-     * }
-     * ```
-     *
-     * where
-     *
-     * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" | "lead"
-     * CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong copyleft" | "weak copyleft"
-     *
-     * readers can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
-     *
-     * ### Example request bodies:
-     * ```json
-     * {
-     *   "allowedApprovalSources": ["fsf"],
-     *   "allowedPURLs": [],
-     *   "allowedFamilies": ["copyleft"],
-     *   "allowedTiers": ["model permissive"],
-     *   "allowedStrings": ["License :: OSI Approved :: BSD License"],
-     *   "focusAlertsHere": false
-     * }
-     * ```
+     * For example, these are valid filenames: "requirements.txt", "package.json", "folder/package.json", and "deep/nested/folder/package.json".
      *
      * This endpoint consumes 100 units of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - packages:list
+     * - report:write
      */
-    post: operations['saturateLicensePolicy']
-  }
-  '/license-metadata': {
-    /**
-     * License Metadata
-     * @description For an array of license identifiers or names (short form SPDX identifiers, or long form license names),
-     * returns an array of metadata for the corresponding license, if the license is recognized. If the query
-     * parameter `includetext=true` is set, the returned metadata will also include the license text.
-     *
-     *
-     * ## Example request body:
-     *
-     * ```json
-     * [
-     *   "Apache-2.0",
-     *   "BSD Zero Clause License"
-     * ]
-     * ```
-     *
-     *
-     * ## Return value
-     *
-     * ```json
-     * // Response schema:
-     * Array<{
-     *   licenseId: string,
-     *   name?: string,
-     *   deprecated?: string,
-     *   crossref?: string
-     *   classes: Array<string>
-     *   text?: string
-     * }>
-     *
-     * // Example response:
-     * [
-     *   {
-     *     "licenseId": "Apache-2.0",
-     *     "name": "Apache License 2.0",
-     *     "deprecated": false,
-     *     "crossref": "https://spdx.org/licenses/Apache-2.0.html",
-     *     "classes": [
-     *       "fsf libre",
-     *       "osi approved",
-     *       "permissive (silver)"
-     *     ]
-     *   },
-     *   {
-     *     "licenseId": "0BSD",
-     *     "name": "BSD Zero Clause License",
-     *     "deprecated": false,
-     *     "crossref": "https://spdx.org/licenses/0BSD.html",
-     *     "classes": [
-     *       "osi approved",
-     *       "permissive (bronze)"
-     *     ]
-     *   }
-     * ]
-     * ```
-     *
-     *
-     * ## License policy schema
-     *
-     * ```json
-     * {
-     *   allow?: Array<string>
-     *   warn?: Array<string>
-     *   options?: Array<string>
-     * }
-     * ```
-     *
-     * Elements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in pacakge which not present in either array will produce a license violation (effectively a "hard" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings "Apache-2.0" and "MIT" to the `allow` array. Strings appearing in these arrays are generally "what you see is what you get", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.
-     *
-     * ## License Classes
-     *
-     * Strings which are license classes will expand to a list of licenses known to be in that particular license class. Recognized license classes are:
-     *   'permissive',
-     *   'permissive (model)',
-     *   'permissive (gold)',
-     *   'permissive (silver)',
-     *   'permissive (bronze)',
-     *   'permissive (lead)',
-     *   'copyleft',
-     *   'maximal copyleft',
-     *   'network copyleft',
-     *   'strong copyleft',
-     *   'weak copyleft',
-     *   'contributor license agreement',
-     *   'public domain',
-     *   'proprietary free',
-     *   'source available',
-     *   'proprietary',
-     *   'commercial',
-     *   'patent'
-     *
-     * Users can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
-     *
-     *
-     * ## PURLs
-     *
-     * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.
-     *
-     * purl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).
-     *
-     * ### Examples:
-     * Allow all license data found in a specific version of a package 4.14.1: `pkg:npm/lodash@4.14.1`
-     * Allow all license data found in a version range of a package: `pkg:npm/lodash?version_glob=15.*`
-     * Allow all license data in the test directory of a given package for certain version ranges: `pkg:npm/lodash@15.*.*?file_name=lodash/test/*`
-     * Allow all license data taken from the package registry for a package and version range: `pkg:npm/lodash?version_glob=*&license_provenance=registry_metadata`
-     *
-     * ## Available options
-     *
-     * `toplevelOnly`: only apply the license policy to "top level" license data in a package, which includes registry metadata, LICENSE files, and manifest files which are closest to the root of the package.
-     *
-     * `applyToUnidentified`: Apply license policy to found but unidentified license data. If enabled, the license policy will be applied to license data which could not be affirmatively identified as a known license (this will effectively merge the license policy violation and unidentified license alerts). If disabled, license policy alerts will only be shown for license data which is positively identified as something not allowed or set to warn by the license policy.
-     *
-     * This endpoint consumes 1 unit of your quota.
-     *
-     * This endpoint requires the following org token scopes:
-     */
-    post: operations['licenseMetadata']
-  }
-  '/alert-types': {
-    /**
-     * Alert Types Metadata
-     * @description For an array of alert type identifiers, returns metadata for each alert type. Optionally, specify a language via the 'language' query parameter.
-     *
-     * This endpoint consumes 1 unit of your quota.
-     *
-     * This endpoint requires the following org token scopes:
-     */
-    post: operations['alertTypes']
-  }
-  '/orgs/{org_slug}/audit-log': {
-    /**
-     * Get Audit Log Events
-     * @description Paginated list of audit log events.
-     *
-     * This endpoint consumes 1 unit of your quota.
-     *
-     * This endpoint requires the following org token scopes:
-     * - audit-log:list
-     */
-    get: operations['getAuditLogEvents']
-  }
-  '/orgs/{org_slug}/export/cdx/{id}': {
-    /**
-     * Export CycloneDX SBOM (Beta)
-     * @description Export a Socket SBOM as a CycloneDX SBOM
-     *
-     * Supported ecosystems:
-     *
-     * - crates
-     * - go
-     * - maven
-     * - npm
-     * - nuget
-     * - pypi
-     * - rubygems
-     * - spdx
-     * - cdx
-     *
-     * Unsupported ecosystems are filtered from the export.
-     *
-     * This endpoint consumes 1 unit of your quota.
-     *
-     * This endpoint requires the following org token scopes:
-     * - report:read
-     */
-    get: operations['exportCDX']
-  }
-  '/orgs/{org_slug}/export/spdx/{id}': {
-    /**
-     * Export SPDX SBOM (Beta)
-     * @description Export a Socket SBOM as a SPDX SBOM
-     *
-     * Supported ecosystems:
-     *
-     * - crates
-     * - go
-     * - maven
-     * - npm
-     * - nuget
-     * - pypi
-     * - rubygems
-     * - spdx
-     * - cdx
-     *
-     * Unsupported ecosystems are filtered from the export.
-     *
-     * This endpoint consumes 1 unit of your quota.
-     *
-     * This endpoint requires the following org token scopes:
-     * - report:read
-     */
-    get: operations['exportSPDX']
+    post: operations['createDependenciesSnapshot']
   }
   '/orgs/{org_slug}/full-scans': {
     /**
@@ -571,6 +209,58 @@ export interface paths {
      */
     get: operations['GetOrgFullScanDiffGfm']
   }
+  '/orgs/{org_slug}/export/cdx/{id}': {
+    /**
+     * Export CycloneDX SBOM (Beta)
+     * @description Export a Socket SBOM as a CycloneDX SBOM
+     *
+     * Supported ecosystems:
+     *
+     * - crates
+     * - go
+     * - maven
+     * - npm
+     * - nuget
+     * - pypi
+     * - rubygems
+     * - spdx
+     * - cdx
+     *
+     * Unsupported ecosystems are filtered from the export.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - report:read
+     */
+    get: operations['exportCDX']
+  }
+  '/orgs/{org_slug}/export/spdx/{id}': {
+    /**
+     * Export SPDX SBOM (Beta)
+     * @description Export a Socket SBOM as a SPDX SBOM
+     *
+     * Supported ecosystems:
+     *
+     * - crates
+     * - go
+     * - maven
+     * - npm
+     * - nuget
+     * - pypi
+     * - rubygems
+     * - spdx
+     * - cdx
+     *
+     * Unsupported ecosystems are filtered from the export.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - report:read
+     */
+    get: operations['exportSPDX']
+  }
   '/orgs/{org_slug}/diff-scans': {
     /**
      * List diff scans
@@ -649,6 +339,28 @@ export interface paths {
      * - full-scans:list
      */
     post: operations['createOrgDiffScanFromIds']
+  }
+  '/orgs/{org_slug}/triage/alerts': {
+    /**
+     * List Org Alert Triage
+     * @description Get alert triage actions for an organization.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - triage:alerts-list
+     */
+    get: operations['getOrgTriage']
+    /**
+     * Update Org Alert Triage
+     * @description Update triage actions on organizaton alerts.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - triage:alerts-update
+     */
+    post: operations['updateOrgAlertTriage']
   }
   '/orgs/{org_slug}/repos': {
     /**
@@ -845,86 +557,6 @@ export interface paths {
      */
     post: operations['disassociateOrgRepoLabel']
   }
-  '/orgs/{org_slug}/triage/alerts': {
-    /**
-     * List Org Alert Triage
-     * @description Get alert triage actions for an organization.
-     *
-     * This endpoint consumes 1 unit of your quota.
-     *
-     * This endpoint requires the following org token scopes:
-     * - triage:alerts-list
-     */
-    get: operations['getOrgTriage']
-    /**
-     * Update Org Alert Triage
-     * @description Update triage actions on organizaton alerts.
-     *
-     * This endpoint consumes 1 unit of your quota.
-     *
-     * This endpoint requires the following org token scopes:
-     * - triage:alerts-update
-     */
-    post: operations['updateOrgAlertTriage']
-  }
-  '/orgs/{org_slug}/api-tokens': {
-    /**
-     * List API Tokens
-     * @description List all API Tokens.
-     *
-     * This endpoint consumes 10 units of your quota.
-     *
-     * This endpoint requires the following org token scopes:
-     * - api-tokens:list
-     */
-    get: operations['getAPITokens']
-    /**
-     * Create API Token
-     * @description Create an API Token. The API Token created must use a subset of permissions the API token creating them.
-     *
-     * This endpoint consumes 10 units of your quota.
-     *
-     * This endpoint requires the following org token scopes:
-     * - api-tokens:create
-     */
-    post: operations['postAPIToken']
-  }
-  '/orgs/{org_slug}/api-tokens/update': {
-    /**
-     * Update API Token
-     * @description Update an API Token. The API Token created must use a subset of permissions the API token creating them.
-     *
-     * This endpoint consumes 10 units of your quota.
-     *
-     * This endpoint requires the following org token scopes:
-     * - api-tokens:create
-     */
-    post: operations['postAPITokenUpdate']
-  }
-  '/orgs/{org_slug}/api-tokens/rotate': {
-    /**
-     * Rotate API Token
-     * @description Rotate an API Token
-     *
-     * This endpoint consumes 10 units of your quota.
-     *
-     * This endpoint requires the following org token scopes:
-     * - api-tokens:rotate
-     */
-    post: operations['postAPITokensRotate']
-  }
-  '/orgs/{org_slug}/api-tokens/revoke': {
-    /**
-     * Revoke API Token
-     * @description Revoke an API Token
-     *
-     * This endpoint consumes 10 units of your quota.
-     *
-     * This endpoint requires the following org token scopes:
-     * - api-tokens:revoke
-     */
-    post: operations['postAPITokensRevoke']
-  }
   '/orgs/{org_slug}/settings/integrations/{integration_id}/events': {
     /**
      * Get integration events
@@ -975,8 +607,7 @@ export interface paths {
      * Update License Policy
      * @description Set the organization's license policy
      *
-     *
-     * ## License policy schema
+     *       ## License policy schema
      *
      * ```json
      * {
@@ -986,7 +617,7 @@ export interface paths {
      * }
      * ```
      *
-     * Elements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in pacakge which not present in either array will produce a license violation (effectively a "hard" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings "Apache-2.0" and "MIT" to the `allow` array. Strings appearing in these arrays are generally "what you see is what you get", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.
+     * Elements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in package which not present in either array will produce a license violation (effectively a "hard" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings "Apache-2.0" and "MIT" to the `allow` array. Strings appearing in these arrays are generally "what you see is what you get", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.
      *
      * ## License Classes
      *
@@ -1106,10 +737,8 @@ export interface paths {
     /**
      * List details of periodic historical data snapshots (Beta)
      * @description This API endpoint is used to list the details of historical snapshots.
-     * Snapshots of organization data are taken periodically, and
-     * each historical snapshot record contains high-level overview metrics about the data
-     * that was collected. Other [Historical Data Endpoints](/reference/historical-data-endpoints)
-     * can be used to fetch the raw data associated with each snapshot.
+     * Snapshots of organization data are taken periodically, and each historical snapshot record contains high-level overview metrics about the data that was collected.
+     * Other [Historical Data Endpoints](/reference/historical-data-endpoints) can be used to fetch the raw data associated with each snapshot.
      *
      * Historical snapshots contain details and raw data for the following resources:
      *
@@ -1120,8 +749,7 @@ export interface paths {
      * - Users
      * - Settings
      *
-     * Daily snapshot data is bucketed to the nearest day which is described in
-     * more detail at: [Historical Data Endpoints](/reference/historical-data-endpoints)
+     * Daily snapshot data is bucketed to the nearest day which is described in more detail at: [Historical Data Endpoints](/reference/historical-data-endpoints)
      *
      * This endpoint consumes 10 units of your quota.
      *
@@ -1131,10 +759,8 @@ export interface paths {
     get: operations['historicalSnapshotsList']
     /**
      * Start historical data snapshot job (Beta)
-     * @description This API endpoint is used to start a historical snapshot job. While
-     * snapshots are typically taken at least once a day, this endpoint can
-     * be used to start an "on demand" snapshot job to ensure the latest
-     * data is collected and stored for historical purposes.
+     * @description This API endpoint is used to start a historical snapshot job.
+     * While snapshots are typically taken at least once a day, this endpoint can be used to start an "on demand" snapshot job to ensure the latest data is collected and stored for historical purposes.
      *
      * An historical snapshot will contain details and raw data for the following resources:
      *
@@ -1145,8 +771,7 @@ export interface paths {
      * - Users
      * - Settings
      *
-     * Historical snapshot data is bucketed to the nearest day which is described in
-     * more detail at: [Historical Data Endpoints](/reference/historical-data-endpoints)
+     * Historical snapshot data is bucketed to the nearest day which is described in more detail at: [Historical Data Endpoints](/reference/historical-data-endpoints)
      *
      * This endpoint consumes 10 units of your quota.
      *
@@ -1154,6 +779,76 @@ export interface paths {
      * - historical:snapshots-start
      */
     post: operations['historicalSnapshotsStart']
+  }
+  '/orgs/{org_slug}/audit-log': {
+    /**
+     * Get Audit Log Events
+     * @description Paginated list of audit log events.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - audit-log:list
+     */
+    get: operations['getAuditLogEvents']
+  }
+  '/orgs/{org_slug}/api-tokens': {
+    /**
+     * List API Tokens
+     * @description List all API Tokens.
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - api-tokens:list
+     */
+    get: operations['getAPITokens']
+    /**
+     * Create API Token
+     * @description Create an API Token. The API Token created must use a subset of permissions the API token creating them.
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - api-tokens:create
+     */
+    post: operations['postAPIToken']
+  }
+  '/orgs/{org_slug}/api-tokens/update': {
+    /**
+     * Update API Token
+     * @description Update an API Token. The API Token created must use a subset of permissions the API token creating them.
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - api-tokens:create
+     */
+    post: operations['postAPITokenUpdate']
+  }
+  '/orgs/{org_slug}/api-tokens/rotate': {
+    /**
+     * Rotate API Token
+     * @description Rotate an API Token
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - api-tokens:rotate
+     */
+    post: operations['postAPITokensRotate']
+  }
+  '/orgs/{org_slug}/api-tokens/revoke': {
+    /**
+     * Revoke API Token
+     * @description Revoke an API Token
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - api-tokens:revoke
+     */
+    post: operations['postAPITokensRevoke']
   }
   '/orgs/{org_slug}/supported-files': {
     /**
@@ -1202,71 +897,383 @@ export interface paths {
      */
     get: operations['getOrgThreatFeedItems']
   }
-  '/analytics/org/{filter}': {
+  '/license-policy': {
     /**
-     * Get organization analytics (unstable)
+     * License Policy (Beta)
+     * @description Compare the license data found for a list of packages (given as PURL strings) with the contents of a configurable license policy,
+     *     returning information about license data which does not comply with the license allow list.
+     *
+     *     ## Example request body:
+     *
+     *     ```json
+     *     {
+     *       "components": [
+     *         {
+     *           "purl": "pkg:npm/lodash@4.17.21"
+     *         },
+     *         {
+     *           "purl": "pkg:npm/lodash@4.14.1"
+     *         }
+     *       ],
+     *       "allow": [
+     *         "permissive",
+     *         "pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*"
+     *       ],
+     *       "warn": [
+     *         "copyleft",
+     *         "pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*"
+     *       ],
+     *       "options": ["toplevelOnly"]
+     *     }
+     *     ```
+     *
+     *
+     *     ## Return value
+     *
+     *     For each requested PURL, an array is returned. Each array contains a list of license policy violations
+     *     detected for the requested PURL.
+     *
+     *     Violations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,
+     *     a message describing why the license data is believed to be incompatible with the license policy, and a list
+     *     of locations (by filepath or other provenance information) where the offending license data may be found.
+     *
+     *     ```json
+     *     Array<
+     *       Array<{
+     *         filepathOrProvenance: Array<string>,
+     *         level: "warning" | "violation",
+     *         purl: string,
+     *         spdxAtomOrExtraData: string,
+     *         violationExplanation: string
+     *       }>
+     *     >
+     *     ```
+     *
+     *     ## License policy schema
+     *
+     * ```json
+     * {
+     *   allow?: Array<string>
+     *   warn?: Array<string>
+     *   options?: Array<string>
+     * }
+     * ```
+     *
+     * Elements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in package which not present in either array will produce a license violation (effectively a "hard" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings "Apache-2.0" and "MIT" to the `allow` array. Strings appearing in these arrays are generally "what you see is what you get", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.
+     *
+     * ## License Classes
+     *
+     * Strings which are license classes will expand to a list of licenses known to be in that particular license class. Recognized license classes are:
+     *   'permissive',
+     *   'permissive (model)',
+     *   'permissive (gold)',
+     *   'permissive (silver)',
+     *   'permissive (bronze)',
+     *   'permissive (lead)',
+     *   'copyleft',
+     *   'maximal copyleft',
+     *   'network copyleft',
+     *   'strong copyleft',
+     *   'weak copyleft',
+     *   'contributor license agreement',
+     *   'public domain',
+     *   'proprietary free',
+     *   'source available',
+     *   'proprietary',
+     *   'commercial',
+     *   'patent'
+     *
+     * Users can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+     *
+     *
+     * ## PURLs
+     *
+     * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.
+     *
+     * purl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).
+     *
+     * ### Examples:
+     * Allow all license data found in a specific version of a package 4.14.1: `pkg:npm/lodash@4.14.1`
+     * Allow all license data found in a version range of a package: `pkg:npm/lodash?version_glob=15.*`
+     * Allow all license data in the test directory of a given package for certain version ranges: `pkg:npm/lodash@15.*.*?file_name=lodash/test/*`
+     * Allow all license data taken from the package registry for a package and version range: `pkg:npm/lodash?version_glob=*&license_provenance=registry_metadata`
+     *
+     * ## Available options
+     *
+     * `toplevelOnly`: only apply the license policy to "top level" license data in a package, which includes registry metadata, LICENSE files, and manifest files which are closest to the root of the package.
+     *
+     * `applyToUnidentified`: Apply license policy to found but unidentified license data. If enabled, the license policy will be applied to license data which could not be affirmatively identified as a known license (this will effectively merge the license policy violation and unidentified license alerts). If disabled, license policy alerts will only be shown for license data which is positively identified as something not allowed or set to warn by the license policy.
+     *
+     * This endpoint consumes 100 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     *       - packages:list
+     * - license-policy:read
+     */
+    post: operations['licensePolicy']
+  }
+  '/saturate-license-policy': {
+    /**
+     * Saturate License Policy (Legacy)
      * @deprecated
-     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/historicalalertstrend) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/updateorglicensepolicy) instead.
      *
-     * Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
+     * Get the "saturated" version of a license policy's allow list, filling in the entire set of allowed
+     * license data. For example, the saturated form of a license allow list which only specifies that
+     * licenses in the tier "maximal copyleft" are allowed is shown below (note the expanded `allowedStrings` property):
      *
-     * Get analytics data regarding the number of alerts found across all active repositories.
+     * ```json
+     * {
+     *   "allowedApprovalSources": [],
+     *   "allowedFamilies": [],
+     *   "allowedTiers": [
+     *     "maximal copyleft"
+     *   ],
+     *   "allowedStrings": [
+     *     "Parity-6.0.0",
+     *     "QPL-1.0-INRIA-2004",
+     *     "QPL-1.0",
+     *     "RPL-1.1",
+     *     "RPL-1.5"
+     *   ],
+     *   "allowedPURLs": [],
+     *   "focusAlertsHere": false
+     * }
+     * ```
+     *
+     * This may be helpful for users who want to compose more complex sets of allowed license data via
+     * the "allowedStrings" property, or for users who want to know more about the contents of a particular
+     * license group (family, tier, or approval source).
+     *
+     * ## Allow List Schema
+     *
+     * ```json
+     * ```
+     *
+     * where
+     *
+     * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" | "lead"
+     * CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong copyleft" | "weak copyleft"
+     *
+     * ## Return Value
+     *
+     * The returned value has the same shape as a license allow list:
+     *
+     * ```json
+     * {
+     *   allowedApprovalSources?: Array<"fsf" | "osi">,
+     *   allowedFamilies?: Array<"copyleft" | "permissive">,
+     *   allowedTiers?: Array<PermissiveTier | CopyleftTier>,
+     *   allowedStrings?: Array<string>
+     *   allowedPURLs?: Array<string>
+     *   focusAlertsHere?: boolean
+     * }
+     * ```
+     *
+     * where
+     *
+     * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" | "lead"
+     * CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong copyleft" | "weak copyleft"
+     *
+     * readers can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+     *
+     * ### Example request bodies:
+     * ```json
+     * {
+     *   "allowedApprovalSources": ["fsf"],
+     *   "allowedPURLs": [],
+     *   "allowedFamilies": ["copyleft"],
+     *   "allowedTiers": ["model permissive"],
+     *   "allowedStrings": ["License :: OSI Approved :: BSD License"],
+     *   "focusAlertsHere": false
+     * }
+     * ```
+     *
+     * This endpoint consumes 100 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - packages:list
+     */
+    post: operations['saturateLicensePolicy']
+  }
+  '/license-metadata': {
+    /**
+     * License Metadata
+     * @description For an array of license identifiers or names (short form SPDX identifiers, or long form license names),
+     *     returns an array of metadata for the corresponding license, if the license is recognized. If the query
+     *     parameter `includetext=true` is set, the returned metadata will also include the license text.
+     *
+     *
+     *     ## Example request body:
+     *
+     *     ```json
+     *     [
+     *       "Apache-2.0",
+     *       "BSD Zero Clause License"
+     *     ]
+     *     ```
+     *
+     *
+     *     ## Return value
+     *
+     *     ```json
+     *     // Response schema:
+     *     Array<{
+     *       licenseId: string,
+     *       name?: string,
+     *       deprecated?: string,
+     *       crossref?: string
+     *       classes: Array<string>
+     *       text?: string
+     *     }>
+     *
+     *     // Example response:
+     *     [
+     *       {
+     *         "licenseId": "Apache-2.0",
+     *         "name": "Apache License 2.0",
+     *         "deprecated": false,
+     *         "crossref": "https://spdx.org/licenses/Apache-2.0.html",
+     *         "classes": [
+     *           "fsf libre",
+     *           "osi approved",
+     *           "permissive (silver)"
+     *         ]
+     *       },
+     *       {
+     *         "licenseId": "0BSD",
+     *         "name": "BSD Zero Clause License",
+     *         "deprecated": false,
+     *         "crossref": "https://spdx.org/licenses/0BSD.html",
+     *         "classes": [
+     *           "osi approved",
+     *           "permissive (bronze)"
+     *         ]
+     *       }
+     *     ]
+     *     ```
+     *
+     *     ## License policy schema
+     *
+     * ```json
+     * {
+     *   allow?: Array<string>
+     *   warn?: Array<string>
+     *   options?: Array<string>
+     * }
+     * ```
+     *
+     * Elements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in package which not present in either array will produce a license violation (effectively a "hard" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings "Apache-2.0" and "MIT" to the `allow` array. Strings appearing in these arrays are generally "what you see is what you get", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.
+     *
+     * ## License Classes
+     *
+     * Strings which are license classes will expand to a list of licenses known to be in that particular license class. Recognized license classes are:
+     *   'permissive',
+     *   'permissive (model)',
+     *   'permissive (gold)',
+     *   'permissive (silver)',
+     *   'permissive (bronze)',
+     *   'permissive (lead)',
+     *   'copyleft',
+     *   'maximal copyleft',
+     *   'network copyleft',
+     *   'strong copyleft',
+     *   'weak copyleft',
+     *   'contributor license agreement',
+     *   'public domain',
+     *   'proprietary free',
+     *   'source available',
+     *   'proprietary',
+     *   'commercial',
+     *   'patent'
+     *
+     * Users can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+     *
+     *
+     * ## PURLs
+     *
+     * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.
+     *
+     * purl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).
+     *
+     * ### Examples:
+     * Allow all license data found in a specific version of a package 4.14.1: `pkg:npm/lodash@4.14.1`
+     * Allow all license data found in a version range of a package: `pkg:npm/lodash?version_glob=15.*`
+     * Allow all license data in the test directory of a given package for certain version ranges: `pkg:npm/lodash@15.*.*?file_name=lodash/test/*`
+     * Allow all license data taken from the package registry for a package and version range: `pkg:npm/lodash?version_glob=*&license_provenance=registry_metadata`
+     *
+     * ## Available options
+     *
+     * `toplevelOnly`: only apply the license policy to "top level" license data in a package, which includes registry metadata, LICENSE files, and manifest files which are closest to the root of the package.
+     *
+     * `applyToUnidentified`: Apply license policy to found but unidentified license data. If enabled, the license policy will be applied to license data which could not be affirmatively identified as a known license (this will effectively merge the license policy violation and unidentified license alerts). If disabled, license policy alerts will only be shown for license data which is positively identified as something not allowed or set to warn by the license policy.
      *
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - report:write
      */
-    get: operations['getOrgAnalytics']
+    post: operations['licenseMetadata']
   }
-  '/analytics/repo/{name}/{filter}': {
+  '/alert-types': {
     /**
-     * Get repository analytics
-     * @deprecated
-     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/historicalalertstrend) instead.
-     *
-     * Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
-     *
-     * Get analytics data regarding the number of alerts found in a single repository.
+     * Alert Types Metadata
+     * @description For an array of alert type identifiers, returns metadata for each alert type. Optionally, specify a language via the 'language' query parameter.
      *
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - report:write
      */
-    get: operations['getRepoAnalytics']
+    post: operations['alertTypes']
   }
-  '/dependencies/search': {
+  '/openapi': {
     /**
-     * Search dependencies
-     * @description Search for any dependency that is being used in your organization.
+     * Returns the OpenAPI definition
+     * @description Retrieve the API specification in an Openapi JSON format.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     */
+    get: operations['getOpenAPI']
+  }
+  '/quota': {
+    /**
+     * Get quota
+     * @description Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
+     *
+     * This endpoint consumes 0 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - No Scopes Required, but authentication is required
+     */
+    get: operations['getQuota']
+  }
+  '/organizations': {
+    /**
+     * List organizations
+     * @description Get information on the current organizations associated with the API token.
      *
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
      * - No Scopes Required, but authentication is required
      */
-    post: operations['searchDependencies']
+    get: operations['getOrganizations']
   }
-  '/dependencies/upload': {
+  '/settings': {
     /**
-     * Create a snapshot of all dependencies from manifest information
+     * Calculate settings
      * @deprecated
-     * @description **This endpoint is deprecated.**
+     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/updateorgsecuritypolicy) instead.
      *
-     * Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.
-     * You can upload multiple lockfiles in the same request, but each filename must be unique.
+     * Get current settings for the requested organizations and default settings to allow deferrals.
      *
-     * The name of the file must be in the supported list.
-     *
-     * For example, these are valid filenames: "requirements.txt", "package.json", "folder/package.json", and "deep/nested/folder/package.json".
-     *
-     * This endpoint consumes 100 units of your quota.
+     * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - report:write
+     * - No Scopes Required, but authentication is required
      */
-    post: operations['createDependenciesSnapshot']
+    post: operations['postSettings']
   }
   '/report/supported': {
     /**
@@ -1370,56 +1377,6 @@ export interface paths {
      */
     get: operations['getRepoList']
   }
-  '/openapi': {
-    /**
-     * Returns the OpenAPI definition
-     * @description Retrieve the API specification in an Openapi JSON format.
-     *
-     * This endpoint consumes 1 unit of your quota.
-     *
-     * This endpoint requires the following org token scopes:
-     */
-    get: operations['getOpenAPI']
-  }
-  '/quota': {
-    /**
-     * Get quota
-     * @description Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
-     *
-     * This endpoint consumes 0 units of your quota.
-     *
-     * This endpoint requires the following org token scopes:
-     * - No Scopes Required, but authentication is required
-     */
-    get: operations['getQuota']
-  }
-  '/organizations': {
-    /**
-     * List organizations
-     * @description Get information on the current organizations associated with the API token.
-     *
-     * This endpoint consumes 1 unit of your quota.
-     *
-     * This endpoint requires the following org token scopes:
-     * - No Scopes Required, but authentication is required
-     */
-    get: operations['getOrganizations']
-  }
-  '/settings': {
-    /**
-     * Calculate settings
-     * @deprecated
-     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/updateorgsecuritypolicy) instead.
-     *
-     * Get current settings for the requested organizations and default settings to allow deferrals.
-     *
-     * This endpoint consumes 1 unit of your quota.
-     *
-     * This endpoint requires the following org token scopes:
-     * - No Scopes Required, but authentication is required
-     */
-    post: operations['postSettings']
-  }
   '/npm/{package}/{version}/issues': {
     /**
      * Get issues by package
@@ -1483,6 +1440,40 @@ export interface paths {
      */
     get: operations['getScoreByNPMPackage']
   }
+  '/analytics/org/{filter}': {
+    /**
+     * Get organization analytics (unstable)
+     * @deprecated
+     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/historicalalertstrend) instead.
+     *
+     * Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
+     *
+     * Get analytics data regarding the number of alerts found across all active repositories.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - report:write
+     */
+    get: operations['getOrgAnalytics']
+  }
+  '/analytics/repo/{name}/{filter}': {
+    /**
+     * Get repository analytics
+     * @deprecated
+     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/historicalalertstrend) instead.
+     *
+     * Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
+     *
+     * Get analytics data regarding the number of alerts found in a single repository.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - report:write
+     */
+    get: operations['getRepoAnalytics']
+  }
 }
 
 export type webhooks = Record<string, never>
@@ -1499,20 +1490,61 @@ export interface components {
     SocketBatchPURLFetch: {
       components: Array<components['schemas']['SocketBatchPURLRequest']>
     }
-    /** @default null */
-    LicenseAllowListRequest: Record<string, never>
-    LicensePolicy: {
-      allow: components['schemas']['LicenseAllowListElabbed']
-      warn: components['schemas']['LicenseAllowListElabbed']
-      monitor: components['schemas']['LicenseAllowListElabbed']
+    SocketArtifact: components['schemas']['SocketPURL'] &
+      components['schemas']['SocketArtifactLink'] & {
+        id?: components['schemas']['SocketId']
+        /** @description List of package authors or maintainers */
+        author?: string[]
+        /**
+         * @description Total size of the package artifact in bytes
+         * @default 0
+         */
+        size?: number
+        /**
+         * @description Hugging Face model, dataset, or space type
+         * @default
+         */
+        repositoryType?: string
+        alerts?: Array<components['schemas']['SocketAlert']>
+        score?: components['schemas']['SocketScore']
+        /**
+         * @description Original unmodified PURL input string before normalization
+         * @default
+         */
+        inputPurl?: string
+        /**
+         * @description Deprecated: Always 0. Previously used for batch ordering but replaced by inputPurl for better tracking.
+         * @default 0
+         */
+        batchIndex?: number
+        /** @default */
+        license?: string
+        licenseDetails?: components['schemas']['LicenseDetails']
+        licenseAttrib?: components['schemas']['SAttrib1_N']
+      }
+    SocketDiffArtifact: components['schemas']['SocketPURL'] & {
+      diffType: components['schemas']['SocketDiffArtifactType']
+      id?: components['schemas']['SocketId']
+      /** @description List of package authors or maintainers */
+      author?: string[]
+      /** @description Artifact links from the base/before state */
+      base?: Array<components['schemas']['SocketArtifactLink']>
+      capabilities?: components['schemas']['Capabilities']
+      /** @description Artifact links from the head/after state */
+      head?: Array<components['schemas']['SocketArtifactLink']>
+      qualifiers?: components['schemas']['Qualifiers']
+      /**
+       * @description Total size of the package artifact in bytes
+       * @default 0
+       */
+      size?: number
+      /** @default */
+      license?: string
+      licenseDetails?: components['schemas']['LicenseDetails']
+      licenseAttrib?: components['schemas']['SAttrib1_N']
+      score?: components['schemas']['SocketScore']
+      alerts?: Array<components['schemas']['SocketAlert']>
     }
-    LicenseAllowList: {
-      strings: string[]
-    }
-    /** @default null */
-    SLicenseMetaRes: Record<string, never>
-    /** @default null */
-    SLicenseMetaReq: Record<string, never>
     CDXManifestSchema: {
       /** @default CycloneDX */
       bomFormat: string
@@ -1693,61 +1725,8 @@ export interface components {
         relationshipType: string
       }>
     }
-    SocketArtifact: components['schemas']['SocketPURL'] &
-      components['schemas']['SocketArtifactLink'] & {
-        id?: components['schemas']['SocketId']
-        /** @description List of package authors or maintainers */
-        author?: string[]
-        /**
-         * @description Total size of the package artifact in bytes
-         * @default 0
-         */
-        size?: number
-        /**
-         * @description Hugging Face model, dataset, or space type
-         * @default
-         */
-        repositoryType?: string
-        alerts?: Array<components['schemas']['SocketAlert']>
-        score?: components['schemas']['SocketScore']
-        /**
-         * @description Original unmodified PURL input string before normalization
-         * @default
-         */
-        inputPurl?: string
-        /**
-         * @description Deprecated: Always 0. Previously used for batch ordering but replaced by inputPurl for better tracking.
-         * @default 0
-         */
-        batchIndex?: number
-        /** @default */
-        license?: string
-        licenseDetails?: components['schemas']['LicenseDetails']
-        licenseAttrib?: components['schemas']['SAttrib1_N']
-      }
-    SocketDiffArtifact: components['schemas']['SocketPURL'] & {
-      diffType: components['schemas']['SocketDiffArtifactType']
-      id?: components['schemas']['SocketId']
-      /** @description List of package authors or maintainers */
-      author?: string[]
-      /** @description Artifact links from the base/before state */
-      base?: Array<components['schemas']['SocketArtifactLink']>
-      capabilities?: components['schemas']['Capabilities']
-      /** @description Artifact links from the head/after state */
-      head?: Array<components['schemas']['SocketArtifactLink']>
-      qualifiers?: components['schemas']['Qualifiers']
-      /**
-       * @description Total size of the package artifact in bytes
-       * @default 0
-       */
-      size?: number
-      /** @default */
-      license?: string
-      licenseDetails?: components['schemas']['LicenseDetails']
-      licenseAttrib?: components['schemas']['SAttrib1_N']
-      score?: components['schemas']['SocketScore']
-      alerts?: Array<components['schemas']['SocketAlert']>
-    }
+    /** @default null */
+    LicenseAllowListRequest: Record<string, never>
     SStoredLicensePolicy: {
       allow: string[] | null
       warn: string[] | null
@@ -1838,6 +1817,18 @@ export interface components {
     }
     /** @default */
     SocketId: string
+    LicensePolicy: {
+      allow: components['schemas']['LicenseAllowListElabbed']
+      warn: components['schemas']['LicenseAllowListElabbed']
+      monitor: components['schemas']['LicenseAllowListElabbed']
+    }
+    LicenseAllowList: {
+      strings: string[]
+    }
+    /** @default null */
+    SLicenseMetaRes: Record<string, never>
+    /** @default null */
+    SLicenseMetaReq: Record<string, never>
     SocketReport: {
       /** @default */
       id: string
@@ -1879,96 +1870,6 @@ export interface components {
     SocketBatchPURLRequest: {
       /** @default */
       purl: string
-    }
-    LicenseAllowListElabbed: {
-      strings: string[]
-      classes: string[]
-      packageURLs: string[]
-      disjs: string[]
-    }
-    CDXComponentSchema: {
-      /** @default */
-      author?: string
-      /** @default */
-      publisher?: string
-      /** @default */
-      group: string
-      /** @default */
-      name: string
-      /** @default */
-      version: string
-      /** @default */
-      description?: string
-      /** @default */
-      scope?: string
-      hashes?: Array<{
-        /** @default */
-        alg: string
-        /** @default */
-        content: string
-      }>
-      licenses?: Array<{
-        /** @default */
-        expression?: string
-        license?: {
-          /** @default */
-          id?: string
-          /** @default */
-          name?: string
-          /** @default */
-          url?: string
-        }
-      }>
-      /** @default */
-      purl: string
-      externalReferences?: Array<{
-        /** @default */
-        type: string
-        /** @default */
-        url: string
-      }>
-      /** @default application */
-      type: string
-      /** @default */
-      'bom-ref': string
-      evidence?: {
-        identity: {
-          /** @default */
-          field: string
-          /** @default 0 */
-          confidence: number
-          methods: Array<{
-            /** @default */
-            technique: string
-            /** @default 0 */
-            confidence: number
-            /** @default */
-            value: string
-          }>
-        }
-        occurrences?: Array<{
-          /** @default */
-          location: string
-        }>
-      }
-      tags?: string[]
-      properties?: Array<{
-        /** @default */
-        name: string
-        /** @default */
-        value: string
-      }>
-      cryptoProperties?: Array<{
-        /** @default */
-        assetType: string
-        algorithmProperties: {
-          /** @default */
-          executionEnvironment: string
-          /** @default */
-          implementationPlatform: string
-        }
-      }>
-      components?: Array<components['schemas']['CDXComponentSchema']>
     }
     SocketPURL: {
       type: components['schemas']['SocketPURL_Type']
@@ -2249,6 +2150,96 @@ export interface components {
       | 'updated'
       | 'replaced'
       | 'unchanged'
+    CDXComponentSchema: {
+      /** @default */
+      author?: string
+      /** @default */
+      publisher?: string
+      /** @default */
+      group: string
+      /** @default */
+      name: string
+      /** @default */
+      version: string
+      /** @default */
+      description?: string
+      /** @default */
+      scope?: string
+      hashes?: Array<{
+        /** @default */
+        alg: string
+        /** @default */
+        content: string
+      }>
+      licenses?: Array<{
+        /** @default */
+        expression?: string
+        license?: {
+          /** @default */
+          id?: string
+          /** @default */
+          name?: string
+          /** @default */
+          url?: string
+        }
+      }>
+      /** @default */
+      purl: string
+      externalReferences?: Array<{
+        /** @default */
+        type: string
+        /** @default */
+        url: string
+      }>
+      /** @default application */
+      type: string
+      /** @default */
+      'bom-ref': string
+      evidence?: {
+        identity: {
+          /** @default */
+          field: string
+          /** @default 0 */
+          confidence: number
+          methods: Array<{
+            /** @default */
+            technique: string
+            /** @default 0 */
+            confidence: number
+            /** @default */
+            value: string
+          }>
+        }
+        occurrences?: Array<{
+          /** @default */
+          location: string
+        }>
+      }
+      tags?: string[]
+      properties?: Array<{
+        /** @default */
+        name: string
+        /** @default */
+        value: string
+      }>
+      cryptoProperties?: Array<{
+        /** @default */
+        assetType: string
+        algorithmProperties: {
+          /** @default */
+          executionEnvironment: string
+          /** @default */
+          implementationPlatform: string
+        }
+      }>
+      components?: Array<components['schemas']['CDXComponentSchema']>
+    }
+    LicenseAllowListElabbed: {
+      strings: string[]
+      classes: string[]
+      packageURLs: string[]
+      disjs: string[]
+    }
     SocketIssue:
       | {
           /** @enum {string} */
@@ -4489,543 +4480,61 @@ export interface operations {
     }
   }
   /**
-   * License Policy (Beta)
-   * @description Compare the license data found for a list of packages (given as PURL strings) with the contents of a configurable license policy,
-   * returning information about license data which does not comply with the license allow list.
+   * Search dependencies
+   * @description Search for any dependency that is being used in your organization.
    *
-   * ## Example request body:
-   *
-   * ```json
-   * {
-   *   "components": [
-   *     {
-   *       "purl": "pkg:npm/lodash@4.17.21"
-   *     },
-   *     {
-   *       "purl": "pkg:npm/lodash@4.14.1"
-   *     }
-   *   ],
-   *   "allow": [
-   *     "permissive",
-   *     "pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*"
-   *   ],
-   *   "warn": [
-   *     "copyleft",
-   *     "pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*"
-   *   ],
-   *   "options": ["toplevelOnly"]
-   * }
-   * ```
-   *
-   *
-   * ## Return value
-   *
-   * For each requested PURL, an array is returned. Each array contains a list of license policy violations
-   * detected for the requested PURL.
-   *
-   * Violations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,
-   * a message describing why the license data is believed to be incompatible with the license policy, and a list
-   * of locations (by filepath or other provenance information) where the offending license data may be found.
-   *
-   * ```json
-   * Array<
-   *   Array<{
-   *     filepathOrProvenance: Array<string>,
-   *     level: "warning" | "violation",
-   *     purl: string,
-   *     spdxAtomOrExtraData: string,
-   *     violationExplanation: string
-   *   }>
-   * >
-   * ```
-   *
-   *
-   * ## License policy schema
-   *
-   * ```json
-   * {
-   *   allow?: Array<string>
-   *   warn?: Array<string>
-   *   options?: Array<string>
-   * }
-   * ```
-   *
-   * Elements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in pacakge which not present in either array will produce a license violation (effectively a "hard" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings "Apache-2.0" and "MIT" to the `allow` array. Strings appearing in these arrays are generally "what you see is what you get", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.
-   *
-   * ## License Classes
-   *
-   * Strings which are license classes will expand to a list of licenses known to be in that particular license class. Recognized license classes are:
-   *   'permissive',
-   *   'permissive (model)',
-   *   'permissive (gold)',
-   *   'permissive (silver)',
-   *   'permissive (bronze)',
-   *   'permissive (lead)',
-   *   'copyleft',
-   *   'maximal copyleft',
-   *   'network copyleft',
-   *   'strong copyleft',
-   *   'weak copyleft',
-   *   'contributor license agreement',
-   *   'public domain',
-   *   'proprietary free',
-   *   'source available',
-   *   'proprietary',
-   *   'commercial',
-   *   'patent'
-   *
-   * Users can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
-   *
-   *
-   * ## PURLs
-   *
-   * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.
-   *
-   * purl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).
-   *
-   * ### Examples:
-   * Allow all license data found in a specific version of a package 4.14.1: `pkg:npm/lodash@4.14.1`
-   * Allow all license data found in a version range of a package: `pkg:npm/lodash?version_glob=15.*`
-   * Allow all license data in the test directory of a given package for certain version ranges: `pkg:npm/lodash@15.*.*?file_name=lodash/test/*`
-   * Allow all license data taken from the package registry for a package and version range: `pkg:npm/lodash?version_glob=*&license_provenance=registry_metadata`
-   *
-   * ## Available options
-   *
-   * `toplevelOnly`: only apply the license policy to "top level" license data in a package, which includes registry metadata, LICENSE files, and manifest files which are closest to the root of the package.
-   *
-   * `applyToUnidentified`: Apply license policy to found but unidentified license data. If enabled, the license policy will be applied to license data which could not be affirmatively identified as a known license (this will effectively merge the license policy violation and unidentified license alerts). If disabled, license policy alerts will only be shown for license data which is positively identified as something not allowed or set to warn by the license policy.
-   *
-   * This endpoint consumes 100 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
-   *       - packages:list
-   * - license-policy:read
+   * - No Scopes Required, but authentication is required
    */
-  licensePolicy: {
-    requestBody?: {
-      content: {
-        'application/json': components['schemas']['LicenseAllowListRequest']
-      }
-    }
-    responses: {
-      /** @description Data about license policy violations, if any exist */
-      200: {
-        content: {
-          'application/x-ndjson': Array<{
-            filepathOrProvenance: string[]
-            /** @default */
-            level: string
-            /** @default */
-            purl: string
-            /** @default */
-            spdxAtomOrExtraData: string
-            /** @default */
-            violationExplanation: string
-          }>
-        }
-      }
-      400: components['responses']['SocketBadRequest']
-      401: components['responses']['SocketUnauthorized']
-      403: components['responses']['SocketForbidden']
-      404: components['responses']['SocketNotFoundResponse']
-      429: components['responses']['SocketTooManyRequestsResponse']
-      500: components['responses']['SocketInternalServerError']
-    }
-  }
-  /**
-   * Saturate License Policy (Legacy)
-   * @deprecated
-   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/updateorglicensepolicy) instead.
-   *
-   * Get the "saturated" version of a license policy's allow list, filling in the entire set of allowed
-   * license data. For example, the saturated form of a license allow list which only specifies that
-   * licenses in the tier "maximal copyleft" are allowed is shown below (note the expanded `allowedStrings` property):
-   *
-   * ```json
-   * {
-   *   "allowedApprovalSources": [],
-   *   "allowedFamilies": [],
-   *   "allowedTiers": [
-   *     "maximal copyleft"
-   *   ],
-   *   "allowedStrings": [
-   *     "Parity-6.0.0",
-   *     "QPL-1.0-INRIA-2004",
-   *     "QPL-1.0",
-   *     "RPL-1.1",
-   *     "RPL-1.5"
-   *   ],
-   *   "allowedPURLs": [],
-   *   "focusAlertsHere": false
-   * }
-   * ```
-   *
-   * This may be helpful for users who want to compose more complex sets of allowed license data via
-   * the "allowedStrings" property, or for users who want to know more about the contents of a particular
-   * license group (family, tier, or approval source).
-   *
-   * ## Allow List Schema
-   *
-   * ```json
-   * ```
-   *
-   * where
-   *
-   * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" | "lead"
-   * CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong copyleft" | "weak copyleft"
-   *
-   * ## Return Value
-   *
-   * The returned value has the same shape as a license allow list:
-   *
-   * ```json
-   * {
-   *   allowedApprovalSources?: Array<"fsf" | "osi">,
-   *   allowedFamilies?: Array<"copyleft" | "permissive">,
-   *   allowedTiers?: Array<PermissiveTier | CopyleftTier>,
-   *   allowedStrings?: Array<string>
-   *   allowedPURLs?: Array<string>
-   *   focusAlertsHere?: boolean
-   * }
-   * ```
-   *
-   * where
-   *
-   * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" | "lead"
-   * CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong copyleft" | "weak copyleft"
-   *
-   * readers can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
-   *
-   * ### Example request bodies:
-   * ```json
-   * {
-   *   "allowedApprovalSources": ["fsf"],
-   *   "allowedPURLs": [],
-   *   "allowedFamilies": ["copyleft"],
-   *   "allowedTiers": ["model permissive"],
-   *   "allowedStrings": ["License :: OSI Approved :: BSD License"],
-   *   "focusAlertsHere": false
-   * }
-   * ```
-   *
-   * This endpoint consumes 100 units of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - packages:list
-   */
-  saturateLicensePolicy: {
+  searchDependencies: {
     requestBody?: {
       content: {
         'application/json': {
-          allow: components['schemas']['LicenseAllowList']
-          warn: components['schemas']['LicenseAllowList']
-          monitor: components['schemas']['LicenseAllowList']
-          allowedApprovalSources: string[] | null
-          allowedFamilies: string[] | null
-          allowedTiers: string[] | null
-          allowedStrings: string[] | null
-          allowedPURLs: string[] | null
-          /** @default false */
-          focusAlertsHere: boolean | null
+          /** @default 50 */
+          limit: number
+          /** @default 0 */
+          offset: number
+          purls?: string[]
         }
       }
     }
     responses: {
-      /** @description Saturated License Allow List */
-      200: {
-        content: {
-          'application/json': components['schemas']['LicensePolicy']
-        }
-      }
-      400: components['responses']['SocketBadRequest']
-      401: components['responses']['SocketUnauthorized']
-      403: components['responses']['SocketForbidden']
-      404: components['responses']['SocketNotFoundResponse']
-      429: components['responses']['SocketTooManyRequestsResponse']
-      500: components['responses']['SocketInternalServerError']
-    }
-  }
-  /**
-   * License Metadata
-   * @description For an array of license identifiers or names (short form SPDX identifiers, or long form license names),
-   * returns an array of metadata for the corresponding license, if the license is recognized. If the query
-   * parameter `includetext=true` is set, the returned metadata will also include the license text.
-   *
-   *
-   * ## Example request body:
-   *
-   * ```json
-   * [
-   *   "Apache-2.0",
-   *   "BSD Zero Clause License"
-   * ]
-   * ```
-   *
-   *
-   * ## Return value
-   *
-   * ```json
-   * // Response schema:
-   * Array<{
-   *   licenseId: string,
-   *   name?: string,
-   *   deprecated?: string,
-   *   crossref?: string
-   *   classes: Array<string>
-   *   text?: string
-   * }>
-   *
-   * // Example response:
-   * [
-   *   {
-   *     "licenseId": "Apache-2.0",
-   *     "name": "Apache License 2.0",
-   *     "deprecated": false,
-   *     "crossref": "https://spdx.org/licenses/Apache-2.0.html",
-   *     "classes": [
-   *       "fsf libre",
-   *       "osi approved",
-   *       "permissive (silver)"
-   *     ]
-   *   },
-   *   {
-   *     "licenseId": "0BSD",
-   *     "name": "BSD Zero Clause License",
-   *     "deprecated": false,
-   *     "crossref": "https://spdx.org/licenses/0BSD.html",
-   *     "classes": [
-   *       "osi approved",
-   *       "permissive (bronze)"
-   *     ]
-   *   }
-   * ]
-   * ```
-   *
-   *
-   * ## License policy schema
-   *
-   * ```json
-   * {
-   *   allow?: Array<string>
-   *   warn?: Array<string>
-   *   options?: Array<string>
-   * }
-   * ```
-   *
-   * Elements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in pacakge which not present in either array will produce a license violation (effectively a "hard" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings "Apache-2.0" and "MIT" to the `allow` array. Strings appearing in these arrays are generally "what you see is what you get", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.
-   *
-   * ## License Classes
-   *
-   * Strings which are license classes will expand to a list of licenses known to be in that particular license class. Recognized license classes are:
-   *   'permissive',
-   *   'permissive (model)',
-   *   'permissive (gold)',
-   *   'permissive (silver)',
-   *   'permissive (bronze)',
-   *   'permissive (lead)',
-   *   'copyleft',
-   *   'maximal copyleft',
-   *   'network copyleft',
-   *   'strong copyleft',
-   *   'weak copyleft',
-   *   'contributor license agreement',
-   *   'public domain',
-   *   'proprietary free',
-   *   'source available',
-   *   'proprietary',
-   *   'commercial',
-   *   'patent'
-   *
-   * Users can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
-   *
-   *
-   * ## PURLs
-   *
-   * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.
-   *
-   * purl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).
-   *
-   * ### Examples:
-   * Allow all license data found in a specific version of a package 4.14.1: `pkg:npm/lodash@4.14.1`
-   * Allow all license data found in a version range of a package: `pkg:npm/lodash?version_glob=15.*`
-   * Allow all license data in the test directory of a given package for certain version ranges: `pkg:npm/lodash@15.*.*?file_name=lodash/test/*`
-   * Allow all license data taken from the package registry for a package and version range: `pkg:npm/lodash?version_glob=*&license_provenance=registry_metadata`
-   *
-   * ## Available options
-   *
-   * `toplevelOnly`: only apply the license policy to "top level" license data in a package, which includes registry metadata, LICENSE files, and manifest files which are closest to the root of the package.
-   *
-   * `applyToUnidentified`: Apply license policy to found but unidentified license data. If enabled, the license policy will be applied to license data which could not be affirmatively identified as a known license (this will effectively merge the license policy violation and unidentified license alerts). If disabled, license policy alerts will only be shown for license data which is positively identified as something not allowed or set to warn by the license policy.
-   *
-   * This endpoint consumes 1 unit of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   */
-  licenseMetadata: {
-    parameters: {
-      query?: {
-        /** @description If `true`, the response will include the full text of the requested licenses */
-        includetext?: boolean
-      }
-    }
-    requestBody?: {
-      content: {
-        'application/json': components['schemas']['SLicenseMetaReq']
-      }
-    }
-    responses: {
-      /** @description Metadata for the requested licenses */
-      200: {
-        content: {
-          'application/json': components['schemas']['SLicenseMetaRes']
-        }
-      }
-      400: components['responses']['SocketBadRequest']
-    }
-  }
-  /**
-   * Alert Types Metadata
-   * @description For an array of alert type identifiers, returns metadata for each alert type. Optionally, specify a language via the 'language' query parameter.
-   *
-   * This endpoint consumes 1 unit of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   */
-  alertTypes: {
-    parameters: {
-      query?: {
-        /** @description Language for alert metadata */
-        language?: 'ach-UG' | 'de-DE' | 'en-US' | 'es-ES' | 'fr-FR' | 'it-IT'
-      }
-    }
-    requestBody?: {
-      content: {
-        'application/json': string[]
-      }
-    }
-    responses: {
-      /** @description Metadata for the requested alert types */
-      200: {
-        content: {
-          'application/json': Array<{
-            /** @default */
-            type: string
-            /** @default */
-            title: string
-            /** @default */
-            description: string
-            /** @default */
-            suggestion: string
-            /** @default */
-            emoji: string
-            /** @default */
-            nextStepTitle: string
-            props: {
-              [key: string]: string
-            } | null
-          }>
-        }
-      }
-      400: components['responses']['SocketBadRequest']
-    }
-  }
-  /**
-   * Get Audit Log Events
-   * @description Paginated list of audit log events.
-   *
-   * This endpoint consumes 1 unit of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - audit-log:list
-   */
-  getAuditLogEvents: {
-    parameters: {
-      query?: {
-        /** @description Filter audit log events by type. Omit for all types. */
-        type?:
-          | 'AddLicenseOverlayNote'
-          | 'AssociateLabel'
-          | 'CancelInvitation'
-          | 'ChangeMemberRole'
-          | 'ChangePlanSubscriptionSeats'
-          | 'CreateApiToken'
-          | 'CreateLabel'
-          | 'DeleteLabel'
-          | 'DeleteLabelSetting'
-          | 'DeleteReport'
-          | 'DeleteRepository'
-          | 'DisassociateLabel'
-          | 'JoinOrganization'
-          | 'RemoveLicenseOverlay'
-          | 'RemoveMember'
-          | 'ResetInvitationLink'
-          | 'ResetOrganizationSettingToDefault'
-          | 'RevokeApiToken'
-          | 'RotateApiToken'
-          | 'SendInvitation'
-          | 'SetLabelSettingToDefault'
-          | 'SyncOrganization'
-          | 'TransferOwnership'
-          | 'UpdateAlertTriage'
-          | 'UpdateApiTokenCommitter'
-          | 'UpdateApiTokenMaxQuota'
-          | 'UpdateApiTokenName'
-          | 'UpdateApiTokenScopes'
-          | 'UpdateApiTokenVisibility'
-          | 'UpdateAutopatchCurated'
-          | 'UpdateLabel'
-          | 'UpdateLabelSetting'
-          | 'UpdateOrganizationSetting'
-          | 'UpgradeOrganizationPlan'
-        /** @description Number of events per page */
-        per_page?: number
-        /** @description Page token */
-        page?: string
-        /** @description A Unix timestamp in seconds to filter results prior to this date. */
-        from?: string
-      }
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string
-      }
-    }
-    responses: {
-      /** @description The paginated list of events in an organizations audit log and the next page querystring token. */
+      /** @description Search dependencies response */
       200: {
         content: {
           'application/json': {
-            results: Array<{
+            /** @default false */
+            end: boolean
+            /** @default 1000 */
+            limit: number
+            /** @default 0 */
+            offset: number
+            purlFilters: {
+              valid: string[]
+              invalid: string[]
+            }
+            rows: Array<{
               /** @default */
-              event_id?: string
+              branch: string
+              /** @default false */
+              direct: boolean
               /** @default */
-              created_at?: string
+              id: string
               /** @default */
-              updated_at?: string
+              name: string
               /** @default */
-              country_code?: string | null
+              repository: string
               /** @default */
-              organization_id?: string | null
+              type: string
               /** @default */
-              ip_address?: string | null
-              /** @default null */
-              payload?: Record<string, unknown> | null
-              /** @default 0 */
-              status_code?: number | null
+              namespace?: string
               /** @default */
-              type?: string
+              version?: string
               /** @default */
-              user_agent?: string | null
-              /** @default */
-              user_id?: string | null
-              /** @default */
-              user_email?: string
-              /** @default */
-              user_image?: string
-              /** @default */
-              organization_name?: string
+              release?: string
             }>
-            /** @default */
-            nextPage: string | null
           }
         }
       }
@@ -5037,127 +4546,52 @@ export interface operations {
     }
   }
   /**
-   * Export CycloneDX SBOM (Beta)
-   * @description Export a Socket SBOM as a CycloneDX SBOM
+   * Create a snapshot of all dependencies from manifest information
+   * @deprecated
+   * @description **This endpoint is deprecated.**
    *
-   * Supported ecosystems:
+   * Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.
+   * You can upload multiple lockfiles in the same request, but each filename must be unique.
    *
-   * - crates
-   * - go
-   * - maven
-   * - npm
-   * - nuget
-   * - pypi
-   * - rubygems
-   * - spdx
-   * - cdx
+   * The name of the file must be in the supported list.
    *
-   * Unsupported ecosystems are filtered from the export.
+   * For example, these are valid filenames: "requirements.txt", "package.json", "folder/package.json", and "deep/nested/folder/package.json".
    *
-   * This endpoint consumes 1 unit of your quota.
+   * This endpoint consumes 100 units of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - report:read
+   * - report:write
    */
-  exportCDX: {
+  createDependenciesSnapshot: {
     parameters: {
       query?: {
-        /**
-         * @description The person(s) who created the BOM.
-         * Set this value if you're intending the modify the BOM and claim authorship.
-         */
-        author?: string
-        /** @description Dependency track project group */
-        project_group?: string
-        /** @description Dependency track project name. Default use the directory name */
-        project_name?: string
-        /** @description Dependency track project version */
-        project_version?: string
-        /** @description Dependency track project id. Either provide the id or the project name and version together */
-        project_id?: string
-        /** @description Include vulnerability information in the SBOM. Also includes reachability/VEX if available */
-        include_vulnerabilities?: string
+        repository?: string
+        branch?: string
       }
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string
-        /** @description The full scan OR sbom report ID */
-        id: string
+    }
+    requestBody?: {
+      content: {
+        'multipart/form-data': {
+          /** @default */
+          repository?: string
+          /** @default */
+          branch?: string
+          [key: string]: undefined
+        }
       }
     }
     responses: {
-      /** @description CycloneDX SBOM */
+      /** @description ID of the dependencies snapshot */
       200: {
         content: {
-          'application/json': components['schemas']['CDXManifestSchema']
+          'application/json': Record<string, never>
         }
       }
       400: components['responses']['SocketBadRequest']
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
       429: components['responses']['SocketTooManyRequestsResponse']
-    }
-  }
-  /**
-   * Export SPDX SBOM (Beta)
-   * @description Export a Socket SBOM as a SPDX SBOM
-   *
-   * Supported ecosystems:
-   *
-   * - crates
-   * - go
-   * - maven
-   * - npm
-   * - nuget
-   * - pypi
-   * - rubygems
-   * - spdx
-   * - cdx
-   *
-   * Unsupported ecosystems are filtered from the export.
-   *
-   * This endpoint consumes 1 unit of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - report:read
-   */
-  exportSPDX: {
-    parameters: {
-      query?: {
-        /**
-         * @description The person(s) who created the BOM.
-         * Set this value if you're intending the modify the BOM and claim authorship.
-         */
-        author?: string
-        /** @description Dependency track project group */
-        project_group?: string
-        /** @description Dependency track project name. Default use the directory name */
-        project_name?: string
-        /** @description Dependency track project version */
-        project_version?: string
-        /** @description Dependency track project id. Either provide the id or the project name and version together */
-        project_id?: string
-        /** @description Include vulnerability information in the SBOM. Also includes reachability/VEX if available */
-        include_vulnerabilities?: string
-      }
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string
-        /** @description The full scan OR sbom report ID */
-        id: string
-      }
-    }
-    responses: {
-      /** @description SPDX SBOM */
-      200: {
-        content: {
-          'application/json': components['schemas']['SPDXManifestSchema']
-        }
-      }
-      400: components['responses']['SocketBadRequest']
-      401: components['responses']['SocketUnauthorized']
-      403: components['responses']['SocketForbidden']
-      429: components['responses']['SocketTooManyRequestsResponse']
+      500: components['responses']['SocketInternalServerError']
     }
   }
   /**
@@ -5754,6 +5188,130 @@ export interface operations {
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
       404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Export CycloneDX SBOM (Beta)
+   * @description Export a Socket SBOM as a CycloneDX SBOM
+   *
+   * Supported ecosystems:
+   *
+   * - crates
+   * - go
+   * - maven
+   * - npm
+   * - nuget
+   * - pypi
+   * - rubygems
+   * - spdx
+   * - cdx
+   *
+   * Unsupported ecosystems are filtered from the export.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - report:read
+   */
+  exportCDX: {
+    parameters: {
+      query?: {
+        /**
+         * @description The person(s) who created the BOM.
+         * Set this value if you're intending the modify the BOM and claim authorship.
+         */
+        author?: string
+        /** @description Dependency track project group */
+        project_group?: string
+        /** @description Dependency track project name. Default use the directory name */
+        project_name?: string
+        /** @description Dependency track project version */
+        project_version?: string
+        /** @description Dependency track project id. Either provide the id or the project name and version together */
+        project_id?: string
+        /** @description Include vulnerability information in the SBOM. Also includes reachability/VEX if available */
+        include_vulnerabilities?: string
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The full scan OR sbom report ID */
+        id: string
+      }
+    }
+    responses: {
+      /** @description CycloneDX SBOM */
+      200: {
+        content: {
+          'application/json': components['schemas']['CDXManifestSchema']
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Export SPDX SBOM (Beta)
+   * @description Export a Socket SBOM as a SPDX SBOM
+   *
+   * Supported ecosystems:
+   *
+   * - crates
+   * - go
+   * - maven
+   * - npm
+   * - nuget
+   * - pypi
+   * - rubygems
+   * - spdx
+   * - cdx
+   *
+   * Unsupported ecosystems are filtered from the export.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - report:read
+   */
+  exportSPDX: {
+    parameters: {
+      query?: {
+        /**
+         * @description The person(s) who created the BOM.
+         * Set this value if you're intending the modify the BOM and claim authorship.
+         */
+        author?: string
+        /** @description Dependency track project group */
+        project_group?: string
+        /** @description Dependency track project name. Default use the directory name */
+        project_name?: string
+        /** @description Dependency track project version */
+        project_version?: string
+        /** @description Dependency track project id. Either provide the id or the project name and version together */
+        project_id?: string
+        /** @description Include vulnerability information in the SBOM. Also includes reachability/VEX if available */
+        include_vulnerabilities?: string
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The full scan OR sbom report ID */
+        id: string
+      }
+    }
+    responses: {
+      /** @description SPDX SBOM */
+      200: {
+        content: {
+          'application/json': components['schemas']['SPDXManifestSchema']
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -6381,6 +5939,128 @@ export interface operations {
               /** @default */
               api_url: string | null
             }
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * List Org Alert Triage
+   * @description Get alert triage actions for an organization.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - triage:alerts-list
+   */
+  getOrgTriage: {
+    parameters: {
+      query?: {
+        sort?: string
+        direction?: string
+        per_page?: number
+        page?: number
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    responses: {
+      /** @description Lists triage actions for the specified organization. */
+      200: {
+        content: {
+          'application/json': {
+            results: Array<{
+              /**
+               * @description The alert_key associated with the triage state
+               * @default
+               */
+              alert_key?: string
+              /**
+               * @description The creation date of the triage action
+               * @default
+               */
+              created_at?: string
+              /**
+               * @description The last update date of the triage action
+               * @default
+               */
+              updated_at?: string
+              /**
+               * @description The note associated with the triage action
+               * @default
+               */
+              note?: string
+              /**
+               * @description The organization id associated with the triage action
+               * @default
+               */
+              organization_id?: string
+              /**
+               * @description The triage state of the alert
+               * @default inherit
+               * @enum {string}
+               */
+              state?: 'block' | 'ignore' | 'inherit' | 'monitor' | 'warn'
+            }>
+            /** @default 0 */
+            nextPage: number | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Update Org Alert Triage
+   * @description Update triage actions on organizaton alerts.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - triage:alerts-update
+   */
+  updateOrgAlertTriage: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    requestBody?: {
+      content: {
+        'application/json': {
+          alertTriage: Array<{
+            /** @default */
+            alertKey?: string
+            /** @default */
+            note?: string
+            /**
+             * @description The triage state of the alert
+             * @enum {string}
+             */
+            state?: 'block' | 'ignore' | 'inherit' | 'monitor' | 'warn'
+          }>
+        }
+      }
+    }
+    responses: {
+      /** @description Updated Alert Triage */
+      202: {
+        content: {
+          'application/json': {
+            /** @default */
+            result: string
           }
         }
       }
@@ -8875,631 +8555,6 @@ export interface operations {
     }
   }
   /**
-   * List Org Alert Triage
-   * @description Get alert triage actions for an organization.
-   *
-   * This endpoint consumes 1 unit of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - triage:alerts-list
-   */
-  getOrgTriage: {
-    parameters: {
-      query?: {
-        sort?: string
-        direction?: string
-        per_page?: number
-        page?: number
-      }
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string
-      }
-    }
-    responses: {
-      /** @description Lists triage actions for the specified organization. */
-      200: {
-        content: {
-          'application/json': {
-            results: Array<{
-              /**
-               * @description The alert_key associated with the triage state
-               * @default
-               */
-              alert_key?: string
-              /**
-               * @description The creation date of the triage action
-               * @default
-               */
-              created_at?: string
-              /**
-               * @description The last update date of the triage action
-               * @default
-               */
-              updated_at?: string
-              /**
-               * @description The note associated with the triage action
-               * @default
-               */
-              note?: string
-              /**
-               * @description The organization id associated with the triage action
-               * @default
-               */
-              organization_id?: string
-              /**
-               * @description The triage state of the alert
-               * @default inherit
-               * @enum {string}
-               */
-              state?: 'block' | 'ignore' | 'inherit' | 'monitor' | 'warn'
-            }>
-            /** @default 0 */
-            nextPage: number | null
-          }
-        }
-      }
-      400: components['responses']['SocketBadRequest']
-      401: components['responses']['SocketUnauthorized']
-      403: components['responses']['SocketForbidden']
-      404: components['responses']['SocketNotFoundResponse']
-      429: components['responses']['SocketTooManyRequestsResponse']
-    }
-  }
-  /**
-   * Update Org Alert Triage
-   * @description Update triage actions on organizaton alerts.
-   *
-   * This endpoint consumes 1 unit of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - triage:alerts-update
-   */
-  updateOrgAlertTriage: {
-    parameters: {
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string
-      }
-    }
-    requestBody?: {
-      content: {
-        'application/json': {
-          alertTriage: Array<{
-            /** @default */
-            alertKey?: string
-            /** @default */
-            note?: string
-            /**
-             * @description The triage state of the alert
-             * @enum {string}
-             */
-            state?: 'block' | 'ignore' | 'inherit' | 'monitor' | 'warn'
-          }>
-        }
-      }
-    }
-    responses: {
-      /** @description Updated Alert Triage */
-      202: {
-        content: {
-          'application/json': {
-            /** @default */
-            result: string
-          }
-        }
-      }
-      400: components['responses']['SocketBadRequest']
-      401: components['responses']['SocketUnauthorized']
-      403: components['responses']['SocketForbidden']
-      404: components['responses']['SocketNotFoundResponse']
-      429: components['responses']['SocketTooManyRequestsResponse']
-    }
-  }
-  /**
-   * List API Tokens
-   * @description List all API Tokens.
-   *
-   * This endpoint consumes 10 units of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - api-tokens:list
-   */
-  getAPITokens: {
-    parameters: {
-      query?: {
-        /** @description Specify Sort order. */
-        sort?: 'created_at'
-        /** @description Specify sort direction. */
-        direction?: 'asc' | 'desc'
-        /** @description Specify the maximum number of results to return per page. */
-        per_page?: number
-        /** @description The token specifying which page to return. */
-        page?: number
-      }
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string
-      }
-    }
-    responses: {
-      /** @description The paginated array of API tokens for the organization, and related metadata. */
-      200: {
-        content: {
-          'application/json': {
-            tokens: Array<{
-              committers: Array<{
-                /** @default */
-                email?: string
-                /**
-                 * @default api
-                 * @enum {string}
-                 */
-                provider?: 'api' | 'azure' | 'bitbucket' | 'github' | 'gitlab'
-                /** @default */
-                providerLoginName?: string
-                /** @default */
-                providerUserId?: string
-              }>
-              /**
-               * Format: date
-               * @default
-               */
-              created_at: string
-              /**
-               * @description The ID of the API Token
-               * @default
-               */
-              id: string
-              /**
-               * Format: date
-               * @default
-               */
-              last_used_at: string
-              /** @default 1000 */
-              max_quota: number
-              /**
-               * @description Name for the API Token
-               * @default api token
-               */
-              name: string | null
-              scopes: Array<
-                | 'alerts'
-                | 'alerts:list'
-                | 'alerts:trend'
-                | 'api-tokens'
-                | 'api-tokens:create'
-                | 'api-tokens:update'
-                | 'api-tokens:revoke'
-                | 'api-tokens:rotate'
-                | 'api-tokens:list'
-                | 'audit-log'
-                | 'audit-log:list'
-                | 'dependencies'
-                | 'dependencies:list'
-                | 'dependencies:trend'
-                | 'full-scans'
-                | 'full-scans:list'
-                | 'full-scans:create'
-                | 'full-scans:delete'
-                | 'diff-scans'
-                | 'diff-scans:list'
-                | 'diff-scans:create'
-                | 'diff-scans:delete'
-                | 'entitlements'
-                | 'entitlements:list'
-                | 'historical'
-                | 'historical:snapshots-list'
-                | 'historical:snapshots-start'
-                | 'historical:alerts-list'
-                | 'historical:alerts-trend'
-                | 'historical:dependencies-list'
-                | 'historical:dependencies-trend'
-                | 'integration'
-                | 'integration:list'
-                | 'integration:create'
-                | 'integration:update'
-                | 'integration:delete'
-                | 'license-policy'
-                | 'license-policy:update'
-                | 'license-policy:read'
-                | 'packages'
-                | 'packages:list'
-                | 'report'
-                | 'report:list'
-                | 'report:read'
-                | 'report:write'
-                | 'repo'
-                | 'repo:list'
-                | 'repo:create'
-                | 'repo:update'
-                | 'repo:delete'
-                | 'repo-label'
-                | 'repo-label:list'
-                | 'repo-label:create'
-                | 'repo-label:update'
-                | 'repo-label:delete'
-                | 'security-policy'
-                | 'security-policy:update'
-                | 'security-policy:read'
-                | 'socket-basics'
-                | 'socket-basics:read'
-                | 'threat-feed'
-                | 'threat-feed:list'
-                | 'triage'
-                | 'triage:alerts-list'
-                | 'triage:alerts-update'
-              >
-              /**
-               * @description The obfuscated token of the API Token
-               * @default
-               */
-              token: string
-              /**
-               * @description The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.
-               * @default organization
-               * @enum {string}
-               */
-              visibility: 'admin' | 'organization'
-            }>
-            /** @default 0 */
-            nextPage: number | null
-          }
-        }
-      }
-      401: components['responses']['SocketUnauthorized']
-      403: components['responses']['SocketForbidden']
-      429: components['responses']['SocketTooManyRequestsResponse']
-    }
-  }
-  /**
-   * Create API Token
-   * @description Create an API Token. The API Token created must use a subset of permissions the API token creating them.
-   *
-   * This endpoint consumes 10 units of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - api-tokens:create
-   */
-  postAPIToken: {
-    parameters: {
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string
-      }
-    }
-    /** @description The settings to create the api token with. */
-    requestBody?: {
-      content: {
-        'application/json': {
-          /** @default 1000 */
-          max_quota: number
-          scopes: Array<
-            | 'alerts'
-            | 'alerts:list'
-            | 'alerts:trend'
-            | 'api-tokens'
-            | 'api-tokens:create'
-            | 'api-tokens:update'
-            | 'api-tokens:revoke'
-            | 'api-tokens:rotate'
-            | 'api-tokens:list'
-            | 'audit-log'
-            | 'audit-log:list'
-            | 'dependencies'
-            | 'dependencies:list'
-            | 'dependencies:trend'
-            | 'full-scans'
-            | 'full-scans:list'
-            | 'full-scans:create'
-            | 'full-scans:delete'
-            | 'diff-scans'
-            | 'diff-scans:list'
-            | 'diff-scans:create'
-            | 'diff-scans:delete'
-            | 'entitlements'
-            | 'entitlements:list'
-            | 'historical'
-            | 'historical:snapshots-list'
-            | 'historical:snapshots-start'
-            | 'historical:alerts-list'
-            | 'historical:alerts-trend'
-            | 'historical:dependencies-list'
-            | 'historical:dependencies-trend'
-            | 'integration'
-            | 'integration:list'
-            | 'integration:create'
-            | 'integration:update'
-            | 'integration:delete'
-            | 'license-policy'
-            | 'license-policy:update'
-            | 'license-policy:read'
-            | 'packages'
-            | 'packages:list'
-            | 'report'
-            | 'report:list'
-            | 'report:read'
-            | 'report:write'
-            | 'repo'
-            | 'repo:list'
-            | 'repo:create'
-            | 'repo:update'
-            | 'repo:delete'
-            | 'repo-label'
-            | 'repo-label:list'
-            | 'repo-label:create'
-            | 'repo-label:update'
-            | 'repo-label:delete'
-            | 'security-policy'
-            | 'security-policy:update'
-            | 'security-policy:read'
-            | 'socket-basics'
-            | 'socket-basics:read'
-            | 'threat-feed'
-            | 'threat-feed:list'
-            | 'triage'
-            | 'triage:alerts-list'
-            | 'triage:alerts-update'
-          >
-          /**
-           * @description The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.
-           * @default organization
-           * @enum {string}
-           */
-          visibility: 'admin' | 'organization'
-          committer: {
-            /** @default */
-            email?: string
-            /**
-             * @default api
-             * @enum {string}
-             */
-            provider?: 'api' | 'azure' | 'bitbucket' | 'github' | 'gitlab'
-            /** @default */
-            providerLoginName?: string
-            /** @default */
-            providerUserId?: string
-          }
-          /**
-           * @description Name for the API Token
-           * @default api token
-           */
-          name?: string
-        }
-      }
-    }
-    responses: {
-      /** @description The newly created api token. */
-      200: {
-        content: {
-          'application/json': {
-            /** @default */
-            token: string
-          }
-        }
-      }
-      401: components['responses']['SocketUnauthorized']
-      403: components['responses']['SocketForbidden']
-      429: components['responses']['SocketTooManyRequestsResponse']
-    }
-  }
-  /**
-   * Update API Token
-   * @description Update an API Token. The API Token created must use a subset of permissions the API token creating them.
-   *
-   * This endpoint consumes 10 units of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - api-tokens:create
-   */
-  postAPITokenUpdate: {
-    parameters: {
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string
-      }
-    }
-    /** @description The token and properties to update on the token. */
-    requestBody?: {
-      content: {
-        'application/json': {
-          /** @default 1000 */
-          max_quota: number
-          scopes: Array<
-            | 'alerts'
-            | 'alerts:list'
-            | 'alerts:trend'
-            | 'api-tokens'
-            | 'api-tokens:create'
-            | 'api-tokens:update'
-            | 'api-tokens:revoke'
-            | 'api-tokens:rotate'
-            | 'api-tokens:list'
-            | 'audit-log'
-            | 'audit-log:list'
-            | 'dependencies'
-            | 'dependencies:list'
-            | 'dependencies:trend'
-            | 'full-scans'
-            | 'full-scans:list'
-            | 'full-scans:create'
-            | 'full-scans:delete'
-            | 'diff-scans'
-            | 'diff-scans:list'
-            | 'diff-scans:create'
-            | 'diff-scans:delete'
-            | 'entitlements'
-            | 'entitlements:list'
-            | 'historical'
-            | 'historical:snapshots-list'
-            | 'historical:snapshots-start'
-            | 'historical:alerts-list'
-            | 'historical:alerts-trend'
-            | 'historical:dependencies-list'
-            | 'historical:dependencies-trend'
-            | 'integration'
-            | 'integration:list'
-            | 'integration:create'
-            | 'integration:update'
-            | 'integration:delete'
-            | 'license-policy'
-            | 'license-policy:update'
-            | 'license-policy:read'
-            | 'packages'
-            | 'packages:list'
-            | 'report'
-            | 'report:list'
-            | 'report:read'
-            | 'report:write'
-            | 'repo'
-            | 'repo:list'
-            | 'repo:create'
-            | 'repo:update'
-            | 'repo:delete'
-            | 'repo-label'
-            | 'repo-label:list'
-            | 'repo-label:create'
-            | 'repo-label:update'
-            | 'repo-label:delete'
-            | 'security-policy'
-            | 'security-policy:update'
-            | 'security-policy:read'
-            | 'socket-basics'
-            | 'socket-basics:read'
-            | 'threat-feed'
-            | 'threat-feed:list'
-            | 'triage'
-            | 'triage:alerts-list'
-            | 'triage:alerts-update'
-          >
-          /** @default */
-          token: string
-          /**
-           * @description The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.
-           * @default organization
-           * @enum {string}
-           */
-          visibility: 'admin' | 'organization'
-          committer: {
-            /** @default */
-            email?: string
-            /**
-             * @default api
-             * @enum {string}
-             */
-            provider?: 'api' | 'azure' | 'bitbucket' | 'github' | 'gitlab'
-            /** @default */
-            providerLoginName?: string
-            /** @default */
-            providerUserId?: string
-          }
-          /**
-           * @description Name for the API Token
-           * @default api token
-           */
-          name?: string
-        }
-      }
-    }
-    responses: {
-      /** @description The updated token. */
-      200: {
-        content: {
-          'application/json': {
-            /** @default */
-            token: string
-          }
-        }
-      }
-      401: components['responses']['SocketUnauthorized']
-      403: components['responses']['SocketForbidden']
-      429: components['responses']['SocketTooManyRequestsResponse']
-    }
-  }
-  /**
-   * Rotate API Token
-   * @description Rotate an API Token
-   *
-   * This endpoint consumes 10 units of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - api-tokens:rotate
-   */
-  postAPITokensRotate: {
-    parameters: {
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string
-      }
-    }
-    /** @description The API Token to rotate */
-    requestBody?: {
-      content: {
-        'application/json': {
-          /** @default */
-          token: string
-        }
-      }
-    }
-    responses: {
-      /** @description The replacement API Token */
-      200: {
-        content: {
-          'application/json': {
-            /** @default */
-            token: string
-          }
-        }
-      }
-      401: components['responses']['SocketUnauthorized']
-      403: components['responses']['SocketForbidden']
-      429: components['responses']['SocketTooManyRequestsResponse']
-    }
-  }
-  /**
-   * Revoke API Token
-   * @description Revoke an API Token
-   *
-   * This endpoint consumes 10 units of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - api-tokens:revoke
-   */
-  postAPITokensRevoke: {
-    parameters: {
-      path: {
-        /** @description The slug of the organization */
-        org_slug: string
-      }
-    }
-    /** @description The token to revoke. */
-    requestBody?: {
-      content: {
-        'application/json': {
-          /** @default */
-          token: string
-        }
-      }
-    }
-    responses: {
-      /** @description Response body */
-      200: {
-        content: {
-          'application/json': {
-            /**
-             * Format: The status of the token
-             * @default revoked
-             */
-            status: string
-          }
-        }
-      }
-      401: components['responses']['SocketUnauthorized']
-      403: components['responses']['SocketForbidden']
-      429: components['responses']['SocketTooManyRequestsResponse']
-    }
-  }
-  /**
    * Get integration events
    * @description This endpoint consumes 1 unit of your quota.
    *
@@ -11838,8 +10893,7 @@ export interface operations {
    * Update License Policy
    * @description Set the organization's license policy
    *
-   *
-   * ## License policy schema
+   *       ## License policy schema
    *
    * ```json
    * {
@@ -11849,7 +10903,7 @@ export interface operations {
    * }
    * ```
    *
-   * Elements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in pacakge which not present in either array will produce a license violation (effectively a "hard" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings "Apache-2.0" and "MIT" to the `allow` array. Strings appearing in these arrays are generally "what you see is what you get", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.
+   * Elements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in package which not present in either array will produce a license violation (effectively a "hard" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings "Apache-2.0" and "MIT" to the `allow` array. Strings appearing in these arrays are generally "what you see is what you get", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.
    *
    * ## License Classes
    *
@@ -12630,10 +11684,8 @@ export interface operations {
   /**
    * List details of periodic historical data snapshots (Beta)
    * @description This API endpoint is used to list the details of historical snapshots.
-   * Snapshots of organization data are taken periodically, and
-   * each historical snapshot record contains high-level overview metrics about the data
-   * that was collected. Other [Historical Data Endpoints](/reference/historical-data-endpoints)
-   * can be used to fetch the raw data associated with each snapshot.
+   * Snapshots of organization data are taken periodically, and each historical snapshot record contains high-level overview metrics about the data that was collected.
+   * Other [Historical Data Endpoints](/reference/historical-data-endpoints) can be used to fetch the raw data associated with each snapshot.
    *
    * Historical snapshots contain details and raw data for the following resources:
    *
@@ -12644,8 +11696,7 @@ export interface operations {
    * - Users
    * - Settings
    *
-   * Daily snapshot data is bucketed to the nearest day which is described in
-   * more detail at: [Historical Data Endpoints](/reference/historical-data-endpoints)
+   * Daily snapshot data is bucketed to the nearest day which is described in more detail at: [Historical Data Endpoints](/reference/historical-data-endpoints)
    *
    * This endpoint consumes 10 units of your quota.
    *
@@ -12743,10 +11794,8 @@ export interface operations {
   }
   /**
    * Start historical data snapshot job (Beta)
-   * @description This API endpoint is used to start a historical snapshot job. While
-   * snapshots are typically taken at least once a day, this endpoint can
-   * be used to start an "on demand" snapshot job to ensure the latest
-   * data is collected and stored for historical purposes.
+   * @description This API endpoint is used to start a historical snapshot job.
+   * While snapshots are typically taken at least once a day, this endpoint can be used to start an "on demand" snapshot job to ensure the latest data is collected and stored for historical purposes.
    *
    * An historical snapshot will contain details and raw data for the following resources:
    *
@@ -12757,8 +11806,7 @@ export interface operations {
    * - Users
    * - Settings
    *
-   * Historical snapshot data is bucketed to the nearest day which is described in
-   * more detail at: [Historical Data Endpoints](/reference/historical-data-endpoints)
+   * Historical snapshot data is bucketed to the nearest day which is described in more detail at: [Historical Data Endpoints](/reference/historical-data-endpoints)
    *
    * This endpoint consumes 10 units of your quota.
    *
@@ -12787,6 +11835,616 @@ export interface operations {
         }
       }
       400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Get Audit Log Events
+   * @description Paginated list of audit log events.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - audit-log:list
+   */
+  getAuditLogEvents: {
+    parameters: {
+      query?: {
+        /** @description Filter audit log events by type. Omit for all types. */
+        type?:
+          | 'AddLicenseOverlayNote'
+          | 'AssociateLabel'
+          | 'CancelInvitation'
+          | 'ChangeMemberRole'
+          | 'ChangePlanSubscriptionSeats'
+          | 'CreateApiToken'
+          | 'CreateLabel'
+          | 'DeleteLabel'
+          | 'DeleteLabelSetting'
+          | 'DeleteReport'
+          | 'DeleteRepository'
+          | 'DisassociateLabel'
+          | 'JoinOrganization'
+          | 'RemoveLicenseOverlay'
+          | 'RemoveMember'
+          | 'ResetInvitationLink'
+          | 'ResetOrganizationSettingToDefault'
+          | 'RevokeApiToken'
+          | 'RotateApiToken'
+          | 'SendInvitation'
+          | 'SetLabelSettingToDefault'
+          | 'SyncOrganization'
+          | 'TransferOwnership'
+          | 'UpdateAlertTriage'
+          | 'UpdateApiTokenCommitter'
+          | 'UpdateApiTokenMaxQuota'
+          | 'UpdateApiTokenName'
+          | 'UpdateApiTokenScopes'
+          | 'UpdateApiTokenVisibility'
+          | 'UpdateAutopatchCurated'
+          | 'UpdateLabel'
+          | 'UpdateLabelSetting'
+          | 'UpdateOrganizationSetting'
+          | 'UpgradeOrganizationPlan'
+        /** @description Number of events per page */
+        per_page?: number
+        /** @description Page token */
+        page?: string
+        /** @description A Unix timestamp in seconds to filter results prior to this date. */
+        from?: string
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    responses: {
+      /** @description The paginated list of events in an organizations audit log and the next page querystring token. */
+      200: {
+        content: {
+          'application/json': {
+            results: Array<{
+              /** @default */
+              event_id?: string
+              /** @default */
+              created_at?: string
+              /** @default */
+              updated_at?: string
+              /** @default */
+              country_code?: string | null
+              /** @default */
+              organization_id?: string | null
+              /** @default */
+              ip_address?: string | null
+              /** @default null */
+              payload?: Record<string, unknown> | null
+              /** @default 0 */
+              status_code?: number | null
+              /** @default */
+              type?: string
+              /** @default */
+              user_agent?: string | null
+              /** @default */
+              user_id?: string | null
+              /** @default */
+              user_email?: string
+              /** @default */
+              user_image?: string
+              /** @default */
+              organization_name?: string
+            }>
+            /** @default */
+            nextPage: string | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * List API Tokens
+   * @description List all API Tokens.
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - api-tokens:list
+   */
+  getAPITokens: {
+    parameters: {
+      query?: {
+        /** @description Specify Sort order. */
+        sort?: 'created_at'
+        /** @description Specify sort direction. */
+        direction?: 'asc' | 'desc'
+        /** @description Specify the maximum number of results to return per page. */
+        per_page?: number
+        /** @description The token specifying which page to return. */
+        page?: number
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    responses: {
+      /** @description The paginated array of API tokens for the organization, and related metadata. */
+      200: {
+        content: {
+          'application/json': {
+            tokens: Array<{
+              committers: Array<{
+                /** @default */
+                email?: string
+                /**
+                 * @default api
+                 * @enum {string}
+                 */
+                provider?: 'api' | 'azure' | 'bitbucket' | 'github' | 'gitlab'
+                /** @default */
+                providerLoginName?: string
+                /** @default */
+                providerUserId?: string
+              }>
+              /**
+               * Format: date
+               * @default
+               */
+              created_at: string
+              /**
+               * @description The ID of the API Token
+               * @default
+               */
+              id: string
+              /**
+               * Format: date
+               * @default
+               */
+              last_used_at: string
+              /** @default 1000 */
+              max_quota: number
+              /**
+               * @description Name for the API Token
+               * @default api token
+               */
+              name: string | null
+              scopes: Array<
+                | 'alerts'
+                | 'alerts:list'
+                | 'alerts:trend'
+                | 'api-tokens'
+                | 'api-tokens:create'
+                | 'api-tokens:update'
+                | 'api-tokens:revoke'
+                | 'api-tokens:rotate'
+                | 'api-tokens:list'
+                | 'audit-log'
+                | 'audit-log:list'
+                | 'dependencies'
+                | 'dependencies:list'
+                | 'dependencies:trend'
+                | 'full-scans'
+                | 'full-scans:list'
+                | 'full-scans:create'
+                | 'full-scans:delete'
+                | 'diff-scans'
+                | 'diff-scans:list'
+                | 'diff-scans:create'
+                | 'diff-scans:delete'
+                | 'entitlements'
+                | 'entitlements:list'
+                | 'historical'
+                | 'historical:snapshots-list'
+                | 'historical:snapshots-start'
+                | 'historical:alerts-list'
+                | 'historical:alerts-trend'
+                | 'historical:dependencies-list'
+                | 'historical:dependencies-trend'
+                | 'integration'
+                | 'integration:list'
+                | 'integration:create'
+                | 'integration:update'
+                | 'integration:delete'
+                | 'license-policy'
+                | 'license-policy:update'
+                | 'license-policy:read'
+                | 'packages'
+                | 'packages:list'
+                | 'report'
+                | 'report:list'
+                | 'report:read'
+                | 'report:write'
+                | 'repo'
+                | 'repo:list'
+                | 'repo:create'
+                | 'repo:update'
+                | 'repo:delete'
+                | 'repo-label'
+                | 'repo-label:list'
+                | 'repo-label:create'
+                | 'repo-label:update'
+                | 'repo-label:delete'
+                | 'security-policy'
+                | 'security-policy:update'
+                | 'security-policy:read'
+                | 'socket-basics'
+                | 'socket-basics:read'
+                | 'threat-feed'
+                | 'threat-feed:list'
+                | 'triage'
+                | 'triage:alerts-list'
+                | 'triage:alerts-update'
+              >
+              /**
+               * @description The obfuscated token of the API Token
+               * @default
+               */
+              token: string
+              /**
+               * @description The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.
+               * @default organization
+               * @enum {string}
+               */
+              visibility: 'admin' | 'organization'
+            }>
+            /** @default 0 */
+            nextPage: number | null
+          }
+        }
+      }
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Create API Token
+   * @description Create an API Token. The API Token created must use a subset of permissions the API token creating them.
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - api-tokens:create
+   */
+  postAPIToken: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    /** @description The settings to create the api token with. */
+    requestBody?: {
+      content: {
+        'application/json': {
+          /** @default 1000 */
+          max_quota: number
+          scopes: Array<
+            | 'alerts'
+            | 'alerts:list'
+            | 'alerts:trend'
+            | 'api-tokens'
+            | 'api-tokens:create'
+            | 'api-tokens:update'
+            | 'api-tokens:revoke'
+            | 'api-tokens:rotate'
+            | 'api-tokens:list'
+            | 'audit-log'
+            | 'audit-log:list'
+            | 'dependencies'
+            | 'dependencies:list'
+            | 'dependencies:trend'
+            | 'full-scans'
+            | 'full-scans:list'
+            | 'full-scans:create'
+            | 'full-scans:delete'
+            | 'diff-scans'
+            | 'diff-scans:list'
+            | 'diff-scans:create'
+            | 'diff-scans:delete'
+            | 'entitlements'
+            | 'entitlements:list'
+            | 'historical'
+            | 'historical:snapshots-list'
+            | 'historical:snapshots-start'
+            | 'historical:alerts-list'
+            | 'historical:alerts-trend'
+            | 'historical:dependencies-list'
+            | 'historical:dependencies-trend'
+            | 'integration'
+            | 'integration:list'
+            | 'integration:create'
+            | 'integration:update'
+            | 'integration:delete'
+            | 'license-policy'
+            | 'license-policy:update'
+            | 'license-policy:read'
+            | 'packages'
+            | 'packages:list'
+            | 'report'
+            | 'report:list'
+            | 'report:read'
+            | 'report:write'
+            | 'repo'
+            | 'repo:list'
+            | 'repo:create'
+            | 'repo:update'
+            | 'repo:delete'
+            | 'repo-label'
+            | 'repo-label:list'
+            | 'repo-label:create'
+            | 'repo-label:update'
+            | 'repo-label:delete'
+            | 'security-policy'
+            | 'security-policy:update'
+            | 'security-policy:read'
+            | 'socket-basics'
+            | 'socket-basics:read'
+            | 'threat-feed'
+            | 'threat-feed:list'
+            | 'triage'
+            | 'triage:alerts-list'
+            | 'triage:alerts-update'
+          >
+          /**
+           * @description The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.
+           * @default organization
+           * @enum {string}
+           */
+          visibility: 'admin' | 'organization'
+          committer: {
+            /** @default */
+            email?: string
+            /**
+             * @default api
+             * @enum {string}
+             */
+            provider?: 'api' | 'azure' | 'bitbucket' | 'github' | 'gitlab'
+            /** @default */
+            providerLoginName?: string
+            /** @default */
+            providerUserId?: string
+          }
+          /**
+           * @description Name for the API Token
+           * @default api token
+           */
+          name?: string
+        }
+      }
+    }
+    responses: {
+      /** @description The newly created api token. */
+      200: {
+        content: {
+          'application/json': {
+            /** @default */
+            token: string
+          }
+        }
+      }
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Update API Token
+   * @description Update an API Token. The API Token created must use a subset of permissions the API token creating them.
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - api-tokens:create
+   */
+  postAPITokenUpdate: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    /** @description The token and properties to update on the token. */
+    requestBody?: {
+      content: {
+        'application/json': {
+          /** @default 1000 */
+          max_quota: number
+          scopes: Array<
+            | 'alerts'
+            | 'alerts:list'
+            | 'alerts:trend'
+            | 'api-tokens'
+            | 'api-tokens:create'
+            | 'api-tokens:update'
+            | 'api-tokens:revoke'
+            | 'api-tokens:rotate'
+            | 'api-tokens:list'
+            | 'audit-log'
+            | 'audit-log:list'
+            | 'dependencies'
+            | 'dependencies:list'
+            | 'dependencies:trend'
+            | 'full-scans'
+            | 'full-scans:list'
+            | 'full-scans:create'
+            | 'full-scans:delete'
+            | 'diff-scans'
+            | 'diff-scans:list'
+            | 'diff-scans:create'
+            | 'diff-scans:delete'
+            | 'entitlements'
+            | 'entitlements:list'
+            | 'historical'
+            | 'historical:snapshots-list'
+            | 'historical:snapshots-start'
+            | 'historical:alerts-list'
+            | 'historical:alerts-trend'
+            | 'historical:dependencies-list'
+            | 'historical:dependencies-trend'
+            | 'integration'
+            | 'integration:list'
+            | 'integration:create'
+            | 'integration:update'
+            | 'integration:delete'
+            | 'license-policy'
+            | 'license-policy:update'
+            | 'license-policy:read'
+            | 'packages'
+            | 'packages:list'
+            | 'report'
+            | 'report:list'
+            | 'report:read'
+            | 'report:write'
+            | 'repo'
+            | 'repo:list'
+            | 'repo:create'
+            | 'repo:update'
+            | 'repo:delete'
+            | 'repo-label'
+            | 'repo-label:list'
+            | 'repo-label:create'
+            | 'repo-label:update'
+            | 'repo-label:delete'
+            | 'security-policy'
+            | 'security-policy:update'
+            | 'security-policy:read'
+            | 'socket-basics'
+            | 'socket-basics:read'
+            | 'threat-feed'
+            | 'threat-feed:list'
+            | 'triage'
+            | 'triage:alerts-list'
+            | 'triage:alerts-update'
+          >
+          /** @default */
+          token: string
+          /**
+           * @description The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.
+           * @default organization
+           * @enum {string}
+           */
+          visibility: 'admin' | 'organization'
+          committer: {
+            /** @default */
+            email?: string
+            /**
+             * @default api
+             * @enum {string}
+             */
+            provider?: 'api' | 'azure' | 'bitbucket' | 'github' | 'gitlab'
+            /** @default */
+            providerLoginName?: string
+            /** @default */
+            providerUserId?: string
+          }
+          /**
+           * @description Name for the API Token
+           * @default api token
+           */
+          name?: string
+        }
+      }
+    }
+    responses: {
+      /** @description The updated token. */
+      200: {
+        content: {
+          'application/json': {
+            /** @default */
+            token: string
+          }
+        }
+      }
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Rotate API Token
+   * @description Rotate an API Token
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - api-tokens:rotate
+   */
+  postAPITokensRotate: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    /** @description The API Token to rotate */
+    requestBody?: {
+      content: {
+        'application/json': {
+          /** @default */
+          token: string
+        }
+      }
+    }
+    responses: {
+      /** @description The replacement API Token */
+      200: {
+        content: {
+          'application/json': {
+            /** @default */
+            token: string
+          }
+        }
+      }
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Revoke API Token
+   * @description Revoke an API Token
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - api-tokens:revoke
+   */
+  postAPITokensRevoke: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    /** @description The token to revoke. */
+    requestBody?: {
+      content: {
+        'application/json': {
+          /** @default */
+          token: string
+        }
+      }
+    }
+    responses: {
+      /** @description Response body */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * Format: The status of the token
+             * @default revoked
+             */
+            status: string
+          }
+        }
+      }
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
       429: components['responses']['SocketTooManyRequestsResponse']
@@ -13040,137 +12698,137 @@ export interface operations {
     }
   }
   /**
-   * Get organization analytics (unstable)
-   * @deprecated
-   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/historicalalertstrend) instead.
+   * License Policy (Beta)
+   * @description Compare the license data found for a list of packages (given as PURL strings) with the contents of a configurable license policy,
+   *     returning information about license data which does not comply with the license allow list.
    *
-   * Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
+   *     ## Example request body:
    *
-   * Get analytics data regarding the number of alerts found across all active repositories.
+   *     ```json
+   *     {
+   *       "components": [
+   *         {
+   *           "purl": "pkg:npm/lodash@4.17.21"
+   *         },
+   *         {
+   *           "purl": "pkg:npm/lodash@4.14.1"
+   *         }
+   *       ],
+   *       "allow": [
+   *         "permissive",
+   *         "pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*"
+   *       ],
+   *       "warn": [
+   *         "copyleft",
+   *         "pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*"
+   *       ],
+   *       "options": ["toplevelOnly"]
+   *     }
+   *     ```
    *
-   * This endpoint consumes 1 unit of your quota.
+   *
+   *     ## Return value
+   *
+   *     For each requested PURL, an array is returned. Each array contains a list of license policy violations
+   *     detected for the requested PURL.
+   *
+   *     Violations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,
+   *     a message describing why the license data is believed to be incompatible with the license policy, and a list
+   *     of locations (by filepath or other provenance information) where the offending license data may be found.
+   *
+   *     ```json
+   *     Array<
+   *       Array<{
+   *         filepathOrProvenance: Array<string>,
+   *         level: "warning" | "violation",
+   *         purl: string,
+   *         spdxAtomOrExtraData: string,
+   *         violationExplanation: string
+   *       }>
+   *     >
+   *     ```
+   *
+   *     ## License policy schema
+   *
+   * ```json
+   * {
+   *   allow?: Array<string>
+   *   warn?: Array<string>
+   *   options?: Array<string>
+   * }
+   * ```
+   *
+   * Elements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in package which not present in either array will produce a license violation (effectively a "hard" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings "Apache-2.0" and "MIT" to the `allow` array. Strings appearing in these arrays are generally "what you see is what you get", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.
+   *
+   * ## License Classes
+   *
+   * Strings which are license classes will expand to a list of licenses known to be in that particular license class. Recognized license classes are:
+   *   'permissive',
+   *   'permissive (model)',
+   *   'permissive (gold)',
+   *   'permissive (silver)',
+   *   'permissive (bronze)',
+   *   'permissive (lead)',
+   *   'copyleft',
+   *   'maximal copyleft',
+   *   'network copyleft',
+   *   'strong copyleft',
+   *   'weak copyleft',
+   *   'contributor license agreement',
+   *   'public domain',
+   *   'proprietary free',
+   *   'source available',
+   *   'proprietary',
+   *   'commercial',
+   *   'patent'
+   *
+   * Users can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+   *
+   *
+   * ## PURLs
+   *
+   * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.
+   *
+   * purl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).
+   *
+   * ### Examples:
+   * Allow all license data found in a specific version of a package 4.14.1: `pkg:npm/lodash@4.14.1`
+   * Allow all license data found in a version range of a package: `pkg:npm/lodash?version_glob=15.*`
+   * Allow all license data in the test directory of a given package for certain version ranges: `pkg:npm/lodash@15.*.*?file_name=lodash/test/*`
+   * Allow all license data taken from the package registry for a package and version range: `pkg:npm/lodash?version_glob=*&license_provenance=registry_metadata`
+   *
+   * ## Available options
+   *
+   * `toplevelOnly`: only apply the license policy to "top level" license data in a package, which includes registry metadata, LICENSE files, and manifest files which are closest to the root of the package.
+   *
+   * `applyToUnidentified`: Apply license policy to found but unidentified license data. If enabled, the license policy will be applied to license data which could not be affirmatively identified as a known license (this will effectively merge the license policy violation and unidentified license alerts). If disabled, license policy alerts will only be shown for license data which is positively identified as something not allowed or set to warn by the license policy.
+   *
+   * This endpoint consumes 100 units of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - report:write
+   *       - packages:list
+   * - license-policy:read
    */
-  getOrgAnalytics: {
-    parameters: {
-      path: {
-        filter: string
+  licensePolicy: {
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['LicenseAllowListRequest']
       }
     }
     responses: {
-      /** @description Socket analytics - organization-level data */
+      /** @description Data about license policy violations, if any exist */
       200: {
         content: {
-          'application/json': Array<{
-            /** @default 0 */
-            id: number
+          'application/x-ndjson': Array<{
+            filepathOrProvenance: string[]
             /** @default */
-            created_at: string
+            level: string
             /** @default */
-            repository_id: string
-            /** @default 0 */
-            organization_id: number
+            purl: string
             /** @default */
-            repository_name: string
-            /** @default 0 */
-            total_critical_alerts: number
-            /** @default 0 */
-            total_high_alerts: number
-            /** @default 0 */
-            total_medium_alerts: number
-            /** @default 0 */
-            total_low_alerts: number
-            /** @default 0 */
-            total_critical_added: number
-            /** @default 0 */
-            total_high_added: number
-            /** @default 0 */
-            total_medium_added: number
-            /** @default 0 */
-            total_low_added: number
-            /** @default 0 */
-            total_critical_prevented: number
-            /** @default 0 */
-            total_high_prevented: number
-            /** @default 0 */
-            total_medium_prevented: number
-            /** @default 0 */
-            total_low_prevented: number
-            /** @default {} */
-            top_five_alert_types: Record<string, never>
-          }>
-        }
-      }
-      400: components['responses']['SocketBadRequest']
-      401: components['responses']['SocketUnauthorized']
-      403: components['responses']['SocketForbidden']
-      429: components['responses']['SocketTooManyRequestsResponse']
-    }
-  }
-  /**
-   * Get repository analytics
-   * @deprecated
-   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/historicalalertstrend) instead.
-   *
-   * Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
-   *
-   * Get analytics data regarding the number of alerts found in a single repository.
-   *
-   * This endpoint consumes 1 unit of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - report:write
-   */
-  getRepoAnalytics: {
-    parameters: {
-      path: {
-        name: string
-        filter: string
-      }
-    }
-    responses: {
-      /** @description Socket analytics - repo-level data */
-      200: {
-        content: {
-          'application/json': Array<{
-            /** @default 0 */
-            id: number
+            spdxAtomOrExtraData: string
             /** @default */
-            repository_id: string
-            /** @default */
-            created_at: string
-            /** @default 0 */
-            organization_id: number
-            /** @default */
-            repository_name: string
-            /** @default 0 */
-            total_critical_alerts: number
-            /** @default 0 */
-            total_high_alerts: number
-            /** @default 0 */
-            total_medium_alerts: number
-            /** @default 0 */
-            total_low_alerts: number
-            /** @default 0 */
-            total_critical_added: number
-            /** @default 0 */
-            total_high_added: number
-            /** @default 0 */
-            total_medium_added: number
-            /** @default 0 */
-            total_low_added: number
-            /** @default 0 */
-            total_critical_prevented: number
-            /** @default 0 */
-            total_high_prevented: number
-            /** @default 0 */
-            total_medium_prevented: number
-            /** @default 0 */
-            total_low_prevented: number
-            /** @default {} */
-            top_five_alert_types: Record<string, never>
+            violationExplanation: string
           }>
         }
       }
@@ -13179,121 +12837,440 @@ export interface operations {
       403: components['responses']['SocketForbidden']
       404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
+      500: components['responses']['SocketInternalServerError']
     }
   }
   /**
-   * Search dependencies
-   * @description Search for any dependency that is being used in your organization.
+   * Saturate License Policy (Legacy)
+   * @deprecated
+   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/updateorglicensepolicy) instead.
+   *
+   * Get the "saturated" version of a license policy's allow list, filling in the entire set of allowed
+   * license data. For example, the saturated form of a license allow list which only specifies that
+   * licenses in the tier "maximal copyleft" are allowed is shown below (note the expanded `allowedStrings` property):
+   *
+   * ```json
+   * {
+   *   "allowedApprovalSources": [],
+   *   "allowedFamilies": [],
+   *   "allowedTiers": [
+   *     "maximal copyleft"
+   *   ],
+   *   "allowedStrings": [
+   *     "Parity-6.0.0",
+   *     "QPL-1.0-INRIA-2004",
+   *     "QPL-1.0",
+   *     "RPL-1.1",
+   *     "RPL-1.5"
+   *   ],
+   *   "allowedPURLs": [],
+   *   "focusAlertsHere": false
+   * }
+   * ```
+   *
+   * This may be helpful for users who want to compose more complex sets of allowed license data via
+   * the "allowedStrings" property, or for users who want to know more about the contents of a particular
+   * license group (family, tier, or approval source).
+   *
+   * ## Allow List Schema
+   *
+   * ```json
+   * ```
+   *
+   * where
+   *
+   * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" | "lead"
+   * CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong copyleft" | "weak copyleft"
+   *
+   * ## Return Value
+   *
+   * The returned value has the same shape as a license allow list:
+   *
+   * ```json
+   * {
+   *   allowedApprovalSources?: Array<"fsf" | "osi">,
+   *   allowedFamilies?: Array<"copyleft" | "permissive">,
+   *   allowedTiers?: Array<PermissiveTier | CopyleftTier>,
+   *   allowedStrings?: Array<string>
+   *   allowedPURLs?: Array<string>
+   *   focusAlertsHere?: boolean
+   * }
+   * ```
+   *
+   * where
+   *
+   * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" | "lead"
+   * CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong copyleft" | "weak copyleft"
+   *
+   * readers can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+   *
+   * ### Example request bodies:
+   * ```json
+   * {
+   *   "allowedApprovalSources": ["fsf"],
+   *   "allowedPURLs": [],
+   *   "allowedFamilies": ["copyleft"],
+   *   "allowedTiers": ["model permissive"],
+   *   "allowedStrings": ["License :: OSI Approved :: BSD License"],
+   *   "focusAlertsHere": false
+   * }
+   * ```
+   *
+   * This endpoint consumes 100 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - packages:list
+   */
+  saturateLicensePolicy: {
+    requestBody?: {
+      content: {
+        'application/json': {
+          allow: components['schemas']['LicenseAllowList']
+          warn: components['schemas']['LicenseAllowList']
+          monitor: components['schemas']['LicenseAllowList']
+          allowedApprovalSources: string[] | null
+          allowedFamilies: string[] | null
+          allowedTiers: string[] | null
+          allowedStrings: string[] | null
+          allowedPURLs: string[] | null
+          /** @default false */
+          focusAlertsHere: boolean | null
+        }
+      }
+    }
+    responses: {
+      /** @description Saturated License Allow List */
+      200: {
+        content: {
+          'application/json': components['schemas']['LicensePolicy']
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+      500: components['responses']['SocketInternalServerError']
+    }
+  }
+  /**
+   * License Metadata
+   * @description For an array of license identifiers or names (short form SPDX identifiers, or long form license names),
+   *     returns an array of metadata for the corresponding license, if the license is recognized. If the query
+   *     parameter `includetext=true` is set, the returned metadata will also include the license text.
+   *
+   *
+   *     ## Example request body:
+   *
+   *     ```json
+   *     [
+   *       "Apache-2.0",
+   *       "BSD Zero Clause License"
+   *     ]
+   *     ```
+   *
+   *
+   *     ## Return value
+   *
+   *     ```json
+   *     // Response schema:
+   *     Array<{
+   *       licenseId: string,
+   *       name?: string,
+   *       deprecated?: string,
+   *       crossref?: string
+   *       classes: Array<string>
+   *       text?: string
+   *     }>
+   *
+   *     // Example response:
+   *     [
+   *       {
+   *         "licenseId": "Apache-2.0",
+   *         "name": "Apache License 2.0",
+   *         "deprecated": false,
+   *         "crossref": "https://spdx.org/licenses/Apache-2.0.html",
+   *         "classes": [
+   *           "fsf libre",
+   *           "osi approved",
+   *           "permissive (silver)"
+   *         ]
+   *       },
+   *       {
+   *         "licenseId": "0BSD",
+   *         "name": "BSD Zero Clause License",
+   *         "deprecated": false,
+   *         "crossref": "https://spdx.org/licenses/0BSD.html",
+   *         "classes": [
+   *           "osi approved",
+   *           "permissive (bronze)"
+   *         ]
+   *       }
+   *     ]
+   *     ```
+   *
+   *     ## License policy schema
+   *
+   * ```json
+   * {
+   *   allow?: Array<string>
+   *   warn?: Array<string>
+   *   options?: Array<string>
+   * }
+   * ```
+   *
+   * Elements of the `allow` and `warn` arrays strings representing items which should be allowed, or which should trigger a warning; license data found in package which not present in either array will produce a license violation (effectively a "hard" error). For example, to allow Apache-2.0 and MIT to the allow list, simply add the strings "Apache-2.0" and "MIT" to the `allow` array. Strings appearing in these arrays are generally "what you see is what you get", with two important exceptions: strings which are recognized as license classes and strings which are recognized as PURLs are handled differently to allow for more flexible license policy creation.
+   *
+   * ## License Classes
+   *
+   * Strings which are license classes will expand to a list of licenses known to be in that particular license class. Recognized license classes are:
+   *   'permissive',
+   *   'permissive (model)',
+   *   'permissive (gold)',
+   *   'permissive (silver)',
+   *   'permissive (bronze)',
+   *   'permissive (lead)',
+   *   'copyleft',
+   *   'maximal copyleft',
+   *   'network copyleft',
+   *   'strong copyleft',
+   *   'weak copyleft',
+   *   'contributor license agreement',
+   *   'public domain',
+   *   'proprietary free',
+   *   'source available',
+   *   'proprietary',
+   *   'commercial',
+   *   'patent'
+   *
+   * Users can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+   *
+   *
+   * ## PURLs
+   *
+   * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.
+   *
+   * purl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).
+   *
+   * ### Examples:
+   * Allow all license data found in a specific version of a package 4.14.1: `pkg:npm/lodash@4.14.1`
+   * Allow all license data found in a version range of a package: `pkg:npm/lodash?version_glob=15.*`
+   * Allow all license data in the test directory of a given package for certain version ranges: `pkg:npm/lodash@15.*.*?file_name=lodash/test/*`
+   * Allow all license data taken from the package registry for a package and version range: `pkg:npm/lodash?version_glob=*&license_provenance=registry_metadata`
+   *
+   * ## Available options
+   *
+   * `toplevelOnly`: only apply the license policy to "top level" license data in a package, which includes registry metadata, LICENSE files, and manifest files which are closest to the root of the package.
+   *
+   * `applyToUnidentified`: Apply license policy to found but unidentified license data. If enabled, the license policy will be applied to license data which could not be affirmatively identified as a known license (this will effectively merge the license policy violation and unidentified license alerts). If disabled, license policy alerts will only be shown for license data which is positively identified as something not allowed or set to warn by the license policy.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   */
+  licenseMetadata: {
+    parameters: {
+      query?: {
+        /** @description If `true`, the response will include the full text of the requested licenses */
+        includetext?: boolean
+      }
+    }
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['SLicenseMetaReq']
+      }
+    }
+    responses: {
+      /** @description Metadata for the requested licenses */
+      200: {
+        content: {
+          'application/json': components['schemas']['SLicenseMetaRes']
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+    }
+  }
+  /**
+   * Alert Types Metadata
+   * @description For an array of alert type identifiers, returns metadata for each alert type. Optionally, specify a language via the 'language' query parameter.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   */
+  alertTypes: {
+    parameters: {
+      query?: {
+        /** @description Language for alert metadata */
+        language?: 'ach-UG' | 'de-DE' | 'en-US' | 'es-ES' | 'fr-FR' | 'it-IT'
+      }
+    }
+    requestBody?: {
+      content: {
+        'application/json': string[]
+      }
+    }
+    responses: {
+      /** @description Metadata for the requested alert types */
+      200: {
+        content: {
+          'application/json': Array<{
+            /** @default */
+            type: string
+            /** @default */
+            title: string
+            /** @default */
+            description: string
+            /** @default */
+            suggestion: string
+            /** @default */
+            emoji: string
+            /** @default */
+            nextStepTitle: string
+            props: {
+              [key: string]: string
+            } | null
+          }>
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+    }
+  }
+  /**
+   * Returns the OpenAPI definition
+   * @description Retrieve the API specification in an Openapi JSON format.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   */
+  getOpenAPI: {
+    responses: {
+      /** @description OpenAPI specification */
+      200: {
+        content: {
+          'application/json': unknown
+        }
+      }
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Get quota
+   * @description Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
+   *
+   * This endpoint consumes 0 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - No Scopes Required, but authentication is required
+   */
+  getQuota: {
+    responses: {
+      /** @description Quota amount */
+      200: {
+        content: {
+          'application/json': {
+            /** @default 0 */
+            quota: number
+          }
+        }
+      }
+      401: components['responses']['SocketUnauthorized']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * List organizations
+   * @description Get information on the current organizations associated with the API token.
    *
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
    * - No Scopes Required, but authentication is required
    */
-  searchDependencies: {
-    requestBody?: {
-      content: {
-        'application/json': {
-          /** @default 50 */
-          limit: number
-          /** @default 0 */
-          offset: number
-          purls?: string[]
-        }
-      }
-    }
+  getOrganizations: {
     responses: {
-      /** @description Search dependencies response */
+      /** @description Organizations information */
       200: {
         content: {
           'application/json': {
-            /** @default false */
-            end: boolean
-            /** @default 1000 */
-            limit: number
-            /** @default 0 */
-            offset: number
-            purlFilters: {
-              valid: string[]
-              invalid: string[]
+            organizations: {
+              [key: string]: {
+                /** @default */
+                id: string
+                /** @default */
+                name: string | null
+                /** @default */
+                image: string | null
+                /** @default */
+                plan: string
+                /** @default */
+                slug: string
+              }
             }
-            rows: Array<{
-              /** @default */
-              branch: string
-              /** @default false */
-              direct: boolean
-              /** @default */
-              id: string
-              /** @default */
-              name: string
-              /** @default */
-              repository: string
-              /** @default */
-              type: string
-              /** @default */
-              namespace?: string
-              /** @default */
-              version?: string
-              /** @default */
-              release?: string
-            }>
           }
         }
       }
-      400: components['responses']['SocketBadRequest']
       401: components['responses']['SocketUnauthorized']
-      403: components['responses']['SocketForbidden']
-      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
   /**
-   * Create a snapshot of all dependencies from manifest information
+   * Calculate settings
    * @deprecated
-   * @description **This endpoint is deprecated.**
+   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/updateorgsecuritypolicy) instead.
    *
-   * Upload a set of manifest or lockfiles to get your dependency tree analyzed by Socket.
-   * You can upload multiple lockfiles in the same request, but each filename must be unique.
+   * Get current settings for the requested organizations and default settings to allow deferrals.
    *
-   * The name of the file must be in the supported list.
-   *
-   * For example, these are valid filenames: "requirements.txt", "package.json", "folder/package.json", and "deep/nested/folder/package.json".
-   *
-   * This endpoint consumes 100 units of your quota.
+   * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - report:write
+   * - No Scopes Required, but authentication is required
    */
-  createDependenciesSnapshot: {
-    parameters: {
-      query?: {
-        repository?: string
-        branch?: string
-      }
-    }
+  postSettings: {
+    /** @description Array of organization selector objects (with `organization` field holding the organization ID) to get settings for */
     requestBody?: {
       content: {
-        'multipart/form-data': {
+        'application/json': Array<{
           /** @default */
-          repository?: string
-          /** @default */
-          branch?: string
-          [key: string]: undefined
-        }
+          organization?: string
+        }>
       }
     }
     responses: {
-      /** @description ID of the dependencies snapshot */
+      /** @description Organization settings. Returned object contains default issue rules and an array of entries, with each entry representing an organization's settings. */
       200: {
         content: {
-          'application/json': Record<string, never>
+          'application/json': {
+            defaults: {
+              issueRules: {
+                [key: string]: {
+                  /** @enum {string} */
+                  action?: 'error' | 'ignore' | 'warn'
+                }
+              }
+            }
+            entries: Array<{
+              /** @default */
+              start: string | null
+              settings: {
+                [key: string]: {
+                  deferTo: string | null
+                  issueRules: {
+                    [key: string]: {
+                      /** @enum {string} */
+                      action: 'defer' | 'error' | 'ignore' | 'warn' | 'monitor'
+                    }
+                  }
+                }
+              }
+            }>
+          }
         }
       }
-      400: components['responses']['SocketBadRequest']
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
       429: components['responses']['SocketTooManyRequestsResponse']
-      500: components['responses']['SocketInternalServerError']
     }
   }
   /**
@@ -13558,143 +13535,6 @@ export interface operations {
     }
   }
   /**
-   * Returns the OpenAPI definition
-   * @description Retrieve the API specification in an Openapi JSON format.
-   *
-   * This endpoint consumes 1 unit of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   */
-  getOpenAPI: {
-    responses: {
-      /** @description OpenAPI specification */
-      200: {
-        content: {
-          'application/json': unknown
-        }
-      }
-      429: components['responses']['SocketTooManyRequestsResponse']
-    }
-  }
-  /**
-   * Get quota
-   * @description Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
-   *
-   * This endpoint consumes 0 units of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - No Scopes Required, but authentication is required
-   */
-  getQuota: {
-    responses: {
-      /** @description Quota amount */
-      200: {
-        content: {
-          'application/json': {
-            /** @default 0 */
-            quota: number
-          }
-        }
-      }
-      401: components['responses']['SocketUnauthorized']
-      429: components['responses']['SocketTooManyRequestsResponse']
-    }
-  }
-  /**
-   * List organizations
-   * @description Get information on the current organizations associated with the API token.
-   *
-   * This endpoint consumes 1 unit of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - No Scopes Required, but authentication is required
-   */
-  getOrganizations: {
-    responses: {
-      /** @description Organizations information */
-      200: {
-        content: {
-          'application/json': {
-            organizations: {
-              [key: string]: {
-                /** @default */
-                id: string
-                /** @default */
-                name: string | null
-                /** @default */
-                image: string | null
-                /** @default */
-                plan: string
-                /** @default */
-                slug: string
-              }
-            }
-          }
-        }
-      }
-      401: components['responses']['SocketUnauthorized']
-      429: components['responses']['SocketTooManyRequestsResponse']
-    }
-  }
-  /**
-   * Calculate settings
-   * @deprecated
-   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/updateorgsecuritypolicy) instead.
-   *
-   * Get current settings for the requested organizations and default settings to allow deferrals.
-   *
-   * This endpoint consumes 1 unit of your quota.
-   *
-   * This endpoint requires the following org token scopes:
-   * - No Scopes Required, but authentication is required
-   */
-  postSettings: {
-    /** @description Array of organization selector objects (with `organization` field holding the organization ID) to get settings for */
-    requestBody?: {
-      content: {
-        'application/json': Array<{
-          /** @default */
-          organization?: string
-        }>
-      }
-    }
-    responses: {
-      /** @description Organization settings. Returned object contains default issue rules and an array of entries, with each entry representing an organization's settings. */
-      200: {
-        content: {
-          'application/json': {
-            defaults: {
-              issueRules: {
-                [key: string]: {
-                  /** @enum {string} */
-                  action?: 'error' | 'ignore' | 'warn'
-                }
-              }
-            }
-            entries: Array<{
-              /** @default */
-              start: string | null
-              settings: {
-                [key: string]: {
-                  deferTo: string | null
-                  issueRules: {
-                    [key: string]: {
-                      /** @enum {string} */
-                      action: 'defer' | 'error' | 'ignore' | 'warn' | 'monitor'
-                    }
-                  }
-                }
-              }
-            }>
-          }
-        }
-      }
-      401: components['responses']['SocketUnauthorized']
-      403: components['responses']['SocketForbidden']
-      429: components['responses']['SocketTooManyRequestsResponse']
-    }
-  }
-  /**
    * Get issues by package
    * @deprecated
    * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference) instead.
@@ -13784,6 +13624,148 @@ export interface operations {
       200: {
         content: {
           'application/json': components['schemas']['SocketPackageScore']
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Get organization analytics (unstable)
+   * @deprecated
+   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/historicalalertstrend) instead.
+   *
+   * Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
+   *
+   * Get analytics data regarding the number of alerts found across all active repositories.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - report:write
+   */
+  getOrgAnalytics: {
+    parameters: {
+      path: {
+        filter: string
+      }
+    }
+    responses: {
+      /** @description Socket analytics - organization-level data */
+      200: {
+        content: {
+          'application/json': Array<{
+            /** @default 0 */
+            id: number
+            /** @default */
+            created_at: string
+            /** @default */
+            repository_id: string
+            /** @default 0 */
+            organization_id: number
+            /** @default */
+            repository_name: string
+            /** @default 0 */
+            total_critical_alerts: number
+            /** @default 0 */
+            total_high_alerts: number
+            /** @default 0 */
+            total_medium_alerts: number
+            /** @default 0 */
+            total_low_alerts: number
+            /** @default 0 */
+            total_critical_added: number
+            /** @default 0 */
+            total_high_added: number
+            /** @default 0 */
+            total_medium_added: number
+            /** @default 0 */
+            total_low_added: number
+            /** @default 0 */
+            total_critical_prevented: number
+            /** @default 0 */
+            total_high_prevented: number
+            /** @default 0 */
+            total_medium_prevented: number
+            /** @default 0 */
+            total_low_prevented: number
+            /** @default {} */
+            top_five_alert_types: Record<string, never>
+          }>
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Get repository analytics
+   * @deprecated
+   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/historicalalertstrend) instead.
+   *
+   * Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
+   *
+   * Get analytics data regarding the number of alerts found in a single repository.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - report:write
+   */
+  getRepoAnalytics: {
+    parameters: {
+      path: {
+        name: string
+        filter: string
+      }
+    }
+    responses: {
+      /** @description Socket analytics - repo-level data */
+      200: {
+        content: {
+          'application/json': Array<{
+            /** @default 0 */
+            id: number
+            /** @default */
+            repository_id: string
+            /** @default */
+            created_at: string
+            /** @default 0 */
+            organization_id: number
+            /** @default */
+            repository_name: string
+            /** @default 0 */
+            total_critical_alerts: number
+            /** @default 0 */
+            total_high_alerts: number
+            /** @default 0 */
+            total_medium_alerts: number
+            /** @default 0 */
+            total_low_alerts: number
+            /** @default 0 */
+            total_critical_added: number
+            /** @default 0 */
+            total_high_added: number
+            /** @default 0 */
+            total_medium_added: number
+            /** @default 0 */
+            total_low_added: number
+            /** @default 0 */
+            total_critical_prevented: number
+            /** @default 0 */
+            total_high_prevented: number
+            /** @default 0 */
+            total_medium_prevented: number
+            /** @default 0 */
+            total_low_prevented: number
+            /** @default {} */
+            top_five_alert_types: Record<string, never>
+          }>
         }
       }
       400: components['responses']['SocketBadRequest']
