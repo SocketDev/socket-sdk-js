@@ -53,6 +53,7 @@
     "check:lint": "dotenvx -q run -f .env.local -- eslint --report-unused-disable-directives .",
     "check:lint:fix": "pnpm run check:lint -- --fix",
     "check:tsc": "dotenvx -q run -f .env.local -- tsc",
+    "check-ci": "pnpm check:lint",
     "coverage": "run-s coverage:*",
     "coverage:test": "run-s test:prepare test:unit:coverage",
     "coverage:type": "dotenvx -q run -f .env.local -- type-coverage --detail",
