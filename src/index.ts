@@ -330,16 +330,16 @@ async function createPostRequest(
 function createRequestBodyForFilepaths(
   filepaths: string[],
   basePath: string
-): Array<string | ReadStream> {
+): Array<Array<string | ReadStream>> {
   const requestBody = []
   for (const absPath of filepaths) {
     const relPath = path.relative(basePath, absPath)
     const filename = path.basename(absPath)
-    requestBody.push(
+    requestBody.push([
       `Content-Disposition: form-data; name="${relPath}"; filename="${filename}"\r\n`,
       `Content-Type: application/octet-stream\r\n\r\n`,
       createReadStream(absPath, { highWaterMark: 1024 * 1024 })
-    )
+    ])
   }
   return requestBody
 }
