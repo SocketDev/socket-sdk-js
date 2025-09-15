@@ -4,10 +4,25 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'openapi.json'
+      - 'scripts/generate-types.mjs'
+      - 'scripts/prettify-base-json.mjs'
+      - '.github/workflows/generate.yml'
   schedule:
     # At 06:37 on every day-of-week from Monday through Friday.
     - cron: '37 6 * * 1-5'
   workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force regeneration even if no changes detected'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
 
 permissions:
   contents: write
@@ -24,5 +39,43 @@ jobs:
       branch-name: 'automated/open-api'
       commit-message: 'fix(openapi): sync with openapi definition'
       pr-title: 'Sync with OpenAPI definition'
-      pr-body: 'The OpenAPI definition in the API has been updated. This PR downloads the latest one and regenerates the SDK.'
+      pr-body: |
+        ## 🔄 OpenAPI Sync
+
+        The OpenAPI definition in the API has been updated. This PR automatically:
+        - Downloads the latest OpenAPI specification
+        - Regenerates TypeScript types
+        - Updates SDK method signatures if needed
+
+        ### What's Changed
+        See the file changes below for specific updates to the API types and methods.
+
+        ⚠️ **Please review carefully for any breaking changes in the API.**
       npm-post-sync-script: 'generate-sdk'
+
+  validate:
+    name: Validate generated SDK
+    needs: fetch_and_update
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+        with:
+          ref: automated/open-api
+
+      - uses: SocketDev/socket-sdk-js/.github/actions/setup@e8ae193eb686db288e09cbacce75a828681ccae9
+        with:
+          node-version: '22'
+
+      - name: Validate TypeScript types
+        run: pnpm run check:tsc
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Check for breaking changes
+        run: |
+          if git diff origin/main...HEAD --name-only | grep -q 'types/api.d.ts'; then
+            echo "⚠️ API types have changed. Please review for breaking changes."
+            git diff origin/main...HEAD types/api.d.ts | head -100
+          fi
