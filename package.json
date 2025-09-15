@@ -44,26 +44,27 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "npm run clean && run-p -c --aggregate-output build:* && run-p -c --aggregate-output build:clean:*",
+    "build": "pnpm run clean && run-p -c --aggregate-output build:* && run-p -c --aggregate-output build:clean:*",
     "build:cjs": "dotenvx -q run -f .env.local -- tsc",
     "build:esm": "dotenvx -q run -f .env.local -- tsc -p tsconfig.esm.json",
     "build:clean:cjs": "dotenvx -q run -f .env.local -- node scripts/rename-dist-cjs-files.mjs",
     "build:clean:esm": "dotenvx -q run -f .env.local -- node scripts/rename-dist-esm-files.mjs",
     "check": "run-p -c --aggregate-output check:*",
     "check:lint": "dotenvx -q run -f .env.local -- eslint --report-unused-disable-directives .",
-    "check:lint:fix": "npm run check:lint -- --fix",
+    "check:lint:fix": "pnpm run check:lint -- --fix",
     "check:tsc": "dotenvx -q run -f .env.local -- tsc",
     "coverage": "run-s coverage:*",
     "coverage:test": "run-s test:prepare test:unit:coverage",
     "coverage:type": "dotenvx -q run -f .env.local -- type-coverage --detail",
     "clean": "run-p -c --aggregate-output clean:*",
+    "clean:cache": "del-cli '**/.cache'",
     "clean:dist": "del-cli 'dist'",
     "clean:declarations": "del-cli '*.d.ts' '!api*.d.ts'",
-    "fix": "run-s lint:fix check:lint:fix",
+    "fix": "run-s lint:fix",
     "generate-sdk": "run-s generate-sdk:*",
     "generate-sdk:01-prettify": "dotenvx -q run -f .env.local -- node scripts/prettify-base-json.mjs",
     "generate-sdk:02-generate": "dotenvx -q run -f .env.local -- node scripts/generate-types.mjs > types/api.d.ts",
-    "generate-sdk:03-clean-api": "npm run fix && npm run fix",
+    "generate-sdk:03-clean-api": "pnpm run fix && pnpm run fix",
     "knip:dependencies": "knip --dependencies",
     "knip:exports": "knip --include exports,duplicates",
     "lint": "dotenvx -q run -f .env.local -- oxlint -c=.oxlintrc.json --ignore-path=.oxlintignore --tsconfig=tsconfig.json .",
@@ -76,13 +77,13 @@
     "prepare": "dotenvx -q run -f .env.local -- husky",
     "prepublishOnly": "run-s build",
     "test": "run-s check test:*",
-    "test:prepare": "dotenvx -q run -f .env.test -- npm run build",
+    "test:prepare": "dotenvx -q run -f .env.test -- pnpm run build",
     "test:unit": "dotenvx -q run -f .env.test -- vitest --run",
     "test:unit:update": "dotenvx -q run -f .env.test -- vitest --run --update",
     "test:unit:coverage": "dotenvx -q run -f .env.test -- vitest run --coverage",
     "test-ci": "run-s build test:*",
     "update": "run-p --aggregate-output update:**",
-    "update:deps": "npx --yes npm-check-updates"
+    "update:deps": "taze"
   },
   "dependencies": {
     "@socketsecurity/registry": "1.1.8"
@@ -113,16 +114,20 @@
     "npm-run-all2": "8.0.4",
     "openapi-typescript": "6.7.6",
     "oxlint": "1.15.0",
+    "taze": "19.6.0",
     "type-coverage": "2.29.7",
     "typescript": "5.9.2",
     "typescript-eslint": "8.43.0",
     "vitest": "3.2.4"
   },
-  "overrides": {
-    "vite": "7.1.5"
+  "pnpm": {
+    "overrides": {
+      "vite": "7.1.5"
+    }
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=18",
+    "pnpm": ">=10.16.0"
   },
   "files": [
     "dist/**",
@@ -130,8 +135,8 @@
   ],
   "lint-staged": {
     "*.{cjs,js,json,md,mjs,mts,ts}": [
-      "npm run lint -- --fix",
-      "npm run lint:fix:fast -- --no-errors-on-unmatched --files-ignore-unknown=true --colors=off"
+      "pnpm run lint:fix:oxlint",
+      "pnpm run lint:fix:biome -- --no-errors-on-unmatched --files-ignore-unknown=true --colors=off"
     ]
   },
   "typeCoverage": {
