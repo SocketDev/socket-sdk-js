@@ -28,6 +28,8 @@ jobs:
   fetch_and_update:
     name: Sync OpenAPI definition
     runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.check.outputs.has_changes }}
     steps:
       - name: Random delay
         if: github.event_name == 'schedule'
@@ -128,8 +130,10 @@ jobs:
   validate:
     name: Validate generated SDK
     needs: fetch_and_update
-    if: success()
+    if: needs.fetch_and_update.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.check.outputs.has_changes }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
