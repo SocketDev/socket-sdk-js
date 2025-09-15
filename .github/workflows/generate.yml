@@ -10,8 +10,8 @@ on:
       - 'scripts/prettify-base-json.mjs'
       - '.github/workflows/generate.yml'
   schedule:
-    # At 06:37 on every day-of-week from Monday through Friday.
-    - cron: '37 6 * * 1-5'
+    # At 07:23 on every day-of-week from Monday through Friday.
+    - cron: '23 7 * * 1-5'
   workflow_dispatch:
     inputs:
       force:
@@ -24,34 +24,106 @@ permissions:
   contents: write
   pull-requests: write
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   fetch_and_update:
     name: Sync OpenAPI definition
-    uses: SocketDev/workflows/.github/workflows/reusable-sync.yml@master
-    secrets: inherit
-    with:
-      url: 'https://api.socket.dev/v0/openapi'
-      path: 'openapi.json'
-      branch-name: 'automated/open-api'
-      commit-message: 'fix(openapi): sync with openapi definition'
-      pr-title: 'Sync with OpenAPI definition'
-      pr-body: |
-        ## 🔄 OpenAPI Sync
+    runs-on: ubuntu-latest
+    steps:
+      - name: Random delay
+        if: github.event_name == 'schedule'
+        run: |
+          # Add random delay between 0-10 minutes for scheduled runs
+          delay=$((RANDOM % 600))
+          echo "Sleeping for $delay seconds..."
+          sleep $delay
 
-        The OpenAPI definition in the API has been updated. This PR automatically:
-        - Downloads the latest OpenAPI specification
-        - Regenerates TypeScript types
-        - Updates SDK method signatures if needed
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-        ### What's Changed
-        See the file changes below for specific updates to the API types and methods.
+      - uses: SocketDev/socket-sdk-js/.github/actions/setup@62eccf4b30fb53542d85450470b41b014666803c
+        with:
+          node-version: '22'
 
-        ⚠️ **Please review carefully for any breaking changes in the API.**
-      npm-post-sync-script: 'generate-sdk'
+      - name: Fetch latest OpenAPI definition
+        id: fetch
+        run: |
+          echo "Fetching latest OpenAPI definition..."
+          curl -sSL https://api.socket.dev/v0/openapi -o openapi-new.json
+
+          # Check if file changed
+          if [ -f openapi.json ]; then
+            if diff -q openapi.json openapi-new.json > /dev/null; then
+              echo "No changes detected"
+              echo "changed=false" >> $GITHUB_OUTPUT
+            else
+              echo "Changes detected"
+              echo "changed=true" >> $GITHUB_OUTPUT
+              mv openapi-new.json openapi.json
+            fi
+          else
+            echo "OpenAPI file doesn't exist, creating new one"
+            echo "changed=true" >> $GITHUB_OUTPUT
+            mv openapi-new.json openapi.json
+          fi
+
+      - name: Run post-sync script
+        if: steps.fetch.outputs.changed == 'true' || github.event.inputs.force == 'true'
+        run: pnpm run generate-sdk
+
+      - name: Configure git
+        if: steps.fetch.outputs.changed == 'true' || github.event.inputs.force == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Check for changes
+        id: check
+        if: steps.fetch.outputs.changed == 'true' || github.event.inputs.force == 'true'
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push changes
+        if: steps.check.outputs.has_changes == 'true'
+        run: |
+          git checkout -b automated/open-api
+          git add .
+          git commit -m "fix(openapi): sync with openapi definition"
+          git push origin automated/open-api -fu --no-verify
+
+      - name: Create Pull Request
+        if: steps.check.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if PR already exists
+          existing_pr=$(gh pr list --head automated/open-api --json number --jq '.[0].number' || echo "")
+
+          if [ -z "$existing_pr" ]; then
+            gh pr create \
+              --head automated/open-api \
+              --base main \
+              --title "Sync with OpenAPI definition" \
+              --body "## 🔄 OpenAPI Sync
+
+          The OpenAPI definition in the API has been updated. This PR automatically:
+          - Downloads the latest OpenAPI specification
+          - Regenerates TypeScript types
+          - Updates SDK method signatures if needed
+
+          ### What's Changed
+          See the file changes below for specific updates to the API types and methods.
+
+          ⚠️ **Please review carefully for any breaking changes in the API.**" \
+              --label "dependencies" \
+              --label "automated"
+          else
+            echo "PR #$existing_pr already exists, skipping creation"
+          fi
 
   validate:
     name: Validate generated SDK
@@ -59,11 +131,11 @@ jobs:
     if: success()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
         with:
           ref: automated/open-api
 
-      - uses: SocketDev/socket-sdk-js/.github/actions/setup@e8ae193eb686db288e09cbacce75a828681ccae9
+      - uses: SocketDev/socket-sdk-js/.github/actions/setup@62eccf4b30fb53542d85450470b41b014666803c
         with:
           node-version: '22'
 
