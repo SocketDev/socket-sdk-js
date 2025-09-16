@@ -44,7 +44,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "pnpm run clean && run-p -c --aggregate-output build:* && run-p -c --aggregate-output build:clean:*",
+    "build": "pnpm run clean:dist && run-p -c --aggregate-output build:* && run-p -c --aggregate-output build:clean:*",
     "build:cjs": "dotenvx -q run -f .env.local -- tsc",
     "build:esm": "dotenvx -q run -f .env.local -- tsc -p tsconfig.esm.json",
     "build:clean:cjs": "dotenvx -q run -f .env.local -- node scripts/rename-dist-cjs-files.mjs",
@@ -57,10 +57,11 @@
     "coverage": "run-s coverage:*",
     "coverage:test": "run-s test:prepare test:unit:coverage",
     "coverage:type": "dotenvx -q run -f .env.local -- type-coverage --detail",
-    "clean": "run-p -c --aggregate-output clean:*",
+    "clean": "run-s -c clean:*",
     "clean:cache": "del-cli '**/.cache'",
     "clean:dist": "del-cli 'dist'",
     "clean:declarations": "del-cli '*.d.ts' '!api*.d.ts'",
+    "clean:node_modules": "del-cli '**/node_modules'",
     "fix": "run-s lint:fix",
     "generate-sdk": "run-s generate-sdk:*",
     "generate-sdk:01-prettify": "dotenvx -q run -f .env.local -- node scripts/prettify-base-json.mjs",
