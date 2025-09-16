@@ -133,7 +133,8 @@
   },
   "files": [
     "dist/**",
-    "types/**"
+    "types/**",
+    "CHANGELOG.md"
   ],
   "lint-staged": {
     "*.{cjs,js,json,md,mjs,mts,ts}": [
