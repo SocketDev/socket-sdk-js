@@ -2,7 +2,7 @@ import { defineConfig } from 'taze'
 
 export default defineConfig({
   // Exclude these packages (add as needed).
-  exclude: [],
+  exclude: ['eslint-plugin-unicorn', 'openapi-typescript'],
   // Interactive mode disabled for automation.
   interactive: false,
   // Use minimal logging similar to ncu loglevel.
