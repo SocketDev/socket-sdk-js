@@ -86,10 +86,11 @@
     "test-ci": "run-s build test:*",
     "test-pre-commit": "dotenvx -q run -f .env.precommit -- pnpm test",
     "update": "run-p --aggregate-output update:**",
-    "update:deps": "taze"
+    "update:deps": "taze",
+    "update:socket": "pnpm update '@socketsecurity/*' --latest"
   },
   "dependencies": {
-    "@socketsecurity/registry": "1.1.10",
+    "@socketsecurity/registry": "1.1.17",
     "trash": "10.0.0"
   },
   "devDependencies": {
