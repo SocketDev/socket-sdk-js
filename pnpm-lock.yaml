@@ -12,8 +12,8 @@ importers:
   .:
     dependencies:
       '@socketsecurity/registry':
-        specifier: 1.1.10
-        version: 1.1.10
+        specifier: 1.1.17
+        version: 1.1.17
       trash:
         specifier: 10.0.0
         version: 10.0.0
@@ -779,8 +779,8 @@ packages:
     resolution: {integrity: sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==}
     engines: {node: '>=18'}
 
-  '@socketsecurity/registry@1.1.10':
-    resolution: {integrity: sha512-u2MY5AV+/39qzCujIowfZZd5rfGuGkZMtx7c8zPF3phUe6a5+5gOSP6MGhOmb9jSx9KC+0HtVIsLOR67EJli0g==}
+  '@socketsecurity/registry@1.1.17':
+    resolution: {integrity: sha512-5j0eH6JaBZlcvnbdu+58Sw8c99AK25PTp0Z/lwP7HknHdJ0TMMoTzNIBbp7WCTZKoGrPgBWchi0udN1ObZ53VQ==}
     engines: {node: '>=18'}
 
   '@stroncium/procfs@1.2.1':
@@ -3122,7 +3122,7 @@ snapshots:
 
   '@sindresorhus/merge-streams@2.3.0': {}
 
-  '@socketsecurity/registry@1.1.10': {}
+  '@socketsecurity/registry@1.1.17': {}
 
   '@stroncium/procfs@1.2.1': {}
 
