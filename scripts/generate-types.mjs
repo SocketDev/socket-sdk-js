@@ -1,9 +1,9 @@
 import path from 'node:path'
-import url from 'node:url'
+import { fileURLToPath } from 'node:url'
 
 import openapiTS from 'openapi-typescript'
 
-const __filename = url.fileURLToPath(import.meta.url)
+const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const rootPath = path.join(__dirname, '..')

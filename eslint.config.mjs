@@ -1,6 +1,6 @@
 import { createRequire } from 'node:module'
 import path from 'node:path'
-import url from 'node:url'
+import { fileURLToPath } from 'node:url'
 
 import {
   convertIgnorePatternToMinimatch,
@@ -19,7 +19,7 @@ import tsEslint from 'typescript-eslint'
 
 import constants from '@socketsecurity/registry/lib/constants'
 
-const __filename = url.fileURLToPath(import.meta.url)
+const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const require = createRequire(import.meta.url)
 
@@ -205,7 +205,7 @@ export default [
             'test/*.ts',
             'types/*.ts'
           ],
-          defaultProject: 'tsconfig.json',
+          defaultProject: rootTsConfigPath,
           tsconfigRootDir: rootPath,
           // Need this to glob test files in src.
           maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 100
