@@ -12,8 +12,8 @@ importers:
   .:
     dependencies:
       '@socketsecurity/registry':
-        specifier: 1.1.8
-        version: 1.1.8
+        specifier: 1.1.10
+        version: 1.1.10
     devDependencies:
       '@biomejs/biome':
         specifier: 2.2.4
@@ -763,8 +763,8 @@ packages:
     resolution: {integrity: sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==}
     engines: {node: '>=18'}
 
-  '@socketsecurity/registry@1.1.8':
-    resolution: {integrity: sha512-7Omgtj/K5dbz7mJT23EchIGTdom22mWpXMJ1jFm4M2hO3x9T++2gYhQ6DjJaAUY94jiAU2bHhbI1N/XCpneaKA==}
+  '@socketsecurity/registry@1.1.10':
+    resolution: {integrity: sha512-u2MY5AV+/39qzCujIowfZZd5rfGuGkZMtx7c8zPF3phUe6a5+5gOSP6MGhOmb9jSx9KC+0HtVIsLOR67EJli0g==}
     engines: {node: '>=18'}
 
   '@tybys/wasm-util@0.10.1':
@@ -3022,7 +3022,7 @@ snapshots:
 
   '@sindresorhus/merge-streams@2.3.0': {}
 
-  '@socketsecurity/registry@1.1.8': {}
+  '@socketsecurity/registry@1.1.10': {}
 
   '@tybys/wasm-util@0.10.1':
     dependencies:
