@@ -88,7 +88,8 @@
     "update:deps": "taze"
   },
   "dependencies": {
-    "@socketsecurity/registry": "1.1.10"
+    "@socketsecurity/registry": "1.1.10",
+    "trash": "10.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
