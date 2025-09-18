@@ -84,6 +84,7 @@
     "test:unit:update": "dotenvx -q run -f .env.test -- vitest --run --update",
     "test:unit:coverage": "dotenvx -q run -f .env.test -- vitest run --coverage",
     "test-ci": "run-s build test:*",
+    "test-pre-commit": "dotenvx -q run -f .env.precommit -- pnpm test",
     "update": "run-p --aggregate-output update:**",
     "update:deps": "taze"
   },
