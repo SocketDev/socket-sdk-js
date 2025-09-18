@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { safeRemove } from './utils/safe-remove.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -28,8 +29,8 @@ void (async () => {
       path.join(distPath, 'index.js.map')
     )
   ])
-  await Promise.all([
-    fs.rm(distEsmPath, { recursive: true }),
-    fs.rm(path.join(distPath, 'tsconfig.esm.tsbuildinfo'))
+  await safeRemove([
+    distEsmPath,
+    path.join(distPath, 'tsconfig.esm.tsbuildinfo')
   ])
 })()
