@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    // The following options are not supported by @typescript/native-preview.
+    // They are either ignored or throw an unknown option error:
+    //"importsNotUsedAsValues": "remove",
+    //"incremental": true,
     "allowImportingTsExtensions": false,
     "allowJs": false,
     "composite": true,
@@ -7,31 +11,26 @@
     "declarationMap": true,
     "erasableSyntaxOnly": true,
     "esModuleInterop": true,
+    "exactOptionalPropertyTypes": true,
     "forceConsistentCasingInFileNames": true,
-    "incremental": true,
     "isolatedModules": true,
     "lib": ["esnext"],
     "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "noUncheckedSideEffectImports": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "resolveJsonModule": true,
-    "rootDir": "src",
+    "rewriteRelativeImportExtensions": true,
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
     "strictNullChecks": true,
     "target": "esnext",
     "useUnknownInCatchVariables": true,
-
-    /* New checks being tried out */
-    "exactOptionalPropertyTypes": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noUncheckedIndexedAccess": true,
-
-    /* Additional checks */
-    "importsNotUsedAsValues": "remove",
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noUncheckedSideEffectImports": true
+    "verbatimModuleSyntax": true
   }
 }
