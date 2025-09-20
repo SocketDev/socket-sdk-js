@@ -5,10 +5,10 @@ on:
     branches:
       - main
     paths:
+      - '.github/workflows/generate.yml'
       - 'openapi.json'
       - 'scripts/generate-types.mjs'
       - 'scripts/prettify-base-json.mjs'
-      - '.github/workflows/generate.yml'
   schedule:
     # At 07:23 on every day-of-week from Monday through Friday.
     - cron: '23 7 * * 1-5'
@@ -43,9 +43,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: SocketDev/socket-sdk-js/.github/actions/setup@62eccf4b30fb53542d85450470b41b014666803c
-        with:
-          node-version: '22'
+      - uses: SocketDev/socket-registry/.github/workflows/setup-and-install@main
 
       - name: Fetch latest OpenAPI definition
         id: fetch
@@ -139,9 +137,7 @@ jobs:
         with:
           ref: automated/open-api
 
-      - uses: SocketDev/socket-sdk-js/.github/actions/setup@62eccf4b30fb53542d85450470b41b014666803c
-        with:
-          node-version: '22'
+      - uses: SocketDev/socket-registry/.github/workflows/setup-and-install@main
 
       - name: Validate TypeScript types
         run: pnpm run check:tsc
