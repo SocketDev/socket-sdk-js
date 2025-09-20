@@ -2,30 +2,15 @@ name: Linting
 
 on:
   push:
-    branches:
-      - main
-    tags:
-      - '*'
+    branches: [main]
+    tags: ['*']
   pull_request:
-    branches:
-      - main
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
-
 jobs:
-  linting:
-    name: 'Linting'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - uses: SocketDev/socket-sdk-js/.github/actions/setup@62eccf4b30fb53542d85450470b41b014666803c
-        with:
-          node-version: '22'
-
-      - name: Run linting
-        run: pnpm run check-ci
+  lint:
+    uses: SocketDev/socket-registry/.github/workflows/lint.yml@main
