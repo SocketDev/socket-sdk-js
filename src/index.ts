@@ -327,7 +327,8 @@ async function createPostRequest(
   return await getResponse(req)
 }
 
-function createRequestBodyForFilepaths(
+// Exported for testing.
+export function createRequestBodyForFilepaths(
   filepaths: string[],
   basePath: string
 ): Array<Array<string | ReadStream>> {

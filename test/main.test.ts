@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { SocketSdk } from '../dist/index.js'
+import { SocketSdk, createRequestBodyForFilepaths } from '../dist/index.js'
 
 process.on('unhandledRejection', cause => {
   throw new Error('Unhandled rejection', { cause })
@@ -1182,6 +1182,84 @@ describe('SocketSdk', () => {
       // But the stream yields one result per batch response
       expect(results.length).toBeGreaterThan(0)
       expect(results[0].success).toBe(true)
+    })
+  })
+
+  describe('Request Body Formation', () => {
+    it('should create properly structured request body for file uploads', async () => {
+      const tempDir = mkdtempSync(join(tmpdir(), 'socket-sdk-test-'))
+      const testFile1 = join(tempDir, 'test1.json')
+      const testFile2 = join(tempDir, 'test2.json')
+      const testContent1 = '{"test": 1}'
+      const testContent2 = '{"test": 2}'
+
+      try {
+        writeFileSync(testFile1, testContent1)
+        writeFileSync(testFile2, testContent2)
+
+        const result = createRequestBodyForFilepaths(
+          [testFile1, testFile2],
+          tempDir
+        )
+
+        // Should have 2 entries, each being an array with 3 elements
+        expect(Array.isArray(result)).toBe(true)
+        expect(result).toHaveLength(2)
+
+        // Check first file entry
+        expect(Array.isArray(result[0])).toBe(true)
+        expect(result[0]).toHaveLength(3)
+
+        const [contentDisposition1, contentType1, readStream1] = result[0]
+        expect(typeof contentDisposition1).toBe('string')
+        expect(contentDisposition1).toContain('Content-Disposition: form-data')
+        expect(contentDisposition1).toContain('name="test1.json"')
+        expect(contentDisposition1).toContain('filename="test1.json"')
+        expect(typeof contentType1).toBe('string')
+        expect(contentType1).toContain('Content-Type: application/octet-stream')
+        expect(readStream1).toBeDefined()
+
+        // Check second file entry
+        expect(Array.isArray(result[1])).toBe(true)
+        expect(result[1]).toHaveLength(3)
+
+        const [contentDisposition2, contentType2, readStream2] = result[1]
+        expect(typeof contentDisposition2).toBe('string')
+        expect(contentDisposition2).toContain('Content-Disposition: form-data')
+        expect(contentDisposition2).toContain('name="test2.json"')
+        expect(contentDisposition2).toContain('filename="test2.json"')
+        expect(typeof contentType2).toBe('string')
+        expect(contentType2).toContain('Content-Type: application/octet-stream')
+        expect(readStream2).toBeDefined()
+
+        // Test that the read streams contain the correct content
+        let streamContent1 = ''
+        readStream1.on('data', (chunk: Buffer) => {
+          streamContent1 += chunk.toString()
+        })
+
+        let streamContent2 = ''
+        readStream2.on('data', (chunk: Buffer) => {
+          streamContent2 += chunk.toString()
+        })
+
+        await Promise.all([
+          new Promise<void>(resolve => {
+            readStream1.on('end', () => {
+              expect(streamContent1).toBe(testContent1)
+              resolve()
+            })
+          }),
+          new Promise<void>(resolve => {
+            readStream2.on('end', () => {
+              expect(streamContent2).toBe(testContent2)
+              resolve()
+            })
+          })
+        ])
+      } finally {
+        rmSync(tempDir, { recursive: true, force: true })
+      }
     })
   })
 
