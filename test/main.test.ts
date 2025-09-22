@@ -1076,7 +1076,7 @@ describe('SocketSdk', () => {
         .reply(200, scanData)
 
       const client = new SocketSdk('test-token')
-      const tempFile = '/tmp/test-scan.json'
+      const tempFile = path.join(tmpdir(), 'test-scan.json')
 
       // Since we can't easily mock createWriteStream in ESM, we'll just verify the request happens
       const res = await client.streamOrgFullScan(
@@ -2620,9 +2620,10 @@ describe('SocketSdk', () => {
         .reply(200, { id: 'dep124' })
 
       const client = new SocketSdk('test-token')
+      const tempDir = tmpdir()
       const res = await client.createDependenciesSnapshot(
-        ['/tmp/test.json'],
-        '/tmp',
+        [path.join(tempDir, 'test.json')],
+        tempDir,
       )
 
       expect(res.success).toBe(true)
