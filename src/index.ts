@@ -11,6 +11,7 @@ import SOCKET_PUBLIC_API_TOKEN from '@socketsecurity/registry/lib/constants/sock
 import { debugLog, isDebug } from '@socketsecurity/registry/lib/debug'
 import { jsonParse } from '@socketsecurity/registry/lib/json'
 import { getOwn, isObjectObject } from '@socketsecurity/registry/lib/objects'
+import { normalizePath } from '@socketsecurity/registry/lib/path'
 import { pRetry } from '@socketsecurity/registry/lib/promises'
 import {
   parseUrl,
@@ -332,7 +333,7 @@ export function createRequestBodyForFilepaths(
 ): Array<Array<string | ReadStream>> {
   const requestBody = []
   for (const absPath of filepaths) {
-    const relPath = path.relative(basePath, absPath)
+    const relPath = normalizePath(path.relative(basePath, absPath))
     const filename = path.basename(absPath)
     requestBody.push([
       `Content-Disposition: form-data; name="${relPath}"; filename="${filename}"\r\n`,
