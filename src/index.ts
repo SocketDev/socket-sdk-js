@@ -762,7 +762,7 @@ export class SocketSdk {
         {
           retries: 4,
           onRetryRethrow: true,
-          onRetry(_attempt, error) {
+          onRetry(_attempt: number, error: unknown) {
             if (!(error instanceof ResponseError)) {
               return
             }
@@ -793,10 +793,10 @@ export class SocketSdk {
           /* c8 ignore next - conditional is always reached, added for clarity */
           isPublicToken
             ? /* c8 ignore next - public token reshaping branch */ reshapeArtifactForPublicPolicy(
-                artifact,
+                artifact!,
                 queryParams,
               )
-            : artifact,
+            : artifact!,
         )
       }
     }
@@ -875,8 +875,8 @@ export class SocketSdk {
       if (isObjectObject(artifact)) {
         results.push(
           isPublicToken
-            ? reshapeArtifactForPublicPolicy(artifact, queryParams)
-            : artifact,
+            ? reshapeArtifactForPublicPolicy(artifact!, queryParams)
+            : artifact!,
         )
       }
     }
