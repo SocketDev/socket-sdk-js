@@ -176,6 +176,9 @@ export default [
       .map(p => convertIgnorePatternToMinimatch(p.slice(1))),
   },
   {
+    ignores: ['coverage/**'],
+  },
+  {
     files: ['**/*.{cts,mts,ts}'],
     ...jsPlugin.configs.recommended,
     ...importFlatConfigsForModule.typescript,
