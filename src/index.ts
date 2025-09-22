@@ -571,6 +571,10 @@ async function getResponseJson(response: IncomingMessage) {
     chunks.push(chunk)
   }
   const data = Buffer.concat(chunks).toString('utf8')
+  // Handle empty response body (e.g. 204 No Content).
+  if (!data) {
+    return {}
+  }
   try {
     return JSON.parse(data)
   } catch (e) {
