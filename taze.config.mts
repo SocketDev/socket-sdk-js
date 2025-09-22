@@ -12,5 +12,5 @@ export default defineConfig({
   // Update mode: 'latest' is similar to ncu's default behavior.
   mode: 'latest',
   // Write to package.json automatically.
-  write: true
+  write: true,
 })

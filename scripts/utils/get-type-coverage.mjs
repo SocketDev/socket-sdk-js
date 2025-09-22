@@ -4,7 +4,7 @@ import { spawn } from '@socketsecurity/registry/lib/spawn'
 export async function getTypeCoverage() {
   const result = await spawn('pnpm', ['run', 'coverage:type'], {
     stdio: 'pipe',
-    shell: constants.WIN32
+    shell: constants.WIN32,
   })
 
   if (result.code !== 0) {

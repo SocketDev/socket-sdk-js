@@ -19,7 +19,7 @@ async function logCoveragePercentage(argv) {
   const coverageJsonPath = path.join(
     process.cwd(),
     'coverage',
-    'coverage-final.json'
+    'coverage-final.json',
   )
 
   // Get code coverage
@@ -54,17 +54,22 @@ async function logCoveragePercentage(argv) {
     parseFloat(codeCoverage.statements.percent),
     parseFloat(codeCoverage.branches.percent),
     parseFloat(codeCoverage.functions.percent),
-    parseFloat(codeCoverage.lines.percent)
+    parseFloat(codeCoverage.lines.percent),
   ]
 
   let overall
   if (typeCoveragePercent !== null) {
     // Include type coverage in the overall calculation
     const allMetrics = [...codeCoverageMetrics, typeCoveragePercent]
-    overall = (allMetrics.reduce((a, b) => a + b, 0) / allMetrics.length).toFixed(2)
+    overall = (
+      allMetrics.reduce((a, b) => a + b, 0) / allMetrics.length
+    ).toFixed(2)
   } else {
     // Fallback to just code coverage metrics
-    overall = (codeCoverageMetrics.reduce((a, b) => a + b, 0) / codeCoverageMetrics.length).toFixed(2)
+    overall = (
+      codeCoverageMetrics.reduce((a, b) => a + b, 0) /
+      codeCoverageMetrics.length
+    ).toFixed(2)
   }
 
   const overallNum = parseFloat(overall)
@@ -92,12 +97,12 @@ async function logCoveragePercentage(argv) {
       statements: codeCoverage.statements,
       branches: codeCoverage.branches,
       functions: codeCoverage.functions,
-      lines: codeCoverage.lines
+      lines: codeCoverage.lines,
     }
 
     if (typeCoveragePercent !== null) {
       jsonOutput.types = {
-        percent: typeCoveragePercent.toFixed(2)
+        percent: typeCoveragePercent.toFixed(2),
       }
     }
 
@@ -109,15 +114,17 @@ async function logCoveragePercentage(argv) {
   } else {
     logger.info(`Coverage Summary:`)
     logger.info(
-      `${indent}Statements: ${codeCoverage.statements.percent}% (${codeCoverage.statements.covered}/${codeCoverage.statements.total})`
+      `${indent}Statements: ${codeCoverage.statements.percent}% (${codeCoverage.statements.covered}/${codeCoverage.statements.total})`,
     )
     logger.info(
-      `${indent}Branches:   ${codeCoverage.branches.percent}% (${codeCoverage.branches.covered}/${codeCoverage.branches.total})`
+      `${indent}Branches:   ${codeCoverage.branches.percent}% (${codeCoverage.branches.covered}/${codeCoverage.branches.total})`,
     )
     logger.info(
-      `${indent}Functions:  ${codeCoverage.functions.percent}% (${codeCoverage.functions.covered}/${codeCoverage.functions.total})`
+      `${indent}Functions:  ${codeCoverage.functions.percent}% (${codeCoverage.functions.covered}/${codeCoverage.functions.total})`,
     )
-    logger.info(`${indent}Lines:      ${codeCoverage.lines.percent}% (${codeCoverage.lines.covered}/${codeCoverage.lines.total})`)
+    logger.info(
+      `${indent}Lines:      ${codeCoverage.lines.percent}% (${codeCoverage.lines.covered}/${codeCoverage.lines.total})`,
+    )
 
     if (typeCoveragePercent !== null) {
       logger.info(`${indent}Types:      ${typeCoveragePercent.toFixed(2)}%`)
@@ -133,8 +140,8 @@ void (async () => {
     boolean: ['json', 'simple'],
     alias: {
       j: 'json',
-      s: 'simple'
-    }
+      s: 'simple',
+    },
   })
   await logCoveragePercentage(argv)
 })()

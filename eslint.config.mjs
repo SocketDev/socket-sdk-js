@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 
 import {
   convertIgnorePatternToMinimatch,
-  includeIgnoreFile
+  includeIgnoreFile,
 } from '@eslint/compat'
 import jsPlugin from '@eslint/js'
 import tsParser from '@typescript-eslint/parser'
@@ -33,13 +33,13 @@ const gitignorePath = path.join(rootPath, GITIGNORE)
 
 const biomeConfig = require(biomeConfigPath)
 const nodeGlobalsConfig = Object.fromEntries(
-  Object.entries(globals.node).map(([k]) => [k, 'readonly'])
+  Object.entries(globals.node).map(([k]) => [k, 'readonly']),
 )
 
 const sharedPlugins = {
   ...nodePlugin.configs['flat/recommended-script'].plugins,
   'sort-destructure-keys': sortDestructureKeysPlugin,
-  unicorn: unicornPlugin
+  unicorn: unicornPlugin,
 }
 
 const sharedRules = {
@@ -55,16 +55,16 @@ const sharedRules = {
     {
       ignores: ['promise-withresolvers'],
       // Lazily access constants.maintainedNodeVersions.
-      version: constants.maintainedNodeVersions.current
-    }
+      version: constants.maintainedNodeVersions.current,
+    },
   ],
   'n/no-unsupported-features/node-builtins': [
     'error',
     {
       ignores: ['test', 'test.describe'],
       // Lazily access constants.maintainedNodeVersions.
-      version: constants.maintainedNodeVersions.current
-    }
+      version: constants.maintainedNodeVersions.current,
+    },
   ],
   'n/prefer-node-protocol': 'error',
   'unicorn/consistent-function-scoping': 'error',
@@ -80,14 +80,14 @@ const sharedRules = {
     {
       argsIgnorePattern: '^_|^this$',
       ignoreRestSiblings: true,
-      varsIgnorePattern: '^_'
-    }
+      varsIgnorePattern: '^_',
+    },
   ],
   'no-var': 'error',
   'no-warning-comments': ['warn', { terms: ['fixme'] }],
   'prefer-const': 'error',
   'sort-destructure-keys/sort-destructure-keys': 'error',
-  'sort-imports': ['error', { ignoreDeclarationSort: true }]
+  'sort-imports': ['error', { ignoreDeclarationSort: true }],
 }
 
 const sharedRulesForImportX = {
@@ -99,8 +99,8 @@ const sharedRulesForImportX = {
       cjs: 'ignorePackages',
       js: 'ignorePackages',
       json: 'always',
-      mjs: 'ignorePackages'
-    }
+      mjs: 'ignorePackages',
+    },
   ],
   'import-x/order': [
     'warn',
@@ -110,21 +110,21 @@ const sharedRulesForImportX = {
         'external',
         'internal',
         ['parent', 'sibling', 'index'],
-        'type'
+        'type',
       ],
       pathGroups: [
         {
           pattern: '@socket{registry,security}/**',
-          group: 'internal'
-        }
+          group: 'internal',
+        },
       ],
       pathGroupsExcludedImportTypes: ['type'],
       'newlines-between': 'always',
       alphabetize: {
-        order: 'asc'
-      }
-    }
-  ]
+        order: 'asc',
+      },
+    },
+  ],
 }
 
 function getImportXFlatConfigs(isEsm) {
@@ -134,12 +134,12 @@ function getImportXFlatConfigs(isEsm) {
       languageOptions: {
         ...origImportXFlatConfigs.recommended.languageOptions,
         ecmaVersion: LATEST,
-        sourceType: isEsm ? 'module' : 'script'
+        sourceType: isEsm ? 'module' : 'script',
       },
       rules: {
         ...sharedRulesForImportX,
-        'import-x/no-named-as-default-member': 'off'
-      }
+        'import-x/no-named-as-default-member': 'off',
+      },
     },
     typescript: {
       ...origImportXFlatConfigs.typescript,
@@ -148,9 +148,9 @@ function getImportXFlatConfigs(isEsm) {
         ...origImportXFlatConfigs.typescript.settings,
         'import-x/resolver-next': [
           createTypeScriptImportResolver({
-            project: rootTsConfigPath
-          })
-        ]
+            project: rootTsConfigPath,
+          }),
+        ],
       },
       rules: {
         ...sharedRulesForImportX,
@@ -158,9 +158,9 @@ function getImportXFlatConfigs(isEsm) {
         // the referenced module.
         'import-x/named': 'off',
         'import-x/no-named-as-default-member': 'off',
-        'import-x/no-unresolved': 'off'
-      }
-    }
+        'import-x/no-unresolved': 'off',
+      },
+    },
   }
 }
 
@@ -173,7 +173,7 @@ export default [
     name: 'Imported biome.json ignore patterns',
     ignores: biomeConfig.files.includes
       .filter(p => p.startsWith('!'))
-      .map(p => convertIgnorePatternToMinimatch(p.slice(1)))
+      .map(p => convertIgnorePatternToMinimatch(p.slice(1))),
   },
   {
     files: ['**/*.{cts,mts,ts}'],
@@ -188,7 +188,7 @@ export default [
         ...nodeGlobalsConfig,
         BufferConstructor: 'readonly',
         BufferEncoding: 'readonly',
-        NodeJS: 'readonly'
+        NodeJS: 'readonly',
       },
       parser: tsParser,
       parserOptions: {
@@ -203,25 +203,25 @@ export default [
             // Allow configs.
             '*.config.mts',
             'test/*.ts',
-            'types/*.ts'
+            'types/*.ts',
           ],
           defaultProject: rootTsConfigPath,
           tsconfigRootDir: rootPath,
           // Need this to glob test files in src.
-          maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 100
-        }
-      }
+          maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 100,
+        },
+      },
     },
     linterOptions: {
       ...jsPlugin.configs.recommended.linterOptions,
       ...importFlatConfigsForModule.typescript.linterOptions,
-      reportUnusedDisableDirectives: 'off'
+      reportUnusedDisableDirectives: 'off',
     },
     plugins: {
       ...jsPlugin.configs.recommended.plugins,
       ...importFlatConfigsForModule.typescript.plugins,
       ...sharedPlugins,
-      '@typescript-eslint': tsEslint.plugin
+      '@typescript-eslint': tsEslint.plugin,
     },
     rules: {
       ...jsPlugin.configs.recommended.rules,
@@ -230,12 +230,12 @@ export default [
       '@typescript-eslint/array-type': ['error', { default: 'array-simple' }],
       '@typescript-eslint/consistent-type-assertions': [
         'error',
-        { assertionStyle: 'as' }
+        { assertionStyle: 'as' },
       ],
       '@typescript-eslint/no-misused-new': 'error',
       '@typescript-eslint/no-this-alias': [
         'error',
-        { allowDestructuring: true }
+        { allowDestructuring: true },
       ],
       // Returning unawaited promises in a try/catch/finally is dangerous
       // (the `catch` won't catch if the promise is rejected, and the `finally`
@@ -248,8 +248,8 @@ export default [
       '@typescript-eslint/return-await': ['error', 'always'],
       // Disable the following rules because they don't play well with TypeScript.
       'no-redeclare': 'off',
-      'no-unused-vars': 'off'
-    }
+      'no-unused-vars': 'off',
+    },
   },
   {
     files: ['**/*.{cjs,js}'],
@@ -265,23 +265,23 @@ export default [
         ...importFlatConfigsForModule.recommended.languageOptions?.globals,
         ...nodePlugin.configs['flat/recommended-script'].languageOptions
           ?.globals,
-        ...nodeGlobalsConfig
-      }
+        ...nodeGlobalsConfig,
+      },
     },
     plugins: {
       ...jsPlugin.configs.recommended.plugins,
       ...importFlatConfigsForScript.recommended.plugins,
-      ...sharedPlugins
+      ...sharedPlugins,
     },
     rules: {
       ...jsPlugin.configs.recommended.rules,
       ...importFlatConfigsForScript.recommended.rules,
       ...nodePlugin.configs['flat/recommended-script'].rules,
-      ...sharedRules
-    }
+      ...sharedRules,
+    },
   },
   {
     files: ['src/**/*.{cjs,js}'],
-    ...jsdocPlugin.configs['flat/recommended']
-  }
+    ...jsdocPlugin.configs['flat/recommended'],
+  },
 ]
