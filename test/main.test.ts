@@ -41,7 +41,7 @@ describe('SocketSdk', () => {
       expect(res).toEqual({
         success: true,
         status: 200,
-        data: { quota: 1e9 }
+        data: { quota: 1e9 },
       })
     })
   })
@@ -58,7 +58,7 @@ describe('SocketSdk', () => {
       expect(res).toEqual({
         success: true,
         status: 200,
-        data: []
+        data: [],
       })
     })
   })
@@ -85,7 +85,7 @@ describe('SocketSdk', () => {
       expect(authHeader).toContain('Basic')
       const decodedAuth = Buffer.from(
         authHeader.split(' ')[1],
-        'base64'
+        'base64',
       ).toString()
       expect(decodedAuth).toBe(`${apiToken}:`)
     })
@@ -124,7 +124,7 @@ describe('SocketSdk', () => {
         .reply(200, { quota: 10000 })
 
       const client = new SocketSdk('api-token', {
-        baseUrl: customBaseUrl
+        baseUrl: customBaseUrl,
       })
       const res = await client.getQuota()
 
@@ -138,8 +138,8 @@ describe('SocketSdk', () => {
         .reply(401, {
           error: {
             message: 'Token expired',
-            code: 'TOKEN_EXPIRED'
-          }
+            code: 'TOKEN_EXPIRED',
+          },
         })
 
       const client = new SocketSdk('expired-token')
@@ -160,34 +160,34 @@ describe('SocketSdk', () => {
         type: 'npm',
         alertKeysToReachabilityTypes: {
           malware: ['direct'],
-          criticalCVE: ['transitive']
+          criticalCVE: ['transitive'],
         },
         alertKeysToReachabilitySummaries: {
           malware: {
             reachable: true,
             directlyReachable: true,
-            transitivelyReachable: false
+            transitivelyReachable: false,
           },
           criticalCVE: {
             reachable: true,
             directlyReachable: false,
-            transitivelyReachable: true
-          }
+            transitivelyReachable: true,
+          },
         },
         alerts: [
           {
             type: 'malware',
             severity: 'critical',
             key: 'malware',
-            props: {}
+            props: {},
           },
           {
             type: 'criticalCVE',
             severity: 'high',
             key: 'criticalCVE',
-            props: {}
-          }
-        ]
+            props: {},
+          },
+        ],
       }
 
       nock('https://api.socket.dev')
@@ -196,7 +196,7 @@ describe('SocketSdk', () => {
 
       const client = new SocketSdk('test-token')
       const res = await client.batchPackageFetch({
-        components: [{ purl: 'pkg:npm/express@4.19.2' }]
+        components: [{ purl: 'pkg:npm/express@4.19.2' }],
       })
 
       expect(res.success).toBe(true)
@@ -204,14 +204,14 @@ describe('SocketSdk', () => {
       const artifact = res.data[0]
       expect(artifact.alertKeysToReachabilitySummaries).toBeDefined()
       expect(artifact.alertKeysToReachabilitySummaries.malware.reachable).toBe(
-        true
+        true,
       )
       expect(
-        artifact.alertKeysToReachabilitySummaries.malware.directlyReachable
+        artifact.alertKeysToReachabilitySummaries.malware.directlyReachable,
       ).toBe(true)
       expect(
         artifact.alertKeysToReachabilitySummaries.criticalCVE
-          .transitivelyReachable
+          .transitivelyReachable,
       ).toBe(true)
     })
 
@@ -228,9 +228,9 @@ describe('SocketSdk', () => {
             type: 'unpopularPackage',
             severity: 'low',
             key: 'unpopularPackage',
-            props: {}
-          }
-        ]
+            props: {},
+          },
+        ],
       }
 
       nock('https://api.socket.dev')
@@ -239,7 +239,7 @@ describe('SocketSdk', () => {
 
       const client = new SocketSdk('test-token')
       const res = await client.batchPackageFetch({
-        components: [{ purl: 'pkg:npm/lodash@4.17.21' }]
+        components: [{ purl: 'pkg:npm/lodash@4.17.21' }],
       })
 
       expect(res.success).toBe(true)
@@ -259,10 +259,10 @@ describe('SocketSdk', () => {
             cve: {
               reachable: true,
               directlyReachable: true,
-              transitivelyReachable: false
-            }
+              transitivelyReachable: false,
+            },
           },
-          alerts: [{ type: 'cve', severity: 'medium', key: 'cve' }]
+          alerts: [{ type: 'cve', severity: 'medium', key: 'cve' }],
         },
         {
           purl: 'pkg:npm/vue@3.0.0',
@@ -270,8 +270,8 @@ describe('SocketSdk', () => {
           version: '3.0.0',
           type: 'npm',
           alertKeysToReachabilitySummaries: {},
-          alerts: []
-        }
+          alerts: [],
+        },
       ]
 
       nock('https://api.socket.dev')
@@ -282,14 +282,14 @@ describe('SocketSdk', () => {
       const res = await client.batchPackageFetch({
         components: [
           { purl: 'pkg:npm/react@18.0.0' },
-          { purl: 'pkg:npm/vue@3.0.0' }
-        ]
+          { purl: 'pkg:npm/vue@3.0.0' },
+        ],
       })
 
       expect(res.success).toBe(true)
       expect(res.data).toHaveLength(2)
       expect(res.data[0].alertKeysToReachabilitySummaries.cve.reachable).toBe(
-        true
+        true,
       )
       expect(res.data[1].alertKeysToReachabilitySummaries).toEqual({})
     })
@@ -301,13 +301,13 @@ describe('SocketSdk', () => {
         .reply(200, {})
 
       const client = new SocketSdk('test-token', {
-        timeout: 100
+        timeout: 100,
       })
 
       await expect(
         client.batchPackageFetch({
-          components: [{ purl: 'pkg:npm/test@1.0.0' }]
-        })
+          components: [{ purl: 'pkg:npm/test@1.0.0' }],
+        }),
       ).rejects.toThrow()
     })
   })
@@ -362,7 +362,7 @@ describe('SocketSdk', () => {
 
       const client = new SocketSdk('test-token')
       const res = await client.batchPackageFetch({
-        components: [{ purl: 'pkg:npm/test@1.0.0' }]
+        components: [{ purl: 'pkg:npm/test@1.0.0' }],
       })
 
       expect(res.success).toBe(true)
@@ -425,7 +425,7 @@ describe('SocketSdk', () => {
         })
 
       const client = new SocketSdk('test-token', {
-        userAgent: 'CustomApp/1.0.0'
+        userAgent: 'CustomApp/1.0.0',
       })
 
       await client.getQuota()
@@ -454,12 +454,12 @@ describe('SocketSdk', () => {
             version: '1.0.0',
             dependencies: {
               express: '^4.18.0',
-              lodash: '^4.17.21'
-            }
+              lodash: '^4.17.21',
+            },
           },
           null,
-          2
-        )
+          2,
+        ),
       )
 
       writeFileSync(
@@ -476,14 +476,14 @@ describe('SocketSdk', () => {
                 version: '1.0.0',
                 dependencies: {
                   express: '^4.18.0',
-                  lodash: '^4.17.21'
-                }
-              }
-            }
+                  lodash: '^4.17.21',
+                },
+              },
+            },
           },
           null,
-          2
-        )
+          2,
+        ),
       )
     })
 
@@ -508,15 +508,15 @@ describe('SocketSdk', () => {
             {
               id: 'snapshot-123',
               status: 'complete',
-              files: ['package.json', 'package-lock.json']
-            }
+              files: ['package.json', 'package-lock.json'],
+            },
           ]
         })
 
       const client = new SocketSdk('test-token')
       const res = await client.createDependenciesSnapshot(
         [packageJsonPath, packageLockPath],
-        tempDir
+        tempDir,
       )
 
       expect(res.success).toBe(true)
@@ -548,8 +548,8 @@ describe('SocketSdk', () => {
               id: 'scan-456',
               org: 'test-org',
               status: 'processing',
-              files: ['package.json', 'package-lock.json']
-            }
+              files: ['package.json', 'package-lock.json'],
+            },
           ]
         })
 
@@ -557,7 +557,7 @@ describe('SocketSdk', () => {
       const res = await client.createOrgFullScan(
         'test-org',
         [packageJsonPath, packageLockPath],
-        tempDir
+        tempDir,
       )
 
       expect(res.success).toBe(true)
@@ -583,8 +583,8 @@ describe('SocketSdk', () => {
             200,
             {
               tarHash: 'abc123def456',
-              unmatchedFiles: []
-            }
+              unmatchedFiles: [],
+            },
           ]
         })
 
@@ -592,7 +592,7 @@ describe('SocketSdk', () => {
       const res = await client.uploadManifestFiles(
         'test-org',
         [packageJsonPath, packageLockPath],
-        tempDir
+        tempDir,
       )
 
       expect(res.success).toBe(true)
@@ -617,7 +617,7 @@ describe('SocketSdk', () => {
       writeFileSync(packageJsonPath, '{"name": "test"}')
 
       await expect(
-        client.uploadManifestFiles('test-org', [packageJsonPath], tempDir)
+        client.uploadManifestFiles('test-org', [packageJsonPath], tempDir),
       ).rejects.toThrow('Socket API server error (500)')
 
       rmSync(tempDir, { recursive: true })
@@ -636,8 +636,8 @@ describe('SocketSdk', () => {
             200,
             {
               id: 'report-789',
-              status: 'complete'
-            }
+              status: 'complete',
+            },
           ]
         })
 
@@ -648,8 +648,8 @@ describe('SocketSdk', () => {
         {
           malware: true,
           typosquat: true,
-          cve: false
-        }
+          cve: false,
+        },
       )
 
       expect(res.success).toBe(true)
@@ -668,7 +668,7 @@ describe('SocketSdk', () => {
       const largePath = join(tempDir, 'large-package-lock.json')
       const largeContent = {
         name: 'large-project',
-        dependencies: {}
+        dependencies: {},
       }
 
       // Add many dependencies to simulate a large file
@@ -683,7 +683,7 @@ describe('SocketSdk', () => {
         .reply(200, {
           id: 'large-snapshot',
           status: 'complete',
-          files: ['large-package-lock.json']
+          files: ['large-package-lock.json'],
         })
 
       const client = new SocketSdk('test-token')
@@ -698,14 +698,14 @@ describe('SocketSdk', () => {
         .post('/v0/dependencies/upload')
         .reply(413, {
           error: {
-            message: 'Request entity too large'
-          }
+            message: 'Request entity too large',
+          },
         })
 
       const client = new SocketSdk('test-token')
       const res = await client.createDependenciesSnapshot(
         [packageJsonPath],
-        tempDir
+        tempDir,
       )
 
       expect(res.success).toBe(false)
@@ -721,7 +721,7 @@ describe('SocketSdk', () => {
       writeFileSync(readmePath, '# Test Project\n\nThis is a test project.')
       writeFileSync(
         yarnLockPath,
-        '# THIS IS AN AUTOGENERATED FILE\n\nexpress@^4.18.0:\n  version "4.18.2"'
+        '# THIS IS AN AUTOGENERATED FILE\n\nexpress@^4.18.0:\n  version "4.18.2"',
       )
 
       let capturedHeaders: any = {}
@@ -736,8 +736,8 @@ describe('SocketSdk', () => {
               id: 'multi-file-scan',
               org: 'test-org',
               status: 'complete',
-              files: ['package.json', 'README.md', 'yarn.lock']
-            }
+              files: ['package.json', 'README.md', 'yarn.lock'],
+            },
           ]
         })
 
@@ -745,7 +745,7 @@ describe('SocketSdk', () => {
       const res = await client.createOrgFullScan(
         'test-org',
         [packageJsonPath, readmePath, yarnLockPath],
-        tempDir
+        tempDir,
       )
 
       expect(res.success).toBe(true)
@@ -761,14 +761,14 @@ describe('SocketSdk', () => {
         .reply(200, {
           id: 'params-snapshot',
           branch: 'main',
-          commit: 'abc123'
+          commit: 'abc123',
         })
 
       const client = new SocketSdk('test-token')
       const res = await client.createDependenciesSnapshot(
         [packageJsonPath],
         tempDir,
-        { branch: 'main', commit: 'abc123' }
+        { branch: 'main', commit: 'abc123' },
       )
 
       expect(res.success).toBe(true)
@@ -784,7 +784,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.createDependenciesSnapshot([packageJsonPath], tempDir)
+        client.createDependenciesSnapshot([packageJsonPath], tempDir),
       ).rejects.toThrow()
     })
 
@@ -795,7 +795,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.createDependenciesSnapshot([nonExistentPath], tempDir)
+        client.createDependenciesSnapshot([nonExistentPath], tempDir),
       ).rejects.toThrow()
     })
   })
@@ -808,13 +808,13 @@ describe('SocketSdk', () => {
           id: 'repo-123',
           name: 'test-repo',
           org: 'test-org',
-          created_at: '2024-01-01T00:00:00Z'
+          created_at: '2024-01-01T00:00:00Z',
         })
 
       const client = new SocketSdk('test-token')
       const res = await client.createOrgRepo('test-org', {
         name: 'test-repo',
-        url: 'https://github.com/test/repo'
+        url: 'https://github.com/test/repo',
       })
 
       expect(res.success).toBe(true)
@@ -829,7 +829,7 @@ describe('SocketSdk', () => {
           id: 'repo-123',
           name: 'test-repo',
           org: 'test-org',
-          url: 'https://github.com/test/repo'
+          url: 'https://github.com/test/repo',
         })
 
       const client = new SocketSdk('test-token')
@@ -846,9 +846,9 @@ describe('SocketSdk', () => {
         .reply(200, {
           repos: [
             { id: 'repo-1', name: 'repo-1' },
-            { id: 'repo-2', name: 'repo-2' }
+            { id: 'repo-2', name: 'repo-2' },
           ],
-          total: 2
+          total: 2,
         })
 
       const client = new SocketSdk('test-token')
@@ -865,12 +865,12 @@ describe('SocketSdk', () => {
         .reply(200, {
           id: 'repo-123',
           name: 'test-repo',
-          description: 'Updated description'
+          description: 'Updated description',
         })
 
       const client = new SocketSdk('test-token')
       const res = await client.updateOrgRepo('test-org', 'test-repo', {
-        description: 'Updated description'
+        description: 'Updated description',
       })
 
       expect(res.success).toBe(true)
@@ -885,7 +885,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.updateOrgRepo('test-org', 'test-repo', { name: 'new-name' })
+        client.updateOrgRepo('test-org', 'test-repo', { name: 'new-name' }),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
@@ -906,7 +906,7 @@ describe('SocketSdk', () => {
         .reply(200, {
           allowed: ['MIT', 'Apache-2.0'],
           denied: ['GPL-3.0'],
-          policy: 'strict'
+          policy: 'strict',
         })
 
       const client = new SocketSdk('test-token')
@@ -926,10 +926,10 @@ describe('SocketSdk', () => {
               id: 'event-1',
               action: 'repo.create',
               actor: 'user@example.com',
-              timestamp: '2024-01-01T00:00:00Z'
-            }
+              timestamp: '2024-01-01T00:00:00Z',
+            },
           ],
-          total: 1
+          total: 1,
         })
 
       const client = new SocketSdk('test-token')
@@ -948,9 +948,9 @@ describe('SocketSdk', () => {
         .reply(200, {
           scans: [
             { id: 'scan-1', status: 'complete' },
-            { id: 'scan-2', status: 'processing' }
+            { id: 'scan-2', status: 'processing' },
           ],
-          total: 2
+          total: 2,
         })
 
       const client = new SocketSdk('test-token')
@@ -967,7 +967,7 @@ describe('SocketSdk', () => {
           id: 'scan-123',
           created_at: '2024-01-01T00:00:00Z',
           files_count: 10,
-          issues_count: 5
+          issues_count: 5,
         })
 
       const client = new SocketSdk('test-token')
@@ -1016,7 +1016,7 @@ describe('SocketSdk', () => {
       const res = await client.streamOrgFullScan(
         'test-org',
         'scan-789',
-        tempFile
+        tempFile,
       )
 
       expect(res.success).toBe(true)
@@ -1039,7 +1039,7 @@ describe('SocketSdk', () => {
       const res = await client.streamOrgFullScan(
         'test-org',
         'scan-no-stream',
-        false
+        false,
       )
 
       process.stdout.write = originalWrite
@@ -1051,7 +1051,7 @@ describe('SocketSdk', () => {
       const scanData = {
         id: 'scan-buffered',
         status: 'complete',
-        data: 'Full scan buffered data'
+        data: 'Full scan buffered data',
       }
       nock('https://api.socket.dev')
         .get('/v0/orgs/test-org/full-scans/scan-buffered')
@@ -1060,7 +1060,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
       const res = await client.getOrgFullScanBuffered(
         'test-org',
-        'scan-buffered'
+        'scan-buffered',
       )
 
       expect(res.success).toBe(true)
@@ -1097,7 +1097,7 @@ describe('SocketSdk', () => {
       // Verify the URL encoding is correct
       nock('https://api.socket.dev')
         .get(
-          `/v0/orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`
+          `/v0/orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`,
         )
         .reply(200, scanData)
 
@@ -1116,7 +1116,7 @@ describe('SocketSdk', () => {
       const res = await client.streamOrgFullScan(
         'test-org',
         'missing-scan',
-        false
+        false,
       )
 
       expect(res.success).toBe(false)
@@ -1132,7 +1132,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.streamOrgFullScan('test-org', 'network-error', false)
+        client.streamOrgFullScan('test-org', 'network-error', false),
       ).rejects.toThrow()
     })
 
@@ -1144,7 +1144,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
       const res = await client.getOrgFullScanBuffered(
         'test-org',
-        'missing-buffered'
+        'missing-buffered',
       )
 
       expect(res.success).toBe(false)
@@ -1160,7 +1160,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.getOrgFullScanBuffered('test-org', 'network-error-buffered')
+        client.getOrgFullScanBuffered('test-org', 'network-error-buffered'),
       ).rejects.toThrow()
     })
 
@@ -1172,7 +1172,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.streamOrgFullScan('test-org', 'server-error', false)
+        client.streamOrgFullScan('test-org', 'server-error', false),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
@@ -1184,7 +1184,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
       const res = await client.getOrgFullScanBuffered(
         'test-org',
-        'unauthorized'
+        'unauthorized',
       )
 
       expect(res.success).toBe(false)
@@ -1199,7 +1199,7 @@ describe('SocketSdk', () => {
         period: '30d',
         total_scans: 150,
         total_issues: 45,
-        critical_issues: 5
+        critical_issues: 5,
       })
 
       const client = new SocketSdk('test-token')
@@ -1217,7 +1217,7 @@ describe('SocketSdk', () => {
           repo: 'test-repo',
           period: '7d',
           commits: 25,
-          issues_fixed: 10
+          issues_fixed: 10,
         })
 
       const client = new SocketSdk('test-token')
@@ -1237,7 +1237,7 @@ describe('SocketSdk', () => {
           id: 'scan-123',
           status: 'complete',
           issues: [],
-          created_at: '2024-01-01T00:00:00Z'
+          created_at: '2024-01-01T00:00:00Z',
         })
 
       const client = new SocketSdk('test-token')
@@ -1254,9 +1254,9 @@ describe('SocketSdk', () => {
         .reply(200, {
           reports: [
             { id: 'scan-1', status: 'complete' },
-            { id: 'scan-2', status: 'pending' }
+            { id: 'scan-2', status: 'pending' },
           ],
-          total: 2
+          total: 2,
         })
 
       const client = new SocketSdk('test-token')
@@ -1274,8 +1274,8 @@ describe('SocketSdk', () => {
             'package.json',
             'package-lock.json',
             'yarn.lock',
-            'pnpm-lock.yaml'
-          ]
+            'pnpm-lock.yaml',
+          ],
         })
 
       const client = new SocketSdk('test-token')
@@ -1298,8 +1298,8 @@ describe('SocketSdk', () => {
             overall: 85,
             quality: 90,
             maintenance: 88,
-            vulnerability: 75
-          }
+            vulnerability: 75,
+          },
         })
 
       const client = new SocketSdk('test-token')
@@ -1317,7 +1317,7 @@ describe('SocketSdk', () => {
         .post('/v0/settings')
         .reply(200, {
           updated: true,
-          settings: [{ organization: 'test-org' }]
+          settings: [{ organization: 'test-org' }],
         })
 
       const client = new SocketSdk('test-token')
@@ -1335,21 +1335,21 @@ describe('SocketSdk', () => {
             {
               name: 'express',
               version: '4.18.0',
-              type: 'npm'
+              type: 'npm',
             },
             {
               name: 'lodash',
               version: '4.17.21',
-              type: 'npm'
-            }
+              type: 'npm',
+            },
           ],
-          total: 2
+          total: 2,
         })
 
       const client = new SocketSdk('test-token')
       const res = await client.searchDependencies({
         query: 'express',
-        type: 'npm'
+        type: 'npm',
       })
 
       expect(res.success).toBe(true)
@@ -1363,7 +1363,7 @@ describe('SocketSdk', () => {
       const packages = [
         { purl: 'pkg:npm/package1@1.0.0' },
         { purl: 'pkg:npm/package2@1.0.0' },
-        { purl: 'pkg:npm/package3@1.0.0' }
+        { purl: 'pkg:npm/package3@1.0.0' },
       ]
 
       // Mock two separate batch requests
@@ -1376,7 +1376,7 @@ describe('SocketSdk', () => {
             purl: c.purl,
             name: c.purl.split('/')[1].split('@')[0],
             version: c.purl.split('@')[1],
-            alerts: []
+            alerts: [],
           }))
           return response.map((r: any) => JSON.stringify(r)).join('\n')
         })
@@ -1386,7 +1386,7 @@ describe('SocketSdk', () => {
 
       for await (const result of client.batchPackageStream(
         { components: packages },
-        { chunkSize: 2, concurrencyLimit: 1 }
+        { chunkSize: 2, concurrencyLimit: 1 },
       )) {
         results.push(result)
       }
@@ -1412,7 +1412,7 @@ describe('SocketSdk', () => {
 
         const result = testExports.createRequestBodyForFilepaths(
           [testFile1, testFile2],
-          tempDir
+          tempDir,
         )
 
         // Should have 2 entries, each being an array with 3 elements
@@ -1468,7 +1468,7 @@ describe('SocketSdk', () => {
               expect(streamContent2).toBe(testContent2)
               resolve()
             })
-          })
+          }),
         ])
 
         // Destroy streams to close file handles
@@ -1487,8 +1487,8 @@ describe('SocketSdk', () => {
         .reply(429, {
           error: {
             message: 'Rate limit exceeded',
-            retry_after: 60
-          }
+            retry_after: 60,
+          },
         })
 
       const client = new SocketSdk('test-token')
@@ -1504,8 +1504,8 @@ describe('SocketSdk', () => {
         .get('/v0/report/view/non-existent')
         .reply(404, {
           error: {
-            message: 'Report not found'
-          }
+            message: 'Report not found',
+          },
         })
 
       const client = new SocketSdk('test-token')
@@ -1523,9 +1523,9 @@ describe('SocketSdk', () => {
           error: {
             message: 'Validation failed',
             details: {
-              name: 'Repository name is required'
-            }
-          }
+              name: 'Repository name is required',
+            },
+          },
         })
 
       const client = new SocketSdk('test-token')
@@ -1556,8 +1556,8 @@ describe('SocketSdk', () => {
         .reply(200, {
           organizations: [
             { slug: 'org1', name: 'Organization 1' },
-            { slug: 'org2', name: 'Organization 2' }
-          ]
+            { slug: 'org2', name: 'Organization 2' },
+          ],
         })
 
       const client = new SocketSdk('test-token')
@@ -1587,7 +1587,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(client.getOrgLicensePolicy('test-org')).rejects.toThrow(
-        'Socket API server error (500)'
+        'Socket API server error (500)',
       )
     })
 
@@ -1595,7 +1595,7 @@ describe('SocketSdk', () => {
       nock('https://api.socket.dev')
         .get('/v0/report/supported')
         .reply(200, {
-          files: ['package.json', 'package-lock.json', 'yarn.lock']
+          files: ['package.json', 'package-lock.json', 'yarn.lock'],
         })
 
       const client = new SocketSdk('test-token')
@@ -1613,7 +1613,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(client.getSupportedScanFiles()).rejects.toThrow(
-        'Socket API server error (503)'
+        'Socket API server error (503)',
       )
     })
 
@@ -1623,7 +1623,7 @@ describe('SocketSdk', () => {
         .reply(200, {
           slug: 'test-repo',
           name: 'Test Repository',
-          visibility: 'public'
+          visibility: 'public',
         })
 
       const client = new SocketSdk('test-token')
@@ -1651,8 +1651,8 @@ describe('SocketSdk', () => {
         .reply(200, {
           securityPolicyRules: {
             highSeverity: 'error',
-            mediumSeverity: 'warn'
-          }
+            mediumSeverity: 'warn',
+          },
         })
 
       const client = new SocketSdk('test-token')
@@ -1693,7 +1693,7 @@ describe('SocketSdk', () => {
 
       const client = new SocketSdk('test-token')
       const res = await client.createOrgRepo('test-org', {
-        name: 'existing-repo'
+        name: 'existing-repo',
       })
 
       expect(res.success).toBe(false)
@@ -1804,8 +1804,8 @@ describe('SocketSdk', () => {
         .reply(200, {
           reports: [
             { id: 'report1', name: 'Report 1' },
-            { id: 'report2', name: 'Report 2' }
-          ]
+            { id: 'report2', name: 'Report 2' },
+          ],
         })
 
       const client = new SocketSdk('test-token')
@@ -1835,7 +1835,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(client.getScanList()).rejects.toThrow(
-        'Socket API server error (500)'
+        'Socket API server error (500)',
       )
     })
 
@@ -1847,7 +1847,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(client.getScanList()).rejects.toThrow(
-        'Unexpected Socket API error'
+        'Unexpected Socket API error',
       )
     })
 
@@ -1871,7 +1871,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.createDependenciesSnapshot(['test-package.json'])
+        client.createDependenciesSnapshot(['test-package.json']),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
@@ -1882,7 +1882,7 @@ describe('SocketSdk', () => {
 
       const client = new SocketSdk('test-token')
       const res = await client.uploadManifestFiles('test-org', [
-        'test-package.json'
+        'test-package.json',
       ])
 
       expect(res.success).toBe(true)
@@ -1896,7 +1896,7 @@ describe('SocketSdk', () => {
 
       const client = new SocketSdk('test-token')
       const res = await client.uploadManifestFiles('test-org', [
-        'test-package.json'
+        'test-package.json',
       ])
 
       expect(res.success).toBe(false)
@@ -1924,7 +1924,7 @@ describe('SocketSdk', () => {
       const res = await client.createScanFromFilepaths(
         ['test-package.json'],
         '.',
-        { someRule: true }
+        { someRule: true },
       )
 
       expect(res.success).toBe(true)
@@ -1939,7 +1939,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.createScanFromFilepaths(['test-package.json'])
+        client.createScanFromFilepaths(['test-package.json']),
       ).rejects.toThrow('Socket API server error (502)')
     })
 
@@ -1953,7 +1953,7 @@ describe('SocketSdk', () => {
       const res = await client.createDependenciesSnapshot(
         { repoName: 'old-style' } as any,
         ['test-package.json'] as any,
-        '.' as any
+        '.' as any,
       )
 
       expect(res.success).toBe(true)
@@ -1975,7 +1975,7 @@ describe('SocketSdk', () => {
       nock('https://api.socket.dev')
         .get('/v0/quota')
         .reply(429, 'Rate limit exceeded', {
-          'content-type': 'text/plain'
+          'content-type': 'text/plain',
         })
 
       const client = new SocketSdk('test-token')
@@ -1990,7 +1990,7 @@ describe('SocketSdk', () => {
       nock('https://api.socket.dev')
         .get('/v0/quota')
         .reply(400, 'not-json{invalid', {
-          'content-type': 'application/json'
+          'content-type': 'application/json',
         })
 
       const client = new SocketSdk('test-token')
@@ -2060,7 +2060,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.getOrgFullScanMetadata('test-org', 'scan-123')
+        client.getOrgFullScanMetadata('test-org', 'scan-123'),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
@@ -2072,7 +2072,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(client.getOrgRepoList('test-org')).rejects.toThrow(
-        'Socket API server error (500)'
+        'Socket API server error (500)',
       )
     })
 
@@ -2084,7 +2084,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.getOrgFullScanMetadata('test-org', 'scan-123')
+        client.getOrgFullScanMetadata('test-org', 'scan-123'),
       ).rejects.toThrow('Unexpected Socket API error')
     })
 
@@ -2096,7 +2096,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(client.getOrgRepoList('test-org')).rejects.toThrow(
-        'Unexpected Socket API error'
+        'Unexpected Socket API error',
       )
     })
 
@@ -2120,7 +2120,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(client.getOrgFullScanList('test-org')).rejects.toThrow(
-        'Socket API server error (500)'
+        'Socket API server error (500)',
       )
     })
 
@@ -2132,7 +2132,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(client.getOrgFullScanList('test-org')).rejects.toThrow(
-        'Unexpected Socket API error'
+        'Unexpected Socket API error',
       )
     })
 
@@ -2165,7 +2165,7 @@ describe('SocketSdk', () => {
 
       const client = new SocketSdk('test-token')
       const res = await client.createOrgFullScan('test-org', [
-        'test-package.json'
+        'test-package.json',
       ])
 
       expect(res.success).toBe(true)
@@ -2180,7 +2180,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.createOrgFullScan('test-org', ['test-package.json'])
+        client.createOrgFullScan('test-org', ['test-package.json']),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
@@ -2191,7 +2191,7 @@ describe('SocketSdk', () => {
 
       const client = new SocketSdk('test-token')
       const res = await client.updateOrgRepo('test-org', 'test-repo', {
-        archived: true
+        archived: true,
       })
 
       expect(res.success).toBe(false)
@@ -2206,7 +2206,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.getRepoAnalytics({ orgSlug: 'org', repoSlug: 'repo' })
+        client.getRepoAnalytics({ orgSlug: 'org', repoSlug: 'repo' }),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
@@ -2230,7 +2230,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(client.getScan('sample-scan-id')).rejects.toThrow(
-        'Socket API server error (500)'
+        'Socket API server error (500)',
       )
     })
 
@@ -2242,7 +2242,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.postSettings('test', { key: 'value' })
+        client.postSettings('test', { key: 'value' }),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
@@ -2254,7 +2254,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.searchDependencies({ search: 'test' })
+        client.searchDependencies({ search: 'test' }),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
@@ -2266,7 +2266,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.getIssuesByNPMPackage('test-pkg', '1.0.0')
+        client.getIssuesByNPMPackage('test-pkg', '1.0.0'),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
@@ -2279,8 +2279,8 @@ describe('SocketSdk', () => {
 
       await expect(
         client.createOrgRepo('test-org', 'new-repo', {
-          repoName: 'new-repo'
-        })
+          repoName: 'new-repo',
+        }),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
@@ -2292,7 +2292,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.deleteOrgRepo('test-org', 'old-repo')
+        client.deleteOrgRepo('test-org', 'old-repo'),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
@@ -2304,7 +2304,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(client.getAuditLogEvents('test-org')).rejects.toThrow(
-        'Socket API server error (500)'
+        'Socket API server error (500)',
       )
     })
   })
@@ -2344,7 +2344,7 @@ describe('SocketSdk', () => {
 
       const client = new SocketSdk('test-token')
       const res = await client.updateOrgRepo('test-org', 'test-repo', {
-        archived: false
+        archived: false,
       })
 
       expect(res.success).toBe(true)
@@ -2370,7 +2370,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
       const res = await client.getRepoAnalytics({
         orgSlug: 'test-org',
-        repoSlug: 'test-repo'
+        repoSlug: 'test-repo',
       })
 
       expect(res.success).toBe(true)
@@ -2394,7 +2394,7 @@ describe('SocketSdk', () => {
 
       const client = new SocketSdk('test-token')
       const res = await client.createOrgRepo('test-org', 'new-repo', {
-        name: 'new-repo'
+        name: 'new-repo',
       })
 
       expect(res.success).toBe(true)
@@ -2432,7 +2432,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.postSettings([{ organization: 'test' }])
+        client.postSettings([{ organization: 'test' }]),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
@@ -2444,7 +2444,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.searchDependencies({ search: 'test' })
+        client.searchDependencies({ search: 'test' }),
       ).rejects.toThrow('Socket API server error (500)')
     })
   })
@@ -2469,7 +2469,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
       const res = await client.createDependenciesSnapshot(
         ['/tmp/test.json'],
-        '/tmp'
+        '/tmp',
       )
 
       expect(res.success).toBe(true)
@@ -2483,7 +2483,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.uploadManifestFiles('test-org', ['test-package.json'])
+        client.uploadManifestFiles('test-org', ['test-package.json']),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
@@ -2497,7 +2497,7 @@ describe('SocketSdk', () => {
         'test-org',
         ['test-package.json'],
         '.',
-        { branch: 'main' }
+        { branch: 'main' },
       )
 
       expect(res.success).toBe(true)
@@ -2514,7 +2514,7 @@ describe('SocketSdk', () => {
         'test-org',
         { branch: 'dev' } as any,
         ['test-package.json'] as any,
-        '.' as any
+        '.' as any,
       )
 
       expect(res.success).toBe(true)
@@ -2529,7 +2529,7 @@ describe('SocketSdk', () => {
       const res = await client.createScanFromFilepaths(
         ['test-package.json'],
         '.',
-        { someRule: true }
+        { someRule: true },
       )
 
       expect(res.success).toBe(true)
@@ -2555,7 +2555,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.createScanFromFilepaths(['test-package.json'])
+        client.createScanFromFilepaths(['test-package.json']),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
@@ -2590,7 +2590,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(client.getAuditLogEvents('test-org')).rejects.toThrow(
-        'Socket API server error (500)'
+        'Socket API server error (500)',
       )
     })
 
@@ -2602,7 +2602,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
       const res = await client.getRepoAnalytics({
         orgSlug: 'test-org',
-        repoSlug: 'test-repo'
+        repoSlug: 'test-repo',
       })
 
       expect(res.success).toBe(false)
@@ -2617,7 +2617,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.getRepoAnalytics({ orgSlug: 'test-org', repoSlug: 'test-repo' })
+        client.getRepoAnalytics({ orgSlug: 'test-org', repoSlug: 'test-repo' }),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
@@ -2641,7 +2641,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(client.getScan('test-scan-id')).rejects.toThrow(
-        'Socket API server error (500)'
+        'Socket API server error (500)',
       )
     })
 
@@ -2652,7 +2652,7 @@ describe('SocketSdk', () => {
 
       const client = new SocketSdk('test-token')
       const res = await client.updateOrgRepo('test-org', 'test-repo', {
-        archived: true
+        archived: true,
       })
 
       expect(res.success).toBe(false)
@@ -2667,7 +2667,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.updateOrgRepo('test-org', 'test-repo', { archived: true })
+        client.updateOrgRepo('test-org', 'test-repo', { archived: true }),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
@@ -2678,7 +2678,7 @@ describe('SocketSdk', () => {
 
       const client = new SocketSdk('test-token')
       const res = await client.createOrgRepo('test-org', 'new-repo', {
-        name: 'new-repo'
+        name: 'new-repo',
       })
 
       expect(res.success).toBe(false)
@@ -2693,7 +2693,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.createOrgRepo('test-org', 'new-repo', { name: 'new-repo' })
+        client.createOrgRepo('test-org', 'new-repo', { name: 'new-repo' }),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
@@ -2717,7 +2717,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.deleteOrgRepo('test-org', 'old-repo')
+        client.deleteOrgRepo('test-org', 'old-repo'),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
@@ -2741,7 +2741,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.getIssuesByNPMPackage('test-pkg', '1.0.0')
+        client.getIssuesByNPMPackage('test-pkg', '1.0.0'),
       ).rejects.toThrow('Socket API server error (500)')
     })
   })
@@ -2873,7 +2873,7 @@ describe('SocketSdk', () => {
         .reply(200, { metadata: {} })
       const metadata = await client.getOrgFullScanMetadata(
         'test-org',
-        'scan-123'
+        'scan-123',
       )
       expect(metadata.success).toBe(true)
 
@@ -2936,7 +2936,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
       const res = await client.getRepoAnalytics({
         orgSlug: 'test-org',
-        repoSlug: 'test-repo'
+        repoSlug: 'test-repo',
       })
       expect(res.success).toBe(true)
     })
@@ -2965,7 +2965,7 @@ describe('SocketSdk', () => {
         .reply(200, { updated: true })
       const client = new SocketSdk('test-token')
       const res = await client.updateOrgRepo('test-org', 'test-repo', {
-        archived: false
+        archived: false,
       })
       expect(res.success).toBe(true)
     })
@@ -2976,7 +2976,7 @@ describe('SocketSdk', () => {
         .reply(200, { created: true })
       const client = new SocketSdk('test-token')
       const res = await client.createOrgRepo('test-org', 'new-repo', {
-        name: 'new-repo'
+        name: 'new-repo',
       })
       expect(res.success).toBe(true)
     })
@@ -3014,7 +3014,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
       const client = new SocketSdk('test-token')
       await expect(
-        client.createDependenciesSnapshot(['test-package.json'])
+        client.createDependenciesSnapshot(['test-package.json']),
       ).rejects.toThrow('Unexpected Socket API error')
     })
 
@@ -3024,7 +3024,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
       const client = new SocketSdk('test-token')
       await expect(
-        client.uploadManifestFiles('test-org', ['test-package.json'])
+        client.uploadManifestFiles('test-org', ['test-package.json']),
       ).rejects.toThrow('Unexpected Socket API error')
     })
 
@@ -3034,7 +3034,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
       const client = new SocketSdk('test-token')
       await expect(
-        client.createOrgFullScan('test-org', ['test-package.json'])
+        client.createOrgFullScan('test-org', ['test-package.json']),
       ).rejects.toThrow('Unexpected Socket API error')
     })
 
@@ -3044,7 +3044,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
       const client = new SocketSdk('test-token')
       await expect(
-        client.createScanFromFilepaths(['test-package.json'])
+        client.createScanFromFilepaths(['test-package.json']),
       ).rejects.toThrow('Unexpected Socket API error')
     })
   })
@@ -3084,7 +3084,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
       const packages = [
         { name: 'test-pkg1', version: '1.0.0' },
-        { name: 'test-pkg2', version: '2.0.0' }
+        { name: 'test-pkg2', version: '2.0.0' },
       ]
 
       // Mock the batch package fetch endpoint
@@ -3107,8 +3107,8 @@ describe('SocketSdk', () => {
         undefined,
         {
           concurrencyLimit: 5, // This will trigger the max listeners adjustment
-          signal: abortController.signal
-        }
+          signal: abortController.signal,
+        },
       )
 
       expect(results.length).toBe(2)
@@ -3134,7 +3134,7 @@ describe('SocketSdk', () => {
         'test-org',
         { someQuery: 'value' } as any, // queryParams in old position
         [testFile] as any, // files in old position
-        tempDir as any // basePath in old position
+        tempDir as any, // basePath in old position
       )
 
       expect(result.success).toBe(true)
@@ -3153,7 +3153,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
 
       await expect(client.getScan('scan-id')).rejects.toThrow(
-        'Unexpected Socket API error'
+        'Unexpected Socket API error',
       )
     })
 
@@ -3164,7 +3164,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
 
       await expect(
-        client.updateOrgRepo('test-org', 'test-repo')
+        client.updateOrgRepo('test-org', 'test-repo'),
       ).rejects.toThrow('Unexpected Socket API error')
     })
 
@@ -3175,7 +3175,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
 
       await expect(
-        client.createOrgRepo('test-org', 'test-repo', { someOption: true })
+        client.createOrgRepo('test-org', 'test-repo', { someOption: true }),
       ).rejects.toThrow('Unexpected Socket API error')
     })
 
@@ -3186,7 +3186,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
 
       await expect(
-        client.deleteOrgRepo('test-org', 'test-repo')
+        client.deleteOrgRepo('test-org', 'test-repo'),
       ).rejects.toThrow('Unexpected Socket API error')
     })
 
@@ -3197,7 +3197,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
 
       await expect(
-        client.getIssuesByNPMPackage('test-package', '1.0.0')
+        client.getIssuesByNPMPackage('test-package', '1.0.0'),
       ).rejects.toThrow('Unexpected Socket API error')
     })
   })
@@ -3218,7 +3218,7 @@ describe('SocketSdk', () => {
       const result = await client.createDependenciesSnapshot(
         { someQuery: 'value' },
         [testFile],
-        tempDir
+        tempDir,
       )
 
       expect(result.success).toBe(true)
@@ -3241,7 +3241,7 @@ describe('SocketSdk', () => {
         .reply(200, { id: 'test-123', success: true })
 
       const result = await client.createScanFromFilepaths([testFile], tempDir, {
-        key: true
+        key: true,
       })
 
       expect(result.success).toBe(true)
@@ -3263,7 +3263,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
 
       await expect(client.createScanFromFilepaths([testFile])).rejects.toThrow(
-        'Unexpected Socket API error'
+        'Unexpected Socket API error',
       )
 
       // Cleanup
@@ -3280,7 +3280,7 @@ describe('SocketSdk', () => {
 
       // Should throw an error as network errors are not handled gracefully
       await expect(client.getAuditLogEvents('test-org')).rejects.toThrow(
-        'Unexpected Socket API error'
+        'Unexpected Socket API error',
       )
     })
 
@@ -3294,7 +3294,7 @@ describe('SocketSdk', () => {
 
       // Should throw an error as network errors are not handled gracefully
       await expect(client.getRepoAnalytics('test-repo', '30d')).rejects.toThrow(
-        'Unexpected Socket API error'
+        'Unexpected Socket API error',
       )
     })
   })
@@ -3310,7 +3310,7 @@ describe('SocketSdk', () => {
 
       // Should throw an error as network errors are not handled gracefully
       await expect(
-        client.postSettings([{ organization: 'test' }])
+        client.postSettings([{ organization: 'test' }]),
       ).rejects.toThrow('Unexpected Socket API error')
     })
 
@@ -3324,7 +3324,7 @@ describe('SocketSdk', () => {
 
       // Should throw an error as network errors are not handled gracefully
       await expect(
-        client.searchDependencies({ query: 'test' })
+        client.searchDependencies({ query: 'test' }),
       ).rejects.toThrow('Unexpected Socket API error')
     })
 
@@ -3351,7 +3351,7 @@ describe('SocketSdk', () => {
 
       // 500 errors throw by default
       await expect(
-        client.searchDependencies({ query: 'test' })
+        client.searchDependencies({ query: 'test' }),
       ).rejects.toThrow('Socket API server error (500)')
     })
   })
@@ -3360,7 +3360,7 @@ describe('SocketSdk', () => {
     it('should handle batchPackageStream with public token', async () => {
       // Use the actual public token
       const client = new SocketSdk(
-        'sktsec_t_--RAN5U4ivauy4w37-6aoKyYPDt5ZbaT5JBVMqiwKo_api'
+        'sktsec_t_--RAN5U4ivauy4w37-6aoKyYPDt5ZbaT5JBVMqiwKo_api',
       )
       const packages = [{ name: 'test-pkg', version: '1.0.0' }]
 
@@ -3369,12 +3369,12 @@ describe('SocketSdk', () => {
         .post('/v0/purl')
         .reply(
           200,
-          '{"id":"1","name":"test-pkg","version":"1.0.0","score":{"score":0.5},"alerts":[{"type":"malware","severity":"high"}]}\n'
+          '{"id":"1","name":"test-pkg","version":"1.0.0","score":{"score":0.5},"alerts":[{"type":"malware","severity":"high"}]}\n',
         )
 
       const results: any[] = []
       for await (const pkg of client.batchPackageStream({
-        components: [{ purl: 'pkg:npm/test-pkg@1.0.0' }]
+        components: [{ purl: 'pkg:npm/test-pkg@1.0.0' }],
       })) {
         results.push(pkg)
       }
@@ -3386,7 +3386,7 @@ describe('SocketSdk', () => {
     it('should handle batchPackageFetch with public token', async () => {
       // Use the actual public token
       const client = new SocketSdk(
-        'sktsec_t_--RAN5U4ivauy4w37-6aoKyYPDt5ZbaT5JBVMqiwKo_api'
+        'sktsec_t_--RAN5U4ivauy4w37-6aoKyYPDt5ZbaT5JBVMqiwKo_api',
       )
       const packages = [{ purl: 'pkg:npm/test-pkg@1.0.0' }]
 
@@ -3395,7 +3395,7 @@ describe('SocketSdk', () => {
         .post('/v0/purl')
         .reply(
           200,
-          '{"id":"1","name":"test-pkg","version":"1.0.0","score":{"score":0.5},"alerts":[{"type":"criticalCVE","severity":"high"}]}\n'
+          '{"id":"1","name":"test-pkg","version":"1.0.0","score":{"score":0.5},"alerts":[{"type":"criticalCVE","severity":"high"}]}\n',
         )
 
       const result = await client.batchPackageFetch({ components: packages })
@@ -3415,7 +3415,7 @@ describe('SocketSdk', () => {
 
       const results: any[] = []
       for await (const pkg of client.batchPackageStream({
-        components: [{ purl: 'pkg:npm/pkg1@1.0.0' }]
+        components: [{ purl: 'pkg:npm/pkg1@1.0.0' }],
       })) {
         results.push(pkg)
       }
@@ -3433,7 +3433,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
 
       const generator = client.batchPackageStream({
-        components: [{ purl: 'pkg:npm/test@1.0.0' }]
+        components: [{ purl: 'pkg:npm/test@1.0.0' }],
       })
 
       // Try to iterate and catch error
@@ -3459,8 +3459,8 @@ describe('SocketSdk', () => {
 
       await expect(
         client.getOrgFullScanList({
-          components: [{ purl: 'pkg:npm/test@1.0.0' }]
-        })
+          components: [{ purl: 'pkg:npm/test@1.0.0' }],
+        }),
       ).rejects.toThrow('Unexpected Socket API error')
     })
   })
@@ -3469,7 +3469,7 @@ describe('SocketSdk', () => {
     it('should handle reshapeArtifactForPublicPolicy with non-public actions', () => {
       // Test alert action filtering where publicAction is null
       const client = new SocketSdk(
-        'sktsec_t_--RAN5U4ivauy4w37-6aoKyYPDt5ZbaT5JBVMqiwKo_api'
+        'sktsec_t_--RAN5U4ivauy4w37-6aoKyYPDt5ZbaT5JBVMqiwKo_api',
       )
       // This test verifies the branch where publicAction is null and falls back to alert.action
       expect(client).toBeDefined()
@@ -3478,7 +3478,7 @@ describe('SocketSdk', () => {
     it('should handle GotOptions with only http agent', () => {
       const httpAgent = { keepAlive: true }
       const client = new SocketSdk('test-token', {
-        agent: { http: httpAgent }
+        agent: { http: httpAgent },
       })
       expect(client).toBeDefined()
     })
@@ -3486,7 +3486,7 @@ describe('SocketSdk', () => {
     it('should handle GotOptions with only http2 agent', () => {
       const http2Agent = { timeout: 5000 }
       const client = new SocketSdk('test-token', {
-        agent: { http2: http2Agent }
+        agent: { http2: http2Agent },
       })
       expect(client).toBeDefined()
     })
@@ -3504,9 +3504,7 @@ describe('SocketSdk', () => {
 
     it('should handle error response with null message', async () => {
       const client = new SocketSdk('test-token')
-      nock('https://api.socket.dev')
-        .get('/v0/quota')
-        .reply(400, {})
+      nock('https://api.socket.dev').get('/v0/quota').reply(400, {})
 
       const result = await client.getQuota()
       expect(result.success).toBe(false)
@@ -3527,7 +3525,9 @@ describe('SocketSdk', () => {
     })
 
     it('should handle custom user agent', () => {
-      const client = new SocketSdk('test-token', { userAgent: 'CustomAgent/1.0' })
+      const client = new SocketSdk('test-token', {
+        userAgent: 'CustomAgent/1.0',
+      })
       expect(client).toBeDefined()
     })
 
@@ -3539,8 +3539,8 @@ describe('SocketSdk', () => {
         .reply(200, '{"name":"pkg1","version":"1.0.0"}\n')
 
       const result = await client.batchPackageFetch(
-        { components: [{purl: 'pkg:npm/test@1.0.0'}] },
-        { compact: true }
+        { components: [{ purl: 'pkg:npm/test@1.0.0' }] },
+        { compact: true },
       )
       expect(result.success).toBe(true)
     })
@@ -3551,14 +3551,14 @@ describe('SocketSdk', () => {
         .get('/v0/quota')
         .replyWithError('Network error')
 
-      await expect(client.getQuota()).rejects.toThrow('Unexpected Socket API error')
+      await expect(client.getQuota()).rejects.toThrow(
+        'Unexpected Socket API error',
+      )
     })
 
     it('should handle error without message', async () => {
       const client = new SocketSdk('test-token')
-      nock('https://api.socket.dev')
-        .get('/v0/quota')
-        .reply(400, '')
+      nock('https://api.socket.dev').get('/v0/quota').reply(400, '')
 
       const result = await client.getQuota()
       expect(result.success).toBe(false)
@@ -3579,7 +3579,9 @@ describe('SocketSdk', () => {
           return [403, 'Forbidden']
         })
 
-      const generator = client.batchPackageStream({ components: [{purl: 'pkg:npm/test@1.0.0'}] })
+      const generator = client.batchPackageStream({
+        components: [{ purl: 'pkg:npm/test@1.0.0' }],
+      })
       let hasError = false
       for await (const result of generator) {
         if (!result.success) {
@@ -3611,7 +3613,9 @@ describe('SocketSdk', () => {
           return [200, '{"name":"test","version":"1.0.0"}\n']
         })
 
-      const generator = client.batchPackageStream({ components: [{purl: 'pkg:npm/test@1.0.0'}] })
+      const generator = client.batchPackageStream({
+        components: [{ purl: 'pkg:npm/test@1.0.0' }],
+      })
       const results: any[] = []
       for await (const result of generator) {
         results.push(result)
@@ -3628,10 +3632,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       // Mock with any query to avoid strict matching
-      nock('https://api.socket.dev')
-        .get('/v0/scans')
-        .query(true)
-        .reply(200, [])
+      nock('https://api.socket.dev').get('/v0/scans').query(true).reply(200, [])
 
       // Pass 0 as a value which should be included (not filtered out)
       const result = await client.getScanList({ page: 0 })
@@ -3641,10 +3642,7 @@ describe('SocketSdk', () => {
     it.skip('should handle false value in query params', async () => {
       const client = new SocketSdk('test-token')
 
-      nock('https://api.socket.dev')
-        .get('/v0/scans')
-        .query(true)
-        .reply(200, [])
+      nock('https://api.socket.dev').get('/v0/scans').query(true).reply(200, [])
 
       // Pass false which should be filtered out
       const result = await client.getScanList({ page: false as any })
@@ -3659,7 +3657,7 @@ describe('SocketSdk', () => {
       nock('https://api.socket.dev')
         .persist()
         .get('/v0/quota')
-        .reply(function() {
+        .reply(function () {
           callCount++
           if (callCount === 1) {
             // First call returns undefined statusCode to trigger the ?? operator
@@ -3681,9 +3679,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
 
       // Mock that returns error without message property
-      nock('https://api.socket.dev')
-        .get('/v0/quota')
-        .reply(404, { error: {} })
+      nock('https://api.socket.dev').get('/v0/quota').reply(404, { error: {} })
 
       const result = await client.getQuota()
       expect(result.success).toBe(false)
@@ -3700,7 +3696,7 @@ describe('SocketSdk', () => {
       // Test with 0 which should be included
       nock('https://api.socket.dev')
         .get('/v0/scans')
-        .query((query) => {
+        .query(query => {
           // Check that 0 value is included
           return query.page === '0'
         })
@@ -3715,7 +3711,7 @@ describe('SocketSdk', () => {
 
       nock('https://api.socket.dev')
         .get('/v0/scans')
-        .query((query) => {
+        .query(query => {
           // Undefined values should not be in query
           return !('page' in query)
         })
@@ -3726,17 +3722,22 @@ describe('SocketSdk', () => {
     })
 
     it.skip('should handle alert filtering with public token and non-matching actions', async () => {
-      const client = new SocketSdk('sktsec_t_--RAN5U4ivauy4w37-6aoKyYPDt5ZbaT5JBVMqiwKo_api')
+      const client = new SocketSdk(
+        'sktsec_t_--RAN5U4ivauy4w37-6aoKyYPDt5ZbaT5JBVMqiwKo_api',
+      )
 
       // Mock response with alert that has action not in allowed list
       nock('https://api.socket.dev')
         .post('/v0/purl')
         .query({ alert_actions: 'warn' })
-        .reply(200, '{"name":"test","version":"1.0.0","alerts":[{"type":"customAlert","action":"error"}]}\n')
+        .reply(
+          200,
+          '{"name":"test","version":"1.0.0","alerts":[{"type":"customAlert","action":"error"}]}\n',
+        )
 
       const result = await client.batchPackageFetch(
-        { components: [{purl: 'pkg:npm/test@1.0.0'}] },
-        { alertActions: 'warn' }
+        { components: [{ purl: 'pkg:npm/test@1.0.0' }] },
+        { alertActions: 'warn' },
       )
 
       expect(result.success).toBe(true)
@@ -3749,7 +3750,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
       nock('https://api.socket.dev')
         .get('/v0/scans')
-        .query(true)  // Accept any query params
+        .query(true) // Accept any query params
         .reply(200, [])
 
       const result = await client.getScanList({ page: 0 })
@@ -3758,9 +3759,7 @@ describe('SocketSdk', () => {
 
     it.skip('should handle query param with undefined value', async () => {
       const client = new SocketSdk('test-token')
-      nock('https://api.socket.dev')
-        .get('/v0/scans')
-        .reply(200, [])
+      nock('https://api.socket.dev').get('/v0/scans').reply(200, [])
 
       const result = await client.getScanList({ page: undefined })
       expect(result.success).toBe(true)
@@ -3795,7 +3794,7 @@ describe('SocketSdk', () => {
       const client4 = new SocketSdk('test-token', {
         https: httpsAgent,
         http: httpAgent,
-        http2: http2Agent
+        http2: http2Agent,
       })
       expect(client4).toBeDefined()
     })
@@ -3805,7 +3804,7 @@ describe('SocketSdk', () => {
       nock('https://api.socket.dev').post('/v0/purl').reply(401, 'Unauthorized')
 
       const generator = client.batchPackageStream({
-        components: [{ purl: 'pkg:npm/test@1.0.0' }]
+        components: [{ purl: 'pkg:npm/test@1.0.0' }],
       })
       let hasError = false
       for await (const result of generator) {
@@ -3821,7 +3820,7 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
       nock('https://api.socket.dev')
         .get('/v0/orgs/test-org/audit-log')
-        .query((queryObject) => {
+        .query(queryObject => {
           // Check that perPage was transformed to per_page
           return queryObject['per_page'] === '20'
         })
@@ -3835,18 +3834,22 @@ describe('SocketSdk', () => {
       const client = new SocketSdk('test-token')
       nock('https://api.socket.dev')
         .get('/v0/orgs/test-org/repos')
-        .query((queryObject) => {
+        .query(queryObject => {
           // Check that defaultBranch was transformed to default_branch
           return queryObject['default_branch'] === 'main'
         })
         .reply(200, [])
 
-      const result = await client.getOrgRepoList('test-org', { defaultBranch: 'main' })
+      const result = await client.getOrgRepoList('test-org', {
+        defaultBranch: 'main',
+      })
       expect(result.success).toBe(true)
     })
 
     it('should handle HTTP protocol URLs', async () => {
-      const client = new SocketSdk('test-token', { baseUrl: 'http://api.socket.dev/v0/' })
+      const client = new SocketSdk('test-token', {
+        baseUrl: 'http://api.socket.dev/v0/',
+      })
       nock('http://api.socket.dev')
         .get('/v0/npm/test-pkg/1.0.0/score')
         .reply(200, '{"score":{"score":0.8}}\n')
@@ -3883,9 +3886,7 @@ describe('SocketSdk', () => {
 
       try {
         const client = new SocketSdk('test-token')
-        nock('https://api.socket.dev')
-          .get('/v0/report/list')
-          .reply(200, [])
+        nock('https://api.socket.dev').get('/v0/report/list').reply(200, [])
 
         const result = await client.getScanList()
         expect(result.success).toBe(true)
@@ -3915,9 +3916,7 @@ describe('SocketSdk', () => {
         throw { notAnError: true }
       }
 
-      nock('https://api.socket.dev')
-        .get('/v0/report/list')
-        .reply(200, 'valid')
+      nock('https://api.socket.dev').get('/v0/report/list').reply(200, 'valid')
 
       let hasError = false
       try {
@@ -3934,7 +3933,7 @@ describe('SocketSdk', () => {
 
     it.skip('should handle reshapeArtifactForPublicPolicy with filtered alerts', async () => {
       const client = new SocketSdk(
-        'sktsec_t_--RAN5U4ivauy4w37-6aoKyYPDt5ZbaT5JBVMqiwKo_api'
+        'sktsec_t_--RAN5U4ivauy4w37-6aoKyYPDt5ZbaT5JBVMqiwKo_api',
       )
 
       // Mock response with alert that will be filtered out
@@ -3943,12 +3942,12 @@ describe('SocketSdk', () => {
         .query(true) // Accept any query params
         .reply(
           200,
-          '{"name":"test-pkg","version":"1.0.0","alerts":[{"type":"unknown","action":"error"}]}\n'
+          '{"name":"test-pkg","version":"1.0.0","alerts":[{"type":"unknown","action":"error"}]}\n',
         )
 
       const result = await client.batchPackageFetch(
         { components: [{ purl: 'pkg:npm/test@1.0.0' }] },
-        { alertActions: 'warn' }
+        { alertActions: 'warn' },
       )
       expect(result.success).toBe(true)
       if (result.success && result.data) {
@@ -3962,11 +3961,11 @@ describe('SocketSdk', () => {
         .post('/v0/purl')
         .reply(
           200,
-          '{"name":"pkg1","version":"1.0.0"}\n\n{"name":"pkg2","version":"2.0.0"}\n'
+          '{"name":"pkg1","version":"1.0.0"}\n\n{"name":"pkg2","version":"2.0.0"}\n',
         )
 
       const result = await client.batchPackageFetch({
-        components: [{ purl: 'pkg:npm/test@1.0.0' }]
+        components: [{ purl: 'pkg:npm/test@1.0.0' }],
       })
       expect(result.success).toBe(true)
       if (result.success && result.data) {
@@ -3981,7 +3980,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
 
       await expect(client.getOrganizations()).rejects.toThrow(
-        'Unexpected Socket API error'
+        'Unexpected Socket API error',
       )
     })
 
@@ -3992,7 +3991,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
 
       await expect(client.getQuota()).rejects.toThrow(
-        'Unexpected Socket API error'
+        'Unexpected Socket API error',
       )
     })
 
@@ -4003,7 +4002,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
 
       await expect(
-        client.getScoreByNPMPackage('test-pkg', '1.0.0')
+        client.getScoreByNPMPackage('test-pkg', '1.0.0'),
       ).rejects.toThrow('Unexpected Socket API error')
     })
 
@@ -4014,7 +4013,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
 
       await expect(client.getOrgSecurityPolicy('test-org')).rejects.toThrow(
-        'Unexpected Socket API error'
+        'Unexpected Socket API error',
       )
     })
 
@@ -4025,7 +4024,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
 
       await expect(client.getScanList()).rejects.toThrow(
-        'Unexpected Socket API error'
+        'Unexpected Socket API error',
       )
     })
 
@@ -4040,7 +4039,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
 
       await expect(client.uploadManifestFiles([testFile])).rejects.toThrow(
-        'Unexpected Socket API error'
+        'Unexpected Socket API error',
       )
 
       rmSync(tempDir, { recursive: true, force: true })
@@ -4057,7 +4056,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
 
       await expect(
-        client.createDependenciesSnapshot([testFile], tempDir)
+        client.createDependenciesSnapshot([testFile], tempDir),
       ).rejects.toThrow('Unexpected Socket API error')
 
       rmSync(tempDir, { recursive: true, force: true })
@@ -4074,7 +4073,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
 
       await expect(
-        client.createOrgFullScan('test-org', [testFile], tempDir)
+        client.createOrgFullScan('test-org', [testFile], tempDir),
       ).rejects.toThrow('Unexpected Socket API error')
 
       rmSync(tempDir, { recursive: true, force: true })
@@ -4085,7 +4084,7 @@ describe('SocketSdk', () => {
     it.skip('should handle batchPackageFetch with successful stream', async () => {
       const packages = [
         { name: 'pkg1', version: '1.0.0' },
-        { name: 'pkg2', version: '2.0.0' }
+        { name: 'pkg2', version: '2.0.0' },
       ]
 
       nock('https://api.socket.dev')
@@ -4094,7 +4093,7 @@ describe('SocketSdk', () => {
           200,
           JSON.stringify({ id: '1', name: 'pkg1' }) +
             '\n' +
-            JSON.stringify({ id: '2', name: 'pkg2' })
+            JSON.stringify({ id: '2', name: 'pkg2' }),
         )
 
       const client = new SocketSdk('test-token')
@@ -4122,7 +4121,7 @@ describe('SocketSdk', () => {
         () => {},
         err => {
           errors.push(err)
-        }
+        },
       )
 
       expect(errors.length).toBeGreaterThan(0)

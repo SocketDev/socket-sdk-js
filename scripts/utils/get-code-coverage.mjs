@@ -16,7 +16,7 @@ export async function getCodeCoverage(options = {}) {
   const coverageJsonPath = path.join(
     process.cwd(),
     'coverage',
-    'coverage-final.json'
+    'coverage-final.json',
   )
 
   if (!existsSync(coverageJsonPath)) {
@@ -26,11 +26,13 @@ export async function getCodeCoverage(options = {}) {
 
     const result = await spawn('pnpm', ['run', 'test:unit:coverage'], {
       stdio: 'ignore',
-      shell: constants.WIN32
+      shell: constants.WIN32,
     })
 
     if (result.code !== 0) {
-      throw new Error(`Failed to generate coverage data: exit code ${result.code}`)
+      throw new Error(
+        `Failed to generate coverage data: exit code ${result.code}`,
+      )
     }
   }
 
@@ -98,22 +100,22 @@ export async function getCodeCoverage(options = {}) {
     statements: {
       percent: stmtPercent,
       covered: coveredStatements,
-      total: totalStatements
+      total: totalStatements,
     },
     branches: {
       percent: branchPercent,
       covered: coveredBranches,
-      total: totalBranches
+      total: totalBranches,
     },
     functions: {
       percent: funcPercent,
       covered: coveredFunctions,
-      total: totalFunctions
+      total: totalFunctions,
     },
     lines: {
       percent: linePercent,
       covered: coveredLines,
-      total: totalLines
-    }
+      total: totalLines,
+    },
   }
 }

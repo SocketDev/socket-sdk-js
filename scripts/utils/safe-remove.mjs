@@ -40,7 +40,7 @@ export async function safeRemove(paths, options) {
           }
         }
       },
-      { concurrency }
+      { concurrency },
     )
   }
 }

@@ -17,7 +17,7 @@ export default defineConfig({
         'types/**',
         'test/**',
         '**/*.mjs',
-        '**/*.cjs'
+        '**/*.cjs',
       ],
       include: ['src/**/*.ts'],
       all: true,
@@ -25,8 +25,8 @@ export default defineConfig({
         lines: 99,
         functions: 99,
         branches: 99,
-        statements: 99
-      }
-    }
-  }
+        statements: 99,
+      },
+    },
+  },
 })
