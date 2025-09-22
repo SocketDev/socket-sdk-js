@@ -3,8 +3,10 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   test: {
     coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
       exclude: [
-        '**/{eslint,vitest}.config.*',
+        '**/*.config.*',
         '**/node_modules/**',
         '**/[.]**',
         '**/*.d.ts',
@@ -12,9 +14,19 @@ export default defineConfig({
         'coverage/**',
         'dist/**',
         'scripts/**',
-        'types/**/*.ts',
-        'test/**'
-      ]
+        'types/**',
+        'test/**',
+        '**/*.mjs',
+        '**/*.cjs'
+      ],
+      include: ['src/**/*.ts'],
+      all: true,
+      thresholds: {
+        lines: 99,
+        functions: 99,
+        branches: 99,
+        statements: 99
+      }
     }
   }
 })
