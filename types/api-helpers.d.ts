@@ -1,6 +1,6 @@
 declare type ValueOf<
   ObjectType,
-  ValueType extends keyof ObjectType = keyof ObjectType
+  ValueType extends keyof ObjectType = keyof ObjectType,
 > = ObjectType[ValueType]
 
 // Based on openapi-typescript-fetch.

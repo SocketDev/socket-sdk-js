@@ -15,7 +15,7 @@ import { pRetry } from '@socketsecurity/registry/lib/promises'
 import {
   parseUrl,
   urlSearchParamAsArray,
-  urlSearchParamAsBoolean
+  urlSearchParamAsBoolean,
 } from '@socketsecurity/registry/lib/url'
 
 // Import attributes are only supported when the '--module' option is set to
@@ -32,12 +32,12 @@ import type {
   ClientRequest,
   Agent as HttpAgent,
   RequestOptions as HttpRequestOptions,
-  IncomingMessage
+  IncomingMessage,
 } from 'node:http'
 import type { ClientSessionRequestOptions } from 'node:http2'
 import type {
   Agent as HttpsAgent,
-  RequestOptions as HttpsRequestOptions
+  RequestOptions as HttpsRequestOptions,
 } from 'node:https'
 
 export type ALERT_ACTION = 'error' | 'monitor' | 'warn' | 'ignore'
@@ -263,7 +263,7 @@ const publicPolicy = new Map<ALERT_TYPE, ALERT_ACTION>([
   ['unusedDependency', 'ignore'],
   ['urlStrings', 'ignore'],
   ['usesEval', 'ignore'],
-  ['zeroWidth', 'ignore']
+  ['zeroWidth', 'ignore'],
 ])
 
 class ResponseError extends Error {
@@ -274,7 +274,7 @@ class ResponseError extends Error {
     const statusMessage = response.statusMessage ?? 'No status message'
     super(
       /* c8 ignore next - fallback empty message if not provided */
-      `Socket API ${message || 'Request failed'} (${statusCode}): ${statusMessage}`
+      `Socket API ${message || 'Request failed'} (${statusCode}): ${statusMessage}`,
     )
     this.name = 'ResponseError'
     this.response = response
@@ -285,12 +285,12 @@ class ResponseError extends Error {
 async function createDeleteRequest(
   baseUrl: string,
   urlPath: string,
-  options: RequestOptions
+  options: RequestOptions,
 ): Promise<IncomingMessage> {
   const req = getHttpModule(baseUrl)
     .request(`${baseUrl}${urlPath}`, {
       method: 'DELETE',
-      ...options
+      ...options,
     })
     .end()
   return await getResponse(req)
@@ -299,12 +299,12 @@ async function createDeleteRequest(
 async function createGetRequest(
   baseUrl: string,
   urlPath: string,
-  options: RequestOptions
+  options: RequestOptions,
 ): Promise<IncomingMessage> {
   const req = getHttpModule(baseUrl)
     .request(`${baseUrl}${urlPath}`, {
       method: 'GET',
-      ...options
+      ...options,
     })
     .end()
   return await getResponse(req)
@@ -314,12 +314,12 @@ async function createPostRequest(
   baseUrl: string,
   urlPath: string,
   postJson: any,
-  options: RequestOptions
+  options: RequestOptions,
 ): Promise<IncomingMessage> {
   const req = getHttpModule(baseUrl)
     .request(`${baseUrl}${urlPath}`, {
       method: 'POST',
-      ...options
+      ...options,
     })
     .end(JSON.stringify(postJson))
   return await getResponse(req)
@@ -328,7 +328,7 @@ async function createPostRequest(
 // Exported for testing.
 export function createRequestBodyForFilepaths(
   filepaths: string[],
-  basePath: string
+  basePath: string,
 ): Array<Array<string | ReadStream>> {
   const requestBody = []
   for (const absPath of filepaths) {
@@ -337,7 +337,7 @@ export function createRequestBodyForFilepaths(
     requestBody.push([
       `Content-Disposition: form-data; name="${relPath}"; filename="${filename}"\r\n`,
       `Content-Type: application/octet-stream\r\n\r\n`,
-      createReadStream(absPath, { highWaterMark: 1024 * 1024 })
+      createReadStream(absPath, { highWaterMark: 1024 * 1024 }),
     ])
   }
   return requestBody
@@ -345,7 +345,7 @@ export function createRequestBodyForFilepaths(
 
 function createRequestBodyForJson(
   jsonData: any,
-  basename = 'data.json'
+  basename = 'data.json',
 ): Array<string | Readable> {
   const ext = path.extname(basename)
   const name = path.basename(basename, ext)
@@ -353,7 +353,7 @@ function createRequestBodyForJson(
     `Content-Disposition: form-data; name="${name}"; filename="${basename}"\r\n` +
       `Content-Type: application/json\r\n\r\n`,
     Readable.from(JSON.stringify(jsonData), { highWaterMark: 1024 * 1024 }),
-    '\r\n'
+    '\r\n',
   ]
 }
 
@@ -361,7 +361,7 @@ async function createUploadRequest(
   baseUrl: string,
   urlPath: string,
   requestBodyNoBoundaries: Array<string | Readable | Array<string | Readable>>,
-  options: RequestOptions
+  options: RequestOptions,
 ): Promise<IncomingMessage> {
   // This function constructs and sends a multipart/form-data HTTP POST request
   // where each part is streamed to the server. It supports string payloads
@@ -388,9 +388,9 @@ async function createUploadRequest(
     const requestBody = [
       ...requestBodyNoBoundaries.flatMap(part => [
         boundarySep,
-        ...(Array.isArray(part) ? part : [part])
+        ...(Array.isArray(part) ? part : [part]),
       ]),
-      finalBoundary
+      finalBoundary,
     ]
 
     const url = new URL(urlPath, baseUrl)
@@ -399,8 +399,8 @@ async function createUploadRequest(
       ...options,
       headers: {
         ...(options as HttpsRequestOptions)?.headers,
-        'Content-Type': `multipart/form-data; boundary=${boundary}`
-      }
+        'Content-Type': `multipart/form-data; boundary=${boundary}`,
+      },
     })
 
     // Send headers early to prompt server validation (auth, URL, quota, etc.).
@@ -450,7 +450,7 @@ async function createUploadRequest(
           if (typeof part.destroy === 'function') {
             part.destroy()
           }
-        /* c8 ignore next 3 - defensive check for non-string/stream types */
+          /* c8 ignore next 3 - defensive check for non-string/stream types */
         } else {
           throw new TypeError('Expected string or stream')
         }
@@ -471,12 +471,12 @@ function desc(value: any) {
     __proto__: null,
     configurable: true,
     value,
-    writable: true
+    writable: true,
   } as PropertyDescriptor
 }
 
 async function getErrorResponseBody(
-  response: IncomingMessage
+  response: IncomingMessage,
 ): Promise<string> {
   const chunks: Buffer[] = []
   let size = 0
@@ -576,7 +576,7 @@ async function getResponseJson(response: IncomingMessage) {
     const message = (e as Error)?.['message'] || 'Unknown error'
     throw new SyntaxError(
       `Socket API - Invalid JSON response:\n${data}\n→ ${message}`,
-      { cause: e }
+      { cause: e },
     )
   }
 }
@@ -613,7 +613,7 @@ function queryToSearchParams(
     | Iterable<[string, any]>
     | ReadonlyArray<[string, any]>
     | null
-    | undefined
+    | undefined,
 ): URLSearchParams {
   const params = new URLSearchParams(init ?? '')
   const normalized = { __proto__: null } as unknown as QueryParams
@@ -637,7 +637,7 @@ function queryToSearchParams(
 }
 
 function reshapeArtifactForPublicPolicy<
-  T extends SocketArtifact | CompactSocketArtifact
+  T extends SocketArtifact | CompactSocketArtifact,
 >(artifact: T, queryParams?: QueryParams | undefined): T {
   const alerts = artifact.alerts as SocketArtifactAlert[]
   if (Array.isArray(alerts)) {
@@ -667,7 +667,7 @@ function reshapeArtifactForPublicPolicy<
 
 function resolveAbsPaths(
   filepaths: string[],
-  pathsRelativeTo?: string
+  pathsRelativeTo?: string,
 ): string[] {
   const basePath = resolveBasePath(pathsRelativeTo)
   // Node's path.resolve will process path segments from right to left until
@@ -712,7 +712,7 @@ export class SocketSdk {
       agent: agentOrObj,
       baseUrl = 'https://api.socket.dev/v0/',
       timeout,
-      userAgent
+      userAgent,
     } = { __proto__: null, ...options } as SocketSdkOptions
     const agentKeys = agentOrObj ? Object.keys(agentOrObj) : []
     const agentAsGotOptions = agentOrObj as GotOptions
@@ -730,22 +730,22 @@ export class SocketSdk {
       ...(agent ? { agent } : {}),
       headers: {
         Authorization: `Basic ${btoa(`${apiToken}:`)}`,
-        'User-Agent': userAgent ?? DEFAULT_USER_AGENT
+        'User-Agent': userAgent ?? DEFAULT_USER_AGENT,
       },
       signal: abortSignal,
-      ...(timeout ? { timeout } : {})
+      ...(timeout ? { timeout } : {}),
     }
   }
 
   async #createBatchPurlRequest(
     componentsObj: { components: Array<{ purl: string }> },
-    queryParams?: QueryParams | undefined
+    queryParams?: QueryParams | undefined,
   ): Promise<IncomingMessage> {
     // Adds the first 'abort' listener to abortSignal.
     const req = getHttpModule(this.#baseUrl)
       .request(`${this.#baseUrl}purl?${queryToSearchParams(queryParams)}`, {
         method: 'POST',
-        ...this.#reqOptions
+        ...this.#reqOptions,
       })
       .end(JSON.stringify(componentsObj))
     return await getResponse(req)
@@ -753,7 +753,7 @@ export class SocketSdk {
 
   async *#createBatchPurlGenerator(
     componentsObj: { components: Array<{ purl: string }> },
-    queryParams?: QueryParams | undefined
+    queryParams?: QueryParams | undefined,
   ): AsyncGenerator<BatchPackageFetchResultType> {
     let res: IncomingMessage | undefined
     try {
@@ -770,8 +770,8 @@ export class SocketSdk {
             if (statusCode === 401 || statusCode === 403) {
               throw error
             }
-          }
-        }
+          },
+        },
       )
     } catch (e) {
       return await this.#handleApiError<'batchPackageFetch'>(e)
@@ -780,7 +780,7 @@ export class SocketSdk {
     const rli = readline.createInterface({
       input: res,
       crlfDelay: Infinity,
-      signal: abortSignal
+      signal: abortSignal,
     })
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
     for await (const line of rli) {
@@ -794,26 +794,26 @@ export class SocketSdk {
           isPublicToken
             ? /* c8 ignore next - public token reshaping branch */ reshapeArtifactForPublicPolicy(
                 artifact,
-                queryParams
+                queryParams,
               )
-            : artifact
+            : artifact,
         )
       }
     }
   }
 
   async #handleApiError<T extends SocketSdkOperations>(
-    error: unknown
+    error: unknown,
   ): Promise<SocketSdkErrorResult<T>> {
     if (!(error instanceof ResponseError)) {
       throw new Error('Unexpected Socket API error', {
-        cause: error
+        cause: error,
       })
     }
     const { statusCode } = error.response
     if (statusCode && statusCode >= 500) {
       throw new Error(`Socket API server error (${statusCode})`, {
-        cause: error
+        cause: error,
       })
     }
     // The error payload may give a meaningful hint as to what went wrong.
@@ -835,23 +835,23 @@ export class SocketSdk {
       /* c8 ignore next 2 - fallback for missing status code in edge cases */
       status: statusCode ?? 0,
       error: error.message ?? 'Unknown error',
-      cause: body
+      cause: body,
     } as SocketSdkErrorResult<T>
   }
 
   #handleApiSuccess<T extends SocketSdkOperations>(
-    data: unknown
+    data: unknown,
   ): SocketSdkSuccessResult<T> {
     return {
       success: true,
       status: 200,
-      data: data as SocketSdkSuccessResult<T>['data']
+      data: data as SocketSdkSuccessResult<T>['data'],
     } satisfies SocketSdkSuccessResult<T>
   }
 
   async batchPackageFetch(
     componentsObj: { components: Array<{ purl: string }> },
-    queryParams?: QueryParams | undefined
+    queryParams?: QueryParams | undefined,
   ): Promise<BatchPackageFetchResultType> {
     let res: IncomingMessage | undefined
     try {
@@ -863,7 +863,7 @@ export class SocketSdk {
     const rli = readline.createInterface({
       input: res,
       crlfDelay: Infinity,
-      signal: abortSignal
+      signal: abortSignal,
     })
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
     const results: SocketArtifact[] = []
@@ -876,27 +876,27 @@ export class SocketSdk {
         results.push(
           isPublicToken
             ? reshapeArtifactForPublicPolicy(artifact, queryParams)
-            : artifact
+            : artifact,
         )
       }
     }
     const compact = urlSearchParamAsBoolean(getOwn(queryParams, 'compact'))
     return this.#handleApiSuccess<'batchPackageFetch'>(
-      compact ? (results as CompactSocketArtifact[]) : results
+      compact ? (results as CompactSocketArtifact[]) : results,
     )
   }
 
   async *batchPackageStream(
     componentsObj: { components: Array<{ purl: string }> },
-    options?: BatchPackageStreamOptions | undefined
+    options?: BatchPackageStreamOptions | undefined,
   ): AsyncGenerator<BatchPackageFetchResultType> {
     const {
       chunkSize = 100,
       concurrencyLimit = 10,
-      queryParams
+      queryParams,
     } = {
       __proto__: null,
-      ...options
+      ...options,
     } as BatchPackageStreamOptions
 
     type GeneratorStep = {
@@ -932,30 +932,30 @@ export class SocketSdk {
       const generator = this.#createBatchPurlGenerator(
         {
           // Chunk components.
-          components: components.slice(index, index + chunkSize)
+          components: components.slice(index, index + chunkSize),
         },
-        queryParams
+        queryParams,
       )
       continueGen(generator)
       index += chunkSize
     }
     const continueGen = (
-      generator: AsyncGenerator<BatchPackageFetchResultType>
+      generator: AsyncGenerator<BatchPackageFetchResultType>,
     ) => {
       const {
         promise,
         reject: rejectFn,
-        resolve: resolveFn
+        resolve: resolveFn,
       } = promiseWithResolvers<GeneratorStep>()
       running.push({
         generator,
-        promise
+        promise,
       })
       void generator
         .next()
         .then(
           iteratorResult => resolveFn({ generator, iteratorResult }),
-          rejectFn
+          rejectFn,
         )
     }
     // Start initial batch of generators.
@@ -965,12 +965,12 @@ export class SocketSdk {
     while (running.length > 0) {
       // eslint-disable-next-line no-await-in-loop
       const { generator, iteratorResult } = await Promise.race(
-        running.map(entry => entry.promise)
+        running.map(entry => entry.promise),
       )
       // Remove generator.
       running.splice(
         running.findIndex(entry => entry.generator === generator),
-        1
+        1,
       )
       // Yield the value if one is given, even when done:true.
       if (iteratorResult.value) {
@@ -995,7 +995,7 @@ export class SocketSdk {
   async createDependenciesSnapshot(
     filepaths: string[],
     pathsRelativeTo = '.',
-    queryParams?: QueryParams | undefined
+    queryParams?: QueryParams | undefined,
   ): Promise<SocketSdkResult<'createDependenciesSnapshot'>> {
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
@@ -1005,8 +1005,8 @@ export class SocketSdk {
           this.#baseUrl,
           `dependencies/upload?${queryToSearchParams(queryParams)}`,
           createRequestBodyForFilepaths(absFilepaths, basePath),
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'createDependenciesSnapshot'>(data)
     } catch (e) {
@@ -1018,7 +1018,7 @@ export class SocketSdk {
     orgSlug: string,
     filepaths: string[],
     pathsRelativeTo: string = '.',
-    queryParams?: QueryParams | undefined
+    queryParams?: QueryParams | undefined,
   ): Promise<SocketSdkResult<'CreateOrgFullScan'>> {
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
@@ -1028,8 +1028,8 @@ export class SocketSdk {
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(queryParams)}`,
           createRequestBodyForFilepaths(absFilepaths, basePath),
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'CreateOrgFullScan'>(data)
     } catch (e) {
@@ -1039,7 +1039,7 @@ export class SocketSdk {
 
   async createOrgRepo(
     orgSlug: string,
-    queryParams?: QueryParams | undefined
+    queryParams?: QueryParams | undefined,
   ): Promise<SocketSdkResult<'createOrgRepo'>> {
     try {
       const data = await getResponseJson(
@@ -1047,8 +1047,8 @@ export class SocketSdk {
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/repos`,
           queryParams,
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'createOrgRepo'>(data)
     } catch (e) {
@@ -1059,7 +1059,7 @@ export class SocketSdk {
   async createScanFromFilepaths(
     filepaths: string[],
     pathsRelativeTo: string = '.',
-    issueRules?: Record<string, boolean>
+    issueRules?: Record<string, boolean>,
   ): Promise<SocketSdkResult<'createReport'>> {
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
@@ -1071,12 +1071,12 @@ export class SocketSdk {
           ...createRequestBodyForFilepaths(absFilepaths, basePath),
           ...(issueRules
             ? createRequestBodyForJson(issueRules, 'issueRules')
-            : [])
+            : []),
         ],
         {
           ...this.#reqOptions,
-          method: 'PUT'
-        }
+          method: 'PUT',
+        },
       )
       return this.#handleApiSuccess<'createReport'>(data)
     } catch (e) {
@@ -1086,15 +1086,15 @@ export class SocketSdk {
 
   async deleteOrgFullScan(
     orgSlug: string,
-    fullScanId: string
+    fullScanId: string,
   ): Promise<SocketSdkResult<'deleteOrgFullScan'>> {
     try {
       const data = await getResponseJson(
         await createDeleteRequest(
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`,
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'deleteOrgFullScan'>(data)
     } catch (e) {
@@ -1104,15 +1104,15 @@ export class SocketSdk {
 
   async deleteOrgRepo(
     orgSlug: string,
-    repoSlug: string
+    repoSlug: string,
   ): Promise<SocketSdkResult<'deleteOrgRepo'>> {
     try {
       const data = await getResponseJson(
         await createDeleteRequest(
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`,
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'deleteOrgRepo'>(data)
     } catch (e) {
@@ -1122,15 +1122,15 @@ export class SocketSdk {
 
   async getAuditLogEvents(
     orgSlug: string,
-    queryParams?: QueryParams | undefined
+    queryParams?: QueryParams | undefined,
   ): Promise<SocketSdkResult<'getAuditLogEvents'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/audit-log?${queryToSearchParams(queryParams)}`,
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'getAuditLogEvents'>(data)
     } catch (e) {
@@ -1140,15 +1140,15 @@ export class SocketSdk {
 
   async getIssuesByNPMPackage(
     pkgName: string,
-    version: string
+    version: string,
   ): Promise<SocketSdkResult<'getIssuesByNPMPackage'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
           `npm/${encodeURIComponent(pkgName)}/${encodeURIComponent(version)}/issues`,
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'getIssuesByNPMPackage'>(data)
     } catch (e) {
@@ -1157,15 +1157,15 @@ export class SocketSdk {
   }
 
   async getOrgAnalytics(
-    time: string
+    time: string,
   ): Promise<SocketSdkResult<'getOrgAnalytics'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
           `analytics/org/${encodeURIComponent(time)}`,
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'getOrgAnalytics'>(data)
     } catch (e) {
@@ -1176,7 +1176,11 @@ export class SocketSdk {
   async getOrganizations(): Promise<SocketSdkResult<'getOrganizations'>> {
     try {
       const data = await getResponseJson(
-        await createGetRequest(this.#baseUrl, 'organizations', this.#reqOptions)
+        await createGetRequest(
+          this.#baseUrl,
+          'organizations',
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'getOrganizations'>(data)
     } catch (e) {
@@ -1187,7 +1191,7 @@ export class SocketSdk {
   async streamOrgFullScan(
     orgSlug: string,
     fullScanId: string,
-    output?: string | boolean
+    output?: string | boolean,
   ): Promise<SocketSdkResult<'getOrgFullScan'>> {
     try {
       const req = getHttpModule(this.#baseUrl)
@@ -1195,8 +1199,8 @@ export class SocketSdk {
           `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`,
           {
             method: 'GET',
-            ...this.#reqOptions
-          }
+            ...this.#reqOptions,
+          },
         )
         .end()
       const res = await getResponse(req)
@@ -1218,15 +1222,15 @@ export class SocketSdk {
 
   async getOrgFullScanBuffered(
     orgSlug: string,
-    fullScanId: string
+    fullScanId: string,
   ): Promise<SocketSdkResult<'getOrgFullScan'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`,
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'getOrgFullScan'>(data)
     } catch (e) {
@@ -1236,15 +1240,15 @@ export class SocketSdk {
 
   async getOrgFullScanList(
     orgSlug: string,
-    queryParams?: QueryParams | undefined
+    queryParams?: QueryParams | undefined,
   ): Promise<SocketSdkResult<'getOrgFullScanList'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(queryParams)}`,
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'getOrgFullScanList'>(data)
     } catch (e) {
@@ -1254,15 +1258,15 @@ export class SocketSdk {
 
   async getOrgFullScanMetadata(
     orgSlug: string,
-    fullScanId: string
+    fullScanId: string,
   ): Promise<SocketSdkResult<'getOrgFullScanMetadata'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/metadata`,
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'getOrgFullScanMetadata'>(data)
     } catch (e) {
@@ -1271,15 +1275,15 @@ export class SocketSdk {
   }
 
   async getOrgLicensePolicy(
-    orgSlug: string
+    orgSlug: string,
   ): Promise<SocketSdkResult<'getOrgLicensePolicy'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/settings/license-policy`,
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'getOrgLicensePolicy'>(data)
     } catch (e) {
@@ -1289,7 +1293,7 @@ export class SocketSdk {
 
   async getOrgRepo(
     orgSlug: string,
-    repoSlug: string
+    repoSlug: string,
   ): Promise<SocketSdkResult<'getOrgRepo'>> {
     const orgSlugParam = encodeURIComponent(orgSlug)
     const repoSlugParam = encodeURIComponent(repoSlug)
@@ -1299,8 +1303,8 @@ export class SocketSdk {
         await createGetRequest(
           this.#baseUrl,
           `orgs/${orgSlugParam}/repos/${repoSlugParam}`,
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'getOrgRepo'>(data)
     } catch (e) {
@@ -1310,15 +1314,15 @@ export class SocketSdk {
 
   async getOrgRepoList(
     orgSlug: string,
-    queryParams?: QueryParams | undefined
+    queryParams?: QueryParams | undefined,
   ): Promise<SocketSdkResult<'getOrgRepoList'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/repos?${queryToSearchParams(queryParams)}`,
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'getOrgRepoList'>(data)
     } catch (e) {
@@ -1327,15 +1331,15 @@ export class SocketSdk {
   }
 
   async getOrgSecurityPolicy(
-    orgSlug: string
+    orgSlug: string,
   ): Promise<SocketSdkResult<'getOrgSecurityPolicy'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/settings/security-policy`,
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'getOrgSecurityPolicy'>(data)
     } catch (e) {
@@ -1346,7 +1350,7 @@ export class SocketSdk {
   async getQuota(): Promise<SocketSdkResult<'getQuota'>> {
     try {
       const data = await getResponseJson(
-        await createGetRequest(this.#baseUrl, 'quota', this.#reqOptions)
+        await createGetRequest(this.#baseUrl, 'quota', this.#reqOptions),
       )
       return this.#handleApiSuccess<'getQuota'>(data)
     } catch (e) {
@@ -1356,15 +1360,15 @@ export class SocketSdk {
 
   async getRepoAnalytics(
     repo: string,
-    time: string
+    time: string,
   ): Promise<SocketSdkResult<'getRepoAnalytics'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
           `analytics/repo/${encodeURIComponent(repo)}/${encodeURIComponent(time)}`,
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'getRepoAnalytics'>(data)
     } catch (e) {
@@ -1378,8 +1382,8 @@ export class SocketSdk {
         await createGetRequest(
           this.#baseUrl,
           `report/view/${encodeURIComponent(id)}`,
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'getReport'>(data)
     } catch (e) {
@@ -1390,7 +1394,7 @@ export class SocketSdk {
   async getScanList(): Promise<SocketSdkResult<'getReportList'>> {
     try {
       const data = await getResponseJson(
-        await createGetRequest(this.#baseUrl, 'report/list', this.#reqOptions)
+        await createGetRequest(this.#baseUrl, 'report/list', this.#reqOptions),
       )
       return this.#handleApiSuccess<'getReportList'>(data)
     } catch (e) {
@@ -1406,8 +1410,8 @@ export class SocketSdk {
         await createGetRequest(
           this.#baseUrl,
           'report/supported',
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'getReportSupportedFiles'>(data)
     } catch (e) {
@@ -1417,15 +1421,15 @@ export class SocketSdk {
 
   async getScoreByNpmPackage(
     pkgName: string,
-    version: string
+    version: string,
   ): Promise<SocketSdkResult<'getScoreByNPMPackage'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
           `npm/${encodeURIComponent(pkgName)}/${encodeURIComponent(version)}/score`,
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'getScoreByNPMPackage'>(data)
     } catch (e) {
@@ -1434,7 +1438,7 @@ export class SocketSdk {
   }
 
   async postSettings(
-    selectors: Array<{ organization?: string }>
+    selectors: Array<{ organization?: string }>,
   ): Promise<SocketSdkResult<'postSettings'>> {
     try {
       const data = await getResponseJson(
@@ -1442,8 +1446,8 @@ export class SocketSdk {
           this.#baseUrl,
           'settings',
           { json: selectors },
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'postSettings'>(data)
     } catch (e) {
@@ -1452,7 +1456,7 @@ export class SocketSdk {
   }
 
   async searchDependencies(
-    queryParams?: QueryParams | undefined
+    queryParams?: QueryParams | undefined,
   ): Promise<SocketSdkResult<'searchDependencies'>> {
     try {
       const data = await getResponseJson(
@@ -1460,8 +1464,8 @@ export class SocketSdk {
           this.#baseUrl,
           'dependencies/search',
           queryParams,
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'searchDependencies'>(data)
     } catch (e) {
@@ -1472,7 +1476,7 @@ export class SocketSdk {
   async updateOrgRepo(
     orgSlug: string,
     repoSlug: string,
-    queryParams?: QueryParams | undefined
+    queryParams?: QueryParams | undefined,
   ): Promise<SocketSdkResult<'updateOrgRepo'>> {
     try {
       const data = await getResponseJson(
@@ -1480,8 +1484,8 @@ export class SocketSdk {
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`,
           queryParams,
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<'updateOrgRepo'>(data)
     } catch (e) {
@@ -1492,7 +1496,7 @@ export class SocketSdk {
   async uploadManifestFiles(
     orgSlug: string,
     filepaths: string[],
-    pathsRelativeTo: string = '.'
+    pathsRelativeTo: string = '.',
   ): Promise<UploadManifestFilesReturnType | UploadManifestFilesError> {
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
@@ -1502,15 +1506,15 @@ export class SocketSdk {
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/upload-manifest-files`,
           createRequestBodyForFilepaths(absFilepaths, basePath),
-          this.#reqOptions
-        )
+          this.#reqOptions,
+        ),
       )
       return this.#handleApiSuccess<any>(
-        data
+        data,
       ) as unknown as UploadManifestFilesReturnType
     } catch (e) {
       return (await this.#handleApiError<any>(
-        e
+        e,
       )) as unknown as UploadManifestFilesError
     }
   }
@@ -1532,7 +1536,7 @@ Object.defineProperties(SocketSdk.prototype, {
   getReport: desc(SocketSdk.prototype.getScan),
   getReportList: desc(SocketSdk.prototype.getScanList),
   getReportSupportedFiles: desc(SocketSdk.prototype.getSupportedScanFiles),
-  getScoreByNPMPackage: desc(SocketSdk.prototype.getScoreByNpmPackage)
+  getScoreByNPMPackage: desc(SocketSdk.prototype.getScoreByNpmPackage),
 })
 
 // Optional live heap trace.
@@ -1545,5 +1549,5 @@ if (isDebug('heap')) {
 
 // Export private functions for testing
 export const testExports = {
-  createRequestBodyForFilepaths
+  createRequestBodyForFilepaths,
 }

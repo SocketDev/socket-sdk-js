@@ -16,7 +16,7 @@ void (async () => {
         if ('format' in schemaObject && schemaObject.format === 'binary') {
           return 'never'
         }
-      }
+      },
     })
     console.log(output)
   } catch (e) {

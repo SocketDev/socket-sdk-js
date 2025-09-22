@@ -13,7 +13,7 @@ void (async () => {
     const openApiData = await fs.readFile(openApiJsonPath, 'utf8')
     await fs.writeFile(
       openApiJsonPath,
-      JSON.stringify(JSON.parse(openApiData), null, 2)
+      JSON.stringify(JSON.parse(openApiData), null, 2),
     )
   } catch (e) {
     process.exitCode = 1
