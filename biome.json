@@ -6,7 +6,6 @@
       "!**/.git",
       "!**/.github",
       "!**/.husky",
-      "!**/.tap",
       "!**/.type-coverage",
       "!**/.vscode",
       "!**/coverage",
