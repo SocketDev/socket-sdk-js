@@ -835,11 +835,24 @@ export class SocketSdk {
     } catch {
       body = bodyStr
     }
+    // Build error message that includes the body content if available.
+    let errorMessage = error.message ?? 'Unknown error'
+    const trimmedBody = body?.trim()
+    if (trimmedBody && !errorMessage.includes(trimmedBody)) {
+      // Replace generic status message with actual error body if present,
+      // otherwise append the body to the error message.
+      const statusMessage = error.response?.statusMessage
+      if (statusMessage && errorMessage.includes(statusMessage)) {
+        errorMessage = errorMessage.replace(statusMessage, trimmedBody)
+      } else {
+        errorMessage = `${errorMessage}: ${trimmedBody}`
+      }
+    }
     return {
       success: false,
-      /* c8 ignore next 2 - fallback for missing status code in edge cases */
+      /* c8 ignore next - fallback for missing status code in edge cases. */
       status: statusCode ?? 0,
-      error: error.message ?? 'Unknown error',
+      error: errorMessage,
       cause: body,
     } as SocketSdkErrorResult<T>
   }
