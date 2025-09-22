@@ -1674,7 +1674,7 @@ describe('SocketSdk', () => {
     })
   })
 
-  describe('Additional Coverage Tests', () => {
+  describe('Organization and Repository API Tests', () => {
     it('should handle getOrganizations', async () => {
       nock('https://api.socket.dev')
         .get('/v0/organizations')
@@ -1819,7 +1819,7 @@ describe('SocketSdk', () => {
       expect(res.status).toBe(404)
     })
 
-    it.skip('should handle createOrgRepo error', async () => {
+    it('should handle createOrgRepo error', async () => {
       nock('https://api.socket.dev')
         .post('/v0/orgs/test-org/repos')
         .reply(409, { error: { message: 'Repo already exists' } })
@@ -1845,7 +1845,7 @@ describe('SocketSdk', () => {
       expect(res.status).toBe(403)
     })
 
-    it.skip('should handle getAuditLogEvents error', async () => {
+    it('should handle getAuditLogEvents error', async () => {
       nock('https://api.socket.dev')
         .get('/v0/orgs/test-org/audit-log')
         .reply(403, { error: { message: 'Audit logs not available' } })
@@ -1857,7 +1857,7 @@ describe('SocketSdk', () => {
       expect(res.status).toBe(403)
     })
 
-    it.skip('should handle postSettings error', async () => {
+    it('should handle postSettings error', async () => {
       nock('https://api.socket.dev')
         .post('/v0/settings')
         .reply(400, { error: { message: 'Invalid settings' } })
@@ -1881,7 +1881,7 @@ describe('SocketSdk', () => {
       await expect(client.getOrgAnalytics('30d')).rejects.toThrow()
     })
 
-    it.skip('should handle getRepoAnalytics error', async () => {
+    it('should handle getRepoAnalytics error', async () => {
       nock('https://api.socket.dev')
         .get('/v0/analytics/repo/test-repo/7d')
         .reply(404, { error: { message: 'Repo not found' } })
@@ -1919,7 +1919,7 @@ describe('SocketSdk', () => {
       expect(res.status).toBe(404)
     })
 
-    it.skip('should handle searchDependencies error', async () => {
+    it('should handle searchDependencies error', async () => {
       nock('https://api.socket.dev')
         .post('/v0/dependencies/search')
         .reply(400, { error: { message: 'Bad request' } })
@@ -1932,7 +1932,7 @@ describe('SocketSdk', () => {
     })
   })
 
-  describe('Additional Coverage for 98%', () => {
+  describe('Scan List API Operations', () => {
     it('should handle getScanList successfully', async () => {
       nock('https://api.socket.dev')
         .get('/v0/report/list')
@@ -2043,7 +2043,7 @@ describe('SocketSdk', () => {
       expect(res.status).toBe(403)
     })
 
-    it.skip('should handle createScanFromFilepaths', async () => {
+    it('should handle createScanFromFilepaths', async () => {
       nock('https://api.socket.dev')
         .put('/v0/report/upload')
         .reply(200, { id: 'scan123' })
@@ -2057,7 +2057,7 @@ describe('SocketSdk', () => {
       }
     })
 
-    it.skip('should handle createScanFromFilepaths with query params', async () => {
+    it('should handle createScanFromFilepaths with query params', async () => {
       nock('https://api.socket.dev')
         .put('/v0/report/upload')
         .reply(200, { id: 'scan124' })
@@ -2075,7 +2075,7 @@ describe('SocketSdk', () => {
       }
     })
 
-    it.skip('should handle createScanFromFilepaths error', async () => {
+    it('should handle createScanFromFilepaths error', async () => {
       nock('https://api.socket.dev')
         .put('/v0/report/upload')
         .reply(502, { error: { message: 'Bad gateway' } })
@@ -2087,26 +2087,7 @@ describe('SocketSdk', () => {
       ).rejects.toThrow('Socket API server error (502)')
     })
 
-    it.skip('should handle old argument signature for createDependenciesSnapshot', async () => {
-      nock('https://api.socket.dev')
-        .post('/v0/dependencies/upload?repoName=old-style')
-        .reply(200, { id: 'snapshot125' })
-
-      const client = new SocketSdk('test-token')
-      // Test old signature: (queryParams, filepaths, pathsRelativeTo)
-      const res = await client.createDependenciesSnapshot(
-        { repoName: 'old-style' } as any,
-        ['test-package.json'] as any,
-        '.' as any,
-      )
-
-      expect(res.success).toBe(true)
-      if (res.success) {
-        expect(res.data['id']).toBe('snapshot125')
-      }
-    })
-
-    it.skip('should handle empty response body in handleApiSuccess', async () => {
+    it('should handle empty response body in handleApiSuccess', async () => {
       nock('https://api.socket.dev')
         .delete('/v0/orgs/test-org/full-scans/scan456')
         .reply(204) // No content
@@ -2117,7 +2098,7 @@ describe('SocketSdk', () => {
       expect(res.success).toBe(true)
     })
 
-    it.skip('should handle text/plain response in error handler', async () => {
+    it('should handle text/plain response in error handler', async () => {
       nock('https://api.socket.dev')
         .get('/v0/quota')
         .reply(429, 'Rate limit exceeded', {
@@ -2134,7 +2115,7 @@ describe('SocketSdk', () => {
       }
     })
 
-    it.skip('should handle malformed JSON in error response', async () => {
+    it('should handle malformed JSON in error response', async () => {
       nock('https://api.socket.dev')
         .get('/v0/quota')
         .reply(400, 'not-json{invalid', {
@@ -2163,9 +2144,9 @@ describe('SocketSdk', () => {
       expect(res.status).toBe(400)
     })
 
-    it.skip('should handle 401 unauthorized with message', async () => {
+    it('should handle 401 unauthorized with message', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/orgs')
+        .get('/v0/organizations')
         .reply(401, { error: { message: 'Invalid API key' } })
 
       const client = new SocketSdk('test-token')
@@ -2179,7 +2160,7 @@ describe('SocketSdk', () => {
     })
   })
 
-  describe('Final Coverage Push to 98%', () => {
+  describe('Organization Full Scan and Repository Operations', () => {
     it('should handle getOrgFullScanMetadata error', async () => {
       nock('https://api.socket.dev')
         .get('/v0/orgs/test-org/full-scans/scan-123/metadata')
@@ -2288,7 +2269,7 @@ describe('SocketSdk', () => {
       )
     })
 
-    it.skip('should handle createScanFromFilepaths error when called without query params', async () => {
+    it('should handle createScanFromFilepaths error when called without query params', async () => {
       nock('https://api.socket.dev')
         .put('/v0/report/upload')
         .reply(429, { error: { message: 'Rate limited' } })
@@ -2338,9 +2319,9 @@ describe('SocketSdk', () => {
       ).rejects.toThrow('Socket API server error (500)')
     })
 
-    it.skip('should handle updateOrgRepo error', async () => {
+    it('should handle updateOrgRepo error', async () => {
       nock('https://api.socket.dev')
-        .patch('/v0/orgs/test-org/repos/test-repo')
+        .post('/v0/orgs/test-org/repos/test-repo')
         .reply(404, { error: { message: 'Not found' } })
 
       const client = new SocketSdk('test-token')
@@ -2352,9 +2333,9 @@ describe('SocketSdk', () => {
       expect(res.status).toBe(404)
     })
 
-    it.skip('should handle getRepoAnalytics error', async () => {
+    it('should handle getRepoAnalytics error', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/analytics/org/repo/30d')
+        .get('/v0/analytics/repo/repo/30d')
         .reply(500, { error: { message: 'Server error' } })
 
       const client = new SocketSdk('test-token')
@@ -2364,9 +2345,9 @@ describe('SocketSdk', () => {
       )
     })
 
-    it.skip('should handle getScan error', async () => {
+    it('should handle getScan error', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/report/sample-scan-id')
+        .get('/v0/report/view/sample-scan-id')
         .reply(404, { error: { message: 'Scan not found' } })
 
       const client = new SocketSdk('test-token')
@@ -2376,9 +2357,9 @@ describe('SocketSdk', () => {
       expect(res.status).toBe(404)
     })
 
-    it.skip('should handle getScan 500 error', async () => {
+    it('should handle getScan 500 error', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/report/sample-scan-id')
+        .get('/v0/report/view/sample-scan-id')
         .reply(500, { error: { message: 'Server error' } })
 
       const client = new SocketSdk('test-token')
@@ -2388,9 +2369,9 @@ describe('SocketSdk', () => {
       )
     })
 
-    it.skip('should handle postSettings error', async () => {
+    it('should handle postSettings error', async () => {
       nock('https://api.socket.dev')
-        .post('/v0/settings/test')
+        .post('/v0/settings')
         .reply(500, { error: { message: 'Server error' } })
 
       const client = new SocketSdk('test-token')
@@ -2400,9 +2381,9 @@ describe('SocketSdk', () => {
       ).rejects.toThrow('Socket API server error (500)')
     })
 
-    it.skip('should handle searchDependencies error', async () => {
+    it('should handle searchDependencies error', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/search/dependencies?search=test')
+        .post('/v0/dependencies/search')
         .reply(500, { error: { message: 'Server error' } })
 
       const client = new SocketSdk('test-token')
@@ -2424,9 +2405,9 @@ describe('SocketSdk', () => {
       ).rejects.toThrow('Socket API server error (500)')
     })
 
-    it.skip('should handle createOrgRepo error', async () => {
+    it('should handle createOrgRepo error', async () => {
       nock('https://api.socket.dev')
-        .put('/v0/orgs/test-org/repos/new-repo')
+        .post('/v0/orgs/test-org/repos')
         .reply(500, { error: { message: 'Server error' } })
 
       const client = new SocketSdk('test-token')
@@ -2450,9 +2431,9 @@ describe('SocketSdk', () => {
       ).rejects.toThrow('Socket API server error (500)')
     })
 
-    it.skip('should handle getAuditLogEvents error', async () => {
+    it('should handle getAuditLogEvents error', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/orgs/test-org/audit-log/30d')
+        .get('/v0/orgs/test-org/audit-log')
         .reply(500, { error: { message: 'Server error' } })
 
       const client = new SocketSdk('test-token')
@@ -2463,8 +2444,8 @@ describe('SocketSdk', () => {
     })
   })
 
-  describe.skip('Debug and Edge Cases', () => {
-    it.skip('should test debug heap tracing', () => {
+  describe('Debug and Edge Cases', () => {
+    it('should test debug heap tracing', () => {
       // Skipping as ES modules can't be reloaded dynamically
       expect(true).toBe(true)
     })
@@ -2493,7 +2474,7 @@ describe('SocketSdk', () => {
 
     it('should handle updateOrgRepo successfully', async () => {
       nock('https://api.socket.dev')
-        .patch('/v0/orgs/test-org/repos/test-repo')
+        .post('/v0/orgs/test-org/repos/test-repo')
         .reply(200, { updated: true })
 
       const client = new SocketSdk('test-token')
@@ -2506,7 +2487,7 @@ describe('SocketSdk', () => {
 
     it('should handle getScan successfully', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/report/scan-id-123')
+        .get('/v0/report/view/scan-id-123')
         .reply(200, { id: 'scan-id-123', status: 'complete' })
 
       const client = new SocketSdk('test-token')
@@ -2518,9 +2499,9 @@ describe('SocketSdk', () => {
       }
     })
 
-    it.skip('should handle getRepoAnalytics with orgSlug and repoSlug', async () => {
+    it('should handle getRepoAnalytics with orgSlug and repoSlug', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/analytics/test-org/test-repo/30d')
+        .get('/v0/analytics/repo/test-repo/30d')
         .reply(200, { analytics: 'data' })
 
       const client = new SocketSdk('test-token')
@@ -2529,9 +2510,9 @@ describe('SocketSdk', () => {
       expect(res.success).toBe(true)
     })
 
-    it.skip('should handle getAuditLogEvents successfully', async () => {
+    it('should handle getAuditLogEvents successfully', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/orgs/test-org/audit-log/30d')
+        .get('/v0/orgs/test-org/audit-log')
         .reply(200, { events: [] })
 
       const client = new SocketSdk('test-token')
@@ -2542,7 +2523,7 @@ describe('SocketSdk', () => {
 
     it('should handle createOrgRepo successfully', async () => {
       nock('https://api.socket.dev')
-        .put('/v0/orgs/test-org/repos/new-repo')
+        .post('/v0/orgs/test-org/repos')
         .reply(200, { created: true })
 
       const client = new SocketSdk('test-token')
@@ -2602,7 +2583,7 @@ describe('SocketSdk', () => {
     })
   })
 
-  describe.skip('Extra Coverage Tests', () => {
+  describe('Manifest Upload and Full Scan Tests', () => {
     it('should handle empty createDependenciesSnapshot', async () => {
       nock('https://api.socket.dev')
         .post('/v0/dependencies/upload')
@@ -2620,12 +2601,13 @@ describe('SocketSdk', () => {
         .reply(200, { id: 'dep124' })
 
       const client = new SocketSdk('test-token')
-      const tempDir = tmpdir()
-      const res = await client.createDependenciesSnapshot(
-        [path.join(tempDir, 'test.json')],
-        tempDir,
-      )
+      const tempDir = mkdtempSync(path.join(tmpdir(), 'socket-test-'))
+      const testFile = path.join(tempDir, 'test.json')
+      writeFileSync(testFile, '{"name": "test-package", "version": "1.0.0"}')
 
+      const res = await client.createDependenciesSnapshot([testFile], tempDir)
+
+      rmSync(tempDir, { recursive: true, force: true })
       expect(res.success).toBe(true)
     })
 
@@ -2657,24 +2639,7 @@ describe('SocketSdk', () => {
       expect(res.success).toBe(true)
     })
 
-    it('should handle createOrgFullScan with old signature', async () => {
-      nock('https://api.socket.dev')
-        .post('/v0/orgs/test-org/full-scans?branch=dev')
-        .reply(200, { id: 'fullscan789' })
-
-      const client = new SocketSdk('test-token')
-      // Test old signature with object as first param
-      const res = await client.createOrgFullScan(
-        'test-org',
-        { branch: 'dev' } as any,
-        ['test-package.json'] as any,
-        '.' as any,
-      )
-
-      expect(res.success).toBe(true)
-    })
-
-    it.skip('should handle createScanFromFilepaths with issue rules', async () => {
+    it('should handle createScanFromFilepaths with issue rules', async () => {
       nock('https://api.socket.dev')
         .put('/v0/report/upload')
         .reply(200, { id: 'scan456' })
@@ -2689,7 +2654,7 @@ describe('SocketSdk', () => {
       expect(res.success).toBe(true)
     })
 
-    it.skip('should handle createScanFromFilepaths 400 error', async () => {
+    it('should handle createScanFromFilepaths 400 error', async () => {
       nock('https://api.socket.dev')
         .put('/v0/report/upload')
         .reply(400, { error: { message: 'Bad request' } })
@@ -2701,7 +2666,7 @@ describe('SocketSdk', () => {
       expect(res.status).toBe(400)
     })
 
-    it.skip('should handle createScanFromFilepaths 500 error', async () => {
+    it('should handle createScanFromFilepaths 500 error', async () => {
       nock('https://api.socket.dev')
         .put('/v0/report/upload')
         .reply(500, { error: { message: 'Server error' } })
@@ -2726,7 +2691,7 @@ describe('SocketSdk', () => {
 
     it('should handle getAuditLogEvents 400 error', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/orgs/test-org/audit-log/30d')
+        .get('/v0/orgs/test-org/audit-log')
         .reply(400, { error: { message: 'Bad request' } })
 
       const client = new SocketSdk('test-token')
@@ -2738,7 +2703,7 @@ describe('SocketSdk', () => {
 
     it('should handle getAuditLogEvents 500 error', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/orgs/test-org/audit-log/30d')
+        .get('/v0/orgs/test-org/audit-log')
         .reply(500, { error: { message: 'Server error' } })
 
       const client = new SocketSdk('test-token')
@@ -2750,7 +2715,7 @@ describe('SocketSdk', () => {
 
     it('should handle getRepoAnalytics 400 error', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/analytics/test-org/test-repo/30d')
+        .get('/v0/analytics/repo/test-repo/30d')
         .reply(400, { error: { message: 'Bad request' } })
 
       const client = new SocketSdk('test-token')
@@ -2762,7 +2727,7 @@ describe('SocketSdk', () => {
 
     it('should handle getRepoAnalytics 500 error', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/analytics/test-org/test-repo/30d')
+        .get('/v0/analytics/repo/test-repo/30d')
         .reply(500, { error: { message: 'Server error' } })
 
       const client = new SocketSdk('test-token')
@@ -2774,7 +2739,7 @@ describe('SocketSdk', () => {
 
     it('should handle getScan 400 error', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/report/test-scan-id')
+        .get('/v0/report/view/test-scan-id')
         .reply(400, { error: { message: 'Bad request' } })
 
       const client = new SocketSdk('test-token')
@@ -2784,9 +2749,9 @@ describe('SocketSdk', () => {
       expect(res.status).toBe(400)
     })
 
-    it.skip('should handle getScan 500 error', async () => {
+    it('should handle getScan 500 error', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/report/test-scan-id')
+        .get('/v0/report/view/test-scan-id')
         .reply(500, { error: { message: 'Server error' } })
 
       const client = new SocketSdk('test-token')
@@ -2798,7 +2763,7 @@ describe('SocketSdk', () => {
 
     it('should handle updateOrgRepo 400 error', async () => {
       nock('https://api.socket.dev')
-        .patch('/v0/orgs/test-org/repos/test-repo')
+        .post('/v0/orgs/test-org/repos/test-repo')
         .reply(400, { error: { message: 'Bad request' } })
 
       const client = new SocketSdk('test-token')
@@ -2812,7 +2777,7 @@ describe('SocketSdk', () => {
 
     it('should handle updateOrgRepo 500 error', async () => {
       nock('https://api.socket.dev')
-        .patch('/v0/orgs/test-org/repos/test-repo')
+        .post('/v0/orgs/test-org/repos/test-repo')
         .reply(500, { error: { message: 'Server error' } })
 
       const client = new SocketSdk('test-token')
@@ -2824,7 +2789,7 @@ describe('SocketSdk', () => {
 
     it('should handle createOrgRepo 400 error', async () => {
       nock('https://api.socket.dev')
-        .put('/v0/orgs/test-org/repos/new-repo')
+        .post('/v0/orgs/test-org/repos')
         .reply(400, { error: { message: 'Bad request' } })
 
       const client = new SocketSdk('test-token')
@@ -2838,7 +2803,7 @@ describe('SocketSdk', () => {
 
     it('should handle createOrgRepo 500 error', async () => {
       nock('https://api.socket.dev')
-        .put('/v0/orgs/test-org/repos/new-repo')
+        .post('/v0/orgs/test-org/repos')
         .reply(500, { error: { message: 'Server error' } })
 
       const client = new SocketSdk('test-token')
@@ -2997,14 +2962,14 @@ describe('SocketSdk', () => {
     })
   })
 
-  describe.skip('Push to 95% Coverage', () => {
+  describe('API Success Path Tests', () => {
     it('should test successful API calls', async () => {
       // Test multiple successful API calls to increase coverage
       const client = new SocketSdk('test-token')
 
       // getOrganizations
       nock('https://api.socket.dev')
-        .get('/v0/orgs')
+        .get('/v0/organizations')
         .reply(200, { organizations: [] })
       const orgs = await client.getOrganizations()
       expect(orgs.success).toBe(true)
@@ -3099,7 +3064,7 @@ describe('SocketSdk', () => {
 
     it('should handle getScan success', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/report/scan-123')
+        .get('/v0/report/view/scan-123')
         .reply(200, { scan: {} })
       const client = new SocketSdk('test-token')
       const res = await client.getScan('scan-123')
@@ -3108,7 +3073,7 @@ describe('SocketSdk', () => {
 
     it('should handle getRepoAnalytics success', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/analytics/test-org/test-repo/30d')
+        .get('/v0/analytics/repo/test-repo/30d')
         .reply(200, { analytics: {} })
       const client = new SocketSdk('test-token')
       const res = await client.getRepoAnalytics('test-repo', '30d')
@@ -3117,7 +3082,7 @@ describe('SocketSdk', () => {
 
     it('should handle getAuditLogEvents success', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/orgs/test-org/audit-log/30d')
+        .get('/v0/orgs/test-org/audit-log')
         .reply(200, { events: [] })
       const client = new SocketSdk('test-token')
       const res = await client.getAuditLogEvents('test-org')
@@ -3135,7 +3100,7 @@ describe('SocketSdk', () => {
 
     it('should handle updateOrgRepo success', async () => {
       nock('https://api.socket.dev')
-        .patch('/v0/orgs/test-org/repos/test-repo')
+        .post('/v0/orgs/test-org/repos/test-repo')
         .reply(200, { updated: true })
       const client = new SocketSdk('test-token')
       const res = await client.updateOrgRepo('test-org', 'test-repo', {
@@ -3146,7 +3111,7 @@ describe('SocketSdk', () => {
 
     it('should handle createOrgRepo success', async () => {
       nock('https://api.socket.dev')
-        .put('/v0/orgs/test-org/repos/new-repo')
+        .post('/v0/orgs/test-org/repos')
         .reply(200, { created: true })
       const client = new SocketSdk('test-token')
       const res = await client.createOrgRepo('test-org', {
@@ -3223,8 +3188,8 @@ describe('SocketSdk', () => {
     })
   })
 
-  describe('Heap Debug Tracing Coverage', () => {
-    it.skip('should trace heap when DEBUG=heap is set', () => {
+  describe('Debug Environment Configuration', () => {
+    it('should trace heap when DEBUG=heap is set', () => {
       // Save original DEBUG env
       const originalDebug = process.env['DEBUG']
 
@@ -3232,11 +3197,11 @@ describe('SocketSdk', () => {
       process.env['DEBUG'] = 'heap'
 
       // Clear the module cache to force re-evaluation
-      const modulePath = require.resolve('../src/index')
+      const modulePath = require.resolve('../dist/index.cjs')
       delete require.cache[modulePath]
 
       // Re-import to trigger the heap trace code
-      require('../src/index')
+      require('../dist/index.cjs')
 
       // Restore original DEBUG
       if (originalDebug !== undefined) {
@@ -3253,8 +3218,8 @@ describe('SocketSdk', () => {
     })
   })
 
-  describe('AbortSignal Max Listeners Coverage', () => {
-    it.skip('should handle batchPackageFetch with abort signal to trigger max listeners', async () => {
+  describe('Batch Package Fetch with Abort Signal', () => {
+    it('should handle batchPackageFetch with abort signal to trigger max listeners', async () => {
       const client = new SocketSdk('test-token')
       const packages = {
         components: [
@@ -3265,58 +3230,21 @@ describe('SocketSdk', () => {
 
       // Mock the batch package fetch endpoint
       nock('https://api.socket.dev')
-        .post('/v0/package-fetch')
+        .post('/v0/purl')
         .reply(200, function () {
           // Return NDJSON response
           return '{"id":"1","name":"test-pkg1","version":"1.0.0"}\n{"id":"2","name":"test-pkg2","version":"2.0.0"}\n'
         })
 
-      const abortController = new AbortController()
-      const results: any[] = []
+      // Call batchPackageFetch (which doesn't support signal/concurrencyLimit)
+      const response = await client.batchPackageFetch(packages)
 
-      // Call with abort signal and high concurrency to trigger the max listeners logic
-      const response = await client.batchPackageFetch(packages, {
-        concurrencyLimit: 5, // This will trigger the max listeners adjustment
-        signal: abortController.signal,
-      })
-
-      if (response.success) {
-        results.push(response)
+      expect(response.success).toBe(true)
+      if (response.success && Array.isArray(response.data)) {
+        expect(response.data.length).toBe(2)
+        expect((response.data as any)[0].name).toBe('test-pkg1')
+        expect((response.data as any)[1].name).toBe('test-pkg2')
       }
-
-      expect(results.length).toBe(2)
-      expect(results[0].name).toBe('test-pkg1')
-      expect(results[1].name).toBe('test-pkg2')
-    })
-  })
-
-  describe('Old Signature Compatibility Tests', () => {
-    it.skip('should handle createOrgFullScan with old argument signature', async () => {
-      const client = new SocketSdk('test-token')
-      const tempDir = mkdtempSync(path.join(tmpdir(), 'test-'))
-      const testFile = path.join(tempDir, 'package.json')
-      writeFileSync(testFile, '{"name": "test-pkg"}')
-
-      // Mock successful response
-      nock('https://api.socket.dev')
-        .put('/v0/orgs/test-org/full-scans')
-        .reply(200, { id: 'scan-123', success: true })
-
-      // Call with old signature (queryParams as second param, files as third)
-      const result = await client.createOrgFullScan(
-        'test-org',
-        { someQuery: 'value' } as any, // queryParams in old position
-        [testFile] as any, // files in old position
-        tempDir as any, // basePath in old position
-      )
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data.id).toBe('scan-123')
-      }
-
-      // Cleanup
-      rmSync(tempDir, { recursive: true, force: true })
     })
   })
 
@@ -3332,10 +3260,10 @@ describe('SocketSdk', () => {
       )
     })
 
-    it.skip('should handle updateOrgRepo network error', async () => {
+    it('should handle updateOrgRepo network error', async () => {
       const client = new SocketSdk('test-token')
       nock('https://api.socket.dev')
-        .patch('/v0/orgs/test-org/repos/test-repo')
+        .post('/v0/orgs/test-org/repos/test-repo')
         .replyWithError('Network error')
 
       await expect(
@@ -3377,34 +3305,8 @@ describe('SocketSdk', () => {
     })
   })
 
-  describe('Push to 95% Coverage Part 2', () => {
-    it.skip('should handle createDependenciesSnapshot with old signature', async () => {
-      const client = new SocketSdk('test-token')
-      const tempDir = mkdtempSync(path.join(tmpdir(), 'test-'))
-      const testFile = path.join(tempDir, 'package.json')
-      writeFileSync(testFile, '{"name": "test"}')
-
-      // Mock successful response
-      nock('https://api.socket.dev')
-        .post('/v0/dependencies/snapshot')
-        .reply(200, { success: true })
-
-      // Call with old signature (queryParams first)
-      const result = await client.createDependenciesSnapshot(
-        [testFile],
-        tempDir,
-        { someQuery: 'value' } as any,
-      )
-
-      expect(result.success).toBe(true)
-
-      // Cleanup
-      rmSync(tempDir, { recursive: true, force: true })
-    })
-  })
-
-  describe('Coverage to 95%', () => {
-    it.skip('should handle createScanFromFilepaths with issueRules', async () => {
+  describe('Scan Creation Tests', () => {
+    it('should handle createScanFromFilepaths with issueRules', async () => {
       const client = new SocketSdk('test-token')
       const tempDir = mkdtempSync(path.join(tmpdir(), 'test-'))
       const testFile = path.join(tempDir, 'package.json')
@@ -3476,7 +3378,7 @@ describe('SocketSdk', () => {
     })
   })
 
-  describe('Coverage 95% Target', () => {
+  describe('Network and API Error Handling', () => {
     it('should handle postSettings network error', async () => {
       const client = new SocketSdk('test-token')
 
@@ -3533,7 +3435,7 @@ describe('SocketSdk', () => {
     })
   })
 
-  describe('Public Token Coverage', () => {
+  describe('Public API Token Operations', () => {
     it('should handle batchPackageStream with public token', async () => {
       // Use the actual public token
       const client = new SocketSdk(SOCKET_PUBLIC_API_TOKEN)
@@ -3621,12 +3523,12 @@ describe('SocketSdk', () => {
       expect(results.length).toBe(0)
     }, 10000)
 
-    it.skip('should handle getOrgFullScanList error', async () => {
+    it('should handle getOrgFullScanList error', async () => {
       const client = new SocketSdk('test-token')
 
       // Mock network error
       nock('https://api.socket.dev')
-        .post('/v0/package-fetch')
+        .get('/v0/orgs/test-org/full-scans')
         .replyWithError('Network error')
 
       await expect(client.getOrgFullScanList('test-org')).rejects.toThrow(
@@ -3635,7 +3537,7 @@ describe('SocketSdk', () => {
     })
   })
 
-  describe('Push to 99% Branch Coverage', () => {
+  describe('Edge Cases and Error Handling', () => {
     it('should handle reshapeArtifactForPublicPolicy with non-public actions', () => {
       // Test alert action filtering where publicAction is null
       const client = new SocketSdk(SOCKET_PUBLIC_API_TOKEN)
@@ -3795,22 +3697,28 @@ describe('SocketSdk', () => {
     })
   })
 
-  describe('Final Push to 99% Coverage', () => {
-    it.skip('should handle zero value in query params', async () => {
+  describe('Query Parameter Edge Cases', () => {
+    it('should handle zero value in query params', async () => {
       const client = new SocketSdk('test-token')
 
       // Mock with any query to avoid strict matching
-      nock('https://api.socket.dev').get('/v0/scans').query(true).reply(200, [])
+      nock('https://api.socket.dev')
+        .get('/v0/report/list')
+        .query(true)
+        .reply(200, [])
 
       // Pass 0 as a value which should be included (not filtered out)
       const result = await client.getScanList()
       expect(result.success).toBe(true)
     })
 
-    it.skip('should handle false value in query params', async () => {
+    it('should handle false value in query params', async () => {
       const client = new SocketSdk('test-token')
 
-      nock('https://api.socket.dev').get('/v0/scans').query(true).reply(200, [])
+      nock('https://api.socket.dev')
+        .get('/v0/report/list')
+        .query(true)
+        .reply(200, [])
 
       // Pass false which should be filtered out
       const result = await client.getScanList()
@@ -3858,27 +3766,30 @@ describe('SocketSdk', () => {
       }
     })
 
-    it.skip('should handle query params with falsy values correctly', async () => {
+    it('should handle query params with falsy values correctly', async () => {
       const client = new SocketSdk('test-token')
 
       // Test with 0 which should be included
       nock('https://api.socket.dev')
-        .get('/v0/scans')
+        .post('/v0/purl')
         .query(query => {
           // Check that 0 value is included
           return query['page'] === '0'
         })
-        .reply(200, [])
+        .reply(200, '{"id":"1","name":"test-pkg","version":"1.0.0"}\n')
 
-      const result = await client.getScanList()
+      const result = await client.batchPackageFetch(
+        { components: [{ purl: 'pkg:npm/test@1.0.0' }] },
+        { page: 0 } as any, // Pass 0 as a query param value
+      )
       expect(result.success).toBe(true)
     })
 
-    it.skip('should filter out undefined/null query params', async () => {
+    it('should filter out undefined/null query params', async () => {
       const client = new SocketSdk('test-token')
 
       nock('https://api.socket.dev')
-        .get('/v0/scans')
+        .get('/v0/report/list')
         .query(query => {
           // Undefined values should not be in query
           return !('page' in query)
@@ -3889,13 +3800,13 @@ describe('SocketSdk', () => {
       expect(result.success).toBe(true)
     })
 
-    it.skip('should handle alert filtering with public token and non-matching actions', async () => {
+    it('should handle alert filtering with public token and non-matching actions', async () => {
       const client = new SocketSdk(SOCKET_PUBLIC_API_TOKEN)
 
       // Mock response with alert that has action not in allowed list
       nock('https://api.socket.dev')
         .post('/v0/purl')
-        .query({ alert_actions: 'warn' })
+        .query({ actions: 'warn' })
         .reply(
           200,
           '{"name":"test","version":"1.0.0","alerts":[{"type":"customAlert","action":"error"}]}\n',
@@ -3903,7 +3814,7 @@ describe('SocketSdk', () => {
 
       const result = await client.batchPackageFetch(
         { components: [{ purl: 'pkg:npm/test@1.0.0' }] },
-        { alertActions: 'warn' },
+        { actions: 'warn' } as any,
       )
 
       expect(result.success).toBe(true)
@@ -3912,10 +3823,10 @@ describe('SocketSdk', () => {
         expect((result.data as any)[0].alerts.length).toBe(0)
       }
     })
-    it.skip('should handle query param with value 0', async () => {
+    it('should handle query param with value 0', async () => {
       const client = new SocketSdk('test-token')
       nock('https://api.socket.dev')
-        .get('/v0/scans')
+        .get('/v0/report/list')
         .query(true) // Accept any query params
         .reply(200, [])
 
@@ -3923,9 +3834,9 @@ describe('SocketSdk', () => {
       expect(result.success).toBe(true)
     })
 
-    it.skip('should handle query param with undefined value', async () => {
+    it('should handle query param with undefined value', async () => {
       const client = new SocketSdk('test-token')
-      nock('https://api.socket.dev').get('/v0/scans').reply(200, [])
+      nock('https://api.socket.dev').get('/v0/report/list').reply(200, [])
 
       const result = await client.getScanList()
       expect(result.success).toBe(true)
@@ -3939,7 +3850,7 @@ describe('SocketSdk', () => {
     })
   })
 
-  describe('Additional Error Handling Coverage', () => {
+  describe('HTTP Agent and Error Handling Tests', () => {
     it('should handle Got agent options', () => {
       // Test agent as Got options with https agent
       const httpsAgent = new HttpsAgent({ keepAlive: true })
@@ -4059,7 +3970,7 @@ describe('SocketSdk', () => {
       }
     })
 
-    it.skip('should handle ResponseError with empty message', async () => {
+    it('should handle ResponseError with empty message', async () => {
       const client = new SocketSdk('test-token')
       nock('https://api.socket.dev')
         .get('/v0/report/list')
@@ -4068,7 +3979,7 @@ describe('SocketSdk', () => {
       const result = await client.getScanList()
       expect(result.success).toBe(false)
       if (!result.success) {
-        expect(result.error).toContain('Request failed')
+        expect(result.error).toContain('GET request failed')
       }
     })
 
@@ -4096,7 +4007,7 @@ describe('SocketSdk', () => {
       expect(hasError).toBe(true)
     })
 
-    it.skip('should handle reshapeArtifactForPublicPolicy with filtered alerts', async () => {
+    it('should handle reshapeArtifactForPublicPolicy with filtered alerts', async () => {
       const client = new SocketSdk(SOCKET_PUBLIC_API_TOKEN)
 
       // Mock response with alert that will be filtered out
@@ -4110,7 +4021,7 @@ describe('SocketSdk', () => {
 
       const result = await client.batchPackageFetch(
         { components: [{ purl: 'pkg:npm/test@1.0.0' }] },
-        { alertActions: 'warn' },
+        { actions: 'warn' } as any,
       )
       expect(result.success).toBe(true)
       if (result.success && result.data && Array.isArray(result.data)) {
@@ -4136,10 +4047,10 @@ describe('SocketSdk', () => {
       }
     })
 
-    it.skip('should handle getOrganizations network error', async () => {
+    it('should handle getOrganizations network error', async () => {
       const client = new SocketSdk('test-token')
       nock('https://api.socket.dev')
-        .get('/v0/orgs')
+        .get('/v0/organizations')
         .replyWithError('Network error')
 
       await expect(client.getOrganizations()).rejects.toThrow(
@@ -4191,14 +4102,14 @@ describe('SocketSdk', () => {
       )
     })
 
-    it.skip('should handle uploadManifestFiles network error', async () => {
+    it('should handle uploadManifestFiles network error', async () => {
       const client = new SocketSdk('test-token')
       const tempDir = mkdtempSync(path.join(tmpdir(), 'test-'))
       const testFile = path.join(tempDir, 'package.json')
       writeFileSync(testFile, '{}')
 
       nock('https://api.socket.dev')
-        .put('/v0/report/upload/files')
+        .post('/v0/orgs/test-org/upload-manifest-files')
         .replyWithError('Network error')
 
       await expect(
@@ -4208,14 +4119,14 @@ describe('SocketSdk', () => {
       rmSync(tempDir, { recursive: true, force: true })
     })
 
-    it.skip('should handle createDependenciesSnapshot network error', async () => {
+    it('should handle createDependenciesSnapshot network error', async () => {
       const client = new SocketSdk('test-token')
       const tempDir = mkdtempSync(path.join(tmpdir(), 'test-'))
       const testFile = path.join(tempDir, 'package.json')
       writeFileSync(testFile, '{}')
 
       nock('https://api.socket.dev')
-        .post('/v0/dependencies/snapshot')
+        .post('/v0/dependencies/upload')
         .replyWithError('Network error')
 
       await expect(
@@ -4225,14 +4136,14 @@ describe('SocketSdk', () => {
       rmSync(tempDir, { recursive: true, force: true })
     })
 
-    it.skip('should handle createOrgFullScan network error', async () => {
+    it('should handle createOrgFullScan network error', async () => {
       const client = new SocketSdk('test-token')
       const tempDir = mkdtempSync(path.join(tmpdir(), 'test-'))
       const testFile = path.join(tempDir, 'package.json')
       writeFileSync(testFile, '{}')
 
       nock('https://api.socket.dev')
-        .put('/v0/orgs/test-org/full-scans')
+        .post('/v0/orgs/test-org/full-scans')
         .replyWithError('Network error')
 
       await expect(
@@ -4244,7 +4155,7 @@ describe('SocketSdk', () => {
   })
 
   describe('Batch Package Fetch Operations', () => {
-    it.skip('should handle batchPackageFetch with successful stream', async () => {
+    it('should handle batchPackageFetch with successful stream', async () => {
       const packages = {
         components: [
           { purl: 'pkg:npm/pkg1@1.0.0' },
@@ -4253,7 +4164,7 @@ describe('SocketSdk', () => {
       }
 
       nock('https://api.socket.dev')
-        .post('/v0/package-fetch')
+        .post('/v0/purl')
         .reply(
           200,
           JSON.stringify({ id: '1', name: 'pkg1' }) +
@@ -4272,24 +4183,24 @@ describe('SocketSdk', () => {
       expect(results).toHaveLength(2)
     })
 
-    it.skip('should handle batchPackageFetch with error callback', async () => {
+    it('should handle batchPackageFetch with error callback', async () => {
       const packages = {
         components: [{ purl: 'pkg:npm/bad-pkg@1.0.0' }],
       }
 
       nock('https://api.socket.dev')
-        .post('/v0/package-fetch')
+        .post('/v0/purl')
         .reply(200, 'invalid-json\n')
 
       const client = new SocketSdk('test-token')
-      const errors: any[] = []
 
       const response = await client.batchPackageFetch(packages)
-      if (!response.success) {
-        errors.push(response.error)
-      }
 
-      expect(errors.length).toBeGreaterThan(0)
+      // Invalid JSON lines are silently skipped, so we should get success with empty data
+      expect(response.success).toBe(true)
+      if (response.success) {
+        expect(response.data).toHaveLength(0)
+      }
     })
   })
 })
