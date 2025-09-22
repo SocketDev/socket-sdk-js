@@ -3,6 +3,9 @@
   "files": {
     "includes": [
       "**",
+      "!**/.DS_Store",
+      "!**/._.DS_Store",
+      "!**/.env",
       "!**/.git",
       "!**/.github",
       "!**/.husky",
