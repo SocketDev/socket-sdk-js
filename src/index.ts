@@ -679,7 +679,7 @@ function resolveAbsPaths(
   // it creates a valid absolute path. So if `pathsRelativeTo` is an absolute
   // path, process.cwd() is not used, which is the common expectation. If none
   // of the paths resolve then it defaults to process.cwd().
-  return filepaths.map(p => path.resolve(basePath, p))
+  return filepaths.map(p => normalizePath(path.resolve(basePath, p)))
 }
 
 function resolveBasePath(pathsRelativeTo = '.'): string {
@@ -687,7 +687,7 @@ function resolveBasePath(pathsRelativeTo = '.'): string {
   // it creates a valid absolute path. So if `pathsRelativeTo` is an absolute
   // path, process.cwd() is not used, which is the common expectation. If none
   // of the paths resolve then it defaults to process.cwd().
-  return path.resolve(process.cwd(), pathsRelativeTo)
+  return normalizePath(path.resolve(process.cwd(), pathsRelativeTo))
 }
 
 /**
