@@ -11,7 +11,7 @@
       "!**/coverage",
       "!**/dist",
       "!**/package.json",
-      "!**/package-lock.json",
+      "!**/pnpm-lock.yaml",
       "!openapi.json"
     ],
     "maxSize": 5242880
