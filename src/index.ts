@@ -1069,19 +1069,21 @@ export class SocketSdk {
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
     try {
-      const data = await createUploadRequest(
-        this.#baseUrl,
-        'report/upload',
-        [
-          ...createRequestBodyForFilepaths(absFilepaths, basePath),
-          ...(issueRules
-            ? createRequestBodyForJson(issueRules, 'issueRules')
-            : []),
-        ],
-        {
-          ...this.#reqOptions,
-          method: 'PUT',
-        },
+      const data = await getResponseJson(
+        await createUploadRequest(
+          this.#baseUrl,
+          'report/upload',
+          [
+            ...createRequestBodyForFilepaths(absFilepaths, basePath),
+            ...(issueRules
+              ? createRequestBodyForJson(issueRules, 'issueRules')
+              : []),
+          ],
+          {
+            ...this.#reqOptions,
+            method: 'PUT',
+          },
+        ),
       )
       return this.#handleApiSuccess<'createReport'>(data)
     } catch (e) {
