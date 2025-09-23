@@ -14288,6 +14288,58 @@
                             "default": "",
                             "nullable": true
                           },
+                          "integration_meta": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "github"
+                                    ]
+                                  },
+                                  "value": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "description": "",
+                                    "properties": {
+                                      "installation_id": {
+                                        "type": "string",
+                                        "description": "The GitHub installation_id of the active associated Socket GitHub App",
+                                        "default": ""
+                                      },
+                                      "installation_login": {
+                                        "type": "string",
+                                        "description": "The GitHub login name that the active Socket GitHub App installation is installed to",
+                                        "default": ""
+                                      },
+                                      "repo_name": {
+                                        "type": "string",
+                                        "description": "The name of the associated GitHub repo.",
+                                        "default": "",
+                                        "nullable": true
+                                      },
+                                      "repo_id": {
+                                        "type": "string",
+                                        "description": "The id of the associated GitHub repo.",
+                                        "default": "",
+                                        "nullable": true
+                                      }
+                                    },
+                                    "required": [
+                                      "installation_id",
+                                      "installation_login",
+                                      "repo_id",
+                                      "repo_name"
+                                    ]
+                                  }
+                                }
+                              }
+                            ],
+                            "nullable": true
+                          },
                           "name": {
                             "type": "string",
                             "description": "The name of the repository",
@@ -14479,6 +14531,58 @@
                       "default": "",
                       "nullable": true
                     },
+                    "integration_meta": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "github"
+                              ]
+                            },
+                            "value": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "description": "",
+                              "properties": {
+                                "installation_id": {
+                                  "type": "string",
+                                  "description": "The GitHub installation_id of the active associated Socket GitHub App",
+                                  "default": ""
+                                },
+                                "installation_login": {
+                                  "type": "string",
+                                  "description": "The GitHub login name that the active Socket GitHub App installation is installed to",
+                                  "default": ""
+                                },
+                                "repo_name": {
+                                  "type": "string",
+                                  "description": "The name of the associated GitHub repo.",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "repo_id": {
+                                  "type": "string",
+                                  "description": "The id of the associated GitHub repo.",
+                                  "default": "",
+                                  "nullable": true
+                                }
+                              },
+                              "required": [
+                                "installation_id",
+                                "installation_login",
+                                "repo_id",
+                                "repo_name"
+                              ]
+                            }
+                          }
+                        }
+                      ],
+                      "nullable": true
+                    },
                     "name": {
                       "type": "string",
                       "description": "The name of the repository",
@@ -14617,6 +14721,58 @@
                       "default": "",
                       "nullable": true
                     },
+                    "integration_meta": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "github"
+                              ]
+                            },
+                            "value": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "description": "",
+                              "properties": {
+                                "installation_id": {
+                                  "type": "string",
+                                  "description": "The GitHub installation_id of the active associated Socket GitHub App",
+                                  "default": ""
+                                },
+                                "installation_login": {
+                                  "type": "string",
+                                  "description": "The GitHub login name that the active Socket GitHub App installation is installed to",
+                                  "default": ""
+                                },
+                                "repo_name": {
+                                  "type": "string",
+                                  "description": "The name of the associated GitHub repo.",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "repo_id": {
+                                  "type": "string",
+                                  "description": "The id of the associated GitHub repo.",
+                                  "default": "",
+                                  "nullable": true
+                                }
+                              },
+                              "required": [
+                                "installation_id",
+                                "installation_login",
+                                "repo_id",
+                                "repo_name"
+                              ]
+                            }
+                          }
+                        }
+                      ],
+                      "nullable": true
+                    },
                     "name": {
                       "type": "string",
                       "description": "The name of the repository",
@@ -14668,6 +14824,7 @@
                     "head_full_scan_id",
                     "homepage",
                     "id",
+                    "integration_meta",
                     "name",
                     "slig",
                     "slug",
@@ -14819,6 +14976,58 @@
                       "type": "string",
                       "description": "The ID of the head full scan of the repository",
                       "default": "",
+                      "nullable": true
+                    },
+                    "integration_meta": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "github"
+                              ]
+                            },
+                            "value": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "description": "",
+                              "properties": {
+                                "installation_id": {
+                                  "type": "string",
+                                  "description": "The GitHub installation_id of the active associated Socket GitHub App",
+                                  "default": ""
+                                },
+                                "installation_login": {
+                                  "type": "string",
+                                  "description": "The GitHub login name that the active Socket GitHub App installation is installed to",
+                                  "default": ""
+                                },
+                                "repo_name": {
+                                  "type": "string",
+                                  "description": "The name of the associated GitHub repo.",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "repo_id": {
+                                  "type": "string",
+                                  "description": "The id of the associated GitHub repo.",
+                                  "default": "",
+                                  "nullable": true
+                                }
+                              },
+                              "required": [
+                                "installation_id",
+                                "installation_login",
+                                "repo_id",
+                                "repo_name"
+                              ]
+                            }
+                          }
+                        }
+                      ],
                       "nullable": true
                     },
                     "name": {
@@ -30221,6 +30430,7 @@
                 "ChangePlanSubscriptionSeats",
                 "CreateApiToken",
                 "CreateLabel",
+                "DeleteFullScan",
                 "DeleteLabel",
                 "DeleteLabelSetting",
                 "DeleteReport",
