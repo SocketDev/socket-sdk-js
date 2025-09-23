@@ -12,6 +12,10 @@ on:
           - '0'
           - '1'
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   publish:
     uses: SocketDev/socket-registry/.github/workflows/provenance.yml@main
