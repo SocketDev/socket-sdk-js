@@ -4,11 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.5.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.5.0) - 2025-09-22
+## [1.5.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.5.0) - 2025-09-23
+
+### Added
+- `getOrgFullScanBuffered` method for buffered full scan retrieval
 
 ### Changed
 - **BREAKING:** Renamed `getOrgFullScan` to `streamOrgFullScan` for clarity
-- Added `getOrgFullScanBuffered` method for buffered full scan retrieval
+
+### Fixed
+- Added missing `getResponseJson` call to `createScanFromFilepaths`
+- Improved handling of empty response bodies
 
 ## [1.4.93](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.4.93) - 2025-09-15
 
