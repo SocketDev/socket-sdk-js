@@ -93,8 +93,7 @@
     "update:socket": "pnpm update '@socketsecurity/*' --latest"
   },
   "dependencies": {
-    "@socketsecurity/registry": "1.1.17",
-    "trash": "10.0.0"
+    "@socketsecurity/registry": "1.1.17"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
@@ -124,6 +123,7 @@
     "openapi-typescript": "6.7.6",
     "oxlint": "1.15.0",
     "taze": "19.6.0",
+    "trash": "10.0.0",
     "type-coverage": "2.29.7",
     "typescript-eslint": "8.43.0",
     "vitest": "3.2.4",
