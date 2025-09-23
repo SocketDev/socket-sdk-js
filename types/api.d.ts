@@ -6126,6 +6126,32 @@ export interface operations {
                * @default
                */
               head_full_scan_id?: string | null
+              integration_meta?: {
+                /** @enum {string} */
+                type?: 'github'
+                value?: {
+                  /**
+                   * @description The GitHub installation_id of the active associated Socket GitHub App
+                   * @default
+                   */
+                  installation_id: string
+                  /**
+                   * @description The GitHub login name that the active Socket GitHub App installation is installed to
+                   * @default
+                   */
+                  installation_login: string
+                  /**
+                   * @description The name of the associated GitHub repo.
+                   * @default
+                   */
+                  repo_name: string | null
+                  /**
+                   * @description The id of the associated GitHub repo.
+                   * @default
+                   */
+                  repo_id: string | null
+                }
+              } | null
               /**
                * @description The name of the repository
                * @default
@@ -6255,6 +6281,32 @@ export interface operations {
              * @default
              */
             head_full_scan_id?: string | null
+            integration_meta?: {
+              /** @enum {string} */
+              type?: 'github'
+              value?: {
+                /**
+                 * @description The GitHub installation_id of the active associated Socket GitHub App
+                 * @default
+                 */
+                installation_id: string
+                /**
+                 * @description The GitHub login name that the active Socket GitHub App installation is installed to
+                 * @default
+                 */
+                installation_login: string
+                /**
+                 * @description The name of the associated GitHub repo.
+                 * @default
+                 */
+                repo_name: string | null
+                /**
+                 * @description The id of the associated GitHub repo.
+                 * @default
+                 */
+                repo_id: string | null
+              }
+            } | null
             /**
              * @description The name of the repository
              * @default
@@ -6344,6 +6396,32 @@ export interface operations {
              * @default
              */
             head_full_scan_id: string | null
+            integration_meta: {
+              /** @enum {string} */
+              type?: 'github'
+              value?: {
+                /**
+                 * @description The GitHub installation_id of the active associated Socket GitHub App
+                 * @default
+                 */
+                installation_id: string
+                /**
+                 * @description The GitHub login name that the active Socket GitHub App installation is installed to
+                 * @default
+                 */
+                installation_login: string
+                /**
+                 * @description The name of the associated GitHub repo.
+                 * @default
+                 */
+                repo_name: string | null
+                /**
+                 * @description The id of the associated GitHub repo.
+                 * @default
+                 */
+                repo_id: string | null
+              }
+            } | null
             /**
              * @description The name of the repository
              * @default
@@ -6475,6 +6553,32 @@ export interface operations {
              * @default
              */
             head_full_scan_id?: string | null
+            integration_meta?: {
+              /** @enum {string} */
+              type?: 'github'
+              value?: {
+                /**
+                 * @description The GitHub installation_id of the active associated Socket GitHub App
+                 * @default
+                 */
+                installation_id: string
+                /**
+                 * @description The GitHub login name that the active Socket GitHub App installation is installed to
+                 * @default
+                 */
+                installation_login: string
+                /**
+                 * @description The name of the associated GitHub repo.
+                 * @default
+                 */
+                repo_name: string | null
+                /**
+                 * @description The id of the associated GitHub repo.
+                 * @default
+                 */
+                repo_id: string | null
+              }
+            } | null
             /**
              * @description The name of the repository
              * @default
@@ -11861,6 +11965,7 @@ export interface operations {
           | 'ChangePlanSubscriptionSeats'
           | 'CreateApiToken'
           | 'CreateLabel'
+          | 'DeleteFullScan'
           | 'DeleteLabel'
           | 'DeleteLabelSetting'
           | 'DeleteReport'
