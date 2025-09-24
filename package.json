@@ -13,30 +13,14 @@
     "type": "git",
     "url": "git://github.com/SocketDev/socket-sdk-js.git"
   },
-  "type": "module",
+  "type": "commonjs",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "node": {
-        "module-sync": {
-          "types": "./dist/index.d.mts",
-          "default": "./dist/index.js"
-        },
-        "default": {
-          "types": "./dist/index.d.cts",
-          "default": "./dist/index.cjs"
-        }
-      },
-      "default": {
-        "types": "./dist/index.d.mts",
-        "default": "./dist/index.js"
-      }
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
-    "./dist/index.cjs": {
-      "types": "./dist/index.d.cts",
-      "default": "./dist/index.cjs"
-    },
-    "./dist/index.d.cts": "./dist/index.d.cts",
-    "./dist/index.d.mts": "./dist/index.d.mts",
     "./types/api-helpers": "./types/api-helpers.d.ts",
     "./types/api-helpers.d.ts": "./types/api-helpers.d.ts",
     "./types/api": "./types/api.d.ts",
@@ -44,11 +28,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "pnpm run clean:dist && run-p -c --aggregate-output build:* && run-p -c --aggregate-output build:clean:*",
-    "build:cjs": "dotenvx -q run -f .env.local -- tsgo",
-    "build:esm": "dotenvx -q run -f .env.local -- tsgo -p tsconfig.esm.json",
-    "build:clean:cjs": "dotenvx -q run -f .env.local -- node scripts/rename-dist-cjs-files.mjs",
-    "build:clean:esm": "dotenvx -q run -f .env.local -- node scripts/rename-dist-esm-files.mjs",
+    "build": "pnpm run clean:dist && dotenvx -q run -f .env.local -- tsgo",
     "check": "run-p -c --aggregate-output check:*",
     "check:lint": "dotenvx -q run -f .env.local -- eslint --report-unused-disable-directives .",
     "check:lint:fix": "pnpm run check:lint -- --fix",
