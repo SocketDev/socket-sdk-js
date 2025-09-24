@@ -2470,37 +2470,35 @@ export interface components {
                * @default
                */
               vulnerableVersionRange: string
-              kevs:
-                | Array<{
-                    /** @default */
-                    vulnerabilityName: string
-                    /** @default */
-                    shortDescription: string | null
-                    /** @default */
-                    requiredAction: string | null
-                    /**
-                     * @description Date when added to CISA KEV catalog (ISO 8601 format)
-                     * @default
-                     */
-                    dateAdded: string
-                    /**
-                     * @description Remediation deadline for federal agencies (ISO 8601 format)
-                     * @default
-                     */
-                    dueDate: string | null
-                    /**
-                     * @description Known, Unknown, or specific ransomware campaign names
-                     * @default
-                     */
-                    knownRansomwareCampaignUse: string | null
-                    /** @default */
-                    notes: string | null
-                    /** @default */
-                    vendorProject: string
-                    /** @default */
-                    product: string
-                  }>
-                | null
+              kevs: Array<{
+                /** @default */
+                vulnerabilityName: string
+                /** @default */
+                shortDescription: string | null
+                /** @default */
+                requiredAction: string | null
+                /**
+                 * @description Date when added to CISA KEV catalog (ISO 8601 format)
+                 * @default
+                 */
+                dateAdded: string
+                /**
+                 * @description Remediation deadline for federal agencies (ISO 8601 format)
+                 * @default
+                 */
+                dueDate: string | null
+                /**
+                 * @description Known, Unknown, or specific ransomware campaign names
+                 * @default
+                 */
+                knownRansomwareCampaignUse: string | null
+                /** @default */
+                notes: string | null
+                /** @default */
+                vendorProject: string
+                /** @default */
+                product: string
+              }> | null
               /** @description Exploit Prediction Scoring System https://www.first.org/epss/ */
               epss: {
                 /** @default 0 */
@@ -2571,37 +2569,35 @@ export interface components {
                * @default
                */
               vulnerableVersionRange: string
-              kevs:
-                | Array<{
-                    /** @default */
-                    vulnerabilityName: string
-                    /** @default */
-                    shortDescription: string | null
-                    /** @default */
-                    requiredAction: string | null
-                    /**
-                     * @description Date when added to CISA KEV catalog (ISO 8601 format)
-                     * @default
-                     */
-                    dateAdded: string
-                    /**
-                     * @description Remediation deadline for federal agencies (ISO 8601 format)
-                     * @default
-                     */
-                    dueDate: string | null
-                    /**
-                     * @description Known, Unknown, or specific ransomware campaign names
-                     * @default
-                     */
-                    knownRansomwareCampaignUse: string | null
-                    /** @default */
-                    notes: string | null
-                    /** @default */
-                    vendorProject: string
-                    /** @default */
-                    product: string
-                  }>
-                | null
+              kevs: Array<{
+                /** @default */
+                vulnerabilityName: string
+                /** @default */
+                shortDescription: string | null
+                /** @default */
+                requiredAction: string | null
+                /**
+                 * @description Date when added to CISA KEV catalog (ISO 8601 format)
+                 * @default
+                 */
+                dateAdded: string
+                /**
+                 * @description Remediation deadline for federal agencies (ISO 8601 format)
+                 * @default
+                 */
+                dueDate: string | null
+                /**
+                 * @description Known, Unknown, or specific ransomware campaign names
+                 * @default
+                 */
+                knownRansomwareCampaignUse: string | null
+                /** @default */
+                notes: string | null
+                /** @default */
+                vendorProject: string
+                /** @default */
+                product: string
+              }> | null
               /** @description Exploit Prediction Scoring System https://www.first.org/epss/ */
               epss: {
                 /** @default 0 */
@@ -2672,37 +2668,35 @@ export interface components {
                * @default
                */
               vulnerableVersionRange: string
-              kevs:
-                | Array<{
-                    /** @default */
-                    vulnerabilityName: string
-                    /** @default */
-                    shortDescription: string | null
-                    /** @default */
-                    requiredAction: string | null
-                    /**
-                     * @description Date when added to CISA KEV catalog (ISO 8601 format)
-                     * @default
-                     */
-                    dateAdded: string
-                    /**
-                     * @description Remediation deadline for federal agencies (ISO 8601 format)
-                     * @default
-                     */
-                    dueDate: string | null
-                    /**
-                     * @description Known, Unknown, or specific ransomware campaign names
-                     * @default
-                     */
-                    knownRansomwareCampaignUse: string | null
-                    /** @default */
-                    notes: string | null
-                    /** @default */
-                    vendorProject: string
-                    /** @default */
-                    product: string
-                  }>
-                | null
+              kevs: Array<{
+                /** @default */
+                vulnerabilityName: string
+                /** @default */
+                shortDescription: string | null
+                /** @default */
+                requiredAction: string | null
+                /**
+                 * @description Date when added to CISA KEV catalog (ISO 8601 format)
+                 * @default
+                 */
+                dateAdded: string
+                /**
+                 * @description Remediation deadline for federal agencies (ISO 8601 format)
+                 * @default
+                 */
+                dueDate: string | null
+                /**
+                 * @description Known, Unknown, or specific ransomware campaign names
+                 * @default
+                 */
+                knownRansomwareCampaignUse: string | null
+                /** @default */
+                notes: string | null
+                /** @default */
+                vendorProject: string
+                /** @default */
+                product: string
+              }> | null
               /** @description Exploit Prediction Scoring System https://www.first.org/epss/ */
               epss: {
                 /** @default 0 */
@@ -2773,37 +2767,35 @@ export interface components {
                * @default
                */
               vulnerableVersionRange: string
-              kevs:
-                | Array<{
-                    /** @default */
-                    vulnerabilityName: string
-                    /** @default */
-                    shortDescription: string | null
-                    /** @default */
-                    requiredAction: string | null
-                    /**
-                     * @description Date when added to CISA KEV catalog (ISO 8601 format)
-                     * @default
-                     */
-                    dateAdded: string
-                    /**
-                     * @description Remediation deadline for federal agencies (ISO 8601 format)
-                     * @default
-                     */
-                    dueDate: string | null
-                    /**
-                     * @description Known, Unknown, or specific ransomware campaign names
-                     * @default
-                     */
-                    knownRansomwareCampaignUse: string | null
-                    /** @default */
-                    notes: string | null
-                    /** @default */
-                    vendorProject: string
-                    /** @default */
-                    product: string
-                  }>
-                | null
+              kevs: Array<{
+                /** @default */
+                vulnerabilityName: string
+                /** @default */
+                shortDescription: string | null
+                /** @default */
+                requiredAction: string | null
+                /**
+                 * @description Date when added to CISA KEV catalog (ISO 8601 format)
+                 * @default
+                 */
+                dateAdded: string
+                /**
+                 * @description Remediation deadline for federal agencies (ISO 8601 format)
+                 * @default
+                 */
+                dueDate: string | null
+                /**
+                 * @description Known, Unknown, or specific ransomware campaign names
+                 * @default
+                 */
+                knownRansomwareCampaignUse: string | null
+                /** @default */
+                notes: string | null
+                /** @default */
+                vendorProject: string
+                /** @default */
+                product: string
+              }> | null
               /** @description Exploit Prediction Scoring System https://www.first.org/epss/ */
               epss: {
                 /** @default 0 */
@@ -4834,7 +4826,9 @@ export interface operations {
     parameters: {
       query: {
         /** @description Control which alert priority fields to include in the response. Set to "true" to include all fields, "false" to exclude all fields, or specify individual fields like "components,formula" to include only those fields. */
-        include_alert_priority_details?: boolean | Array<'component' | 'formula'>
+        include_alert_priority_details?:
+          | boolean
+          | Array<'component' | 'formula'>
         /** @description Include license details in the response. This can increase the response size significantly. */
         include_license_details: boolean
       }
@@ -5069,7 +5063,9 @@ export interface operations {
             artifacts: {
               added: Array<components['schemas']['SocketDiffArtifact']>
               removed: Array<components['schemas']['SocketDiffArtifact']>
-              unchanged: Array<components['schemas']['SocketDiffArtifact']> | null
+              unchanged: Array<
+                components['schemas']['SocketDiffArtifact']
+              > | null
               replaced: Array<components['schemas']['SocketDiffArtifact']>
               updated: Array<components['schemas']['SocketDiffArtifact']>
             }
@@ -5507,7 +5503,9 @@ export interface operations {
               artifacts: {
                 added: Array<components['schemas']['SocketDiffArtifact']>
                 removed: Array<components['schemas']['SocketDiffArtifact']>
-                unchanged: Array<components['schemas']['SocketDiffArtifact']> | null
+                unchanged: Array<
+                  components['schemas']['SocketDiffArtifact']
+                > | null
                 replaced: Array<components['schemas']['SocketDiffArtifact']>
                 updated: Array<components['schemas']['SocketDiffArtifact']>
               }
