@@ -3885,6 +3885,45 @@ describe('SocketSdk', () => {
       expect(client4).toBeDefined()
     })
 
+    it('should handle Got-style agent options object with http/https/http2 properties', () => {
+      // Test with https property in agent options object (Got-style).
+      const httpsAgent = new HttpsAgent({ keepAlive: true })
+      const client1 = new SocketSdk('test-token', {
+        agent: {
+          https: httpsAgent,
+        },
+      })
+      expect(client1).toBeDefined()
+
+      // Test with http property in agent options object (Got-style).
+      const httpAgent = new HttpAgent({ keepAlive: false })
+      const client2 = new SocketSdk('test-token', {
+        agent: {
+          http: httpAgent,
+        },
+      })
+      expect(client2).toBeDefined()
+
+      // Test with http2 property in agent options object (Got-style).
+      // Note: http2 requires a ClientHttp2Session, not an HttpsAgent.
+      const client3 = new SocketSdk('test-token', {
+        agent: {
+          http2: {} as any, // Mock ClientHttp2Session for testing.
+        },
+      })
+      expect(client3).toBeDefined()
+
+      // Test with multiple agent properties - https takes precedence.
+      const client4 = new SocketSdk('test-token', {
+        agent: {
+          https: httpsAgent,
+          http: httpAgent,
+          http2: {} as any, // Mock ClientHttp2Session for testing.
+        },
+      })
+      expect(client4).toBeDefined()
+    })
+
     it('should handle batchPackageStream 401 error', async () => {
       const client = new SocketSdk('test-token')
       nock('https://api.socket.dev').post('/v0/purl').reply(401, 'Unauthorized')
@@ -3992,6 +4031,43 @@ describe('SocketSdk', () => {
       expect(result.success).toBe(false)
       if (!result.success) {
         expect(result.error).toContain('GET request failed')
+      }
+    })
+
+    it('should handle error with statusMessage in message and replace it with body', async () => {
+      const client = new SocketSdk('test-token')
+
+      // Mock a response that includes statusMessage in the error message.
+      nock('https://api.socket.dev')
+        .get('/v0/report/list')
+        .reply(400, 'Custom error body', {
+          'Content-Type': 'text/plain',
+        })
+
+      const result = await client.getScanList()
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        // The error should contain the custom body instead of the generic statusMessage.
+        expect(result.error).toContain('Custom error body')
+        expect(result.cause).toBe('Custom error body')
+      }
+    })
+
+    it('should handle error with body appended when statusMessage not in error', async () => {
+      const client = new SocketSdk('test-token')
+
+      // Mock a response with body content - use a custom error message without statusMessage.
+      nock('https://api.socket.dev')
+        .get('/v0/report/list')
+        .reply(400, 'Server error details', {
+          'Content-Type': 'text/plain',
+        })
+
+      const result = await client.getScanList()
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        // Should contain the error details in the message.
+        expect(result.error).toContain('Server error details')
       }
     })
 
