@@ -23,18 +23,27 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const require = createRequire(import.meta.url)
 
-const { BIOME_JSON, GITIGNORE, LATEST, TSCONFIG_JSON } = constants
-
 const rootPath = __dirname
-const rootTsConfigPath = path.join(rootPath, TSCONFIG_JSON)
+const rootTsConfigPath = path.join(rootPath, 'tsconfig.json')
 
-const biomeConfigPath = path.join(rootPath, BIOME_JSON)
-const gitignorePath = path.join(rootPath, GITIGNORE)
-
-const biomeConfig = require(biomeConfigPath)
 const nodeGlobalsConfig = Object.fromEntries(
   Object.entries(globals.node).map(([k]) => [k, 'readonly']),
 )
+
+const biomeConfigPath = path.join(rootPath, 'biome.json')
+const biomeConfig = require(biomeConfigPath)
+const biomeIgnores = {
+  name: `Imported biome.json ignore patterns`,
+  ignores: biomeConfig.files.includes
+    .filter(p => p.startsWith('!'))
+    .map(p => convertIgnorePatternToMinimatch(p.slice(1))),
+}
+
+const gitignorePath = path.join(rootPath, '.gitignore')
+const gitIgnores = {
+  ...includeIgnoreFile(gitignorePath),
+  name: `Imported .gitignore ignore patterns`,
+}
 
 const sharedPlugins = {
   ...nodePlugin.configs['flat/recommended-script'].plugins,
@@ -133,7 +142,7 @@ function getImportXFlatConfigs(isEsm) {
       ...origImportXFlatConfigs.recommended,
       languageOptions: {
         ...origImportXFlatConfigs.recommended.languageOptions,
-        ecmaVersion: LATEST,
+        ecmaVersion: 'latest',
         sourceType: isEsm ? 'module' : 'script',
       },
       rules: {
@@ -168,13 +177,8 @@ const importFlatConfigsForScript = getImportXFlatConfigs(false)
 const importFlatConfigsForModule = getImportXFlatConfigs(true)
 
 export default [
-  includeIgnoreFile(gitignorePath),
-  {
-    name: 'Imported biome.json ignore patterns',
-    ignores: biomeConfig.files.includes
-      .filter(p => p.startsWith('!'))
-      .map(p => convertIgnorePatternToMinimatch(p.slice(1))),
-  },
+  biomeIgnores,
+  gitIgnores,
   {
     ignores: ['coverage/**'],
   },
