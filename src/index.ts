@@ -845,6 +845,7 @@ export class SocketSdk {
       if (statusMessage && errorMessage.includes(statusMessage)) {
         errorMessage = errorMessage.replace(statusMessage, trimmedBody)
       } else {
+        /* c8 ignore next 2 - edge case where statusMessage is undefined or not in error message. */
         errorMessage = `${errorMessage}: ${trimmedBody}`
       }
     }
