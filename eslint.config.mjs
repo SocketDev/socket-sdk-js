@@ -209,7 +209,8 @@ export default [
           allowDefaultProject: [
             // Allow configs.
             '*.config.mts',
-            'test/*.ts',
+            'test/*.mts',
+            'src/*.mts',
             'types/*.ts',
           ],
           defaultProject: rootTsConfigPath,
