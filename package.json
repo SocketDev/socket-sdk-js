@@ -107,7 +107,7 @@
     "type-coverage": "2.29.7",
     "typescript-eslint": "8.43.0",
     "vitest": "3.2.4",
-    "yargs-parser": "^22.0.0",
+    "yargs-parser": "22.0.0",
     "yoctocolors": "2.1.2"
   },
   "pnpm": {
