@@ -1641,12 +1641,12 @@ export interface components {
         affects?: Array<{
           /** @default */
           ref: string
-          versions?: {
+          versions?: Array<{
             /** @default */
             version?: string
             /** @default */
             status?: string
-          }[]
+          }>
         }>
         analysis?: {
           /** @default */
@@ -2471,7 +2471,7 @@ export interface components {
                */
               vulnerableVersionRange: string
               kevs:
-                | {
+                | Array<{
                     /** @default */
                     vulnerabilityName: string
                     /** @default */
@@ -2499,7 +2499,7 @@ export interface components {
                     vendorProject: string
                     /** @default */
                     product: string
-                  }[]
+                  }>
                 | null
               /** @description Exploit Prediction Scoring System https://www.first.org/epss/ */
               epss: {
@@ -2572,7 +2572,7 @@ export interface components {
                */
               vulnerableVersionRange: string
               kevs:
-                | {
+                | Array<{
                     /** @default */
                     vulnerabilityName: string
                     /** @default */
@@ -2600,7 +2600,7 @@ export interface components {
                     vendorProject: string
                     /** @default */
                     product: string
-                  }[]
+                  }>
                 | null
               /** @description Exploit Prediction Scoring System https://www.first.org/epss/ */
               epss: {
@@ -2673,7 +2673,7 @@ export interface components {
                */
               vulnerableVersionRange: string
               kevs:
-                | {
+                | Array<{
                     /** @default */
                     vulnerabilityName: string
                     /** @default */
@@ -2701,7 +2701,7 @@ export interface components {
                     vendorProject: string
                     /** @default */
                     product: string
-                  }[]
+                  }>
                 | null
               /** @description Exploit Prediction Scoring System https://www.first.org/epss/ */
               epss: {
@@ -2774,7 +2774,7 @@ export interface components {
                */
               vulnerableVersionRange: string
               kevs:
-                | {
+                | Array<{
                     /** @default */
                     vulnerabilityName: string
                     /** @default */
@@ -2802,7 +2802,7 @@ export interface components {
                     vendorProject: string
                     /** @default */
                     product: string
-                  }[]
+                  }>
                 | null
               /** @description Exploit Prediction Scoring System https://www.first.org/epss/ */
               epss: {
@@ -4834,7 +4834,7 @@ export interface operations {
     parameters: {
       query: {
         /** @description Control which alert priority fields to include in the response. Set to "true" to include all fields, "false" to exclude all fields, or specify individual fields like "components,formula" to include only those fields. */
-        include_alert_priority_details?: boolean | ('component' | 'formula')[]
+        include_alert_priority_details?: boolean | Array<'component' | 'formula'>
         /** @description Include license details in the response. This can increase the response size significantly. */
         include_license_details: boolean
       }
@@ -5069,7 +5069,7 @@ export interface operations {
             artifacts: {
               added: Array<components['schemas']['SocketDiffArtifact']>
               removed: Array<components['schemas']['SocketDiffArtifact']>
-              unchanged: components['schemas']['SocketDiffArtifact'][] | null
+              unchanged: Array<components['schemas']['SocketDiffArtifact']> | null
               replaced: Array<components['schemas']['SocketDiffArtifact']>
               updated: Array<components['schemas']['SocketDiffArtifact']>
             }
@@ -5507,7 +5507,7 @@ export interface operations {
               artifacts: {
                 added: Array<components['schemas']['SocketDiffArtifact']>
                 removed: Array<components['schemas']['SocketDiffArtifact']>
-                unchanged: components['schemas']['SocketDiffArtifact'][] | null
+                unchanged: Array<components['schemas']['SocketDiffArtifact']> | null
                 replaced: Array<components['schemas']['SocketDiffArtifact']>
                 updated: Array<components['schemas']['SocketDiffArtifact']>
               }
