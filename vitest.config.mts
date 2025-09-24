@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     globals: false,
     environment: 'node',
-    include: ['test/**/*.test.{js,ts,mjs,cjs}'],
+    include: ['test/**/*.test.{js,ts,mjs,mts,cjs}'],
     reporters: ['default'],
     // Improve memory usage by running tests sequentially in CI.
     pool: 'forks',
@@ -40,7 +40,7 @@ export default defineConfig({
         '**/*.mjs',
         '**/*.cjs',
       ],
-      include: ['src/**/*.ts'],
+      include: ['src/**/*.{ts,mts,cts}'],
       all: true,
       thresholds: {
         lines: 99,
