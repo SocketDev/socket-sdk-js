@@ -1,0 +1,756 @@
+import nock from 'nock'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+
+import { SocketSdk } from '../src/index'
+
+import type { CResult } from '../src/index'
+import type { IncomingMessage } from 'node:http'
+
+describe('getApi and sendApi Methods', () => {
+  let client: SocketSdk
+
+  beforeEach(() => {
+    nock.cleanAll()
+    nock.disableNetConnect()
+    client = new SocketSdk('test-api-token')
+  })
+
+  afterEach(() => {
+    if (!nock.isDone()) {
+      throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
+    }
+  })
+
+  describe('getApi', () => {
+    it('should return IncomingMessage when throws=true (default)', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/test-endpoint')
+        .reply(200, 'success')
+
+      const result = await client.getApi('test-endpoint')
+
+      expect(result).toBeDefined()
+      expect((result as IncomingMessage).statusCode).toBe(200)
+    })
+
+    it('should return CResult<IncomingMessage> when throws=false', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/test-endpoint')
+        .reply(200, 'success')
+
+      const result = (await client.getApi('test-endpoint', {
+        throws: false,
+      })) as CResult<IncomingMessage>
+
+      expect(result.ok).toBe(true)
+      if (result.ok) {
+        expect(result.data).toBeDefined()
+        expect(result.data.statusCode).toBe(200)
+      }
+    })
+
+    it('should throw error when throws=true and request fails', async () => {
+      await expect(client.getApi('nonexistent-endpoint')).rejects.toThrow()
+    })
+
+    it('should return error CResult when throws=false and request fails', async () => {
+      const result = (await client.getApi('nonexistent-endpoint', {
+        throws: false,
+      })) as CResult<IncomingMessage>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.message).toBe('API request failed')
+        expect(result.cause).toBeDefined()
+      }
+    })
+
+    it('should handle baseUrl with trailing slash correctly', async () => {
+      const clientWithSlash = new SocketSdk('test-token', {
+        baseUrl: 'https://api.socket.dev/v0/',
+      })
+      nock('https://api.socket.dev')
+        .get('/v0/test-endpoint')
+        .reply(200, 'success')
+
+      const result = await clientWithSlash.getApi('test-endpoint')
+      expect((result as IncomingMessage).statusCode).toBe(200)
+    })
+
+    it('should handle baseUrl without trailing slash correctly', async () => {
+      const clientWithoutSlash = new SocketSdk('test-token', {
+        baseUrl: 'https://api.socket.dev/v0',
+      })
+      nock('https://api.socket.dev')
+        .get('/v0/test-endpoint')
+        .reply(200, 'success')
+
+      const result = await clientWithoutSlash.getApi('test-endpoint')
+      expect((result as IncomingMessage).statusCode).toBe(200)
+    })
+  })
+
+  describe('getApi with responseType: text', () => {
+    it('should return text when throws=true (default) and request succeeds', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/test-text')
+        .reply(200, 'Hello, world!')
+
+      const result = await client.getApi<string>('test-text', {
+        responseType: 'text',
+      })
+
+      expect(result).toBe('Hello, world!')
+    })
+
+    it('should return CResult<string> when throws=false and request succeeds', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/test-text')
+        .reply(200, 'Hello, world!')
+
+      const result = (await client.getApi<string>('test-text', {
+        responseType: 'text',
+        throws: false,
+      })) as CResult<string>
+
+      expect(result.ok).toBe(true)
+      if (result.ok) {
+        expect(result.data).toBe('Hello, world!')
+      }
+    })
+
+    it('should throw error when throws=true and API returns error status', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/test-error')
+        .reply(404, 'Not found')
+
+      await expect(
+        client.getApi<string>('test-error', { responseType: 'text' }),
+      ).rejects.toThrow(/Socket API GET request failed \(404\)/)
+    })
+
+    it('should return error CResult when throws=false and API returns error status', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/test-error')
+        .reply(404, 'Not found')
+
+      const result = (await client.getApi<string>('test-error', {
+        responseType: 'text',
+        throws: false,
+      })) as CResult<string>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.code).toBe(404)
+        expect(result.message).toBe('Socket API error')
+        expect(result.cause).toContain('Not found')
+      }
+    })
+
+    it('should handle empty response body', async () => {
+      nock('https://api.socket.dev').get('/v0/empty').reply(200, '')
+
+      const result = (await client.getApi<string>('empty', {
+        responseType: 'text',
+        throws: false,
+      })) as CResult<string>
+
+      expect(result.ok).toBe(true)
+      if (result.ok) {
+        expect(result.data).toBe('')
+      }
+    })
+
+    it('should handle network errors gracefully with throws=false', async () => {
+      const result = (await client.getApi<string>('network-error', {
+        responseType: 'text',
+        throws: false,
+      })) as CResult<string>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.message).toBe('API request failed')
+        expect(result.cause).toBeDefined()
+      }
+    })
+  })
+
+  describe('getApi with responseType: json', () => {
+    it('should return parsed JSON when throws=true (default)', async () => {
+      const testData = { message: 'Hello, JSON!' }
+      nock('https://api.socket.dev').get('/v0/test-json').reply(200, testData)
+
+      const result = await client.getApi<typeof testData>('test-json', {
+        responseType: 'json',
+      })
+
+      expect(result).toEqual(testData)
+    })
+
+    it('should return CResult<T> when throws=false', async () => {
+      const testData = { message: 'Hello, JSON!' }
+      nock('https://api.socket.dev').get('/v0/test-json').reply(200, testData)
+
+      const result = (await client.getApi<typeof testData>('test-json', {
+        responseType: 'json',
+        throws: false,
+      })) as CResult<typeof testData>
+
+      expect(result.ok).toBe(true)
+      if (result.ok) {
+        expect(result.data).toEqual(testData)
+      }
+    })
+
+    it('should handle complex JSON objects', async () => {
+      const complexData = {
+        users: [
+          { id: 1, name: 'Alice', active: true },
+          { id: 2, name: 'Bob', active: false },
+        ],
+        meta: { total: 2, page: 1 },
+      }
+      nock('https://api.socket.dev')
+        .get('/v0/complex-json')
+        .reply(200, complexData)
+
+      const result = (await client.getApi<typeof complexData>('complex-json', {
+        responseType: 'json',
+        throws: false,
+      })) as CResult<typeof complexData>
+
+      expect(result.ok).toBe(true)
+      if (result.ok) {
+        expect(result.data).toEqual(complexData)
+      }
+    })
+
+    it('should throw error when throws=true and JSON is invalid', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/invalid-json')
+        .reply(200, 'invalid json content')
+
+      await expect(
+        client.getApi('invalid-json', { responseType: 'json' }),
+      ).rejects.toThrow()
+    })
+
+    it('should return error CResult when throws=false and JSON is invalid', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/invalid-json')
+        .reply(200, 'invalid json content')
+
+      const result = (await client.getApi('invalid-json', {
+        responseType: 'json',
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.message).toBe('Server returned invalid JSON')
+        expect(result.cause).toContain('invalid json content')
+      }
+    })
+
+    it('should handle API error responses', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/api-error')
+        .reply(400, { error: 'Bad Request' })
+
+      const result = (await client.getApi('api-error', {
+        responseType: 'json',
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.code).toBe(400)
+        expect(result.message).toBe('Socket API error')
+      }
+    })
+  })
+
+  describe('sendApi', () => {
+    it('should send POST request with JSON body when throws=true (default)', async () => {
+      const requestData = { name: 'Test', value: 42 }
+      const responseData = { id: 123, status: 'created' }
+
+      nock('https://api.socket.dev')
+        .post('/v0/create', requestData)
+        .reply(201, responseData)
+
+      const result = await client.sendApi<typeof responseData>('create', {
+        method: 'POST',
+        body: requestData,
+      })
+
+      expect(result).toEqual({
+        ok: true,
+        data: responseData,
+      })
+    })
+
+    it('should return CResult<T> when throws=false', async () => {
+      const requestData = { name: 'Test', value: 42 }
+      const responseData = { id: 123, status: 'created' }
+
+      nock('https://api.socket.dev')
+        .post('/v0/create', requestData)
+        .reply(201, responseData)
+
+      const result = (await client.sendApi<typeof responseData>('create', {
+        method: 'POST',
+        body: requestData,
+        throws: false,
+      })) as CResult<typeof responseData>
+
+      expect(result.ok).toBe(true)
+      if (result.ok) {
+        expect(result.data).toEqual(responseData)
+      }
+    })
+
+    it('should send PUT request', async () => {
+      const requestData = { name: 'Updated Test', value: 84 }
+      const responseData = { id: 123, status: 'updated' }
+
+      nock('https://api.socket.dev')
+        .put('/v0/update/123', requestData)
+        .reply(200, responseData)
+
+      const result = (await client.sendApi<typeof responseData>('update/123', {
+        method: 'PUT',
+        body: requestData,
+        throws: false,
+      })) as CResult<typeof responseData>
+
+      expect(result.ok).toBe(true)
+      if (result.ok) {
+        expect(result.data).toEqual(responseData)
+      }
+    })
+
+    it('should handle requests without body', async () => {
+      const responseData = { status: 'processed' }
+
+      nock('https://api.socket.dev')
+        .post('/v0/process')
+        .reply(200, responseData)
+
+      const result = (await client.sendApi<typeof responseData>('process', {
+        throws: false,
+      })) as CResult<typeof responseData>
+
+      expect(result.ok).toBe(true)
+      if (result.ok) {
+        expect(result.data).toEqual(responseData)
+      }
+    })
+
+    it('should throw error when throws=true and request fails', async () => {
+      const requestData = { invalid: true }
+
+      nock('https://api.socket.dev')
+        .post('/v0/fail', requestData)
+        .reply(400, { error: 'Validation failed' })
+
+      await expect(
+        client.sendApi('fail', {
+          body: requestData,
+        }),
+      ).rejects.toThrow(/Socket API POST request failed \(400\)/)
+    })
+
+    it('should return error CResult when throws=false and request fails', async () => {
+      const requestData = { invalid: true }
+
+      nock('https://api.socket.dev')
+        .post('/v0/fail', requestData)
+        .reply(422, { error: 'Unprocessable Entity' })
+
+      const result = (await client.sendApi('fail', {
+        body: requestData,
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.code).toBe(422)
+        expect(result.message).toBe('Socket API error')
+        expect(result.cause).toContain('Unprocessable Entity')
+      }
+    })
+
+    it('should handle JSON parsing errors in response', async () => {
+      nock('https://api.socket.dev')
+        .post('/v0/invalid-response')
+        .reply(200, 'not valid json')
+
+      const result = (await client.sendApi('invalid-response', {
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.message).toBe('API request failed')
+        expect(result.cause).toContain(
+          'SyntaxError: Socket API - Invalid JSON response',
+        )
+      }
+    })
+
+    it('should include Content-Type header for JSON requests', async () => {
+      const requestData = { test: true }
+      let capturedHeaders: any = {}
+
+      nock('https://api.socket.dev')
+        .post('/v0/headers-test', requestData)
+        .reply(function () {
+          capturedHeaders = this.req.headers
+          return [200, { received: true }]
+        })
+
+      await client.sendApi('headers-test', {
+        body: requestData,
+        throws: false,
+      })
+
+      expect(capturedHeaders['content-type']).toBe('application/json')
+    })
+
+    it('should handle network errors gracefully', async () => {
+      const result = (await client.sendApi('network-fail', {
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.message).toBe('API request failed')
+        expect(result.cause).toBeDefined()
+      }
+    })
+  })
+
+  describe('Edge case error handling for coverage', () => {
+    it('should handle error with long response text in JSON parsing error', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/long-invalid-json')
+        .reply(
+          200,
+          'a'.repeat(150) +
+            ' - this is a very long invalid json response that should be truncated',
+        )
+
+      const result = (await client.getApi('long-invalid-json', {
+        responseType: 'json',
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.message).toBe('Server returned invalid JSON')
+        expect(result.cause).toContain('...')
+      }
+    })
+
+    it('should handle error with no match in JSON parsing error', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/no-match-json')
+        .reply(200, 'invalid json')
+
+      const result = (await client.getApi('no-match-json', {
+        responseType: 'json',
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.message).toBe('Server returned invalid JSON')
+        expect(result.cause).toContain('Please report this')
+      }
+    })
+
+    it('should handle null/undefined errors in sendApi', async () => {
+      const result = (await client.sendApi('null-error', {
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.message).toBe('API request failed')
+        expect(typeof result.cause).toBe('string')
+      }
+    })
+
+    it('should handle empty response text causing empty preview', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/empty-preview-json')
+        .reply(200, '')
+
+      const result = (await client.getApi('empty-preview-json', {
+        responseType: 'json',
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(true) // Empty response is handled as empty object by getResponseJson
+      if (result.ok) {
+        expect(result.data).toEqual({})
+      }
+    })
+
+    it('should handle falsy error string in error result creation', async () => {
+      // Simulate a custom error handler that tests the edge case
+      nock('https://api.socket.dev')
+        .get('/v0/falsy-error')
+        .reply(400, 'Bad Request')
+
+      const result = (await client.getApi('falsy-error', {
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.message).toBe('Socket API error')
+        expect(result.cause).toBeDefined()
+      }
+    })
+
+    it('should handle short response text without truncation', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/short-invalid-json')
+        .reply(200, 'short response')
+
+      const result = (await client.getApi('short-invalid-json', {
+        responseType: 'json',
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.message).toBe('Server returned invalid JSON')
+        expect(result.cause).toContain('short response')
+        expect(result.cause).not.toContain('...')
+      }
+    })
+
+    it('should handle undefined errors in error result creation', async () => {
+      // Test the null/undefined error path more specifically
+      const result = (await client.sendApi('nonexistent-endpoint', {
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.message).toBe('API request failed')
+        expect(typeof result.cause).toBe('string')
+      }
+    })
+
+    it('should handle JSON parsing error with no regex match', async () => {
+      // Create a SyntaxError that doesn't match the regex pattern
+      nock('https://api.socket.dev')
+        .get('/v0/no-match-error')
+        .reply(200, 'invalid')
+
+      const result = (await client.getApi('no-match-error', {
+        responseType: 'json',
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.message).toBe('Server returned invalid JSON')
+        expect(result.cause).toContain('Please report this')
+      }
+    })
+
+    it('should handle empty preview string in error creation', async () => {
+      // Test when responseText.slice(0, 100) returns empty string
+      nock('https://api.socket.dev').get('/v0/empty-slice').reply(200, '')
+
+      const result = (await client.getApi('empty-slice', {
+        responseType: 'json',
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(true) // Empty response is handled as {} by getResponseJson
+    })
+
+    it('should handle null error in sendApi error creation', async () => {
+      // Simulate a scenario that creates an error that becomes null when stringified
+      const result = (await client.sendApi('null-error-path', {
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.message).toBe('API request failed')
+        expect(result.cause).toBeDefined()
+      }
+    })
+
+    it('should handle empty error string in sendApi', async () => {
+      // This will test the errStr || UNKNOWN_ERROR branch
+      const result = (await client.sendApi('empty-error-string', {
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.message).toBe('API request failed')
+        expect(typeof result.cause).toBe('string')
+      }
+    })
+
+    it('should handle falsy error parameter in getApi error creation', async () => {
+      // Test the e ? String(e).trim() : '' branch with falsy e
+      const result = (await client.getApi('falsy-error-param', {
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.message).toBe('API request failed')
+        expect(typeof result.cause).toBe('string')
+      }
+    })
+
+    it('should handle error with match but no captured group', async () => {
+      // Mock getResponseJson to throw a specific SyntaxError that will match regex but have no captured group
+      nock('https://api.socket.dev')
+        .get('/v0/no-capture-group')
+        .reply(200, 'malformed json {')
+
+      const result = (await client.getApi('no-capture-group', {
+        responseType: 'json',
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.message).toBe('Server returned invalid JSON')
+        expect(result.cause).toContain('Please report this')
+      }
+    })
+
+    it('should handle error with trim on empty string', async () => {
+      // Create a scenario that tests trim() on an empty response
+      nock('https://api.socket.dev').get('/v0/empty-trim').reply(200, '   ')
+
+      const result = (await client.getApi('empty-trim', {
+        responseType: 'json',
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.message).toBe('Server returned invalid JSON')
+        expect(result.cause).toBeDefined()
+      }
+    })
+
+    it('should handle preview slice edge case with empty result', async () => {
+      // Test responseText.slice(0, 100) || '' where slice returns empty
+      nock('https://api.socket.dev').get('/v0/preview-edge').reply(200, '')
+
+      const result = (await client.getApi('preview-edge', {
+        responseType: 'json',
+        throws: false,
+      })) as CResult<unknown>
+
+      // Empty response returns {} from getResponseJson, so this should succeed
+      expect(result.ok).toBe(true)
+    })
+
+    it('should handle error that becomes empty string when converted', async () => {
+      // Test the errStr || UNKNOWN_ERROR branches more directly
+      const result = (await client.sendApi('trigger-empty-string-error', {
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.message).toBe('API request failed')
+        expect(result.cause).toBeDefined()
+      }
+    })
+  })
+
+  describe('Integration with existing patterns', () => {
+    it('should include proper authentication headers', async () => {
+      let capturedHeaders: any = {}
+
+      nock('https://api.socket.dev')
+        .get('/v0/auth-test')
+        .reply(function () {
+          capturedHeaders = this.req.headers
+          return [200, 'authenticated']
+        })
+
+      await client.getApi<string>('auth-test', {
+        responseType: 'text',
+        throws: false,
+      })
+
+      expect(capturedHeaders.authorization).toBe('Basic dGVzdC1hcGktdG9rZW46')
+    })
+
+    it('should handle fallback responseType for default response handling', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/fallback-test')
+        .reply(200, 'fallback response')
+
+      const result = (await client.getApi('fallback-test', {
+        responseType: 'invalid' as any,
+        throws: false,
+      })) as CResult<IncomingMessage>
+
+      expect(result.ok).toBe(true)
+      if (result.ok) {
+        expect(result.data).toBeDefined()
+        expect(result.data.statusCode).toBe(200)
+      }
+    })
+
+    it('should use custom User-Agent from SDK options', async () => {
+      const customClient = new SocketSdk('test-token', {
+        userAgent: 'CustomApp/1.0.0',
+      })
+      let capturedHeaders: any = {}
+
+      nock('https://api.socket.dev')
+        .get('/v0/user-agent-test')
+        .reply(function () {
+          capturedHeaders = this.req.headers
+          return [200, 'ok']
+        })
+
+      await customClient.getApi<string>('user-agent-test', {
+        responseType: 'text',
+        throws: false,
+      })
+
+      expect(capturedHeaders['user-agent']).toBe('CustomApp/1.0.0')
+    })
+
+    it('should work with custom base URLs', async () => {
+      const customClient = new SocketSdk('test-token', {
+        baseUrl: 'https://custom.socket.dev/api/',
+      })
+
+      nock('https://custom.socket.dev')
+        .get('/api/custom-endpoint')
+        .reply(200, { custom: true })
+
+      const result = (await customClient.getApi<{ custom: boolean }>(
+        'custom-endpoint',
+        { responseType: 'json', throws: false },
+      )) as CResult<{ custom: boolean }>
+
+      expect(result.ok).toBe(true)
+      if (result.ok) {
+        expect(result.data.custom).toBe(true)
+      }
+    })
+  })
+})

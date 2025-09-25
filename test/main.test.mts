@@ -11,7 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 // @ts-ignore - internal import
 import SOCKET_PUBLIC_API_TOKEN from '@socketsecurity/registry/lib/constants/socket-public-api-token'
 
-import { SocketSdk, testExports } from '../src/index'
+import { SocketSdk, createRequestBodyForFilepaths } from '../src/index'
 
 // Mock fs.createReadStream to prevent test-package.json from being created
 vi.mock('node:fs', async () => {
@@ -1511,7 +1511,7 @@ describe('SocketSdk', () => {
         writeFileSync(testFile1, testContent1)
         writeFileSync(testFile2, testContent2)
 
-        const result = testExports.createRequestBodyForFilepaths(
+        const result = createRequestBodyForFilepaths(
           [testFile1, testFile2],
           tempDir,
         )
@@ -2864,7 +2864,6 @@ describe('SocketSdk', () => {
 
   describe('Test Private Functions', () => {
     it('should test createRequestBodyForFilepaths', async () => {
-      const { createRequestBodyForFilepaths } = testExports
       const tempDir = mkdtempSync(path.join(tmpdir(), 'test-'))
       const file1 = path.join(tempDir, 'file1.js')
       const file2 = path.join(tempDir, 'dir', 'file2.js')
@@ -2926,13 +2925,11 @@ describe('SocketSdk', () => {
     })
 
     it('should test createRequestBodyForFilepaths with empty array', () => {
-      const { createRequestBodyForFilepaths } = testExports
       const result = createRequestBodyForFilepaths([], '/base')
       expect(result).toEqual([])
     })
 
     it('should test createRequestBodyForFilepaths with single file', async () => {
-      const { createRequestBodyForFilepaths } = testExports
       const tempDir = mkdtempSync(path.join(tmpdir(), 'test-'))
       const testFile = path.join(tempDir, 'package.json')
       writeFileSync(testFile, '{}')
@@ -3855,7 +3852,6 @@ describe('SocketSdk', () => {
     })
 
     it('should test createRequestBodyForFilepaths with different file structure', () => {
-      const { createRequestBodyForFilepaths } = testExports
       // Test with base dir having trailing slash
       const result = createRequestBodyForFilepaths([], '/base/dir/')
       expect(result).toEqual([])
@@ -3979,7 +3975,7 @@ describe('SocketSdk', () => {
         .get('/v0/npm/test-pkg/1.0.0/score')
         .reply(200, '{"score":{"score":0.8}}\n')
 
-      const result = await client.getScoreByNPMPackage('test-pkg', '1.0.0')
+      const result = await client.getScoreByNpmPackage('test-pkg', '1.0.0')
       expect(result.success).toBe(true)
     })
 
@@ -4164,7 +4160,7 @@ describe('SocketSdk', () => {
         .replyWithError('Network error')
 
       await expect(
-        client.getScoreByNPMPackage('test-pkg', '1.0.0'),
+        client.getScoreByNpmPackage('test-pkg', '1.0.0'),
       ).rejects.toThrow('Unexpected Socket API error')
     })
 
