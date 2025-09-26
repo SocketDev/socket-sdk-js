@@ -57,6 +57,7 @@ When working in any Socket repository, check for updates and patterns in other c
 - **Error Message Consistency**: Use consistent error message patterns across all Socket projects
 - **TypeScript Strict Mode**: All projects should use strict TypeScript configuration
 - **Import Organization**: Separate type imports from runtime imports for better tree-shaking
+- **Documentation Organization**: API method documentation should be organized alphabetically within functional categories for better discoverability and maintainability
 
 ## 🏗️ PROJECT ARCHITECTURE
 
@@ -155,6 +156,14 @@ This is the Socket SDK for JavaScript/TypeScript, providing programmatic access 
   - **Unique temp dirs**: Use `fs.mkdtemp()` or `fs.mkdtempSync()` for collision-free directories
   - ✅ PREFERRED: `await fs.mkdtemp(path.join(os.tmpdir(), 'socket-test-'))` (async)
   - ✅ ACCEPTABLE: `fs.mkdtempSync(path.join(os.tmpdir(), 'socket-test-'))` (sync)
+- **Path separators**: Never hard-code `/` or `\` in paths
+  - Use `path.sep` when you need the separator character
+  - Use `path.join()` to construct paths correctly
+- **File URLs**: Use `pathToFileURL()` and `fileURLToPath()` from `node:url` when working with file:// URLs
+  - ❌ WRONG: `path.dirname(new URL(import.meta.url).pathname)` (Windows path doubling)
+  - ✅ CORRECT: `path.dirname(fileURLToPath(import.meta.url))` (cross-platform)
+- **Line endings**: Be aware of CRLF (Windows) vs LF (Unix) differences when processing text files
+- **Shell commands**: Consider platform differences in shell commands and utilities
 
 ## 📦 PACKAGE MANAGEMENT
 
@@ -230,12 +239,37 @@ This is the Socket SDK for JavaScript/TypeScript, providing programmatic access 
 - **Destructuring order**: Sort destructured properties alphabetically in const declarations
 - **Function ordering**: Place functions in alphabetical order, with private functions first, then exported functions
 - **Object mappings**: Use objects with `__proto__: null` for static string-to-string mappings to prevent prototype pollution
-- **Array length checks**: Use `!array.length` instead of `array.length === 0`
+- **Mapping constants**: Move static mapping objects outside functions as module-level constants with descriptive UPPER_SNAKE_CASE names
+- **Array length checks**: Use `!array.length` instead of `array.length === 0`. For `array.length > 0`, use `!!array.length` when function must return boolean, or `array.length` when used in conditional contexts
 - **Catch parameter naming**: Use `catch (e)` instead of `catch (error)` for consistency
 - **Number formatting**: 🚨 REQUIRED - Use underscore separators (e.g., `20_000`) for large numeric literals. 🚨 FORBIDDEN - Do NOT modify number values inside strings
 - **Node.js fs imports**: 🚨 MANDATORY pattern - `import { someSyncThing, promises as fs } from 'node:fs'`
 - **Process spawning**: 🚨 FORBIDDEN to use Node.js built-in `child_process.spawn` - MUST use `spawn` from `@socketsecurity/registry/lib/spawn`
 - **List formatting**: Use `-` for bullet points in text output, not `•` or other Unicode characters, for better terminal compatibility
+- **For...of loop type annotations**: 🚨 FORBIDDEN - Never use type annotations in for...of loop variable declarations. TypeScript cannot parse `for await (const chunk: Buffer of stream)` - use `for await (const chunk of stream)` instead and let TypeScript infer the type
+
+### 🏗️ Function Options Pattern (MANDATORY)
+- **🚨 REQUIRED**: ALL functions accepting options MUST follow this exact pattern:
+  ```typescript
+  function foo(a: SomeA, b: SomeB, options?: SomeOptions | undefined): FooResult {
+    const opts = { __proto__: null, ...options } as SomeOptions
+    // OR for destructuring with defaults:
+    const { someOption = 'someDefaultValue' } = { __proto__: null, ...options } as SomeOptions
+    // ... rest of function
+  }
+  ```
+- **Key requirements**:
+  - Options parameter MUST be optional with `?` and explicitly typed as `| undefined`
+  - MUST use `{ __proto__: null, ...options }` pattern to prevent prototype pollution
+  - MUST use `as SomeOptions` type assertion after spreading
+  - Use destructuring form when you need defaults for individual options
+  - Use direct assignment form when passing entire options object to other functions
+- **Examples**:
+  - ✅ CORRECT: `const opts = { __proto__: null, ...options } as SomeOptions`
+  - ✅ CORRECT: `const { timeout = 5000, retries = 3 } = { __proto__: null, ...options } as SomeOptions`
+  - ❌ FORBIDDEN: `const opts = { ...options }` (vulnerable to prototype pollution)
+  - ❌ FORBIDDEN: `const opts = options || {}` (doesn't handle null prototype)
+  - ❌ FORBIDDEN: `const opts = Object.assign({}, options)` (inconsistent pattern)
 
 ### Formatting Rules
 - **Indentation**: 2 spaces (no tabs)
@@ -264,6 +298,19 @@ This is the Socket SDK for JavaScript/TypeScript, providing programmatic access 
 ### Test Organization Best Practices
 - **Modular structure**: Split large test files by functionality
 - **Descriptive naming**: Use clear, descriptive test file names
+- **Test utilities organization**: 🚨 MANDATORY - Organize test utilities in `test/utils/` directory
+  - **Directory structure**: Create `test/utils/` subdirectory for reusable test utilities
+  - **Modular utilities**: Split utilities by purpose into focused modules:
+    - `environment.mts` - Test environment setup and cleanup (nock, error handling)
+    - `fixtures.mts` - Test data configurations and mock objects
+    - `mock-helpers.mts` - Mock setup and configuration utilities
+    - `constants.mts` - Test constants and configuration values
+  - **Import paths**: Update all test file imports to reference specific utility modules
+  - **Cross-project consistency**: Apply this pattern across all Socket projects for standardization
+  - **Examples**:
+    - ✅ CORRECT: `import { setupTestEnvironment } from './utils/environment.mts'`
+    - ✅ CORRECT: `import { TEST_PACKAGE_CONFIGS } from './utils/fixtures.mts'`
+    - ❌ OLD PATTERN: `import { setupTestEnvironment } from './test-utils.mts'`
 - **Proper mocking**: Clean up HTTP mocks (nock) properly to prevent test interference
 - **Error scenarios**: Test both success and error paths for all API methods
 - **Edge cases**: Include tests for Unicode, empty responses, malformed data
@@ -349,6 +396,31 @@ Follow the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format:
 - ✅ Improved test organization and maintainability
 - ✅ Enhanced error handling patterns
 - ✅ Updated cross-platform compatibility measures
+
+## 📋 Recurring Patterns & Instructions
+
+These are patterns and instructions that should be consistently applied across all Socket projects:
+
+### 🏗️ Mandatory Code Patterns
+1. **Options Parameter Pattern**: Use `{ __proto__: null, ...options } as SomeOptions` for all functions accepting options
+2. **Reflect.apply Pattern**: Use `const { apply: ReflectApply } = Reflect` and `ReflectApply(fn, thisArg, [])` instead of `.call()` for method invocation
+3. **Object Mappings**: Use `{ __proto__: null, ...mapping }` for static string-to-string mappings to prevent prototype pollution
+4. **Import Separation**: ALWAYS separate type imports (`import type`) from runtime imports
+5. **Node.js Imports**: ALWAYS use `node:` prefix for Node.js built-in modules
+
+### 🧪 Test Patterns & Cleanup
+1. **Remove Duplicate Tests**: Eliminate tests that verify the same functionality across multiple files
+2. **Centralize Test Data**: Use shared test fixtures instead of hardcoded values repeated across projects
+3. **Focus Test Scope**: Each project should test its specific functionality, not dependencies' core features
+
+### 🔄 Cross-Project Consistency
+These patterns should be enforced across all Socket repositories:
+- `socket-cli`
+- `socket-packageurl-js`
+- `socket-registry`
+- `socket-sdk-js`
+
+When working in any Socket repository, check CLAUDE.md files in other Socket projects for consistency and apply these patterns universally.
 
 ---
 
