@@ -4,7 +4,7 @@ import { Agent as HttpsAgent } from 'node:https'
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
-import { setupTestEnvironment } from './test-utils.mts'
+import { setupTestEnvironment } from './utils/environment.mts'
 import { SocketSdk } from '../src/index'
 
 describe('SocketSdk Agent Configuration', () => {
