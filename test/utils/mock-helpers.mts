@@ -1,10 +1,7 @@
+/** @fileoverview Mock utilities for test setup. */
 import { Readable } from 'node:stream'
 
-import nock from 'nock'
-import { afterEach, beforeEach, vi } from 'vitest'
-
-// @ts-ignore - internal import
-export { default as SOCKET_PUBLIC_API_TOKEN } from '@socketsecurity/registry/lib/constants/socket-public-api-token'
+import { vi } from 'vitest'
 
 // Mock fs.createReadStream to prevent test-package.json from being created.
 vi.mock('node:fs', async () => {
@@ -24,24 +21,3 @@ vi.mock('node:fs', async () => {
     }),
   }
 })
-
-// Handle unhandled rejections in tests.
-process.on('unhandledRejection', cause => {
-  const error = new Error('Unhandled rejection')
-  ;(error as any).cause = cause
-  throw error
-})
-
-export function setupTestEnvironment() {
-  beforeEach(() => {
-    nock.cleanAll()
-    nock.disableNetConnect()
-  })
-
-  afterEach(() => {
-    if (!nock.isDone()) {
-      throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
-    }
-    nock.cleanAll()
-  })
-}
