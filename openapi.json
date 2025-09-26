@@ -1761,6 +1761,11 @@
               }
             },
             "description": ""
+          },
+          "subType": {
+            "type": "string",
+            "description": "Generic alert sub-type",
+            "default": ""
           }
         },
         "required": [

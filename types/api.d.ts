@@ -1987,6 +1987,11 @@ export interface components {
         head?: components['schemas']['ReachabilityResult']
         base?: components['schemas']['ReachabilityResult']
       }
+      /**
+       * @description Generic alert sub-type
+       * @default
+       */
+      subType?: string
     }
     LicenseDetails: Array<{
       /**
