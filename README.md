@@ -35,36 +35,210 @@ if (res.success) {
 const { SocketSdk } = require('@socketsecurity/sdk')
 ```
 
+## API Overview
+
+The Socket SDK provides programmatic access to Socket.dev's security analysis platform through 60+ API methods organized into functional categories:
+
+### Package Analysis
+- **Package Security**: Get vulnerability reports, security scores, and issue details for npm packages
+- **Batch Processing**: Analyze multiple packages efficiently with streaming and concurrent processing
+- **PURL Support**: Process Package URLs for comprehensive package identification
+
+### Organization Management
+- **Organizations**: List, manage, and configure organization settings
+- **Repositories**: Create, update, and delete organization repositories
+- **Labels**: Manage repository categorization and tagging systems
+
+### Security Scanning & Analysis
+- **Full Scans**: Create comprehensive security scans from manifest files
+- **Diff Scans**: Compare scans to identify changes and new vulnerabilities
+- **Dependencies**: Upload and analyze project dependency files
+- **Reports**: Generate, retrieve, and manage detailed security reports
+
+### Policy & Compliance
+- **Security Policies**: Configure and update organization security policies
+- **License Policies**: Manage allowed/restricted license types
+- **Alert Triage**: Review and manage security alert statuses
+- **Audit Logs**: Access chronological security and administrative events
+
+### Data Export & Integration
+- **SBOM Export**: Generate CycloneDX and SPDX Software Bill of Materials
+- **Streaming**: Efficient data streaming for large datasets
+- **Analytics**: Access usage metrics and security trend data
+
+### Authentication & Access
+- **API Tokens**: Create, rotate, update, and revoke organization API tokens
+- **Entitlements**: View enabled Socket products and features
+- **Quota Management**: Monitor API usage limits and quotas
+
+### Advanced Features
+- **Patches**: View and stream security patches for vulnerabilities
+- **Custom Queries**: Raw API access with configurable response handling
+- **Cross-platform**: Full Windows, macOS, and Linux compatibility
+
 ## SocketSdk Methods
 
-### Package methods
+### Package Analysis Methods
 
-* `getIssuesByNPMPackage(packageName, version)`
-  * `packageName`: A `string` representing the name of the npm package you want the issues for
-  * `version`:  A `string` representing the version of the npm package to return the issues for
-* `getScoreByNPMPackage(packageName, version)`
-  * `packageName`: A `string` representing the name of the npm package you want the score for
-  * `version`:  A `string` representing the version of the npm package to return the score for
+* `batchPackageFetch(componentsObj, queryParams?)` - Analyze multiple packages in batch
+  * Returns all results at once after processing is complete
+* `batchPackageStream(componentsObj, options?)` - Stream package analysis with concurrency control
+  * Returns results as they become available via async generator
+* `getIssuesByNpmPackage(packageName, version)` - Get security issues for a specific npm package
+  * Returns detailed vulnerability and security alert information
+* `getScoreByNpmPackage(packageName, version)` - Get security score for a package
+  * Returns numerical security rating and scoring breakdown
 
-### Report methods
+### Scanning & Analysis Methods
 
-* `createReportFromFilepaths(filePaths, pathsRelativeTo=., [issueRules])`
-  * `filePaths`: An `array` of absolute or relative `string` paths to `package.json` and any corresponding `package-lock.json` files
-  * `pathsRelativeTo`: A `string` path that the absolute paths `filePaths` are relative to. This to calculate where in your project the `package.json`/`package-lock.json` files lives
-  * `issueRules`: An object that follows the format of the [`socket.yml`](https://docs.socket.dev/docs/socket-yml) issue rules. Keys being issue names, values being a boolean that activates or deactivates it. Is applied on top of default config and organization config.
-* `getReportList()`
-* `getReportSupportedFiles()`
-* `getReport(id)`
-  * `id`: A `string` representing the id of a created report
+* `createDependenciesSnapshot(filepaths, pathsRelativeTo='.', queryParams?)` - Create dependency snapshot
+  * Analyzes dependency files to generate comprehensive security report
+* `createOrgFullScan(orgSlug, filepaths, pathsRelativeTo='.', queryParams?)` - Create full organization scan
+  * Uploads project files and initiates complete security analysis
+* `createScanFromFilepaths(filePaths, pathsRelativeTo='.', issueRules?)` - Create security scan from files
+  * Analyzes uploaded files for security vulnerabilities and policy violations
+* `getScan(id)` - Get detailed scan results
+  * Returns complete scan analysis including vulnerabilities and alerts
+* `getScanList()` - List all accessible scans
+  * Returns paginated list of scan metadata and status
+* `getSupportedScanFiles()` - Get supported file formats
+  * Returns supported manifest files, lockfiles, and configuration formats
 
-### Utility methods
+### Organization Management Methods
 
-* `getQuota()`
-* `getOrganizations()`
-* `postSettings(selectors)`
-  * `selectors`: An array of settings selectors, e.g. `[{ organization: 'id' }]`
-* `getOrgSecurityPolicy(orgSlug)`
-  * `orgSlug`: the slug of the organization
+* `createOrgRepo(orgSlug, queryParams?)` - Create new repository
+  * Registers repository for monitoring and security scanning
+* `deleteOrgRepo(orgSlug, repoSlug)` - Delete repository
+  * Removes repository monitoring and associated scan data
+* `getOrganizations()` - List accessible organizations
+  * Returns organization details and access permissions
+* `getOrgRepo(orgSlug, repoSlug)` - Get repository details
+  * Returns repository configuration, monitoring status, and metadata
+* `getOrgRepoList(orgSlug, queryParams?)` - List organization repositories
+  * Returns paginated list of repository metadata and status
+* `updateOrgRepo(orgSlug, repoSlug, queryParams?)` - Update repository configuration
+  * Modifies monitoring settings, branch configuration, and scan preferences
+
+### Full Scan Management Methods
+
+* `deleteOrgFullScan(orgSlug, fullScanId)` - Delete full scan
+  * Permanently removes scan data and results
+* `getOrgFullScanBuffered(orgSlug, fullScanId)` - Get complete scan results in memory
+  * Returns entire scan data as JSON for programmatic processing
+* `getOrgFullScanList(orgSlug, queryParams?)` - List organization full scans
+  * Returns paginated list of scan metadata and status
+* `getOrgFullScanMetadata(orgSlug, fullScanId)` - Get scan metadata
+  * Returns scan configuration, status, and summary information
+* `streamOrgFullScan(orgSlug, fullScanId, output?)` - Stream scan results
+  * Provides efficient streaming for large scan datasets to file or stdout
+
+### Policy & Settings Methods
+
+* `getOrgLicensePolicy(orgSlug)` - Get license policy configuration
+  * Returns allowed, restricted, and monitored license types
+* `getOrgSecurityPolicy(orgSlug)` - Get organization security policy
+  * Returns alert rules, severity thresholds, and enforcement settings
+* `postSettings(selectors)` - Update user or organization settings
+  * Configures preferences, notifications, and security policies
+* `updateOrgLicensePolicy(orgSlug, policyData, queryParams?)` - Update license policy
+  * Modifies allowed, restricted, and monitored license types
+* `updateOrgSecurityPolicy(orgSlug, policyData)` - Update security policy
+  * Modifies alert rules, severity thresholds, and enforcement settings
+
+### Analytics & Monitoring Methods
+
+* `getAuditLogEvents(orgSlug, queryParams?)` - Get audit log events
+  * Returns chronological log of security and administrative actions
+* `getOrgAnalytics(time)` - Get organization analytics
+  * Returns statistical analysis for specified time period
+* `getQuota()` - Get current API quota usage
+  * Returns remaining requests, rate limits, and quota reset times
+* `getRepoAnalytics(repo, time)` - Get repository analytics
+  * Returns security metrics, dependency trends, and vulnerability statistics
+
+### Authentication & Access Methods
+
+* `getAPITokens(orgSlug)` - List organization API tokens
+  * Returns organization API tokens with metadata and permissions
+* `postAPIToken(orgSlug, tokenData)` - Create new API token
+  * Generates API token with specified scopes and metadata
+* `postAPITokensRevoke(orgSlug, tokenId)` - Revoke API token
+  * Permanently disables the token and removes access
+* `postAPITokensRotate(orgSlug, tokenId)` - Rotate API token
+  * Generates new token value while preserving token metadata
+* `postAPITokenUpdate(orgSlug, tokenId, updateData)` - Update API token
+  * Modifies token metadata, scopes, or other properties
+
+### Export & Integration Methods
+
+* `exportCDX(orgSlug, fullScanId)` - Export CycloneDX SBOM
+  * Returns Software Bill of Materials compliant with CycloneDX standard
+* `exportSPDX(orgSlug, fullScanId)` - Export SPDX SBOM
+  * Returns Software Bill of Materials compliant with SPDX standard
+* `searchDependencies(queryParams?)` - Search monitored dependencies
+  * Returns matching packages with security information and usage patterns
+* `uploadManifestFiles(orgSlug, filepaths, pathsRelativeTo='.')` - Upload manifest files
+  * Processes package files to create dependency snapshots and security analysis
+
+### Alert & Triage Methods
+
+* `getOrgTriage(orgSlug)` - Get organization triage settings
+  * Returns alert triage configuration and current state
+* `updateOrgAlertTriage(orgSlug, alertId, triageData)` - Update alert triage
+  * Modifies alert resolution status and triage decisions
+
+### Repository Label Methods
+
+* `createOrgRepoLabel(orgSlug, repoSlug, labelData)` - Create repository label
+  * Adds label for repository categorization and management
+* `deleteOrgRepoLabel(orgSlug, repoSlug, labelSlug)` - Delete repository label
+  * Removes label and associated configuration
+* `getOrgRepoLabel(orgSlug, repoSlug, labelSlug)` - Get label details
+  * Returns label configuration and metadata
+* `getOrgRepoLabelList(orgSlug, repoSlug)` - List repository labels
+  * Returns all labels configured for repository management
+* `updateOrgRepoLabel(orgSlug, repoSlug, labelSlug, labelData)` - Update repository label
+  * Modifies label properties and configuration
+
+### Diff Scan Methods
+
+* `createOrgDiffScanFromIds(orgSlug, queryParams?)` - Create diff scan from IDs
+  * Compares two existing full scans to identify changes
+* `deleteOrgDiffScan(orgSlug, diffScanId)` - Delete diff scan
+  * Permanently removes diff scan data and results
+* `getDiffScanById(orgSlug, diffScanId)` - Get diff scan details
+  * Returns comparison between two full scans with artifact changes
+* `listOrgDiffScans(orgSlug)` - List organization diff scans
+  * Returns paginated list of diff scan metadata and status
+
+### Patch & Vulnerability Methods
+
+* `streamPatchesFromScan(orgSlug, scanId)` - Stream patches from scan
+  * Returns ReadableStream for processing large patch datasets
+* `viewPatch(orgSlug, uuid)` - View patch details
+  * Retrieves comprehensive patch information including files and vulnerabilities
+
+### Entitlement Methods
+
+* `getEnabledEntitlements(orgSlug)` - Get enabled entitlements
+  * Returns array of enabled Socket product keys
+* `getEntitlements(orgSlug)` - Get all organization entitlements
+  * Returns complete list of entitlements with their status
+
+### Advanced Query Methods
+
+* `getApi<T>(urlPath, options?)` - Execute raw GET request
+  * Direct API access with configurable response type (response, json, text)
+* `sendApi<T>(urlPath, options?)` - Send POST/PUT with JSON body
+  * Direct API access for POST/PUT operations with JSON responses
+
+### Legacy Methods (Deprecated Names)
+
+* `createReportFromFilepaths()` → Use `createScanFromFilepaths()`
+* `deleteReport(reportId)` → Use scan-specific delete methods
+* `getReport(id)` → Use `getScan(id)`
+* `getReportList()` → Use `getScanList()`
+* `getReportSupportedFiles()` → Use `getSupportedScanFiles()`
 
 ## Additional exports
 
