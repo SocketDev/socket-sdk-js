@@ -1,3 +1,7 @@
+/**
+ * @fileoverview JSON prettification script for Socket API base files.
+ * Formats and prettifies JSON configuration files for better readability.
+ */
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'

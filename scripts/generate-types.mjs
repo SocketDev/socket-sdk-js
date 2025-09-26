@@ -1,3 +1,7 @@
+/**
+ * @fileoverview TypeScript type generation script for Socket API.
+ * Generates type definitions from OpenAPI schema for Socket SDK.
+ */
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 

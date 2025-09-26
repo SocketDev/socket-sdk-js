@@ -1,4 +1,9 @@
 /**
+ * @fileoverview User-Agent string generation utilities.
+ * Creates standardized User-Agent headers from package.json data for API requests.
+ */
+
+/**
  * Generate a User-Agent string from package.json data.
  * Creates standardized User-Agent format with optional homepage URL.
  */
