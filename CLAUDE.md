@@ -176,6 +176,10 @@ This is the Socket SDK for JavaScript/TypeScript, providing programmatic access 
 - **Script execution**: Always use `pnpm run <script>` for package.json scripts to distinguish from built-in pnpm commands
   - ✅ CORRECT: `pnpm run build`, `pnpm run test`, `pnpm run check`
   - ❌ AVOID: `pnpm build`, `pnpm test` (unclear if built-in or script)
+- **README installation examples**: 🚨 MANDATORY - All package installation examples in README.md files MUST use `pnpm install` instead of `npm install`
+  - ✅ CORRECT: `pnpm install @socketsecurity/sdk`
+  - ❌ WRONG: `npm install @socketsecurity/sdk`
+  - **Rationale**: Maintain consistency with project's chosen package manager across all documentation
 - **Add to workspace root**: Use `-w` flag when adding packages to workspace root
 - **🚨 MANDATORY**: Always add dependencies with exact versions using `--save-exact` flag to ensure reproducible builds
 - **Dependency validation**: All dependencies MUST be pinned to exact versions without range specifiers like `^` or `~`
@@ -298,6 +302,18 @@ This is the Socket SDK for JavaScript/TypeScript, providing programmatic access 
 ### Test Organization Best Practices
 - **Modular structure**: Split large test files by functionality
 - **Descriptive naming**: Use clear, descriptive test file names
+- **Test directory structure**: 🚨 MANDATORY - Standardize test directory organization across all Socket projects:
+  ```
+  test/
+  ├── unit/                   # Unit tests
+  ├── integration/           # Integration tests (if applicable)
+  ├── fixtures/              # Test fixtures and data files
+  └── utils/                 # Test utilities and helpers
+  ```
+- **Test fixtures**: Store reusable test data, mock responses, and sample files in `test/fixtures/` directory
+  - **Organization**: Group fixtures by test category or functionality
+  - **File formats**: Support JSON, text, binary files as needed for comprehensive testing
+  - **Naming**: Use descriptive names that clearly indicate the fixture's purpose
 - **Test utilities organization**: 🚨 MANDATORY - Organize test utilities in `test/utils/` directory
   - **Directory structure**: Create `test/utils/` subdirectory for reusable test utilities
   - **Modular utilities**: Split utilities by purpose into focused modules:
