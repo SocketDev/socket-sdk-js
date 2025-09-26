@@ -124,10 +124,18 @@ export type GotOptions = {
 
 export type QueryParams = Record<string, any>
 
+export type HeadersRecord = Record<string, string | string[]> | undefined
+
+export type SocketArtifactWithExtras = SocketArtifact & {
+  supplyChainRisk?: any
+  scorecards?: any
+  topLevelAncestors?: any
+}
+
 export type RequestOptions = (
-  | HttpsRequestOptions
-  | HttpRequestOptions
-  | ClientSessionRequestOptions
+  | (HttpsRequestOptions & { headers?: HeadersRecord })
+  | (HttpRequestOptions & { headers?: HeadersRecord })
+  | (ClientSessionRequestOptions & { headers?: HeadersRecord })
 ) & { timeout?: number | undefined }
 
 export type SendMethod = 'POST' | 'PUT'
@@ -148,7 +156,7 @@ export type SocketArtifactAlert = Remap<
   Omit<components['schemas']['SocketAlert'], 'action' | 'props' | 'type'> & {
     type: ALERT_TYPE
     action?: ALERT_ACTION | undefined
-    props?: any | undefined
+    props?: Record<string, unknown> | undefined
   }
 >
 

@@ -21,7 +21,7 @@ export function createRequestBodyForFilepaths(
   filepaths: string[],
   basePath: string,
 ): Array<Array<string | ReadStream>> {
-  const requestBody = []
+  const requestBody: Array<Array<string | ReadStream>> = []
   for (const absPath of filepaths) {
     const relPath = normalizePath(path.relative(basePath, absPath))
     const filename = path.basename(absPath)

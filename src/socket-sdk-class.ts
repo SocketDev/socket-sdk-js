@@ -219,7 +219,8 @@ export class SocketSdk {
     // Try to parse the body as JSON, fallback to treating as plain text.
     let body: string | undefined
     try {
-      const parsed = JSON.parse(bodyStr)
+      const parsed: { error?: { message?: string; details?: unknown } } =
+        JSON.parse(bodyStr)
       // Client errors (4xx) should return actionable error messages.
       // Extract both message and details from error response for better context.
       if (typeof parsed?.error?.message === 'string') {
@@ -227,7 +228,7 @@ export class SocketSdk {
 
         // Include details if present for additional error context.
         if (parsed.error.details) {
-          const detailsStr =
+          const detailsStr: string =
             typeof parsed.error.details === 'string'
               ? parsed.error.details
               : JSON.stringify(parsed.error.details)
@@ -408,7 +409,7 @@ export class SocketSdk {
     }
     while (running.length > 0) {
       // eslint-disable-next-line no-await-in-loop
-      const { generator, iteratorResult } = await Promise.race(
+      const { generator, iteratorResult }: GeneratorStep = await Promise.race(
         running.map(entry => entry.promise),
       )
       // Remove generator.
@@ -1819,7 +1820,7 @@ export class SocketSdk {
    * Internal method with size limits to prevent memory exhaustion.
    */
   async #getResponseText(response: IncomingMessage): Promise<string> {
-    const chunks = []
+    const chunks: Buffer[] = []
     let size = 0
     // 50MB limit to prevent out-of-memory errors from large responses.
     const MAX = 50 * 1024 * 1024

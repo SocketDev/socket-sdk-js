@@ -8,7 +8,12 @@ import https from 'node:https'
 import { debugLog } from '@socketsecurity/registry/lib/debug'
 import { jsonParse } from '@socketsecurity/registry/lib/json'
 
-import type { RequestOptions, SendMethod } from './types'
+import type {
+  RequestOptions,
+  SendMethod,
+  SocketArtifactAlert,
+  SocketArtifactWithExtras,
+} from './types'
 import type { ClientRequest, IncomingMessage } from 'node:http'
 
 /**
@@ -94,7 +99,7 @@ export async function createRequestWithJson(
     method,
     ...options,
     headers: {
-      ...(options as any)?.headers,
+      ...options.headers,
       'Content-Length': Buffer.byteLength(body, 'utf8'),
       'Content-Type': 'application/json',
     },
@@ -250,7 +255,7 @@ export function reshapeArtifactForPublicPolicy<T extends Record<string, any>>(
     // Parse actions parameter for alert filtering.
     const allowedActions = actions ? actions.split(',') : undefined
 
-    const reshapeArtifact = (artifact: any) => ({
+    const reshapeArtifact = (artifact: SocketArtifactWithExtras) => ({
       name: artifact.name,
       version: artifact.version,
       size: artifact.size,
@@ -262,18 +267,22 @@ export function reshapeArtifactForPublicPolicy<T extends Record<string, any>>(
       // Compact the alerts array to reduce response size for non-authenticated
       // requests.
       alerts: artifact.alerts
-        ?.filter((alert: any) => {
+        ?.filter((alert: SocketArtifactAlert) => {
           // Filter by severity (remove low severity alerts).
           if (alert.severity === 'low') {
             return false
           }
           // Filter by actions if specified.
-          if (allowedActions && !allowedActions.includes(alert.action)) {
+          if (
+            allowedActions &&
+            alert.action &&
+            !allowedActions.includes(alert.action)
+          ) {
             return false
           }
           return true
         })
-        .map((alert: any) => ({
+        .map((alert: SocketArtifactAlert) => ({
           type: alert.type,
           severity: alert.severity,
           key: alert.key,
@@ -289,7 +298,9 @@ export function reshapeArtifactForPublicPolicy<T extends Record<string, any>>(
       }
     } else if (data['alerts']) {
       // Single artifact with alerts.
-      return reshapeArtifact(data) as unknown as T
+      return reshapeArtifact(
+        data as unknown as SocketArtifactWithExtras,
+      ) as unknown as T
     }
   }
   return data
