@@ -1,7 +1,7 @@
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
-import { setupTestEnvironment } from './test-utils.mts'
+import { setupTestEnvironment } from './utils/environment.mts'
 import { SocketSdk } from '../src/index'
 
 describe('SocketSdk Authentication and Basic Operations', () => {
