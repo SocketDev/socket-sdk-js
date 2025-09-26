@@ -94,6 +94,7 @@ describe('Comprehensive Network Error Scenarios', () => {
           `error-${method.toLowerCase()}-${i}`,
           {
             method,
+            body: {},
             throws: false,
           },
         )) as CResult<unknown>
