@@ -5,6 +5,7 @@ import * as path from 'node:path'
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { TEST_PACKAGE_CONFIGS } from './utils/fixtures.mts'
 import { SocketSdk } from '../src/index'
 
 describe('SocketSdk - Organization Management', () => {
@@ -19,13 +20,7 @@ describe('SocketSdk - Organization Management', () => {
     packageJsonPath = path.join(tempDir, 'package.json')
     writeFileSync(
       packageJsonPath,
-      JSON.stringify({
-        name: 'test-package',
-        version: '1.0.0',
-        dependencies: {
-          express: '^4.18.0',
-        },
-      }),
+      JSON.stringify(TEST_PACKAGE_CONFIGS.expressBasic),
     )
   })
 
