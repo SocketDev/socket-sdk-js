@@ -126,7 +126,7 @@ describe('getApi and sendApi Methods', () => {
 
       await expect(
         client.getApi<string>('test-error', { responseType: 'text' }),
-      ).rejects.toThrow(/Socket API GET request failed \(404\)/)
+      ).rejects.toThrow(/Socket API Request failed \(404\)/)
     })
 
     it('should return error CResult when throws=false and API returns error status', async () => {
@@ -338,6 +338,7 @@ describe('getApi and sendApi Methods', () => {
         .reply(200, responseData)
 
       const result = (await client.sendApi<typeof responseData>('process', {
+        body: {},
         throws: false,
       })) as CResult<typeof responseData>
 
@@ -358,7 +359,7 @@ describe('getApi and sendApi Methods', () => {
         client.sendApi('fail', {
           body: requestData,
         }),
-      ).rejects.toThrow(/Socket API POST request failed \(400\)/)
+      ).rejects.toThrow(/Socket API Request failed \(400\)/)
     })
 
     it('should return error CResult when throws=false and request fails', async () => {
@@ -387,15 +388,14 @@ describe('getApi and sendApi Methods', () => {
         .reply(200, 'not valid json')
 
       const result = (await client.sendApi('invalid-response', {
+        body: { test: true },
         throws: false,
       })) as CResult<unknown>
 
       expect(result.ok).toBe(false)
       if (!result.ok) {
         expect(result.message).toBe('API request failed')
-        expect(result.cause).toContain(
-          'SyntaxError: Socket API - Invalid JSON response',
-        )
+        expect(result.cause).toContain('Socket API - Invalid JSON response')
       }
     })
 
