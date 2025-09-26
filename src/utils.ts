@@ -56,10 +56,10 @@ export function queryToSearchParams(
 ): URLSearchParams {
   const params = new URLSearchParams(init ?? '')
   const normalized = { __proto__: null } as unknown as QueryParams
-  const entries: Iterable<[string, any]> = params.entries()
+  const entries: Iterable<[string, string]> = params.entries()
   for (const entry of entries) {
-    let key = entry[0]
-    const value = entry[1]
+    let key: string = entry[0]
+    const value: string = entry[1]
     if (key === 'defaultBranch') {
       /* c8 ignore next - query parameter normalization for API compatibility */
       key = 'default_branch'
@@ -67,8 +67,8 @@ export function queryToSearchParams(
       /* c8 ignore next 2 - query parameter normalization for API compatibility */
       key = 'per_page'
     }
-    /* c8 ignore next - skip undefined/null values in params */
-    if (value || value === 0) {
+    /* c8 ignore next - skip empty string values in params */
+    if (value) {
       normalized[key] = value
     }
   }

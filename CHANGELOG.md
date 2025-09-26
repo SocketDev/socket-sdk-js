@@ -4,6 +4,39 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.7.0) - 2025-09-26
+
+### Added
+- `getApi` method for raw GET requests with configurable response handling
+- `sendApi` method for POST/PUT requests with JSON body support
+- `CResult` type pattern for non-throwing API operations
+- `CustomResponseType` type export for response type options
+- Support for custom response types (`response`, `text`, `json`) in `getApi`
+- Enhanced error handling with detailed error context from `error.details` field
+- Socket API `error.details` parsing for richer error information
+- `getEntitlements` method for retrieving organization entitlements
+- `getEnabledEntitlements` method for getting enabled entitlement keys
+- `viewPatch` method for retrieving patch details by UUID
+- `streamPatchesFromScan` method for streaming patches from scan results
+- `Entitlement` and `EntitlementsResponse` types for entitlements API
+- `PatchFile`, `Vulnerability`, `SecurityAlert`, `PatchRecord`, `PatchViewResponse`, and `ArtifactPatches` types for patches API
+- Support for NDJSON streaming responses in patches API
+- Comprehensive test coverage improvements (484 total tests, 99.92% line coverage, 99.39% branch coverage)
+- Enhanced error handling tests for JSON parsing edge cases in streaming
+- Additional coverage tests for invalid JSON line handling in NDJSON streams
+
+### Changed
+- Improved error message formatting and JSON parsing error handling
+- Enhanced type safety with better generic constraints
+- Renamed option types to `GetOptions` and `SendOptions` for consistency
+- Reorganized test files into focused, functionality-based modules
+- Raised coverage thresholds to match achieved levels (100% statements, functions, lines)
+- Removed duplicate tests while maintaining coverage integrity
+- Renamed `getIssuesByNPMPackage` to `getIssuesByNpmPackage` for consistent naming convention
+- Improved method alphabetical ordering in source code
+- Enhanced test coverage from 99.77% to 99.92% line coverage
+- Improved branch coverage from 99.08% to 99.39%
+
 ## [1.6.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.6.1) - 2025-09-24
 
 ### Changed
