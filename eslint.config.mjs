@@ -210,6 +210,7 @@ export default [
             // Allow configs.
             '*.config.mts',
             'test/*.mts',
+            'test/utils/*.mts',
             'src/*.mts',
             'types/*.ts',
           ],
