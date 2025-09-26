@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Main entry point for the Socket SDK.
+ * Provides the SocketSdk class and utility functions for Socket security analysis API interactions.
+ */
+
 // Import from our modules
 import { DEFAULT_USER_AGENT, httpAgentNames, publicPolicy } from './constants'
 import {

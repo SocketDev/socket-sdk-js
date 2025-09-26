@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Utility functions for Socket SDK operations.
+ * Provides URL normalization, query parameter handling, and path resolution utilities.
+ */
 import path from 'node:path'
 
 import { normalizePath } from '@socketsecurity/registry/lib/path'

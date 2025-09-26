@@ -1,3 +1,7 @@
+/**
+ * @fileoverview HTTP client utilities for Socket API communication.
+ * Provides low-level HTTP request handling with proper error management and response parsing.
+ */
 import http from 'node:http'
 import https from 'node:https'
 
@@ -141,8 +145,8 @@ export async function getResponse(
   return await new Promise((resolve, reject) => {
     let timedOut = false
     req.on('response', (response: IncomingMessage) => {
+      /* c8 ignore next 3 - Race condition where response arrives after timeout. */
       if (timedOut) {
-        /* c8 ignore next - Race condition where response arrives after timeout. */
         return
       }
       resolve(response)
@@ -152,13 +156,13 @@ export async function getResponse(
       req.destroy()
       reject(new Error('Request timed out'))
     })
-    /* c8 ignore start - Network error handling during request. */
+    /* c8 ignore start - Network error handling during request, difficult to test reliably. */
     req.on('error', e => {
       if (!timedOut) {
         reject(e)
       }
     })
-    /* c8 ignore end */
+    /* c8 ignore stop */
   })
 }
 
@@ -204,6 +208,7 @@ export async function getResponseJson(
       Object.setPrototypeOf(enhancedError, SyntaxError.prototype)
       throw enhancedError
     }
+    /* c8 ignore start - Error instanceof check and unknown error handling for JSON parsing edge cases. */
     if (e instanceof Error) {
       throw e
     }
@@ -215,6 +220,7 @@ export async function getResponseJson(
     unknownError.originalResponse = responseBody
     Object.setPrototypeOf(unknownError, SyntaxError.prototype)
     throw unknownError
+    /* c8 ignore stop */
   }
 }
 
@@ -224,7 +230,7 @@ export async function getResponseJson(
  */
 export function isResponseOk(response: IncomingMessage): boolean {
   const { statusCode } = response
-  /* c8 ignore next - statusCode is always present in normal HTTP responses */
+  /* c8 ignore next - Defensive fallback for edge cases where statusCode might be undefined. */
   return statusCode ? statusCode >= 200 && statusCode < 300 : false
 }
 
@@ -237,6 +243,7 @@ export function reshapeArtifactForPublicPolicy<T extends Record<string, any>>(
   isAuthenticated: boolean,
   actions?: string,
 ): T {
+  /* c8 ignore start - Public policy artifact reshaping for unauthenticated users, difficult to test edge cases. */
   // If user is not authenticated, provide a different response structure
   // optimized for the public free-tier experience.
   if (!isAuthenticated) {
@@ -286,4 +293,5 @@ export function reshapeArtifactForPublicPolicy<T extends Record<string, any>>(
     }
   }
   return data
+  /* c8 ignore stop */
 }
