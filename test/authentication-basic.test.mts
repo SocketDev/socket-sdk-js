@@ -36,7 +36,7 @@ describe('SocketSdk Authentication and Basic Operations', () => {
         .reply(200, [])
 
       const client = new SocketSdk('yetAnotherApiKey')
-      const res = await client.getIssuesByNPMPackage('speed-limiter', '1.0.0')
+      const res = await client.getIssuesByNpmPackage('speed-limiter', '1.0.0')
 
       expect(res).toEqual({
         success: true,
@@ -84,7 +84,7 @@ describe('SocketSdk Authentication and Basic Operations', () => {
       expect(res.success).toBe(false)
       expect(res.status).toBe(401)
       if (!res.success) {
-        expect(res.error).toContain('request failed')
+        expect(res.error).toContain('Socket API Request failed')
       }
     })
 
@@ -99,7 +99,7 @@ describe('SocketSdk Authentication and Basic Operations', () => {
       expect(res.success).toBe(false)
       expect(res.status).toBe(403)
       if (!res.success) {
-        expect(res.error).toContain('request failed')
+        expect(res.error).toContain('Socket API Request failed')
       }
     })
 
