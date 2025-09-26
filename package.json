@@ -69,7 +69,7 @@
     "test-ci": "run-s build test:*",
     "test-pre-commit": "dotenvx -q run -f .env.precommit -- pnpm test",
     "update": "run-p --aggregate-output update:**",
-    "update:deps": "taze",
+    "update:deps": "node scripts/taze.mjs",
     "update:socket": "pnpm update '@socketsecurity/*' --latest"
   },
   "dependencies": {
