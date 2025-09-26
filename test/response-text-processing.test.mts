@@ -60,6 +60,7 @@ describe('Response Text Processing', () => {
 
       // eslint-disable-next-line no-await-in-loop
       const result = (await client.sendApi(`whitespace-${index}`, {
+        body: {},
         throws: false,
       })) as CResult<unknown>
       expect(result.ok).toBe(false)
@@ -84,6 +85,7 @@ describe('Response Text Processing', () => {
       .reply(400, '  \t\n  ')
 
     const result = (await client.sendApi('whitespace-error', {
+      body: {},
       throws: false,
     })) as CResult<unknown>
 

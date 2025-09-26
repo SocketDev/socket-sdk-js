@@ -63,6 +63,7 @@ describe('Error Message Formatting', () => {
       .reply(400, veryLongError)
 
     const result = (await client.sendApi('very-long-error', {
+      body: {},
       throws: false,
     })) as CResult<unknown>
     expect(result.ok).toBe(false)

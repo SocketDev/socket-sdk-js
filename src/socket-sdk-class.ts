@@ -1,0 +1,1461 @@
+import events from 'node:events'
+import { createWriteStream } from 'node:fs'
+import readline from 'node:readline'
+
+import abortSignal from '@socketsecurity/registry/lib/constants/abort-signal'
+import SOCKET_PUBLIC_API_TOKEN from '@socketsecurity/registry/lib/constants/socket-public-api-token'
+import UNKNOWN_ERROR from '@socketsecurity/registry/lib/constants/unknown-error'
+import { debugLog, isDebug } from '@socketsecurity/registry/lib/debug'
+import { jsonParse } from '@socketsecurity/registry/lib/json'
+import { getOwn, isObjectObject } from '@socketsecurity/registry/lib/objects'
+import { pRetry } from '@socketsecurity/registry/lib/promises'
+import { urlSearchParamAsBoolean } from '@socketsecurity/registry/lib/url'
+
+import { DEFAULT_USER_AGENT, httpAgentNames } from './constants'
+import {
+  createRequestBodyForFilepaths,
+  createRequestBodyForJson,
+  createUploadRequest,
+} from './file-upload'
+import {
+  ResponseError,
+  createDeleteRequest,
+  createGetRequest,
+  createRequestWithJson,
+  getErrorResponseBody,
+  getHttpModule,
+  getResponse,
+  getResponseJson,
+  isResponseOk,
+  reshapeArtifactForPublicPolicy,
+} from './http-client'
+import {
+  normalizeBaseUrl,
+  promiseWithResolvers,
+  queryToSearchParams,
+  resolveAbsPaths,
+  resolveBasePath,
+} from './utils'
+
+import type {
+  Agent,
+  ArtifactPatches,
+  BatchPackageFetchResultType,
+  BatchPackageStreamOptions,
+  CResult,
+  CompactSocketArtifact,
+  CustomResponseType,
+  Entitlement,
+  EntitlementsResponse,
+  GetOptions,
+  GotOptions,
+  PatchViewResponse,
+  QueryParams,
+  RequestOptions,
+  SendOptions,
+  SocketArtifact,
+  SocketSdkErrorResult,
+  SocketSdkOperations,
+  SocketSdkOptions,
+  SocketSdkResult,
+  SocketSdkSuccessResult,
+  UploadManifestFilesError,
+  UploadManifestFilesReturnType,
+} from './types'
+import type { IncomingMessage } from 'node:http'
+
+/**
+ * Socket SDK for programmatic access to Socket.dev security analysis APIs.
+ * Provides methods for package scanning, organization management, and security analysis.
+ */
+export class SocketSdk {
+  readonly #apiToken: string
+  readonly #baseUrl: string
+  readonly #reqOptions: RequestOptions
+
+  /**
+   * Initialize Socket SDK with API token and configuration options.
+   * Sets up authentication, base URL, and HTTP client options.
+   */
+  constructor(apiToken: string, options?: SocketSdkOptions | undefined) {
+    const {
+      agent: agentOrObj,
+      baseUrl = 'https://api.socket.dev/v0/',
+      timeout,
+      userAgent,
+    } = { __proto__: null, ...options } as SocketSdkOptions
+    const agentKeys = agentOrObj ? Object.keys(agentOrObj) : []
+    const agentAsGotOptions = agentOrObj as GotOptions
+    const agent = (
+      agentKeys.length && agentKeys.every(k => httpAgentNames.has(k))
+        ? /* c8 ignore next 3 - Got-style agent options compatibility layer */
+          agentAsGotOptions.https ||
+          agentAsGotOptions.http ||
+          agentAsGotOptions.http2
+        : agentOrObj
+    ) as Agent | undefined
+    this.#apiToken = apiToken
+    this.#baseUrl = normalizeBaseUrl(baseUrl)
+    this.#reqOptions = {
+      ...(agent ? { agent } : {}),
+      headers: {
+        Authorization: `Basic ${btoa(`${apiToken}:`)}`,
+        'User-Agent': userAgent ?? DEFAULT_USER_AGENT,
+      },
+      signal: abortSignal,
+      ...(timeout ? { timeout } : {}),
+    }
+  }
+
+  /**
+   * Create HTTP request for batch package URL processing.
+   * Internal method for handling PURL batch API calls with retry logic.
+   */
+  async #createBatchPurlRequest(
+    componentsObj: { components: Array<{ purl: string }> },
+    queryParams?: QueryParams | undefined,
+  ): Promise<IncomingMessage> {
+    // Adds the first 'abort' listener to abortSignal.
+    const req = getHttpModule(this.#baseUrl)
+      .request(`${this.#baseUrl}purl?${queryToSearchParams(queryParams)}`, {
+        method: 'POST',
+        ...this.#reqOptions,
+      })
+      .end(JSON.stringify(componentsObj))
+    const response = await getResponse(req)
+
+    // Throw ResponseError for non-2xx status codes so retry logic works properly.
+    if (!isResponseOk(response)) {
+      throw new ResponseError(response)
+    }
+
+    return response
+  }
+
+  /**
+   * Create async generator for streaming batch package URL processing.
+   * Internal method for handling chunked PURL responses with error handling.
+   */
+  async *#createBatchPurlGenerator(
+    componentsObj: { components: Array<{ purl: string }> },
+    queryParams?: QueryParams | undefined,
+  ): AsyncGenerator<BatchPackageFetchResultType> {
+    let res: IncomingMessage | undefined
+    try {
+      res = await pRetry(
+        () => this.#createBatchPurlRequest(componentsObj, queryParams),
+        {
+          retries: 4,
+          onRetryRethrow: true,
+          onRetry(_attempt: number, error: unknown) {
+            if (!(error instanceof ResponseError)) {
+              return
+            }
+            const { statusCode } = error.response
+            // Don't retry authentication/authorization errors - they won't succeed.
+            if (statusCode === 401 || statusCode === 403) {
+              throw error
+            }
+          },
+        },
+      )
+    } catch (e) {
+      yield await this.#handleApiError<'batchPackageFetch'>(e)
+      return
+    }
+    // Parse the newline delimited JSON response.
+    const rli = readline.createInterface({
+      input: res,
+      crlfDelay: Infinity,
+      signal: abortSignal,
+    })
+    const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
+    for await (const line of rli) {
+      const trimmed = line.trim()
+      const artifact = trimmed
+        ? (jsonParse(line, { throws: false }) as SocketArtifact)
+        : null
+      if (isObjectObject(artifact)) {
+        yield this.#handleApiSuccess<'batchPackageFetch'>(
+          /* c8 ignore next - conditional is always reached, added for clarity */
+          isPublicToken
+            ? /* c8 ignore next - public token reshaping branch */ reshapeArtifactForPublicPolicy(
+                artifact!,
+                false,
+                queryParams?.['actions'] as string,
+              )
+            : artifact!,
+        )
+      }
+    }
+  }
+
+  /**
+   * Handle API error responses and convert to standardized error result.
+   * Internal error handling with status code analysis and message formatting.
+   */
+  async #handleApiError<T extends SocketSdkOperations>(
+    error: unknown,
+  ): Promise<SocketSdkErrorResult<T>> {
+    if (!(error instanceof ResponseError)) {
+      throw new Error('Unexpected Socket API error', {
+        cause: error,
+      })
+    }
+    const { statusCode } = error.response
+    // Throw server errors (5xx) immediately - these are not recoverable client-side.
+    if (statusCode && statusCode >= 500) {
+      throw new Error(`Socket API server error (${statusCode})`, {
+        cause: error,
+      })
+    }
+    // The error payload may give a meaningful hint as to what went wrong.
+    const bodyStr = await getErrorResponseBody(error.response)
+    // Try to parse the body as JSON, fallback to treating as plain text.
+    let body: string | undefined
+    try {
+      const parsed = JSON.parse(bodyStr)
+      // Client errors (4xx) should return actionable error messages.
+      // Extract both message and details from error response for better context.
+      if (typeof parsed?.error?.message === 'string') {
+        body = parsed.error.message
+
+        // Include details if present for additional error context.
+        if (parsed.error.details) {
+          const detailsStr =
+            typeof parsed.error.details === 'string'
+              ? parsed.error.details
+              : JSON.stringify(parsed.error.details)
+          body = `${body} - Details: ${detailsStr}`
+        }
+      }
+    } catch {
+      body = bodyStr
+    }
+    // Build error message that includes the body content if available.
+    let errorMessage = error.message ?? UNKNOWN_ERROR
+    const trimmedBody = body?.trim()
+    if (trimmedBody && !errorMessage.includes(trimmedBody)) {
+      // Replace generic status message with actual error body if present,
+      // otherwise append the body to the error message.
+      const statusMessage = error.response?.statusMessage
+      if (statusMessage && errorMessage.includes(statusMessage)) {
+        errorMessage = errorMessage.replace(statusMessage, trimmedBody)
+      } else {
+        /* c8 ignore next 2 - edge case where statusMessage is undefined or not in error message. */
+        errorMessage = `${errorMessage}: ${trimmedBody}`
+      }
+    }
+    return {
+      success: false,
+      /* c8 ignore next - fallback for missing status code in edge cases. */
+      status: statusCode ?? 0,
+      error: errorMessage,
+      cause: body,
+    } as SocketSdkErrorResult<T>
+  }
+
+  /**
+   * Handle successful API responses and convert to standardized success result.
+   * Internal success handling with consistent response formatting.
+   */
+  #handleApiSuccess<T extends SocketSdkOperations>(
+    data: unknown,
+  ): SocketSdkSuccessResult<T> {
+    return {
+      success: true,
+      // Use generic 200 OK status for all successful API responses.
+      status: 200,
+      data: data as SocketSdkSuccessResult<T>['data'],
+    } satisfies SocketSdkSuccessResult<T>
+  }
+
+  /**
+   * Fetch package analysis data for multiple packages in a single batch request.
+   * Returns all results at once after processing is complete.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async batchPackageFetch(
+    componentsObj: { components: Array<{ purl: string }> },
+    queryParams?: QueryParams | undefined,
+  ): Promise<BatchPackageFetchResultType> {
+    let res: IncomingMessage | undefined
+    try {
+      res = await this.#createBatchPurlRequest(componentsObj, queryParams)
+    } catch (e) {
+      return await this.#handleApiError<'batchPackageFetch'>(e)
+    }
+    // Parse the newline delimited JSON response.
+    const rli = readline.createInterface({
+      input: res,
+      crlfDelay: Infinity,
+      signal: abortSignal,
+    })
+    const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
+    const results: SocketArtifact[] = []
+    for await (const line of rli) {
+      const trimmed = line.trim()
+      const artifact = trimmed
+        ? (jsonParse(line, { throws: false }) as SocketArtifact)
+        : null
+      if (isObjectObject(artifact)) {
+        results.push(
+          isPublicToken
+            ? reshapeArtifactForPublicPolicy(
+                artifact!,
+                false,
+                queryParams?.['actions'] as string,
+              )
+            : artifact!,
+        )
+      }
+    }
+    const compact = urlSearchParamAsBoolean(getOwn(queryParams, 'compact'))
+    return this.#handleApiSuccess<'batchPackageFetch'>(
+      compact ? (results as CompactSocketArtifact[]) : results,
+    )
+  }
+
+  /**
+   * Stream package analysis data for multiple packages with chunked processing and concurrency control.
+   * Returns results as they become available via async generator.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async *batchPackageStream(
+    componentsObj: { components: Array<{ purl: string }> },
+    options?: BatchPackageStreamOptions | undefined,
+  ): AsyncGenerator<BatchPackageFetchResultType> {
+    const {
+      chunkSize = 100,
+      concurrencyLimit = 10,
+      queryParams,
+    } = {
+      __proto__: null,
+      ...options,
+    } as BatchPackageStreamOptions
+
+    type GeneratorStep = {
+      generator: AsyncGenerator<BatchPackageFetchResultType>
+      iteratorResult: IteratorResult<BatchPackageFetchResultType>
+    }
+    type GeneratorEntry = {
+      generator: AsyncGenerator<BatchPackageFetchResultType>
+      promise: Promise<GeneratorStep>
+    }
+
+    // The createBatchPurlGenerator method will add 2 'abort' event listeners to
+    // abortSignal so we multiply the concurrencyLimit by 2.
+    const neededMaxListeners = concurrencyLimit * 2
+    // Increase abortSignal max listeners count to avoid Node's MaxListenersExceededWarning.
+    const oldAbortSignalMaxListeners = events.getMaxListeners(abortSignal)
+    let abortSignalMaxListeners = oldAbortSignalMaxListeners
+    /* c8 ignore start - max listeners adjustment for high concurrency scenarios */
+    if (oldAbortSignalMaxListeners < neededMaxListeners) {
+      abortSignalMaxListeners = oldAbortSignalMaxListeners + neededMaxListeners
+      events.setMaxListeners(abortSignalMaxListeners, abortSignal)
+    }
+    /* c8 ignore stop - end max listeners adjustment */
+    const { components } = componentsObj
+    const { length: componentsCount } = components
+    const running: GeneratorEntry[] = []
+    let index = 0
+    const enqueueGen = () => {
+      if (index >= componentsCount) {
+        // No more work to do.
+        return
+      }
+      const generator = this.#createBatchPurlGenerator(
+        {
+          // Chunk components.
+          components: components.slice(index, index + chunkSize),
+        },
+        queryParams,
+      )
+      continueGen(generator)
+      index += chunkSize
+    }
+    const continueGen = (
+      generator: AsyncGenerator<BatchPackageFetchResultType>,
+    ) => {
+      const {
+        promise,
+        reject: rejectFn,
+        resolve: resolveFn,
+      } = promiseWithResolvers<GeneratorStep>()
+      running.push({
+        generator,
+        promise,
+      })
+      void generator
+        .next()
+        .then(
+          iteratorResult => resolveFn({ generator, iteratorResult }),
+          rejectFn,
+        )
+    }
+    // Start initial batch of generators.
+    while (running.length < concurrencyLimit && index < componentsCount) {
+      enqueueGen()
+    }
+    while (running.length > 0) {
+      // eslint-disable-next-line no-await-in-loop
+      const { generator, iteratorResult } = await Promise.race(
+        running.map(entry => entry.promise),
+      )
+      // Remove generator.
+      running.splice(
+        running.findIndex(entry => entry.generator === generator),
+        1,
+      )
+      // Yield the value if one is given, even when done:true.
+      if (iteratorResult.value) {
+        yield iteratorResult.value
+      }
+      if (iteratorResult.done) {
+        // Start a new generator if available.
+        enqueueGen()
+      } else {
+        // Keep fetching values from this generator.
+        continueGen(generator)
+      }
+    }
+    // Reset abortSignal max listeners count.
+    /* c8 ignore start - reset max listeners if they were increased */
+    if (abortSignalMaxListeners > oldAbortSignalMaxListeners) {
+      events.setMaxListeners(oldAbortSignalMaxListeners, abortSignal)
+    }
+    /* c8 ignore stop - end max listeners reset */
+  }
+
+  /**
+   * Create a snapshot of project dependencies by uploading manifest files.
+   * Analyzes dependency files to generate a comprehensive security report.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async createDependenciesSnapshot(
+    filepaths: string[],
+    pathsRelativeTo = '.',
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'createDependenciesSnapshot'>> {
+    const basePath = resolveBasePath(pathsRelativeTo)
+    const absFilepaths = resolveAbsPaths(filepaths, basePath)
+    try {
+      const data = await getResponseJson(
+        await createUploadRequest(
+          this.#baseUrl,
+          `dependencies/upload?${queryToSearchParams(queryParams)}`,
+          createRequestBodyForFilepaths(absFilepaths, basePath),
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'createDependenciesSnapshot'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'createDependenciesSnapshot'>(e)
+    }
+  }
+
+  /**
+   * Create a comprehensive security scan for an organization.
+   * Uploads project files and initiates full security analysis.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async createOrgFullScan(
+    orgSlug: string,
+    filepaths: string[],
+    pathsRelativeTo: string = '.',
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'CreateOrgFullScan'>> {
+    const basePath = resolveBasePath(pathsRelativeTo)
+    const absFilepaths = resolveAbsPaths(filepaths, basePath)
+    try {
+      const data = await getResponseJson(
+        await createUploadRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(queryParams)}`,
+          createRequestBodyForFilepaths(absFilepaths, basePath),
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'CreateOrgFullScan'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'CreateOrgFullScan'>(e)
+    }
+  }
+
+  /**
+   * Create a new repository in an organization.
+   * Registers a repository for monitoring and security scanning.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async createOrgRepo(
+    orgSlug: string,
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'createOrgRepo'>> {
+    try {
+      const data = await getResponseJson(
+        await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/repos`,
+          queryParams,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'createOrgRepo'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'createOrgRepo'>(e)
+    }
+  }
+
+  /**
+   * Create a security scan by uploading project files.
+   * Analyzes uploaded files for security vulnerabilities and policy violations.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async createScanFromFilepaths(
+    filepaths: string[],
+    pathsRelativeTo: string = '.',
+    issueRules?: Record<string, boolean>,
+  ): Promise<SocketSdkResult<'createReport'>> {
+    const basePath = resolveBasePath(pathsRelativeTo)
+    const absFilepaths = resolveAbsPaths(filepaths, basePath)
+    try {
+      const data = await getResponseJson(
+        await createUploadRequest(
+          this.#baseUrl,
+          'report/upload',
+          [
+            ...createRequestBodyForFilepaths(absFilepaths, basePath),
+            ...(issueRules
+              ? createRequestBodyForJson(issueRules, 'issueRules')
+              : []),
+          ],
+          {
+            ...this.#reqOptions,
+            method: 'PUT',
+          },
+        ),
+      )
+      return this.#handleApiSuccess<'createReport'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'createReport'>(e)
+    }
+  }
+
+  /**
+   * Delete a full scan from an organization.
+   * Permanently removes scan data and results.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async deleteOrgFullScan(
+    orgSlug: string,
+    fullScanId: string,
+  ): Promise<SocketSdkResult<'deleteOrgFullScan'>> {
+    try {
+      const data = await getResponseJson(
+        await createDeleteRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'deleteOrgFullScan'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'deleteOrgFullScan'>(e)
+    }
+  }
+
+  /**
+   * Delete a repository from an organization.
+   * Removes repository monitoring and associated scan data.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async deleteOrgRepo(
+    orgSlug: string,
+    repoSlug: string,
+  ): Promise<SocketSdkResult<'deleteOrgRepo'>> {
+    try {
+      const data = await getResponseJson(
+        await createDeleteRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'deleteOrgRepo'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'deleteOrgRepo'>(e)
+    }
+  }
+
+  /**
+   * Retrieve audit log events for an organization.
+   * Returns chronological log of security and administrative actions.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getAuditLogEvents(
+    orgSlug: string,
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'getAuditLogEvents'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/audit-log?${queryToSearchParams(queryParams)}`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getAuditLogEvents'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getAuditLogEvents'>(e)
+    }
+  }
+
+  /**
+   * Retrieve the enabled entitlements for an organization.
+   *
+   * This method fetches the organization's entitlements and filters for only
+   * the enabled ones, returning their keys. Entitlements represent Socket
+   * Products that the organization has access to use.
+   */
+  async getEnabledEntitlements(orgSlug: string): Promise<string[]> {
+    const data = await getResponseJson(
+      await createGetRequest(
+        this.#baseUrl,
+        `orgs/${encodeURIComponent(orgSlug)}/entitlements`,
+        this.#reqOptions,
+      ),
+    )
+
+    // Extract enabled products from the response.
+    const items = (data as EntitlementsResponse)?.items || []
+    return items
+      .filter((item: Entitlement) => item && item.enabled === true && item.key)
+      .map((item: Entitlement) => item.key)
+  }
+
+  /**
+   * Retrieve all entitlements for an organization.
+   *
+   * This method fetches all entitlements (both enabled and disabled) for
+   * an organization, returning the complete list with their status.
+   */
+  async getEntitlements(orgSlug: string): Promise<Entitlement[]> {
+    const data = await getResponseJson(
+      await createGetRequest(
+        this.#baseUrl,
+        `orgs/${encodeURIComponent(orgSlug)}/entitlements`,
+        this.#reqOptions,
+      ),
+    )
+
+    return (data as EntitlementsResponse)?.items || []
+  }
+
+  /**
+   * Get security issues for a specific npm package and version.
+   * Returns detailed vulnerability and security alert information.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getIssuesByNpmPackage(
+    pkgName: string,
+    version: string,
+  ): Promise<SocketSdkResult<'getIssuesByNPMPackage'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `npm/${encodeURIComponent(pkgName)}/${encodeURIComponent(version)}/issues`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getIssuesByNPMPackage'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getIssuesByNPMPackage'>(e)
+    }
+  }
+
+  /**
+   * Get analytics data for organization usage patterns and security metrics.
+   * Returns statistical analysis for specified time period.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgAnalytics(
+    time: string,
+  ): Promise<SocketSdkResult<'getOrgAnalytics'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `analytics/org/${encodeURIComponent(time)}`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getOrgAnalytics'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgAnalytics'>(e)
+    }
+  }
+
+  /**
+   * List all organizations accessible to the current user.
+   * Returns organization details and access permissions.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrganizations(): Promise<SocketSdkResult<'getOrganizations'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          'organizations',
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getOrganizations'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrganizations'>(e)
+    }
+  }
+
+  /**
+   * Stream a full scan's results to file or stdout.
+   * Provides efficient streaming for large scan datasets.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async streamOrgFullScan(
+    orgSlug: string,
+    fullScanId: string,
+    output?: string | boolean,
+  ): Promise<SocketSdkResult<'getOrgFullScan'>> {
+    try {
+      const req = getHttpModule(this.#baseUrl)
+        .request(
+          `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`,
+          {
+            method: 'GET',
+            ...this.#reqOptions,
+          },
+        )
+        .end()
+      const res = await getResponse(req)
+
+      // Check for HTTP error status codes.
+      if (!isResponseOk(res)) {
+        throw new ResponseError(res)
+      }
+
+      if (typeof output === 'string') {
+        // Stream to file
+        res.pipe(createWriteStream(output))
+      } else if (output === true) {
+        // Stream to stdout
+        res.pipe(process.stdout)
+      }
+
+      // If output is false or undefined, just return the response without streaming
+      return this.#handleApiSuccess<'getOrgFullScan'>(res)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgFullScan'>(e)
+    }
+  }
+
+  /**
+   * Stream patches for artifacts in a scan report.
+   *
+   * This method streams all available patches for artifacts in a scan.
+   * Free tier users will only receive free patches.
+   *
+   * Note: This method returns a ReadableStream for processing large datasets.
+   */
+  async streamPatchesFromScan(
+    orgSlug: string,
+    scanId: string,
+  ): Promise<ReadableStream<ArtifactPatches>> {
+    const response = await createGetRequest(
+      this.#baseUrl,
+      `orgs/${encodeURIComponent(orgSlug)}/patches/scan/${encodeURIComponent(scanId)}`,
+      this.#reqOptions,
+    )
+
+    // Check for HTTP error status codes.
+    if (!isResponseOk(response)) {
+      throw new ResponseError(response, 'GET Request failed')
+    }
+
+    // The response itself is the readable stream for NDJSON data
+    // Convert the Node.js readable stream to a Web ReadableStream
+    return new ReadableStream<ArtifactPatches>({
+      start(controller) {
+        response.on('data', (chunk: Buffer) => {
+          // Parse NDJSON chunks line by line
+          const lines = chunk
+            .toString()
+            .split('\n')
+            .filter(line => line.trim())
+          for (const line of lines) {
+            try {
+              const data = JSON.parse(line) as ArtifactPatches
+              controller.enqueue(data)
+            } catch (e) {
+              // Skip invalid JSON lines
+              continue
+            }
+          }
+        })
+
+        response.on('end', () => {
+          controller.close()
+        })
+
+        response.on('error', error => {
+          controller.error(error)
+        })
+      },
+    })
+  }
+
+  /**
+   * Get complete full scan results in memory.
+   * Returns entire scan data as JSON for programmatic processing.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgFullScanBuffered(
+    orgSlug: string,
+    fullScanId: string,
+  ): Promise<SocketSdkResult<'getOrgFullScan'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getOrgFullScan'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgFullScan'>(e)
+    }
+  }
+
+  /**
+   * List all full scans for an organization.
+   * Returns paginated list of scan metadata and status.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgFullScanList(
+    orgSlug: string,
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'getOrgFullScanList'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(queryParams)}`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getOrgFullScanList'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgFullScanList'>(e)
+    }
+  }
+
+  /**
+   * Get metadata for a specific full scan.
+   * Returns scan configuration, status, and summary information.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgFullScanMetadata(
+    orgSlug: string,
+    fullScanId: string,
+  ): Promise<SocketSdkResult<'getOrgFullScanMetadata'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/metadata`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getOrgFullScanMetadata'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgFullScanMetadata'>(e)
+    }
+  }
+
+  /**
+   * Get organization's license policy configuration.
+   * Returns allowed, restricted, and monitored license types.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgLicensePolicy(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'getOrgLicensePolicy'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/settings/license-policy`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getOrgLicensePolicy'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgLicensePolicy'>(e)
+    }
+  }
+
+  /**
+   * Get details for a specific organization repository.
+   * Returns repository configuration, monitoring status, and metadata.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgRepo(
+    orgSlug: string,
+    repoSlug: string,
+  ): Promise<SocketSdkResult<'getOrgRepo'>> {
+    const orgSlugParam = encodeURIComponent(orgSlug)
+    const repoSlugParam = encodeURIComponent(repoSlug)
+
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `orgs/${orgSlugParam}/repos/${repoSlugParam}`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getOrgRepo'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgRepo'>(e)
+    }
+  }
+
+  /**
+   * List all repositories in an organization.
+   * Returns paginated list of repository metadata and status.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgRepoList(
+    orgSlug: string,
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'getOrgRepoList'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/repos?${queryToSearchParams(queryParams)}`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getOrgRepoList'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgRepoList'>(e)
+    }
+  }
+
+  /**
+   * Get organization's security policy configuration.
+   * Returns alert rules, severity thresholds, and enforcement settings.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgSecurityPolicy(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'getOrgSecurityPolicy'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/settings/security-policy`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getOrgSecurityPolicy'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgSecurityPolicy'>(e)
+    }
+  }
+
+  /**
+   * Get current API quota usage and limits.
+   * Returns remaining requests, rate limits, and quota reset times.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getQuota(): Promise<SocketSdkResult<'getQuota'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(this.#baseUrl, 'quota', this.#reqOptions),
+      )
+      return this.#handleApiSuccess<'getQuota'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getQuota'>(e)
+    }
+  }
+
+  /**
+   * Get analytics data for a specific repository.
+   * Returns security metrics, dependency trends, and vulnerability statistics.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getRepoAnalytics(
+    repo: string,
+    time: string,
+  ): Promise<SocketSdkResult<'getRepoAnalytics'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `analytics/repo/${encodeURIComponent(repo)}/${encodeURIComponent(time)}`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getRepoAnalytics'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getRepoAnalytics'>(e)
+    }
+  }
+
+  /**
+   * Get detailed results for a specific scan.
+   * Returns complete scan analysis including vulnerabilities and alerts.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getScan(id: string): Promise<SocketSdkResult<'getReport'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `report/view/${encodeURIComponent(id)}`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getReport'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getReport'>(e)
+    }
+  }
+
+  /**
+   * List all scans accessible to the current user.
+   * Returns paginated list of scan metadata and status.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getScanList(): Promise<SocketSdkResult<'getReportList'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(this.#baseUrl, 'report/list', this.#reqOptions),
+        'GET',
+      )
+      return this.#handleApiSuccess<'getReportList'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getReportList'>(e)
+    }
+  }
+
+  /**
+   * Get list of file types and formats supported for scanning.
+   * Returns supported manifest files, lockfiles, and configuration formats.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getSupportedScanFiles(): Promise<
+    SocketSdkResult<'getReportSupportedFiles'>
+  > {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          'report/supported',
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getReportSupportedFiles'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getReportSupportedFiles'>(e)
+    }
+  }
+
+  /**
+   * Get security score for a specific npm package and version.
+   * Returns numerical security rating and scoring breakdown.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getScoreByNpmPackage(
+    pkgName: string,
+    version: string,
+  ): Promise<SocketSdkResult<'getScoreByNPMPackage'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `npm/${encodeURIComponent(pkgName)}/${encodeURIComponent(version)}/score`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getScoreByNPMPackage'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getScoreByNPMPackage'>(e)
+    }
+  }
+
+  /**
+   * Update user or organization settings.
+   * Configures preferences, notifications, and security policies.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async postSettings(
+    selectors: Array<{ organization?: string }>,
+  ): Promise<SocketSdkResult<'postSettings'>> {
+    try {
+      const data = await getResponseJson(
+        await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          'settings',
+          { json: selectors },
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'postSettings'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'postSettings'>(e)
+    }
+  }
+
+  /**
+   * Search for dependencies across monitored projects.
+   * Returns matching packages with security information and usage patterns.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async searchDependencies(
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'searchDependencies'>> {
+    try {
+      const data = await getResponseJson(
+        await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          'dependencies/search',
+          queryParams,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'searchDependencies'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'searchDependencies'>(e)
+    }
+  }
+
+  /**
+   * Update configuration for an organization repository.
+   * Modifies monitoring settings, branch configuration, and scan preferences.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async updateOrgRepo(
+    orgSlug: string,
+    repoSlug: string,
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'updateOrgRepo'>> {
+    try {
+      const data = await getResponseJson(
+        await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`,
+          queryParams,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'updateOrgRepo'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgRepo'>(e)
+    }
+  }
+
+  /**
+   * Upload manifest files for dependency analysis.
+   * Processes package files to create dependency snapshots and security analysis.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async uploadManifestFiles(
+    orgSlug: string,
+    filepaths: string[],
+    pathsRelativeTo: string = '.',
+  ): Promise<UploadManifestFilesReturnType | UploadManifestFilesError> {
+    const basePath = resolveBasePath(pathsRelativeTo)
+    const absFilepaths = resolveAbsPaths(filepaths, basePath)
+    try {
+      const data = await getResponseJson(
+        await createUploadRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/upload-manifest-files`,
+          createRequestBodyForFilepaths(absFilepaths, basePath),
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<any>(
+        data,
+      ) as unknown as UploadManifestFilesReturnType
+    } catch (e) {
+      return (await this.#handleApiError<any>(
+        e,
+      )) as unknown as UploadManifestFilesError
+    }
+  }
+
+  /**
+   * View detailed information about a specific patch by its UUID.
+   *
+   * This method retrieves comprehensive patch details including files,
+   * vulnerabilities, description, license, and tier information.
+   */
+  async viewPatch(orgSlug: string, uuid: string): Promise<PatchViewResponse> {
+    const data = await getResponseJson(
+      await createGetRequest(
+        this.#baseUrl,
+        `orgs/${encodeURIComponent(orgSlug)}/patches/view/${encodeURIComponent(uuid)}`,
+        this.#reqOptions,
+      ),
+    )
+
+    return data as PatchViewResponse
+  }
+
+  /**
+   * Handle query API response data based on requested response type.
+   * Internal method for processing different response formats (json, text, response).
+   */
+  async #handleQueryResponseData<T>(
+    response: IncomingMessage,
+    responseType: CustomResponseType,
+  ): Promise<T> {
+    if (responseType === 'response') {
+      return response as T
+    }
+
+    if (responseType === 'text') {
+      return (await this.#getResponseText(response)) as T
+    }
+
+    if (responseType === 'json') {
+      return (await getResponseJson(response)) as T
+    }
+
+    return response as T
+  }
+
+  /**
+   * Extract text content from HTTP response stream.
+   * Internal method with size limits to prevent memory exhaustion.
+   */
+  async #getResponseText(response: IncomingMessage): Promise<string> {
+    const chunks = []
+    let size = 0
+    // 50MB limit to prevent out-of-memory errors from large responses.
+    const MAX = 50 * 1024 * 1024
+    for await (const chunk of response) {
+      size += chunk.length
+      /* c8 ignore next 3 - MAX size limit protection for edge cases */
+      if (size > MAX) {
+        throw new Error('Response body too large')
+      }
+      chunks.push(chunk)
+    }
+    return Buffer.concat(chunks).toString('utf8')
+  }
+
+  /**
+   * Create standardized error result from query operation exceptions.
+   * Internal error handling for non-throwing query API methods.
+   */
+  #createQueryErrorResult<T>(e: unknown): CResult<T> {
+    if (e instanceof SyntaxError) {
+      // Try to get response text from enhanced error, fall back to regex pattern for compatibility.
+      const enhancedError = e as SyntaxError & { originalResponse?: string }
+      let responseText = enhancedError.originalResponse || ''
+
+      if (!responseText) {
+        const match = e.message.match(/Invalid JSON response:\n([\s\S]*?)\n→/)
+        responseText = match?.[1] || ''
+      }
+
+      const preview = responseText.slice(0, 100) || ''
+      return {
+        ok: false,
+        message: 'Server returned invalid JSON',
+        cause: `Please report this. JSON.parse threw an error over the following response: \`${preview.trim()}${responseText.length > 100 ? '...' : ''}\``,
+      } as CResult<T>
+    }
+
+    /* c8 ignore start - Defensive error stringification fallback branches for edge cases. */
+    const errStr = e ? String(e).trim() : ''
+    return {
+      ok: false,
+      message: 'API request failed',
+      cause: errStr || UNKNOWN_ERROR,
+    } as CResult<T>
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Execute a raw GET request to any API endpoint with configurable response type.
+   */
+  async getApi<T = IncomingMessage>(
+    urlPath: string,
+    options?: GetOptions | undefined,
+  ): Promise<T | CResult<T>> {
+    const { responseType = 'response', throws = true } = {
+      __proto__: null,
+      ...options,
+    } as GetOptions
+
+    try {
+      const response = await createGetRequest(
+        this.#baseUrl,
+        urlPath,
+        this.#reqOptions,
+      )
+      // Check for HTTP error status codes first.
+      if (!isResponseOk(response)) {
+        if (throws) {
+          throw new ResponseError(response)
+        }
+        const errorResult = await this.#handleApiError<any>(
+          new ResponseError(response),
+        )
+        return {
+          ok: false,
+          code: errorResult.status,
+          message: 'Socket API error',
+          cause: errorResult.cause || errorResult.error,
+          data: { code: errorResult.status },
+        } as CResult<T>
+      }
+
+      const data = await this.#handleQueryResponseData<T>(
+        response,
+        responseType,
+      )
+
+      if (throws) {
+        return data as T
+      }
+
+      return {
+        ok: true,
+        data,
+      } as CResult<T>
+    } catch (e) {
+      if (throws) {
+        throw e
+      }
+
+      if (e instanceof ResponseError) {
+        // Re-use existing error handling logic from the SDK
+        const errorResult = await this.#handleApiError<any>(e)
+        return {
+          ok: false,
+          code: errorResult.status,
+          message: 'Socket API error',
+          cause: errorResult.cause || errorResult.error,
+          data: { code: errorResult.status },
+        } as CResult<T>
+      }
+
+      return this.#createQueryErrorResult<T>(e)
+    }
+  }
+
+  /**
+   * Send POST or PUT request with JSON body and return parsed JSON response.
+   */
+  async sendApi<T>(
+    urlPath: string,
+    options?: SendOptions | undefined,
+  ): Promise<T | CResult<T>> {
+    const {
+      body,
+      // Default to POST method for JSON API requests.
+      method = 'POST',
+      throws = true,
+    } = { __proto__: null, ...options } as SendOptions
+
+    try {
+      // Route to appropriate HTTP method handler (POST or PUT).
+      const response = await createRequestWithJson(
+        method,
+        this.#baseUrl,
+        urlPath,
+        body,
+        this.#reqOptions,
+      )
+
+      return {
+        ok: true,
+        data: (await getResponseJson(response)) as T,
+      }
+    } catch (e) {
+      if (throws) {
+        throw e
+      }
+
+      if (e instanceof ResponseError) {
+        // Re-use existing error handling logic from the SDK
+        const errorResult = await this.#handleApiError<any>(e)
+        return {
+          ok: false,
+          code: errorResult.status,
+          message: 'Socket API error',
+          cause: errorResult.cause || errorResult.error,
+          data: { code: errorResult.status },
+        }
+      }
+
+      /* c8 ignore start - Defensive error stringification fallback branches for sendApi edge cases. */
+      const errStr = e ? String(e).trim() : ''
+      return {
+        ok: false,
+        message: 'API request failed',
+        cause: errStr || UNKNOWN_ERROR,
+      }
+      /* c8 ignore stop */
+    }
+  }
+}
+
+// Optional live heap trace.
+/* c8 ignore start - optional debug logging for heap monitoring */
+if (isDebug('heap')) {
+  const used = process.memoryUsage()
+  debugLog('heap', `heap used: ${Math.round(used.heapUsed / 1024 / 1024)}MB`)
+}
+/* c8 ignore stop - end debug logging */
