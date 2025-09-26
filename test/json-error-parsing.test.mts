@@ -72,4 +72,23 @@ describe('JSON Parsing Error Handling', () => {
       expect(result.cause).toBeDefined()
     }
   })
+
+  it('should use regex fallback for SyntaxError without originalResponse', async () => {
+    // This response format triggers SyntaxError and tests the regex fallback logic
+    nock('https://api.socket.dev')
+      .get('/v0/test-regex-fallback')
+      .reply(
+        200,
+        'not json but formatted as: Invalid JSON response:\ntest content\n→ error',
+      )
+
+    const result = await client.getApi('test-regex-fallback', {
+      throws: false,
+      responseType: 'json',
+    })
+
+    expect(result).toHaveProperty('ok', false)
+    expect(result).toHaveProperty('message', 'Server returned invalid JSON')
+    expect((result as any).cause).toContain('test content')
+  })
 })

@@ -1,3 +1,4 @@
+/** @fileoverview File upload utilities for Socket API with multipart form data support. */
 import events from 'node:events'
 import { createReadStream } from 'node:fs'
 import path from 'node:path'
@@ -88,6 +89,7 @@ export async function createUploadRequest(
     const requestBody = [
       ...requestBodyNoBoundaries.flatMap(part => [
         boundarySep,
+        /* c8 ignore next - Array.isArray branch for part is defensive coding for edge cases. */
         ...(Array.isArray(part) ? part : [part]),
       ]),
       finalBoundary,
