@@ -39,6 +39,7 @@ export default defineConfig({
         'test/**',
         '**/*.mjs',
         '**/*.cjs',
+        'src/types.ts',
       ],
       include: ['src/**/*.{ts,mts,cts}'],
       all: true,
