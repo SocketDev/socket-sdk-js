@@ -367,6 +367,7 @@ This is the Socket SDK for JavaScript/TypeScript, providing programmatic access 
 - **🚨 FORBIDDEN**: Do NOT include "Generated with Claude Code" or similar AI attribution in commit messages
 - **Commit messages**: Should be written as if by a human developer, focusing on the what and why of changes
 - **Professional commits**: Write clear, concise commit messages that describe the actual changes made
+- **Pithy messages**: Keep commit messages concise and to the point - avoid lengthy explanations
 - **Commit without tests**: `git commit --no-verify` (skips pre-commit hooks including tests)
 
 ### Git Workflow Rules
@@ -451,6 +452,7 @@ These are patterns and instructions that should be consistently applied across a
 3. **Object Mappings**: Use `{ __proto__: null, ...mapping }` for static string-to-string mappings to prevent prototype pollution
 4. **Import Separation**: ALWAYS separate type imports (`import type`) from runtime imports
 5. **Node.js Imports**: ALWAYS use `node:` prefix for Node.js built-in modules
+6. **🚨 TSGO PRESERVATION**: NEVER replace tsgo with tsc - tsgo provides enhanced performance and should be maintained across all Socket projects
 
 ### 🧪 Test Patterns & Cleanup
 1. **Remove Duplicate Tests**: Eliminate tests that verify the same functionality across multiple files
