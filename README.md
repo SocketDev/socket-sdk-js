@@ -30,6 +30,36 @@ if (res.success) {
 }
 ```
 
+### Quota Management Example
+
+```javascript
+import {
+  SocketSdk,
+  getQuotaCost,
+  calculateTotalQuotaCost,
+  hasQuotaForMethods
+} from '@socketsecurity/sdk'
+
+const client = new SocketSdk('your-api-key')
+
+// Check quota cost before making API calls
+const batchCost = getQuotaCost('batchPackageFetch') // Returns: 100
+const analyticsCost = getQuotaCost('getOrgAnalytics') // Returns: 10
+
+// Calculate total cost for multiple operations
+const operations = ['batchPackageFetch', 'getOrgAnalytics', 'uploadManifestFiles']
+const totalCost = calculateTotalQuotaCost(operations) // Returns: 210
+
+// Check if you have sufficient quota
+const quotaRes = await client.getQuota()
+if (quotaRes.success && hasQuotaForMethods(quotaRes.data.quota, operations)) {
+  // Proceed with API calls
+  console.log(`Sufficient quota available: ${quotaRes.data.quota} units`)
+} else {
+  console.log('Insufficient quota - consider using free alternatives')
+}
+```
+
 ### CommonJS
 
 ```javascript
@@ -70,7 +100,8 @@ The Socket SDK provides programmatic access to Socket.dev's security analysis pl
 ### Authentication & Access
 - **API Tokens**: Create, rotate, update, and revoke organization API tokens
 - **Entitlements**: View enabled Socket products and features
-- **Quota Management**: Monitor API usage limits and quotas
+- **Quota Management**: Monitor API usage limits, quotas, and plan method calls
+- **Quota Utilities**: Pre-calculate costs, check permissions, and optimize API usage
 
 ### Advanced Features
 - **Patches**: View and stream security patches for vulnerabilities
@@ -154,6 +185,16 @@ The Socket SDK provides programmatic access to Socket.dev's security analysis pl
   * Returns statistical analysis for specified time period
 * `getQuota()` - Get current API quota usage
   * Returns remaining requests, rate limits, and quota reset times
+
+### Quota Utility Functions
+* `getQuotaCost(methodName)` - Get quota cost for any SDK method
+* `getRequiredPermissions(methodName)` - Get required permissions for SDK method
+* `calculateTotalQuotaCost(methodNames[])` - Calculate total cost for multiple methods
+* `hasQuotaForMethods(availableQuota, methodNames[])` - Check if quota is sufficient
+* `getMethodsByQuotaCost(cost)` - Find methods by quota cost (0, 10, 100 units)
+* `getMethodsByPermissions(permissions[])` - Find methods requiring specific permissions
+* `getQuotaUsageSummary()` - Get summary of all methods grouped by quota cost
+* `getAllMethodRequirements()` - Get complete mapping of methods to costs and permissions
 * `getRepoAnalytics(repo, time)` - Get repository analytics
   * Returns security metrics, dependency trends, and vulnerability statistics
 
