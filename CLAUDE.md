@@ -223,11 +223,14 @@ This is the Socket SDK for JavaScript/TypeScript, providing programmatic access 
 
 ### Comment Standards
 - **Comment formatting**: 🚨 MANDATORY - ALL comments MUST follow these rules:
+  - **Single-line preference**: Prefer single-line comments (`//`) over multiline comments (`/* */`) unless for method headers, module headers, or copyright notices. Use single-line comments for property descriptions, inline explanations, and general code comments.
   - **Periods required**: Every comment MUST end with a period, except ESLint disable comments and URLs which are directives/references
   - **Sentence structure**: Comments should be complete sentences with proper capitalization and grammar
   - **Placement**: Place comments on their own line above the code they describe, not trailing to the right of code
   - **Style**: Use fewer hyphens/dashes and prefer commas, colons, or semicolons for better readability
   - **Examples**:
+    - ✅ CORRECT: `// Custom GitHub host (default: github.com).` (property description)
+    - ❌ WRONG: `/** Custom GitHub host (default: github.com). */` (multiline for simple property)
     - ✅ CORRECT: `// This function validates user input.`
     - ✅ CORRECT: `/* This is a multi-line comment that explains the complex logic below. */`
     - ✅ CORRECT: `// eslint-disable-next-line no-await-in-loop` (directive, no period)
@@ -251,6 +254,28 @@ This is the Socket SDK for JavaScript/TypeScript, providing programmatic access 
 - **Process spawning**: 🚨 FORBIDDEN to use Node.js built-in `child_process.spawn` - MUST use `spawn` from `@socketsecurity/registry/lib/spawn`
 - **List formatting**: Use `-` for bullet points in text output, not `•` or other Unicode characters, for better terminal compatibility
 - **For...of loop type annotations**: 🚨 FORBIDDEN - Never use type annotations in for...of loop variable declarations. TypeScript cannot parse `for await (const chunk: Buffer of stream)` - use `for await (const chunk of stream)` instead and let TypeScript infer the type
+- **JSDoc function documentation**: 🚨 MANDATORY - Function JSDoc comments MUST follow this exact pattern:
+  - **Format**: Description only, with optional `@throws` - NO `@param` or `@returns` tags
+  - **Order**: Description paragraph, then `@throws` tag (if needed)
+  - **Closure**: End with `*/` immediately after the last JSDoc tag
+  - **Examples**:
+    - ✅ CORRECT:
+      ```javascript
+      /**
+       * Check if a string contains a trusted domain using proper URL parsing.
+       */
+      ```
+    - ✅ CORRECT (with throws):
+      ```javascript
+      /**
+       * Parse a configuration file and validate its contents.
+       * @throws {Error} When file cannot be read or parsed.
+       */
+      ```
+    - ❌ FORBIDDEN: Adding `@param` or `@returns` tags
+    - ❌ FORBIDDEN: Adding extra tags like `@author`, `@since`, `@example`, etc.
+    - ❌ FORBIDDEN: Adding empty lines between JSDoc tags
+    - ❌ FORBIDDEN: Adding extra content after the last JSDoc tag
 
 ### 🏗️ Function Options Pattern (MANDATORY)
 - **🚨 REQUIRED**: ALL functions accepting options MUST follow this exact pattern:
