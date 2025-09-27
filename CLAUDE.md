@@ -43,12 +43,13 @@ Claude Code should periodically scan and learn from CLAUDE.md files across Socke
 - `socket-packageurl-js/CLAUDE.md`
 - `socket-registry/CLAUDE.md`
 - `socket-sdk-js/CLAUDE.md`
+- `socket-workflows/CLAUDE.md`
 
 When working in any Socket repository, check for updates and patterns in other claude.md files to ensure consistency across the ecosystem.
 
 ### Cross-Project Learning
 - When discovering generally applicable patterns or guidelines, update CLAUDE.md files in other socket- projects
-- Examples: c8 comment formatting, error handling patterns, code style rules, test organization patterns
+- Examples: c8 comment formatting, error handling patterns, code style rules, test organization patterns, workflow patterns
 - This ensures consistency across the Socket ecosystem
 
 ### Recent Learnings Applied
@@ -58,6 +59,8 @@ When working in any Socket repository, check for updates and patterns in other c
 - **TypeScript Strict Mode**: All projects should use strict TypeScript configuration
 - **Import Organization**: Separate type imports from runtime imports for better tree-shaking
 - **Documentation Organization**: API method documentation should be organized alphabetically within functional categories for better discoverability and maintainability
+- **Safe File Removal**: Use appropriate file removal patterns optimized for different environments
+- **Cross-Platform Support**: Enhanced cross-platform compatibility measures across all projects
 
 ## 🏗️ PROJECT ARCHITECTURE
 
@@ -460,6 +463,7 @@ These patterns should be enforced across all Socket repositories:
 - `socket-packageurl-js`
 - `socket-registry`
 - `socket-sdk-js`
+- `socket-workflows`
 
 When working in any Socket repository, check CLAUDE.md files in other Socket projects for consistency and apply these patterns universally.
 
