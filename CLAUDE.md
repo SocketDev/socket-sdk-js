@@ -363,13 +363,14 @@ This is the Socket SDK for JavaScript/TypeScript, providing programmatic access 
 ## 🔧 GIT & WORKFLOW
 
 ### Git Commit Guidelines
-- **🚨 FORBIDDEN**: NEVER add Claude co-authorship or Claude signatures to commits
-- **🚨 FORBIDDEN**: Do NOT include "Generated with Claude Code" or similar AI attribution in commit messages
-- **🚨 FORBIDDEN**: Do NOT use "chore:" prefix in commit messages - follow established project conventions
-- **Commit message style**: Follow the existing project's commit message format without prefixes like "chore:", "feat:", "fix:" unless explicitly used in the project
-- **Commit messages**: Should be written as if by a human developer, focusing on the what and why of changes
-- **Professional commits**: Write clear, concise commit messages that describe the actual changes made
-- **Pithy messages**: Keep commit messages concise and to the point - avoid lengthy explanations
+- **DO NOT commit automatically** - let the user review changes first
+- Use `--no-verify` flag only when explicitly requested
+- **Commit message style**: Use conventional format without prefixes (feat:, fix:, chore:, etc.)
+- **Message guidelines**: Keep commit messages short, pithy, and targeted - avoid lengthy explanations
+- **Small commits**: Make small, focused commits that address a single concern
+- **❌ FORBIDDEN**: Do NOT add Claude Code attribution footer to commit messages
+  - ❌ WRONG: Including "🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>"
+  - ✅ CORRECT: Clean commit messages without attribution footers
 - **Commit without tests**: `git commit --no-verify` (skips pre-commit hooks including tests)
 
 ### Git Workflow Rules
@@ -470,6 +471,89 @@ These patterns should be enforced across all Socket repositories:
 - `socket-workflows`
 
 When working in any Socket repository, check CLAUDE.md files in other Socket projects for consistency and apply these patterns universally.
+
+## 📦 Dependency Alignment Standards (CRITICAL)
+
+### 🚨 MANDATORY Dependency Versions
+All Socket projects MUST maintain alignment on these core dependencies:
+
+#### Core Build Tools & TypeScript
+- **@typescript/native-preview**: `7.0.0-dev.20250927.1` (tsgo - NEVER use standard tsc)
+- **@types/node**: `24.5.2` (latest LTS types)
+- **typescript-eslint**: `8.44.1` (unified package - do NOT use separate @typescript-eslint/* packages)
+
+#### Essential DevDependencies
+- **@biomejs/biome**: `2.2.4`
+- **@dotenvx/dotenvx**: `1.49.0`
+- **@eslint/compat**: `1.3.2`
+- **@eslint/js**: `9.35.0`
+- **@vitest/coverage-v8**: `3.2.4`
+- **eslint**: `9.35.0`
+- **eslint-plugin-import-x**: `4.16.1`
+- **eslint-plugin-n**: `17.23.1`
+- **eslint-plugin-sort-destructure-keys**: `2.0.0`
+- **eslint-plugin-unicorn**: `56.0.1`
+- **globals**: `16.4.0`
+- **husky**: `9.1.7`
+- **knip**: `5.63.1`
+- **lint-staged**: `16.1.6`
+- **npm-run-all2**: `8.0.4`
+- **oxlint**: `1.15.0`
+- **taze**: `19.6.0`
+- **trash**: `10.0.0`
+- **type-coverage**: `2.29.7`
+- **vitest**: `3.2.4`
+- **yargs-parser**: `22.0.0`
+- **yoctocolors-cjs**: `2.1.3`
+
+### 🔧 TypeScript Compiler Standardization
+- **🚨 MANDATORY**: ALL Socket projects MUST use `tsgo` instead of `tsc`
+- **Package**: `@typescript/native-preview@7.0.0-dev.20250927.1`
+- **Scripts**: Replace `tsc` with `tsgo` in all package.json scripts
+- **Benefits**: Enhanced performance, better memory management, faster compilation
+
+#### Script Examples:
+```json
+{
+  "build": "tsgo",
+  "check:tsc": "tsgo --noEmit",
+  "build:types": "tsgo --project tsconfig.dts.json"
+}
+```
+
+### 🛠️ ESLint Configuration Standardization
+- **🚨 FORBIDDEN**: Do NOT use separate `@typescript-eslint/eslint-plugin` and `@typescript-eslint/parser` packages
+- **✅ REQUIRED**: Use unified `typescript-eslint@8.44.1` package only
+- **Migration**: Remove separate packages, add unified package
+
+#### Migration Commands:
+```bash
+pnpm remove @typescript-eslint/eslint-plugin @typescript-eslint/parser
+pnpm add -D typescript-eslint@8.44.1 --save-exact
+```
+
+### 📋 Dependency Audit Requirements
+When updating dependencies across Socket projects:
+
+1. **Version Consistency**: All projects MUST use identical versions for shared dependencies
+2. **Exact Versions**: Always use `--save-exact` flag to prevent version drift
+3. **Batch Updates**: Update all Socket projects simultaneously to maintain alignment
+4. **Testing**: Run full test suites after dependency updates to ensure compatibility
+5. **Documentation**: Update CLAUDE.md files when standard versions change
+
+### 🔄 Regular Maintenance
+- **Monthly Audits**: Review dependency versions across all Socket projects
+- **Security Updates**: Apply security patches immediately across all projects
+- **Major Version Updates**: Coordinate across projects, test thoroughly
+- **Legacy Cleanup**: Remove unused dependencies during regular maintenance
+
+### 🚨 Enforcement Rules
+- **Pre-commit Hooks**: Configure to prevent commits with misaligned dependencies
+- **CI/CD Integration**: Fail builds on version mismatches
+- **Code Reviews**: Always verify dependency alignment in PRs
+- **Documentation**: Keep this section updated with current standard versions
+
+This standardization ensures consistency, reduces maintenance overhead, and prevents dependency-related issues across the Socket ecosystem.
 
 ---
 
