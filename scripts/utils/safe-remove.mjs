@@ -7,9 +7,6 @@ const DEFAULT_CONCURRENCY = 10
 
 /**
  * Safely remove files/directories using trash, with fallback to fs.rm.
- * @param {string|string[]} paths - Path(s) to remove
- * @param {object} options - Options for fs.rm fallback
- * @returns {Promise<void>}
  */
 export async function safeRemove(paths, options) {
   const pathArray = Array.isArray(paths) ? paths : [paths]
