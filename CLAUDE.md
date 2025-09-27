@@ -209,6 +209,11 @@ This is the Socket SDK for JavaScript/TypeScript, providing programmatic access 
 - **Type imports**: 🚨 ALWAYS use separate `import type` statements for TypeScript types, NEVER mix runtime imports with type imports in the same statement
   - ✅ CORRECT: `import { readPackageJson } from '@socketsecurity/registry/lib/packages'` followed by `import type { PackageJson } from '@socketsecurity/registry/lib/packages'`
   - ❌ FORBIDDEN: `import { readPackageJson, type PackageJson } from '@socketsecurity/registry/lib/packages'`
+- **Import patterns**: 🚨 MANDATORY - Avoid `import * as` pattern except when creating re-export wrappers
+  - ✅ CORRECT: `import semver from './external/semver'` (default import)
+  - ✅ CORRECT: `import { satisfies, gt, lt } from './external/semver'` (named imports)
+  - ❌ AVOID: `import * as semver from './external/semver'` (namespace import - only use in external re-export files)
+  - **Exception**: External wrapper files in `src/external/` may use `import * as` to create default exports
 
 ### Naming Conventions
 - **Constants**: Use `UPPER_SNAKE_CASE` for constants
