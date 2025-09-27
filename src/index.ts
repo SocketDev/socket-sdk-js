@@ -43,6 +43,19 @@ export {
 // Re-export the main SocketSdk class
 export { SocketSdk } from './socket-sdk-class'
 
+// Re-export quota utility functions
+export {
+  calculateTotalQuotaCost,
+  getAllMethodRequirements,
+  getMethodRequirements,
+  getMethodsByPermissions,
+  getMethodsByQuotaCost,
+  getQuotaCost,
+  getQuotaUsageSummary,
+  getRequiredPermissions,
+  hasQuotaForMethods,
+} from './quota-utils'
+
 // Re-export utility functions
 export {
   normalizeBaseUrl,
