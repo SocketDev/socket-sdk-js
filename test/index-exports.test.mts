@@ -68,6 +68,17 @@ describe('index.ts exports', () => {
       // Main SDK class
       'SocketSdk',
 
+      // Quota utility functions
+      'calculateTotalQuotaCost',
+      'getAllMethodRequirements',
+      'getMethodRequirements',
+      'getMethodsByPermissions',
+      'getMethodsByQuotaCost',
+      'getQuotaCost',
+      'getQuotaUsageSummary',
+      'getRequiredPermissions',
+      'hasQuotaForMethods',
+
       // User agent function
       'createUserAgentFromPkgJson',
 
@@ -106,6 +117,15 @@ describe('index.ts exports', () => {
       'createRequestBodyForJson',
       'createUploadRequest',
       'SocketSdk',
+      'calculateTotalQuotaCost',
+      'getAllMethodRequirements',
+      'getMethodRequirements',
+      'getMethodsByPermissions',
+      'getMethodsByQuotaCost',
+      'getQuotaCost',
+      'getQuotaUsageSummary',
+      'getRequiredPermissions',
+      'hasQuotaForMethods',
       'createUserAgentFromPkgJson',
       'normalizeBaseUrl',
       'promiseWithResolvers',
