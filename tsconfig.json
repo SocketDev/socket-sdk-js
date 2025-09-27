@@ -7,5 +7,5 @@
     "rootDir": "src",
     "verbatimModuleSyntax": false
   },
-  "include": ["src/*.ts"]
+  "include": ["src/**/*.ts"]
 }

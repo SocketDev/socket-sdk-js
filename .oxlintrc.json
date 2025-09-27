@@ -6,6 +6,7 @@
     "perf": "warn",
     "suspicious": "warn"
   },
+  "ignorePatterns": ["dist/"],
   "settings": {},
   "rules": {
     "@typescript-eslint/array-type": ["error", { "default": "array-simple" }],
