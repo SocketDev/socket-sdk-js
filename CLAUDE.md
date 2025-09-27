@@ -365,6 +365,8 @@ This is the Socket SDK for JavaScript/TypeScript, providing programmatic access 
 ### Git Commit Guidelines
 - **🚨 FORBIDDEN**: NEVER add Claude co-authorship or Claude signatures to commits
 - **🚨 FORBIDDEN**: Do NOT include "Generated with Claude Code" or similar AI attribution in commit messages
+- **🚨 FORBIDDEN**: Do NOT use "chore:" prefix in commit messages - follow established project conventions
+- **Commit message style**: Follow the existing project's commit message format without prefixes like "chore:", "feat:", "fix:" unless explicitly used in the project
 - **Commit messages**: Should be written as if by a human developer, focusing on the what and why of changes
 - **Professional commits**: Write clear, concise commit messages that describe the actual changes made
 - **Pithy messages**: Keep commit messages concise and to the point - avoid lengthy explanations
