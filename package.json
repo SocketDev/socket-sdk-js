@@ -28,11 +28,11 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "pnpm run clean:dist && dotenvx -q run -f .env.local -- tsgo",
+    "build": "pnpm run clean:dist && dotenvx -q run -f .env.local -- tsc",
     "check": "run-p -c --aggregate-output check:*",
     "check:lint": "dotenvx -q run -f .env.local -- eslint --report-unused-disable-directives .",
     "check:lint:fix": "pnpm run check:lint -- --fix",
-    "check:tsc": "dotenvx -q run -f .env.local -- tsgo --noEmit -p tsconfig.check.json",
+    "check:tsc": "dotenvx -q run -f .env.local -- tsc --noEmit -p tsconfig.check.json",
     "check-ci": "pnpm run check:lint",
     "coverage": "run-s coverage:*",
     "coverage:test": "run-s test:prepare test:unit:coverage",
@@ -105,6 +105,7 @@
     "taze": "19.6.0",
     "trash": "10.0.0",
     "type-coverage": "2.29.7",
+    "typescript": "5.9.2",
     "typescript-eslint": "8.43.0",
     "vitest": "3.2.4",
     "yargs-parser": "22.0.0",
