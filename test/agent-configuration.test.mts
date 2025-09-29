@@ -71,7 +71,8 @@ describe('SocketSdk Agent Configuration', () => {
       // we'll use a mock object that matches the expected type.
       const client3 = new SocketSdk('test-token', {
         agent: {
-          http2: {} as any, // Mock ClientHttp2Session for testing.
+          // Mock ClientHttp2Session for testing.
+          http2: {} as any,
         },
       })
       expect(client3).toBeDefined()
@@ -86,7 +87,8 @@ describe('SocketSdk Agent Configuration', () => {
         agent: {
           https: httpsAgent,
           http: httpAgent,
-          http2: {} as any, // Mock ClientHttp2Session for testing.
+          // Mock ClientHttp2Session for testing.
+          http2: {} as any,
         },
       })
       expect(client4).toBeDefined()
