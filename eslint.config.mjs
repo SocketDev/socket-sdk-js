@@ -78,6 +78,7 @@ const sharedRules = {
   'n/prefer-node-protocol': 'error',
   'unicorn/consistent-function-scoping': 'error',
   curly: 'error',
+  'line-comment-position': ['error', { position: 'above' }],
   'no-await-in-loop': 'error',
   'no-control-regex': 'error',
   'no-empty': ['error', { allowEmptyCatch: true }],
