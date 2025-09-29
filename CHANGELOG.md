@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.8.0) - 2025-09-27
+
+### Added
+- Quota utility functions for API cost management in `quota-utils.ts`
+- New exported functions: `checkQuota`, `formatQuotaReport`, `getEstimatedCost`, `getMethodCost`, `getQuotaSummary`, `isWithinQuota`
+- Example files demonstrating quota usage patterns
+
+### Changed
+- Improved error handling for quota utilities
+
 ## [1.7.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.7.0) - 2025-09-26
 
 ### Added
