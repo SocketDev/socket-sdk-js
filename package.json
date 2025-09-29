@@ -28,14 +28,14 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "pnpm run clean:dist && tsgo",
+    "build": "pnpm run clean:dist && tsgo --build",
     "check": "run-p -c --aggregate-output check:*",
     "check:lint": "eslint --report-unused-disable-directives .",
     "check:lint:fix": "pnpm run check:lint -- --fix",
-    "check:tsc": "tsgo --noEmit -p tsconfig.check.json",
+    "check:tsc": "pnpm run build && tsgo --noEmit -p tsconfig.check.json",
     "check-ci": "pnpm run check:lint",
     "coverage": "run-s coverage:*",
-    "coverage:test": "run-s test:prepare test:unit:coverage",
+    "coverage:test": "run-s pretest:unit test:unit:coverage",
     "coverage:type": "type-coverage",
     "coverage:type:verbose": "type-coverage --detail",
     "coverage:percent": "node scripts/get-coverage-percentage.mjs",
