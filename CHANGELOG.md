@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.2](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.8.2) - 2025-09-29
+
+### Fixed
+- Fixed publishing workflow to ensure dist folder is built before npm publish
+- Changed prepublishOnly script to prevent accidental local publishing
+
 ## [1.8.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.8.1) - 2025-09-29
 
 ### Changed

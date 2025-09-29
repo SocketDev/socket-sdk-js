@@ -22,4 +22,5 @@ jobs:
     with:
       debug: ${{ inputs.debug }}
       package-name: '@socketsecurity/sdk'
+      setup-script: 'pnpm run build'
       use-trusted-publishing: true
