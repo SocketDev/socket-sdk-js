@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import * as sdk from '../src/index'
+import * as sdk from '../dist/index'
 
 describe('index.ts exports', () => {
   it('should export all expected functions from http-client', () => {
@@ -137,8 +137,10 @@ describe('index.ts exports', () => {
       'publicPolicy',
     ])
 
-    // Check that we don't have unexpected exports
-    const unexpectedExports = sdkKeys.filter(key => !expectedKeys.has(key))
+    // Check that we don't have unexpected exports (CommonJS build adds 'default')
+    const unexpectedExports = sdkKeys.filter(
+      key => !expectedKeys.has(key) && key !== 'default',
+    )
     expect(unexpectedExports).toEqual([])
   })
 })

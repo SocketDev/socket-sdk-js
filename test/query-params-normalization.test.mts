@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { queryToSearchParams } from '../src/index'
+import { queryToSearchParams } from '../dist/index'
 
 describe('Query Parameter Normalization', () => {
   describe('queryToSearchParams', () => {
