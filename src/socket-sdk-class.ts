@@ -634,8 +634,7 @@ export class SocketSdk {
   /**
    * Retrieve the enabled entitlements for an organization.
    *
-   * This method fetches the organization's entitlements and filters for only
-   * the enabled ones, returning their keys. Entitlements represent Socket
+   * This method fetches the organization's entitlements and filters for only* the enabled ones, returning their keys. Entitlements represent Socket
    * Products that the organization has access to use.
    */
   async getEnabledEntitlements(orgSlug: string): Promise<string[]> {
@@ -741,8 +740,7 @@ export class SocketSdk {
   }
 
   /**
-   * Stream a full scan's results to file or stdout.
-   * Provides efficient streaming for large scan datasets.
+   * Stream a full scan's results to file or stdout.* Provides efficient streaming for large scan datasets.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -912,8 +910,7 @@ export class SocketSdk {
   }
 
   /**
-   * Get organization's license policy configuration.
-   * Returns allowed, restricted, and monitored license types.
+   * Get organization's license policy configuration.* Returns allowed, restricted, and monitored license types.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -986,8 +983,7 @@ export class SocketSdk {
   }
 
   /**
-   * Get organization's security policy configuration.
-   * Returns alert rules, severity thresholds, and enforcement settings.
+   * Get organization's security policy configuration.* Returns alert rules, severity thresholds, and enforcement settings.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -1464,8 +1460,7 @@ export class SocketSdk {
   }
 
   /**
-   * Update organization's security policy configuration.
-   * Modifies alert rules, severity thresholds, and enforcement settings.
+   * Update organization's security policy configuration.* Modifies alert rules, severity thresholds, and enforcement settings.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -1490,8 +1485,7 @@ export class SocketSdk {
   }
 
   /**
-   * Update organization's license policy configuration.
-   * Modifies allowed, restricted, and monitored license types.
+   * Update organization's license policy configuration.* Modifies allowed, restricted, and monitored license types.
    *
    * @throws {Error} When server returns 5xx status codes
    */
