@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { createRequestBodyForJson } from '../src/index'
+import { createRequestBodyForJson } from '../dist/index'
 
 describe('JSON Request Body Creation', () => {
   describe('createRequestBodyForJson', () => {

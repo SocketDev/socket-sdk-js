@@ -6,7 +6,7 @@ import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { TEST_PACKAGE_CONFIGS } from './utils/fixtures.mts'
-import { SocketSdk } from '../src/index'
+import { SocketSdk } from '../dist/index'
 
 describe('SocketSdk - Organization Management', () => {
   let tempDir: string
