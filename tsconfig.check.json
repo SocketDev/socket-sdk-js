@@ -5,8 +5,7 @@
     "moduleResolution": "bundler",
     "noEmit": true,
     "paths": {
-      "*": ["./*"],
-      "../dist/index": ["./src/index.ts"]
+      "../dist/*": ["./src/*"]
     },
     "types": ["vitest/globals", "node"],
     "verbatimModuleSyntax": false
