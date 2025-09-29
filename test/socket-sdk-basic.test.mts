@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 // @ts-ignore - internal import
 import SOCKET_PUBLIC_API_TOKEN from '@socketsecurity/registry/lib/constants/socket-public-api-token'
 
-import { SocketSdk } from '../src/index'
+import { SocketSdk } from '../dist/index'
 
 // Mock fs.createReadStream to prevent test-package.json from being created
 vi.mock('node:fs', async () => {
