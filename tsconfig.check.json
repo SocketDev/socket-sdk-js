@@ -4,12 +4,8 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "noEmit": true,
-    "paths": {
-      "../dist/index": ["./src/index.ts"],
-      "../dist/*": ["./src/*"]
-    },
-    "types": ["vitest/globals", "node"],
+    "types": ["node"],
     "verbatimModuleSyntax": false
   },
-  "include": ["test/**/*.mts", "src/**/*.ts"]
+  "include": ["src/**/*.ts"]
 }
