@@ -3947,6 +3947,117 @@ export interface components {
             usage?: components['schemas']['SocketUsageRef']
           }
         }
+      | {
+          /** @enum {string} */
+          type?: 'vsxProposedApiUsage'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              proposals: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'vsxActivationWildcard'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              event: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'vsxWorkspaceContainsActivation'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              pattern: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'vsxUntrustedWorkspaceSupported'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              supported: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'vsxVirtualWorkspaceSupported'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              supported: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'vsxWebviewContribution'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: Record<string, never>
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'vsxDebuggerContribution'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: Record<string, never>
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'vsxExtensionDependency'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              extension: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'vsxExtensionPack'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              count: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
     SocketMetricSchema: {
       /** @default 0 */
       score: number
@@ -7771,6 +7882,69 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              vsxProposedApiUsage?: {
+                /**
+                 * @description The action to take for vsxProposedApiUsage issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxActivationWildcard?: {
+                /**
+                 * @description The action to take for vsxActivationWildcard issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxWorkspaceContainsActivation?: {
+                /**
+                 * @description The action to take for vsxWorkspaceContainsActivation issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxUntrustedWorkspaceSupported?: {
+                /**
+                 * @description The action to take for vsxUntrustedWorkspaceSupported issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxVirtualWorkspaceSupported?: {
+                /**
+                 * @description The action to take for vsxVirtualWorkspaceSupported issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxWebviewContribution?: {
+                /**
+                 * @description The action to take for vsxWebviewContribution issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxDebuggerContribution?: {
+                /**
+                 * @description The action to take for vsxDebuggerContribution issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxExtensionDependency?: {
+                /**
+                 * @description The action to take for vsxExtensionDependency issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxExtensionPack?: {
+                /**
+                 * @description The action to take for vsxExtensionPack issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
             } | null
             /**
              * @description The default security policy for the repository label
@@ -8534,6 +8708,69 @@ export interface operations {
             potentialVulnerability?: {
               /**
                * @description The action to take for potentialVulnerability issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxProposedApiUsage?: {
+              /**
+               * @description The action to take for vsxProposedApiUsage issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxActivationWildcard?: {
+              /**
+               * @description The action to take for vsxActivationWildcard issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxWorkspaceContainsActivation?: {
+              /**
+               * @description The action to take for vsxWorkspaceContainsActivation issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxUntrustedWorkspaceSupported?: {
+              /**
+               * @description The action to take for vsxUntrustedWorkspaceSupported issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxVirtualWorkspaceSupported?: {
+              /**
+               * @description The action to take for vsxVirtualWorkspaceSupported issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxWebviewContribution?: {
+              /**
+               * @description The action to take for vsxWebviewContribution issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxDebuggerContribution?: {
+              /**
+               * @description The action to take for vsxDebuggerContribution issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxExtensionDependency?: {
+              /**
+               * @description The action to take for vsxExtensionDependency issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxExtensionPack?: {
+              /**
+               * @description The action to take for vsxExtensionPack issues.
                * @enum {string}
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -9459,6 +9696,69 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              vsxProposedApiUsage?: {
+                /**
+                 * @description The action to take for vsxProposedApiUsage issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxActivationWildcard?: {
+                /**
+                 * @description The action to take for vsxActivationWildcard issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxWorkspaceContainsActivation?: {
+                /**
+                 * @description The action to take for vsxWorkspaceContainsActivation issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxUntrustedWorkspaceSupported?: {
+                /**
+                 * @description The action to take for vsxUntrustedWorkspaceSupported issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxVirtualWorkspaceSupported?: {
+                /**
+                 * @description The action to take for vsxVirtualWorkspaceSupported issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxWebviewContribution?: {
+                /**
+                 * @description The action to take for vsxWebviewContribution issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxDebuggerContribution?: {
+                /**
+                 * @description The action to take for vsxDebuggerContribution issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxExtensionDependency?: {
+                /**
+                 * @description The action to take for vsxExtensionDependency issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxExtensionPack?: {
+                /**
+                 * @description The action to take for vsxExtensionPack issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
             }
             /**
              * @description The default security policy for the organization
@@ -10219,6 +10519,69 @@ export interface operations {
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
             }
+            vsxProposedApiUsage?: {
+              /**
+               * @description The action to take for vsxProposedApiUsage issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxActivationWildcard?: {
+              /**
+               * @description The action to take for vsxActivationWildcard issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxWorkspaceContainsActivation?: {
+              /**
+               * @description The action to take for vsxWorkspaceContainsActivation issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxUntrustedWorkspaceSupported?: {
+              /**
+               * @description The action to take for vsxUntrustedWorkspaceSupported issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxVirtualWorkspaceSupported?: {
+              /**
+               * @description The action to take for vsxVirtualWorkspaceSupported issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxWebviewContribution?: {
+              /**
+               * @description The action to take for vsxWebviewContribution issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxDebuggerContribution?: {
+              /**
+               * @description The action to take for vsxDebuggerContribution issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxExtensionDependency?: {
+              /**
+               * @description The action to take for vsxExtensionDependency issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxExtensionPack?: {
+              /**
+               * @description The action to take for vsxExtensionPack issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
           }
           /**
            * @description Reset the policy rules to the default. When set to true, do not include any policyRules updates.
@@ -10944,6 +11307,69 @@ export interface operations {
               potentialVulnerability?: {
                 /**
                  * @description The action to take for potentialVulnerability issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxProposedApiUsage?: {
+                /**
+                 * @description The action to take for vsxProposedApiUsage issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxActivationWildcard?: {
+                /**
+                 * @description The action to take for vsxActivationWildcard issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxWorkspaceContainsActivation?: {
+                /**
+                 * @description The action to take for vsxWorkspaceContainsActivation issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxUntrustedWorkspaceSupported?: {
+                /**
+                 * @description The action to take for vsxUntrustedWorkspaceSupported issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxVirtualWorkspaceSupported?: {
+                /**
+                 * @description The action to take for vsxVirtualWorkspaceSupported issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxWebviewContribution?: {
+                /**
+                 * @description The action to take for vsxWebviewContribution issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxDebuggerContribution?: {
+                /**
+                 * @description The action to take for vsxDebuggerContribution issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxExtensionDependency?: {
+                /**
+                 * @description The action to take for vsxExtensionDependency issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxExtensionPack?: {
+                /**
+                 * @description The action to take for vsxExtensionPack issues.
                  * @enum {string}
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -11970,11 +12396,13 @@ export interface operations {
           | 'ChangePlanSubscriptionSeats'
           | 'CreateApiToken'
           | 'CreateLabel'
+          | 'CreateWebhook'
           | 'DeleteFullScan'
           | 'DeleteLabel'
           | 'DeleteLabelSetting'
           | 'DeleteReport'
           | 'DeleteRepository'
+          | 'DeleteWebhook'
           | 'DisassociateLabel'
           | 'JoinOrganization'
           | 'RemoveLicenseOverlay'
@@ -11997,6 +12425,7 @@ export interface operations {
           | 'UpdateLabel'
           | 'UpdateLabelSetting'
           | 'UpdateOrganizationSetting'
+          | 'UpdateWebhook'
           | 'UpgradeOrganizationPlan'
         /** @description Number of events per page */
         per_page?: number
