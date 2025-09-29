@@ -32,7 +32,7 @@
     "check": "run-p -c --aggregate-output check:*",
     "check:lint": "eslint --report-unused-disable-directives .",
     "check:lint:fix": "pnpm run check:lint -- --fix",
-    "check:tsc": "pnpm run build && tsgo --noEmit -p tsconfig.check.json",
+    "check:tsc": "tsgo --noEmit -p tsconfig.check.json",
     "check-ci": "pnpm run check:lint",
     "coverage": "run-s coverage:*",
     "coverage:test": "run-s pretest:unit test:unit:coverage",
