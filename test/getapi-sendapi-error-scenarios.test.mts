@@ -61,7 +61,8 @@ describe('getApi and sendApi Error Scenarios', () => {
       throws: false,
     })) as CResult<unknown>
 
-    expect(result.ok).toBe(true) // Empty response becomes {}
+    // Empty response becomes {}
+    expect(result.ok).toBe(true)
   })
 
   it('should test trim on whitespace-only preview', async () => {
@@ -186,7 +187,8 @@ describe('getApi and sendApi Error Scenarios', () => {
       throws: false,
     })) as CResult<unknown>
 
-    expect(result.ok).toBe(true) // Empty response becomes {}
+    // Empty response becomes {}
+    expect(result.ok).toBe(true)
   })
 
   it('should handle string error that trims to empty', async () => {

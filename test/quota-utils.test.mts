@@ -93,7 +93,8 @@ describe('Quota Utils', () => {
     it('should calculate total cost for multiple methods', () => {
       const methods = ['batchPackageFetch', 'getOrgAnalytics', 'getQuota']
       const total = calculateTotalQuotaCost(methods)
-      expect(total).toBe(110) // 100 + 10 + 0
+      // 100 + 10 + 0
+      expect(total).toBe(110)
     })
 
     it('should return 0 for empty array', () => {
@@ -126,7 +127,8 @@ describe('Quota Utils', () => {
       const methods = getMethodsByQuotaCost(0)
       expect(methods).toContain('getQuota')
       expect(methods).toContain('getOrganizations')
-      expect(methods.length).toBeGreaterThan(10) // Should be many free methods
+      // Should be many free methods
+      expect(methods.length).toBeGreaterThan(10)
     })
   })
 

@@ -29,7 +29,8 @@ describe('JSON Empty Response Handling', () => {
       throws: false,
     })) as CResult<unknown>
 
-    expect(result.ok).toBe(true) // Empty JSON becomes {}
+    // Empty JSON becomes {}
+    expect(result.ok).toBe(true)
   })
 
   it('should handle whitespace-only responses as invalid JSON', async () => {
