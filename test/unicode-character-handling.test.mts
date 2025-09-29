@@ -27,7 +27,8 @@ describe('Unicode Character Handling', () => {
       'Error: \uFFFD replacement character',
       'Error: \u200B zero-width space',
       'Error: \uD83D\uDE00 emoji',
-      'Error: \u{1F4A9}', // pile of poo emoji
+      // pile of poo emoji
+      'Error: \u{1F4A9}',
       'Error: \n\r\t mixed whitespace',
     ]
 
@@ -48,11 +49,16 @@ describe('Unicode Character Handling', () => {
 
   it('should handle Unicode whitespace characters in trimming', async () => {
     const unicodeWhitespace = [
-      '\u0009\u000A\u000B\u000C\u000D\u0020', // Standard whitespace
-      '\u00A0\u1680\u2000\u2001\u2002\u2003', // Non-breaking spaces
-      '\u2004\u2005\u2006\u2007\u2008\u2009', // Em spaces, en spaces, etc.
-      '\u200A\u2028\u2029\u202F\u205F\u3000', // More Unicode spaces
-      '\uFEFF', // Byte order mark
+      // Standard whitespace
+      '\u0009\u000A\u000B\u000C\u000D\u0020',
+      // Non-breaking spaces
+      '\u00A0\u1680\u2000\u2001\u2002\u2003',
+      // Em spaces, en spaces, etc.
+      '\u2004\u2005\u2006\u2007\u2008\u2009',
+      // More Unicode spaces
+      '\u200A\u2028\u2029\u202F\u205F\u3000',
+      // Byte order mark
+      '\uFEFF',
     ]
 
     for (const [index, whitespace] of unicodeWhitespace.entries()) {

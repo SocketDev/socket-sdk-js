@@ -347,7 +347,8 @@ describe('SocketSdk - Edge Cases', () => {
 
     it('should handle getSBOMFromScan error', async () => {
       // getSBOMFromScan method doesn't exist in current SDK version
-      expect(true).toBe(true) // Placeholder test
+      // Placeholder test
+      expect(true).toBe(true)
     })
 
     it('should handle streamPatchesFromScan error', async () => {

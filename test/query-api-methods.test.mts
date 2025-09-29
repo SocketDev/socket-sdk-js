@@ -84,7 +84,8 @@ describe('Socket SDK - Query API Methods', () => {
 
     it('should handle unknown errors in non-throwing mode', async () => {
       // This is harder to test directly, but we can test the fallback path
-      nock('https://api.socket.dev').get('/v0/test-endpoint').replyWithError('') // Empty error message to test fallback
+      // Empty error message to test fallback
+      nock('https://api.socket.dev').get('/v0/test-endpoint').replyWithError('')
 
       const result = await client.getApi('test-endpoint', {
         throws: false,
@@ -135,7 +136,8 @@ describe('Socket SDK - Query API Methods', () => {
 
       nock('https://api.socket.dev')
         .post('/v0/test-endpoint', body)
-        .replyWithError('') // Empty error to test fallback
+        // Empty error to test fallback
+        .replyWithError('')
 
       const result = await client.sendApi('test-endpoint', {
         body,
