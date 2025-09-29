@@ -14,3 +14,5 @@ permissions:
 jobs:
   test:
     uses: SocketDev/socket-registry/.github/workflows/test.yml@main
+    with:
+      setup-script: 'pnpm run build'
