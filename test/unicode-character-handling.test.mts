@@ -1,9 +1,9 @@
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../src/index'
+import { SocketSdk } from '../dist/index'
 
-import type { CResult } from '../src/index'
+import type { CResult } from '../dist/index'
 
 describe('Unicode Character Handling', () => {
   let client: SocketSdk
