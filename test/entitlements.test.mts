@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../dist/index'
 
-import type { EntitlementsResponse } from '../dist/index'
+import type { Entitlement, EntitlementsResponse } from '../dist/index'
 
 describe('Entitlements API', () => {
   let client: SocketSdk
@@ -271,7 +271,7 @@ describe('Entitlements API', () => {
     })
 
     it('should handle large number of entitlements', async () => {
-      const items = Array.from({ length: 100 }, (_, i) => ({
+      const items = Array.from({ length: 100 }, (_: unknown, i: number) => ({
         key: `product-${i}`,
         // Every other one enabled
         enabled: i % 2 === 0,
@@ -363,13 +363,15 @@ describe('Entitlements API', () => {
         .times(5)
         .reply(200, mockResponse)
 
-      const promises = Array.from({ length: 5 }, () =>
-        client.getEnabledEntitlements('concurrent-org'),
+      const promises = Array.from(
+        { length: 5 },
+        (): Promise<string[]> =>
+          client.getEnabledEntitlements('concurrent-org'),
       )
 
       const results = await Promise.all(promises)
 
-      results.forEach(result => {
+      results.forEach((result: string[]) => {
         expect(result).toEqual(['firewall'])
       })
     })
@@ -383,13 +385,15 @@ describe('Entitlements API', () => {
           })
       }
 
-      const promises = Array.from({ length: 10 }, (_, i) =>
-        client.getEnabledEntitlements(`org-${i}`),
+      const promises = Array.from(
+        { length: 10 },
+        (_: unknown, i: number): Promise<string[]> =>
+          client.getEnabledEntitlements(`org-${i}`),
       )
 
       const results = await Promise.all(promises)
 
-      results.forEach((result, i) => {
+      results.forEach((result: string[], i: number) => {
         expect(result).toEqual([`product-${i}`])
       })
     })
@@ -411,7 +415,7 @@ describe('Entitlements API', () => {
       const entitlements = await client.getEntitlements('type-test-org')
 
       // Verify TypeScript types are preserved
-      entitlements.forEach(entitlement => {
+      entitlements.forEach((entitlement: Entitlement) => {
         expect(typeof entitlement.key).toBe('string')
         expect(typeof entitlement.enabled).toBe('boolean')
       })
