@@ -14,3 +14,5 @@ permissions:
 jobs:
   type-check:
     uses: SocketDev/socket-registry/.github/workflows/types.yml@main
+    with:
+      setup-script: 'pnpm run build'
