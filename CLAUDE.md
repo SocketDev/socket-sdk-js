@@ -43,7 +43,6 @@ Claude Code should periodically scan and learn from CLAUDE.md files across Socke
 - `socket-packageurl-js/CLAUDE.md`
 - `socket-registry/CLAUDE.md`
 - `socket-sdk-js/CLAUDE.md`
-- `socket-workflows/CLAUDE.md`
 
 When working in any Socket repository, check for updates and patterns in other claude.md files to ensure consistency across the ecosystem.
 
@@ -476,7 +475,6 @@ These patterns should be enforced across all Socket repositories:
 - `socket-packageurl-js`
 - `socket-registry`
 - `socket-sdk-js`
-- `socket-workflows`
 
 When working in any Socket repository, check CLAUDE.md files in other Socket projects for consistency and apply these patterns universally.
 
