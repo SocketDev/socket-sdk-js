@@ -369,11 +369,15 @@ describe('Patches API', () => {
       // Additional edge cases to ensure comprehensive coverage
       const edgeCaseResponse =
         '{"artifactId":"test","patches":[]}\n' +
-        '\n' + // Empty line
-        '   \n' + // Whitespace only line
+        // Empty line
+        '\n' +
+        // Whitespace only line
+        '   \n' +
         '{"artifactId":"test2","patches":[]}\n' +
-        'null\n' + // null value
-        'undefined\n' + // undefined string
+        // null value
+        'null\n' +
+        // undefined string
+        'undefined\n' +
         '{"artifactId":"test3","patches":[]}\n'
 
       nock('https://api.socket.dev')

@@ -35,7 +35,8 @@ describe('Response Text Processing', () => {
       })) as CResult<unknown>
 
       if (scenario === '') {
-        expect(result.ok).toBe(true) // Empty string becomes {}
+        // Empty string becomes {}
+        expect(result.ok).toBe(true)
       } else {
         expect(result.ok).toBe(false)
       }
@@ -98,10 +99,14 @@ describe('Response Text Processing', () => {
   it('should handle preview trimming boundary conditions', async () => {
     // Test exactly when preview.trim() would return empty vs non-empty
     const boundaryTests = [
-      ' a', // Should not be empty after trim
-      'a ', // Should not be empty after trim
-      ' a ', // Should not be empty after trim
-      '   ', // Should be empty after trim
+      // Should not be empty after trim
+      ' a',
+      // Should not be empty after trim
+      'a ',
+      // Should not be empty after trim
+      ' a ',
+      // Should be empty after trim
+      '   ',
     ]
 
     for (const [index, content] of boundaryTests.entries()) {

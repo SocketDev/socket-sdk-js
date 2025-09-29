@@ -310,7 +310,8 @@ describe('SocketSdk - Organization Management', () => {
 
       process.stdout.write = originalWrite
       expect(res.success).toBe(true)
-      expect(wasCalled).toBe(false) // No output should be written
+      // No output should be written
+      expect(wasCalled).toBe(false)
     })
 
     it('should get buffered full scan data using getOrgFullScanBuffered', async () => {
@@ -358,7 +359,8 @@ describe('SocketSdk - Organization Management', () => {
 
       process.stdout.write = originalWrite
       expect(res.success).toBe(true)
-      expect(wasCalled).toBe(false) // No output should be written
+      // No output should be written
+      expect(wasCalled).toBe(false)
     })
 
     it('should create an organization full scan', async () => {
