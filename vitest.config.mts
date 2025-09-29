@@ -1,6 +1,14 @@
+import path from 'node:path'
+
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '../dist/index': path.resolve(__dirname, './src/index.ts'),
+      '../dist/http-client.js': path.resolve(__dirname, './src/http-client.ts'),
+    },
+  },
   test: {
     globals: false,
     environment: 'node',
