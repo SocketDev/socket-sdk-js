@@ -75,7 +75,8 @@ describe('API Response Scenarios', () => {
       responseType: 'json',
       throws: false,
     })) as CResult<unknown>
-    expect(result1.ok).toBe(true) // Empty becomes {}
+    // Empty becomes {}
+    expect(result1.ok).toBe(true)
 
     // Case 2: responseText has content, slice returns non-empty
     const content50 = 'a'.repeat(50)
@@ -183,13 +184,20 @@ describe('API Response Scenarios', () => {
 
   it('should test preview.trim() with various whitespace scenarios', async () => {
     const whitespaceTests = [
-      '   ', // spaces only
-      '\t\t\t', // tabs only
-      '\n\n\n', // newlines only
-      '\r\r\r', // carriage returns only
-      ' \t\n\r ', // mixed whitespace
-      '  \u00A0  ', // non-breaking space
-      '\u2000\u2001', // Unicode spaces
+      // spaces only
+      '   ',
+      // tabs only
+      '\t\t\t',
+      // newlines only
+      '\n\n\n',
+      // carriage returns only
+      '\r\r\r',
+      // mixed whitespace
+      ' \t\n\r ',
+      // non-breaking space
+      '  \u00A0  ',
+      // Unicode spaces
+      '\u2000\u2001',
     ]
 
     for (const [index, whitespace] of whitespaceTests.entries()) {

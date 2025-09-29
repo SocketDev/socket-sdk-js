@@ -26,7 +26,8 @@ describe('Response Truncation Logic', () => {
       'b'.repeat(99) + 'x',
       '1'.repeat(100),
       ' '.repeat(99) + 'x',
-      'test'.repeat(25), // 100 chars
+      // 100 chars
+      'test'.repeat(25),
     ]
 
     for (const [index, testCase] of testCases.entries()) {
@@ -59,7 +60,8 @@ describe('Response Truncation Logic', () => {
       'd'.repeat(150),
       'e'.repeat(200),
       'f'.repeat(500),
-      'test'.repeat(26), // 104 chars
+      // 104 chars
+      'test'.repeat(26),
     ]
 
     for (const [index, testCase] of testCases.entries()) {

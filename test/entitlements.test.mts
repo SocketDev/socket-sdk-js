@@ -244,10 +244,14 @@ describe('Entitlements API', () => {
       const mockResponse = {
         items: [
           { key: 'firewall', enabled: true },
-          { key: 'incomplete' }, // missing enabled property
-          { enabled: true }, // missing key property
-          null, // null item
-          undefined, // undefined item
+          // missing enabled property
+          { key: 'incomplete' },
+          // missing key property
+          { enabled: true },
+          // null item
+          null,
+          // undefined item
+          undefined,
         ],
       }
 
@@ -261,14 +265,16 @@ describe('Entitlements API', () => {
         await client.getEnabledEntitlements('incomplete-org')
 
       expect(entitlements).toHaveLength(5)
-      expect(enabledProducts).toHaveLength(1) // Only the first complete enabled item
+      // Only the first complete enabled item
+      expect(enabledProducts).toHaveLength(1)
       expect(enabledProducts).toEqual(['firewall'])
     })
 
     it('should handle large number of entitlements', async () => {
       const items = Array.from({ length: 100 }, (_, i) => ({
         key: `product-${i}`,
-        enabled: i % 2 === 0, // Every other one enabled
+        // Every other one enabled
+        enabled: i % 2 === 0,
       }))
 
       const mockResponse: EntitlementsResponse = { items }
@@ -282,7 +288,8 @@ describe('Entitlements API', () => {
       const enabledProducts = await client.getEnabledEntitlements('large-org')
 
       expect(entitlements).toHaveLength(100)
-      expect(enabledProducts).toHaveLength(50) // Half enabled
+      // Half enabled
+      expect(enabledProducts).toHaveLength(50)
     })
 
     it('should handle entitlements with special characters in keys', async () => {

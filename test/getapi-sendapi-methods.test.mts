@@ -492,7 +492,8 @@ describe('getApi and sendApi Methods', () => {
         throws: false,
       })) as CResult<unknown>
 
-      expect(result.ok).toBe(true) // Empty response is handled as empty object by getResponseJson
+      // Empty response is handled as empty object by getResponseJson
+      expect(result.ok).toBe(true)
       if (result.ok) {
         expect(result.data).toEqual({})
       }
@@ -573,7 +574,8 @@ describe('getApi and sendApi Methods', () => {
         throws: false,
       })) as CResult<unknown>
 
-      expect(result.ok).toBe(true) // Empty response is handled as {} by getResponseJson
+      // Empty response is handled as {} by getResponseJson
+      expect(result.ok).toBe(true)
     })
 
     it('should handle null error in sendApi error creation', async () => {
