@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/sdk",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "license": "MIT",
   "description": "SDK for the Socket API client",
   "author": {
@@ -60,7 +60,7 @@
     "lint-staged": "lint-staged",
     "precommit": "lint-staged",
     "prepare": "husky",
-    "prepublishOnly": "pnpm run build",
+    "prepublishOnly": "echo 'ERROR: Use GitHub Actions workflow for publishing' && exit 1",
     "pretest:unit": "dotenvx -q run -f .env.test -- pnpm run build",
     "test": "run-s check test:*",
     "test:unit": "dotenvx -q run -f .env.test -- vitest --run",
