@@ -2,12 +2,20 @@ import path from 'node:path'
 
 import { defineConfig } from 'vitest/config'
 
+const isCoverage = process.argv.includes('--coverage')
+
 export default defineConfig({
   resolve: {
-    alias: {
-      '../dist/index': path.resolve(__dirname, './src/index.ts'),
-      '../dist/http-client.js': path.resolve(__dirname, './src/http-client.ts'),
-    },
+    // Map dist imports to src when running coverage, use dist otherwise.
+    alias: isCoverage
+      ? {
+          '../dist/index': path.resolve(__dirname, './src/index.ts'),
+          '../dist/http-client.js': path.resolve(
+            __dirname,
+            './src/http-client.ts',
+          ),
+        }
+      : {},
   },
   test: {
     globals: false,
