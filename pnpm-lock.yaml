@@ -12,8 +12,8 @@ importers:
   .:
     dependencies:
       '@socketsecurity/registry':
-        specifier: 1.2.2
-        version: 1.2.2
+        specifier: 1.3.1
+        version: 1.3.1
     devDependencies:
       '@biomejs/biome':
         specifier: 2.2.4
@@ -788,8 +788,8 @@ packages:
     resolution: {integrity: sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==}
     engines: {node: '>=18'}
 
-  '@socketsecurity/registry@1.2.2':
-    resolution: {integrity: sha512-2SaktloQ7b3oowpqI2trZaKvfodAlWurL3CHGtOEgp4/20vWNxvX7HK022gRIZO+8Bm/NzxmG76H6hHeJlHACg==}
+  '@socketsecurity/registry@1.3.1':
+    resolution: {integrity: sha512-ysNZWRF8hfS00XX+vJxEvHXk8vmBZcNJFtEnQlDJMNPZs4CEiHHLWc6aAlZGziMVxjt3PIkKrG9cVXTCb3eOzQ==}
     engines: {node: '>=18'}
 
   '@stroncium/procfs@1.2.1':
@@ -3178,7 +3178,7 @@ snapshots:
 
   '@sindresorhus/merge-streams@2.3.0': {}
 
-  '@socketsecurity/registry@1.2.2': {}
+  '@socketsecurity/registry@1.3.1': {}
 
   '@stroncium/procfs@1.2.1': {}
 
