@@ -9,7 +9,7 @@ import readline from 'node:readline'
 import abortSignal from '@socketsecurity/registry/lib/constants/abort-signal'
 import SOCKET_PUBLIC_API_TOKEN from '@socketsecurity/registry/lib/constants/socket-public-api-token'
 import UNKNOWN_ERROR from '@socketsecurity/registry/lib/constants/unknown-error'
-import { debugLog, isDebug } from '@socketsecurity/registry/lib/debug'
+import { debugLog, isDebugNs } from '@socketsecurity/registry/lib/debug'
 import { jsonParse } from '@socketsecurity/registry/lib/json'
 import { getOwn, isObjectObject } from '@socketsecurity/registry/lib/objects'
 import { pRetry } from '@socketsecurity/registry/lib/promises'
@@ -170,7 +170,7 @@ export class SocketSdk {
     }
     // Parse the newline delimited JSON response.
     const rli = readline.createInterface({
-      input: res,
+      input: res!,
       crlfDelay: Infinity,
       signal: abortSignal,
     })
@@ -294,7 +294,7 @@ export class SocketSdk {
     }
     // Parse the newline delimited JSON response.
     const rli = readline.createInterface({
-      input: res,
+      input: res!,
       crlfDelay: Infinity,
       signal: abortSignal,
     })
@@ -1994,7 +1994,7 @@ export class SocketSdk {
 
 // Optional live heap trace.
 /* c8 ignore start - optional debug logging for heap monitoring */
-if (isDebug('heap')) {
+if (isDebugNs('heap')) {
   const used = process.memoryUsage()
   debugLog('heap', `heap used: ${Math.round(used.heapUsed / 1024 / 1024)}MB`)
 }
