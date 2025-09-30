@@ -70,7 +70,7 @@
     "test-pre-commit": "dotenvx -q run -f .env.precommit -- pnpm test",
     "update": "run-p --aggregate-output update:**",
     "update:deps": "node scripts/taze.mjs",
-    "update:socket": "pnpm update '@socketsecurity/*' --latest"
+    "update:socket": "pnpm -r update '@socketsecurity/*' --latest"
   },
   "dependencies": {
     "@socketsecurity/registry": "1.2.2"
