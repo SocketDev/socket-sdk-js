@@ -15,8 +15,10 @@ export interface paths {
      *
      * More information on purl and CycloneDX:
      *
-     * - [`purl` Spec](https://github.com/package-url/purl-spec)
-     * - [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)
+     //github.com/package-url/purl-spec)
+     * - [`purl` Spec](https:
+     //cyclonedx.org/specification/overview/#components)
+     * - [CycloneDX Spec](https:
      *
      * This endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).
      * Actively running analysis will be returned when available on subsequent runs.
@@ -310,8 +312,7 @@ export interface paths {
   '/orgs/{org_slug}/diff-scans/from-repo/{repo_slug}': {
     /**
      * Create diff scan from repository HEAD full-scan
-     * @description Create a diff scan between the repository's current HEAD full scan and a new full scan from uploaded manifest files.
-     * Returns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from
+     * @description Create a diff scan between the repository's current HEAD full scan and a new full scan from uploaded manifest files.* Returns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from
      * the [api_url](/reference/getDiffScanById) URL to get the contents of the diff.
      *
      * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 67 MB.
@@ -593,7 +594,8 @@ export interface paths {
     /**
      * Get Organization License Policy
      * @deprecated
-     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/viewlicensepolicy) instead.
+     //docs.socket.dev/reference/viewlicensepolicy) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https:
      *
      * Retrieve the license policy of an organization.
      *
@@ -605,8 +607,7 @@ export interface paths {
     get: operations['getOrgLicensePolicy']
     /**
      * Update License Policy
-     * @description Set the organization's license policy
-     *
+     * @description Set the organization's license policy*
      *       ## License policy schema
      *
      * ```json
@@ -641,13 +642,13 @@ export interface paths {
      *   'commercial',
      *   'patent'
      *
-     * Users can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+     //blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+     * Users can learn more about [copyleft tiers](https:
      *
      *
      * ## PURLs
      *
-     * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.
-     *
+     * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.*
      * purl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).
      *
      * ### Examples:
@@ -672,8 +673,7 @@ export interface paths {
   '/orgs/{org_slug}/settings/license-policy/view': {
     /**
      * Get License Policy (Beta)
-     * @description Returns an organization's license policy
-     *
+     * @description Returns an organization's license policy*
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
@@ -870,11 +870,13 @@ export interface paths {
     /**
      * Get Threat Feed Items (Deprecated)
      * @deprecated
-     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/getorgthreatfeeditems) instead.
+     //docs.socket.dev/reference/getorgthreatfeeditems) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https:
      *
      * Paginated list of threat feed items.
      *
-     * This endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.
+     //socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.
+     * This endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https:
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -888,7 +890,8 @@ export interface paths {
      * Get Threat Feed Items (Beta)
      * @description Paginated list of threats, sorted by updated_at by default. Set updated_after to the unix timestamp of your last sync while sorting by updated_at to synchronize all new or updated threats in the feed.
      *
-     * This endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.
+     //socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.
+     * This endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https:
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -983,13 +986,13 @@ export interface paths {
      *   'commercial',
      *   'patent'
      *
-     * Users can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+     //blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+     * Users can learn more about [copyleft tiers](https:
      *
      *
      * ## PURLs
      *
-     * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.
-     *
+     * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.*
      * purl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).
      *
      * ### Examples:
@@ -1016,10 +1019,10 @@ export interface paths {
     /**
      * Saturate License Policy (Legacy)
      * @deprecated
-     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/updateorglicensepolicy) instead.
+     //docs.socket.dev/reference/updateorglicensepolicy) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https:
      *
-     * Get the "saturated" version of a license policy's allow list, filling in the entire set of allowed
-     * license data. For example, the saturated form of a license allow list which only specifies that
+     * Get the "saturated" version of a license policy's allow list, filling in the entire set of allowed* license data. For example, the saturated form of a license allow list which only specifies that
      * licenses in the tier "maximal copyleft" are allowed is shown below (note the expanded `allowedStrings` property):
      *
      * ```json
@@ -1075,7 +1078,8 @@ export interface paths {
      * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" | "lead"
      * CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong copyleft" | "weak copyleft"
      *
-     * readers can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+     //blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+     * readers can learn more about [copyleft tiers](https:
      *
      * ### Example request bodies:
      * ```json
@@ -1117,7 +1121,8 @@ export interface paths {
      *     ## Return value
      *
      *     ```json
-     *     // Response schema:
+     // Response schema:
+     *
      *     Array<{
      *       licenseId: string,
      *       name?: string,
@@ -1127,7 +1132,8 @@ export interface paths {
      *       text?: string
      *     }>
      *
-     *     // Example response:
+     // Example response:
+     *
      *     [
      *       {
      *         "licenseId": "Apache-2.0",
@@ -1187,13 +1193,13 @@ export interface paths {
      *   'commercial',
      *   'patent'
      *
-     * Users can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+     //blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+     * Users can learn more about [copyleft tiers](https:
      *
      *
      * ## PURLs
      *
-     * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.
-     *
+     * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.*
      * purl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).
      *
      * ### Examples:
@@ -1264,7 +1270,8 @@ export interface paths {
     /**
      * Calculate settings
      * @deprecated
-     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/updateorgsecuritypolicy) instead.
+     //docs.socket.dev/reference/updateorgsecuritypolicy) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https:
      *
      * Get current settings for the requested organizations and default settings to allow deferrals.
      *
@@ -1279,7 +1286,8 @@ export interface paths {
     /**
      * Get supported files for report
      * @deprecated
-     * @description **This endpoint is deprecated.** Deprecated since 2023-01-15. Use the [successor version](https://docs.socket.dev/reference/getsupportedfiles) instead.
+     //docs.socket.dev/reference/getsupportedfiles) instead.
+     * @description **This endpoint is deprecated.** Deprecated since 2023-01-15. Use the [successor version](https:
      *
      * This route has been moved to the `orgs/{org_slug}/supported-files` endpoint.
      *
@@ -1299,7 +1307,8 @@ export interface paths {
     /**
      * Delete a report
      * @deprecated
-     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference) instead.
+     //docs.socket.dev/reference) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https:
      *
      * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Delete a specific project report generated with the GitHub app.
      *
@@ -1314,7 +1323,8 @@ export interface paths {
     /**
      * Get list of reports
      * @deprecated
-     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference) instead.
+     //docs.socket.dev/reference) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https:
      *
      * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all your project reports generated with the GitHub app.
      *
@@ -1329,7 +1339,8 @@ export interface paths {
     /**
      * Create a report
      * @deprecated
-     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/createorgfullscan) instead.
+     //docs.socket.dev/reference/createorgfullscan) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https:
      *
      * Deprecated: Use `/orgs/{org_slug}/full-scans` instead.
      *
@@ -1351,7 +1362,8 @@ export interface paths {
     /**
      * View a report
      * @deprecated
-     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/getorgfullscan) instead.
+     //docs.socket.dev/reference/getorgfullscan) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https:
      *
      * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all the issues, packages, and scores related to an specific project report.
      *
@@ -1366,7 +1378,8 @@ export interface paths {
     /**
      * List GitHub repositories
      * @deprecated
-     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/getorgrepolist) instead.
+     //docs.socket.dev/reference/getorgrepolist) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https:
      *
      * Deprecated: Use `/orgs/{org_slug}/repos` instead. Get all GitHub repositories associated with a Socket org.
      *
@@ -1381,12 +1394,14 @@ export interface paths {
     /**
      * Get issues by package
      * @deprecated
-     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference) instead.
+     //docs.socket.dev/reference) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https:
      *
      * Get all the issues related with a particular npm package version.
      * This endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.
      *
-     * You can [see here](https://socket.dev/alerts) the full list of issues.
+     //socket.dev/alerts) the full list of issues.
+     * You can [see here](https:
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -1399,7 +1414,8 @@ export interface paths {
     /**
      * Get score by package
      * @deprecated
-     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/batchpackagefetch) instead.
+     //docs.socket.dev/reference/batchpackagefetch) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https:
      *
      * Get all the scores and metrics by category that are used to evaluate the package version.
      *
@@ -1414,20 +1430,17 @@ export interface paths {
      * - quality: Score factors relating to code quality (0-1)
      * - qualityIssueLow/Mid/High/Critical: The number of code quality issues of varying severity. Lower numbers contribute to a higher score.
      * - linesOfCode: The number of lines of code in the package. Lower count contributes to a higher score.
-     * - readmeLength: The length of the package's README file. Longer READMEs contribute to a higher score.
-     * - maintenance: Score factors relating to package maintenance (0-1)
+     * - readmeLength: The length of the package's README file. Longer READMEs contribute to a higher score.* - maintenance: Score factors relating to package maintenance (0-1)
      * - maintainerCount: The number of maintainers for the package. More maintainers contribute to a higher score.
      * - versionsLastWeek/Month/TwoMonths/Year: The number of versions released in different time periods. More recent releases contribute to a higher score.
      * - versionCount: The total number of versions released. Higher count contributes to a higher score.
      * - maintenanceIssueLow/Mid/High/Critical: The number of maintenance issues of varying severity. Lower numbers contribute to a higher score.
      * - vulnerability: Score factors relating to package vulnerabilities (0-1)
      * - vulnerabilityIssueLow/Mid/High/Critical: The number of vulnerability issues of varying severity. Lower numbers contribute to a higher score.
-     * - dependencyVulnerabilityCount: The number of vulnerabilities in the package's dependencies. Lower count contributes to a higher score.
-     * - vulnerabilityCount: The number of vulnerabilities in the package itself. Lower count contributes to a higher score.
+     * - dependencyVulnerabilityCount: The number of vulnerabilities in the package's dependencies. Lower count contributes to a higher score.* - vulnerabilityCount: The number of vulnerabilities in the package itself. Lower count contributes to a higher score.
      * - license: Score factors relating to package licensing (0-1)
      * - licenseIssueLow/Mid/High/Critical: The number of license issues of varying severity. Lower numbers contribute to a higher score.
-     * - licenseQuality: A score indicating the quality/permissiveness of the package's license. Higher quality contributes to a higher score.
-     * - miscellaneous: Miscellaneous metadata about the package version.
+     * - licenseQuality: A score indicating the quality/permissiveness of the package's license. Higher quality contributes to a higher score.* - miscellaneous: Miscellaneous metadata about the package version.
      * - versionAuthorName/Email: The name and email of the version author.
      * - fileCount: The number of files in the package.
      * - byteCount: The total size in bytes of the package.
@@ -1444,7 +1457,8 @@ export interface paths {
     /**
      * Get organization analytics (unstable)
      * @deprecated
-     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/historicalalertstrend) instead.
+     //docs.socket.dev/reference/historicalalertstrend) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https:
      *
      * Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
      *
@@ -1461,7 +1475,8 @@ export interface paths {
     /**
      * Get repository analytics
      * @deprecated
-     * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/historicalalertstrend) instead.
+     //docs.socket.dev/reference/historicalalertstrend) instead.
+     * @description **This endpoint is deprecated.** Use the [successor version](https:
      *
      * Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
      *
@@ -1895,8 +1910,7 @@ export interface components {
        */
       subpath?: string
       /**
-       * @description Package-specific release identifier, such as PyPI's artifact ID or the specific build/release version
-       * @default
+       * @description Package-specific release identifier, such as PyPI's artifact ID or the specific build/release version* @default
        */
       release?: string
     }
@@ -4471,7 +4485,8 @@ export interface components {
       headers: {
         /**
          * @description Retry contacting the endpoint *at least* after seconds.
-         * See https://tools.ietf.org/html/rfc7231#section-7.1.3
+         //tools.ietf.org/html/rfc7231#section-7.1.3
+         * See https:
          */
         'Retry-After'?: number
       }
@@ -4534,8 +4549,10 @@ export interface operations {
    *
    * More information on purl and CycloneDX:
    *
-   * - [`purl` Spec](https://github.com/package-url/purl-spec)
-   * - [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)
+   //github.com/package-url/purl-spec)
+   * - [`purl` Spec](https:
+   //cyclonedx.org/specification/overview/#components)
+   * - [CycloneDX Spec](https:
    *
    * This endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).
    * Actively running analysis will be returned when available on subsequent runs.
@@ -5379,8 +5396,7 @@ export interface operations {
       query?: {
         /**
          * @description The person(s) who created the BOM.
-         * Set this value if you're intending the modify the BOM and claim authorship.
-         */
+         * Set this value if you're intending the modify the BOM and claim authorship.*/
         author?: string
         /** @description Dependency track project group */
         project_group?: string
@@ -5441,8 +5457,7 @@ export interface operations {
       query?: {
         /**
          * @description The person(s) who created the BOM.
-         * Set this value if you're intending the modify the BOM and claim authorship.
-         */
+         * Set this value if you're intending the modify the BOM and claim authorship.*/
         author?: string
         /** @description Dependency track project group */
         project_group?: string
@@ -5836,8 +5851,7 @@ export interface operations {
   }
   /**
    * Create diff scan from repository HEAD full-scan
-   * @description Create a diff scan between the repository's current HEAD full scan and a new full scan from uploaded manifest files.
-   * Returns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from
+   * @description Create a diff scan between the repository's current HEAD full scan and a new full scan from uploaded manifest files.* Returns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from
    * the [api_url](/reference/getDiffScanById) URL to get the contents of the diff.
    *
    * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 67 MB.
@@ -11438,7 +11452,8 @@ export interface operations {
   /**
    * Get Organization License Policy
    * @deprecated
-   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/viewlicensepolicy) instead.
+   //docs.socket.dev/reference/viewlicensepolicy) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https:
    *
    * Retrieve the license policy of an organization.
    *
@@ -11470,8 +11485,7 @@ export interface operations {
   }
   /**
    * Update License Policy
-   * @description Set the organization's license policy
-   *
+   * @description Set the organization's license policy*
    *       ## License policy schema
    *
    * ```json
@@ -11506,13 +11520,13 @@ export interface operations {
    *   'commercial',
    *   'patent'
    *
-   * Users can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+   //blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+   * Users can learn more about [copyleft tiers](https:
    *
    *
    * ## PURLs
    *
-   * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.
-   *
+   * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.*
    * purl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).
    *
    * ### Examples:
@@ -11564,8 +11578,7 @@ export interface operations {
   }
   /**
    * Get License Policy (Beta)
-   * @description Returns an organization's license policy
-   *
+   * @description Returns an organization's license policy*
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
@@ -11714,10 +11727,8 @@ export interface operations {
         'filters.artifactType'?: string
         /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
         'filters.artifactType.notIn'?: string
-        /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
-        'filters.alertAction'?: string
-        /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
-        'filters.alertAction.notIn'?: string
+        /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */ 'filters.alertAction'?: string
+        /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */ 'filters.alertAction.notIn'?: string
         /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be included */
         'filters.alertActionSourceType'?: string
         /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
@@ -11887,8 +11898,7 @@ export interface operations {
                 artifactName?: string[]
                 /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
                 artifactType?: string[]
-                /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
-                alertAction?: string[]
+                /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */ alertAction?: string[]
                 /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
                 alertActionSourceType?: string[]
                 /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be excluded */
@@ -11966,10 +11976,8 @@ export interface operations {
         'filters.artifactType'?: string
         /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
         'filters.artifactType.notIn'?: string
-        /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
-        'filters.alertAction'?: string
-        /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
-        'filters.alertAction.notIn'?: string
+        /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */ 'filters.alertAction'?: string
+        /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */ 'filters.alertAction.notIn'?: string
         /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be included */
         'filters.alertActionSourceType'?: string
         /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
@@ -12055,8 +12063,7 @@ export interface operations {
                 artifactName?: string[]
                 /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
                 artifactType?: string[]
-                /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
-                alertAction?: string[]
+                /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */ alertAction?: string[]
                 /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
                 alertActionSourceType?: string[]
                 /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be excluded */
@@ -13075,11 +13082,13 @@ export interface operations {
   /**
    * Get Threat Feed Items (Deprecated)
    * @deprecated
-   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/getorgthreatfeeditems) instead.
+   //docs.socket.dev/reference/getorgthreatfeeditems) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https:
    *
    * Paginated list of threat feed items.
    *
-   * This endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.
+   //socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.
+   * This endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https:
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -13179,7 +13188,8 @@ export interface operations {
    * Get Threat Feed Items (Beta)
    * @description Paginated list of threats, sorted by updated_at by default. Set updated_after to the unix timestamp of your last sync while sorting by updated_at to synchronize all new or updated threats in the feed.
    *
-   * This endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.
+   //socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking) our sales team for more details.
+   * This endpoint requires an Enterprise Plan with Threat Feed add-on. [Contact](https:
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -13366,13 +13376,13 @@ export interface operations {
    *   'commercial',
    *   'patent'
    *
-   * Users can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+   //blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+   * Users can learn more about [copyleft tiers](https:
    *
    *
    * ## PURLs
    *
-   * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.
-   *
+   * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.*
    * purl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).
    *
    * ### Examples:
@@ -13427,10 +13437,10 @@ export interface operations {
   /**
    * Saturate License Policy (Legacy)
    * @deprecated
-   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/updateorglicensepolicy) instead.
+   //docs.socket.dev/reference/updateorglicensepolicy) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https:
    *
-   * Get the "saturated" version of a license policy's allow list, filling in the entire set of allowed
-   * license data. For example, the saturated form of a license allow list which only specifies that
+   * Get the "saturated" version of a license policy's allow list, filling in the entire set of allowed* license data. For example, the saturated form of a license allow list which only specifies that
    * licenses in the tier "maximal copyleft" are allowed is shown below (note the expanded `allowedStrings` property):
    *
    * ```json
@@ -13486,7 +13496,8 @@ export interface operations {
    * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" | "lead"
    * CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong copyleft" | "weak copyleft"
    *
-   * readers can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+   //blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+   * readers can learn more about [copyleft tiers](https:
    *
    * ### Example request bodies:
    * ```json
@@ -13557,7 +13568,8 @@ export interface operations {
    *     ## Return value
    *
    *     ```json
-   *     // Response schema:
+   // Response schema:
+   *
    *     Array<{
    *       licenseId: string,
    *       name?: string,
@@ -13567,7 +13579,8 @@ export interface operations {
    *       text?: string
    *     }>
    *
-   *     // Example response:
+   // Example response:
+   *
    *     [
    *       {
    *         "licenseId": "Apache-2.0",
@@ -13627,13 +13640,13 @@ export interface operations {
    *   'commercial',
    *   'patent'
    *
-   * Users can learn more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+   //blueoakcouncil.org/copyleft) and [permissive tiers](https://blueoakcouncil.org/list) by reading the linked resources.
+   * Users can learn more about [copyleft tiers](https:
    *
    *
    * ## PURLs
    *
-   * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.
-   *
+   * Users may also modify their license policy's allow and warn lists by using [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which support glob patterns to allow a range of versions, files and directories, etc.*
    * purl qualifiers which support globs are `filename`, `version_glob`, `artifact_id` and `license_provenance` (primarily used for allowing data from registry metadata).
    *
    * ### Examples:
@@ -13802,7 +13815,8 @@ export interface operations {
   /**
    * Calculate settings
    * @deprecated
-   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/updateorgsecuritypolicy) instead.
+   //docs.socket.dev/reference/updateorgsecuritypolicy) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https:
    *
    * Get current settings for the requested organizations and default settings to allow deferrals.
    *
@@ -13822,8 +13836,7 @@ export interface operations {
       }
     }
     responses: {
-      /** @description Organization settings. Returned object contains default issue rules and an array of entries, with each entry representing an organization's settings. */
-      200: {
+      /** @description Organization settings. Returned object contains default issue rules and an array of entries, with each entry representing an organization's settings. */ 200: {
         content: {
           'application/json': {
             defaults: {
@@ -13860,7 +13873,8 @@ export interface operations {
   /**
    * Get supported files for report
    * @deprecated
-   * @description **This endpoint is deprecated.** Deprecated since 2023-01-15. Use the [successor version](https://docs.socket.dev/reference/getsupportedfiles) instead.
+   //docs.socket.dev/reference/getsupportedfiles) instead.
+   * @description **This endpoint is deprecated.** Deprecated since 2023-01-15. Use the [successor version](https:
    *
    * This route has been moved to the `orgs/{org_slug}/supported-files` endpoint.
    *
@@ -13896,7 +13910,8 @@ export interface operations {
   /**
    * Delete a report
    * @deprecated
-   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference) instead.
+   //docs.socket.dev/reference) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https:
    *
    * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Delete a specific project report generated with the GitHub app.
    *
@@ -13931,7 +13946,8 @@ export interface operations {
   /**
    * Get list of reports
    * @deprecated
-   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference) instead.
+   //docs.socket.dev/reference) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https:
    *
    * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all your project reports generated with the GitHub app.
    *
@@ -13983,7 +13999,8 @@ export interface operations {
   /**
    * Create a report
    * @deprecated
-   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/createorgfullscan) instead.
+   //docs.socket.dev/reference/createorgfullscan) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https:
    *
    * Deprecated: Use `/orgs/{org_slug}/full-scans` instead.
    *
@@ -14031,7 +14048,8 @@ export interface operations {
   /**
    * View a report
    * @deprecated
-   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/getorgfullscan) instead.
+   //docs.socket.dev/reference/getorgfullscan) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https:
    *
    * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all the issues, packages, and scores related to an specific project report.
    *
@@ -14064,7 +14082,8 @@ export interface operations {
   /**
    * List GitHub repositories
    * @deprecated
-   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/getorgrepolist) instead.
+   //docs.socket.dev/reference/getorgrepolist) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https:
    *
    * Deprecated: Use `/orgs/{org_slug}/repos` instead. Get all GitHub repositories associated with a Socket org.
    *
@@ -14121,12 +14140,14 @@ export interface operations {
   /**
    * Get issues by package
    * @deprecated
-   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference) instead.
+   //docs.socket.dev/reference) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https:
    *
    * Get all the issues related with a particular npm package version.
    * This endpoint returns the issue type, location, and additional details related to each issue in the `props` attribute.
    *
-   * You can [see here](https://socket.dev/alerts) the full list of issues.
+   //socket.dev/alerts) the full list of issues.
+   * You can [see here](https:
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -14157,7 +14178,8 @@ export interface operations {
   /**
    * Get score by package
    * @deprecated
-   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/batchpackagefetch) instead.
+   //docs.socket.dev/reference/batchpackagefetch) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https:
    *
    * Get all the scores and metrics by category that are used to evaluate the package version.
    *
@@ -14172,20 +14194,17 @@ export interface operations {
    * - quality: Score factors relating to code quality (0-1)
    * - qualityIssueLow/Mid/High/Critical: The number of code quality issues of varying severity. Lower numbers contribute to a higher score.
    * - linesOfCode: The number of lines of code in the package. Lower count contributes to a higher score.
-   * - readmeLength: The length of the package's README file. Longer READMEs contribute to a higher score.
-   * - maintenance: Score factors relating to package maintenance (0-1)
+   * - readmeLength: The length of the package's README file. Longer READMEs contribute to a higher score.* - maintenance: Score factors relating to package maintenance (0-1)
    * - maintainerCount: The number of maintainers for the package. More maintainers contribute to a higher score.
    * - versionsLastWeek/Month/TwoMonths/Year: The number of versions released in different time periods. More recent releases contribute to a higher score.
    * - versionCount: The total number of versions released. Higher count contributes to a higher score.
    * - maintenanceIssueLow/Mid/High/Critical: The number of maintenance issues of varying severity. Lower numbers contribute to a higher score.
    * - vulnerability: Score factors relating to package vulnerabilities (0-1)
    * - vulnerabilityIssueLow/Mid/High/Critical: The number of vulnerability issues of varying severity. Lower numbers contribute to a higher score.
-   * - dependencyVulnerabilityCount: The number of vulnerabilities in the package's dependencies. Lower count contributes to a higher score.
-   * - vulnerabilityCount: The number of vulnerabilities in the package itself. Lower count contributes to a higher score.
+   * - dependencyVulnerabilityCount: The number of vulnerabilities in the package's dependencies. Lower count contributes to a higher score.* - vulnerabilityCount: The number of vulnerabilities in the package itself. Lower count contributes to a higher score.
    * - license: Score factors relating to package licensing (0-1)
    * - licenseIssueLow/Mid/High/Critical: The number of license issues of varying severity. Lower numbers contribute to a higher score.
-   * - licenseQuality: A score indicating the quality/permissiveness of the package's license. Higher quality contributes to a higher score.
-   * - miscellaneous: Miscellaneous metadata about the package version.
+   * - licenseQuality: A score indicating the quality/permissiveness of the package's license. Higher quality contributes to a higher score.* - miscellaneous: Miscellaneous metadata about the package version.
    * - versionAuthorName/Email: The name and email of the version author.
    * - fileCount: The number of files in the package.
    * - byteCount: The total size in bytes of the package.
@@ -14220,7 +14239,8 @@ export interface operations {
   /**
    * Get organization analytics (unstable)
    * @deprecated
-   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/historicalalertstrend) instead.
+   //docs.socket.dev/reference/historicalalertstrend) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https:
    *
    * Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
    *
@@ -14290,7 +14310,8 @@ export interface operations {
   /**
    * Get repository analytics
    * @deprecated
-   * @description **This endpoint is deprecated.** Use the [successor version](https://docs.socket.dev/reference/historicalalertstrend) instead.
+   //docs.socket.dev/reference/historicalalertstrend) instead.
+   * @description **This endpoint is deprecated.** Use the [successor version](https:
    *
    * Please implement against the [Historical dependencies](/reference/historicaldependenciestrend) or [Historical alerts](/reference/historicalalertstrend) endpoints.
    *

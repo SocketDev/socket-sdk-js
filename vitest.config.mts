@@ -22,6 +22,7 @@ export default defineConfig({
     environment: 'node',
     include: ['test/**/*.test.{js,ts,mjs,mts,cjs}'],
     reporters: ['default'],
+    setupFiles: ['./test/utils/setup.mts'],
     // Improve memory usage by running tests sequentially in CI.
     pool: 'forks',
     poolOptions: {
