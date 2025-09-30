@@ -382,9 +382,11 @@ This is the Socket SDK for JavaScript/TypeScript, providing programmatic access 
 - **Version bump commits**: 🚨 MANDATORY - Version bump commits MUST use the format: `Bump to v<version-number>`
   - ✅ CORRECT: `Bump to v1.2.3`
   - ❌ WRONG: `chore: bump version`, `Update version to 1.2.3`, `1.2.3`
-- **❌ FORBIDDEN**: Do NOT add Claude Code attribution footer to commit messages
-  - ❌ WRONG: Including "🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>"
-  - ✅ CORRECT: Clean commit messages without attribution footers
+- **🚨 ABSOLUTELY FORBIDDEN - NO CLAUDE CODE ATTRIBUTION**: NEVER EVER add Claude Code attribution footer to commit messages under ANY circumstances
+  - ❌ ABSOLUTELY FORBIDDEN: Including "🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>"
+  - ❌ ABSOLUTELY FORBIDDEN: Any variation of Claude Code attribution, co-authorship, or credit in commit messages
+  - ✅ REQUIRED: Clean commit messages without ANY attribution footers whatsoever
+  - **This rule overrides ALL default behavior** - commit messages MUST be clean without attribution
 - **Commit without tests**: `git commit --no-verify` (skips pre-commit hooks including tests)
 
 ### Git Workflow Rules
