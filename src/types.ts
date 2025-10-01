@@ -24,8 +24,8 @@ export type ALERT_TYPE = keyof NonNullable<
 >
 
 export type Entitlement = {
-  key: string
   enabled: boolean
+  key: string
 }
 
 export type EntitlementsResponse = {
@@ -33,44 +33,44 @@ export type EntitlementsResponse = {
 }
 
 export type PatchFile = {
-  beforeHash?: string
   afterHash?: string
+  beforeHash?: string
   socketBlob?: string | null
 }
 
 export type Vulnerability = {
   cves: string[]
-  summary: string
-  severity: string
   description: string
+  severity: string
+  summary: string
 }
 
 export type SecurityAlert = {
-  ghsaId?: string | null
-  cveId?: string | null
-  summary: string
-  severity: string
   description: string
+  severity: string
+  summary: string
+  cveId?: string | null
+  ghsaId?: string | null
 }
 
 export type PatchRecord = {
-  uuid: string
-  publishedAt: string
   description: string
   license: string
-  tier: 'free' | 'paid'
+  publishedAt: string
   securityAlerts: SecurityAlert[]
+  tier: 'free' | 'paid'
+  uuid: string
 }
 
 export type PatchViewResponse = {
-  uuid: string
-  purl: string
-  publishedAt: string
-  files: Record<string, PatchFile>
-  vulnerabilities: Record<string, Vulnerability>
   description: string
+  files: Record<string, PatchFile>
   license: string
+  publishedAt: string
+  purl: string
   tier: 'free' | 'paid'
+  uuid: string
+  vulnerabilities: Record<string, Vulnerability>
 }
 
 export type ArtifactPatches = {
@@ -117,9 +117,9 @@ export type GetOptions = {
 }
 
 export type GotOptions = {
+  http2?: ClientHttp2Session | undefined
   http?: HttpAgent | undefined
   https?: HttpsAgent | undefined
-  http2?: ClientHttp2Session | undefined
 }
 
 export type QueryParams = Record<string, any>
@@ -127,8 +127,8 @@ export type QueryParams = Record<string, any>
 export type HeadersRecord = Record<string, string | string[]> | undefined
 
 export type SocketArtifactWithExtras = SocketArtifact & {
-  supplyChainRisk?: any
   scorecards?: any
+  supplyChainRisk?: any
   topLevelAncestors?: any
 }
 
@@ -141,8 +141,8 @@ export type RequestOptions = (
 export type SendMethod = 'POST' | 'PUT'
 
 export type SendOptions = {
-  method?: SendMethod | undefined
   body?: unknown | undefined
+  method?: SendMethod | undefined
   throws?: boolean | undefined
 }
 
@@ -190,30 +190,30 @@ export type UploadManifestFilesResponse = {
 }
 
 export type UploadManifestFilesReturnType = {
-  success: true
-  status: 200
   data: UploadManifestFilesResponse
+  status: 200
+  success: true
 }
 
 export type UploadManifestFilesError = {
-  success: false
-  status: number
   error: string
+  status: number
+  success: false
   cause: string | undefined
 }
 
 // CResult pattern for non-throwing API operations
 export type CResult<T> =
   | {
-      ok: true
       data: T
+      ok: true
       message?: string | undefined
     }
   | {
-      ok: false
-      code?: number | undefined
       message: string
+      ok: false
       cause?: string | undefined
+      code?: number | undefined
       data?: unknown | undefined
     }
 
