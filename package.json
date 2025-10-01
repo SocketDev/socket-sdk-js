@@ -73,7 +73,7 @@
     "update:socket": "pnpm -r update '@socketsecurity/*' --latest"
   },
   "dependencies": {
-    "@socketsecurity/registry": "1.3.3"
+    "@socketsecurity/registry": "1.3.4"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
