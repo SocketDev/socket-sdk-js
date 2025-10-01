@@ -245,6 +245,12 @@ This is the Socket SDK for JavaScript/TypeScript, providing programmatic access 
 - **Array destructuring**: Use object notation for tuple access when appropriate
   - ✅ CORRECT: `{ 0: key, 1: data }`
   - ❌ AVOID: `[key, data]`
+- **Array destructuring performance**: For `Object.entries()` loops, use object destructuring for better V8 performance
+  - ❌ SLOWER: `for (const [key, value] of Object.entries(obj))`
+  - ✅ FASTER: `for (const { 0: key, 1: value } of Object.entries(obj))`
+  - **Rationale**: Array destructuring requires iterator protocol (per ECMAScript spec), while object destructuring directly accesses indexed properties
+  - **Reference**: https://stackoverflow.com/a/66321410 (V8 developer explanation)
+  - **Trade-off**: This is a microbenchmark optimization - prioritize readability unless profiling shows this is a bottleneck
 - **Array checks**: Use `!array.length` instead of `array.length === 0`
 - **Destructuring**: Sort properties alphabetically in const declarations
 
