@@ -196,131 +196,255 @@ This is the Socket SDK for JavaScript/TypeScript, providing programmatic access 
 
 ## 🎨 CODE STYLE (MANDATORY)
 
-### File Organization
-- **File extensions**: Use `.mts` for TypeScript files
-- **Module headers**: 🚨 MANDATORY - All JavaScript/TypeScript modules MUST have `@fileoverview` headers
-  - **Format**: Use `/** @fileoverview Brief description of module purpose. */` at the top of each file
-  - **Placement**: Must be the very first content in the file, before imports or other code
-  - **Content**: Provide a concise, clear description of what the module does and its primary purpose
-  - **Examples**:
-    - ✅ CORRECT: `/** @fileoverview Socket SDK client for security analysis and vulnerability detection. */`
-    - ✅ CORRECT: `/** @fileoverview API response types and interfaces for Socket security endpoints. */`
-    - ❌ FORBIDDEN: Missing @fileoverview header entirely
-    - ❌ FORBIDDEN: Placing @fileoverview after imports or other code
-- **Import order**: Node.js built-ins first, then third-party packages, then local imports
-- **Import grouping**: Group imports by source (Node.js, external packages, local modules)
-- **Node.js module imports**: 🚨 MANDATORY - Always use `node:` prefix for Node.js built-in modules
-  - ✅ CORRECT: `import { readFile } from 'node:fs'`, `import path from 'node:path'`
-  - ❌ FORBIDDEN: `import { readFile } from 'fs'`, `import path from 'path'`
-- **Type imports**: 🚨 ALWAYS use separate `import type` statements for TypeScript types, NEVER mix runtime imports with type imports in the same statement
-  - ✅ CORRECT: `import { readPackageJson } from '@socketsecurity/registry/lib/packages'` followed by `import type { PackageJson } from '@socketsecurity/registry/lib/packages'`
-  - ❌ FORBIDDEN: `import { readPackageJson, type PackageJson } from '@socketsecurity/registry/lib/packages'`
-- **Import patterns**: 🚨 MANDATORY - Avoid `import * as` pattern except when creating re-export wrappers
-  - ✅ CORRECT: `import semver from './external/semver'` (default import)
-  - ✅ CORRECT: `import { satisfies, gt, lt } from './external/semver'` (named imports)
-  - ❌ AVOID: `import * as semver from './external/semver'` (namespace import - only use in external re-export files)
-  - **Exception**: External wrapper files in `src/external/` may use `import * as` to create default exports
+### 📁 File Organization & Imports
 
-### Naming Conventions
-- **Constants**: Use `UPPER_SNAKE_CASE` for constants
-- **Files**: Use kebab-case for filenames
-- **Variables**: Use camelCase for variables and functions
-- **Types/Interfaces**: Use PascalCase for types and interfaces
+#### File Structure
+- **File extensions**: `.mts` for TypeScript module files
+- **Naming**: kebab-case for filenames
+- **Module headers**: 🚨 MANDATORY - All modules MUST have `@fileoverview` headers as first content
+  - Format: `/** @fileoverview Brief description of module purpose. */`
+  - Placement: Before imports or any other code
+  - ✅ CORRECT: `/** @fileoverview Socket SDK client for security analysis. */`
+  - ❌ FORBIDDEN: Missing header or placed after imports
+- **"use strict"**: 🚨 FORBIDDEN in .mjs and .mts files - ES modules are automatically in strict mode
 
-### Critical Code Patterns
-- **Type definitions**: 🚨 ALWAYS use `import type` for better tree-shaking
-- **Error handling**: 🚨 REQUIRED - Use proper error types and handle errors gracefully
-- **Array destructuring**: Use object notation `{ 0: key, 1: data }` instead of array destructuring when appropriate
-- **Dynamic imports**: 🚨 FORBIDDEN - Never use dynamic imports (`await import()`). Always use static imports at the top of the file
-- **Sorting**: 🚨 MANDATORY - Always sort lists, exports, and items in documentation headers alphabetically/alphanumerically for consistency
-- **"use strict" directives**: 🚨 FORBIDDEN in .mjs and .mts files - ES modules are automatically in strict mode, adding 'use strict' is redundant and should be avoided
+#### Import Organization
+- **Order**: Node.js built-ins → third-party packages → local imports
+- **Node.js imports**: 🚨 MANDATORY - Always use `node:` prefix
+  - ✅ CORRECT: `import path from 'node:path'`
+  - ❌ FORBIDDEN: `import path from 'path'`
+- **Type imports**: 🚨 MANDATORY - Always separate type imports from runtime imports
+  - ✅ CORRECT: `import { readFile } from 'node:fs'` then `import type { Stats } from 'node:fs'`
+  - ❌ FORBIDDEN: `import { readFile, type Stats } from 'node:fs'`
+- **Import patterns**: Avoid `import * as` except in `src/external/` re-export wrappers
+  - ✅ CORRECT: `import semver from './external/semver'` or `import { parse } from 'semver'`
+  - ❌ AVOID: `import * as semver from 'semver'`
+- **fs imports**: Use pattern `import { syncMethod, promises as fs } from 'node:fs'`
 
-### Comment Standards
-- **Comment formatting**: 🚨 MANDATORY - ALL comments MUST follow these rules:
-  - **Single-line preference**: Prefer single-line comments (`//`) over multiline comments (`/* */`) unless for method headers, module headers, or copyright notices. Use single-line comments for property descriptions, inline explanations, and general code comments.
-  - **Periods required**: Every comment MUST end with a period, except ESLint disable comments and URLs which are directives/references
-  - **Sentence structure**: Comments should be complete sentences with proper capitalization and grammar
-  - **Placement**: Place comments on their own line above the code they describe, not trailing to the right of code
-  - **Style**: Use fewer hyphens/dashes and prefer commas, colons, or semicolons for better readability
-  - **Examples**:
-    - ✅ CORRECT: `// Custom GitHub host (default: github.com).` (property description)
-    - ❌ WRONG: `/** Custom GitHub host (default: github.com). */` (multiline for simple property)
-    - ✅ CORRECT: `// This function validates user input.`
-    - ✅ CORRECT: `/* This is a multi-line comment that explains the complex logic below. */`
-    - ✅ CORRECT: `// eslint-disable-next-line no-await-in-loop` (directive, no period)
-    - ✅ CORRECT: `// See https://example.com/docs` (URL reference, no period)
-    - ✅ CORRECT: `// c8 ignore start - Reason for ignoring.` (explanation has period)
-    - ❌ WRONG: `// this validates input` (no period, not capitalized)
-    - ❌ WRONG: `const x = 5 // some value` (trailing comment)
+### 🏗️ Code Structure & Patterns
 
-### Additional Code Patterns
-- **Await in loops**: When using `await` inside for-loops, add `// eslint-disable-next-line no-await-in-loop` when sequential processing is intentional
-- **If statement returns**: Never use single-line return if statements; always use proper block syntax with braces
-- **Existence checks**: Perform simple existence checks first before complex operations
-- **Destructuring order**: Sort destructured properties alphabetically in const declarations
-- **Function ordering**: Place functions in alphabetical order, with private functions first, then exported functions
-- **Object mappings**: Use objects with `__proto__: null` for static string-to-string mappings to prevent prototype pollution
-- **Mapping constants**: Move static mapping objects outside functions as module-level constants with descriptive UPPER_SNAKE_CASE names
-- **Array length checks**: Use `!array.length` instead of `array.length === 0`. For `array.length > 0`, use `!!array.length` when function must return boolean, or `array.length` when used in conditional contexts
-- **Catch parameter naming**: Use `catch (e)` instead of `catch (error)` for consistency
-- **Number formatting**: 🚨 REQUIRED - Use underscore separators (e.g., `20_000`) for large numeric literals. 🚨 FORBIDDEN - Do NOT modify number values inside strings
-- **Node.js fs imports**: 🚨 MANDATORY pattern - `import { someSyncThing, promises as fs } from 'node:fs'`
-- **Process spawning**: 🚨 FORBIDDEN to use Node.js built-in `child_process.spawn` - MUST use `spawn` from `@socketsecurity/registry/lib/spawn`
-- **List formatting**: Use `-` for bullet points in text output, not `•` or other Unicode characters, for better terminal compatibility
-- **For...of loop type annotations**: 🚨 FORBIDDEN - Never use type annotations in for...of loop variable declarations. TypeScript cannot parse `for await (const chunk: Buffer of stream)` - use `for await (const chunk of stream)` instead and let TypeScript infer the type
-- **JSDoc function documentation**: 🚨 MANDATORY - Function JSDoc comments MUST follow this exact pattern:
-  - **Format**: Description only, with optional `@throws` - NO `@param` or `@returns` tags
-  - **Order**: Description paragraph, then `@throws` tag (if needed)
-  - **Closure**: End with `*/` immediately after the last JSDoc tag
-  - **Examples**:
-    - ✅ CORRECT:
-      ```javascript
-      /**
-       * Check if a string contains a trusted domain using proper URL parsing.
-       */
-      ```
-    - ✅ CORRECT (with throws):
-      ```javascript
-      /**
-       * Parse a configuration file and validate its contents.
-       * @throws {Error} When file cannot be read or parsed.
-       */
-      ```
-    - ❌ FORBIDDEN: Adding `@param` or `@returns` tags
-    - ❌ FORBIDDEN: Adding extra tags like `@author`, `@since`, `@example`, etc.
-    - ❌ FORBIDDEN: Adding empty lines between JSDoc tags
-    - ❌ FORBIDDEN: Adding extra content after the last JSDoc tag
+#### Naming Conventions
+- **Constants**: `UPPER_SNAKE_CASE`
+- **Variables/Functions**: `camelCase`
+- **Classes/Types**: `PascalCase`
 
-### 🏗️ Function Options Pattern (MANDATORY)
-- **🚨 REQUIRED**: ALL functions accepting options MUST follow this exact pattern:
+#### TypeScript Patterns
+- **Type safety**: 🚨 FORBIDDEN - Avoid `any` type; prefer `unknown` or specific types
+- **Type imports**: Always use `import type` for better tree-shaking
+- **Loop annotations**: 🚨 FORBIDDEN - Never annotate for...of loop variables
+  - ✅ CORRECT: `for await (const chunk of stream)`
+  - ❌ FORBIDDEN: `for await (const chunk: Buffer of stream)`
+
+#### Object & Array Patterns
+- **Object literals with __proto__**: 🚨 MANDATORY - `__proto__: null` ALWAYS comes first in object literals
+  - ✅ CORRECT: `const MAP = { __proto__: null, foo: 'bar', baz: 'qux' }`
+  - ✅ CORRECT: `{ __proto__: null, ...options }`
+  - ❌ FORBIDDEN: `{ foo: 'bar', __proto__: null }` (wrong order)
+  - ❌ FORBIDDEN: `{ ...options, __proto__: null }` (wrong order)
+  - Use `Map` for dynamic collections
+- **Array destructuring**: Use object notation for tuple access when appropriate
+  - ✅ CORRECT: `{ 0: key, 1: data }`
+  - ❌ AVOID: `[key, data]`
+- **Array checks**: Use `!array.length` instead of `array.length === 0`
+- **Destructuring**: Sort properties alphabetically in const declarations
+
+#### Function Patterns
+- **Ordering**: Alphabetical order; private functions first, then exported
+- **Options parameter**: 🚨 MANDATORY pattern for all functions with options:
   ```typescript
-  function foo(a: SomeA, b: SomeB, options?: SomeOptions | undefined): FooResult {
+  function foo(a: SomeA, options?: SomeOptions | undefined): Result {
     const opts = { __proto__: null, ...options } as SomeOptions
-    // OR for destructuring with defaults:
-    const { someOption = 'someDefaultValue' } = { __proto__: null, ...options } as SomeOptions
-    // ... rest of function
+    // OR with destructuring:
+    const { retries = 3 } = { __proto__: null, ...options } as SomeOptions
   }
   ```
-- **Key requirements**:
-  - Options parameter MUST be optional with `?` and explicitly typed as `| undefined`
-  - MUST use `{ __proto__: null, ...options }` pattern to prevent prototype pollution
-  - MUST use `as SomeOptions` type assertion after spreading
-  - Use destructuring form when you need defaults for individual options
-  - Use direct assignment form when passing entire options object to other functions
-- **Examples**:
-  - ✅ CORRECT: `const opts = { __proto__: null, ...options } as SomeOptions`
-  - ✅ CORRECT: `const { retries = 3, timeout = 5_000 } = { __proto__: null, ...options } as SomeOptions`
-  - ❌ FORBIDDEN: `const opts = { ...options }` (vulnerable to prototype pollution)
-  - ❌ FORBIDDEN: `const opts = options || {}` (doesn't handle null prototype)
-  - ❌ FORBIDDEN: `const opts = Object.assign({}, options)` (inconsistent pattern)
+  - Must be optional (`?`) and typed `| undefined`
+  - Must use `{ __proto__: null, ...options }` pattern
+  - Must include `as SomeOptions` type assertion
+- **Error handling**: Use proper error types and handle errors gracefully
+- **Dynamic imports**: 🚨 FORBIDDEN - Use static imports only (except test mocking)
+- **Process spawning**: 🚨 FORBIDDEN - Don't use `child_process.spawn`; use `@socketsecurity/registry/lib/spawn`
 
-### Formatting Rules
+### 🔤 Comprehensive Sorting Standards (MANDATORY)
+All code elements MUST be sorted according to these rules for consistency and maintainability:
+
+#### Type Property Sorting
+- **🚨 MANDATORY**: Sort type and interface properties with required properties first, then optional properties
+- **Within each group**: Sort alphabetically/alphanumerically
+- **Examples**:
+  - ✅ CORRECT:
+    ```typescript
+    interface Config {
+      apiKey: string
+      baseUrl: string
+      timeout: number
+      debug?: boolean
+      retries?: number
+    }
+    ```
+  - ❌ WRONG:
+    ```typescript
+    interface Config {
+      debug?: boolean
+      apiKey: string
+      retries?: number
+      timeout: number
+      baseUrl: string
+    }
+    ```
+
+#### Class Member Sorting
+- **🚨 MANDATORY**: Sort class members in this exact order:
+  1. Private properties (alphabetically)
+  2. Private methods (alphabetically)
+  3. Public methods (alphabetically)
+- **Examples**:
+  - ✅ CORRECT:
+    ```typescript
+    class Example {
+      #cache: Map<string, unknown>
+      #config: Config
+
+      #parseResponse(data: unknown): unknown { }
+      #validateInput(input: string): boolean { }
+
+      fetchData(url: string): Promise<void> { }
+      processData(data: unknown): void { }
+    }
+    ```
+  - ❌ WRONG:
+    ```typescript
+    class Example {
+      fetchData(url: string): Promise<void> { }
+      #cache: Map<string, unknown>
+      #validateInput(input: string): boolean { }
+      #config: Config
+      processData(data: unknown): void { }
+      #parseResponse(data: unknown): unknown { }
+    }
+    ```
+
+#### Object Property Sorting
+- **🚨 MANDATORY**: Sort object properties alphabetically when creating object literals
+- **Exception**: Preserve order when the order has semantic meaning (e.g., ordered lists, specific API requirements)
+- **Examples**:
+  - ✅ CORRECT:
+    ```typescript
+    const config = {
+      apiKey: 'key',
+      baseUrl: 'https://api.example.com',
+      debug: true,
+      timeout: 5_000
+    }
+    ```
+  - ❌ WRONG:
+    ```typescript
+    const config = {
+      timeout: 5_000,
+      apiKey: 'key',
+      debug: true,
+      baseUrl: 'https://api.example.com'
+    }
+    ```
+
+#### Destructuring Property Sorting
+- **🚨 MANDATORY**: Sort destructured properties alphabetically in const declarations
+- **Examples**:
+  - ✅ CORRECT: `const { apiKey, baseUrl, timeout } = config`
+  - ❌ WRONG: `const { timeout, apiKey, baseUrl } = config`
+
+#### Import Statement Sorting
+- **🚨 MANDATORY**: Sort imports in this exact order with blank lines between groups (enforced by ESLint import-x/order):
+  1. Node.js built-in modules (with `node:` prefix) - sorted alphabetically
+  2. External third-party packages - sorted alphabetically
+  3. Internal Socket packages (`@socketsecurity/*`) - sorted alphabetically
+  4. Local/relative imports (parent, sibling, index) - sorted alphabetically
+  5. **Type imports LAST as separate group** - sorted alphabetically (all `import type` statements together at the end)
+- **Within each group**: Sort alphabetically by module name
+- **Named imports**: Sort named imports alphabetically within the import statement (enforced by sort-imports)
+- **Type import placement**: Type imports must come LAST, after all runtime imports, as a separate group with blank line before
+- **Examples**:
+  - ✅ CORRECT:
+    ```typescript
+    import { readFile } from 'node:fs'
+    import path from 'node:path'
+    import { promisify } from 'node:util'
+
+    import axios from 'axios'
+    import semver from 'semver'
+
+    import { readPackageJson } from '@socketsecurity/registry/lib/packages'
+    import { spawn } from '@socketsecurity/registry/lib/spawn'
+
+    import { API_BASE_URL } from './constants'
+    import { formatError, parseResponse } from './utils'
+
+    import type { ClientRequest, IncomingMessage } from 'node:http'
+    import type { PackageJson } from '@socketsecurity/registry/lib/packages'
+    import type { Config } from './types'
+    ```
+  - ❌ WRONG:
+    ```typescript
+    import { formatError, parseResponse } from './utils'
+    import axios from 'axios'
+    import type { Config } from './types'
+    import { readFile } from 'node:fs'
+    import { spawn } from '@socketsecurity/registry/lib/spawn'
+    import semver from 'semver'
+    import type { PackageJson } from '@socketsecurity/registry/lib/packages'
+    ```
+
+### 📝 Comments & Documentation
+
+#### Comment Style
+- **Preference**: Single-line (`//`) over multiline (`/* */`) except for headers
+- **Periods**: 🚨 MANDATORY - All comments end with periods (except directives and URLs)
+- **Placement**: Own line above code, never trailing
+- **Sentence structure**: Complete sentences with proper capitalization
+- **Style**: Use commas/colons/semicolons instead of excessive hyphens
+- **Examples**:
+  - ✅ CORRECT: `// This validates user input.`
+  - ✅ CORRECT: `// eslint-disable-next-line no-await-in-loop` (directive, no period)
+  - ✅ CORRECT: `// See https://example.com` (URL, no period)
+  - ✅ CORRECT: `// c8 ignore start - Not exported.` (reason has period)
+  - ❌ WRONG: `// this validates input` (no period, not capitalized)
+  - ❌ WRONG: `const x = 5 // some value` (trailing)
+
+#### JSDoc Documentation
+- **Function docs**: Description only with optional `@throws`
+  - ✅ CORRECT:
+    ```javascript
+    /**
+     * Parse configuration and validate contents.
+     * @throws {Error} When file cannot be read.
+     */
+    ```
+  - ❌ FORBIDDEN: `@param`, `@returns`, `@author`, `@since`, `@example` tags
+  - ❌ FORBIDDEN: Empty lines between tags
+- **Test coverage**: All `c8 ignore` comments MUST include reason ending with period
+  - Format: `// c8 ignore start - Reason for ignoring.`
+
+### 🔧 Code Organization
+
+#### Control Flow
+- **If statements**: Never single-line returns; always use braces
+- **Await in loops**: Add `// eslint-disable-next-line no-await-in-loop` when intentional
+- **Existence checks**: Perform simple checks before complex operations
+
+#### Data & Collections
+- **Mapping constants**: Move outside functions as module-level `UPPER_SNAKE_CASE` constants
+- **Sorting**: 🚨 MANDATORY - Sort lists, exports, and items alphabetically
+- **Catch parameters**: Use `catch (e)` not `catch (error)`
+- **Number formatting**: Use underscore separators for large numbers (e.g., `20_000`)
+  - 🚨 FORBIDDEN - Don't modify numbers inside strings
+
+#### Formatting Standards
 - **Indentation**: 2 spaces (no tabs)
-- **Quotes**: Single quotes for strings preferred
+- **Quotes**: Single quotes preferred
 - **Semicolons**: Use semicolons
-- **Variables**: Use camelCase for variables and functions
+- **Line length**: Target 80 characters where practical
+- **List formatting**: Use `-` for bullets, not `•`
 - **Linting**: Uses ESLint with TypeScript support
-- **Line length**: Target 80 character line width where practical
 
 ## 🧪 TESTING STANDARDS
 
@@ -466,12 +590,13 @@ Follow the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format:
 These are patterns and instructions that should be consistently applied across all Socket projects:
 
 ### 🏗️ Mandatory Code Patterns
-1. **Options Parameter Pattern**: Use `{ __proto__: null, ...options } as SomeOptions` for all functions accepting options
-2. **Reflect.apply Pattern**: Use `const { apply: ReflectApply } = Reflect` and `ReflectApply(fn, thisArg, [])` instead of `.call()` for method invocation
-3. **Object Mappings**: Use `{ __proto__: null, ...mapping }` for static string-to-string mappings to prevent prototype pollution
-4. **Import Separation**: ALWAYS separate type imports (`import type`) from runtime imports
-5. **Node.js Imports**: ALWAYS use `node:` prefix for Node.js built-in modules
-6. **🚨 TSGO PRESERVATION**: NEVER replace tsgo with tsc - tsgo provides enhanced performance and should be maintained across all Socket projects
+1. **__proto__ Ordering**: 🚨 MANDATORY - `__proto__: null` ALWAYS comes first in object literals (e.g., `{ __proto__: null, ...options }`, never `{ ...options, __proto__: null }`)
+2. **Options Parameter Pattern**: Use `{ __proto__: null, ...options } as SomeOptions` for all functions accepting options
+3. **Reflect.apply Pattern**: Use `const { apply: ReflectApply } = Reflect` and `ReflectApply(fn, thisArg, [])` instead of `.call()` for method invocation
+4. **Object Mappings**: Use `{ __proto__: null, ...mapping }` for static string-to-string mappings to prevent prototype pollution
+5. **Import Separation**: ALWAYS separate type imports (`import type`) from runtime imports
+6. **Node.js Imports**: ALWAYS use `node:` prefix for Node.js built-in modules
+7. **🚨 TSGO PRESERVATION**: NEVER replace tsgo with tsc - tsgo provides enhanced performance and should be maintained across all Socket projects
 
 ### 🧪 Test Patterns & Cleanup
 1. **Remove Duplicate Tests**: Eliminate tests that verify the same functionality across multiple files
