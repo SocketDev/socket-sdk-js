@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.4](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.8.4) - 2025-10-01
+
+### Fixed
+- Fixed registry constant import paths to use correct casing (SOCKET_PUBLIC_API_TOKEN, UNKNOWN_ERROR)
+
 ## [1.8.3](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.8.3) - 2025-09-30
 
 ### Changed
