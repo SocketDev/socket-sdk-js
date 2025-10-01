@@ -253,11 +253,11 @@ export class SocketSdk {
       }
     }
     return {
-      success: false,
+      cause: body,
+      error: errorMessage,
       /* c8 ignore next - fallback for missing status code in edge cases. */
       status: statusCode ?? 0,
-      error: errorMessage,
-      cause: body,
+      success: false,
     } as SocketSdkErrorResult<T>
   }
 
@@ -269,10 +269,10 @@ export class SocketSdk {
     data: unknown,
   ): SocketSdkSuccessResult<T> {
     return {
-      success: true,
+      data: data as SocketSdkSuccessResult<T>['data'],
       // Use generic 200 OK status for all successful API responses.
       status: 200,
-      data: data as SocketSdkSuccessResult<T>['data'],
+      success: true,
     } satisfies SocketSdkSuccessResult<T>
   }
 
