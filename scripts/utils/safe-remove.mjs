@@ -1,12 +1,18 @@
+/** @fileoverview Safe file removal utility with trash fallback. */
 import { promises as fs } from 'node:fs'
 
 import { pEach } from '@socketsecurity/registry/lib/promises'
 import trash from 'trash'
 
+// Max concurrent fs.rm operations when trash fails.
 const DEFAULT_CONCURRENCY = 10
 
 /**
- * Safely remove files/directories using trash, with fallback to fs.rm.
+ * Remove files or directories safely using trash with fs.rm fallback.
+ * First attempts to move items to trash for recoverability. If trash fails
+ * (e.g., on CI systems or when trash binary is unavailable), falls back to
+ * permanent deletion using fs.rm with error handling.
+ * @throws {Error} Never throws; logs warnings for non-ENOENT errors via spinner if provided.
  */
 export async function safeRemove(paths, options) {
   const pathArray = Array.isArray(paths) ? paths : [paths]
