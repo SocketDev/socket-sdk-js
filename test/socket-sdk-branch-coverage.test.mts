@@ -56,7 +56,24 @@ describe('SocketSdk - Branch Coverage Tests', () => {
     })
   })
 
-  describe('sendApi error handling branches', () => {
+  describe('API error handling branches', () => {
+    it('should handle ResponseError in getApi with throws: false', async () => {
+      // Mock a ResponseError (HTTP error response) for getApi
+      nock('https://api.socket.dev')
+        .get('/v0/getapi-error-test')
+        .reply(404, { error: 'Not Found', message: 'Resource not found' })
+
+      const result = (await client.getApi('getapi-error-test', {
+        responseType: 'json',
+        throws: false,
+      })) as CResult<unknown>
+
+      expect(result.ok).toBe(false)
+      if (!result.ok) {
+        expect(result.code).toBe(404)
+      }
+    })
+
     it('should handle ResponseError in sendApi with throws: false', async () => {
       // Mock a ResponseError (HTTP error response)
       nock('https://api.socket.dev')
