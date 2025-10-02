@@ -98,6 +98,7 @@ This is the Socket SDK for JavaScript/TypeScript, providing programmatic access 
 ### Development Commands
 - **Build**: `pnpm build`
 - **Test**: `pnpm test` (runs all tests)
+- **Test runner**: `pnpm run test:run` (custom test runner with glob support)
 - **Type check**: `pnpm tsc`
 - **Lint**: `pnpm check:lint`
 - **Check all**: `pnpm check` (lint + typecheck)
@@ -121,6 +122,13 @@ This is the Socket SDK for JavaScript/TypeScript, providing programmatic access 
 - **Test structure**: Group tests by logical functionality, not just by class methods
 - **Shared setup**: Use common beforeEach/afterEach patterns across test files
 - **Mock management**: Clean up mocks properly to prevent test interference
+
+### CI Testing Infrastructure
+- **Reusable workflows**: Use `.github/workflows/_reusable-test.yml` for consistent testing across projects
+- **Matrix testing**: Test across multiple Node.js versions (20, 22, 24) and platforms (Linux, Windows)
+- **Custom test runner**: `scripts/test.mjs` provides glob expansion, force flags, and memory optimization
+- **Documentation**: See `docs/CI_TESTING.md` for comprehensive testing guide
+- **Memory configuration**: Automatic heap size adjustment for CI (8GB) vs local (4GB) environments
 
 ### Test Naming Standards (Critical for Coverage)
 - **File names**: Use descriptive, specific names that clearly indicate what's being tested
