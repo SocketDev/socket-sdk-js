@@ -4,12 +4,10 @@
  */
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+import { getRootPath } from './utils/path-helpers.mjs'
 
-const rootPath = path.join(__dirname, '..')
+const rootPath = getRootPath(import.meta.url)
 const openApiJsonPath = path.join(rootPath, 'openapi.json')
 
 void (async () => {
@@ -21,6 +19,6 @@ void (async () => {
     )
   } catch (e) {
     process.exitCode = 1
-    console.error('Failed with error:', e.stack)
+    console.error('Failed with error:', e.message)
   }
 })()
