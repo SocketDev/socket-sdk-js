@@ -1837,6 +1837,7 @@ export class SocketSdk {
     if (e instanceof SyntaxError) {
       // Try to get response text from enhanced error, fall back to regex pattern for compatibility.
       const enhancedError = e as SyntaxError & { originalResponse?: string }
+      /* c8 ignore next - Defensive empty string fallback for originalResponse. */
       let responseText = enhancedError.originalResponse || ''
 
       /* c8 ignore next 5 - Empty response text fallback check for JSON parsing errors without originalResponse. */
@@ -1845,6 +1846,7 @@ export class SocketSdk {
         responseText = match?.[1] || ''
       }
 
+      /* c8 ignore next - Defensive empty string fallback when slice returns empty. */
       const preview = responseText.slice(0, 100) || ''
       return {
         ok: false,
