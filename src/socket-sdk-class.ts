@@ -1822,7 +1822,7 @@ export class SocketSdk {
       size += chunk.length
       /* c8 ignore next 3 - MAX size limit protection for edge cases */
       if (size > MAX) {
-        throw new Error('Response body too large')
+        throw new Error('Response body exceeds maximum size limit')
       }
       chunks.push(chunk)
     }

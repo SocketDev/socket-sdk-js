@@ -218,7 +218,9 @@ export async function getResponseJson(
       throw e
     }
     // Handle non-Error objects thrown by JSON parsing.
-    const unknownError = new Error('Unknown error') as SyntaxError & {
+    const unknownError = new Error(
+      'Unknown JSON parsing error',
+    ) as SyntaxError & {
       originalResponse?: string
     }
     unknownError.name = 'SyntaxError'
