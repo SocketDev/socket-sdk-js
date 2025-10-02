@@ -29311,7 +29311,7 @@
             "name": "filters.repoLabels",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of repo labels that should be included",
+            "description": "Comma-separated list of repo labels that should be included. Use \"\" to filter for repositories with no labels.",
             "schema": {
               "type": "string"
             }
@@ -29320,7 +29320,7 @@
             "name": "filters.repoLabels.notIn",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of repo labels that should be excluded",
+            "description": "Comma-separated list of repo labels that should be excluded. Use \"\" to filter for repositories with no labels.",
             "schema": {
               "type": "string"
             }
@@ -29998,7 +29998,7 @@
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Comma-separated list of repo labels that should be excluded"
+                              "description": "Comma-separated list of repo labels that should be excluded. Use \"\" to filter for repositories with no labels."
                             },
                             "alertType": {
                               "type": "array",
@@ -30271,7 +30271,7 @@
             "name": "filters.repoLabels",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of repo labels that should be included",
+            "description": "Comma-separated list of repo labels that should be included. Use \"\" to filter for repositories with no labels.",
             "schema": {
               "type": "string"
             }
@@ -30280,7 +30280,7 @@
             "name": "filters.repoLabels.notIn",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of repo labels that should be excluded",
+            "description": "Comma-separated list of repo labels that should be excluded. Use \"\" to filter for repositories with no labels.",
             "schema": {
               "type": "string"
             }
@@ -30689,7 +30689,7 @@
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Comma-separated list of repo labels that should be excluded"
+                              "description": "Comma-separated list of repo labels that should be excluded. Use \"\" to filter for repositories with no labels."
                             },
                             "alertType": {
                               "type": "array",
@@ -33208,7 +33208,8 @@
                 "spy",
                 "typo",
                 "secret",
-                "obf"
+                "obf",
+                "dual"
               ],
               "default": "mal"
             }
@@ -33488,7 +33489,8 @@
                 "spy",
                 "typo",
                 "secret",
-                "obf"
+                "obf",
+                "dual"
               ],
               "default": "mal"
             }
@@ -34097,6 +34099,29 @@
         ],
         "summary": "Returns the OpenAPI definition",
         "operationId": "getOpenAPI",
+        "security": [],
+        "description": "Retrieve the API specification in an Openapi JSON format.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "OpenAPI specification"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Returns the OpenAPI definition",
+        "operationId": "getOpenAPIJSON",
         "security": [],
         "description": "Retrieve the API specification in an Openapi JSON format.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:",
         "responses": {
