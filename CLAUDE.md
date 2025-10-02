@@ -174,6 +174,12 @@ All code elements MUST be sorted:
 
 ## 🔧 GIT WORKFLOW
 
+### Commit Messages
+- **🚨 ABSOLUTELY FORBIDDEN**: NEVER add Claude Code attribution to commit messages
+  - ❌ WRONG: Adding "🤖 Generated with [Claude Code]..." or "Co-Authored-By: Claude"
+  - ✅ CORRECT: Write commit messages without any AI attribution or signatures
+  - **Rationale**: This is a professional project and commit messages should not contain AI tool attributions
+
 ### Pre-Commit Quality Checks
 - **🚨 MANDATORY**: Always run these commands before committing:
   - `pnpm run fix` (if available) or `pnpm check:lint:fix` - Fix linting and formatting issues
