@@ -27,7 +27,7 @@ describe('Quota Utils - Error Handling', () => {
       const { getQuotaCost } = await import('../src/quota-utils')
 
       expect(() => getQuotaCost('someMethod')).toThrow(
-        'Failed to load requirements.json',
+        'Failed to load "requirements.json"',
       )
     })
 
@@ -40,7 +40,7 @@ describe('Quota Utils - Error Handling', () => {
       const { getQuotaCost } = await import('../src/quota-utils')
 
       expect(() => getQuotaCost('someMethod')).toThrow(
-        'Failed to load requirements.json',
+        'Failed to load "requirements.json"',
       )
     })
   })
@@ -61,7 +61,7 @@ describe('Quota Utils - Error Handling', () => {
       const { getMethodRequirements } = await import('../src/quota-utils')
 
       expect(() => getMethodRequirements('missingMethod')).toThrow(
-        'Unknown SDK method: missingMethod',
+        'Unknown SDK method: "missingMethod"',
       )
     })
 
@@ -80,7 +80,7 @@ describe('Quota Utils - Error Handling', () => {
       const { getRequiredPermissions } = await import('../src/quota-utils')
 
       expect(() => getRequiredPermissions('missingMethod')).toThrow(
-        'Unknown SDK method: missingMethod',
+        'Unknown SDK method: "missingMethod"',
       )
     })
   })
