@@ -50,7 +50,7 @@ describe('JSON Parsing Edge Cases', () => {
       await expect(getResponseJson(mockResponse)).rejects.toThrow(
         expect.objectContaining({
           name: 'SyntaxError',
-          message: 'Unknown error',
+          message: 'Unknown JSON parsing error',
           originalResponse: responseBody,
         }),
       )
