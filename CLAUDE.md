@@ -172,6 +172,21 @@ All code elements MUST be sorted:
 - **Edge cases**: Include tests for Unicode, empty responses, malformed data
 - **Cross-platform**: Ensure tests work on Windows and POSIX
 
+## 🔧 GIT WORKFLOW
+
+### Pre-Commit Quality Checks
+- **🚨 MANDATORY**: Always run these commands before committing:
+  - `pnpm run fix` (if available) or `pnpm check:lint:fix` - Fix linting and formatting issues
+  - `pnpm check` - Run all checks (lint, type-check, tests)
+  - **Rationale**: Ensures code quality regardless of whether hooks run
+
+### Commit Strategy with --no-verify
+- **--no-verify usage**: Use `--no-verify` flag for commits that don't require pre-commit hooks
+  - ✅ **Safe to skip hooks**: Scripts (scripts/), GitHub Actions workflows (.github/workflows/), tests (test/), documentation (*.md, docs/), configuration files
+  - ❌ **Always run hooks**: SDK source code (src/), published package code, API implementations
+  - **Important**: Even when using `--no-verify`, you MUST still run linting/checking commands manually first
+  - **Rationale**: Pre-commit hooks run linting and type-checking which are critical for SDK source code but less critical for non-published files
+
 ## 🔍 DEBUGGING
 
 ### Common Issues
