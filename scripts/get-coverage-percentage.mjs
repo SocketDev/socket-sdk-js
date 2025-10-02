@@ -38,18 +38,20 @@ async function logCoveragePercentage(argv) {
     codeCoverage = await getCodeCoverage()
 
     spinner.stop()
-  } catch (error) {
+  } catch (e) {
     spinner.stop()
-    logger.error('Failed to get code coverage:', error.message)
-    throw error
+    logger.error('Failed to get code coverage:', e.message)
+    throw e
   }
 
   // Get type coverage (optional - if it fails, we continue without it).
+  // Type coverage is non-fatal because it's a secondary metric and may fail
+  // in environments where dependencies are not fully available.
   let typeCoveragePercent = null
   try {
     typeCoveragePercent = await getTypeCoverage()
-  } catch (error) {
-    logger.error('Failed to get type coverage:', error.message)
+  } catch (e) {
+    logger.error('Failed to get type coverage:', e.message)
     // Continue without type coverage - it's not critical.
   }
 
@@ -77,33 +79,21 @@ async function logCoveragePercentage(argv) {
   }
 
   // Select an emoji based on overall coverage percentage for visual feedback.
+  const COVERAGE_EMOJI_THRESHOLDS = [
+    { threshold: 99, emoji: ' 🚀' },
+    { threshold: 95, emoji: ' 🎯' },
+    { threshold: 90, emoji: ' ✨' },
+    { threshold: 80, emoji: ' 💪' },
+    { threshold: 70, emoji: ' 📈' },
+    { threshold: 60, emoji: ' ⚡' },
+    { threshold: 50, emoji: ' 🔨' },
+    { threshold: 0, emoji: ' ⚠️' },
+  ]
+
   const overallNum = parseFloat(overall)
-  let emoji = ''
-  if (overallNum >= 99) {
-    // Excellent coverage.
-    emoji = ' 🚀'
-  } else if (overallNum >= 95) {
-    // Great coverage.
-    emoji = ' 🎯'
-  } else if (overallNum >= 90) {
-    // Very good coverage.
-    emoji = ' ✨'
-  } else if (overallNum >= 80) {
-    // Good coverage.
-    emoji = ' 💪'
-  } else if (overallNum >= 70) {
-    // Decent coverage.
-    emoji = ' 📈'
-  } else if (overallNum >= 60) {
-    // Fair coverage.
-    emoji = ' ⚡'
-  } else if (overallNum >= 50) {
-    // Needs improvement.
-    emoji = ' 🔨'
-  } else {
-    // Low coverage warning.
-    emoji = ' ⚠️'
-  }
+  const emoji =
+    COVERAGE_EMOJI_THRESHOLDS.find(({ threshold }) => overallNum >= threshold)
+      ?.emoji || ''
 
   // Output the coverage data in the requested format.
   if (argv.json) {

@@ -10,6 +10,9 @@
 import { logger } from '@socketsecurity/registry/lib/logger'
 import { spawn } from '@socketsecurity/registry/lib/spawn'
 
+/**
+ * Check if output contains provenance downgrade warning.
+ */
 function includesProvenanceDowngradeWarning(output) {
   const lowered = output.toString().toLowerCase()
   return (
@@ -43,18 +46,18 @@ void (async () => {
     }
   })
 
-  tazePromise.process.on('close', () => {
-    if (hasProvenanceDowngrade) {
-      logger.error('')
-      logger.fail(
-        'ERROR: Provenance downgrade detected! Failing build to maintain security.',
-      )
-      logger.error(
-        '   Configure your dependencies to maintain provenance or exclude problematic packages.',
-      )
-      process.exit(1)
-    }
-  })
-
+  // Wait for taze to complete before checking for provenance downgrades.
   await tazePromise
+
+  // Check after process completes to ensure all output has been captured.
+  if (hasProvenanceDowngrade) {
+    logger.error('')
+    logger.fail(
+      'ERROR: Provenance downgrade detected! Failing build to maintain security.',
+    )
+    logger.error(
+      '   Configure your dependencies to maintain provenance or exclude problematic packages.',
+    )
+    process.exit(1)
+  }
 })()
