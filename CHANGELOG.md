@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.5](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.8.5) - 2025-10-02
+
+### Changed
+- Synced with OpenAPI definition
+  - Added new `/openapi.json` endpoint for retrieving API specification in JSON format
+  - Updated repo label filter descriptions to document empty string ("") usage for repositories with no labels
+  - Added 'dual' threat category type
+
 ## [1.8.4](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.8.4) - 2025-10-01
 
 ### Fixed

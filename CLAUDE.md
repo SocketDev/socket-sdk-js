@@ -187,6 +187,20 @@ All code elements MUST be sorted:
   - **Important**: Even when using `--no-verify`, you MUST still run linting/checking commands manually first
   - **Rationale**: Pre-commit hooks run linting and type-checking which are critical for SDK source code but less critical for non-published files
 
+### Changelog Management
+- **🚨 MANDATORY**: When creating changelog entries for version bumps:
+  - **Check OpenAPI definition updates**: Always analyze `types/api.d.ts` changes
+    ```bash
+    git diff v{previous-version}..HEAD -- types/
+    ```
+  - **Document user-facing changes**: Include specific details about:
+    - New endpoints added (e.g., `/openapi.json`)
+    - Updated parameter descriptions and behavior
+    - New type categories or enum values (e.g., 'dual' threat type)
+    - Breaking changes to API contracts
+  - **Focus on user impact**: Only include changes that affect SDK users, not internal infrastructure
+  - **Rationale**: OpenAPI changes directly impact SDK users and must be documented for API discoverability
+
 ## 🔍 DEBUGGING
 
 ### Common Issues
