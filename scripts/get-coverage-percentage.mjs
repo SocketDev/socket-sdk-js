@@ -29,17 +29,24 @@ async function logCoveragePercentage(argv) {
   // Get code coverage metrics (statements, branches, functions, lines).
   let codeCoverage
   try {
-    if (!existsSync(coverageJsonPath)) {
-      spinner.start('Generating coverage data...')
-    } else {
-      spinner.start('Reading coverage data...')
+    // Only show spinner in default output mode (not JSON or simple).
+    if (!argv.json && !argv.simple) {
+      if (!existsSync(coverageJsonPath)) {
+        spinner.start('Generating coverage data...')
+      } else {
+        spinner.start('Reading coverage data...')
+      }
     }
 
     codeCoverage = await getCodeCoverage()
 
-    spinner.stop()
+    if (!argv.json && !argv.simple) {
+      spinner.stop()
+    }
   } catch (e) {
-    spinner.stop()
+    if (!argv.json && !argv.simple) {
+      spinner.stop()
+    }
     logger.error('Failed to get code coverage:', e.message)
     throw e
   }
