@@ -205,6 +205,7 @@ export async function getResponseJson(
       // Attach the original response text for better error reporting.
       const enhancedError = new Error(
         `Socket API - Invalid JSON response:\n${responseBody}\n→ ${e.message}`,
+        { cause: e },
       ) as SyntaxError & {
         originalResponse?: string
       }
@@ -218,9 +219,9 @@ export async function getResponseJson(
       throw e
     }
     // Handle non-Error objects thrown by JSON parsing.
-    const unknownError = new Error(
-      'Unknown JSON parsing error',
-    ) as SyntaxError & {
+    const unknownError = new Error('Unknown JSON parsing error', {
+      cause: e,
+    }) as SyntaxError & {
       originalResponse?: string
     }
     unknownError.name = 'SyntaxError'
