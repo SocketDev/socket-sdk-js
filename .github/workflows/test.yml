@@ -13,6 +13,11 @@ permissions:
 
 jobs:
   test:
-    uses: SocketDev/socket-registry/.github/workflows/test.yml@main
+    uses: ./.github/workflows/_reusable-test.yml
     with:
       setup-script: 'pnpm run build'
+      node-versions: '[20, 22, 24]'
+      os-versions: '["ubuntu-latest", "windows-latest"]'
+      test-script: 'pnpm run test-ci'
+      timeout-minutes: 10
+      upload-artifacts: false
