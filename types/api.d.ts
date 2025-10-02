@@ -1236,6 +1236,17 @@ export interface paths {
      */
     get: operations['getOpenAPI']
   }
+  '/openapi.json': {
+    /**
+     * Returns the OpenAPI definition
+     * @description Retrieve the API specification in an Openapi JSON format.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     */
+    get: operations['getOpenAPIJSON']
+  }
   '/quota': {
     /**
      * Get quota
@@ -11698,9 +11709,9 @@ export interface operations {
         'filters.repoSlug'?: string
         /** @description Comma-separated list of repo slugs that should be excluded */
         'filters.repoSlug.notIn'?: string
-        /** @description Comma-separated list of repo labels that should be included */
+        /** @description Comma-separated list of repo labels that should be included. Use "" to filter for repositories with no labels. */
         'filters.repoLabels'?: string
-        /** @description Comma-separated list of repo labels that should be excluded */
+        /** @description Comma-separated list of repo labels that should be excluded. Use "" to filter for repositories with no labels. */
         'filters.repoLabels.notIn'?: string
         /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
         'filters.alertType'?: string
@@ -11879,7 +11890,7 @@ export interface operations {
                 alertSeverity?: string[]
                 /** @description Comma-separated list of repo slugs that should be excluded */
                 repoSlug?: string[]
-                /** @description Comma-separated list of repo labels that should be excluded */
+                /** @description Comma-separated list of repo labels that should be excluded. Use "" to filter for repositories with no labels. */
                 repoLabels?: string[]
                 /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be excluded */
                 alertType?: string[]
@@ -11950,9 +11961,9 @@ export interface operations {
         'filters.repoSlug'?: string
         /** @description Comma-separated list of repo slugs that should be excluded */
         'filters.repoSlug.notIn'?: string
-        /** @description Comma-separated list of repo labels that should be included */
+        /** @description Comma-separated list of repo labels that should be included. Use "" to filter for repositories with no labels. */
         'filters.repoLabels'?: string
-        /** @description Comma-separated list of repo labels that should be excluded */
+        /** @description Comma-separated list of repo labels that should be excluded. Use "" to filter for repositories with no labels. */
         'filters.repoLabels.notIn'?: string
         /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
         'filters.alertType'?: string
@@ -12047,7 +12058,7 @@ export interface operations {
                 alertSeverity?: string[]
                 /** @description Comma-separated list of repo slugs that should be excluded */
                 repoSlug?: string[]
-                /** @description Comma-separated list of repo labels that should be excluded */
+                /** @description Comma-separated list of repo labels that should be excluded. Use "" to filter for repositories with no labels. */
                 repoLabels?: string[]
                 /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be excluded */
                 alertType?: string[]
@@ -13113,6 +13124,7 @@ export interface operations {
           | 'typo'
           | 'secret'
           | 'obf'
+          | 'dual'
         /** @description Filter threats by package name */
         name?: string
         /** @description Filter threats by package version */
@@ -13215,6 +13227,7 @@ export interface operations {
           | 'typo'
           | 'secret'
           | 'obf'
+          | 'dual'
         /** @description Filter threats by package name */
         name?: string
         /** @description Filter threats by package version. */
@@ -13729,6 +13742,25 @@ export interface operations {
    * This endpoint requires the following org token scopes:
    */
   getOpenAPI: {
+    responses: {
+      /** @description OpenAPI specification */
+      200: {
+        content: {
+          'application/json': unknown
+        }
+      }
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Returns the OpenAPI definition
+   * @description Retrieve the API specification in an Openapi JSON format.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   */
+  getOpenAPIJSON: {
     responses: {
       /** @description OpenAPI specification */
       200: {
