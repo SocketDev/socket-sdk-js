@@ -154,7 +154,7 @@ export async function createUploadRequest(
           }
           /* c8 ignore next 3 - defensive check for non-string/stream types */
         } else {
-          throw new TypeError('Expected string or stream')
+          throw new TypeError('Expected "string" or "stream" type')
         }
       }
     } catch (e) {

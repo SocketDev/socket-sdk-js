@@ -31,7 +31,7 @@ function loadRequirements(): Requirements {
     requirements = JSON.parse(data) as Requirements
     return requirements
   } catch (e) {
-    throw new Error('Failed to load requirements.json', { cause: e })
+    throw new Error('Failed to load "requirements.json"', { cause: e })
   }
 }
 
@@ -44,7 +44,7 @@ export function getQuotaCost(methodName: SocketSdkOperations | string): number {
   const requirement = reqs.api[methodName]
 
   if (!requirement) {
-    throw new Error(`Unknown SDK method: ${methodName}`)
+    throw new Error(`Unknown SDK method: "${methodName}"`)
   }
 
   return requirement.quota
@@ -61,7 +61,7 @@ export function getRequiredPermissions(
   const requirement = reqs.api[methodName]
 
   if (!requirement) {
-    throw new Error(`Unknown SDK method: ${methodName}`)
+    throw new Error(`Unknown SDK method: "${methodName}"`)
   }
 
   return [...requirement.permissions]
@@ -78,7 +78,7 @@ export function getMethodRequirements(
   const requirement = reqs.api[methodName]
 
   if (!requirement) {
-    throw new Error(`Unknown SDK method: ${methodName}`)
+    throw new Error(`Unknown SDK method: "${methodName}"`)
   }
 
   return {
