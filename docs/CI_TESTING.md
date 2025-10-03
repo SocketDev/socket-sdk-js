@@ -2,43 +2,51 @@
 
 ## Overview
 
-This project uses a comprehensive CI testing solution inspired by socket-registry's testing infrastructure. The solution provides:
+This project uses socket-registry's centralized CI testing infrastructure. The solution provides:
 
+- **🚨 MANDATORY**: Use `SocketDev/socket-registry/.github/workflows/ci.yml@main` for consistent CI
 - **Multi-platform testing**: Linux, Windows, and macOS support
 - **Multi-version Node.js matrix**: Test across Node.js 20, 22, and 24
 - **Flexible configuration**: Customizable test scripts, timeouts, and artifact uploads
 - **Memory optimization**: Configured heap sizes for CI and local environments
 - **Cross-platform compatibility**: Handles Windows and POSIX path differences
 
+**For socket-registry-specific package testing tools**, see `socket-registry/docs/CI_TESTING_TOOLS.md` and `socket-registry/docs/PACKAGE_TESTING_GUIDE.md`. These tools (`validate:packages`, `validate:ci`) are specific to socket-registry's package override structure.
+
 ## Workflow Structure
 
-### Reusable Test Workflow
+### Centralized CI Workflow
 
-Located at `.github/workflows/_reusable-test.yml`, this workflow provides a flexible testing foundation that can be customized per project.
+**🚨 MANDATORY**: Use `SocketDev/socket-registry/.github/workflows/ci.yml@main` for consistent CI across all Socket projects.
 
 **Key Features:**
 - Matrix testing across Node.js versions and operating systems
-- Configurable setup scripts for build steps
+- Parallel execution of lint, type-check, test, and coverage
+- Configurable scripts for project-specific requirements
 - Artifact upload support for coverage reports
 - Debug mode for verbose logging
 - Timeout protection for long-running tests
 
 ### Main Test Workflow
 
-Located at `.github/workflows/test.yml`, this workflow calls the reusable workflow with project-specific configuration:
+Located at `.github/workflows/test.yml`, this workflow calls socket-registry's reusable CI workflow:
 
 ```yaml
 jobs:
   test:
-    uses: ./.github/workflows/_reusable-test.yml
+    uses: SocketDev/socket-registry/.github/workflows/ci.yml@main
     with:
       setup-script: 'pnpm run build'
       node-versions: '[20, 22, 24]'
       os-versions: '["ubuntu-latest", "windows-latest"]'
       test-script: 'pnpm run test-ci'
+      lint-script: 'pnpm run check:lint'
+      type-check-script: 'pnpm run check:tsc'
       timeout-minutes: 10
       upload-artifacts: false
 ```
+
+**Note**: For projects still using local reusable workflows (`.github/workflows/_reusable-test.yml`), migrate to socket-registry's centralized workflow.
 
 ## Configuration Options
 
@@ -232,13 +240,15 @@ pnpm run test:run
 
 ## Integration with socket-registry
 
-This testing solution is aligned with socket-registry patterns:
-- Reusable workflow structure
-- Memory optimization strategies
-- Cross-platform compatibility
-- Test coordination utilities
+This project uses socket-registry's centralized CI infrastructure:
+- **CI Workflow**: `SocketDev/socket-registry/.github/workflows/ci.yml@main`
+- **Memory optimization strategies**: Aligned with socket-registry patterns
+- **Cross-platform compatibility**: Follows socket-registry guidelines
+- **Test coordination utilities**: Shared utilities from socket-registry
 
-For consistency across Socket projects, follow the patterns established in socket-registry and documented here.
+**Socket-registry-specific tools**: The `validate:packages` and `validate:ci` scripts in socket-registry are specific to its package override structure and not applicable to SDK projects. See `socket-registry/docs/CI_TESTING_TOOLS.md` and `socket-registry/docs/PACKAGE_TESTING_GUIDE.md` for details.
+
+For consistency across Socket projects, follow the patterns established in socket-registry/CLAUDE.md and documented here.
 
 ## Future Enhancements
 
