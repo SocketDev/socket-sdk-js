@@ -112,31 +112,6 @@ export class SocketSdk {
   }
 
   /**
-   * Create HTTP request for batch package URL processing.
-   * Internal method for handling PURL batch API calls with retry logic.
-   */
-  async #createBatchPurlRequest(
-    componentsObj: { components: Array<{ purl: string }> },
-    queryParams?: QueryParams | undefined,
-  ): Promise<IncomingMessage> {
-    // Adds the first 'abort' listener to abortSignal.
-    const req = getHttpModule(this.#baseUrl)
-      .request(`${this.#baseUrl}purl?${queryToSearchParams(queryParams)}`, {
-        method: 'POST',
-        ...this.#reqOptions,
-      })
-      .end(JSON.stringify(componentsObj))
-    const response = await getResponse(req)
-
-    // Throw ResponseError for non-2xx status codes so retry logic works properly.
-    if (!isResponseOk(response)) {
-      throw new ResponseError(response)
-    }
-
-    return response
-  }
-
-  /**
    * Create async generator for streaming batch package URL processing.
    * Internal method for handling chunked PURL responses with error handling.
    */
@@ -193,6 +168,91 @@ export class SocketSdk {
         )
       }
     }
+  }
+
+  /**
+   * Create HTTP request for batch package URL processing.
+   * Internal method for handling PURL batch API calls with retry logic.
+   */
+  async #createBatchPurlRequest(
+    componentsObj: { components: Array<{ purl: string }> },
+    queryParams?: QueryParams | undefined,
+  ): Promise<IncomingMessage> {
+    // Adds the first 'abort' listener to abortSignal.
+    const req = getHttpModule(this.#baseUrl)
+      .request(`${this.#baseUrl}purl?${queryToSearchParams(queryParams)}`, {
+        method: 'POST',
+        ...this.#reqOptions,
+      })
+      .end(JSON.stringify(componentsObj))
+    const response = await getResponse(req)
+
+    // Throw ResponseError for non-2xx status codes so retry logic works properly.
+    if (!isResponseOk(response)) {
+      throw new ResponseError(response)
+    }
+
+    return response
+  }
+
+  /**
+   * Create standardized error result from query operation exceptions.
+   * Internal error handling for non-throwing query API methods.
+   */
+  #createQueryErrorResult<T>(e: unknown): SocketSdkGenericResult<T> {
+    if (e instanceof SyntaxError) {
+      // Try to get response text from enhanced error, fall back to regex pattern for compatibility.
+      const enhancedError = e as SyntaxError & { originalResponse?: string }
+      /* c8 ignore next - Defensive empty string fallback for originalResponse. */
+      let responseText = enhancedError.originalResponse || ''
+
+      /* c8 ignore next 5 - Empty response text fallback check for JSON parsing errors without originalResponse. */
+      if (!responseText) {
+        const match = e.message.match(/Invalid JSON response:\n([\s\S]*?)\n→/)
+        responseText = match?.[1] || ''
+      }
+
+      /* c8 ignore next - Defensive empty string fallback when slice returns empty. */
+      const preview = responseText.slice(0, 100) || ''
+      return {
+        cause: `Please report this. JSON.parse threw an error over the following response: \`${preview.trim()}${responseText.length > 100 ? '...' : ''}\``,
+        data: undefined,
+        error: 'Server returned invalid JSON',
+        status: 0,
+        success: false,
+      }
+    }
+
+    /* c8 ignore start - Defensive error stringification fallback branches for edge cases. */
+    const errStr = e ? String(e).trim() : ''
+    return {
+      cause: errStr || UNKNOWN_ERROR,
+      data: undefined,
+      error: 'API request failed',
+      status: 0,
+      success: false,
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Extract text content from HTTP response stream.
+   * Internal method with size limits to prevent memory exhaustion.
+   */
+  async #getResponseText(response: IncomingMessage): Promise<string> {
+    const chunks: Buffer[] = []
+    let size = 0
+    // 50MB limit to prevent out-of-memory errors from large responses.
+    const MAX = 50 * 1024 * 1024
+    for await (const chunk of response) {
+      size += chunk.length
+      /* c8 ignore next 3 - MAX size limit protection for edge cases */
+      if (size > MAX) {
+        throw new Error('Response body exceeds maximum size limit')
+      }
+      chunks.push(chunk)
+    }
+    return Buffer.concat(chunks).toString('utf8')
   }
 
   /**
@@ -277,6 +337,29 @@ export class SocketSdk {
       status: 200,
       success: true,
     } satisfies SocketSdkSuccessResult<T>
+  }
+
+  /**
+   * Handle query API response data based on requested response type.
+   * Internal method for processing different response formats (json, text, response).
+   */
+  async #handleQueryResponseData<T>(
+    response: IncomingMessage,
+    responseType: CustomResponseType,
+  ): Promise<T> {
+    if (responseType === 'response') {
+      return response as T
+    }
+
+    if (responseType === 'text') {
+      return (await this.#getResponseText(response)) as T
+    }
+
+    if (responseType === 'json') {
+      return (await getResponseJson(response)) as T
+    }
+
+    return response as T
   }
 
   /**
@@ -470,6 +553,32 @@ export class SocketSdk {
   }
 
   /**
+   * Create a diff scan from two full scan IDs.
+   * Compares two existing full scans to identify changes.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async createOrgDiffScanFromIds(
+    orgSlug: string,
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'createOrgDiffScanFromIds'>> {
+    try {
+      const data = await getResponseJson(
+        await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/diff-scans?${queryToSearchParams(queryParams)}`,
+          {},
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'createOrgDiffScanFromIds'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'createOrgDiffScanFromIds'>(e)
+    }
+  }
+
+  /**
    * Create a comprehensive security scan for an organization.
    * Uploads project files and initiates full security analysis.
    *
@@ -525,6 +634,33 @@ export class SocketSdk {
   }
 
   /**
+   * Create a new repository label for an organization.
+   * Adds label for repository categorization and management.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async createOrgRepoLabel(
+    orgSlug: string,
+    repoSlug: string,
+    labelData: QueryParams,
+  ): Promise<SocketSdkResult<'createOrgRepoLabel'>> {
+    try {
+      const data = await getResponseJson(
+        await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}/labels`,
+          labelData,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'createOrgRepoLabel'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'createOrgRepoLabel'>(e)
+    }
+  }
+
+  /**
    * Create a security scan by uploading project files.
    * Analyzes uploaded files for security vulnerabilities and policy violations.
    *
@@ -559,6 +695,30 @@ export class SocketSdk {
       return this.#handleApiSuccess<'createReport'>(data)
     } catch (e) {
       return await this.#handleApiError<'createReport'>(e)
+    }
+  }
+
+  /**
+   * Delete a diff scan from an organization.
+   * Permanently removes diff scan data and results.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async deleteOrgDiffScan(
+    orgSlug: string,
+    diffScanId: string,
+  ): Promise<SocketSdkResult<'deleteOrgDiffScan'>> {
+    try {
+      const data = await getResponseJson(
+        await createDeleteRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/diff-scans/${encodeURIComponent(diffScanId)}`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'deleteOrgDiffScan'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'deleteOrgDiffScan'>(e)
     }
   }
 
@@ -611,6 +771,205 @@ export class SocketSdk {
   }
 
   /**
+   * Delete a repository label from an organization.
+   * Removes label and associated configuration.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async deleteOrgRepoLabel(
+    orgSlug: string,
+    repoSlug: string,
+    labelSlug: string,
+  ): Promise<SocketSdkResult<'deleteOrgRepoLabel'>> {
+    try {
+      const data = await getResponseJson(
+        await createDeleteRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}/labels/${encodeURIComponent(labelSlug)}`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'deleteOrgRepoLabel'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'deleteOrgRepoLabel'>(e)
+    }
+  }
+
+  /**
+   * Delete a scan report permanently.
+   * Removes scan data and analysis results from the system.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async deleteReport(
+    reportId: string,
+  ): Promise<SocketSdkResult<'deleteReport'>> {
+    try {
+      const data = await getResponseJson(
+        await createDeleteRequest(
+          this.#baseUrl,
+          `report/delete/${encodeURIComponent(reportId)}`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'deleteReport'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'deleteReport'>(e)
+    }
+  }
+
+  /**
+   * Export scan results in CycloneDX SBOM format.
+   * Returns Software Bill of Materials compliant with CycloneDX standard.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async exportCDX(
+    orgSlug: string,
+    fullScanId: string,
+  ): Promise<SocketSdkResult<'exportCDX'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/sbom/export/cdx`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'exportCDX'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'exportCDX'>(e)
+    }
+  }
+
+  /**
+   * Export scan results in SPDX SBOM format.
+   * Returns Software Bill of Materials compliant with SPDX standard.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async exportSPDX(
+    orgSlug: string,
+    fullScanId: string,
+  ): Promise<SocketSdkResult<'exportSPDX'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/sbom/export/spdx`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'exportSPDX'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'exportSPDX'>(e)
+    }
+  }
+
+  /**
+   * Execute a raw GET request to any API endpoint with configurable response type.
+   * Supports both throwing (default) and non-throwing modes.
+   * @param urlPath - API endpoint path (e.g., 'organizations')
+   * @param options - Request options including responseType and throws behavior
+   * @returns Raw response, parsed data, or SocketSdkGenericResult based on options
+   */
+  async getApi<T = IncomingMessage>(
+    urlPath: string,
+    options?: GetOptions | undefined,
+  ): Promise<T | SocketSdkGenericResult<T>> {
+    const { responseType = 'response', throws = true } = {
+      __proto__: null,
+      ...options,
+    } as GetOptions
+
+    try {
+      const response = await createGetRequest(
+        this.#baseUrl,
+        urlPath,
+        this.#reqOptions,
+      )
+      // Check for HTTP error status codes first.
+      if (!isResponseOk(response)) {
+        if (throws) {
+          throw new ResponseError(response)
+        }
+        const errorResult = await this.#handleApiError<any>(
+          new ResponseError(response),
+        )
+        return {
+          cause: errorResult.cause,
+          data: undefined,
+          error: errorResult.error,
+          status: errorResult.status,
+          success: false,
+        }
+      }
+
+      const data = await this.#handleQueryResponseData<T>(
+        response,
+        responseType,
+      )
+
+      if (throws) {
+        return data as T
+      }
+
+      return {
+        cause: undefined,
+        data,
+        error: undefined,
+        /* c8 ignore next - Defensive fallback: response.statusCode is always defined in Node.js http/https */
+        status: response.statusCode ?? 200,
+        success: true,
+      }
+    } catch (e) {
+      if (throws) {
+        throw e
+      }
+
+      if (e instanceof ResponseError) {
+        /* c8 ignore start - ResponseError handling in getApi non-throwing mode covered by other tests */
+        // Re-use existing error handling logic from the SDK
+        const errorResult = await this.#handleApiError<any>(e)
+        return {
+          cause: errorResult.cause,
+          data: undefined,
+          error: errorResult.error,
+          status: errorResult.status,
+          success: false,
+        }
+        /* c8 ignore stop */
+      } /* c8 ignore next - Closing brace of error result handling. */
+
+      /* c8 ignore next - Fallback error handling for non-ResponseError cases in getApi. */
+      return this.#createQueryErrorResult<T>(e)
+    }
+  }
+
+  /**
+   * Get list of API tokens for an organization.
+   * Returns organization API tokens with metadata and permissions.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getAPITokens(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'getAPITokens'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/tokens`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getAPITokens'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getAPITokens'>(e)
+    }
+  }
+
+  /**
    * Retrieve audit log events for an organization.
    * Returns chronological log of security and administrative actions.
    *
@@ -631,6 +990,30 @@ export class SocketSdk {
       return this.#handleApiSuccess<'getAuditLogEvents'>(data)
     } catch (e) {
       return await this.#handleApiError<'getAuditLogEvents'>(e)
+    }
+  }
+
+  /**
+   * Get details for a specific diff scan.
+   * Returns comparison between two full scans with artifact changes.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getDiffScanById(
+    orgSlug: string,
+    diffScanId: string,
+  ): Promise<SocketSdkResult<'getDiffScanById'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/diff-scans/${encodeURIComponent(diffScanId)}`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getDiffScanById'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getDiffScanById'>(e)
     }
   }
 
@@ -740,104 +1123,6 @@ export class SocketSdk {
     } catch (e) {
       return await this.#handleApiError<'getOrganizations'>(e)
     }
-  }
-
-  /**
-   * Stream a full scan's results to file or stdout.* Provides efficient streaming for large scan datasets.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async streamOrgFullScan(
-    orgSlug: string,
-    fullScanId: string,
-    output?: string | boolean,
-  ): Promise<SocketSdkResult<'getOrgFullScan'>> {
-    try {
-      const req = getHttpModule(this.#baseUrl)
-        .request(
-          `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`,
-          {
-            method: 'GET',
-            ...this.#reqOptions,
-          },
-        )
-        .end()
-      const res = await getResponse(req)
-
-      // Check for HTTP error status codes.
-      if (!isResponseOk(res)) {
-        throw new ResponseError(res)
-      }
-
-      if (typeof output === 'string') {
-        // Stream to file
-        res.pipe(createWriteStream(output))
-      } else if (output === true) {
-        // Stream to stdout
-        res.pipe(process.stdout)
-      }
-
-      // If output is false or undefined, just return the response without streaming
-      return this.#handleApiSuccess<'getOrgFullScan'>(res)
-    } catch (e) {
-      return await this.#handleApiError<'getOrgFullScan'>(e)
-    }
-  }
-
-  /**
-   * Stream patches for artifacts in a scan report.
-   *
-   * This method streams all available patches for artifacts in a scan.
-   * Free tier users will only receive free patches.
-   *
-   * Note: This method returns a ReadableStream for processing large datasets.
-   */
-  async streamPatchesFromScan(
-    orgSlug: string,
-    scanId: string,
-  ): Promise<ReadableStream<ArtifactPatches>> {
-    const response = await createGetRequest(
-      this.#baseUrl,
-      `orgs/${encodeURIComponent(orgSlug)}/patches/scan/${encodeURIComponent(scanId)}`,
-      this.#reqOptions,
-    )
-
-    // Check for HTTP error status codes.
-    if (!isResponseOk(response)) {
-      throw new ResponseError(response, 'GET Request failed')
-    }
-
-    // The response itself is the readable stream for NDJSON data
-    // Convert the Node.js readable stream to a Web ReadableStream
-    return new ReadableStream<ArtifactPatches>({
-      start(controller) {
-        response.on('data', (chunk: Buffer) => {
-          // Parse NDJSON chunks line by line
-          const lines = chunk
-            .toString()
-            .split('\n')
-            .filter(line => line.trim())
-          for (const line of lines) {
-            try {
-              const data = JSON.parse(line) as ArtifactPatches
-              controller.enqueue(data)
-            } catch (e) {
-              // Skip invalid JSON lines
-              continue
-            }
-          }
-        })
-
-        response.on('end', () => {
-          controller.close()
-        })
-
-        response.on('error', error => {
-          /* c8 ignore next - Streaming error handler, difficult to test reliably. */
-          controller.error(error)
-        })
-      },
-    })
   }
 
   /**
@@ -962,6 +1247,55 @@ export class SocketSdk {
   }
 
   /**
+   * Get details for a specific repository label.
+   * Returns label configuration and metadata.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgRepoLabel(
+    orgSlug: string,
+    repoSlug: string,
+    labelSlug: string,
+  ): Promise<SocketSdkResult<'getOrgRepoLabel'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}/labels/${encodeURIComponent(labelSlug)}`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getOrgRepoLabel'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgRepoLabel'>(e)
+    }
+  }
+
+  /**
+   * Get list of repository labels for an organization.
+   * Returns all labels configured for repository management.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgRepoLabelList(
+    orgSlug: string,
+    repoSlug: string,
+  ): Promise<SocketSdkResult<'getOrgRepoLabelList'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}/labels`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getOrgRepoLabelList'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgRepoLabelList'>(e)
+    }
+  }
+
+  /**
    * List all repositories in an organization.
    * Returns paginated list of repository metadata and status.
    *
@@ -1004,6 +1338,29 @@ export class SocketSdk {
       return this.#handleApiSuccess<'getOrgSecurityPolicy'>(data)
     } catch (e) {
       return await this.#handleApiError<'getOrgSecurityPolicy'>(e)
+    }
+  }
+
+  /**
+   * Get organization triage settings and status.
+   * Returns alert triage configuration and current state.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgTriage(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'getOrgTriage'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/triage`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getOrgTriage'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgTriage'>(e)
     }
   }
 
@@ -1088,6 +1445,30 @@ export class SocketSdk {
   }
 
   /**
+   * Get security score for a specific npm package and version.
+   * Returns numerical security rating and scoring breakdown.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getScoreByNpmPackage(
+    pkgName: string,
+    version: string,
+  ): Promise<SocketSdkResult<'getScoreByNPMPackage'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `npm/${encodeURIComponent(pkgName)}/${encodeURIComponent(version)}/score`,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'getScoreByNPMPackage'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getScoreByNPMPackage'>(e)
+    }
+  }
+
+  /**
    * Get list of file types and formats supported for scanning.
    * Returns supported manifest files, lockfiles, and configuration formats.
    *
@@ -1111,26 +1492,130 @@ export class SocketSdk {
   }
 
   /**
-   * Get security score for a specific npm package and version.
-   * Returns numerical security rating and scoring breakdown.
+   * List all diff scans for an organization.
+   * Returns paginated list of diff scan metadata and status.
    *
    * @throws {Error} When server returns 5xx status codes
    */
-  async getScoreByNpmPackage(
-    pkgName: string,
-    version: string,
-  ): Promise<SocketSdkResult<'getScoreByNPMPackage'>> {
+  async listOrgDiffScans(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'listOrgDiffScans'>> {
     try {
       const data = await getResponseJson(
         await createGetRequest(
           this.#baseUrl,
-          `npm/${encodeURIComponent(pkgName)}/${encodeURIComponent(version)}/score`,
+          `orgs/${encodeURIComponent(orgSlug)}/diff-scans`,
           this.#reqOptions,
         ),
       )
-      return this.#handleApiSuccess<'getScoreByNPMPackage'>(data)
+      return this.#handleApiSuccess<'listOrgDiffScans'>(data)
     } catch (e) {
-      return await this.#handleApiError<'getScoreByNPMPackage'>(e)
+      return await this.#handleApiError<'listOrgDiffScans'>(e)
+    }
+  }
+
+  /**
+   * Create a new API token for an organization.
+   * Generates API token with specified scopes and metadata.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async postAPIToken(
+    orgSlug: string,
+    tokenData: QueryParams,
+  ): Promise<SocketSdkResult<'postAPIToken'>> {
+    try {
+      const data = await getResponseJson(
+        await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/tokens`,
+          tokenData,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'postAPIToken'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'postAPIToken'>(e)
+    }
+  }
+
+  /**
+   * Revoke an API token for an organization.
+   * Permanently disables the token and removes access.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async postAPITokensRevoke(
+    orgSlug: string,
+    tokenId: string,
+  ): Promise<SocketSdkResult<'postAPITokensRevoke'>> {
+    try {
+      const data = await getResponseJson(
+        await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/tokens/${encodeURIComponent(tokenId)}/revoke`,
+          {},
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'postAPITokensRevoke'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'postAPITokensRevoke'>(e)
+    }
+  }
+
+  /**
+   * Rotate an API token for an organization.
+   * Generates new token value while preserving token metadata.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async postAPITokensRotate(
+    orgSlug: string,
+    tokenId: string,
+  ): Promise<SocketSdkResult<'postAPITokensRotate'>> {
+    try {
+      const data = await getResponseJson(
+        await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/tokens/${encodeURIComponent(tokenId)}/rotate`,
+          {},
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'postAPITokensRotate'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'postAPITokensRotate'>(e)
+    }
+  }
+
+  /**
+   * Update an existing API token for an organization.
+   * Modifies token metadata, scopes, or other properties.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async postAPITokenUpdate(
+    orgSlug: string,
+    tokenId: string,
+    updateData: QueryParams,
+  ): Promise<SocketSdkResult<'postAPITokenUpdate'>> {
+    try {
+      const data = await getResponseJson(
+        await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/tokens/${encodeURIComponent(tokenId)}/update`,
+          updateData,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'postAPITokenUpdate'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'postAPITokenUpdate'>(e)
     }
   }
 
@@ -1181,774 +1666,6 @@ export class SocketSdk {
       return this.#handleApiSuccess<'searchDependencies'>(data)
     } catch (e) {
       return await this.#handleApiError<'searchDependencies'>(e)
-    }
-  }
-
-  /**
-   * Update configuration for an organization repository.
-   * Modifies monitoring settings, branch configuration, and scan preferences.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async updateOrgRepo(
-    orgSlug: string,
-    repoSlug: string,
-    queryParams?: QueryParams | undefined,
-  ): Promise<SocketSdkResult<'updateOrgRepo'>> {
-    try {
-      const data = await getResponseJson(
-        await createRequestWithJson(
-          'POST',
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`,
-          queryParams,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'updateOrgRepo'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'updateOrgRepo'>(e)
-    }
-  }
-
-  /**
-   * Upload manifest files for dependency analysis.
-   * Processes package files to create dependency snapshots and security analysis.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async uploadManifestFiles(
-    orgSlug: string,
-    filepaths: string[],
-    pathsRelativeTo: string = '.',
-  ): Promise<UploadManifestFilesReturnType | UploadManifestFilesError> {
-    const basePath = resolveBasePath(pathsRelativeTo)
-    const absFilepaths = resolveAbsPaths(filepaths, basePath)
-    try {
-      const data = await getResponseJson(
-        await createUploadRequest(
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/upload-manifest-files`,
-          createRequestBodyForFilepaths(absFilepaths, basePath),
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<any>(
-        data,
-      ) as unknown as UploadManifestFilesReturnType
-    } catch (e) {
-      /* c8 ignore start - Error handling in uploadManifestFiles method for edge cases. */
-      return (await this.#handleApiError<any>(
-        e,
-      )) as unknown as UploadManifestFilesError
-      /* c8 ignore stop */
-    } /* c8 ignore next - Closing brace of error handling block. */
-  }
-
-  /**
-   * View detailed information about a specific patch by its UUID.
-   *
-   * This method retrieves comprehensive patch details including files,
-   * vulnerabilities, description, license, and tier information.
-   */
-  async viewPatch(orgSlug: string, uuid: string): Promise<PatchViewResponse> {
-    const data = await getResponseJson(
-      await createGetRequest(
-        this.#baseUrl,
-        `orgs/${encodeURIComponent(orgSlug)}/patches/view/${encodeURIComponent(uuid)}`,
-        this.#reqOptions,
-      ),
-    )
-
-    return data as PatchViewResponse
-  }
-
-  /**
-   * Delete a scan report permanently.
-   * Removes scan data and analysis results from the system.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async deleteReport(
-    reportId: string,
-  ): Promise<SocketSdkResult<'deleteReport'>> {
-    try {
-      const data = await getResponseJson(
-        await createDeleteRequest(
-          this.#baseUrl,
-          `report/delete/${encodeURIComponent(reportId)}`,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'deleteReport'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'deleteReport'>(e)
-    }
-  }
-
-  /**
-   * Export scan results in CycloneDX SBOM format.
-   * Returns Software Bill of Materials compliant with CycloneDX standard.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async exportCDX(
-    orgSlug: string,
-    fullScanId: string,
-  ): Promise<SocketSdkResult<'exportCDX'>> {
-    try {
-      const data = await getResponseJson(
-        await createGetRequest(
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/sbom/export/cdx`,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'exportCDX'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'exportCDX'>(e)
-    }
-  }
-
-  /**
-   * Export scan results in SPDX SBOM format.
-   * Returns Software Bill of Materials compliant with SPDX standard.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async exportSPDX(
-    orgSlug: string,
-    fullScanId: string,
-  ): Promise<SocketSdkResult<'exportSPDX'>> {
-    try {
-      const data = await getResponseJson(
-        await createGetRequest(
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/sbom/export/spdx`,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'exportSPDX'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'exportSPDX'>(e)
-    }
-  }
-
-  /**
-   * Get list of API tokens for an organization.
-   * Returns organization API tokens with metadata and permissions.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getAPITokens(
-    orgSlug: string,
-  ): Promise<SocketSdkResult<'getAPITokens'>> {
-    try {
-      const data = await getResponseJson(
-        await createGetRequest(
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/tokens`,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'getAPITokens'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'getAPITokens'>(e)
-    }
-  }
-
-  /**
-   * Create a new API token for an organization.
-   * Generates API token with specified scopes and metadata.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async postAPIToken(
-    orgSlug: string,
-    tokenData: QueryParams,
-  ): Promise<SocketSdkResult<'postAPIToken'>> {
-    try {
-      const data = await getResponseJson(
-        await createRequestWithJson(
-          'POST',
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/tokens`,
-          tokenData,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'postAPIToken'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'postAPIToken'>(e)
-    }
-  }
-
-  /**
-   * Update an existing API token for an organization.
-   * Modifies token metadata, scopes, or other properties.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async postAPITokenUpdate(
-    orgSlug: string,
-    tokenId: string,
-    updateData: QueryParams,
-  ): Promise<SocketSdkResult<'postAPITokenUpdate'>> {
-    try {
-      const data = await getResponseJson(
-        await createRequestWithJson(
-          'POST',
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/tokens/${encodeURIComponent(tokenId)}/update`,
-          updateData,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'postAPITokenUpdate'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'postAPITokenUpdate'>(e)
-    }
-  }
-
-  /**
-   * Rotate an API token for an organization.
-   * Generates new token value while preserving token metadata.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async postAPITokensRotate(
-    orgSlug: string,
-    tokenId: string,
-  ): Promise<SocketSdkResult<'postAPITokensRotate'>> {
-    try {
-      const data = await getResponseJson(
-        await createRequestWithJson(
-          'POST',
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/tokens/${encodeURIComponent(tokenId)}/rotate`,
-          {},
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'postAPITokensRotate'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'postAPITokensRotate'>(e)
-    }
-  }
-
-  /**
-   * Revoke an API token for an organization.
-   * Permanently disables the token and removes access.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async postAPITokensRevoke(
-    orgSlug: string,
-    tokenId: string,
-  ): Promise<SocketSdkResult<'postAPITokensRevoke'>> {
-    try {
-      const data = await getResponseJson(
-        await createRequestWithJson(
-          'POST',
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/tokens/${encodeURIComponent(tokenId)}/revoke`,
-          {},
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'postAPITokensRevoke'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'postAPITokensRevoke'>(e)
-    }
-  }
-
-  /**
-   * Update organization's security policy configuration.* Modifies alert rules, severity thresholds, and enforcement settings.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async updateOrgSecurityPolicy(
-    orgSlug: string,
-    policyData: QueryParams,
-  ): Promise<SocketSdkResult<'updateOrgSecurityPolicy'>> {
-    try {
-      const data = await getResponseJson(
-        await createRequestWithJson(
-          'POST',
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/settings/security-policy`,
-          policyData,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'updateOrgSecurityPolicy'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'updateOrgSecurityPolicy'>(e)
-    }
-  }
-
-  /**
-   * Update organization's license policy configuration.* Modifies allowed, restricted, and monitored license types.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async updateOrgLicensePolicy(
-    orgSlug: string,
-    policyData: QueryParams,
-    queryParams?: QueryParams | undefined,
-  ): Promise<SocketSdkResult<'updateOrgLicensePolicy'>> {
-    try {
-      const data = await getResponseJson(
-        await createRequestWithJson(
-          'POST',
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/settings/license-policy?${queryToSearchParams(queryParams)}`,
-          policyData,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'updateOrgLicensePolicy'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'updateOrgLicensePolicy'>(e)
-    }
-  }
-
-  /**
-   * Get organization triage settings and status.
-   * Returns alert triage configuration and current state.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getOrgTriage(
-    orgSlug: string,
-  ): Promise<SocketSdkResult<'getOrgTriage'>> {
-    try {
-      const data = await getResponseJson(
-        await createGetRequest(
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/triage`,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'getOrgTriage'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'getOrgTriage'>(e)
-    }
-  }
-
-  /**
-   * Update alert triage status for an organization.
-   * Modifies alert resolution status and triage decisions.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async updateOrgAlertTriage(
-    orgSlug: string,
-    alertId: string,
-    triageData: QueryParams,
-  ): Promise<SocketSdkResult<'updateOrgAlertTriage'>> {
-    try {
-      const data = await getResponseJson(
-        await createRequestWithJson(
-          'PUT',
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/triage/${encodeURIComponent(alertId)}`,
-          triageData,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'updateOrgAlertTriage'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'updateOrgAlertTriage'>(e)
-    }
-  }
-
-  /**
-   * Get list of repository labels for an organization.
-   * Returns all labels configured for repository management.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getOrgRepoLabelList(
-    orgSlug: string,
-    repoSlug: string,
-  ): Promise<SocketSdkResult<'getOrgRepoLabelList'>> {
-    try {
-      const data = await getResponseJson(
-        await createGetRequest(
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}/labels`,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'getOrgRepoLabelList'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'getOrgRepoLabelList'>(e)
-    }
-  }
-
-  /**
-   * Create a new repository label for an organization.
-   * Adds label for repository categorization and management.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async createOrgRepoLabel(
-    orgSlug: string,
-    repoSlug: string,
-    labelData: QueryParams,
-  ): Promise<SocketSdkResult<'createOrgRepoLabel'>> {
-    try {
-      const data = await getResponseJson(
-        await createRequestWithJson(
-          'POST',
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}/labels`,
-          labelData,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'createOrgRepoLabel'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'createOrgRepoLabel'>(e)
-    }
-  }
-
-  /**
-   * Get details for a specific repository label.
-   * Returns label configuration and metadata.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getOrgRepoLabel(
-    orgSlug: string,
-    repoSlug: string,
-    labelSlug: string,
-  ): Promise<SocketSdkResult<'getOrgRepoLabel'>> {
-    try {
-      const data = await getResponseJson(
-        await createGetRequest(
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}/labels/${encodeURIComponent(labelSlug)}`,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'getOrgRepoLabel'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'getOrgRepoLabel'>(e)
-    }
-  }
-
-  /**
-   * Update a repository label for an organization.
-   * Modifies label properties and configuration.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async updateOrgRepoLabel(
-    orgSlug: string,
-    repoSlug: string,
-    labelSlug: string,
-    labelData: QueryParams,
-  ): Promise<SocketSdkResult<'updateOrgRepoLabel'>> {
-    try {
-      const data = await getResponseJson(
-        await createRequestWithJson(
-          'PUT',
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}/labels/${encodeURIComponent(labelSlug)}`,
-          labelData,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'updateOrgRepoLabel'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'updateOrgRepoLabel'>(e)
-    }
-  }
-
-  /**
-   * Delete a repository label from an organization.
-   * Removes label and associated configuration.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async deleteOrgRepoLabel(
-    orgSlug: string,
-    repoSlug: string,
-    labelSlug: string,
-  ): Promise<SocketSdkResult<'deleteOrgRepoLabel'>> {
-    try {
-      const data = await getResponseJson(
-        await createDeleteRequest(
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}/labels/${encodeURIComponent(labelSlug)}`,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'deleteOrgRepoLabel'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'deleteOrgRepoLabel'>(e)
-    }
-  }
-
-  /**
-   * Get details for a specific diff scan.
-   * Returns comparison between two full scans with artifact changes.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getDiffScanById(
-    orgSlug: string,
-    diffScanId: string,
-  ): Promise<SocketSdkResult<'getDiffScanById'>> {
-    try {
-      const data = await getResponseJson(
-        await createGetRequest(
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/diff-scans/${encodeURIComponent(diffScanId)}`,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'getDiffScanById'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'getDiffScanById'>(e)
-    }
-  }
-
-  /**
-   * Create a diff scan from two full scan IDs.
-   * Compares two existing full scans to identify changes.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async createOrgDiffScanFromIds(
-    orgSlug: string,
-    queryParams?: QueryParams | undefined,
-  ): Promise<SocketSdkResult<'createOrgDiffScanFromIds'>> {
-    try {
-      const data = await getResponseJson(
-        await createRequestWithJson(
-          'POST',
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/diff-scans?${queryToSearchParams(queryParams)}`,
-          {},
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'createOrgDiffScanFromIds'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'createOrgDiffScanFromIds'>(e)
-    }
-  }
-
-  /**
-   * List all diff scans for an organization.
-   * Returns paginated list of diff scan metadata and status.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async listOrgDiffScans(
-    orgSlug: string,
-  ): Promise<SocketSdkResult<'listOrgDiffScans'>> {
-    try {
-      const data = await getResponseJson(
-        await createGetRequest(
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/diff-scans`,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'listOrgDiffScans'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'listOrgDiffScans'>(e)
-    }
-  }
-
-  /**
-   * Delete a diff scan from an organization.
-   * Permanently removes diff scan data and results.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async deleteOrgDiffScan(
-    orgSlug: string,
-    diffScanId: string,
-  ): Promise<SocketSdkResult<'deleteOrgDiffScan'>> {
-    try {
-      const data = await getResponseJson(
-        await createDeleteRequest(
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/diff-scans/${encodeURIComponent(diffScanId)}`,
-          this.#reqOptions,
-        ),
-      )
-      return this.#handleApiSuccess<'deleteOrgDiffScan'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'deleteOrgDiffScan'>(e)
-    }
-  }
-
-  /**
-   * Handle query API response data based on requested response type.
-   * Internal method for processing different response formats (json, text, response).
-   */
-  async #handleQueryResponseData<T>(
-    response: IncomingMessage,
-    responseType: CustomResponseType,
-  ): Promise<T> {
-    if (responseType === 'response') {
-      return response as T
-    }
-
-    if (responseType === 'text') {
-      return (await this.#getResponseText(response)) as T
-    }
-
-    if (responseType === 'json') {
-      return (await getResponseJson(response)) as T
-    }
-
-    return response as T
-  }
-
-  /**
-   * Extract text content from HTTP response stream.
-   * Internal method with size limits to prevent memory exhaustion.
-   */
-  async #getResponseText(response: IncomingMessage): Promise<string> {
-    const chunks: Buffer[] = []
-    let size = 0
-    // 50MB limit to prevent out-of-memory errors from large responses.
-    const MAX = 50 * 1024 * 1024
-    for await (const chunk of response) {
-      size += chunk.length
-      /* c8 ignore next 3 - MAX size limit protection for edge cases */
-      if (size > MAX) {
-        throw new Error('Response body exceeds maximum size limit')
-      }
-      chunks.push(chunk)
-    }
-    return Buffer.concat(chunks).toString('utf8')
-  }
-
-  /**
-   * Create standardized error result from query operation exceptions.
-   * Internal error handling for non-throwing query API methods.
-   */
-  #createQueryErrorResult<T>(e: unknown): SocketSdkGenericResult<T> {
-    if (e instanceof SyntaxError) {
-      // Try to get response text from enhanced error, fall back to regex pattern for compatibility.
-      const enhancedError = e as SyntaxError & { originalResponse?: string }
-      /* c8 ignore next - Defensive empty string fallback for originalResponse. */
-      let responseText = enhancedError.originalResponse || ''
-
-      /* c8 ignore next 5 - Empty response text fallback check for JSON parsing errors without originalResponse. */
-      if (!responseText) {
-        const match = e.message.match(/Invalid JSON response:\n([\s\S]*?)\n→/)
-        responseText = match?.[1] || ''
-      }
-
-      /* c8 ignore next - Defensive empty string fallback when slice returns empty. */
-      const preview = responseText.slice(0, 100) || ''
-      return {
-        cause: `Please report this. JSON.parse threw an error over the following response: \`${preview.trim()}${responseText.length > 100 ? '...' : ''}\``,
-        data: undefined,
-        error: 'Server returned invalid JSON',
-        status: 0,
-        success: false,
-      }
-    }
-
-    /* c8 ignore start - Defensive error stringification fallback branches for edge cases. */
-    const errStr = e ? String(e).trim() : ''
-    return {
-      cause: errStr || UNKNOWN_ERROR,
-      data: undefined,
-      error: 'API request failed',
-      status: 0,
-      success: false,
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Execute a raw GET request to any API endpoint with configurable response type.
-   * Supports both throwing (default) and non-throwing modes.
-   * @param urlPath - API endpoint path (e.g., 'organizations')
-   * @param options - Request options including responseType and throws behavior
-   * @returns Raw response, parsed data, or SocketSdkGenericResult based on options
-   */
-  async getApi<T = IncomingMessage>(
-    urlPath: string,
-    options?: GetOptions | undefined,
-  ): Promise<T | SocketSdkGenericResult<T>> {
-    const { responseType = 'response', throws = true } = {
-      __proto__: null,
-      ...options,
-    } as GetOptions
-
-    try {
-      const response = await createGetRequest(
-        this.#baseUrl,
-        urlPath,
-        this.#reqOptions,
-      )
-      // Check for HTTP error status codes first.
-      if (!isResponseOk(response)) {
-        if (throws) {
-          throw new ResponseError(response)
-        }
-        const errorResult = await this.#handleApiError<any>(
-          new ResponseError(response),
-        )
-        return {
-          cause: errorResult.cause,
-          data: undefined,
-          error: errorResult.error,
-          status: errorResult.status,
-          success: false,
-        }
-      }
-
-      const data = await this.#handleQueryResponseData<T>(
-        response,
-        responseType,
-      )
-
-      if (throws) {
-        return data as T
-      }
-
-      return {
-        cause: undefined,
-        data,
-        error: undefined,
-        /* c8 ignore next - Defensive fallback: response.statusCode is always defined in Node.js http/https */
-        status: response.statusCode ?? 200,
-        success: true,
-      }
-    } catch (e) {
-      if (throws) {
-        throw e
-      }
-
-      if (e instanceof ResponseError) {
-        /* c8 ignore start - ResponseError handling in getApi non-throwing mode covered by other tests */
-        // Re-use existing error handling logic from the SDK
-        const errorResult = await this.#handleApiError<any>(e)
-        return {
-          cause: errorResult.cause,
-          data: undefined,
-          error: errorResult.error,
-          status: errorResult.status,
-          success: false,
-        }
-        /* c8 ignore stop */
-      } /* c8 ignore next - Closing brace of error result handling. */
-
-      /* c8 ignore next - Fallback error handling for non-ResponseError cases in getApi. */
-      return this.#createQueryErrorResult<T>(e)
     }
   }
 
@@ -2022,6 +1739,289 @@ export class SocketSdk {
       }
       /* c8 ignore stop */
     }
+  }
+
+  /**
+   * Stream a full scan's results to file or stdout.* Provides efficient streaming for large scan datasets.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async streamOrgFullScan(
+    orgSlug: string,
+    fullScanId: string,
+    output?: string | boolean,
+  ): Promise<SocketSdkResult<'getOrgFullScan'>> {
+    try {
+      const req = getHttpModule(this.#baseUrl)
+        .request(
+          `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`,
+          {
+            method: 'GET',
+            ...this.#reqOptions,
+          },
+        )
+        .end()
+      const res = await getResponse(req)
+
+      // Check for HTTP error status codes.
+      if (!isResponseOk(res)) {
+        throw new ResponseError(res)
+      }
+
+      if (typeof output === 'string') {
+        // Stream to file
+        res.pipe(createWriteStream(output))
+      } else if (output === true) {
+        // Stream to stdout
+        res.pipe(process.stdout)
+      }
+
+      // If output is false or undefined, just return the response without streaming
+      return this.#handleApiSuccess<'getOrgFullScan'>(res)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgFullScan'>(e)
+    }
+  }
+
+  /**
+   * Stream patches for artifacts in a scan report.
+   *
+   * This method streams all available patches for artifacts in a scan.
+   * Free tier users will only receive free patches.
+   *
+   * Note: This method returns a ReadableStream for processing large datasets.
+   */
+  async streamPatchesFromScan(
+    orgSlug: string,
+    scanId: string,
+  ): Promise<ReadableStream<ArtifactPatches>> {
+    const response = await createGetRequest(
+      this.#baseUrl,
+      `orgs/${encodeURIComponent(orgSlug)}/patches/scan/${encodeURIComponent(scanId)}`,
+      this.#reqOptions,
+    )
+
+    // Check for HTTP error status codes.
+    if (!isResponseOk(response)) {
+      throw new ResponseError(response, 'GET Request failed')
+    }
+
+    // The response itself is the readable stream for NDJSON data
+    // Convert the Node.js readable stream to a Web ReadableStream
+    return new ReadableStream<ArtifactPatches>({
+      start(controller) {
+        response.on('data', (chunk: Buffer) => {
+          // Parse NDJSON chunks line by line
+          const lines = chunk
+            .toString()
+            .split('\n')
+            .filter(line => line.trim())
+          for (const line of lines) {
+            try {
+              const data = JSON.parse(line) as ArtifactPatches
+              controller.enqueue(data)
+            } catch (e) {
+              // Skip invalid JSON lines
+              continue
+            }
+          }
+        })
+
+        response.on('end', () => {
+          controller.close()
+        })
+
+        response.on('error', error => {
+          /* c8 ignore next - Streaming error handler, difficult to test reliably. */
+          controller.error(error)
+        })
+      },
+    })
+  }
+
+  /**
+   * Update alert triage status for an organization.
+   * Modifies alert resolution status and triage decisions.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async updateOrgAlertTriage(
+    orgSlug: string,
+    alertId: string,
+    triageData: QueryParams,
+  ): Promise<SocketSdkResult<'updateOrgAlertTriage'>> {
+    try {
+      const data = await getResponseJson(
+        await createRequestWithJson(
+          'PUT',
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/triage/${encodeURIComponent(alertId)}`,
+          triageData,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'updateOrgAlertTriage'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgAlertTriage'>(e)
+    }
+  }
+
+  /**
+   * Update organization's license policy configuration.* Modifies allowed, restricted, and monitored license types.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async updateOrgLicensePolicy(
+    orgSlug: string,
+    policyData: QueryParams,
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'updateOrgLicensePolicy'>> {
+    try {
+      const data = await getResponseJson(
+        await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/settings/license-policy?${queryToSearchParams(queryParams)}`,
+          policyData,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'updateOrgLicensePolicy'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgLicensePolicy'>(e)
+    }
+  }
+
+  /**
+   * Update configuration for an organization repository.
+   * Modifies monitoring settings, branch configuration, and scan preferences.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async updateOrgRepo(
+    orgSlug: string,
+    repoSlug: string,
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'updateOrgRepo'>> {
+    try {
+      const data = await getResponseJson(
+        await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`,
+          queryParams,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'updateOrgRepo'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgRepo'>(e)
+    }
+  }
+
+  /**
+   * Update a repository label for an organization.
+   * Modifies label properties and configuration.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async updateOrgRepoLabel(
+    orgSlug: string,
+    repoSlug: string,
+    labelSlug: string,
+    labelData: QueryParams,
+  ): Promise<SocketSdkResult<'updateOrgRepoLabel'>> {
+    try {
+      const data = await getResponseJson(
+        await createRequestWithJson(
+          'PUT',
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}/labels/${encodeURIComponent(labelSlug)}`,
+          labelData,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'updateOrgRepoLabel'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgRepoLabel'>(e)
+    }
+  }
+
+  /**
+   * Update organization's security policy configuration.* Modifies alert rules, severity thresholds, and enforcement settings.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async updateOrgSecurityPolicy(
+    orgSlug: string,
+    policyData: QueryParams,
+  ): Promise<SocketSdkResult<'updateOrgSecurityPolicy'>> {
+    try {
+      const data = await getResponseJson(
+        await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/settings/security-policy`,
+          policyData,
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<'updateOrgSecurityPolicy'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgSecurityPolicy'>(e)
+    }
+  }
+
+  /**
+   * Upload manifest files for dependency analysis.
+   * Processes package files to create dependency snapshots and security analysis.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async uploadManifestFiles(
+    orgSlug: string,
+    filepaths: string[],
+    pathsRelativeTo: string = '.',
+  ): Promise<UploadManifestFilesReturnType | UploadManifestFilesError> {
+    const basePath = resolveBasePath(pathsRelativeTo)
+    const absFilepaths = resolveAbsPaths(filepaths, basePath)
+    try {
+      const data = await getResponseJson(
+        await createUploadRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/upload-manifest-files`,
+          createRequestBodyForFilepaths(absFilepaths, basePath),
+          this.#reqOptions,
+        ),
+      )
+      return this.#handleApiSuccess<any>(
+        data,
+      ) as unknown as UploadManifestFilesReturnType
+    } catch (e) {
+      /* c8 ignore start - Error handling in uploadManifestFiles method for edge cases. */
+      return (await this.#handleApiError<any>(
+        e,
+      )) as unknown as UploadManifestFilesError
+      /* c8 ignore stop */
+    } /* c8 ignore next - Closing brace of error handling block. */
+  }
+
+  /**
+   * View detailed information about a specific patch by its UUID.
+   *
+   * This method retrieves comprehensive patch details including files,
+   * vulnerabilities, description, license, and tier information.
+   */
+  async viewPatch(orgSlug: string, uuid: string): Promise<PatchViewResponse> {
+    const data = await getResponseJson(
+      await createGetRequest(
+        this.#baseUrl,
+        `orgs/${encodeURIComponent(orgSlug)}/patches/view/${encodeURIComponent(uuid)}`,
+        this.#reqOptions,
+      ),
+    )
+
+    return data as PatchViewResponse
   }
 }
 
