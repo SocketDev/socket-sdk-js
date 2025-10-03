@@ -29401,7 +29401,7 @@
             "name": "filters.alertActionSourceType",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert action source types (\"fallback\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included",
+            "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included",
             "schema": {
               "type": "string"
             }
@@ -29410,7 +29410,7 @@
             "name": "filters.alertActionSourceType.notIn",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert action source types (\"fallback\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded",
+            "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded",
             "schema": {
               "type": "string"
             }
@@ -30043,7 +30043,7 @@
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Comma-separated list of alert action source types (\"fallback\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded"
+                              "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded"
                             },
                             "alertFixType": {
                               "type": "array",
@@ -30361,7 +30361,7 @@
             "name": "filters.alertActionSourceType",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert action source types (\"fallback\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included",
+            "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included",
             "schema": {
               "type": "string"
             }
@@ -30370,7 +30370,7 @@
             "name": "filters.alertActionSourceType.notIn",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert action source types (\"fallback\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded",
+            "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded",
             "schema": {
               "type": "string"
             }
@@ -30734,7 +30734,7 @@
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Comma-separated list of alert action source types (\"fallback\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded"
+                              "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded"
                             },
                             "alertFixType": {
                               "type": "array",
