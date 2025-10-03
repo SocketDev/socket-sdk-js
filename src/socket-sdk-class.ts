@@ -46,7 +46,6 @@ import type {
   ArtifactPatches,
   BatchPackageFetchResultType,
   BatchPackageStreamOptions,
-  CResult,
   CompactSocketArtifact,
   CustomResponseType,
   Entitlement,
@@ -59,6 +58,7 @@ import type {
   SendOptions,
   SocketArtifact,
   SocketSdkErrorResult,
+  SocketSdkGenericResult,
   SocketSdkOperations,
   SocketSdkOptions,
   SocketSdkResult,
@@ -254,6 +254,7 @@ export class SocketSdk {
     }
     return {
       cause: body,
+      data: undefined,
       error: errorMessage,
       /* c8 ignore next - fallback for missing status code in edge cases. */
       status: statusCode ?? 0,
@@ -269,7 +270,9 @@ export class SocketSdk {
     data: unknown,
   ): SocketSdkSuccessResult<T> {
     return {
+      cause: undefined,
       data: data as SocketSdkSuccessResult<T>['data'],
+      error: undefined,
       // Use generic 200 OK status for all successful API responses.
       status: 200,
       success: true,
@@ -1833,7 +1836,7 @@ export class SocketSdk {
    * Create standardized error result from query operation exceptions.
    * Internal error handling for non-throwing query API methods.
    */
-  #createQueryErrorResult<T>(e: unknown): CResult<T> {
+  #createQueryErrorResult<T>(e: unknown): SocketSdkGenericResult<T> {
     if (e instanceof SyntaxError) {
       // Try to get response text from enhanced error, fall back to regex pattern for compatibility.
       const enhancedError = e as SyntaxError & { originalResponse?: string }
@@ -1849,29 +1852,37 @@ export class SocketSdk {
       /* c8 ignore next - Defensive empty string fallback when slice returns empty. */
       const preview = responseText.slice(0, 100) || ''
       return {
-        ok: false,
-        message: 'Server returned invalid JSON',
         cause: `Please report this. JSON.parse threw an error over the following response: \`${preview.trim()}${responseText.length > 100 ? '...' : ''}\``,
-      } as CResult<T>
+        data: undefined,
+        error: 'Server returned invalid JSON',
+        status: 0,
+        success: false,
+      }
     }
 
     /* c8 ignore start - Defensive error stringification fallback branches for edge cases. */
     const errStr = e ? String(e).trim() : ''
     return {
-      ok: false,
-      message: 'API request failed',
       cause: errStr || UNKNOWN_ERROR,
-    } as CResult<T>
+      data: undefined,
+      error: 'API request failed',
+      status: 0,
+      success: false,
+    }
     /* c8 ignore stop */
   }
 
   /**
    * Execute a raw GET request to any API endpoint with configurable response type.
+   * Supports both throwing (default) and non-throwing modes.
+   * @param urlPath - API endpoint path (e.g., 'organizations')
+   * @param options - Request options including responseType and throws behavior
+   * @returns Raw response, parsed data, or SocketSdkGenericResult based on options
    */
   async getApi<T = IncomingMessage>(
     urlPath: string,
     options?: GetOptions | undefined,
-  ): Promise<T | CResult<T>> {
+  ): Promise<T | SocketSdkGenericResult<T>> {
     const { responseType = 'response', throws = true } = {
       __proto__: null,
       ...options,
@@ -1892,12 +1903,12 @@ export class SocketSdk {
           new ResponseError(response),
         )
         return {
-          ok: false,
-          code: errorResult.status,
-          message: 'Socket API error',
-          cause: errorResult.cause || errorResult.error,
-          data: { code: errorResult.status },
-        } as CResult<T>
+          cause: errorResult.cause,
+          data: undefined,
+          error: errorResult.error,
+          status: errorResult.status,
+          success: false,
+        }
       }
 
       const data = await this.#handleQueryResponseData<T>(
@@ -1910,25 +1921,29 @@ export class SocketSdk {
       }
 
       return {
-        ok: true,
+        cause: undefined,
         data,
-      } as CResult<T>
+        error: undefined,
+        /* c8 ignore next - Defensive fallback: response.statusCode is always defined in Node.js http/https */
+        status: response.statusCode ?? 200,
+        success: true,
+      }
     } catch (e) {
       if (throws) {
         throw e
       }
 
       if (e instanceof ResponseError) {
-        /* c8 ignore start - ResponseError handling in sendApi non-throwing mode */
+        /* c8 ignore start - ResponseError handling in getApi non-throwing mode covered by other tests */
         // Re-use existing error handling logic from the SDK
         const errorResult = await this.#handleApiError<any>(e)
         return {
-          ok: false,
-          code: errorResult.status,
-          message: 'Socket API error',
-          cause: errorResult.cause || errorResult.error,
-          data: { code: errorResult.status },
-        } as CResult<T>
+          cause: errorResult.cause,
+          data: undefined,
+          error: errorResult.error,
+          status: errorResult.status,
+          success: false,
+        }
         /* c8 ignore stop */
       } /* c8 ignore next - Closing brace of error result handling. */
 
@@ -1939,11 +1954,15 @@ export class SocketSdk {
 
   /**
    * Send POST or PUT request with JSON body and return parsed JSON response.
+   * Supports both throwing (default) and non-throwing modes.
+   * @param urlPath - API endpoint path (e.g., 'organizations')
+   * @param options - Request options including method, body, and throws behavior
+   * @returns Parsed JSON response or SocketSdkGenericResult based on options
    */
   async sendApi<T>(
     urlPath: string,
     options?: SendOptions | undefined,
-  ): Promise<T | CResult<T>> {
+  ): Promise<T | SocketSdkGenericResult<T>> {
     const {
       body,
       // Default to POST method for JSON API requests.
@@ -1961,9 +1980,19 @@ export class SocketSdk {
         this.#reqOptions,
       )
 
+      const data = (await getResponseJson(response)) as T
+
+      if (throws) {
+        return data
+      }
+
       return {
-        ok: true,
-        data: (await getResponseJson(response)) as T,
+        cause: undefined,
+        data,
+        error: undefined,
+        /* c8 ignore next - Defensive fallback: response.statusCode is always defined in Node.js http/https */
+        status: response.statusCode ?? 200,
+        success: true,
       }
     } catch (e) {
       if (throws) {
@@ -1974,20 +2003,22 @@ export class SocketSdk {
         // Re-use existing error handling logic from the SDK
         const errorResult = await this.#handleApiError<any>(e)
         return {
-          ok: false,
-          code: errorResult.status,
-          message: 'Socket API error',
-          cause: errorResult.cause || errorResult.error,
-          data: { code: errorResult.status },
+          cause: errorResult.cause,
+          data: undefined,
+          error: errorResult.error,
+          status: errorResult.status,
+          success: false,
         }
       }
 
       /* c8 ignore start - Defensive error stringification fallback branches for sendApi edge cases. */
       const errStr = e ? String(e).trim() : ''
       return {
-        ok: false,
-        message: 'API request failed',
         cause: errStr || UNKNOWN_ERROR,
+        data: undefined,
+        error: 'API request failed',
+        status: 0,
+        success: false,
       }
       /* c8 ignore stop */
     }
