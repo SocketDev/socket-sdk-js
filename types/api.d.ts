@@ -1503,59 +1503,59 @@ export interface components {
     }
     SocketArtifact: components['schemas']['SocketPURL'] &
       components['schemas']['SocketArtifactLink'] & {
-        id?: components['schemas']['SocketId']
+        id?: components['schemas']['SocketId'] | undefined
         /** @description List of package authors or maintainers */
-        author?: string[]
+        author?: string[] | undefined
         /**
          * @description Total size of the package artifact in bytes
          * @default 0
          */
-        size?: number
+        size?: number | undefined
         /**
          * @description Hugging Face model, dataset, or space type
          * @default
          */
-        repositoryType?: string
-        alerts?: Array<components['schemas']['SocketAlert']>
-        score?: components['schemas']['SocketScore']
-        patch?: components['schemas']['SocketArtifactPatch']
+        repositoryType?: string | undefined
+        alerts?: Array<components['schemas']['SocketAlert']> | undefined
+        score?: components['schemas']['SocketScore'] | undefined
+        patch?: components['schemas']['SocketArtifactPatch'] | undefined
         /**
          * @description Original unmodified PURL input string before normalization
          * @default
          */
-        inputPurl?: string
+        inputPurl?: string | undefined
         /**
          * @description Deprecated: Always 0. Previously used for batch ordering but replaced by inputPurl for better tracking.
          * @default 0
          */
-        batchIndex?: number
+        batchIndex?: number | undefined
         /** @default */
-        license?: string
-        licenseDetails?: components['schemas']['LicenseDetails']
-        licenseAttrib?: components['schemas']['SAttrib1_N']
+        license?: string | undefined
+        licenseDetails?: components['schemas']['LicenseDetails'] | undefined
+        licenseAttrib?: components['schemas']['SAttrib1_N'] | undefined
       }
     SocketDiffArtifact: components['schemas']['SocketPURL'] & {
       diffType: components['schemas']['SocketDiffArtifactType']
-      id?: components['schemas']['SocketId']
+      id?: components['schemas']['SocketId'] | undefined
       /** @description List of package authors or maintainers */
-      author?: string[]
+      author?: string[] | undefined
       /** @description Artifact links from the base/before state */
-      base?: Array<components['schemas']['SocketArtifactLink']>
-      capabilities?: components['schemas']['Capabilities']
+      base?: Array<components['schemas']['SocketArtifactLink']> | undefined
+      capabilities?: components['schemas']['Capabilities'] | undefined
       /** @description Artifact links from the head/after state */
-      head?: Array<components['schemas']['SocketArtifactLink']>
-      qualifiers?: components['schemas']['Qualifiers']
+      head?: Array<components['schemas']['SocketArtifactLink']> | undefined
+      qualifiers?: components['schemas']['Qualifiers'] | undefined
       /**
        * @description Total size of the package artifact in bytes
        * @default 0
        */
-      size?: number
+      size?: number | undefined
       /** @default */
-      license?: string
-      licenseDetails?: components['schemas']['LicenseDetails']
-      licenseAttrib?: components['schemas']['SAttrib1_N']
-      score?: components['schemas']['SocketScore']
-      alerts?: Array<components['schemas']['SocketAlert']>
+      license?: string | undefined
+      licenseDetails?: components['schemas']['LicenseDetails'] | undefined
+      licenseAttrib?: components['schemas']['SAttrib1_N'] | undefined
+      score?: components['schemas']['SocketScore'] | undefined
+      alerts?: Array<components['schemas']['SocketAlert']> | undefined
     }
     CDXManifestSchema: {
       /** @default CycloneDX */
@@ -1573,10 +1573,10 @@ export interface components {
           components: Array<
             components['schemas']['CDXComponentSchema'] & {
               /** @default Socket */
-              author?: string
-              authors?: string[]
+              author?: string | undefined
+              authors?: string[] | undefined
               /** @default Socket */
-              publisher?: string
+              publisher?: string | undefined
             }
           >
         }
@@ -1585,7 +1585,7 @@ export interface components {
           name: string
         }>
         /** @default */
-        supplier?: string
+        supplier?: string | undefined
         lifecycles: Array<{
           /** @default build */
           phase: string
@@ -1602,7 +1602,7 @@ export interface components {
       dependencies: Array<{
         /** @default */
         ref: string
-        dependsOn?: string[]
+        dependsOn?: string[] | undefined
       }>
       vulnerabilities?: Array<{
         /** @default */
@@ -1611,67 +1611,67 @@ export interface components {
         id: string
         source?: {
           /** @default */
-          name?: string
+          name?: string | undefined
           /** @default */
-          url?: string
+          url?: string | undefined
         }
         ratings?: Array<{
           source?: {
             /** @default */
-            name?: string
+            name?: string | undefined
             /** @default */
-            url?: string
+            url?: string | undefined
           }
           /** @default 0 */
-          score?: number
+          score?: number | undefined
           /** @default */
-          severity?: string
+          severity?: string | undefined
           /** @default */
-          method?: string
+          method?: string | undefined
           /** @default */
-          vector?: string
+          vector?: string | undefined
         }>
-        cwes?: number[]
+        cwes?: number[] | undefined
         /** @default */
-        description?: string
+        description?: string | undefined
         /** @default */
-        detail?: string
+        detail?: string | undefined
         /** @default */
-        recommendation?: string
+        recommendation?: string | undefined
         advisories?: Array<{
           /** @default */
           url: string
           /** @default */
-          title?: string
+          title?: string | undefined
         }>
         /** @default */
-        created?: string
+        created?: string | undefined
         /** @default */
-        published?: string
+        published?: string | undefined
         /** @default */
-        updated?: string
+        updated?: string | undefined
         affects?: Array<{
           /** @default */
           ref: string
           versions?: Array<{
             /** @default */
-            version?: string
+            version?: string | undefined
             /** @default */
-            status?: string
+            status?: string | undefined
           }>
         }>
         analysis?: {
           /** @default */
-          state?: string
+          state?: string | undefined
           /** @default */
-          justification?: string
-          response?: string[]
+          justification?: string | undefined
+          response?: string[] | undefined
           /** @default */
-          detail?: string
+          detail?: string | undefined
           /** @default */
-          firstIssued?: string
+          firstIssued?: string | undefined
           /** @default */
-          lastUpdated?: string
+          lastUpdated?: string | undefined
         }
       }>
     }
@@ -1702,11 +1702,11 @@ export interface components {
         /** @default */
         packageFileName: string
         /** @default */
-        description?: string
+        description?: string | undefined
         /** @default */
-        primaryPackagePurpose?: string
+        primaryPackagePurpose?: string | undefined
         /** @default */
-        downloadLocation?: string
+        downloadLocation?: string | undefined
         /** @default false */
         filesAnalyzed: boolean
         /** @default NOASSERTION */
@@ -1820,12 +1820,12 @@ export interface components {
        * @description Starting line or position in the manifest file
        * @default 0
        */
-      start?: number
+      start?: number | undefined
       /**
        * @description Ending line or position in the manifest file
        * @default 0
        */
-      end?: number
+      end?: number | undefined
     }
     /** @default */
     SocketId: string
@@ -1889,27 +1889,27 @@ export interface components {
        * @description Package namespace or scope, such as npm organizations (@angular), Maven groupIds, or Docker image owners
        * @default
        */
-      namespace?: string
+      namespace?: string | undefined
       /**
        * @description Package name within its ecosystem
        * @default
        */
-      name?: string
+      name?: string | undefined
       /**
        * @description Package version string
        * @default
        */
-      version?: string
+      version?: string | undefined
       /**
        * @description Path within the package to a specific file or directory, used to reference nested components
        * @default
        */
-      subpath?: string
+      subpath?: string | undefined
       /**
        * @description Package-specific release identifier, such as PyPI's artifact ID or the specific build/release version
        * @default
        */
-      release?: string
+      release?: string | undefined
     }
     SocketAlert: {
       /**
@@ -1922,33 +1922,33 @@ export interface components {
        * @default
        */
       type: string
-      severity?: components['schemas']['SocketIssueSeverity']
-      category?: components['schemas']['SocketCategory']
+      severity?: components['schemas']['SocketIssueSeverity'] | undefined
+      category?: components['schemas']['SocketCategory'] | undefined
       /**
        * @description File path where this alert was detected
        * @default
        */
-      file?: string
+      file?: string | undefined
       /**
        * @description Starting position of the alert in the file
        * @default 0
        */
-      start?: number
+      start?: number | undefined
       /**
        * @description Ending position of the alert in the file
        * @default 0
        */
-      end?: number
+      end?: number | undefined
       /**
        * @description Additional alert-specific properties and metadata that vary by alert type
        * @default null
        */
-      props?: Record<string, never>
+      props?: Record<string, never> | undefined
       /**
        * @description Action to take for this alert (e.g., error, warn, ignore)
        * @default
        */
-      action?: string
+      action?: string | undefined
       actionSource?: {
         /**
          * @description Type of action source (e.g., policy, override)
@@ -1982,7 +1982,7 @@ export interface components {
        * @description Index of the policy rule that triggered this action, for traceability to security policies
        * @default 0
        */
-      actionPolicyIndex?: number
+      actionPolicyIndex?: number | undefined
       fix?: {
         /**
          * @description Type of fix available (e.g., upgrade, remove, cve)
@@ -2011,24 +2011,24 @@ export interface components {
            * @description Indicates if this patch is deprecated and should not be used
            * @default false
            */
-          deprecated?: boolean
+          deprecated?: boolean | undefined
         }>
       }
-      patch?: components['schemas']['SocketPatch']
+      patch?: components['schemas']['SocketPatch'] | undefined
       reachability?: {
-        head?: components['schemas']['ReachabilityResult']
-        base?: components['schemas']['ReachabilityResult']
+        head?: components['schemas']['ReachabilityResult'] | undefined
+        base?: components['schemas']['ReachabilityResult'] | undefined
       }
       /**
        * @description Generic alert sub-type
        * @default
        */
-      subType?: string
+      subType?: string | undefined
     }
     SocketArtifactPatch: {
-      appliedPatch?: components['schemas']['SocketPatch']
+      appliedPatch?: components['schemas']['SocketPatch'] | undefined
       /** @description List of available patches that can be applied to fix vulnerabilities */
-      availablePatches?: Array<components['schemas']['SocketPatch']>
+      availablePatches?: Array<components['schemas']['SocketPatch']> | undefined
     }
     LicenseDetails: Array<{
       /**
@@ -2090,22 +2090,24 @@ export interface components {
        * @description Indicates if this is a direct dependency (not transitive)
        * @default false
        */
-      direct?: boolean
+      direct?: boolean | undefined
       /**
        * @description Indicates if this is a development-only dependency not used in production
        * @default false
        */
-      dev?: boolean
+      dev?: boolean | undefined
       /**
        * @description Indicates if this package is deprecated, abandoned, or no longer maintained
        * @default false
        */
-      dead?: boolean
-      manifestFiles?: Array<components['schemas']['SocketManifestReference']>
+      dead?: boolean | undefined
+      manifestFiles?:
+        | Array<components['schemas']['SocketManifestReference']>
+        | undefined
       /** @description IDs of the root-level packages in the dependency tree that depend on this package */
-      topLevelAncestors?: Array<components['schemas']['SocketId']>
+      topLevelAncestors?: Array<components['schemas']['SocketId']> | undefined
       /** @description IDs of packages that this package directly depends on */
-      dependencies?: Array<components['schemas']['SocketId']>
+      dependencies?: Array<components['schemas']['SocketId']> | undefined
       /** @description Computed priority scores for each alert type based on severity, reachability, and fixability factors */
       alertPriorities?: {
         [key: string]: {
@@ -2161,7 +2163,7 @@ export interface components {
            * @description Formula used to calculate the priority score
            * @default
            */
-          formula?: string
+          formula?: string | undefined
         }
       }
       artifact?: components['schemas']['SocketPURL'] & {
@@ -2194,9 +2196,9 @@ export interface components {
       | 'unchanged'
     CDXComponentSchema: {
       /** @default */
-      author?: string
+      author?: string | undefined
       /** @default */
-      publisher?: string
+      publisher?: string | undefined
       /** @default */
       group: string
       /** @default */
@@ -2204,9 +2206,9 @@ export interface components {
       /** @default */
       version: string
       /** @default */
-      description?: string
+      description?: string | undefined
       /** @default */
-      scope?: string
+      scope?: string | undefined
       hashes?: Array<{
         /** @default */
         alg: string
@@ -2215,14 +2217,14 @@ export interface components {
       }>
       licenses?: Array<{
         /** @default */
-        expression?: string
+        expression?: string | undefined
         license?: {
           /** @default */
-          id?: string
+          id?: string | undefined
           /** @default */
-          name?: string
+          name?: string | undefined
           /** @default */
-          url?: string
+          url?: string | undefined
         }
       }>
       /** @default */
@@ -2257,7 +2259,7 @@ export interface components {
           location: string
         }>
       }
-      tags?: string[]
+      tags?: string[] | undefined
       properties?: Array<{
         /** @default */
         name: string
@@ -2274,7 +2276,9 @@ export interface components {
           implementationPlatform: string
         }
       }>
-      components?: Array<components['schemas']['CDXComponentSchema']>
+      components?:
+        | Array<components['schemas']['CDXComponentSchema']>
+        | undefined
     }
     LicenseAllowListElabbed: {
       strings: string[]
@@ -2285,7 +2289,7 @@ export interface components {
     SocketIssue:
       | {
           /** @enum {string} */
-          type?: 'gptSecurity'
+          type?: 'gptSecurity' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2297,12 +2301,12 @@ export interface components {
               /** @default 0 */
               severity: number
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'gptAnomaly'
+          type?: 'gptAnomaly' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2319,12 +2323,12 @@ export interface components {
                */
               risk: 'low' | 'medium' | 'high'
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'gptMalware'
+          type?: 'gptMalware' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2336,12 +2340,12 @@ export interface components {
               /** @default 0 */
               severity: number
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'filesystemAccess'
+          type?: 'filesystemAccess' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2349,12 +2353,12 @@ export interface components {
               /** @default fs */
               module: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'networkAccess'
+          type?: 'networkAccess' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2362,12 +2366,12 @@ export interface components {
               /** @default net */
               module: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'shellAccess'
+          type?: 'shellAccess' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2375,12 +2379,12 @@ export interface components {
               /** @default child_process */
               module: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'debugAccess'
+          type?: 'debugAccess' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2388,12 +2392,12 @@ export interface components {
               /** @default vm */
               module: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'chromePermission'
+          type?: 'chromePermission' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2403,12 +2407,12 @@ export interface components {
               /** @default */
               permissionType: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'chromeHostPermission'
+          type?: 'chromeHostPermission' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2418,12 +2422,12 @@ export interface components {
               /** @default */
               permissionType: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'chromeWildcardHostPermission'
+          type?: 'chromeWildcardHostPermission' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2433,12 +2437,12 @@ export interface components {
               /** @default */
               permissionType: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'chromeContentScript'
+          type?: 'chromeContentScript' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2450,12 +2454,12 @@ export interface components {
               /** @default */
               runAt: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'criticalCVE'
+          type?: 'criticalCVE' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2549,12 +2553,12 @@ export interface components {
                 percentile: number
               } | null
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'cve'
+          type?: 'cve' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2648,12 +2652,12 @@ export interface components {
                 percentile: number
               } | null
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'mediumCVE'
+          type?: 'mediumCVE' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2747,12 +2751,12 @@ export interface components {
                 percentile: number
               } | null
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'mildCVE'
+          type?: 'mildCVE' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2846,22 +2850,22 @@ export interface components {
                 percentile: number
               } | null
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'emptyPackage'
+          type?: 'emptyPackage' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'trivialPackage'
+          type?: 'trivialPackage' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2869,32 +2873,32 @@ export interface components {
               /** @default 0 */
               linesOfCode: number
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'noREADME'
+          type?: 'noREADME' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'shrinkwrap'
+          type?: 'shrinkwrap' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'generic'
+          type?: 'generic' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2904,12 +2908,12 @@ export interface components {
               /** @default */
               description: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'licenseSpdxDisj'
+          type?: 'licenseSpdxDisj' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2922,22 +2926,22 @@ export interface components {
               warnData: Array<Record<string, never>>
               monitorData: Array<Record<string, never>>
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'unsafeCopyright'
+          type?: 'unsafeCopyright' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'licenseChange'
+          type?: 'licenseChange' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2947,12 +2951,12 @@ export interface components {
               /** @default */
               newLicenseId: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'nonOSILicense'
+          type?: 'nonOSILicense' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2960,12 +2964,12 @@ export interface components {
               /** @default */
               licenseId: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'deprecatedLicense'
+          type?: 'deprecatedLicense' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -2973,32 +2977,32 @@ export interface components {
               /** @default */
               licenseId: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'missingLicense'
+          type?: 'missingLicense' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'nonSPDXLicense'
+          type?: 'nonSPDXLicense' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'unclearLicense'
+          type?: 'unclearLicense' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3006,12 +3010,12 @@ export interface components {
               /** @default */
               possibleLicenseId: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'mixedLicense'
+          type?: 'mixedLicense' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3019,22 +3023,22 @@ export interface components {
               /** @default */
               licenseId: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'notice'
+          type?: 'notice' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'modifiedLicense'
+          type?: 'modifiedLicense' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3044,12 +3048,12 @@ export interface components {
               /** @default 0 */
               similarity: number
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'modifiedException'
+          type?: 'modifiedException' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3061,12 +3065,12 @@ export interface components {
               /** @default */
               comments: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'licenseException'
+          type?: 'licenseException' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3076,12 +3080,12 @@ export interface components {
               /** @default */
               comments: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'deprecatedException'
+          type?: 'deprecatedException' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3091,12 +3095,12 @@ export interface components {
               /** @default */
               comments: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'miscLicenseIssues'
+          type?: 'miscLicenseIssues' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3106,12 +3110,12 @@ export interface components {
               /** @default */
               location: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'unidentifiedLicense'
+          type?: 'unidentifiedLicense' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3125,22 +3129,22 @@ export interface components {
               /** @default 0 */
               match_strength: number
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'noLicenseFound'
+          type?: 'noLicenseFound' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'explicitlyUnlicensedItem'
+          type?: 'explicitlyUnlicensedItem' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3152,12 +3156,12 @@ export interface components {
               /** @default */
               maybeTruncatedSource: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'copyleftLicense'
+          type?: 'copyleftLicense' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3165,12 +3169,12 @@ export interface components {
               /** @default */
               licenseId: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'nonpermissiveLicense'
+          type?: 'nonpermissiveLicense' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3178,12 +3182,12 @@ export interface components {
               /** @default */
               licenseId: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'ambiguousClassifier'
+          type?: 'ambiguousClassifier' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3195,22 +3199,22 @@ export interface components {
               /** @default {} */
               maybeByteSpan: Record<string, never>
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'invalidPackageJSON'
+          type?: 'invalidPackageJSON' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'httpDependency'
+          type?: 'httpDependency' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3220,12 +3224,12 @@ export interface components {
               /** @default */
               url: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'gitDependency'
+          type?: 'gitDependency' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3235,12 +3239,12 @@ export interface components {
               /** @default */
               url: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'gitHubDependency'
+          type?: 'gitHubDependency' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3254,12 +3258,12 @@ export interface components {
               /** @default */
               commitsh: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'fileDependency'
+          type?: 'fileDependency' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3269,42 +3273,42 @@ export interface components {
               /** @default */
               filePath: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'noTests'
+          type?: 'noTests' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'noRepository'
+          type?: 'noRepository' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'badSemver'
+          type?: 'badSemver' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'badSemverDependency'
+          type?: 'badSemverDependency' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3314,62 +3318,62 @@ export interface components {
               /** @default */
               packageVersion: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'noV1'
+          type?: 'noV1' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'noWebsite'
+          type?: 'noWebsite' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'noBugTracker'
+          type?: 'noBugTracker' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'noAuthorData'
+          type?: 'noAuthorData' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'typeModuleCompatibility'
+          type?: 'typeModuleCompatibility' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'floatingDependency'
+          type?: 'floatingDependency' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3377,12 +3381,12 @@ export interface components {
               /** @default */
               dependency: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'manifestConfusion'
+          type?: 'manifestConfusion' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3392,12 +3396,12 @@ export interface components {
               /** @default */
               description: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'malware'
+          type?: 'malware' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3407,12 +3411,12 @@ export interface components {
               /** @default */
               note: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'telemetry'
+          type?: 'telemetry' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3422,12 +3426,12 @@ export interface components {
               /** @default */
               note: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'troll'
+          type?: 'troll' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3437,12 +3441,12 @@ export interface components {
               /** @default */
               note: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'deprecated'
+          type?: 'deprecated' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3450,12 +3454,12 @@ export interface components {
               /** @default This package is deprecated */
               reason: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'chronoAnomaly'
+          type?: 'chronoAnomaly' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3469,12 +3473,12 @@ export interface components {
               /** @default */
               prevSemverVersion: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'compromisedSSHKey'
+          type?: 'compromisedSSHKey' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3486,12 +3490,12 @@ export interface components {
               /** @default */
               username: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'semverAnomaly'
+          type?: 'semverAnomaly' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3501,12 +3505,12 @@ export interface components {
               /** @default */
               newVersion: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'newAuthor'
+          type?: 'newAuthor' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3516,12 +3520,12 @@ export interface components {
               /** @default */
               newAuthor: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'unstableOwnership'
+          type?: 'unstableOwnership' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3529,22 +3533,22 @@ export interface components {
               /** @default */
               author: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'missingAuthor'
+          type?: 'missingAuthor' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'unmaintained'
+          type?: 'unmaintained' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3552,12 +3556,12 @@ export interface components {
               /** @default */
               lastPublish: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'unpublished'
+          type?: 'unpublished' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3565,12 +3569,12 @@ export interface components {
               /** @default */
               version: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'majorRefactor'
+          type?: 'majorRefactor' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3584,22 +3588,22 @@ export interface components {
               /** @default 0 */
               changedPercent: number
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'missingTarball'
+          type?: 'missingTarball' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'suspiciousStarActivity'
+          type?: 'suspiciousStarActivity' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3609,22 +3613,22 @@ export interface components {
               /** @default */
               repository: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'unpopularPackage'
+          type?: 'unpopularPackage' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'socketUpgradeAvailable'
+          type?: 'socketUpgradeAvailable' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3638,44 +3642,44 @@ export interface components {
               /** @default */
               version: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'longStrings'
+          type?: 'longStrings' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'highEntropyStrings'
+          type?: 'highEntropyStrings' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'urlStrings'
+          type?: 'urlStrings' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: {
               urls: string[]
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'usesEval'
+          type?: 'usesEval' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3683,22 +3687,22 @@ export interface components {
               /** @default eval */
               evalType: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'dynamicRequire'
+          type?: 'dynamicRequire' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'envVars'
+          type?: 'envVars' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3706,12 +3710,12 @@ export interface components {
               /** @default */
               envVars: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'missingDependency'
+          type?: 'missingDependency' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3719,12 +3723,12 @@ export interface components {
               /** @default */
               name: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'unusedDependency'
+          type?: 'unusedDependency' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3734,12 +3738,12 @@ export interface components {
               /** @default */
               version: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'peerDependency'
+          type?: 'peerDependency' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3747,12 +3751,12 @@ export interface components {
               /** @default */
               name: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'uncaughtOptionalDependency'
+          type?: 'uncaughtOptionalDependency' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3760,42 +3764,42 @@ export interface components {
               /** @default */
               name: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'unresolvedRequire'
+          type?: 'unresolvedRequire' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'extraneousDependency'
+          type?: 'extraneousDependency' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'obfuscatedRequire'
+          type?: 'obfuscatedRequire' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'obfuscatedFile'
+          type?: 'obfuscatedFile' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3805,12 +3809,12 @@ export interface components {
               /** @default */
               notes: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'minifiedFile'
+          type?: 'minifiedFile' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3818,12 +3822,12 @@ export interface components {
               /** @default 0 */
               confidence: number
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'installScripts'
+          type?: 'installScripts' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3833,22 +3837,22 @@ export interface components {
               /** @default */
               source: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'hasNativeCode'
+          type?: 'hasNativeCode' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'binScriptConfusion'
+          type?: 'binScriptConfusion' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3856,12 +3860,12 @@ export interface components {
               /** @default */
               binScript: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'shellScriptOverride'
+          type?: 'shellScriptOverride' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3869,12 +3873,12 @@ export interface components {
               /** @default */
               binScript: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'didYouMean'
+          type?: 'didYouMean' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3882,12 +3886,12 @@ export interface components {
               /** @default */
               alternatePackage: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'gptDidYouMean'
+          type?: 'gptDidYouMean' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3895,32 +3899,32 @@ export interface components {
               /** @default */
               alternatePackage: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'bidi'
+          type?: 'bidi' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'zeroWidth'
+          type?: 'zeroWidth' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'badEncoding'
+          type?: 'badEncoding' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3928,32 +3932,32 @@ export interface components {
               /** @default utf8 */
               encoding: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'homoglyphs'
+          type?: 'homoglyphs' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'invisibleChars'
+          type?: 'invisibleChars' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'suspiciousString'
+          type?: 'suspiciousString' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3963,12 +3967,12 @@ export interface components {
               /** @default */
               explanation: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'potentialVulnerability'
+          type?: 'potentialVulnerability' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3981,12 +3985,12 @@ export interface components {
                */
               risk: 'low' | 'medium' | 'high'
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'vsxProposedApiUsage'
+          type?: 'vsxProposedApiUsage' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -3994,12 +3998,12 @@ export interface components {
               /** @default */
               proposals: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'vsxActivationWildcard'
+          type?: 'vsxActivationWildcard' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -4007,12 +4011,12 @@ export interface components {
               /** @default */
               event: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'vsxWorkspaceContainsActivation'
+          type?: 'vsxWorkspaceContainsActivation' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -4020,12 +4024,12 @@ export interface components {
               /** @default */
               pattern: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'vsxUntrustedWorkspaceSupported'
+          type?: 'vsxUntrustedWorkspaceSupported' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -4033,12 +4037,12 @@ export interface components {
               /** @default */
               supported: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'vsxVirtualWorkspaceSupported'
+          type?: 'vsxVirtualWorkspaceSupported' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -4046,32 +4050,32 @@ export interface components {
               /** @default */
               supported: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'vsxWebviewContribution'
+          type?: 'vsxWebviewContribution' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'vsxDebuggerContribution'
+          type?: 'vsxDebuggerContribution' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
             props: Record<string, never>
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'vsxExtensionDependency'
+          type?: 'vsxExtensionDependency' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -4079,12 +4083,12 @@ export interface components {
               /** @default */
               extension: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
       | {
           /** @enum {string} */
-          type?: 'vsxExtensionPack'
+          type?: 'vsxExtensionPack' | undefined
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
             description: string
@@ -4092,7 +4096,7 @@ export interface components {
               /** @default */
               count: string
             }
-            usage?: components['schemas']['SocketUsageRef']
+            usage?: components['schemas']['SocketUsageRef'] | undefined
           }
         }
     SocketMetricSchema: {
@@ -4102,9 +4106,9 @@ export interface components {
         [key: string]: components['schemas']['SocketMetricComponent']
       }
       /** @default 0 */
-      limit?: number
+      limit?: number | undefined
       /** @default */
-      limitingMetric?: string
+      limitingMetric?: string | undefined
     }
     /**
      * @description Package ecosystem type identifier based on the PURL specification
@@ -4174,7 +4178,7 @@ export interface components {
        * @description Indicates if this patch is deprecated and should not be used
        * @default false
        */
-      deprecated?: boolean
+      deprecated?: boolean | undefined
     }
     ReachabilityResult: {
       /**
@@ -4213,40 +4217,44 @@ export interface components {
        * @description Indicates if the reachability analysis was stopped early due to depth or complexity limits
        * @default false
        */
-      truncated?: boolean
+      truncated?: boolean | undefined
       /**
        * @description Error message if reachability analysis failed
        * @default
        */
-      error?: string
+      error?: string | undefined
       matches?:
         | {
             /** @enum {string} */
-            type?: 'function-level'
-            value?: Array<Array<components['schemas']['CallStackItem']>>
+            type?: 'function-level' | undefined
+            value?:
+              | Array<Array<components['schemas']['CallStackItem']>>
+              | undefined
           }
         | {
             /** @enum {string} */
-            type?: 'class-level'
-            value?: Array<Array<components['schemas']['ClassStackItem']>>
+            type?: 'class-level' | undefined
+            value?:
+              | Array<Array<components['schemas']['ClassStackItem']>>
+              | undefined
           }
       /**
        * @description Path to the workspace root for multi-workspace projects
        * @default
        */
-      workspacePath?: string
+      workspacePath?: string | undefined
       /**
        * @description Path to the subproject within the workspace
        * @default
        */
-      subprojectPath?: string
+      subprojectPath?: string | undefined
     }
     SocketRefList: Array<components['schemas']['SocketRef']>
     SocketRefFile: {
       /** @default */
       path: string
-      range?: components['schemas']['SocketRefTextRange']
-      bytes?: components['schemas']['SocketRefByteRange']
+      range?: components['schemas']['SocketRefTextRange'] | undefined
+      bytes?: components['schemas']['SocketRefByteRange'] | undefined
     }
     /**
      * @description Status of reachability analysis for vulnerable code paths
@@ -4268,61 +4276,61 @@ export interface components {
        * @description Package URL (PURL) of the dependency containing this code
        * @default
        */
-      purl?: string
-      sourceLocation?: components['schemas']['SourceLocation']
+      purl?: string | undefined
+      sourceLocation?: components['schemas']['SourceLocation'] | undefined
       /**
        * @description Confidence score from 0.0 to 1.0 indicating how certain the reachability analysis is about this result
        * @default 0
        */
-      confidence?: number
+      confidence?: number | undefined
     }
     ClassStackItem: {
       /**
        * @description Package URL (PURL) of the dependency containing this class
        * @default
        */
-      purl?: string
+      purl?: string | undefined
       /**
        * @description Name of the class in the dependency
        * @default
        */
-      class?: string
+      class?: string | undefined
       /**
        * @description Confidence score from 0.0 to 1.0 indicating how certain the reachability analysis is about this result
        * @default 0
        */
-      confidence?: number
+      confidence?: number | undefined
     }
     SocketRef:
       | {
           /** @enum {string} */
-          type?: 'unknown'
-          value?: Record<string, never>
+          type?: 'unknown' | undefined
+          value?: Record<string, never> | undefined
         }
       | {
           /** @enum {string} */
-          type?: 'npm'
-          value?: components['schemas']['SocketRefNPM']
+          type?: 'npm' | undefined
+          value?: components['schemas']['SocketRefNPM'] | undefined
         }
       | {
           /** @enum {string} */
-          type?: 'git'
-          value?: components['schemas']['SocketRefGit']
+          type?: 'git' | undefined
+          value?: components['schemas']['SocketRefGit'] | undefined
         }
       | {
           /** @enum {string} */
-          type?: 'web'
-          value?: components['schemas']['SocketRefWeb']
+          type?: 'web' | undefined
+          value?: components['schemas']['SocketRefWeb'] | undefined
         }
       | {
           /** @enum {string} */
-          type?: 'pypi'
-          value?: components['schemas']['SocketRefPyPI']
+          type?: 'pypi' | undefined
+          value?: components['schemas']['SocketRefPyPI'] | undefined
         }
       | {
           /** @enum {string} */
-          type?: 'go'
-          value?: components['schemas']['SocketRefGo']
+          type?: 'go' | undefined
+          value?: components['schemas']['SocketRefGo'] | undefined
         }
     SocketRefTextRange: {
       /** @default 0 */
@@ -4363,17 +4371,17 @@ export interface components {
          * @description Line number in the source file
          * @default 0
          */
-        line?: number
+        line?: number | undefined
         /**
          * @description Column number in the source file
          * @default 0
          */
-        column?: number
+        column?: number | undefined
         /**
          * @description Absolute byte position from the beginning of the file, used for precise location tracking
          * @default 0
          */
-        byteOffset?: number
+        byteOffset?: number | undefined
       }
       /**
        * @description Path to the source file
@@ -4390,38 +4398,38 @@ export interface components {
       /** @default */
       package: string
       /** @default */
-      version?: string
-      file?: components['schemas']['SocketRefFile']
+      version?: string | undefined
+      file?: components['schemas']['SocketRefFile'] | undefined
     }
     SocketRefGit: {
       /** @default */
       url: string
       /** @default */
-      commit?: string
+      commit?: string | undefined
       /** @default */
-      tag?: string
-      file?: components['schemas']['SocketRefFile']
+      tag?: string | undefined
+      file?: components['schemas']['SocketRefFile'] | undefined
     }
     SocketRefWeb: {
       /** @default */
       url: string
-      file?: components['schemas']['SocketRefFile']
+      file?: components['schemas']['SocketRefFile'] | undefined
     }
     SocketRefPyPI: {
       /** @default */
       package: string
       /** @default */
-      version?: string
+      version?: string | undefined
       /** @default */
-      artifact?: string
-      file?: components['schemas']['SocketRefFile']
+      artifact?: string | undefined
+      file?: components['schemas']['SocketRefFile'] | undefined
     }
     SocketRefGo: {
       /** @default */
       package: string
       /** @default */
-      version?: string
-      file?: components['schemas']['SocketRefFile']
+      version?: string | undefined
+      file?: components['schemas']['SocketRefFile'] | undefined
     }
   }
   responses: {
@@ -4616,19 +4624,19 @@ export interface operations {
     parameters: {
       query?: {
         /** @description Include alert metadata. */
-        alerts?: boolean
+        alerts?: boolean | undefined
         /** @description Include only alerts with comma separated actions defined by security policy. */
-        actions?: Array<'error' | 'monitor' | 'warn' | 'ignore'>
+        actions?: Array<'error' | 'monitor' | 'warn' | 'ignore'> | undefined
         /** @description Compact metadata. */
-        compact?: boolean
+        compact?: boolean | undefined
         /** @description Include only fixable alerts. */
-        fixable?: boolean
+        fixable?: boolean | undefined
         /** @description Include license attribution data, including license text and author information. Maps attribution/license text to a list of data objects to which that attribution info applies. */
-        licenseattrib?: boolean
+        licenseattrib?: boolean | undefined
         /** @description Include detailed license information, including location and match strength, for each license datum. */
-        licensedetails?: boolean
+        licensedetails?: boolean | undefined
         /** @description Return errors found with handling PURLs as error objects in the stream. */
-        purlErrors?: boolean
+        purlErrors?: boolean | undefined
       }
     }
     requestBody?: {
@@ -4667,7 +4675,7 @@ export interface operations {
           limit: number
           /** @default 0 */
           offset: number
-          purls?: string[]
+          purls?: string[] | undefined
         }
       }
     }
@@ -4700,11 +4708,11 @@ export interface operations {
               /** @default */
               type: string
               /** @default */
-              namespace?: string
+              namespace?: string | undefined
               /** @default */
-              version?: string
+              version?: string | undefined
               /** @default */
-              release?: string
+              release?: string | undefined
             }>
           }
         }
@@ -4736,17 +4744,17 @@ export interface operations {
   createDependenciesSnapshot: {
     parameters: {
       query?: {
-        repository?: string
-        branch?: string
+        repository?: string | undefined
+        branch?: string | undefined
       }
     }
     requestBody?: {
       content: {
         'multipart/form-data': {
           /** @default */
-          repository?: string
+          repository?: string | undefined
           /** @default */
-          branch?: string
+          branch?: string | undefined
           [key: string]: undefined
         }
       }
@@ -4778,23 +4786,23 @@ export interface operations {
     parameters: {
       query?: {
         /** @description Specify Sort order. */
-        sort?: 'name' | 'created_at'
+        sort?: 'name' | 'created_at' | undefined
         /** @description Specify sort direction. */
-        direction?: 'asc' | 'desc'
+        direction?: 'asc' | 'desc' | undefined
         /** @description Specify the maximum number of results to return per page. */
-        per_page?: number
+        per_page?: number | undefined
         /** @description The token specifying which page to return. */
-        page?: number
+        page?: number | undefined
         /** @description A Unix timestamp in seconds that filters full-scans prior to the date. */
-        from?: string
+        from?: string | undefined
         /** @description A repository slug to filter full-scans by. */
-        repo?: string
+        repo?: string | undefined
         /** @description A branch name to filter full-scans by. */
-        branch?: string
+        branch?: string | undefined
         /** @description A PR number to filter full-scans by. */
-        pull_request?: string
+        pull_request?: string | undefined
         /** @description A commit hash to filter full-scans by. */
-        commit_hash?: string
+        commit_hash?: string | undefined
       }
       path: {
         /** @description The slug of the organization */
@@ -4808,52 +4816,58 @@ export interface operations {
           'application/json': {
             results: Array<{
               /** @default */
-              id?: string
+              id?: string | undefined
               /** @default */
-              created_at?: string
+              created_at?: string | undefined
               /** @default */
-              updated_at?: string
+              updated_at?: string | undefined
               /** @default */
-              organization_id?: string
+              organization_id?: string | undefined
               /** @default */
-              organization_slug?: string
+              organization_slug?: string | undefined
               /** @default */
-              repository_id?: string
+              repository_id?: string | undefined
               /** @default */
-              repository_slug?: string
+              repository_slug?: string | undefined
               /** @default */
-              branch?: string | null
+              branch?: string | null | undefined
               /** @default */
-              commit_message?: string | null
+              commit_message?: string | null | undefined
               /** @default */
-              commit_hash?: string | null
+              commit_hash?: string | null | undefined
               /** @default 0 */
-              pull_request?: number | null
-              committers?: string[]
+              pull_request?: number | null | undefined
+              committers?: string[] | undefined
               /** @default */
-              html_url?: string | null
+              html_url?: string | null | undefined
               /** @default */
-              api_url?: string | null
+              api_url?: string | null | undefined
               /** @default */
-              repo?: string
+              repo?: string | undefined
               /** @default */
-              html_report_url?: string
+              html_report_url?: string | undefined
               /** @default */
-              integration_type?: string | null
+              integration_type?: string | null | undefined
               /** @default */
-              integration_repo_url?: string
+              integration_repo_url?: string | undefined
               /** @default */
-              integration_branch_url?: string | null
+              integration_branch_url?: string | null | undefined
               /** @default */
-              integration_commit_url?: string | null
+              integration_commit_url?: string | null | undefined
               /** @default */
-              integration_pull_request_url?: string | null
+              integration_pull_request_url?: string | null | undefined
               /**
                * @description The current processing status of the SBOM
                * @default pending
                * @enum {string|null}
                */
-              scan_state?: 'pending' | 'precrawl' | 'resolve' | 'scan' | null
+              scan_state?:
+                | 'pending'
+                | 'precrawl'
+                | 'resolve'
+                | 'scan'
+                | null
+                | undefined
             }>
             /** @default 0 */
             nextPage: number | null
@@ -4886,25 +4900,31 @@ export interface operations {
         /** @description The slug of the repository to associate the full-scan with. */
         repo: string
         /** @description The branch name to associate the full-scan with. Branch names must follow Git branch name rules: be 1–255 characters long; cannot be exactly @;  cannot begin or end with /, ., or .lock; cannot contain "//", "..", or "@{"; and cannot include control characters, spaces, or any of ~^:?*[. */
-        branch?: string
+        branch?: string | undefined
         /** @description The commit message to associate the full-scan with. */
-        commit_message?: string
+        commit_message?: string | undefined
         /** @description The commit hash to associate the full-scan with. */
-        commit_hash?: string
+        commit_hash?: string | undefined
         /** @description The pull request number to associate the full-scan with. */
-        pull_request?: number
+        pull_request?: number | undefined
         /** @description The committers to associate the full-scan with. Set query more than once to set multiple. */
-        committers?: string
+        committers?: string | undefined
         /** @description The integration type to associate the full-scan with. Defaults to "Api" if omitted. */
-        integration_type?: 'api' | 'github' | 'gitlab' | 'bitbucket' | 'azure'
+        integration_type?:
+          | 'api'
+          | 'github'
+          | 'gitlab'
+          | 'bitbucket'
+          | 'azure'
+          | undefined
         /** @description The integration org slug to associate the full-scan with. If omitted, the Socket org name will be used. This is used to generate links and badges. */
-        integration_org_slug?: string
+        integration_org_slug?: string | undefined
         /** @description Set the default branch of the repository to the branch of this full-scan. A branch name is required with this option. */
-        make_default_branch?: boolean
+        make_default_branch?: boolean | undefined
         /** @description Designate this full-scan as the latest scan of a given branch. Default branch head scans are included in org alerts. This is only supported on the default branch. A branch name is required with this option. */
-        set_as_pending_head?: boolean
+        set_as_pending_head?: boolean | undefined
         /** @description Create a temporary full-scan that is not listed in the reports dashboard. Cannot be used when set_as_pending_head=true. */
-        tmp?: boolean
+        tmp?: boolean | undefined
       }
       path: {
         /** @description The slug of the organization */
@@ -4924,53 +4944,59 @@ export interface operations {
         content: {
           'application/json': {
             /** @default */
-            id?: string
+            id?: string | undefined
             /** @default */
-            created_at?: string
+            created_at?: string | undefined
             /** @default */
-            updated_at?: string
+            updated_at?: string | undefined
             /** @default */
-            organization_id?: string
+            organization_id?: string | undefined
             /** @default */
-            organization_slug?: string
+            organization_slug?: string | undefined
             /** @default */
-            repository_id?: string
+            repository_id?: string | undefined
             /** @default */
-            repository_slug?: string
+            repository_slug?: string | undefined
             /** @default */
-            branch?: string | null
+            branch?: string | null | undefined
             /** @default */
-            commit_message?: string | null
+            commit_message?: string | null | undefined
             /** @default */
-            commit_hash?: string | null
+            commit_hash?: string | null | undefined
             /** @default 0 */
-            pull_request?: number | null
-            committers?: string[]
+            pull_request?: number | null | undefined
+            committers?: string[] | undefined
             /** @default */
-            html_url?: string | null
+            html_url?: string | null | undefined
             /** @default */
-            api_url?: string | null
+            api_url?: string | null | undefined
             /** @default */
-            repo?: string
+            repo?: string | undefined
             /** @default */
-            html_report_url?: string
+            html_report_url?: string | undefined
             /** @default */
-            integration_type?: string | null
+            integration_type?: string | null | undefined
             /** @default */
-            integration_repo_url?: string
+            integration_repo_url?: string | undefined
             /** @default */
-            integration_branch_url?: string | null
+            integration_branch_url?: string | null | undefined
             /** @default */
-            integration_commit_url?: string | null
+            integration_commit_url?: string | null | undefined
             /** @default */
-            integration_pull_request_url?: string | null
+            integration_pull_request_url?: string | null | undefined
             /**
              * @description The current processing status of the SBOM
              * @default pending
              * @enum {string|null}
              */
-            scan_state?: 'pending' | 'precrawl' | 'resolve' | 'scan' | null
-            unmatchedFiles?: string[]
+            scan_state?:
+              | 'pending'
+              | 'precrawl'
+              | 'resolve'
+              | 'scan'
+              | null
+              | undefined
+            unmatchedFiles?: string[] | undefined
           }
         }
       }
@@ -5083,52 +5109,58 @@ export interface operations {
         content: {
           'application/json': {
             /** @default */
-            id?: string
+            id?: string | undefined
             /** @default */
-            created_at?: string
+            created_at?: string | undefined
             /** @default */
-            updated_at?: string
+            updated_at?: string | undefined
             /** @default */
-            organization_id?: string
+            organization_id?: string | undefined
             /** @default */
-            organization_slug?: string
+            organization_slug?: string | undefined
             /** @default */
-            repository_id?: string
+            repository_id?: string | undefined
             /** @default */
-            repository_slug?: string
+            repository_slug?: string | undefined
             /** @default */
-            branch?: string | null
+            branch?: string | null | undefined
             /** @default */
-            commit_message?: string | null
+            commit_message?: string | null | undefined
             /** @default */
-            commit_hash?: string | null
+            commit_hash?: string | null | undefined
             /** @default 0 */
-            pull_request?: number | null
-            committers?: string[]
+            pull_request?: number | null | undefined
+            committers?: string[] | undefined
             /** @default */
-            html_url?: string | null
+            html_url?: string | null | undefined
             /** @default */
-            api_url?: string | null
+            api_url?: string | null | undefined
             /** @default */
-            repo?: string
+            repo?: string | undefined
             /** @default */
-            html_report_url?: string
+            html_report_url?: string | undefined
             /** @default */
-            integration_type?: string | null
+            integration_type?: string | null | undefined
             /** @default */
-            integration_repo_url?: string
+            integration_repo_url?: string | undefined
             /** @default */
-            integration_branch_url?: string | null
+            integration_branch_url?: string | null | undefined
             /** @default */
-            integration_commit_url?: string | null
+            integration_commit_url?: string | null | undefined
             /** @default */
-            integration_pull_request_url?: string | null
+            integration_pull_request_url?: string | null | undefined
             /**
              * @description The current processing status of the SBOM
              * @default pending
              * @enum {string|null}
              */
-            scan_state?: 'pending' | 'precrawl' | 'resolve' | 'scan' | null
+            scan_state?:
+              | 'pending'
+              | 'precrawl'
+              | 'resolve'
+              | 'scan'
+              | null
+              | undefined
           }
         }
       }
@@ -5159,9 +5191,9 @@ export interface operations {
         /** @description The full scan ID of the head/changed side of the diff (newer) */
         before: string
         /** @description Include license details in the response. This can increase the response size significantly. */
-        include_license_details?: boolean
+        include_license_details?: boolean | undefined
         /** @description Omit unchanged artifacts from the response. When set to true, the unchanged field will be set to null. */
-        omit_unchanged?: boolean
+        omit_unchanged?: boolean | undefined
       }
       path: {
         /** @description The slug of the organization */
@@ -5392,17 +5424,17 @@ export interface operations {
          * @description The person(s) who created the BOM.
          * Set this value if you're intending the modify the BOM and claim authorship.
          */
-        author?: string
+        author?: string | undefined
         /** @description Dependency track project group */
-        project_group?: string
+        project_group?: string | undefined
         /** @description Dependency track project name. Default use the directory name */
-        project_name?: string
+        project_name?: string | undefined
         /** @description Dependency track project version */
-        project_version?: string
+        project_version?: string | undefined
         /** @description Dependency track project id. Either provide the id or the project name and version together */
-        project_id?: string
+        project_id?: string | undefined
         /** @description Include vulnerability information in the SBOM. Also includes reachability/VEX if available */
-        include_vulnerabilities?: string
+        include_vulnerabilities?: string | undefined
       }
       path: {
         /** @description The slug of the organization */
@@ -5454,17 +5486,17 @@ export interface operations {
          * @description The person(s) who created the BOM.
          * Set this value if you're intending the modify the BOM and claim authorship.
          */
-        author?: string
+        author?: string | undefined
         /** @description Dependency track project group */
-        project_group?: string
+        project_group?: string | undefined
         /** @description Dependency track project name. Default use the directory name */
-        project_name?: string
+        project_name?: string | undefined
         /** @description Dependency track project version */
-        project_version?: string
+        project_version?: string | undefined
         /** @description Dependency track project id. Either provide the id or the project name and version together */
-        project_id?: string
+        project_id?: string | undefined
         /** @description Include vulnerability information in the SBOM. Also includes reachability/VEX if available */
-        include_vulnerabilities?: string
+        include_vulnerabilities?: string | undefined
       }
       path: {
         /** @description The slug of the organization */
@@ -5499,19 +5531,19 @@ export interface operations {
     parameters: {
       query?: {
         /** @description Specify sort field. */
-        sort?: 'created_at' | 'updated_at'
+        sort?: 'created_at' | 'updated_at' | undefined
         /** @description Specify sort direction. */
-        direction?: 'asc' | 'desc'
+        direction?: 'asc' | 'desc' | undefined
         /** @description Specify the maximum number of results to return per page. */
-        per_page?: number
+        per_page?: number | undefined
         /** @description Cursor for pagination. Use the next_cursor or prev_cursor from previous responses. */
-        cursor?: string
+        cursor?: string | undefined
         /** @description Filter by repository ID. */
-        repository_id?: string
+        repository_id?: string | undefined
         /** @description Filter by before full scan ID. */
-        before_full_scan_id?: string
+        before_full_scan_id?: string | undefined
         /** @description Filter by after full scan ID. */
-        after_full_scan_id?: string
+        after_full_scan_id?: string | undefined
       }
       path: {
         /** @description The slug of the organization */
@@ -5576,9 +5608,9 @@ export interface operations {
     parameters: {
       query?: {
         /** @description Omit license details in the response. This can reduce the size of the response significantly, but will not include license information for the artifacts. */
-        omit_license_details?: boolean
+        omit_license_details?: boolean | undefined
         /** @description Omit unchanged artifacts from the response. When set to true, the unchanged field will be set to null. */
-        omit_unchanged?: boolean
+        omit_unchanged?: boolean | undefined
       }
       path: {
         /** @description The slug of the organization */
@@ -5864,25 +5896,31 @@ export interface operations {
     parameters: {
       query?: {
         /** @description A description of the diff scan. This will be used in the diff report and can be used to provide context for the changes made. */
-        description?: string
+        description?: string | undefined
         /** @description An external URL to associate with the diff scan. This can be a link to a pull request, issue, or any other relevant resource. */
-        external_href?: string
+        external_href?: string | undefined
         /** @description The branch name to associate the new full-scan with. Branch names must follow Git branch name rules: be 1–255 characters long; cannot be exactly @;  cannot begin or end with /, ., or .lock; cannot contain "//", "..", or "@{"; and cannot include control characters, spaces, or any of ~^:?*[. */
-        branch?: string
+        branch?: string | undefined
         /** @description The commit message to associate the new full-scan with. */
-        commit_message?: string
+        commit_message?: string | undefined
         /** @description The commit hash to associate the full-scan with. */
-        commit_hash?: string
+        commit_hash?: string | undefined
         /** @description The pull request number to associate the new full-scan with. */
-        pull_request?: number
+        pull_request?: number | undefined
         /** @description The committers to associate the new full-scan with. Set query more than once to set multiple committers. */
-        committers?: string
+        committers?: string | undefined
         /** @description The integration type to associate the new full-scan with. Defaults to "api" if omitted. */
-        integration_type?: 'api' | 'github' | 'gitlab' | 'bitbucket' | 'azure'
+        integration_type?:
+          | 'api'
+          | 'github'
+          | 'gitlab'
+          | 'bitbucket'
+          | 'azure'
+          | undefined
         /** @description The integration org slug to associate the new full-scan with. If omitted, the Socket org name will be used. This is used to generate links and badges. */
-        integration_org_slug?: string
+        integration_org_slug?: string | undefined
         /** @description Set to true when running a diff between a merged commit and its parent commit in the same branch. Set to false when running diffs in an open PR between unmerged commits. */
-        merge?: boolean
+        merge?: boolean | undefined
       }
       path: {
         /** @description The slug of the organization */
@@ -6014,11 +6052,11 @@ export interface operations {
         /** @description The ID of the after/head full scan (newer) */
         after: string
         /** @description A description of the diff scan. This will be used in the diff report and can be used to provide context for the changes made. */
-        description?: string
+        description?: string | undefined
         /** @description An external URL to associate with the diff scan. This can be a link to a pull request, issue, or any other relevant resource. */
-        external_href?: string
+        external_href?: string | undefined
         /** @description Set to true when running a diff between a merged commit and its parent commit in the same branch. Set to false when running diffs in an open PR between unmerged commits. */
-        merge?: boolean
+        merge?: boolean | undefined
       }
       path: {
         /** @description The slug of the organization */
@@ -6132,10 +6170,10 @@ export interface operations {
   getOrgTriage: {
     parameters: {
       query?: {
-        sort?: string
-        direction?: string
-        per_page?: number
-        page?: number
+        sort?: string | undefined
+        direction?: string | undefined
+        per_page?: number | undefined
+        page?: number | undefined
       }
       path: {
         /** @description The slug of the organization */
@@ -6152,33 +6190,39 @@ export interface operations {
                * @description The alert_key associated with the triage state
                * @default
                */
-              alert_key?: string
+              alert_key?: string | undefined
               /**
                * @description The creation date of the triage action
                * @default
                */
-              created_at?: string
+              created_at?: string | undefined
               /**
                * @description The last update date of the triage action
                * @default
                */
-              updated_at?: string
+              updated_at?: string | undefined
               /**
                * @description The note associated with the triage action
                * @default
                */
-              note?: string
+              note?: string | undefined
               /**
                * @description The organization id associated with the triage action
                * @default
                */
-              organization_id?: string
+              organization_id?: string | undefined
               /**
                * @description The triage state of the alert
                * @default inherit
                * @enum {string}
                */
-              state?: 'block' | 'ignore' | 'inherit' | 'monitor' | 'warn'
+              state?:
+                | 'block'
+                | 'ignore'
+                | 'inherit'
+                | 'monitor'
+                | 'warn'
+                | undefined
             }>
             /** @default 0 */
             nextPage: number | null
@@ -6213,14 +6257,20 @@ export interface operations {
         'application/json': {
           alertTriage: Array<{
             /** @default */
-            alertKey?: string
+            alertKey?: string | undefined
             /** @default */
-            note?: string
+            note?: string | undefined
             /**
              * @description The triage state of the alert
              * @enum {string}
              */
-            state?: 'block' | 'ignore' | 'inherit' | 'monitor' | 'warn'
+            state?:
+              | 'block'
+              | 'ignore'
+              | 'inherit'
+              | 'monitor'
+              | 'warn'
+              | undefined
           }>
         }
       }
@@ -6254,12 +6304,12 @@ export interface operations {
   getOrgRepoList: {
     parameters: {
       query?: {
-        sort?: string
-        direction?: string
-        per_page?: number
-        page?: number
+        sort?: string | undefined
+        direction?: string | undefined
+        per_page?: number | undefined
+        page?: number | undefined
         /** @description Include archived repositories in the results */
-        include_archived?: boolean
+        include_archived?: boolean | undefined
       }
       path: {
         /** @description The slug of the organization */
@@ -6276,30 +6326,30 @@ export interface operations {
                * @description The ID of the repository
                * @default
                */
-              id?: string
+              id?: string | undefined
               /**
                * @description The creation date of the repository
                * @default
                */
-              created_at?: string
+              created_at?: string | undefined
               /**
                * @description The last update date of the repository
                * @default
                */
-              updated_at?: string
+              updated_at?: string | undefined
               /**
                * @description The slug of the repository
                * @default
                */
-              slug?: string
+              slug?: string | undefined
               /**
                * @description The ID of the head full scan of the repository
                * @default
                */
-              head_full_scan_id?: string | null
+              head_full_scan_id?: string | null | undefined
               integration_meta?: {
                 /** @enum {string} */
-                type?: 'github'
+                type?: 'github' | undefined
                 value?: {
                   /**
                    * @description The GitHub installation_id of the active associated Socket GitHub App
@@ -6327,33 +6377,33 @@ export interface operations {
                * @description The name of the repository
                * @default
                */
-              name?: string
+              name?: string | undefined
               /**
                * @description The description of the repository
                * @default
                */
-              description?: string | null
+              description?: string | null | undefined
               /**
                * @description The homepage URL of the repository
                * @default
                */
-              homepage?: string | null
+              homepage?: string | null | undefined
               /**
                * @description The visibility of the repository
                * @default private
                * @enum {string}
                */
-              visibility?: 'public' | 'private'
+              visibility?: 'public' | 'private' | undefined
               /**
                * @description Whether the repository is archived or not
                * @default false
                */
-              archived?: boolean
+              archived?: boolean | undefined
               /**
                * @description The default branch of the repository
                * @default main
                */
-              default_branch?: string | null
+              default_branch?: string | null | undefined
             }>
             /** @default 0 */
             nextPage: number | null
@@ -6392,33 +6442,33 @@ export interface operations {
            * @description The name of the repository
            * @default
            */
-          name?: string
+          name?: string | undefined
           /**
            * @description The description of the repository
            * @default
            */
-          description?: string | null
+          description?: string | null | undefined
           /**
            * @description The homepage URL of the repository
            * @default
            */
-          homepage?: string | null
+          homepage?: string | null | undefined
           /**
            * @description The visibility of the repository
            * @default private
            * @enum {string}
            */
-          visibility?: 'public' | 'private'
+          visibility?: 'public' | 'private' | undefined
           /**
            * @description Whether the repository is archived or not
            * @default false
            */
-          archived?: boolean
+          archived?: boolean | undefined
           /**
            * @description The default branch of the repository
            * @default main
            */
-          default_branch?: string | null
+          default_branch?: string | null | undefined
         }
       }
     }
@@ -6431,30 +6481,30 @@ export interface operations {
              * @description The ID of the repository
              * @default
              */
-            id?: string
+            id?: string | undefined
             /**
              * @description The creation date of the repository
              * @default
              */
-            created_at?: string
+            created_at?: string | undefined
             /**
              * @description The last update date of the repository
              * @default
              */
-            updated_at?: string
+            updated_at?: string | undefined
             /**
              * @description The slug of the repository
              * @default
              */
-            slug?: string
+            slug?: string | undefined
             /**
              * @description The ID of the head full scan of the repository
              * @default
              */
-            head_full_scan_id?: string | null
+            head_full_scan_id?: string | null | undefined
             integration_meta?: {
               /** @enum {string} */
-              type?: 'github'
+              type?: 'github' | undefined
               value?: {
                 /**
                  * @description The GitHub installation_id of the active associated Socket GitHub App
@@ -6482,33 +6532,33 @@ export interface operations {
              * @description The name of the repository
              * @default
              */
-            name?: string
+            name?: string | undefined
             /**
              * @description The description of the repository
              * @default
              */
-            description?: string | null
+            description?: string | null | undefined
             /**
              * @description The homepage URL of the repository
              * @default
              */
-            homepage?: string | null
+            homepage?: string | null | undefined
             /**
              * @description The visibility of the repository
              * @default private
              * @enum {string}
              */
-            visibility?: 'public' | 'private'
+            visibility?: 'public' | 'private' | undefined
             /**
              * @description Whether the repository is archived or not
              * @default false
              */
-            archived?: boolean
+            archived?: boolean | undefined
             /**
              * @description The default branch of the repository
              * @default main
              */
-            default_branch?: string | null
+            default_branch?: string | null | undefined
           }
         }
       }
@@ -6569,7 +6619,7 @@ export interface operations {
             head_full_scan_id: string | null
             integration_meta: {
               /** @enum {string} */
-              type?: 'github'
+              type?: 'github' | undefined
               value?: {
                 /**
                  * @description The GitHub installation_id of the active associated Socket GitHub App
@@ -6664,33 +6714,33 @@ export interface operations {
            * @description The name of the repository
            * @default
            */
-          name?: string
+          name?: string | undefined
           /**
            * @description The description of the repository
            * @default
            */
-          description?: string | null
+          description?: string | null | undefined
           /**
            * @description The homepage URL of the repository
            * @default
            */
-          homepage?: string | null
+          homepage?: string | null | undefined
           /**
            * @description The visibility of the repository
            * @default private
            * @enum {string}
            */
-          visibility?: 'public' | 'private'
+          visibility?: 'public' | 'private' | undefined
           /**
            * @description Whether the repository is archived or not
            * @default false
            */
-          archived?: boolean
+          archived?: boolean | undefined
           /**
            * @description The default branch of the repository
            * @default main
            */
-          default_branch?: string | null
+          default_branch?: string | null | undefined
         }
       }
     }
@@ -6703,30 +6753,30 @@ export interface operations {
              * @description The ID of the repository
              * @default
              */
-            id?: string
+            id?: string | undefined
             /**
              * @description The creation date of the repository
              * @default
              */
-            created_at?: string
+            created_at?: string | undefined
             /**
              * @description The last update date of the repository
              * @default
              */
-            updated_at?: string
+            updated_at?: string | undefined
             /**
              * @description The slug of the repository
              * @default
              */
-            slug?: string
+            slug?: string | undefined
             /**
              * @description The ID of the head full scan of the repository
              * @default
              */
-            head_full_scan_id?: string | null
+            head_full_scan_id?: string | null | undefined
             integration_meta?: {
               /** @enum {string} */
-              type?: 'github'
+              type?: 'github' | undefined
               value?: {
                 /**
                  * @description The GitHub installation_id of the active associated Socket GitHub App
@@ -6754,33 +6804,33 @@ export interface operations {
              * @description The name of the repository
              * @default
              */
-            name?: string
+            name?: string | undefined
             /**
              * @description The description of the repository
              * @default
              */
-            description?: string | null
+            description?: string | null | undefined
             /**
              * @description The homepage URL of the repository
              * @default
              */
-            homepage?: string | null
+            homepage?: string | null | undefined
             /**
              * @description The visibility of the repository
              * @default private
              * @enum {string}
              */
-            visibility?: 'public' | 'private'
+            visibility?: 'public' | 'private' | undefined
             /**
              * @description Whether the repository is archived or not
              * @default false
              */
-            archived?: boolean
+            archived?: boolean | undefined
             /**
              * @description The default branch of the repository
              * @default main
              */
-            default_branch?: string | null
+            default_branch?: string | null | undefined
           }
         }
       }
@@ -6853,7 +6903,7 @@ export interface operations {
            * @description The ID of the repository to associate with the label
            * @default
            */
-          repository_id?: string
+          repository_id?: string | undefined
         }
       }
     }
@@ -6866,7 +6916,7 @@ export interface operations {
              * @description Status of the operation
              * @default
              */
-            status?: string
+            status?: string | undefined
           }
         }
       }
@@ -6889,8 +6939,8 @@ export interface operations {
   getOrgRepoLabelList: {
     parameters: {
       query?: {
-        per_page?: number
-        page?: number
+        per_page?: number | undefined
+        page?: number | undefined
       }
       path: {
         /** @description The slug of the organization */
@@ -6907,24 +6957,24 @@ export interface operations {
                * @description The ID of the label
                * @default
                */
-              id?: string
+              id?: string | undefined
               /**
                * @description The name of the label
                * @default
                */
-              name?: string
+              name?: string | undefined
               /** @description The IDs of repositories this label is associated with */
-              repository_ids?: string[]
+              repository_ids?: string[] | undefined
               /**
                * @description Whether the label has a security policy
                * @default false
                */
-              has_security_policy?: boolean
+              has_security_policy?: boolean | undefined
               /**
                * @description Whether the label has a license policy
                * @default false
                */
-              has_license_policy?: boolean
+              has_license_policy?: boolean | undefined
             }>
             /** @default 0 */
             nextPage: number | null
@@ -6976,24 +7026,24 @@ export interface operations {
              * @description The ID of the label
              * @default
              */
-            id?: string
+            id?: string | undefined
             /**
              * @description The name of the label
              * @default
              */
-            name?: string
+            name?: string | undefined
             /** @description The IDs of repositories this label is associated with */
-            repository_ids?: string[]
+            repository_ids?: string[] | undefined
             /**
              * @description Whether the label has a security policy
              * @default false
              */
-            has_security_policy?: boolean
+            has_security_policy?: boolean | undefined
             /**
              * @description Whether the label has a license policy
              * @default false
              */
-            has_license_policy?: boolean
+            has_license_policy?: boolean | undefined
           }
         }
       }
@@ -7044,24 +7094,24 @@ export interface operations {
              * @description The ID of the label
              * @default
              */
-            id?: string
+            id?: string | undefined
             /**
              * @description The name of the label
              * @default
              */
-            name?: string
+            name?: string | undefined
             /** @description The IDs of repositories this label is associated with */
-            repository_ids?: string[]
+            repository_ids?: string[] | undefined
             /**
              * @description Whether the label has a security policy
              * @default false
              */
-            has_security_policy?: boolean
+            has_security_policy?: boolean | undefined
             /**
              * @description Whether the label has a license policy
              * @default false
              */
-            has_license_policy?: boolean
+            has_license_policy?: boolean | undefined
           }
         }
       }
@@ -7112,24 +7162,24 @@ export interface operations {
              * @description The ID of the label
              * @default
              */
-            id?: string
+            id?: string | undefined
             /**
              * @description The name of the label
              * @default
              */
-            name?: string
+            name?: string | undefined
             /** @description The IDs of repositories this label is associated with */
-            repository_ids?: string[]
+            repository_ids?: string[] | undefined
             /**
              * @description Whether the label has a security policy
              * @default false
              */
-            has_security_policy?: boolean
+            has_security_policy?: boolean | undefined
             /**
              * @description Whether the label has a license policy
              * @default false
              */
-            has_license_policy?: boolean
+            has_license_policy?: boolean | undefined
           }
         }
       }
@@ -8013,7 +8063,7 @@ export interface operations {
               | 'high'
               | null
             /** @default null */
-            licensePolicy?: Record<string, unknown> | null
+            licensePolicy?: Record<string, unknown> | null | undefined
           }
         }
       }
@@ -8836,8 +8886,15 @@ export interface operations {
            * @default medium
            * @enum {string}
            */
-          issueRulesPolicyDefault?: 'default' | 'low' | 'medium' | 'high'
-          licensePolicy?: components['schemas']['LicenseAllowListRequest']
+          issueRulesPolicyDefault?:
+            | 'default'
+            | 'low'
+            | 'medium'
+            | 'high'
+            | undefined
+          licensePolicy?:
+            | components['schemas']['LicenseAllowListRequest']
+            | undefined
         }
       }
     }
@@ -8931,7 +8988,7 @@ export interface operations {
            * @description The ID of the repository to disassociate from the label
            * @default
            */
-          repository_id?: string
+          repository_id?: string | undefined
         }
       }
     }
@@ -8944,7 +9001,7 @@ export interface operations {
              * @description Status of the operation
              * @default
              */
-            status?: string
+            status?: string | undefined
           }
         }
       }
@@ -9024,7 +9081,7 @@ export interface operations {
     parameters: {
       query?: {
         /** @description Return only customized security policy rules. */
-        custom_rules_only?: boolean
+        custom_rules_only?: boolean | undefined
       }
       path: {
         /** @description The slug of the organization */
@@ -9820,7 +9877,12 @@ export interface operations {
              * @default default
              * @enum {string}
              */
-            securityPolicyDefault?: 'default' | 'low' | 'medium' | 'high'
+            securityPolicyDefault?:
+              | 'default'
+              | 'low'
+              | 'medium'
+              | 'high'
+              | undefined
           }
         }
       }
@@ -9844,7 +9906,7 @@ export interface operations {
     parameters: {
       query?: {
         /** @description Return only customized security policy rules in the response. */
-        custom_rules_only?: boolean
+        custom_rules_only?: boolean | undefined
       }
       path: {
         /** @description The slug of the organization */
@@ -9858,7 +9920,7 @@ export interface operations {
            * @description The default security policy for the organization
            * @enum {string}
            */
-          policyDefault?: 'default' | 'low' | 'medium' | 'high'
+          policyDefault?: 'default' | 'low' | 'medium' | 'high' | undefined
           policyRules?: {
             gptSecurity?: {
               /**
@@ -10642,7 +10704,7 @@ export interface operations {
            * @description Reset the policy rules to the default. When set to true, do not include any policyRules updates.
            * @default false
            */
-          resetPolicyRules?: boolean
+          resetPolicyRules?: boolean | undefined
         }
       }
     }
@@ -11435,7 +11497,12 @@ export interface operations {
              * @default default
              * @enum {string}
              */
-            securityPolicyDefault?: 'default' | 'low' | 'medium' | 'high'
+            securityPolicyDefault?:
+              | 'default'
+              | 'low'
+              | 'medium'
+              | 'high'
+              | undefined
           }
         }
       }
@@ -11633,47 +11700,47 @@ export interface operations {
              * @description Run a SAST Scan on your source code as part of the Socket Basics scan
              * @default false
              */
-            pythonSastEnabled?: boolean
+            pythonSastEnabled?: boolean | undefined
             /**
              * @description Run a SAST Scan on your source code as part of the Socket Basics scan
              * @default false
              */
-            golangSastEnabled?: boolean
+            golangSastEnabled?: boolean | undefined
             /**
              * @description Run a SAST Scan on your source code as part of the Socket Basics scan
              * @default false
              */
-            javascriptSastEnabled?: boolean
+            javascriptSastEnabled?: boolean | undefined
             /**
              * @description Scan for hardcoded secrets and credentials in your code as part of the Socket Basics scan
              * @default false
              */
-            secretScanningEnabled?: boolean
+            secretScanningEnabled?: boolean | undefined
             /**
              * @description Run a vulnerability scan on your Docker images as part of the Socket Basics scan
              * @default false
              */
-            trivyImageEnabled?: boolean
+            trivyImageEnabled?: boolean | undefined
             /**
              * @description Run a vulnerability scan on your Dockerfiles as part of the Socket Basics scan
              * @default false
              */
-            trivyDockerfileEnabled?: boolean
+            trivyDockerfileEnabled?: boolean | undefined
             /**
              * @description Scan dependencies for security vulnerabilities and issues as part of the Socket Basics scan
              * @default false
              */
-            socketScanningEnabled?: boolean
+            socketScanningEnabled?: boolean | undefined
             /**
              * @description Enables or disable running a Socket SCA Scan as part of the Socket Basics scan. If you have Socket already enabled via the Github App this is not needed. Socket SCA provides 0 day protection of Open Source Supply Chain packages, CVE Reachability, and operational risk of packages.
              * @default false
              */
-            socketScaEnabled?: boolean
+            socketScaEnabled?: boolean | undefined
             /**
              * Format: Additional configuration for Socket Basics, includes support for experimental and custom tooling.
              * @default
              */
-            additionalParameters?: string
+            additionalParameters?: string | undefined
           }
         }
       }
@@ -11694,13 +11761,13 @@ export interface operations {
     parameters: {
       query?: {
         /** @description The UTC date in YYYY-MM-DD format for which to fetch alerts */
-        date?: string
+        date?: string | undefined
         /** @description The number of days of data to fetch as an offset from input date (e.g. "-7d" or "7d") or use "latest" to query for latest alerts for each repo */
-        range?: string
+        range?: string | undefined
         /** @description Specify the maximum number of results to return per page (intermediate pages may have fewer than this limit and callers should always check "endCursor" in response body to know if there are more pages) */
-        per_page?: number
+        per_page?: number | undefined
         /** @description The pagination cursor that was returned as the "endCursor" property in previous request */
-        startAfterCursor?: string
+        startAfterCursor?: string | undefined
         /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
         'filters.alertSeverity'?: string
         /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be excluded */
@@ -11819,18 +11886,18 @@ export interface operations {
                 /** @default */
                 version: string
                 /** @default */
-                artifact_id?: string
+                artifact_id?: string | undefined
                 /** @default */
-                artifactId?: string
+                artifactId?: string | undefined
                 /** @default */
-                author?: string
-                capabilities?: components['schemas']['Capabilities']
-                qualifiers?: components['schemas']['Qualifiers']
-                scores?: components['schemas']['SocketScore']
+                author?: string | undefined
+                capabilities?: components['schemas']['Capabilities'] | undefined
+                qualifiers?: components['schemas']['Qualifiers'] | undefined
+                scores?: components['schemas']['SocketScore'] | undefined
                 /** @default 0 */
-                size?: number
+                size?: number | undefined
                 /** @default */
-                subpath?: string
+                subpath?: string | undefined
               }
               alert: {
                 /** @default */
@@ -11846,13 +11913,13 @@ export interface operations {
                 /** @default */
                 category: string
                 /** @default */
-                file?: string | null
+                file?: string | null | undefined
                 /** @default null */
-                props?: Record<string, unknown> | null
+                props?: Record<string, unknown> | null | undefined
                 /** @default 0 */
-                start?: number | null
+                start?: number | null | undefined
                 /** @default 0 */
-                end?: number | null
+                end?: number | null | undefined
                 fix?: {
                   /** @default */
                   type: string
@@ -11870,8 +11937,12 @@ export interface operations {
                 manifestFiles?: Array<
                   components['schemas']['SocketManifestReference']
                 >
-                topLevelAncestors?: Array<components['schemas']['SocketId']>
-                dependencies?: Array<components['schemas']['SocketId']>
+                topLevelAncestors?:
+                  | Array<components['schemas']['SocketId']>
+                  | undefined
+                dependencies?:
+                  | Array<components['schemas']['SocketId']>
+                  | undefined
               }
             }>
             meta: {
@@ -11887,43 +11958,43 @@ export interface operations {
               includeLatestAlertsOnly: boolean
               filters: {
                 /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be excluded */
-                alertSeverity?: string[]
+                alertSeverity?: string[] | undefined
                 /** @description Comma-separated list of repo slugs that should be excluded */
-                repoSlug?: string[]
+                repoSlug?: string[] | undefined
                 /** @description Comma-separated list of repo labels that should be excluded. Use "" to filter for repositories with no labels. */
-                repoLabels?: string[]
+                repoLabels?: string[] | undefined
                 /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be excluded */
-                alertType?: string[]
+                alertType?: string[] | undefined
                 /** @description Name of artifact */
-                artifactName?: string[]
+                artifactName?: string[] | undefined
                 /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
-                artifactType?: string[]
+                artifactType?: string[] | undefined
                 /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
-                alertAction?: string[]
+                alertAction?: string[] | undefined
                 /** @description Comma-separated list of alert action source types ("fallback", "injected-alert", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
-                alertActionSourceType?: string[]
+                alertActionSourceType?: string[] | undefined
                 /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be excluded */
-                alertFixType?: string[]
+                alertFixType?: string[] | undefined
                 /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be excluded */
-                alertCategory?: string[]
+                alertCategory?: string[] | undefined
                 /** @description CVE ID */
-                alertCveId?: string[]
+                alertCveId?: string[] | undefined
                 /** @description CVE title */
-                alertCveTitle?: string[]
+                alertCveTitle?: string[] | undefined
                 /** @description CWE ID */
-                alertCweId?: string[]
+                alertCweId?: string[] | undefined
                 /** @description CWE name */
-                alertCweName?: string[]
+                alertCweName?: string[] | undefined
                 /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
-                alertReachabilityType?: string[]
+                alertReachabilityType?: string[] | undefined
                 /** @description Alert priority ("low", "medium", or "high") */
-                alertPriority?: string[]
+                alertPriority?: string[] | undefined
                 /** @description Direct/transitive dependency filter flag */
-                dependencyDirect?: boolean[]
+                dependencyDirect?: boolean[] | undefined
                 /** @description Development/production dependency filter flag */
-                dependencyDev?: boolean[]
+                dependencyDev?: boolean[] | undefined
                 /** @description Dead/reachable dependency filter flag */
-                dependencyDead?: boolean[]
+                dependencyDead?: boolean[] | undefined
               }
             }
           }
@@ -11948,9 +12019,9 @@ export interface operations {
     parameters: {
       query?: {
         /** @description The UTC date in YYYY-MM-DD format for which to fetch alerts */
-        date?: string
+        date?: string | undefined
         /** @description The number of days of data to fetch as an offset from input date */
-        range?: string
+        range?: string | undefined
         /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,alertPriority,dependencyDirect,dependencyDev,dependencyDead) */
         'aggregation.fields'?: string
         /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
@@ -12055,43 +12126,43 @@ export interface operations {
               }
               filters: {
                 /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be excluded */
-                alertSeverity?: string[]
+                alertSeverity?: string[] | undefined
                 /** @description Comma-separated list of repo slugs that should be excluded */
-                repoSlug?: string[]
+                repoSlug?: string[] | undefined
                 /** @description Comma-separated list of repo labels that should be excluded. Use "" to filter for repositories with no labels. */
-                repoLabels?: string[]
+                repoLabels?: string[] | undefined
                 /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be excluded */
-                alertType?: string[]
+                alertType?: string[] | undefined
                 /** @description Name of artifact */
-                artifactName?: string[]
+                artifactName?: string[] | undefined
                 /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
-                artifactType?: string[]
+                artifactType?: string[] | undefined
                 /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
-                alertAction?: string[]
+                alertAction?: string[] | undefined
                 /** @description Comma-separated list of alert action source types ("fallback", "injected-alert", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
-                alertActionSourceType?: string[]
+                alertActionSourceType?: string[] | undefined
                 /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be excluded */
-                alertFixType?: string[]
+                alertFixType?: string[] | undefined
                 /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be excluded */
-                alertCategory?: string[]
+                alertCategory?: string[] | undefined
                 /** @description CVE ID */
-                alertCveId?: string[]
+                alertCveId?: string[] | undefined
                 /** @description CVE title */
-                alertCveTitle?: string[]
+                alertCveTitle?: string[] | undefined
                 /** @description CWE ID */
-                alertCweId?: string[]
+                alertCweId?: string[] | undefined
                 /** @description CWE name */
-                alertCweName?: string[]
+                alertCweName?: string[] | undefined
                 /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
-                alertReachabilityType?: string[]
+                alertReachabilityType?: string[] | undefined
                 /** @description Alert priority ("low", "medium", or "high") */
-                alertPriority?: string[]
+                alertPriority?: string[] | undefined
                 /** @description Direct/transitive dependency filter flag */
-                dependencyDirect?: boolean[]
+                dependencyDirect?: boolean[] | undefined
                 /** @description Development/production dependency filter flag */
-                dependencyDev?: boolean[]
+                dependencyDev?: boolean[] | undefined
                 /** @description Dead/reachable dependency filter flag */
-                dependencyDead?: boolean[]
+                dependencyDead?: boolean[] | undefined
               }
             }
             items: Array<{
@@ -12129,21 +12200,21 @@ export interface operations {
     parameters: {
       query?: {
         /** @description The UTC date in YYYY-MM-DD format for which to fetch dependencies */
-        date?: string
+        date?: string | undefined
         /** @description The number of days of data to fetch as an offset from input date */
-        range?: string
+        range?: string | undefined
         /** @description Comma-separated list of repo slugs that should be included */
-        repoSlug?: string
+        repoSlug?: string | undefined
         /** @description Comma-separated list of repo labels that should be included */
-        repoLabels?: string
+        repoLabels?: string | undefined
         /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
-        artifactType?: string
+        artifactType?: string | undefined
         /** @description Direct/transitive dependency filter flag */
-        dependencyDirect?: boolean
+        dependencyDirect?: boolean | undefined
         /** @description Development/production dependency filter flag */
-        dependencyDev?: boolean
+        dependencyDev?: boolean | undefined
         /** @description Dead/reachable dependency filter flag */
-        dependencyDead?: boolean
+        dependencyDead?: boolean | undefined
       }
       path: {
         /** @description The slug of the organization */
@@ -12170,17 +12241,17 @@ export interface operations {
               }
               filters: {
                 /** @description Comma-separated list of repo slugs that should be included */
-                repoSlug?: string[]
+                repoSlug?: string[] | undefined
                 /** @description Comma-separated list of repo labels that should be included */
-                repoLabels?: string[]
+                repoLabels?: string[] | undefined
                 /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
-                artifactType?: string[]
+                artifactType?: string[] | undefined
                 /** @description Direct/transitive dependency filter flag */
-                dependencyDirect?: boolean[]
+                dependencyDirect?: boolean[] | undefined
                 /** @description Development/production dependency filter flag */
-                dependencyDev?: boolean[]
+                dependencyDev?: boolean[] | undefined
                 /** @description Dead/reachable dependency filter flag */
-                dependencyDead?: boolean[]
+                dependencyDead?: boolean[] | undefined
               }
             }
             items: Array<{
@@ -12297,13 +12368,13 @@ export interface operations {
     parameters: {
       query?: {
         /** @description The UTC date in YYYY-MM-DD format for which to fetch snapshots */
-        date?: string
+        date?: string | undefined
         /** @description The number of days of data to fetch as an offset from input date (e.g. "-7d" or "7d") or use "latest" to query for latest snapshots for each repo */
-        range?: string
+        range?: string | undefined
         /** @description Specify the maximum number of results to return per page (intermediate pages may have fewer than this limit and callers should always check "endCursor" in response body to know if there are more pages) */
-        per_page?: number
+        per_page?: number | undefined
         /** @description The pagination cursor that was returned as the "endCursor" property in previous request */
-        startAfterCursor?: string
+        startAfterCursor?: string | undefined
         /** @description Comma-separated list of historical snapshot statuses that should be included (allowed: "in-progress", "success", "failure", "timeout", "skipped") */
         'filters.status'?: string
         /** @description Comma-separated list of requestId values that were used to start the historical snapshot job */
@@ -12329,8 +12400,8 @@ export interface operations {
               /** @default */
               endDateInclusive: string
               filters: {
-                status?: string[]
-                requestId?: string[]
+                status?: string[] | undefined
+                requestId?: string[] | undefined
               }
             }
             items: Array<{
@@ -12484,11 +12555,11 @@ export interface operations {
           | 'UpdateWebhook'
           | 'UpgradeOrganizationPlan'
         /** @description Number of events per page */
-        per_page?: number
+        per_page?: number | undefined
         /** @description Page token */
-        page?: string
+        page?: string | undefined
         /** @description A Unix timestamp in seconds to filter results prior to this date. */
-        from?: string
+        from?: string | undefined
       }
       path: {
         /** @description The slug of the organization */
@@ -12502,33 +12573,33 @@ export interface operations {
           'application/json': {
             results: Array<{
               /** @default */
-              event_id?: string
+              event_id?: string | undefined
               /** @default */
-              created_at?: string
+              created_at?: string | undefined
               /** @default */
-              updated_at?: string
+              updated_at?: string | undefined
               /** @default */
-              country_code?: string | null
+              country_code?: string | null | undefined
               /** @default */
-              organization_id?: string | null
+              organization_id?: string | null | undefined
               /** @default */
-              ip_address?: string | null
+              ip_address?: string | null | undefined
               /** @default null */
-              payload?: Record<string, unknown> | null
+              payload?: Record<string, unknown> | null | undefined
               /** @default 0 */
-              status_code?: number | null
+              status_code?: number | null | undefined
               /** @default */
-              type?: string
+              type?: string | undefined
               /** @default */
-              user_agent?: string | null
+              user_agent?: string | null | undefined
               /** @default */
-              user_id?: string | null
+              user_id?: string | null | undefined
               /** @default */
-              user_email?: string
+              user_email?: string | undefined
               /** @default */
-              user_image?: string
+              user_image?: string | undefined
               /** @default */
-              organization_name?: string
+              organization_name?: string | undefined
             }>
             /** @default */
             nextPage: string | null
@@ -12555,13 +12626,13 @@ export interface operations {
     parameters: {
       query?: {
         /** @description Specify Sort order. */
-        sort?: 'created_at'
+        sort?: 'created_at' | undefined
         /** @description Specify sort direction. */
-        direction?: 'asc' | 'desc'
+        direction?: 'asc' | 'desc' | undefined
         /** @description Specify the maximum number of results to return per page. */
-        per_page?: number
+        per_page?: number | undefined
         /** @description The token specifying which page to return. */
-        page?: number
+        page?: number | undefined
       }
       path: {
         /** @description The slug of the organization */
@@ -12576,16 +12647,22 @@ export interface operations {
             tokens: Array<{
               committers: Array<{
                 /** @default */
-                email?: string
+                email?: string | undefined
                 /**
                  * @default api
                  * @enum {string}
                  */
-                provider?: 'api' | 'azure' | 'bitbucket' | 'github' | 'gitlab'
+                provider?:
+                  | 'api'
+                  | 'azure'
+                  | 'bitbucket'
+                  | 'github'
+                  | 'gitlab'
+                  | undefined
                 /** @default */
-                providerLoginName?: string
+                providerLoginName?: string | undefined
                 /** @default */
-                providerUserId?: string
+                providerUserId?: string | undefined
               }>
               /**
                * Format: date
@@ -12795,22 +12872,28 @@ export interface operations {
           visibility: 'admin' | 'organization'
           committer: {
             /** @default */
-            email?: string
+            email?: string | undefined
             /**
              * @default api
              * @enum {string}
              */
-            provider?: 'api' | 'azure' | 'bitbucket' | 'github' | 'gitlab'
+            provider?:
+              | 'api'
+              | 'azure'
+              | 'bitbucket'
+              | 'github'
+              | 'gitlab'
+              | undefined
             /** @default */
-            providerLoginName?: string
+            providerLoginName?: string | undefined
             /** @default */
-            providerUserId?: string
+            providerUserId?: string | undefined
           }
           /**
            * @description Name for the API Token
            * @default api token
            */
-          name?: string
+          name?: string | undefined
         }
       }
     }
@@ -12928,22 +13011,28 @@ export interface operations {
           visibility: 'admin' | 'organization'
           committer: {
             /** @default */
-            email?: string
+            email?: string | undefined
             /**
              * @default api
              * @enum {string}
              */
-            provider?: 'api' | 'azure' | 'bitbucket' | 'github' | 'gitlab'
+            provider?:
+              | 'api'
+              | 'azure'
+              | 'bitbucket'
+              | 'github'
+              | 'gitlab'
+              | undefined
             /** @default */
-            providerLoginName?: string
+            providerLoginName?: string | undefined
             /** @default */
-            providerUserId?: string
+            providerUserId?: string | undefined
           }
           /**
            * @description Name for the API Token
            * @default api token
            */
-          name?: string
+          name?: string | undefined
         }
       }
     }
@@ -13101,15 +13190,23 @@ export interface operations {
     parameters: {
       query?: {
         /** @description Number of threats per page */
-        per_page?: number
+        per_page?: number | undefined
         /** @description Page token */
-        page?: string
+        page?: string | undefined
         /** @description Sort sort the threat feed by ID or createdAt attribute. */
-        sort?: 'id' | 'created_at'
+        sort?: 'id' | 'created_at' | undefined
         /** @description Filter results by discovery period */
-        discovery_period?: '1h' | '6h' | '1d' | '7d' | '30d' | '90d' | '365d'
+        discovery_period?:
+          | '1h'
+          | '6h'
+          | '1d'
+          | '7d'
+          | '30d'
+          | '90d'
+          | '365d'
+          | undefined
         /** @description Ordering direction of the sort attribute */
-        direction?: 'desc' | 'asc'
+        direction?: 'desc' | 'asc' | undefined
         /** @description Filter what type of threats to return */
         filter?:
           | 'u'
@@ -13126,11 +13223,11 @@ export interface operations {
           | 'obf'
           | 'dual'
         /** @description Filter threats by package name */
-        name?: string
+        name?: string | undefined
         /** @description Filter threats by package version */
-        version?: string
+        version?: string | undefined
         /** @description Only return threats which have been human-reviewed */
-        is_human_reviewed?: boolean
+        is_human_reviewed?: boolean | undefined
         /** @description Filter threats by package ecosystem type */
         ecosystem?:
           | 'github'
@@ -13152,28 +13249,28 @@ export interface operations {
           'application/json': {
             results: Array<{
               /** @default */
-              createdAt?: string
+              createdAt?: string | undefined
               /** @default */
-              updatedAt?: string
+              updatedAt?: string | undefined
               /** @default */
-              description?: string
+              description?: string | undefined
               /** @default 0 */
-              id?: number
+              id?: number | undefined
               /** @default */
-              locationHtmlUrl?: string
+              locationHtmlUrl?: string | undefined
               /** @default */
-              packageHtmlUrl?: string
+              packageHtmlUrl?: string | undefined
               /** @default */
-              purl?: string
+              purl?: string | undefined
               /** @default */
-              removedAt?: string | null
+              removedAt?: string | null | undefined
               /** @default */
-              threatType?: string
+              threatType?: string | undefined
               /**
                * @description Whether the threat still is in need of human review by the threat research team
                * @default false
                */
-              needsHumanReview?: boolean
+              needsHumanReview?: boolean | undefined
             }>
             /** @default */
             nextPage: string | null
@@ -13202,17 +13299,17 @@ export interface operations {
     parameters: {
       query?: {
         /** @description Number of threats per page */
-        per_page?: number
+        per_page?: number | undefined
         /** @description Page cursor token. Pass the returned nextPageCursor to this query string to fetch the next page of the threat feed. */
-        page_cursor?: string
+        page_cursor?: string | undefined
         /** @description Set the sort order for the threat feed items. Default is descending order by updated_at, which includes all new and updated threat feed items. */
-        sort?: 'id' | 'created_at' | 'updated_at'
+        sort?: 'id' | 'created_at' | 'updated_at' | undefined
         /** @description A Unix timestamp in seconds that filters results to items only updated after the timestamp. */
-        updated_after?: string
+        updated_after?: string | undefined
         /** @description A Unix timestamp in seconds that filters results to items only created after the date. */
-        created_after?: string
+        created_after?: string | undefined
         /** @description Order direction of the provided sort field. */
-        direction?: 'desc' | 'asc'
+        direction?: 'desc' | 'asc' | undefined
         /** @description Filter what type of threats to return */
         filter?:
           | 'u'
@@ -13229,11 +13326,11 @@ export interface operations {
           | 'obf'
           | 'dual'
         /** @description Filter threats by package name */
-        name?: string
+        name?: string | undefined
         /** @description Filter threats by package version. */
-        version?: string
+        version?: string | undefined
         /** @description Only return threats which have been human-reviewed */
-        is_human_reviewed?: boolean
+        is_human_reviewed?: boolean | undefined
         /** @description Filter threats by package ecosystem type */
         ecosystem?:
           | 'github'
@@ -13259,28 +13356,28 @@ export interface operations {
           'application/json': {
             results: Array<{
               /** @default */
-              createdAt?: string
+              createdAt?: string | undefined
               /** @default */
-              updatedAt?: string
+              updatedAt?: string | undefined
               /** @default */
-              description?: string
+              description?: string | undefined
               /** @default 0 */
-              id?: number
+              id?: number | undefined
               /** @default */
-              locationHtmlUrl?: string
+              locationHtmlUrl?: string | undefined
               /** @default */
-              packageHtmlUrl?: string
+              packageHtmlUrl?: string | undefined
               /** @default */
-              purl?: string
+              purl?: string | undefined
               /** @default */
-              removedAt?: string | null
+              removedAt?: string | null | undefined
               /** @default */
-              threatType?: string
+              threatType?: string | undefined
               /**
                * @description Whether the threat still is in need of human review by the threat research team
                * @default false
                */
-              needsHumanReview?: boolean
+              needsHumanReview?: boolean | undefined
             }>
             /** @default */
             nextPageCursor: string | null
@@ -13669,7 +13766,7 @@ export interface operations {
     parameters: {
       query?: {
         /** @description If `true`, the response will include the full text of the requested licenses */
-        includetext?: boolean
+        includetext?: boolean | undefined
       }
     }
     requestBody?: {
@@ -13699,7 +13796,14 @@ export interface operations {
     parameters: {
       query?: {
         /** @description Language for alert metadata */
-        language?: 'ach-UG' | 'de-DE' | 'en-US' | 'es-ES' | 'fr-FR' | 'it-IT'
+        language?:
+          | 'ach-UG'
+          | 'de-DE'
+          | 'en-US'
+          | 'es-ES'
+          | 'fr-FR'
+          | 'it-IT'
+          | undefined
       }
     }
     requestBody?: {
@@ -13849,7 +13953,7 @@ export interface operations {
       content: {
         'application/json': Array<{
           /** @default */
-          organization?: string
+          organization?: string | undefined
         }>
       }
     }
@@ -13862,7 +13966,7 @@ export interface operations {
               issueRules: {
                 [key: string]: {
                   /** @enum {string} */
-                  action?: 'error' | 'ignore' | 'warn'
+                  action?: 'error' | 'ignore' | 'warn' | undefined
                 }
               }
             }
@@ -13976,9 +14080,9 @@ export interface operations {
     parameters: {
       query?: {
         /** @description A Unix timestamp in seconds to filter results prior to this date. */
-        from?: string
+        from?: string | undefined
         /** @description When defined, returns only reports for the associated repository slug. */
-        repo?: string
+        repo?: string | undefined
       }
     }
     responses: {
@@ -14108,7 +14212,7 @@ export interface operations {
   getRepoList: {
     parameters: {
       query?: {
-        pageToken?: string
+        pageToken?: string | undefined
       }
     }
     responses: {
