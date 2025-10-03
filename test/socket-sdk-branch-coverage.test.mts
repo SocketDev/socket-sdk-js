@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../dist/index'
 
-import type { CResult } from '../dist/index'
+import type { SocketSdkGenericResult } from '../dist/index'
 
 describe('SocketSdk - Branch Coverage Tests', () => {
   let client: SocketSdk
@@ -31,11 +31,11 @@ describe('SocketSdk - Branch Coverage Tests', () => {
       const result = (await client.getApi('syntax-error-test', {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('Server returned invalid JSON')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('Server returned invalid JSON')
         expect(result.cause).toContain('JSON.parse threw an error')
       }
     })
@@ -49,10 +49,10 @@ describe('SocketSdk - Branch Coverage Tests', () => {
       const result = (await client.getApi('empty-response-test', {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
       // Empty response should actually parse as {} and succeed
-      expect(result.ok).toBe(true)
+      expect(result.success).toBe(true)
     })
   })
 
@@ -66,11 +66,11 @@ describe('SocketSdk - Branch Coverage Tests', () => {
       const result = (await client.getApi('getapi-error-test', {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.code).toBe(404)
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.status).toBe(404)
       }
     })
 
@@ -84,11 +84,11 @@ describe('SocketSdk - Branch Coverage Tests', () => {
         throws: false,
         method: 'POST',
         body: { test: 'data' },
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.code).toBe(400)
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.status).toBe(400)
       }
     })
   })
@@ -108,9 +108,9 @@ describe('SocketSdk - Branch Coverage Tests', () => {
       const result = (await client.getApi('regex-no-capture', {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
+      expect(result.success).toBe(false)
     })
   })
 })
