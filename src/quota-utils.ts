@@ -36,35 +36,33 @@ function loadRequirements(): Requirements {
 }
 
 /**
- * Get quota cost for a specific SDK method.
- * Returns the number of quota units consumed by the method.
+ * Calculate total quota cost for multiple SDK method calls.
+ * Returns sum of quota units for all specified methods.
  */
-export function getQuotaCost(methodName: SocketSdkOperations | string): number {
-  const reqs = loadRequirements()
-  const requirement = reqs.api[methodName]
-
-  if (!requirement) {
-    throw new Error(`Unknown SDK method: "${methodName}"`)
-  }
-
-  return requirement.quota
+export function calculateTotalQuotaCost(
+  methodNames: Array<SocketSdkOperations | string>,
+): number {
+  return methodNames.reduce((total, methodName) => {
+    return total + getQuotaCost(methodName)
+  }, 0)
 }
 
 /**
- * Get required permissions for a specific SDK method.
- * Returns array of permission strings needed to call the method.
+ * Get all available SDK methods with their requirements.
+ * Returns complete mapping of methods to quota and permissions.
  */
-export function getRequiredPermissions(
-  methodName: SocketSdkOperations | string,
-): string[] {
+export function getAllMethodRequirements(): Record<string, ApiRequirement> {
   const reqs = loadRequirements()
-  const requirement = reqs.api[methodName]
+  const result: Record<string, ApiRequirement> = {}
 
-  if (!requirement) {
-    throw new Error(`Unknown SDK method: "${methodName}"`)
-  }
+  Object.entries(reqs.api).forEach(([methodName, requirement]) => {
+    result[methodName] = {
+      permissions: [...requirement.permissions],
+      quota: requirement.quota,
+    }
+  })
 
-  return [...requirement.permissions]
+  return result
 }
 
 /**
@@ -82,34 +80,9 @@ export function getMethodRequirements(
   }
 
   return {
-    quota: requirement.quota,
     permissions: [...requirement.permissions],
+    quota: requirement.quota,
   }
-}
-
-/**
- * Calculate total quota cost for multiple SDK method calls.
- * Returns sum of quota units for all specified methods.
- */
-export function calculateTotalQuotaCost(
-  methodNames: Array<SocketSdkOperations | string>,
-): number {
-  return methodNames.reduce((total, methodName) => {
-    return total + getQuotaCost(methodName)
-  }, 0)
-}
-
-/**
- * Get all methods that consume a specific quota amount.
- * Useful for finding high-cost or free operations.
- */
-export function getMethodsByQuotaCost(quotaCost: number): string[] {
-  const reqs = loadRequirements()
-
-  return Object.entries(reqs.api)
-    .filter(([, requirement]) => requirement.quota === quotaCost)
-    .map(([methodName]) => methodName)
-    .sort()
 }
 
 /**
@@ -130,15 +103,31 @@ export function getMethodsByPermissions(permissions: string[]): string[] {
 }
 
 /**
- * Check if user has sufficient quota for method calls.
- * Returns true if available quota covers the total cost.
+ * Get all methods that consume a specific quota amount.
+ * Useful for finding high-cost or free operations.
  */
-export function hasQuotaForMethods(
-  availableQuota: number,
-  methodNames: Array<SocketSdkOperations | string>,
-): boolean {
-  const totalCost = calculateTotalQuotaCost(methodNames)
-  return availableQuota >= totalCost
+export function getMethodsByQuotaCost(quotaCost: number): string[] {
+  const reqs = loadRequirements()
+
+  return Object.entries(reqs.api)
+    .filter(([, requirement]) => requirement.quota === quotaCost)
+    .map(([methodName]) => methodName)
+    .sort()
+}
+
+/**
+ * Get quota cost for a specific SDK method.
+ * Returns the number of quota units consumed by the method.
+ */
+export function getQuotaCost(methodName: SocketSdkOperations | string): number {
+  const reqs = loadRequirements()
+  const requirement = reqs.api[methodName]
+
+  if (!requirement) {
+    throw new Error(`Unknown SDK method: "${methodName}"`)
+  }
+
+  return requirement.quota
 }
 
 /**
@@ -168,19 +157,30 @@ export function getQuotaUsageSummary(): Record<string, string[]> {
 }
 
 /**
- * Get all available SDK methods with their requirements.
- * Returns complete mapping of methods to quota and permissions.
+ * Get required permissions for a specific SDK method.
+ * Returns array of permission strings needed to call the method.
  */
-export function getAllMethodRequirements(): Record<string, ApiRequirement> {
+export function getRequiredPermissions(
+  methodName: SocketSdkOperations | string,
+): string[] {
   const reqs = loadRequirements()
-  const result: Record<string, ApiRequirement> = {}
+  const requirement = reqs.api[methodName]
 
-  Object.entries(reqs.api).forEach(([methodName, requirement]) => {
-    result[methodName] = {
-      quota: requirement.quota,
-      permissions: [...requirement.permissions],
-    }
-  })
+  if (!requirement) {
+    throw new Error(`Unknown SDK method: "${methodName}"`)
+  }
 
-  return result
+  return [...requirement.permissions]
+}
+
+/**
+ * Check if user has sufficient quota for method calls.
+ * Returns true if available quota covers the total cost.
+ */
+export function hasQuotaForMethods(
+  availableQuota: number,
+  methodNames: Array<SocketSdkOperations | string>,
+): boolean {
+  const totalCost = calculateTotalQuotaCost(methodNames)
+  return availableQuota >= totalCost
 }
