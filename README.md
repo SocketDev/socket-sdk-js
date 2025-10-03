@@ -4,6 +4,8 @@
 [![npm version](https://img.shields.io/npm/v/@socketsecurity/sdk.svg?style=flat)](https://www.npmjs.com/package/@socketsecurity/sdk)
 [![TypeScript types](https://img.shields.io/npm/types/@socketsecurity/sdk.svg?style=flat)](https://www.npmjs.com/package/@socketsecurity/sdk)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://github.com/SocketDev/eslint-config)
+[![CI](https://github.com/SocketDev/socket-sdk-js/actions/workflows/ci.yml/badge.svg)](https://github.com/SocketDev/socket-sdk-js/actions/workflows/ci.yml)
+
 [![Follow @SocketSecurity](https://img.shields.io/twitter/follow/SocketSecurity?style=social)](https://twitter.com/SocketSecurity)
 [![Follow @socket.dev on Bluesky](https://img.shields.io/badge/Follow-@socket.dev-1DA1F2?style=social&logo=bluesky)](https://bsky.app/profile/socket.dev)
 
