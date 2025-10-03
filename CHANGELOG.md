@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.9.1) - 2025-10-03
+
+### Changed
+- Disabled TypeScript declaration map generation to reduce package size
+
 ## [1.9.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.9.0) - 2025-10-03
 
 ### Changed
