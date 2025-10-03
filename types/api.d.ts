@@ -11729,9 +11729,9 @@ export interface operations {
         'filters.alertAction'?: string
         /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
         'filters.alertAction.notIn'?: string
-        /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be included */
+        /** @description Comma-separated list of alert action source types ("fallback", "injected-alert", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be included */
         'filters.alertActionSourceType'?: string
-        /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
+        /** @description Comma-separated list of alert action source types ("fallback", "injected-alert", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
         'filters.alertActionSourceType.notIn'?: string
         /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
         'filters.alertFixType'?: string
@@ -11900,7 +11900,7 @@ export interface operations {
                 artifactType?: string[]
                 /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
                 alertAction?: string[]
-                /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
+                /** @description Comma-separated list of alert action source types ("fallback", "injected-alert", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
                 alertActionSourceType?: string[]
                 /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be excluded */
                 alertFixType?: string[]
@@ -11981,9 +11981,9 @@ export interface operations {
         'filters.alertAction'?: string
         /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
         'filters.alertAction.notIn'?: string
-        /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be included */
+        /** @description Comma-separated list of alert action source types ("fallback", "injected-alert", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be included */
         'filters.alertActionSourceType'?: string
-        /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
+        /** @description Comma-separated list of alert action source types ("fallback", "injected-alert", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
         'filters.alertActionSourceType.notIn'?: string
         /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
         'filters.alertFixType'?: string
@@ -12068,7 +12068,7 @@ export interface operations {
                 artifactType?: string[]
                 /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
                 alertAction?: string[]
-                /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
+                /** @description Comma-separated list of alert action source types ("fallback", "injected-alert", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
                 alertActionSourceType?: string[]
                 /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be excluded */
                 alertFixType?: string[]
