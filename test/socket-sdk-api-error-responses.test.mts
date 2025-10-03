@@ -1,3 +1,4 @@
+/** @fileoverview Tests for API error response handling and various error scenarios. */
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
