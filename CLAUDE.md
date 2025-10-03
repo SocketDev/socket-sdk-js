@@ -193,6 +193,18 @@ All code elements MUST be sorted:
   - **Important**: Even when using `--no-verify`, you MUST still run linting/checking commands manually first
   - **Rationale**: Pre-commit hooks run linting and type-checking which are critical for SDK source code but less critical for non-published files
 
+### Batch Commits Strategy
+- **When making many changes**: Break large changesets into small, logical commits
+- **First commit with tests**: Run full test suite (hooks) for the first commit only
+- **Subsequent commits with --no-verify**: Use `--no-verify` for follow-up commits
+- **Example workflow**:
+  1. Make all changes and ensure `pnpm run fix && pnpm run check` passes
+  2. Stage and commit core changes with hooks: `git commit -m "message"`
+  3. Stage and commit related changes: `git commit --no-verify -m "message"`
+  4. Stage and commit cleanup: `git commit --no-verify -m "message"`
+  5. Stage and commit docs: `git commit --no-verify -m "message"`
+- **Rationale**: Reduces commit time while maintaining code quality through initial validation
+
 ### Changelog Management
 - **🚨 MANDATORY**: When creating changelog entries for version bumps:
   - **Check OpenAPI definition updates**: Always analyze `types/api.d.ts` changes
