@@ -180,7 +180,7 @@ export async function getResponse(
  */
 export async function getResponseJson(
   response: IncomingMessage,
-  method?: string,
+  method?: string | undefined,
 ) {
   if (!isResponseOk(response)) {
     throw new ResponseError(
@@ -207,7 +207,7 @@ export async function getResponseJson(
         `Socket API - Invalid JSON response:\n${responseBody}\n→ ${e.message}`,
         { cause: e },
       ) as SyntaxError & {
-        originalResponse?: string
+        originalResponse?: string | undefined
       }
       enhancedError.name = 'SyntaxError'
       enhancedError.originalResponse = responseBody
@@ -222,7 +222,7 @@ export async function getResponseJson(
     const unknownError = new Error('Unknown JSON parsing error', {
       cause: e,
     }) as SyntaxError & {
-      originalResponse?: string
+      originalResponse?: string | undefined
     }
     unknownError.name = 'SyntaxError'
     unknownError.originalResponse = responseBody
@@ -249,7 +249,7 @@ export function isResponseOk(response: IncomingMessage): boolean {
 export function reshapeArtifactForPublicPolicy<T extends Record<string, any>>(
   data: T,
   isAuthenticated: boolean,
-  actions?: string,
+  actions?: string | undefined,
 ): T {
   /* c8 ignore start - Public policy artifact reshaping for unauthenticated users, difficult to test edge cases. */
   // If user is not authenticated, provide a different response structure
