@@ -33,8 +33,8 @@ export type EntitlementsResponse = {
 }
 
 export type PatchFile = {
-  afterHash?: string
-  beforeHash?: string
+  afterHash?: string | undefined
+  beforeHash?: string | undefined
   socketBlob?: string | null
 }
 
@@ -112,7 +112,7 @@ export type CompactSocketArtifact = Remap<
 export type CustomResponseType = 'response' | 'text' | 'json'
 
 export type GetOptions = {
-  responseType?: CustomResponseType
+  responseType?: CustomResponseType | undefined
   throws?: boolean | undefined
 }
 
@@ -127,15 +127,15 @@ export type QueryParams = Record<string, any>
 export type HeadersRecord = Record<string, string | string[]> | undefined
 
 export type SocketArtifactWithExtras = SocketArtifact & {
-  scorecards?: any
-  supplyChainRisk?: any
-  topLevelAncestors?: any
+  scorecards?: any | undefined
+  supplyChainRisk?: any | undefined
+  topLevelAncestors?: any | undefined
 }
 
 export type RequestOptions = (
-  | (HttpsRequestOptions & { headers?: HeadersRecord })
-  | (HttpRequestOptions & { headers?: HeadersRecord })
-  | (ClientSessionRequestOptions & { headers?: HeadersRecord })
+  | (HttpsRequestOptions & { headers?: HeadersRecord | undefined })
+  | (HttpRequestOptions & { headers?: HeadersRecord | undefined })
+  | (ClientSessionRequestOptions & { headers?: HeadersRecord | undefined })
 ) & { timeout?: number | undefined }
 
 export type SendMethod = 'POST' | 'PUT'
