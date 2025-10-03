@@ -43,7 +43,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@43a668e11f52d9f6a19ced20a0b3ee6e5cdde7e5 # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@43a668e122085d8b5836884e47ee940642216388 # main
 
       - name: Fetch latest OpenAPI definition
         id: fetch
@@ -137,7 +137,7 @@ jobs:
         with:
           ref: automated/open-api
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@43a668e11f52d9f6a19ced20a0b3ee6e5cdde7e5 # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@43a668e122085d8b5836884e47ee940642216388 # main
 
       - name: Validate TypeScript types
         run: pnpm run check:tsc
