@@ -88,11 +88,12 @@ Programmatic access to Socket.dev's security analysis capabilities.
   - ❌ WRONG: `it('works', ...)`
 
 ### CI Testing Infrastructure
-- **Reusable workflows**: Use `.github/workflows/_reusable-test.yml`
+- **🚨 MANDATORY**: Use `SocketDev/socket-registry/.github/workflows/ci.yml@main` for consistent CI across Socket projects
+- **Reusable workflows**: Socket-registry provides centralized, reusable workflows for lint/type-check/test/coverage
 - **Matrix testing**: Test across Node.js versions (20, 22, 24) and platforms
 - **Custom test runner**: `scripts/test.mjs` provides glob expansion
 - **Memory configuration**: Automatic heap size adjustment for CI (8GB) vs local (4GB)
-- **Documentation**: See `docs/CI_TESTING.md`
+- **Documentation**: See `docs/CI_TESTING.md` and `socket-registry/docs/CI_TESTING_TOOLS.md`
 
 ## 🔒 SECURITY & SAFETY
 
