@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../dist/index'
 
-import type { CResult } from '../dist/index'
+import type { SocketSdkGenericResult } from '../dist/index'
 import type { IncomingMessage } from 'node:http'
 
 describe('getApi and sendApi Methods', () => {
@@ -33,17 +33,17 @@ describe('getApi and sendApi Methods', () => {
       expect((result as IncomingMessage).statusCode).toBe(200)
     })
 
-    it('should return CResult<IncomingMessage> when throws=false', async () => {
+    it('should return SocketSdkGenericResult<IncomingMessage> when throws=false', async () => {
       nock('https://api.socket.dev')
         .get('/v0/test-endpoint')
         .reply(200, 'success')
 
       const result = (await client.getApi('test-endpoint', {
         throws: false,
-      })) as CResult<IncomingMessage>
+      })) as SocketSdkGenericResult<IncomingMessage>
 
-      expect(result.ok).toBe(true)
-      if (result.ok) {
+      expect(result.success).toBe(true)
+      if (result.success) {
         expect(result.data).toBeDefined()
         expect(result.data.statusCode).toBe(200)
       }
@@ -56,11 +56,11 @@ describe('getApi and sendApi Methods', () => {
     it('should return error CResult when throws=false and request fails', async () => {
       const result = (await client.getApi('nonexistent-endpoint', {
         throws: false,
-      })) as CResult<IncomingMessage>
+      })) as SocketSdkGenericResult<IncomingMessage>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('API request failed')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('API request failed')
         expect(result.cause).toBeDefined()
       }
     })
@@ -103,7 +103,7 @@ describe('getApi and sendApi Methods', () => {
       expect(result).toBe('Hello, world!')
     })
 
-    it('should return CResult<string> when throws=false and request succeeds', async () => {
+    it('should return SocketSdkGenericResult<string> when throws=false and request succeeds', async () => {
       nock('https://api.socket.dev')
         .get('/v0/test-text')
         .reply(200, 'Hello, world!')
@@ -111,10 +111,10 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.getApi<string>('test-text', {
         responseType: 'text',
         throws: false,
-      })) as CResult<string>
+      })) as SocketSdkGenericResult<string>
 
-      expect(result.ok).toBe(true)
-      if (result.ok) {
+      expect(result.success).toBe(true)
+      if (result.success) {
         expect(result.data).toBe('Hello, world!')
       }
     })
@@ -137,12 +137,12 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.getApi<string>('test-error', {
         responseType: 'text',
         throws: false,
-      })) as CResult<string>
+      })) as SocketSdkGenericResult<string>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.code).toBe(404)
-        expect(result.message).toBe('Socket API error')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.status).toBe(404)
+        expect(result.error).toContain('Socket API')
         expect(result.cause).toContain('Not found')
       }
     })
@@ -153,10 +153,10 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.getApi<string>('empty', {
         responseType: 'text',
         throws: false,
-      })) as CResult<string>
+      })) as SocketSdkGenericResult<string>
 
-      expect(result.ok).toBe(true)
-      if (result.ok) {
+      expect(result.success).toBe(true)
+      if (result.success) {
         expect(result.data).toBe('')
       }
     })
@@ -165,11 +165,11 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.getApi<string>('network-error', {
         responseType: 'text',
         throws: false,
-      })) as CResult<string>
+      })) as SocketSdkGenericResult<string>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('API request failed')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('API request failed')
         expect(result.cause).toBeDefined()
       }
     })
@@ -187,17 +187,17 @@ describe('getApi and sendApi Methods', () => {
       expect(result).toEqual(testData)
     })
 
-    it('should return CResult<T> when throws=false', async () => {
+    it('should return SocketSdkGenericResult<T> when throws=false', async () => {
       const testData = { message: 'Hello, JSON!' }
       nock('https://api.socket.dev').get('/v0/test-json').reply(200, testData)
 
       const result = (await client.getApi<typeof testData>('test-json', {
         responseType: 'json',
         throws: false,
-      })) as CResult<typeof testData>
+      })) as SocketSdkGenericResult<typeof testData>
 
-      expect(result.ok).toBe(true)
-      if (result.ok) {
+      expect(result.success).toBe(true)
+      if (result.success) {
         expect(result.data).toEqual(testData)
       }
     })
@@ -217,10 +217,10 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.getApi<typeof complexData>('complex-json', {
         responseType: 'json',
         throws: false,
-      })) as CResult<typeof complexData>
+      })) as SocketSdkGenericResult<typeof complexData>
 
-      expect(result.ok).toBe(true)
-      if (result.ok) {
+      expect(result.success).toBe(true)
+      if (result.success) {
         expect(result.data).toEqual(complexData)
       }
     })
@@ -243,11 +243,11 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.getApi('invalid-json', {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('Server returned invalid JSON')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('Server returned invalid JSON')
         expect(result.cause).toContain('invalid json content')
       }
     })
@@ -260,12 +260,12 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.getApi('api-error', {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.code).toBe(400)
-        expect(result.message).toBe('Socket API error')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.status).toBe(400)
+        expect(result.error).toContain('Socket API')
       }
     })
   })
@@ -284,13 +284,10 @@ describe('getApi and sendApi Methods', () => {
         body: requestData,
       })
 
-      expect(result).toEqual({
-        ok: true,
-        data: responseData,
-      })
+      expect(result).toEqual(responseData)
     })
 
-    it('should return CResult<T> when throws=false', async () => {
+    it('should return SocketSdkGenericResult<T> when throws=false', async () => {
       const requestData = { name: 'Test', value: 42 }
       const responseData = { id: 123, status: 'created' }
 
@@ -302,10 +299,10 @@ describe('getApi and sendApi Methods', () => {
         method: 'POST',
         body: requestData,
         throws: false,
-      })) as CResult<typeof responseData>
+      })) as SocketSdkGenericResult<typeof responseData>
 
-      expect(result.ok).toBe(true)
-      if (result.ok) {
+      expect(result.success).toBe(true)
+      if (result.success) {
         expect(result.data).toEqual(responseData)
       }
     })
@@ -322,10 +319,10 @@ describe('getApi and sendApi Methods', () => {
         method: 'PUT',
         body: requestData,
         throws: false,
-      })) as CResult<typeof responseData>
+      })) as SocketSdkGenericResult<typeof responseData>
 
-      expect(result.ok).toBe(true)
-      if (result.ok) {
+      expect(result.success).toBe(true)
+      if (result.success) {
         expect(result.data).toEqual(responseData)
       }
     })
@@ -340,10 +337,10 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.sendApi<typeof responseData>('process', {
         body: {},
         throws: false,
-      })) as CResult<typeof responseData>
+      })) as SocketSdkGenericResult<typeof responseData>
 
-      expect(result.ok).toBe(true)
-      if (result.ok) {
+      expect(result.success).toBe(true)
+      if (result.success) {
         expect(result.data).toEqual(responseData)
       }
     })
@@ -372,13 +369,15 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.sendApi('fail', {
         body: requestData,
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.code).toBe(422)
-        expect(result.message).toBe('Socket API error')
-        expect(result.cause).toContain('Unprocessable Entity')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.status).toBe(422)
+        expect(result.error).toContain('Socket API')
+        if (result.cause) {
+          expect(result.cause).toContain('Unprocessable Entity')
+        }
       }
     })
 
@@ -390,11 +389,11 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.sendApi('invalid-response', {
         body: { test: true },
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('API request failed')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('API request failed')
         expect(result.cause).toContain('Socket API - Invalid JSON response')
       }
     })
@@ -421,11 +420,11 @@ describe('getApi and sendApi Methods', () => {
     it('should handle network errors gracefully', async () => {
       const result = (await client.sendApi('network-fail', {
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('API request failed')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('API request failed')
         expect(result.cause).toBeDefined()
       }
     })
@@ -444,11 +443,11 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.getApi('long-invalid-json', {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('Server returned invalid JSON')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('Server returned invalid JSON')
         expect(result.cause).toContain('...')
       }
     })
@@ -461,11 +460,11 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.getApi('no-match-json', {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('Server returned invalid JSON')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('Server returned invalid JSON')
         expect(result.cause).toContain('Please report this')
       }
     })
@@ -473,11 +472,11 @@ describe('getApi and sendApi Methods', () => {
     it('should handle null/undefined errors in sendApi', async () => {
       const result = (await client.sendApi('null-error', {
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('API request failed')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('API request failed')
         expect(typeof result.cause).toBe('string')
       }
     })
@@ -490,11 +489,11 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.getApi('empty-preview-json', {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
       // Empty response is handled as empty object by getResponseJson
-      expect(result.ok).toBe(true)
-      if (result.ok) {
+      expect(result.success).toBe(true)
+      if (result.success) {
         expect(result.data).toEqual({})
       }
     })
@@ -507,11 +506,11 @@ describe('getApi and sendApi Methods', () => {
 
       const result = (await client.getApi('falsy-error', {
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('Socket API error')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toContain('Socket API')
         expect(result.cause).toBeDefined()
       }
     })
@@ -524,11 +523,11 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.getApi('short-invalid-json', {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('Server returned invalid JSON')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('Server returned invalid JSON')
         expect(result.cause).toContain('short response')
         expect(result.cause).not.toContain('...')
       }
@@ -538,11 +537,11 @@ describe('getApi and sendApi Methods', () => {
       // Test the null/undefined error path more specifically
       const result = (await client.sendApi('nonexistent-endpoint', {
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('API request failed')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('API request failed')
         expect(typeof result.cause).toBe('string')
       }
     })
@@ -556,11 +555,11 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.getApi('no-match-error', {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('Server returned invalid JSON')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('Server returned invalid JSON')
         expect(result.cause).toContain('Please report this')
       }
     })
@@ -572,21 +571,21 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.getApi('empty-slice', {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
       // Empty response is handled as {} by getResponseJson
-      expect(result.ok).toBe(true)
+      expect(result.success).toBe(true)
     })
 
     it('should handle null error in sendApi error creation', async () => {
       // Simulate a scenario that creates an error that becomes null when stringified
       const result = (await client.sendApi('null-error-path', {
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('API request failed')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('API request failed')
         expect(result.cause).toBeDefined()
       }
     })
@@ -595,11 +594,11 @@ describe('getApi and sendApi Methods', () => {
       // This will test the errStr || UNKNOWN_ERROR branch
       const result = (await client.sendApi('empty-error-string', {
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('API request failed')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('API request failed')
         expect(typeof result.cause).toBe('string')
       }
     })
@@ -608,11 +607,11 @@ describe('getApi and sendApi Methods', () => {
       // Test the e ? String(e).trim() : '' branch with falsy e
       const result = (await client.getApi('falsy-error-param', {
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('API request failed')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('API request failed')
         expect(typeof result.cause).toBe('string')
       }
     })
@@ -626,11 +625,11 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.getApi('no-capture-group', {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('Server returned invalid JSON')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('Server returned invalid JSON')
         expect(result.cause).toContain('Please report this')
       }
     })
@@ -642,11 +641,11 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.getApi('empty-trim', {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('Server returned invalid JSON')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('Server returned invalid JSON')
         expect(result.cause).toBeDefined()
       }
     })
@@ -658,21 +657,21 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.getApi('preview-edge', {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
       // Empty response returns {} from getResponseJson, so this should succeed
-      expect(result.ok).toBe(true)
+      expect(result.success).toBe(true)
     })
 
     it('should handle error that becomes empty string when converted', async () => {
       // Test the errStr || UNKNOWN_ERROR branches more directly
       const result = (await client.sendApi('trigger-empty-string-error', {
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('API request failed')
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('API request failed')
         expect(result.cause).toBeDefined()
       }
     })
@@ -705,10 +704,10 @@ describe('getApi and sendApi Methods', () => {
       const result = (await client.getApi('fallback-test', {
         responseType: 'invalid' as any,
         throws: false,
-      })) as CResult<IncomingMessage>
+      })) as SocketSdkGenericResult<IncomingMessage>
 
-      expect(result.ok).toBe(true)
-      if (result.ok) {
+      expect(result.success).toBe(true)
+      if (result.success) {
         expect(result.data).toBeDefined()
         expect(result.data.statusCode).toBe(200)
       }
@@ -747,10 +746,10 @@ describe('getApi and sendApi Methods', () => {
       const result = (await customClient.getApi<{ custom: boolean }>(
         'custom-endpoint',
         { responseType: 'json', throws: false },
-      )) as CResult<{ custom: boolean }>
+      )) as SocketSdkGenericResult<{ custom: boolean }>
 
-      expect(result.ok).toBe(true)
-      if (result.ok) {
+      expect(result.success).toBe(true)
+      if (result.success) {
         expect(result.data.custom).toBe(true)
       }
     })

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../dist/index'
 
-import type { CResult } from '../dist/index'
+import type { SocketSdkGenericResult } from '../dist/index'
 
 describe('API Response Scenarios', () => {
   let client: SocketSdk
@@ -30,8 +30,8 @@ describe('API Response Scenarios', () => {
     const result1 = (await client.getApi('no-match-case', {
       responseType: 'json',
       throws: false,
-    })) as CResult<unknown>
-    expect(result1.ok).toBe(false)
+    })) as SocketSdkGenericResult<unknown>
+    expect(result1.success).toBe(false)
 
     // Case 2: match exists but match[1] is undefined
     nock('https://api.socket.dev')
@@ -41,8 +41,8 @@ describe('API Response Scenarios', () => {
     const result2 = (await client.getApi('match-undefined-case', {
       responseType: 'json',
       throws: false,
-    })) as CResult<unknown>
-    expect(result2.ok).toBe(false)
+    })) as SocketSdkGenericResult<unknown>
+    expect(result2.success).toBe(false)
 
     // Case 3: match exists and match[1] is empty string
     nock('https://api.socket.dev')
@@ -52,8 +52,8 @@ describe('API Response Scenarios', () => {
     const result3 = (await client.getApi('match-empty-case', {
       responseType: 'json',
       throws: false,
-    })) as CResult<unknown>
-    expect(result3.ok).toBe(false)
+    })) as SocketSdkGenericResult<unknown>
+    expect(result3.success).toBe(false)
 
     // Case 4: match exists and match[1] has content
     nock('https://api.socket.dev')
@@ -63,8 +63,8 @@ describe('API Response Scenarios', () => {
     const result4 = (await client.getApi('match-content-case', {
       responseType: 'json',
       throws: false,
-    })) as CResult<unknown>
-    expect(result4.ok).toBe(false)
+    })) as SocketSdkGenericResult<unknown>
+    expect(result4.success).toBe(false)
   })
 
   it('should test all variations of preview.slice(0, 100) || "" branch', async () => {
@@ -74,9 +74,9 @@ describe('API Response Scenarios', () => {
     const result1 = (await client.getApi('empty-response-text', {
       responseType: 'json',
       throws: false,
-    })) as CResult<unknown>
+    })) as SocketSdkGenericResult<unknown>
     // Empty becomes {}
-    expect(result1.ok).toBe(true)
+    expect(result1.success).toBe(true)
 
     // Case 2: responseText has content, slice returns non-empty
     const content50 = 'a'.repeat(50)
@@ -87,8 +87,8 @@ describe('API Response Scenarios', () => {
     const result2 = (await client.getApi('content-50-chars', {
       responseType: 'json',
       throws: false,
-    })) as CResult<unknown>
-    expect(result2.ok).toBe(false)
+    })) as SocketSdkGenericResult<unknown>
+    expect(result2.success).toBe(false)
   })
 
   it('should test all variations of responseText.length > 100 ternary', async () => {
@@ -107,10 +107,10 @@ describe('API Response Scenarios', () => {
       const result = (await client.getApi(`length-${length}`, {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
+      expect(result.success).toBe(false)
+      if (!result.success) {
         if (length > 100) {
           expect(result.cause).toContain('...')
         } else {
@@ -141,14 +141,14 @@ describe('API Response Scenarios', () => {
       // eslint-disable-next-line no-await-in-loop
       const resultGet = (await client.getApi(scenario, {
         throws: false,
-      })) as CResult<unknown>
-      expect(resultGet.ok).toBe(false)
+      })) as SocketSdkGenericResult<unknown>
+      expect(resultGet.success).toBe(false)
 
       // eslint-disable-next-line no-await-in-loop
       const resultSend = (await client.sendApi(scenario, {
         throws: false,
-      })) as CResult<unknown>
-      expect(resultSend.ok).toBe(false)
+      })) as SocketSdkGenericResult<unknown>
+      expect(resultSend.success).toBe(false)
     }
   })
 
@@ -163,9 +163,9 @@ describe('API Response Scenarios', () => {
       // eslint-disable-next-line no-await-in-loop
       const resultGet = (await client.getApi(test, {
         throws: false,
-      })) as CResult<unknown>
-      expect(resultGet.ok).toBe(false)
-      if (!resultGet.ok) {
+      })) as SocketSdkGenericResult<unknown>
+      expect(resultGet.success).toBe(false)
+      if (!resultGet.success) {
         expect(typeof resultGet.cause).toBe('string')
         expect(resultGet.cause?.length).toBeGreaterThan(0)
       }
@@ -173,9 +173,9 @@ describe('API Response Scenarios', () => {
       // eslint-disable-next-line no-await-in-loop
       const resultSend = (await client.sendApi(test, {
         throws: false,
-      })) as CResult<unknown>
-      expect(resultSend.ok).toBe(false)
-      if (!resultSend.ok) {
+      })) as SocketSdkGenericResult<unknown>
+      expect(resultSend.success).toBe(false)
+      if (!resultSend.success) {
         expect(typeof resultSend.cause).toBe('string')
         expect(resultSend.cause?.length).toBeGreaterThan(0)
       }
@@ -209,8 +209,8 @@ describe('API Response Scenarios', () => {
       const result = (await client.getApi(`whitespace-trim-${index}`, {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
-      expect(result.ok).toBe(false)
+      })) as SocketSdkGenericResult<unknown>
+      expect(result.success).toBe(false)
     }
   })
 
@@ -232,8 +232,8 @@ describe('API Response Scenarios', () => {
       // eslint-disable-next-line no-await-in-loop
       const result = (await client.getApi(test, {
         throws: false,
-      })) as CResult<unknown>
-      expect(result.ok).toBe(false)
+      })) as SocketSdkGenericResult<unknown>
+      expect(result.success).toBe(false)
     }
 
     // Test SyntaxError with "Invalid JSON response" but no regex match
@@ -244,8 +244,8 @@ describe('API Response Scenarios', () => {
     const result1 = (await client.getApi('invalid-json-no-regex', {
       responseType: 'json',
       throws: false,
-    })) as CResult<unknown>
-    expect(result1.ok).toBe(false)
+    })) as SocketSdkGenericResult<unknown>
+    expect(result1.success).toBe(false)
 
     // Test SyntaxError with regex match but empty capture
     nock('https://api.socket.dev')
@@ -255,8 +255,8 @@ describe('API Response Scenarios', () => {
     const result2 = (await client.getApi('invalid-json-empty-capture', {
       responseType: 'json',
       throws: false,
-    })) as CResult<unknown>
-    expect(result2.ok).toBe(false)
+    })) as SocketSdkGenericResult<unknown>
+    expect(result2.success).toBe(false)
   })
 
   it('should test massive combinations of error scenarios', async () => {
@@ -273,14 +273,14 @@ describe('API Response Scenarios', () => {
         // eslint-disable-next-line no-await-in-loop
         const result = (await client.getApi(scenario, {
           throws: false,
-        })) as CResult<unknown>
-        expect(result.ok).toBe(false)
+        })) as SocketSdkGenericResult<unknown>
+        expect(result.success).toBe(false)
       } else {
         // eslint-disable-next-line no-await-in-loop
         const result = (await client.sendApi(scenario, {
           throws: false,
-        })) as CResult<unknown>
-        expect(result.ok).toBe(false)
+        })) as SocketSdkGenericResult<unknown>
+        expect(result.success).toBe(false)
       }
     }
   })
@@ -304,10 +304,10 @@ describe('API Response Scenarios', () => {
       const result = (await client.getApi(`json-format-${index}`, {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
-      expect(result.ok).toBe(false)
-      if (!result.ok) {
-        expect(result.message).toBe('Server returned invalid JSON')
+      })) as SocketSdkGenericResult<unknown>
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('Server returned invalid JSON')
       }
     }
   })
@@ -323,14 +323,14 @@ describe('API Response Scenarios', () => {
       // eslint-disable-next-line no-await-in-loop
       const getResult = (await client.getApi(getPath, {
         throws: false,
-      })) as CResult<unknown>
-      expect(getResult.ok).toBe(false)
+      })) as SocketSdkGenericResult<unknown>
+      expect(getResult.success).toBe(false)
 
       // eslint-disable-next-line no-await-in-loop
       const sendResult = (await client.sendApi(sendPath, {
         throws: false,
-      })) as CResult<unknown>
-      expect(sendResult.ok).toBe(false)
+      })) as SocketSdkGenericResult<unknown>
+      expect(sendResult.success).toBe(false)
     }
   })
 })

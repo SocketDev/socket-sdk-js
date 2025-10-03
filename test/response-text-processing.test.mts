@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../dist/index'
 
-import type { CResult } from '../dist/index'
+import type { SocketSdkGenericResult } from '../dist/index'
 
 describe('Response Text Processing', () => {
   let client: SocketSdk
@@ -32,13 +32,13 @@ describe('Response Text Processing', () => {
       const result = (await client.getApi(`empty-scenario-${index}`, {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
+      })) as SocketSdkGenericResult<unknown>
 
       if (scenario === '') {
         // Empty string becomes {}
-        expect(result.ok).toBe(true)
+        expect(result.success).toBe(true)
       } else {
-        expect(result.ok).toBe(false)
+        expect(result.success).toBe(false)
       }
     }
   })
@@ -63,8 +63,8 @@ describe('Response Text Processing', () => {
       const result = (await client.sendApi(`whitespace-${index}`, {
         body: {},
         throws: false,
-      })) as CResult<unknown>
-      expect(result.ok).toBe(false)
+      })) as SocketSdkGenericResult<unknown>
+      expect(result.success).toBe(false)
     }
   })
 
@@ -76,8 +76,8 @@ describe('Response Text Processing', () => {
 
     const result = (await client.getApi('unicode-error', {
       throws: false,
-    })) as CResult<unknown>
-    expect(result.ok).toBe(false)
+    })) as SocketSdkGenericResult<unknown>
+    expect(result.success).toBe(false)
   })
 
   it('should handle whitespace errors that stringify to whitespace', async () => {
@@ -88,11 +88,11 @@ describe('Response Text Processing', () => {
     const result = (await client.sendApi('whitespace-error', {
       body: {},
       throws: false,
-    })) as CResult<unknown>
+    })) as SocketSdkGenericResult<unknown>
 
-    expect(result.ok).toBe(false)
-    if (!result.ok) {
-      expect(result.message).toBe('Socket API error')
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error).toContain('Socket API')
     }
   })
 
@@ -118,8 +118,8 @@ describe('Response Text Processing', () => {
       const result = (await client.getApi(`trim-boundary-${index}`, {
         responseType: 'json',
         throws: false,
-      })) as CResult<unknown>
-      expect(result.ok).toBe(false)
+      })) as SocketSdkGenericResult<unknown>
+      expect(result.success).toBe(false)
     }
   })
 })
