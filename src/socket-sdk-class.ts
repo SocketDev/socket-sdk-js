@@ -944,7 +944,7 @@ export class SocketSdk {
           success: false,
         }
         /* c8 ignore stop */
-      } /* c8 ignore next - Closing brace of error result handling. */
+      }
 
       /* c8 ignore next - Fallback error handling for non-ResponseError cases in getApi. */
       return this.#createQueryErrorResult<T>(e)
@@ -2008,7 +2008,7 @@ export class SocketSdk {
         e,
       )) as unknown as UploadManifestFilesError
       /* c8 ignore stop */
-    } /* c8 ignore next - Closing brace of error handling block. */
+    }
   }
 
   /**
