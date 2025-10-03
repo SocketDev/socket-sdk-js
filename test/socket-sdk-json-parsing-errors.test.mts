@@ -1,4 +1,4 @@
-/** @fileoverview Tests for missing branch coverage in socket-sdk-class.ts. */
+/** @fileoverview Tests for JSON parsing and syntax error handling in HTTP client. */
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
