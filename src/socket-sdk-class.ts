@@ -202,7 +202,9 @@ export class SocketSdk {
   #createQueryErrorResult<T>(e: unknown): SocketSdkGenericResult<T> {
     if (e instanceof SyntaxError) {
       // Try to get response text from enhanced error, fall back to regex pattern for compatibility.
-      const enhancedError = e as SyntaxError & { originalResponse?: string }
+      const enhancedError = e as SyntaxError & {
+        originalResponse?: string | undefined
+      }
       /* c8 ignore next - Defensive empty string fallback for originalResponse. */
       let responseText = enhancedError.originalResponse || ''
 
@@ -279,8 +281,11 @@ export class SocketSdk {
     // Try to parse the body as JSON, fallback to treating as plain text.
     let body: string | undefined
     try {
-      const parsed: { error?: { message?: string; details?: unknown } } =
-        JSON.parse(bodyStr)
+      const parsed: {
+        error?:
+          | { message?: string | undefined; details?: unknown | undefined }
+          | undefined
+      } = JSON.parse(bodyStr)
       // Client errors (4xx) should return actionable error messages.
       // Extract both message and details from error response for better context.
       if (typeof parsed?.error?.message === 'string') {
@@ -669,7 +674,7 @@ export class SocketSdk {
   async createScanFromFilepaths(
     filepaths: string[],
     pathsRelativeTo: string = '.',
-    issueRules?: Record<string, boolean>,
+    issueRules?: Record<string, boolean> | undefined,
   ): Promise<SocketSdkResult<'createReport'>> {
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
@@ -1626,7 +1631,7 @@ export class SocketSdk {
    * @throws {Error} When server returns 5xx status codes
    */
   async postSettings(
-    selectors: Array<{ organization?: string }>,
+    selectors: Array<{ organization?: string | undefined }>,
   ): Promise<SocketSdkResult<'postSettings'>> {
     try {
       const data = await getResponseJson(
