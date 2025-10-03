@@ -88,7 +88,8 @@ Programmatic access to Socket.dev's security analysis capabilities.
   - ❌ WRONG: `it('works', ...)`
 
 ### CI Testing Infrastructure
-- **🚨 MANDATORY**: Use `SocketDev/socket-registry/.github/workflows/ci.yml@main` for consistent CI across Socket projects
+- **🚨 MANDATORY**: Use `SocketDev/socket-registry/.github/workflows/ci.yml@<SHA>` with full commit SHA (not @main)
+- **🚨 CRITICAL**: GitHub Actions require full-length commit SHAs. Format: `@662bbcab1b7533e24ba8e3446cffd8a7e5f7617e # main`
 - **Reusable workflows**: Socket-registry provides centralized, reusable workflows for lint/type-check/test/coverage
 - **Matrix testing**: Test across Node.js versions (20, 22, 24) and platforms
 - **Custom test runner**: `scripts/test.mjs` provides glob expansion
