@@ -163,19 +163,40 @@ export type SocketArtifactAlert = Remap<
 export type SocketSdkOperations = keyof operations
 
 export type SocketSdkSuccessResult<T extends SocketSdkOperations> =
-  OpReturnType<operations[T]>
+  OpReturnType<operations[T]> & {
+    cause?: undefined
+    error?: undefined
+  }
 
 export type SocketSdkErrorResult<T extends SocketSdkOperations> = Omit<
   OpErrorType<operations[T]>,
   'error'
 > & {
-  error: string
   cause?: string | undefined
+  data?: undefined
+  error: string
 }
 
 export type SocketSdkResult<T extends SocketSdkOperations> =
   | SocketSdkSuccessResult<T>
   | SocketSdkErrorResult<T>
+
+// Generic result type for methods not mapped to specific operations
+export type SocketSdkGenericResult<T> =
+  | {
+      cause?: undefined
+      data: T
+      error?: undefined
+      status: number
+      success: true
+    }
+  | {
+      cause?: string | undefined
+      data?: undefined
+      error: string
+      status: number
+      success: false
+    }
 
 export interface SocketSdkOptions {
   agent?: Agent | GotOptions | undefined
@@ -190,32 +211,20 @@ export type UploadManifestFilesResponse = {
 }
 
 export type UploadManifestFilesReturnType = {
+  cause?: undefined
   data: UploadManifestFilesResponse
+  error?: undefined
   status: 200
   success: true
 }
 
 export type UploadManifestFilesError = {
+  cause?: string | undefined
+  data?: undefined
   error: string
   status: number
   success: false
-  cause: string | undefined
 }
-
-// CResult pattern for non-throwing API operations
-export type CResult<T> =
-  | {
-      data: T
-      ok: true
-      message?: string | undefined
-    }
-  | {
-      message: string
-      ok: false
-      cause?: string | undefined
-      code?: number | undefined
-      data?: unknown | undefined
-    }
 
 // Derived types that depend on SocketSdkOperations
 export type BatchPackageFetchResultType = SocketSdkResult<'batchPackageFetch'>
