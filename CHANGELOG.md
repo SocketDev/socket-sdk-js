@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.9.0) - 2025-10-03
+
+### Changed
+- **BREAKING**: Improved `SocketSdkResult` type compatibility - success and error results now have symmetric properties (`data`, `error`, `cause`) with explicit `undefined` types for better TypeScript narrowing
+- **BREAKING**: Removed `CResult` type (CLI-specific) in favor of SDK-appropriate `SocketSdkGenericResult` type for `getApi()` and `sendApi()` methods
+- Updated `getApi()` and `sendApi()` to use `SocketSdkGenericResult` with consistent HTTP status codes instead of CLI exit codes
+- All result types now use `success` discriminant with `status` (HTTP code), `data`, `error`, and `cause` properties on both branches
+
+### Migration Guide
+- If using `getApi()` or `sendApi()` with `throws: false`, update from `CResult` to `SocketSdkGenericResult`
+- Change `.ok` checks to `.success`
+- Change `.code` to `.status` (now contains HTTP status code)
+- Change `.message` to `.error`
+- Both success and error branches now have all properties - check discriminant first with `if (result.success)`
+
 ## [1.8.6](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.8.6) - 2025-10-02
 
 ### Changed
