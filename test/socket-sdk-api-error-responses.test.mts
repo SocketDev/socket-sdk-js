@@ -481,7 +481,7 @@ describe('SocketSdk - Edge Cases', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.streamOrgFullScan('test-org', 'scan-123', false),
+        client.streamOrgFullScan('test-org', 'scan-123', { output: false }),
       ).rejects.toThrow('Socket API server error (500)')
     })
 
