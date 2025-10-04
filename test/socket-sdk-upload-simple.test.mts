@@ -51,5 +51,23 @@ describe('SocketSdk - Upload Manifest Coverage', () => {
       expect(result.success).toBe(true)
       expect(result.status).toBe(200)
     })
+
+    it('should handle errors in uploadManifestFiles', async () => {
+      nock('https://api.socket.dev')
+        .post('/v0/orgs/test-org/upload-manifest-files')
+        .reply(400, {
+          error: 'Bad Request',
+          message: 'Invalid manifest files',
+        })
+
+      const result = await sdk.uploadManifestFiles('test-org', [
+        packageJsonPath,
+      ])
+
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.status).toBe(400)
+      }
+    })
   })
 })
