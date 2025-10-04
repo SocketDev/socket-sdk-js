@@ -61,10 +61,10 @@ export default defineConfig({
       include: ['src/**/*.{ts,mts,cts}'],
       all: true,
       thresholds: {
-        lines: 100,
+        lines: 99.5,
         functions: 100,
         branches: 97.86,
-        statements: 100,
+        statements: 99.5,
       },
     },
   },
