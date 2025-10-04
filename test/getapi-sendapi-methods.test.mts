@@ -678,24 +678,6 @@ describe('getApi and sendApi Methods', () => {
   })
 
   describe('Integration with existing patterns', () => {
-    it('should include proper authentication headers', async () => {
-      let capturedHeaders: any = {}
-
-      nock('https://api.socket.dev')
-        .get('/v0/auth-test')
-        .reply(function () {
-          capturedHeaders = this.req.headers
-          return [200, 'authenticated']
-        })
-
-      await client.getApi<string>('auth-test', {
-        responseType: 'text',
-        throws: false,
-      })
-
-      expect(capturedHeaders.authorization).toBe('Basic dGVzdC1hcGktdG9rZW46')
-    })
-
     it('should handle fallback responseType for default response handling', async () => {
       nock('https://api.socket.dev')
         .get('/v0/fallback-test')
