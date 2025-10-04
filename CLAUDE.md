@@ -124,6 +124,12 @@ Programmatic access to Socket.dev's security analysis capabilities.
 - **Semicolons**: Use semicolons (unlike other Socket projects that omit them)
 - **Type safety**: 🚨 FORBIDDEN - Avoid `any` type; prefer `unknown` or specific types
 - **Type imports**: Always use `import type` for better tree-shaking
+- **Null-prototype objects**:
+  - ✅ CORRECT: `{ __proto__: null, key: 'value' }` (object literal with properties)
+  - ✅ CORRECT: `{ __proto__: null, ...options }` (spread pattern)
+  - ✅ CORRECT: `const obj = Object.create(null)` (empty object, populate separately)
+  - ❌ WRONG: `const obj = { __proto__: null }` (empty object literal - use `Object.create(null)` instead)
+  - **Rationale**: Use `Object.create(null)` only for empty null-prototype objects; object literals with `__proto__: null` are fine when they have properties
 
 ### Comprehensive Sorting Standards (MANDATORY)
 All code elements MUST be sorted:
