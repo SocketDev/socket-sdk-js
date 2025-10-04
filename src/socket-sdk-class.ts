@@ -1783,7 +1783,10 @@ export class SocketSdk {
     fullScanId: string,
     options?: StreamOrgFullScanOptions | undefined,
   ): Promise<SocketSdkResult<'getOrgFullScan'>> {
-    const { output } = { __proto__: null, ...options } as StreamOrgFullScanOptions
+    const { output } = {
+      __proto__: null,
+      ...options,
+    } as StreamOrgFullScanOptions
     try {
       const req = getHttpModule(this.#baseUrl)
         .request(
