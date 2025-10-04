@@ -354,7 +354,7 @@ describe('SocketSdk - Batch Operations', () => {
       const client = new SocketSdk('test-token')
       const res = await client.createDependenciesSnapshot(
         [packageJsonPath, packageLockPath],
-        tempDir,
+        { pathsRelativeTo: tempDir },
       )
 
       expect(res.success).toBe(true)
@@ -395,7 +395,7 @@ describe('SocketSdk - Batch Operations', () => {
       const res = await client.createOrgFullScan(
         'test-org',
         [packageJsonPath, packageLockPath],
-        tempDir,
+        { pathsRelativeTo: tempDir },
       )
 
       expect(res.success).toBe(true)
@@ -420,7 +420,9 @@ describe('SocketSdk - Batch Operations', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.createDependenciesSnapshot([packageJsonPath], tempDir),
+        client.createDependenciesSnapshot([packageJsonPath], {
+          pathsRelativeTo: tempDir,
+        }),
       ).rejects.toThrow()
     })
 
@@ -431,7 +433,9 @@ describe('SocketSdk - Batch Operations', () => {
       const client = new SocketSdk('test-token')
 
       await expect(
-        client.createDependenciesSnapshot([nonExistentPath], tempDir),
+        client.createDependenciesSnapshot([nonExistentPath], {
+          pathsRelativeTo: tempDir,
+        }),
       ).rejects.toThrow()
     })
   })
