@@ -55,7 +55,9 @@ describe('HTTP Client - Retry Functionality', () => {
         throw new Error('Persistent error')
       })
 
-      await expect(withRetry(fn, 3, 10)).rejects.toThrow('Persistent error')
+      await expect(withRetry(fn, 3, 10)).rejects.toThrow(
+        'Request failed after 4 attempts',
+      )
       // Initial + 3 retries
       expect(fn).toHaveBeenCalledTimes(4)
     })
@@ -141,7 +143,7 @@ describe('HTTP Client - Retry Functionality', () => {
       })
 
       await expect(withRetry(fn, 0, 10)).rejects.toThrow(
-        'Request failed after retries',
+        'Request failed after 1 attempts',
       )
     })
   })

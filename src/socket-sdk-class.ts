@@ -143,9 +143,13 @@ export class SocketSdk {
       yield await this.#handleApiError<'batchPackageFetch'>(e)
       return
     }
+    // Validate response before processing.
+    if (!res) {
+      throw new Error('Failed to get response from batch PURL request')
+    }
     // Parse the newline delimited JSON response.
     const rli = readline.createInterface({
-      input: res!,
+      input: res,
       crlfDelay: Number.POSITIVE_INFINITY,
       signal: abortSignal,
     })
@@ -383,9 +387,13 @@ export class SocketSdk {
     } catch (e) {
       return await this.#handleApiError<'batchPackageFetch'>(e)
     }
+    // Validate response before processing.
+    if (!res) {
+      throw new Error('Failed to get response from batch PURL request')
+    }
     // Parse the newline delimited JSON response.
     const rli = readline.createInterface({
-      input: res!,
+      input: res,
       crlfDelay: Number.POSITIVE_INFINITY,
       signal: abortSignal,
     })
@@ -503,12 +511,13 @@ export class SocketSdk {
       const { generator, iteratorResult }: GeneratorStep = await Promise.race(
         running.map(entry => entry.promise),
       )
-      // Remove generator.
-      /* c8 ignore next 3 - Concurrent generator cleanup edge case. */
-      running.splice(
-        running.findIndex(entry => entry.generator === generator),
-        1,
-      )
+      // Remove generator with safe index lookup.
+      const index = running.findIndex(entry => entry.generator === generator)
+      /* c8 ignore next 3 - Defensive check for concurrent generator cleanup edge case. */
+      if (index === -1) {
+        continue
+      }
+      running.splice(index, 1)
       // Yield the value if one is given, even when done:true.
       if (iteratorResult.value) {
         yield iteratorResult.value
@@ -1776,11 +1785,20 @@ export class SocketSdk {
       }
 
       if (typeof output === 'string') {
-        // Stream to file
-        res.pipe(createWriteStream(output))
+        // Stream to file with error handling.
+        const writeStream = createWriteStream(output)
+        res.pipe(writeStream)
+        writeStream.on('error', error => {
+          throw new Error(`Failed to write to file: ${output}`, {
+            cause: error,
+          })
+        })
       } else if (output === true) {
-        // Stream to stdout
+        // Stream to stdout with error handling.
         res.pipe(process.stdout)
+        process.stdout.on('error', error => {
+          throw new Error('Failed to write to stdout', { cause: error })
+        })
       }
 
       // If output is false or undefined, just return the response without streaming
@@ -1827,7 +1845,10 @@ export class SocketSdk {
             try {
               const data = JSON.parse(line) as ArtifactPatches
               controller.enqueue(data)
-            } catch (e) {}
+            } catch (e) {
+              // Log parse errors for debugging invalid NDJSON lines.
+              debugLog('streamPatchesFromScan', `Failed to parse line: ${e}`)
+            }
           }
         })
 
