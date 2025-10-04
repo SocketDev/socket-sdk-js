@@ -246,7 +246,7 @@ export function isResponseOk(response: IncomingMessage): boolean {
  * Transform artifact data based on authentication status.
  * Filters and compacts response data for public/free-tier users.
  */
-export function reshapeArtifactForPublicPolicy<T extends Record<string, any>>(
+export function reshapeArtifactForPublicPolicy<T extends Record<string, unknown>>(
   data: T,
   isAuthenticated: boolean,
   actions?: string | undefined,
@@ -295,9 +295,12 @@ export function reshapeArtifactForPublicPolicy<T extends Record<string, any>>(
     // Handle both single artifacts and objects with artifacts arrays.
     if (data['artifacts']) {
       // Object with artifacts array.
+      const artifacts = data['artifacts']
       return {
         ...data,
-        artifacts: data['artifacts']?.map(reshapeArtifact),
+        artifacts: Array.isArray(artifacts)
+          ? artifacts.map(reshapeArtifact)
+          : artifacts,
       }
     } else if (data['alerts']) {
       // Single artifact with alerts.
