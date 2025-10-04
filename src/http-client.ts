@@ -337,27 +337,42 @@ export async function withRetry<T>(
     } catch (error) {
       lastError = error as Error
 
-      // Last attempt - throw error
+      // Last attempt - throw error with retry context.
       if (attempt === retries) {
-        break
+        const enhancedError = new Error(
+          `Request failed after ${retries + 1} attempts`,
+          { cause: lastError },
+        )
+        throw enhancedError
       }
 
-      // Check if error is retryable (network errors, 5xx responses)
+      // Check if error is retryable (network errors, 5xx responses).
       if (error instanceof ResponseError) {
         const status = error.response.statusCode
-        // Don't retry client errors (4xx)
+        // Don't retry client errors (4xx).
         if (status && status >= 400 && status < 500) {
           throw error
         }
+        debugLog(
+          'withRetry',
+          `Retrying after ${status} error (attempt ${attempt + 1}/${retries + 1})`,
+        )
+      } else {
+        debugLog(
+          'withRetry',
+          `Retrying after network error (attempt ${attempt + 1}/${retries + 1})`,
+        )
       }
 
-      // Exponential backoff
+      // Exponential backoff.
       const delayMs = retryDelay * 2 ** attempt
+      debugLog('withRetry', `Waiting ${delayMs}ms before retry`)
       // eslint-disable-next-line no-await-in-loop
       await new Promise(resolve => setTimeout(resolve, delayMs))
     }
   }
 
+  // Fallback error if lastError is somehow undefined.
   throw lastError || new Error('Request failed after retries')
 }
 

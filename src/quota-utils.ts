@@ -25,8 +25,11 @@ function loadRequirements(): Requirements {
   }
 
   try {
-    // Resolve path relative to current working directory
-    const requirementsPath = join(process.cwd(), 'requirements.json')
+    // Resolve path relative to this module file location.
+    // When compiled, __dirname will point to dist/ directory.
+    // In source, __dirname points to src/ directory.
+    // requirements.json is always in the parent directory of dist/ or src/.
+    const requirementsPath = join(__dirname, '..', 'requirements.json')
     const data = readFileSync(requirementsPath, 'utf8')
     requirements = JSON.parse(data) as Requirements
     return requirements
