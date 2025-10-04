@@ -122,14 +122,18 @@ export type GotOptions = {
   https?: HttpsAgent | undefined
 }
 
-export type QueryParams = Record<string, any>
+export type QueryParams = Record<string, unknown>
 
 export type HeadersRecord = Record<string, string | string[]> | undefined
 
+export type SocketMetricSchema = components['schemas']['SocketMetricSchema']
+
+export type SocketId = components['schemas']['SocketId']
+
 export type SocketArtifactWithExtras = SocketArtifact & {
-  scorecards?: any | undefined
-  supplyChainRisk?: any | undefined
-  topLevelAncestors?: any | undefined
+  scorecards?: unknown | undefined
+  supplyChainRisk?: SocketMetricSchema | undefined
+  topLevelAncestors?: SocketId[] | undefined
 }
 
 export type RequestOptions = (
