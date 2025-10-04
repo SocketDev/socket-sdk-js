@@ -28,7 +28,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "pnpm run clean:dist && tsgo --build .config/tsconfig.json --force",
+    "build": "pnpm run clean:dist && tsgo --build .config/tsconfig.json",
     "check": "run-p -c --aggregate-output check:*",
     "check:lint": "eslint --config .config/eslint.config.mjs --report-unused-disable-directives .",
     "check:lint:fix": "pnpm run check:lint -- --fix",
@@ -42,7 +42,7 @@
     "clean": "run-s -c clean:*",
     "clean:cache": "del-cli '**/.cache'",
     "clean:coverage": "del-cli '.type-coverage' 'coverage'",
-    "clean:dist": "del-cli 'dist' '**/*.tsbuildinfo'",
+    "clean:dist": "del-cli 'dist' '.config/*.tsbuildinfo'",
     "clean:declarations": "del-cli '*.d.ts' '!api*.d.ts'",
     "clean:node_modules": "del-cli '**/node_modules'",
     "fix": "run-s lint:fix",
