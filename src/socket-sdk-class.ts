@@ -425,7 +425,9 @@ export class SocketSdk {
         )
       }
     }
-    const compact = urlSearchParamAsBoolean(getOwn(queryParams, 'compact'))
+    const compact = urlSearchParamAsBoolean(
+      getOwn(queryParams, 'compact') as string | null | undefined,
+    )
     return this.#handleApiSuccess<'batchPackageFetch'>(
       compact ? (results as CompactSocketArtifact[]) : results,
     )
