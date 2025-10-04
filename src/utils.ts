@@ -49,12 +49,14 @@ export function queryToSearchParams(
     | URLSearchParams
     | string
     | QueryParams
-    | Iterable<[string, any]>
-    | ReadonlyArray<[string, any]>
+    | Iterable<[string, unknown]>
+    | ReadonlyArray<[string, unknown]>
     | null
     | undefined,
 ): URLSearchParams {
-  const params = new URLSearchParams(init ?? '')
+  const params = new URLSearchParams(
+    init as ConstructorParameters<typeof URLSearchParams>[0],
+  )
   const normalized = Object.create(null) as unknown as QueryParams
   const entries: Iterable<[string, string]> = params.entries()
   for (const entry of entries) {
@@ -72,7 +74,9 @@ export function queryToSearchParams(
       normalized[key] = value
     }
   }
-  return new URLSearchParams(normalized)
+  return new URLSearchParams(
+    normalized as unknown as Record<string, string>,
+  )
 }
 
 /**
