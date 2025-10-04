@@ -47,6 +47,9 @@ import type {
   BatchPackageFetchResultType,
   BatchPackageStreamOptions,
   CompactSocketArtifact,
+  CreateDependenciesSnapshotOptions,
+  CreateOrgFullScanOptions,
+  CreateScanFromFilepathsOptions,
   CustomResponseType,
   Entitlement,
   EntitlementsResponse,
@@ -63,7 +66,9 @@ import type {
   SocketSdkOptions,
   SocketSdkResult,
   SocketSdkSuccessResult,
+  StreamOrgFullScanOptions,
   UploadManifestFilesError,
+  UploadManifestFilesOptions,
   UploadManifestFilesReturnType,
 } from './types'
 import type { IncomingMessage } from 'node:http'
@@ -548,9 +553,12 @@ export class SocketSdk {
    */
   async createDependenciesSnapshot(
     filepaths: string[],
-    pathsRelativeTo = '.',
-    queryParams?: QueryParams | undefined,
+    options?: CreateDependenciesSnapshotOptions | undefined,
   ): Promise<SocketSdkResult<'createDependenciesSnapshot'>> {
+    const { pathsRelativeTo = '.', queryParams } = {
+      __proto__: null,
+      ...options,
+    } as CreateDependenciesSnapshotOptions
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
     try {
@@ -603,9 +611,12 @@ export class SocketSdk {
   async createOrgFullScan(
     orgSlug: string,
     filepaths: string[],
-    pathsRelativeTo = '.',
-    queryParams?: QueryParams | undefined,
+    options?: CreateOrgFullScanOptions | undefined,
   ): Promise<SocketSdkResult<'CreateOrgFullScan'>> {
+    const { pathsRelativeTo = '.', queryParams } = {
+      __proto__: null,
+      ...options,
+    } as CreateOrgFullScanOptions
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
     try {
@@ -684,9 +695,12 @@ export class SocketSdk {
    */
   async createScanFromFilepaths(
     filepaths: string[],
-    pathsRelativeTo = '.',
-    issueRules?: Record<string, boolean> | undefined,
+    options?: CreateScanFromFilepathsOptions | undefined,
   ): Promise<SocketSdkResult<'createReport'>> {
+    const { issueRules, pathsRelativeTo = '.' } = {
+      __proto__: null,
+      ...options,
+    } as CreateScanFromFilepathsOptions
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
     try {
@@ -1767,8 +1781,9 @@ export class SocketSdk {
   async streamOrgFullScan(
     orgSlug: string,
     fullScanId: string,
-    output?: string | boolean,
+    options?: StreamOrgFullScanOptions | undefined,
   ): Promise<SocketSdkResult<'getOrgFullScan'>> {
+    const { output } = { __proto__: null, ...options } as StreamOrgFullScanOptions
     try {
       const req = getHttpModule(this.#baseUrl)
         .request(
@@ -2010,8 +2025,12 @@ export class SocketSdk {
   async uploadManifestFiles(
     orgSlug: string,
     filepaths: string[],
-    pathsRelativeTo = '.',
+    options?: UploadManifestFilesOptions | undefined,
   ): Promise<UploadManifestFilesReturnType | UploadManifestFilesError> {
+    const { pathsRelativeTo = '.' } = {
+      __proto__: null,
+      ...options,
+    } as UploadManifestFilesOptions
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
     try {
