@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.10.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.10.0) - 2025-10-04
+
+### Added
+- Added `PromiseQueue` utility for controlled concurrency in async operations
+- HTTP retry logic with exponential backoff for improved reliability on transient failures
+- Added option type interfaces: `CreateDependenciesSnapshotOptions`, `CreateOrgFullScanOptions`, `CreateScanFromFilepathsOptions`, `StreamOrgFullScanOptions`, `UploadManifestFilesOptions`
+
+### Changed
+- **BREAKING**: Refactored SDK methods to use options objects instead of positional parameters for better API clarity:
+  - `createDependenciesSnapshot(filepaths, options)` - replaced `repo` and `branch` positional parameters with options object
+  - `createOrgFullScan(orgSlug, filepaths, options)` - replaced positional parameters with options object
+  - `createScanFromFilepaths(filepaths, options)` - replaced positional parameters with options object
+  - `streamOrgFullScan(orgSlug, fullScanId, options)` - replaced positional parameters with options object
+  - `uploadManifestFiles(orgSlug, filepaths, options)` - replaced positional parameters with options object
+- Improved type safety by replacing `any` types with `unknown` or `never` where appropriate
+- Enhanced code style with numeric separators for better readability of large numbers
+- Improved coverage reporting accuracy with c8 ignore comments
+- Updated `@socketsecurity/registry` dependency to 1.4.0
+
+### Fixed
+- Fixed import assertion syntax for JSON imports to use standard import syntax
+- Fixed HTTP retry test mocks to correctly match PUT method requests
+- Fixed critical issues in type handling and URL search parameter conversions
+
 ## [1.9.2](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.9.2) - 2025-10-04
 
 ### Changed

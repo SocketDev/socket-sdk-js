@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/sdk",
-  "version": "1.9.2",
+  "version": "1.10.0",
   "license": "MIT",
   "description": "SDK for the Socket API client",
   "author": {
