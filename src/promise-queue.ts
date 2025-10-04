@@ -54,6 +54,7 @@ export class PromiseQueue {
     }
 
     const task = this.queue.shift()
+    /* c8 ignore next 3 - Defensive check; unreachable since we verify queue.length above */
     if (!task) {
       return
     }
