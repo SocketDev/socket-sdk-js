@@ -9,7 +9,10 @@ describe('Socket SDK - SBOM Export', () => {
   beforeEach(() => {
     nock.cleanAll()
     nock.disableNetConnect()
-    client = new SocketSdk('test-api-token')
+    client = new SocketSdk('test-api-token', {
+      // Disable retries for network error tests
+      retries: 0,
+    })
   })
 
   afterEach(() => {
