@@ -583,15 +583,16 @@ export class SocketSdk {
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
     try {
-      const data = await this.#executeWithRetry(async () =>
-        await getResponseJson(
-          await createUploadRequest(
-            this.#baseUrl,
-            `dependencies/upload?${queryToSearchParams(queryParams)}`,
-            createRequestBodyForFilepaths(absFilepaths, basePath),
-            this.#reqOptions,
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createUploadRequest(
+              this.#baseUrl,
+              `dependencies/upload?${queryToSearchParams(queryParams)}`,
+              createRequestBodyForFilepaths(absFilepaths, basePath),
+              this.#reqOptions,
+            ),
           ),
-        ),
       )
       return this.#handleApiSuccess<'createDependenciesSnapshot'>(data)
     } catch (e) {
@@ -1165,14 +1166,15 @@ export class SocketSdk {
    */
   async getOrganizations(): Promise<SocketSdkResult<'getOrganizations'>> {
     try {
-      const data = await this.#executeWithRetry(async () =>
-        await getResponseJson(
-          await createGetRequest(
-            this.#baseUrl,
-            'organizations',
-            this.#reqOptions,
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              'organizations',
+              this.#reqOptions,
+            ),
           ),
-        ),
       )
       return this.#handleApiSuccess<'getOrganizations'>(data)
     } catch (e) {
