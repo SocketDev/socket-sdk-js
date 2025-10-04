@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { IncomingMessage } from 'node:http'
 
-
 // Mock the registry module to control JSON parsing behavior.
 vi.mock('@socketsecurity/registry/lib/json', () => ({
   jsonParse: vi.fn(),
