@@ -14,6 +14,6 @@ export function createUserAgentFromPkgJson(pkgData: {
 }): string {
   const { homepage } = pkgData
   const name = pkgData.name.replace('@', '').replace('/', '-')
-  /* v8 ignore next - homepage URL is optional in package.json */
+  /* c8 ignore next - homepage URL is optional in package.json */
   return `${name}/${pkgData.version}${homepage ? ` (${homepage})` : ''}`
 }

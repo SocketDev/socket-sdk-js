@@ -2,7 +2,7 @@
  * @fileoverview Type definitions and interfaces for Socket SDK.
  * Provides TypeScript types for API requests, responses, and internal SDK functionality.
  */
-/* v8 ignore start - Type definitions only, no runtime code to test. */
+/* c8 ignore start - Type definitions only, no runtime code to test. */
 
 import type { components, operations } from '../types/api'
 import type { OpErrorType, OpReturnType } from '../types/api-helpers'
@@ -239,4 +239,4 @@ export type BatchPackageStreamOptions = {
   concurrencyLimit?: number | undefined
   queryParams?: QueryParams | undefined
 }
-/* v8 ignore stop */
+/* c8 ignore stop */
