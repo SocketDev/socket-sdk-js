@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.9.2](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.9.2) - 2025-10-04
+
+### Changed
+- Improved TypeScript type definitions - All optional properties now include explicit `| undefined` type annotations for better type narrowing and null safety
+
 ## [1.9.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.9.1) - 2025-10-03
 
 ### Changed
