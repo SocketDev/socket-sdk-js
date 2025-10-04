@@ -89,7 +89,7 @@ export async function createUploadRequest(
     const requestBody = [
       ...requestBodyNoBoundaries.flatMap(part => [
         boundarySep,
-        /* c8 ignore next - Array.isArray branch for part is defensive coding for edge cases. */
+        /* v8 ignore next - Array.isArray branch for part is defensive coding for edge cases. */
         ...(Array.isArray(part) ? part : [part]),
       ]),
       finalBoundary,
@@ -117,12 +117,12 @@ export async function createUploadRequest(
 
     try {
       for (const part of requestBody) {
-        /* c8 ignore next 3 - aborted state is difficult to test reliably */
+        /* v8 ignore next 3 - aborted state is difficult to test reliably */
         if (aborted) {
           break
         }
         if (typeof part === 'string') {
-          /* c8 ignore next 5 - backpressure handling requires specific stream conditions */
+          /* v8 ignore next 5 - backpressure handling requires specific stream conditions */
           if (!req.write(part)) {
             // Wait for 'drain' if backpressure is signaled.
             // eslint-disable-next-line no-await-in-loop
@@ -133,17 +133,17 @@ export async function createUploadRequest(
           const stream = part as Readable
           // eslint-disable-next-line no-await-in-loop
           for await (const chunk of stream) {
-            /* c8 ignore next 3 - aborted state during streaming is difficult to test reliably */
+            /* v8 ignore next 3 - aborted state during streaming is difficult to test reliably */
             if (aborted) {
               break
             }
-            /* c8 ignore next 3 - backpressure handling requires specific stream conditions */
+            /* v8 ignore next 3 - backpressure handling requires specific stream conditions */
             if (!req.write(chunk)) {
               await events.once(req, 'drain')
             }
           }
           // Ensure trailing CRLF after file part.
-          /* c8 ignore next 4 - trailing CRLF backpressure handling is edge case */
+          /* v8 ignore next 4 - trailing CRLF backpressure handling is edge case */
           if (!aborted && !req.write('\r\n')) {
             // eslint-disable-next-line no-await-in-loop
             await events.once(req, 'drain')
@@ -152,7 +152,7 @@ export async function createUploadRequest(
           if (typeof part.destroy === 'function') {
             part.destroy()
           }
-          /* c8 ignore next 3 - defensive check for non-string/stream types */
+          /* v8 ignore next 3 - defensive check for non-string/stream types */
         } else {
           throw new TypeError('Expected "string" or "stream" type')
         }

@@ -26,12 +26,12 @@ export function normalizeBaseUrl(baseUrl: string): string {
 export function promiseWithResolvers<T>(): ReturnType<
   typeof Promise.withResolvers<T>
 > {
-  /* c8 ignore next 3 - polyfill for older Node versions without Promise.withResolvers */
+  /* v8 ignore next 3 - polyfill for older Node versions without Promise.withResolvers */
   if (Promise.withResolvers) {
     return Promise.withResolvers<T>()
   }
 
-  /* c8 ignore next 7 - polyfill implementation for older Node versions */
+  /* v8 ignore next 7 - polyfill implementation for older Node versions */
   const obj = {} as ReturnType<typeof Promise.withResolvers<T>>
   obj.promise = new Promise<T>((resolver, reject) => {
     obj.resolve = resolver
@@ -63,13 +63,13 @@ export function queryToSearchParams(
     let key: string = entry[0]
     const value: string = entry[1]
     if (key === 'defaultBranch') {
-      /* c8 ignore next - query parameter normalization for API compatibility */
+      /* v8 ignore next - query parameter normalization for API compatibility */
       key = 'default_branch'
     } else if (key === 'perPage') {
-      /* c8 ignore next 2 - query parameter normalization for API compatibility */
+      /* v8 ignore next 2 - query parameter normalization for API compatibility */
       key = 'per_page'
     }
-    /* c8 ignore next - skip empty string values in params */
+    /* v8 ignore next - skip empty string values in params */
     if (value) {
       normalized[key] = value
     }
