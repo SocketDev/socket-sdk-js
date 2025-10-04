@@ -271,6 +271,65 @@ describe('SocketSdk - Batch Operations', () => {
         expect((res.data as any[])[1].name).toBe('pkg2')
       }
     })
+
+    it('should handle compact mode in batch fetch', async () => {
+      const mockResponse = {
+        purl: 'pkg:npm/express@4.19.2',
+        name: 'express',
+        version: '4.19.2',
+        type: 'npm',
+      }
+
+      nock('https://api.socket.dev')
+        .post('/v0/purl?compact=true')
+        .reply(200, JSON.stringify(mockResponse) + '\n')
+
+      const client = new SocketSdk('test-token')
+      const res = await client.batchPackageFetch(
+        {
+          components: [{ purl: 'pkg:npm/express@4.19.2' }],
+        },
+        { compact: 'true' },
+      )
+
+      expect(res.success).toBe(true)
+      if (res.success) {
+        expect(res.data).toHaveLength(1)
+        const artifact = (res.data as any[])[0]
+        expect(artifact.name).toBe('express')
+      }
+    })
+
+    it('should handle responses with empty lines', async () => {
+      const responses = [
+        { purl: 'pkg:npm/pkg1@1.0.0', name: 'pkg1', version: '1.0.0' },
+        { purl: 'pkg:npm/pkg2@2.0.0', name: 'pkg2', version: '2.0.0' },
+      ]
+
+      // Response with empty lines between results
+      const responseText =
+        JSON.stringify(responses[0]) +
+        '\n\n' +
+        JSON.stringify(responses[1]) +
+        '\n'
+
+      nock('https://api.socket.dev').post('/v0/purl').reply(200, responseText)
+
+      const client = new SocketSdk('test-token')
+      const res = await client.batchPackageFetch({
+        components: [
+          { purl: 'pkg:npm/pkg1@1.0.0' },
+          { purl: 'pkg:npm/pkg2@2.0.0' },
+        ],
+      })
+
+      expect(res.success).toBe(true)
+      if (res.success) {
+        expect(res.data).toHaveLength(2)
+        expect((res.data as any[])[0].name).toBe('pkg1')
+        expect((res.data as any[])[1].name).toBe('pkg2')
+      }
+    })
   })
 
   describe('Multi-part Upload', () => {
