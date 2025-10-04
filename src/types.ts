@@ -206,6 +206,8 @@ export type SocketSdkGenericResult<T> =
 export interface SocketSdkOptions {
   agent?: Agent | GotOptions | undefined
   baseUrl?: string | undefined
+  retries?: number | undefined
+  retryDelay?: number | undefined
   timeout?: number | undefined
   userAgent?: string | undefined
 }

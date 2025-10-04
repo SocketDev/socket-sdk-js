@@ -81,15 +81,19 @@ export class SocketSdk {
   readonly #apiToken: string
   readonly #baseUrl: string
   readonly #reqOptions: RequestOptions
+  readonly #retries: number
+  readonly #retryDelay: number
 
   /**
    * Initialize Socket SDK with API token and configuration options.
-   * Sets up authentication, base URL, and HTTP client options.
+   * Sets up authentication, base URL, HTTP client options, and retry behavior.
    */
   constructor(apiToken: string, options?: SocketSdkOptions | undefined) {
     const {
       agent: agentOrObj,
       baseUrl = 'https://api.socket.dev/v0/',
+      retries = 3,
+      retryDelay = 1000,
       timeout,
       userAgent,
     } = { __proto__: null, ...options } as SocketSdkOptions
@@ -105,6 +109,8 @@ export class SocketSdk {
     ) as Agent | undefined
     this.#apiToken = apiToken
     this.#baseUrl = normalizeBaseUrl(baseUrl)
+    this.#retries = retries
+    this.#retryDelay = retryDelay
     this.#reqOptions = {
       ...(agent ? { agent } : {}),
       headers: {
@@ -117,6 +123,34 @@ export class SocketSdk {
   }
 
   /**
+   * Execute an HTTP request with retry logic.
+   * Internal method for wrapping HTTP operations with exponential backoff.
+   */
+  async #executeWithRetry<T>(operation: () => Promise<T>): Promise<T> {
+    const result = await pRetry(operation, {
+      baseDelayMs: this.#retryDelay,
+      onRetry(_attempt: number, error: unknown) {
+        /* c8 ignore next 3 - Early return for non-ResponseError types in retry logic */
+        if (!(error instanceof ResponseError)) {
+          return
+        }
+        const { statusCode } = error.response
+        // Don't retry authentication/authorization errors - they won't succeed.
+        if (statusCode === 401 || statusCode === 403) {
+          throw error
+        }
+      },
+      onRetryRethrow: true,
+      retries: this.#retries,
+    })
+    /* c8 ignore next 3 - Defensive check for undefined result from pRetry abort */
+    if (result === undefined) {
+      throw new Error('Request aborted')
+    }
+    return result
+  }
+
+  /**
    * Create async generator for streaming batch package URL processing.
    * Internal method for handling chunked PURL responses with error handling.
    */
@@ -126,23 +160,8 @@ export class SocketSdk {
   ): AsyncGenerator<BatchPackageFetchResultType> {
     let res: IncomingMessage | undefined
     try {
-      res = await pRetry(
-        () => this.#createBatchPurlRequest(componentsObj, queryParams),
-        {
-          retries: 4,
-          onRetryRethrow: true,
-          onRetry(_attempt: number, error: unknown) {
-            /* c8 ignore next 3 - Early return for non-ResponseError types in retry logic, difficult to test without complex network error simulation. */
-            if (!(error instanceof ResponseError)) {
-              return
-            }
-            const { statusCode } = error.response
-            // Don't retry authentication/authorization errors - they won't succeed.
-            if (statusCode === 401 || statusCode === 403) {
-              throw error
-            }
-          },
-        },
+      res = await this.#executeWithRetry(() =>
+        this.#createBatchPurlRequest(componentsObj, queryParams),
       )
     } catch (e) {
       yield await this.#handleApiError<'batchPackageFetch'>(e)
@@ -564,12 +583,14 @@ export class SocketSdk {
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
     try {
-      const data = await getResponseJson(
-        await createUploadRequest(
-          this.#baseUrl,
-          `dependencies/upload?${queryToSearchParams(queryParams)}`,
-          createRequestBodyForFilepaths(absFilepaths, basePath),
-          this.#reqOptions,
+      const data = await this.#executeWithRetry(async () =>
+        await getResponseJson(
+          await createUploadRequest(
+            this.#baseUrl,
+            `dependencies/upload?${queryToSearchParams(queryParams)}`,
+            createRequestBodyForFilepaths(absFilepaths, basePath),
+            this.#reqOptions,
+          ),
         ),
       )
       return this.#handleApiSuccess<'createDependenciesSnapshot'>(data)
@@ -1144,11 +1165,13 @@ export class SocketSdk {
    */
   async getOrganizations(): Promise<SocketSdkResult<'getOrganizations'>> {
     try {
-      const data = await getResponseJson(
-        await createGetRequest(
-          this.#baseUrl,
-          'organizations',
-          this.#reqOptions,
+      const data = await this.#executeWithRetry(async () =>
+        await getResponseJson(
+          await createGetRequest(
+            this.#baseUrl,
+            'organizations',
+            this.#reqOptions,
+          ),
         ),
       )
       return this.#handleApiSuccess<'getOrganizations'>(data)
