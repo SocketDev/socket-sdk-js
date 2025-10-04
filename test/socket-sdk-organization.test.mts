@@ -265,7 +265,9 @@ describe('SocketSdk - Organization Management', () => {
 
       // Simply verify the API call succeeds when streaming to stdout
       // The actual streaming happens asynchronously, so we just verify the method works
-      const res = await client.streamOrgFullScan('test-org', 'scan-456', true)
+      const res = await client.streamOrgFullScan('test-org', 'scan-456', {
+        output: true,
+      })
       expect(res.success).toBe(true)
     })
 
@@ -279,11 +281,9 @@ describe('SocketSdk - Organization Management', () => {
       const tempFile = path.join(tmpdir(), 'test-scan.json')
 
       // Since we can't easily mock createWriteStream in ESM, we'll just verify the request happens
-      const res = await client.streamOrgFullScan(
-        'test-org',
-        'scan-789',
-        tempFile,
-      )
+      const res = await client.streamOrgFullScan('test-org', 'scan-789', {
+        output: tempFile,
+      })
 
       expect(res.success).toBe(true)
     })
@@ -302,11 +302,9 @@ describe('SocketSdk - Organization Management', () => {
         return true
       }
 
-      const res = await client.streamOrgFullScan(
-        'test-org',
-        'scan-no-stream',
-        false,
-      )
+      const res = await client.streamOrgFullScan('test-org', 'scan-no-stream', {
+        output: false,
+      })
 
       process.stdout.write = originalWrite
       expect(res.success).toBe(true)
@@ -374,11 +372,9 @@ describe('SocketSdk - Organization Management', () => {
         })
 
       const client = new SocketSdk('test-token')
-      const res = await client.createOrgFullScan(
-        'test-org',
-        [packageJsonPath],
-        tempDir,
-      )
+      const res = await client.createOrgFullScan('test-org', [packageJsonPath], {
+        pathsRelativeTo: tempDir,
+      })
 
       expect(res.success).toBe(true)
       if (res.success) {

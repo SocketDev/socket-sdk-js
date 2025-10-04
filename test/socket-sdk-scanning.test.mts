@@ -232,10 +232,9 @@ describe('SocketSdk - Scanning APIs', () => {
         })
 
       const client = new SocketSdk('test-token')
-      const res = await client.createDependenciesSnapshot(
-        [packageJsonPath],
-        tempDir,
-      )
+      const res = await client.createDependenciesSnapshot([packageJsonPath], {
+        pathsRelativeTo: tempDir,
+      })
 
       expect(res.success).toBe(true)
       if (res.success) {
@@ -253,11 +252,10 @@ describe('SocketSdk - Scanning APIs', () => {
         })
 
       const client = new SocketSdk('test-token')
-      const res = await client.createDependenciesSnapshot(
-        [packageJsonPath],
-        tempDir,
-        { branch: 'main', commit: 'abc123' },
-      )
+      const res = await client.createDependenciesSnapshot([packageJsonPath], {
+        pathsRelativeTo: tempDir,
+        queryParams: { branch: 'main', commit: 'abc123' },
+      })
 
       expect(res.success).toBe(true)
       if (res.success) {
@@ -276,10 +274,9 @@ describe('SocketSdk - Scanning APIs', () => {
         })
 
       const client = new SocketSdk('test-token')
-      const res = await client.createDependenciesSnapshot(
-        [packageJsonPath],
-        tempDir,
-      )
+      const res = await client.createDependenciesSnapshot([packageJsonPath], {
+        pathsRelativeTo: tempDir,
+      })
 
       expect(res.success).toBe(false)
       expect(res.status).toBe(413)
@@ -315,7 +312,9 @@ describe('SocketSdk - Scanning APIs', () => {
         })
 
       const client = new SocketSdk('test-token')
-      const res = await client.createDependenciesSnapshot([largePath], tempDir)
+      const res = await client.createDependenciesSnapshot([largePath], {
+        pathsRelativeTo: tempDir,
+      })
 
       expect(res.success).toBe(true)
       if (res.success) {
@@ -350,7 +349,7 @@ describe('SocketSdk - Scanning APIs', () => {
       const res = await client.createOrgFullScan(
         'test-org',
         [packageJsonPath, readmePath, yarnLockPath],
-        tempDir,
+        { pathsRelativeTo: tempDir },
       )
 
       expect(res.success).toBe(true)
