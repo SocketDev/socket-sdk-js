@@ -23,8 +23,8 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const require = createRequire(import.meta.url)
 
-const rootPath = __dirname
-const rootTsConfigPath = path.join(rootPath, 'tsconfig.json')
+const rootPath = path.dirname(__dirname)
+const rootTsConfigPath = path.join(__dirname, 'tsconfig.json')
 
 const nodeGlobalsConfig = Object.fromEntries(
   Object.entries(globals.node).map(([k]) => [k, 'readonly']),
@@ -209,9 +209,11 @@ export default [
             ?.parserOptions?.projectService,
           allowDefaultProject: [
             // Allow configs.
+            '.config/*.config.mts',
             '*.config.mts',
             'test/*.mts',
             'test/utils/*.mts',
+            'src/*.ts',
             'src/*.mts',
             'types/*.ts',
           ],
