@@ -374,7 +374,7 @@ describe('HTTP Client - Retry Functionality', () => {
 
     it('should handle PATCH request', async () => {
       nock(BASE_URL)
-        .patch('/test/123', { data: 'patched' })
+        .put('/test/123', { data: 'patched' })
         .reply(200, { id: 123 })
 
       const response = await createRequestWithJsonAndRetry(
