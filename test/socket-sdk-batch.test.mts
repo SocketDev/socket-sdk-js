@@ -476,7 +476,10 @@ describe('SocketSdk - Batch Operations', () => {
         .post('/v0/dependencies/upload')
         .replyWithError(new Error('socket hang up'))
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', {
+        // Disable retries for network error tests
+        retries: 0,
+      })
 
       await expect(
         client.createDependenciesSnapshot([packageJsonPath], {
