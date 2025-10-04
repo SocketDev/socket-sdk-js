@@ -5,12 +5,12 @@
     "moduleResolution": "bundler",
     "noEmit": true,
     "paths": {
-      "../dist/*": ["./src/*"]
+      "../dist/*": ["../src/*"]
     },
     "skipLibCheck": true,
     "types": ["vitest/globals", "node"],
     "verbatimModuleSyntax": false
   },
-  "include": ["**/*.ts", "**/*.mts"],
-  "exclude": ["**/node_modules/**/*"]
+  "include": ["../**/*.ts", "../**/*.mts"],
+  "exclude": ["../**/node_modules/**/*"]
 }
