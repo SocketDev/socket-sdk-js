@@ -932,8 +932,8 @@ export class SocketSdk {
         throw e
       }
 
+      /* c8 ignore start - Defensive fallback: ResponseError in catch block handled in try block (lines 897-910) */
       if (e instanceof ResponseError) {
-        /* c8 ignore start - ResponseError handling in getApi non-throwing mode covered by other tests */
         // Re-use existing error handling logic from the SDK
         const errorResult = await this.#handleApiError<any>(e)
         return {
@@ -943,8 +943,8 @@ export class SocketSdk {
           status: errorResult.status,
           success: false,
         }
-        /* c8 ignore stop */
       }
+      /* c8 ignore stop */
 
       /* c8 ignore next - Fallback error handling for non-ResponseError cases in getApi. */
       return this.#createQueryErrorResult<T>(e)
@@ -1721,6 +1721,7 @@ export class SocketSdk {
         throw e
       }
 
+      /* c8 ignore start - Defensive fallback: ResponseError in catch block handled in try block (lines 1686-1695) */
       if (e instanceof ResponseError) {
         // Re-use existing error handling logic from the SDK
         const errorResult = await this.#handleApiError<any>(e)
@@ -1732,6 +1733,7 @@ export class SocketSdk {
           success: false,
         }
       }
+      /* c8 ignore stop */
 
       /* c8 ignore start - Defensive error stringification fallback branches for sendApi edge cases. */
       const errStr = e ? String(e).trim() : ''
