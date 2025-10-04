@@ -29,11 +29,11 @@ export class ResponseError extends Error {
    * Automatically formats error message with status code and message.
    */
   constructor(response: IncomingMessage, message = '') {
-    /* v8 ignore next 2 - statusCode and statusMessage may be undefined in edge cases */
+    /* c8 ignore next 2 - statusCode and statusMessage may be undefined in edge cases */
     const statusCode = response.statusCode ?? 'unknown'
     const statusMessage = response.statusMessage ?? 'No status message'
     super(
-      /* v8 ignore next - fallback empty message if not provided */
+      /* c8 ignore next - fallback empty message if not provided */
       `Socket API ${message || 'Request failed'} (${statusCode}): ${statusMessage}`,
     )
     this.name = 'ResponseError'
@@ -126,7 +126,7 @@ export async function getErrorResponseBody(
     response.setEncoding('utf8')
     response.on('data', (chunk: string) => (body += chunk))
     response.on('end', () => resolve(body))
-    /* v8 ignore next - Extremely rare network or stream error during error response reading. */
+    /* c8 ignore next - Extremely rare network or stream error during error response reading. */
     response.on('error', e => reject(e))
   })
 }
@@ -151,7 +151,7 @@ export async function getResponse(
   return await new Promise((resolve, reject) => {
     let timedOut = false
     req.on('response', (response: IncomingMessage) => {
-      /* v8 ignore next 3 - Race condition where response arrives after timeout. */
+      /* c8 ignore next 3 - Race condition where response arrives after timeout. */
       if (timedOut) {
         return
       }
@@ -162,13 +162,13 @@ export async function getResponse(
       req.destroy()
       reject(new Error('Request timed out'))
     })
-    /* v8 ignore start - Network error handling during request, difficult to test reliably. */
+    /* c8 ignore start - Network error handling during request, difficult to test reliably. */
     req.on('error', e => {
       if (!timedOut) {
         reject(e)
       }
     })
-    /* v8 ignore stop */
+    /* c8 ignore stop */
   })
 }
 
@@ -215,7 +215,7 @@ export async function getResponseJson(
       Object.setPrototypeOf(enhancedError, SyntaxError.prototype)
       throw enhancedError
     }
-    /* v8 ignore start - Error instanceof check and unknown error handling for JSON parsing edge cases. */
+    /* c8 ignore start - Error instanceof check and unknown error handling for JSON parsing edge cases. */
     if (e instanceof Error) {
       throw e
     }
@@ -229,7 +229,7 @@ export async function getResponseJson(
     unknownError.originalResponse = responseBody
     Object.setPrototypeOf(unknownError, SyntaxError.prototype)
     throw unknownError
-    /* v8 ignore stop */
+    /* c8 ignore stop */
   }
 }
 
@@ -239,7 +239,7 @@ export async function getResponseJson(
  */
 export function isResponseOk(response: IncomingMessage): boolean {
   const { statusCode } = response
-  /* v8 ignore next - Defensive fallback for edge cases where statusCode might be undefined. */
+  /* c8 ignore next - Defensive fallback for edge cases where statusCode might be undefined. */
   return statusCode ? statusCode >= 200 && statusCode < 300 : false
 }
 
@@ -250,7 +250,7 @@ export function isResponseOk(response: IncomingMessage): boolean {
 export function reshapeArtifactForPublicPolicy<
   T extends Record<string, unknown>,
 >(data: T, isAuthenticated: boolean, actions?: string | undefined): T {
-  /* v8 ignore start - Public policy artifact reshaping for unauthenticated users, difficult to test edge cases. */
+  /* c8 ignore start - Public policy artifact reshaping for unauthenticated users, difficult to test edge cases. */
   // If user is not authenticated, provide a different response structure
   // optimized for the public free-tier experience.
   if (!isAuthenticated) {
@@ -310,7 +310,7 @@ export function reshapeArtifactForPublicPolicy<
     }
   }
   return data
-  /* v8 ignore stop */
+  /* c8 ignore stop */
 }
 
 /**
