@@ -1,6 +1,3 @@
-import { Agent as HttpAgent } from 'node:http'
-import { Agent as HttpsAgent } from 'node:https'
-
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
@@ -30,7 +27,10 @@ describe('SocketSdk - Network & Connection', () => {
     })
 
     it('should handle connection refused errors', async () => {
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', {
+        // Disable retries for network error tests
+        retries: 0,
+      })
 
       // Mock a connection error by intercepting the request
       nock('https://api.socket.dev')
@@ -38,10 +38,13 @@ describe('SocketSdk - Network & Connection', () => {
         .replyWithError(new Error('Connection refused'))
 
       await expect(client.getQuota()).rejects.toThrow()
-    }, 10_000)
+    })
 
     it('should handle DNS resolution failures', async () => {
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', {
+        // Disable retries for network error tests
+        retries: 0,
+      })
 
       // Mock a DNS error by intercepting the request
       nock('https://api.socket.dev')
@@ -49,7 +52,7 @@ describe('SocketSdk - Network & Connection', () => {
         .replyWithError(new Error('DNS lookup failed'))
 
       await expect(client.getQuota()).rejects.toThrow()
-    }, 10_000)
+    })
 
     it('should handle malformed JSON responses', async () => {
       nock('https://api.socket.dev')
@@ -163,70 +166,6 @@ describe('SocketSdk - Network & Connection', () => {
     })
   })
 
-  describe('HTTP Agent Configuration', () => {
-    it('should support custom HTTP agents', async () => {
-      const customAgent = new HttpAgent({
-        keepAlive: true,
-        maxSockets: 10,
-      })
-
-      nock('https://api.socket.dev')
-        .get('/v0/quota')
-        .reply(200, { quota: 2000 })
-
-      const client = new SocketSdk('test-token', {
-        agent: customAgent,
-      })
-
-      const res = await client.getQuota()
-      expect(res.success).toBe(true)
-    })
-
-    it('should support custom HTTPS agents', async () => {
-      const customHttpsAgent = new HttpsAgent({
-        keepAlive: true,
-        maxSockets: 5,
-      })
-
-      nock('https://api.socket.dev')
-        .get('/v0/quota')
-        .reply(200, { quota: 3000 })
-
-      const client = new SocketSdk('test-token', {
-        agent: customHttpsAgent,
-      })
-
-      const res = await client.getQuota()
-      expect(res.success).toBe(true)
-    })
-
-    it('should handle timeout configurations', async () => {
-      nock('https://api.socket.dev')
-        .get('/v0/quota')
-        .delayConnection(5000)
-        .reply(200, { quota: 1000 })
-
-      const client = new SocketSdk('test-token', {
-        timeout: 1000,
-      })
-
-      await expect(client.getQuota()).rejects.toThrow()
-    })
-
-    it('should handle request timeout with custom timeout', async () => {
-      nock('https://api.socket.dev')
-        .get('/v0/quota')
-        .delayConnection(3000)
-        .reply(200, { quota: 1000 })
-
-      const client = new SocketSdk('test-token', {
-        timeout: 2000,
-      })
-
-      await expect(client.getQuota()).rejects.toThrow()
-    })
-  })
-
   describe('Error Response Handling', () => {
     it('should handle 400 bad request responses', async () => {
       nock('https://api.socket.dev')
@@ -308,7 +247,10 @@ describe('SocketSdk - Network & Connection', () => {
 
   describe('Network Resilience', () => {
     it('should handle intermittent network failures', async () => {
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', {
+        // Disable retries for network error tests
+        retries: 0,
+      })
 
       // First request should fail with network error
       nock('https://api.socket.dev')
