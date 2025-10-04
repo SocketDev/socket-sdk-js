@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   publish:
-    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@d0a45314245b7427bbf60cf42424acb07d51d9fe # main
+    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@a8e09da7ef5aa696efe94a5bb387168cafedb004 # main
     with:
       debug: ${{ inputs.debug }}
       package-name: '@socketsecurity/sdk'
