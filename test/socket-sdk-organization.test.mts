@@ -372,9 +372,13 @@ describe('SocketSdk - Organization Management', () => {
         })
 
       const client = new SocketSdk('test-token')
-      const res = await client.createOrgFullScan('test-org', [packageJsonPath], {
-        pathsRelativeTo: tempDir,
-      })
+      const res = await client.createOrgFullScan(
+        'test-org',
+        [packageJsonPath],
+        {
+          pathsRelativeTo: tempDir,
+        },
+      )
 
       expect(res.success).toBe(true)
       if (res.success) {
