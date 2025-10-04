@@ -898,7 +898,7 @@ export class SocketSdk {
         if (throws) {
           throw new ResponseError(response)
         }
-        const errorResult = await this.#handleApiError<any>(
+        const errorResult = await this.#handleApiError<never>(
           new ResponseError(response),
         )
         return {
@@ -935,7 +935,7 @@ export class SocketSdk {
       /* c8 ignore start - Defensive fallback: ResponseError in catch block handled in try block (lines 897-910) */
       if (e instanceof ResponseError) {
         // Re-use existing error handling logic from the SDK
-        const errorResult = await this.#handleApiError<any>(e)
+        const errorResult = await this.#handleApiError<never>(e)
         return {
           cause: errorResult.cause,
           data: undefined,
@@ -1724,7 +1724,7 @@ export class SocketSdk {
       /* c8 ignore start - Defensive fallback: ResponseError in catch block handled in try block (lines 1686-1695) */
       if (e instanceof ResponseError) {
         // Re-use existing error handling logic from the SDK
-        const errorResult = await this.#handleApiError<any>(e)
+        const errorResult = await this.#handleApiError<never>(e)
         return {
           cause: errorResult.cause,
           data: undefined,
@@ -2001,12 +2001,12 @@ export class SocketSdk {
           this.#reqOptions,
         ),
       )
-      return this.#handleApiSuccess<any>(
+      return this.#handleApiSuccess<never>(
         data,
       ) as unknown as UploadManifestFilesReturnType
     } catch (e) {
       /* c8 ignore start - Error handling in uploadManifestFiles method for edge cases. */
-      return (await this.#handleApiError<any>(
+      return (await this.#handleApiError<never>(
         e,
       )) as unknown as UploadManifestFilesError
       /* c8 ignore stop */
