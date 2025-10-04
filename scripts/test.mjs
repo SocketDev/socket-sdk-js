@@ -10,10 +10,8 @@
 import { spawn } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-
-import fastGlob from 'fast-glob'
-
 import { logger } from '@socketsecurity/registry/lib/logger'
+import fastGlob from 'fast-glob'
 
 import { getDirname } from './utils/path-helpers.mjs'
 

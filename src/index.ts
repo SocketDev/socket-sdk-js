@@ -13,12 +13,12 @@ import {
   resolveBasePath,
 } from './utils'
 
-// Re-export types from modules
-export type * from './types'
-
-// Re-export functions from modules
-export { createUserAgentFromPkgJson } from './user-agent'
-
+// Re-export file upload functions
+export {
+  createRequestBodyForFilepaths,
+  createRequestBodyForJson,
+  createUploadRequest,
+} from './file-upload'
 // Re-export HTTP client functions
 export {
   createDeleteRequest,
@@ -29,20 +29,9 @@ export {
   getResponse,
   getResponseJson,
   isResponseOk,
-  reshapeArtifactForPublicPolicy,
   ResponseError,
+  reshapeArtifactForPublicPolicy,
 } from './http-client'
-
-// Re-export file upload functions
-export {
-  createRequestBodyForFilepaths,
-  createRequestBodyForJson,
-  createUploadRequest,
-} from './file-upload'
-
-// Re-export the main SocketSdk class
-export { SocketSdk } from './socket-sdk-class'
-
 // Re-export quota utility functions
 export {
   calculateTotalQuotaCost,
@@ -55,6 +44,12 @@ export {
   getRequiredPermissions,
   hasQuotaForMethods,
 } from './quota-utils'
+// Re-export the main SocketSdk class
+export { SocketSdk } from './socket-sdk-class'
+// Re-export types from modules
+export type * from './types'
+// Re-export functions from modules
+export { createUserAgentFromPkgJson } from './user-agent'
 
 // Re-export utility functions
 export {

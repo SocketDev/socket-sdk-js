@@ -1,11 +1,9 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-
-import yargsParser from 'yargs-parser'
-import colors from 'yoctocolors'
-
 import constants from '@socketsecurity/registry/lib/constants'
 import { logger } from '@socketsecurity/registry/lib/logger'
+import yargsParser from 'yargs-parser'
+import colors from 'yoctocolors'
 
 import { getCodeCoverage } from './utils/get-code-coverage.mjs'
 import { getTypeCoverage } from './utils/get-type-coverage.mjs'
@@ -64,10 +62,10 @@ async function logCoveragePercentage(argv) {
 
   // Calculate overall percentage (average of all metrics including type coverage if available).
   const codeCoverageMetrics = [
-    parseFloat(codeCoverage.statements.percent),
-    parseFloat(codeCoverage.branches.percent),
-    parseFloat(codeCoverage.functions.percent),
-    parseFloat(codeCoverage.lines.percent),
+    Number.parseFloat(codeCoverage.statements.percent),
+    Number.parseFloat(codeCoverage.branches.percent),
+    Number.parseFloat(codeCoverage.functions.percent),
+    Number.parseFloat(codeCoverage.lines.percent),
   ]
 
   let overall
@@ -97,7 +95,7 @@ async function logCoveragePercentage(argv) {
     { threshold: 0, emoji: ' ⚠️' },
   ]
 
-  const overallNum = parseFloat(overall)
+  const overallNum = Number.parseFloat(overall)
   const emoji =
     COVERAGE_EMOJI_THRESHOLDS.find(({ threshold }) => overallNum >= threshold)
       ?.emoji || ''
@@ -126,7 +124,7 @@ async function logCoveragePercentage(argv) {
     console.log(codeCoverage.statements.percent)
   } else {
     // Default format: human-readable formatted output.
-    logger.info(`Coverage Summary:`)
+    logger.info('Coverage Summary:')
     logger.info(
       `${indent}Statements: ${codeCoverage.statements.percent}% (${codeCoverage.statements.covered}/${codeCoverage.statements.total})`,
     )
