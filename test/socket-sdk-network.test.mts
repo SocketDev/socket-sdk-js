@@ -38,7 +38,7 @@ describe('SocketSdk - Network & Connection', () => {
         .replyWithError(new Error('Connection refused'))
 
       await expect(client.getQuota()).rejects.toThrow()
-    }, 10000)
+    }, 10_000)
 
     it('should handle DNS resolution failures', async () => {
       const client = new SocketSdk('test-token')
@@ -49,7 +49,7 @@ describe('SocketSdk - Network & Connection', () => {
         .replyWithError(new Error('DNS lookup failed'))
 
       await expect(client.getQuota()).rejects.toThrow()
-    }, 10000)
+    }, 10_000)
 
     it('should handle malformed JSON responses', async () => {
       nock('https://api.socket.dev')
@@ -106,7 +106,7 @@ describe('SocketSdk - Network & Connection', () => {
     })
 
     it('should support custom user agents for session tracking', async () => {
-      let capturedUserAgent: string = ''
+      let capturedUserAgent = ''
 
       nock('https://api.socket.dev')
         .get('/v0/quota')
@@ -129,7 +129,7 @@ describe('SocketSdk - Network & Connection', () => {
 
       nock('https://custom.socket.dev')
         .get('/api/quota')
-        .reply(200, { quota: 10000 })
+        .reply(200, { quota: 10_000 })
 
       const client = new SocketSdk('api-token', {
         baseUrl: customBaseUrl,
@@ -138,7 +138,7 @@ describe('SocketSdk - Network & Connection', () => {
 
       expect(res.success).toBe(true)
       if (res.success) {
-        expect(res.data.quota).toBe(10000)
+        expect(res.data.quota).toBe(10_000)
       }
     })
 

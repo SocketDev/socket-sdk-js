@@ -1,8 +1,8 @@
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
-import { setupTestEnvironment } from './utils/environment.mts'
 import { SocketSdk } from '../dist/index'
+import { setupTestEnvironment } from './utils/environment.mts'
 
 describe('SocketSdk Authentication and Basic Operations', () => {
   setupTestEnvironment()
@@ -108,7 +108,7 @@ describe('SocketSdk Authentication and Basic Operations', () => {
 
       nock('https://custom.socket.dev')
         .get('/api/quota')
-        .reply(200, { quota: 10000 })
+        .reply(200, { quota: 10_000 })
 
       const client = new SocketSdk('api-token', {
         baseUrl: customBaseUrl,
@@ -117,7 +117,7 @@ describe('SocketSdk Authentication and Basic Operations', () => {
 
       expect(res.success).toBe(true)
       if (res.success) {
-        expect(res.data.quota).toBe(10000)
+        expect(res.data.quota).toBe(10_000)
       }
     })
 
