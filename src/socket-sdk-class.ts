@@ -146,7 +146,7 @@ export class SocketSdk {
     // Parse the newline delimited JSON response.
     const rli = readline.createInterface({
       input: res!,
-      crlfDelay: Infinity,
+      crlfDelay: Number.POSITIVE_INFINITY,
       signal: abortSignal,
     })
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
@@ -386,7 +386,7 @@ export class SocketSdk {
     // Parse the newline delimited JSON response.
     const rli = readline.createInterface({
       input: res!,
-      crlfDelay: Infinity,
+      crlfDelay: Number.POSITIVE_INFINITY,
       signal: abortSignal,
     })
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
@@ -592,7 +592,7 @@ export class SocketSdk {
   async createOrgFullScan(
     orgSlug: string,
     filepaths: string[],
-    pathsRelativeTo: string = '.',
+    pathsRelativeTo = '.',
     queryParams?: QueryParams | undefined,
   ): Promise<SocketSdkResult<'CreateOrgFullScan'>> {
     const basePath = resolveBasePath(pathsRelativeTo)
@@ -673,7 +673,7 @@ export class SocketSdk {
    */
   async createScanFromFilepaths(
     filepaths: string[],
-    pathsRelativeTo: string = '.',
+    pathsRelativeTo = '.',
     issueRules?: Record<string, boolean> | undefined,
   ): Promise<SocketSdkResult<'createReport'>> {
     const basePath = resolveBasePath(pathsRelativeTo)
@@ -1827,10 +1827,7 @@ export class SocketSdk {
             try {
               const data = JSON.parse(line) as ArtifactPatches
               controller.enqueue(data)
-            } catch (e) {
-              // Skip invalid JSON lines
-              continue
-            }
+            } catch (e) {}
           }
         })
 
@@ -1988,7 +1985,7 @@ export class SocketSdk {
   async uploadManifestFiles(
     orgSlug: string,
     filepaths: string[],
-    pathsRelativeTo: string = '.',
+    pathsRelativeTo = '.',
   ): Promise<UploadManifestFilesReturnType | UploadManifestFilesError> {
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)

@@ -3,6 +3,7 @@
  * Provides TypeScript types for API requests, responses, and internal SDK functionality.
  */
 /* c8 ignore start - Type definitions only, no runtime code to test. */
+
 import type { components, operations } from '../types/api'
 import type { OpErrorType, OpReturnType } from '../types/api-helpers'
 import type { Remap } from '@socketsecurity/registry/lib/objects'

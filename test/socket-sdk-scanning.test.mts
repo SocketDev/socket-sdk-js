@@ -5,8 +5,8 @@ import * as path from 'node:path'
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { TEST_PACKAGE_CONFIGS } from './utils/fixtures.mts'
 import { SocketSdk } from '../dist/index'
+import { TEST_PACKAGE_CONFIGS } from './utils/fixtures.mts'
 
 describe('SocketSdk - Scanning APIs', () => {
   let tempDir: string
@@ -336,17 +336,15 @@ describe('SocketSdk - Scanning APIs', () => {
 
       nock('https://api.socket.dev')
         .post('/v0/orgs/test-org/full-scans')
-        .reply(function () {
-          return [
-            200,
-            {
-              id: 'multi-file-scan',
-              organization_slug: 'test-org',
-              status: 'complete',
-              files: ['package.json', 'README.md', 'yarn.lock'],
-            },
-          ]
-        })
+        .reply(() => [
+          200,
+          {
+            id: 'multi-file-scan',
+            organization_slug: 'test-org',
+            status: 'complete',
+            files: ['package.json', 'README.md', 'yarn.lock'],
+          },
+        ])
 
       const client = new SocketSdk('test-token')
       const res = await client.createOrgFullScan(

@@ -3,9 +3,6 @@
  * Provides default values, HTTP agents, and public policy configurations for API interactions.
  */
 
-// Import attributes are only supported when the '--module' option is set to
-// 'esnext', 'node18', 'node20', 'nodenext', or 'preserve'.
-// @ts-ignore: Avoid TS import attributes error.
 import rootPkgJson from '../package.json' with { type: 'json' }
 import { createUserAgentFromPkgJson } from './user-agent'
 

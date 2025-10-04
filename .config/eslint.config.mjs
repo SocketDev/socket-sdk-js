@@ -7,6 +7,7 @@ import {
   includeIgnoreFile,
 } from '@eslint/compat'
 import jsPlugin from '@eslint/js'
+import constants from '@socketsecurity/registry/lib/constants'
 import tsParser from '@typescript-eslint/parser'
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript'
 import { flatConfigs as origImportXFlatConfigs } from 'eslint-plugin-import-x'
@@ -16,8 +17,6 @@ import sortDestructureKeysPlugin from 'eslint-plugin-sort-destructure-keys'
 import unicornPlugin from 'eslint-plugin-unicorn'
 import globals from 'globals'
 import tsEslint from 'typescript-eslint'
-
-import constants from '@socketsecurity/registry/lib/constants'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -33,7 +32,7 @@ const nodeGlobalsConfig = Object.fromEntries(
 const biomeConfigPath = path.join(rootPath, 'biome.json')
 const biomeConfig = require(biomeConfigPath)
 const biomeIgnores = {
-  name: `Imported biome.json ignore patterns`,
+  name: 'Imported biome.json ignore patterns',
   ignores: biomeConfig.files.includes
     .filter(p => p.startsWith('!'))
     .map(p => convertIgnorePatternToMinimatch(p.slice(1))),
@@ -42,7 +41,7 @@ const biomeIgnores = {
 const gitignorePath = path.join(rootPath, '.gitignore')
 const gitIgnores = {
   ...includeIgnoreFile(gitignorePath),
-  name: `Imported .gitignore ignore patterns`,
+  name: 'Imported .gitignore ignore patterns',
 }
 
 const sharedPlugins = {

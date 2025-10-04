@@ -74,9 +74,7 @@ export function queryToSearchParams(
       normalized[key] = value
     }
   }
-  return new URLSearchParams(
-    normalized as unknown as Record<string, string>,
-  )
+  return new URLSearchParams(normalized as unknown as Record<string, string>)
 }
 
 /**

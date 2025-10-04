@@ -23,7 +23,7 @@ export async function getTypeCoverage() {
   if (percentageLine) {
     const match = percentageLine.match(/(\d+(?:\.\d+)?)%/)
     if (match) {
-      return parseFloat(match[1])
+      return Number.parseFloat(match[1])
     }
   }
 

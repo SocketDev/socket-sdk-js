@@ -2,6 +2,7 @@
  * @fileoverview HTTP client utilities for Socket API communication.
  * Provides low-level HTTP request handling with proper error management and response parsing.
  */
+
 import http from 'node:http'
 import https from 'node:https'
 
@@ -27,7 +28,7 @@ export class ResponseError extends Error {
    * Create a new ResponseError from an HTTP response.
    * Automatically formats error message with status code and message.
    */
-  constructor(response: IncomingMessage, message: string = '') {
+  constructor(response: IncomingMessage, message = '') {
     /* c8 ignore next 2 - statusCode and statusMessage may be undefined in edge cases */
     const statusCode = response.statusCode ?? 'unknown'
     const statusMessage = response.statusMessage ?? 'No status message'
@@ -300,7 +301,8 @@ export function reshapeArtifactForPublicPolicy<
           ? artifacts.map(reshapeArtifact)
           : artifacts,
       }
-    } else if (data['alerts']) {
+    }
+    if (data['alerts']) {
       // Single artifact with alerts.
       return reshapeArtifact(
         data as unknown as SocketArtifactWithExtras,
@@ -323,8 +325,8 @@ export function reshapeArtifactForPublicPolicy<
  */
 export async function withRetry<T>(
   fn: () => Promise<T>,
-  retries: number = 3,
-  retryDelay: number = 1000,
+  retries = 3,
+  retryDelay = 1000,
 ): Promise<T> {
   let lastError: Error | undefined
 
@@ -350,7 +352,7 @@ export async function withRetry<T>(
       }
 
       // Exponential backoff
-      const delayMs = retryDelay * Math.pow(2, attempt)
+      const delayMs = retryDelay * 2 ** attempt
       // eslint-disable-next-line no-await-in-loop
       await new Promise(resolve => setTimeout(resolve, delayMs))
     }
@@ -370,8 +372,8 @@ export async function createGetRequestWithRetry(
   baseUrl: string,
   urlPath: string,
   options: RequestOptions,
-  retries: number = 3,
-  retryDelay: number = 1000,
+  retries = 3,
+  retryDelay = 1000,
 ): Promise<IncomingMessage> {
   return await withRetry(
     () => createGetRequest(baseUrl, urlPath, options),
@@ -391,8 +393,8 @@ export async function createDeleteRequestWithRetry(
   baseUrl: string,
   urlPath: string,
   options: RequestOptions,
-  retries: number = 3,
-  retryDelay: number = 1000,
+  retries = 3,
+  retryDelay = 1000,
 ): Promise<IncomingMessage> {
   return await withRetry(
     () => createDeleteRequest(baseUrl, urlPath, options),
@@ -414,8 +416,8 @@ export async function createRequestWithJsonAndRetry(
   urlPath: string,
   json: unknown,
   options: RequestOptions,
-  retries: number = 3,
-  retryDelay: number = 1000,
+  retries = 3,
+  retryDelay = 1000,
 ): Promise<IncomingMessage> {
   return await withRetry(
     () => createRequestWithJson(method, baseUrl, urlPath, json, options),
