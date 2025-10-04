@@ -10,7 +10,7 @@ Thumbs.db
 **/.cache
 **/dist
 **/node_modules
-/*.tsbuildinfo
+**/*.tsbuildinfo
 *.d.ts
 *.d.ts.map
 
