@@ -126,7 +126,8 @@
   "files": [
     "dist/**",
     "types/**",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "requirements.json"
   ],
   "lint-staged": {
     "*.{cjs,js,json,md,mjs,mts,ts}": [
@@ -136,7 +137,7 @@
   },
   "typeCoverage": {
     "cache": true,
-    "atLeast": 95,
+    "atLeast": 99.6,
     "ignoreAsAssertion": true,
     "ignoreCatch": true,
     "ignoreEmptyType": true,
