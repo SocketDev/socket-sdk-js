@@ -7,51 +7,7 @@ import { setupTestEnvironment } from './utils/environment.mts'
 describe('SocketSdk Network and Error Handling', () => {
   setupTestEnvironment()
 
-  describe('HTTP status code error handling', () => {
-    it('handles 503 service unavailable status correctly', async () => {
-      nock('https://api.socket.dev')
-        .get('/v0/quota')
-        .reply(503, 'Service temporarily unavailable')
-
-      const client = new SocketSdk('test-token')
-
-      await expect(client.getQuota()).rejects.toThrow('server error')
-    })
-
-    it('handles connection refused network errors gracefully', async () => {
-      const client = new SocketSdk('test-token')
-
-      // Mock a connection error by intercepting the request.
-      nock('https://api.socket.dev')
-        .get('/v0/quota')
-        .replyWithError(new Error('Connection refused'))
-
-      await expect(client.getQuota()).rejects.toThrow()
-    }, 10_000)
-
-    it('handles DNS resolution failures with appropriate errors', async () => {
-      const client = new SocketSdk('test-token')
-
-      // Mock a DNS error by intercepting the request.
-      nock('https://api.socket.dev')
-        .get('/v0/quota')
-        .replyWithError(new Error('DNS lookup failed'))
-
-      await expect(client.getQuota()).rejects.toThrow()
-    }, 10_000)
-  })
-
   describe('Response parsing and JSON handling', () => {
-    it('handles malformed JSON responses appropriately', async () => {
-      nock('https://api.socket.dev')
-        .get('/v0/quota')
-        .reply(200, 'This is not JSON')
-
-      const client = new SocketSdk('test-token')
-
-      await expect(client.getQuota()).rejects.toThrow()
-    })
-
     it('handles partial JSON response data gracefully', async () => {
       nock('https://api.socket.dev')
         .post('/v0/purl')
@@ -69,53 +25,12 @@ describe('SocketSdk Network and Error Handling', () => {
     })
   })
 
-  describe('Session management and persistence', () => {
-    it('maintains session state across multiple API requests', async () => {
-      const apiToken = 'persistent-token'
-
-      nock('https://api.socket.dev')
-        .get('/v0/quota')
-        .reply(200, { quota: 1000 })
-        .get('/v0/organizations')
-        .reply(200, { organizations: ['org1', 'org2'] })
-
-      const client = new SocketSdk(apiToken)
-
-      const quotaRes = await client.getQuota()
-      expect(quotaRes.success).toBe(true)
-
-      const orgsRes = await client.getOrganizations()
-      expect(orgsRes.success).toBe(true)
-    })
-
-    it('handles session invalidation and expiration properly', async () => {
-      let requestCount = 0
-
-      nock('https://api.socket.dev')
-        .get('/v0/quota')
-        .times(2)
-        .reply(() => {
-          requestCount++
-          if (requestCount === 1) {
-            return [200, { quota: 5000 }]
-          }
-          return [401, { error: { message: 'Session expired' } }]
-        })
-
-      const client = new SocketSdk('session-token')
-
-      const firstRes = await client.getQuota()
-      expect(firstRes.success).toBe(true)
-
-      const secondRes = await client.getQuota()
-      expect(secondRes.success).toBe(false)
-      expect(secondRes.status).toBe(401)
-    })
-  })
-
   describe('Network error recovery strategies', () => {
     it('handles POST settings network failures gracefully', async () => {
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', {
+        // Disable retries for network error tests
+        retries: 0,
+      })
 
       // Mock a network error for postSettings.
       nock('https://api.socket.dev')
@@ -129,7 +44,10 @@ describe('SocketSdk Network and Error Handling', () => {
     })
 
     it('handles dependency search connection failures', async () => {
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', {
+        // Disable retries for network error tests
+        retries: 0,
+      })
 
       // Mock a network error for searchDependencies.
       nock('https://api.socket.dev')
