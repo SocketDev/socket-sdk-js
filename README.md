@@ -19,7 +19,11 @@ pnpm add @socketsecurity/sdk
 ```javascript
 import { SocketSdk } from '@socketsecurity/sdk'
 
-const client = new SocketSdk('yourApiKeyHere')
+const client = new SocketSdk('yourApiKeyHere', {
+  retries: 3,        // Retry failed requests up to 3 times (default: 3)
+  retryDelay: 1000,  // Start with 1s delay, exponential backoff (default: 1000ms)
+  timeout: 30000,    // Request timeout in milliseconds (optional)
+})
 
 const res = await client.getQuota()
 
@@ -28,6 +32,27 @@ if (res.success) {
   console.log(res.data)
 }
 ```
+
+### Configuration Options
+
+The SDK constructor accepts the following options:
+
+```typescript
+interface SocketSdkOptions {
+  baseUrl?: string          // API base URL (default: 'https://api.socket.dev/v0/')
+  timeout?: number          // Request timeout in milliseconds
+  retries?: number          // Number of retry attempts for failed requests (default: 3)
+  retryDelay?: number       // Initial retry delay in ms, with exponential backoff (default: 1000)
+  userAgent?: string        // Custom user agent string
+  agent?: Agent             // Custom HTTP agent for advanced networking
+}
+```
+
+**Retry Logic:**
+- Automatically retries transient network errors and 5xx server responses
+- Uses exponential backoff: 1s, 2s, 4s, 8s... (configurable via `retryDelay`)
+- Does NOT retry 401/403 authentication errors (immediate failure)
+- Set `retries: 0` to disable retry logic entirely
 
 ### Quota Management Example
 
