@@ -42,7 +42,7 @@
     "clean": "run-s -c clean:*",
     "clean:cache": "del-cli '**/.cache'",
     "clean:coverage": "del-cli '.type-coverage' 'coverage'",
-    "clean:dist": "del-cli 'dist' '.config/*.tsbuildinfo'",
+    "clean:dist": "del-cli 'dist' '**/*.tsbuildinfo' '.config/*.tsbuildinfo'",
     "clean:declarations": "del-cli '*.d.ts' '!api*.d.ts'",
     "clean:node_modules": "del-cli '**/node_modules'",
     "fix": "run-s lint:fix",
