@@ -1,8 +1,8 @@
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
-import { setupTestEnvironment } from './utils/environment.mts'
 import { SocketSdk } from '../dist/index'
+import { setupTestEnvironment } from './utils/environment.mts'
 
 describe('SocketSdk Network and Error Handling', () => {
   setupTestEnvironment()
@@ -27,7 +27,7 @@ describe('SocketSdk Network and Error Handling', () => {
         .replyWithError(new Error('Connection refused'))
 
       await expect(client.getQuota()).rejects.toThrow()
-    }, 10000)
+    }, 10_000)
 
     it('handles DNS resolution failures with appropriate errors', async () => {
       const client = new SocketSdk('test-token')
@@ -38,7 +38,7 @@ describe('SocketSdk Network and Error Handling', () => {
         .replyWithError(new Error('DNS lookup failed'))
 
       await expect(client.getQuota()).rejects.toThrow()
-    }, 10000)
+    }, 10_000)
   })
 
   describe('Response parsing and JSON handling', () => {
