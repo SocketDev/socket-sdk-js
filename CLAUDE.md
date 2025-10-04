@@ -263,6 +263,18 @@ All code elements MUST be sorted:
 - ✅ Improved test organization and maintainability
 - ✅ Enhanced error handling patterns
 
+## 📝 SCRATCH DOCUMENTS
+
+### Working Documents Directory
+- **Location**: `.claude/` directory (gitignored)
+- **Purpose**: Store scratch documents, planning notes, analysis reports, and temporary documentation
+- **🚨 CRITICAL**: NEVER commit files in `.claude/` to version control
+- **Examples of scratch documents**:
+  - Working notes and implementation plans
+  - Analysis reports from codebase investigations
+  - Temporary documentation and TODO lists
+  - Any files not intended for production use
+
 ---
 
 **For all other standards not covered here, refer to `socket-registry/CLAUDE.md` (in sibling repository)**
