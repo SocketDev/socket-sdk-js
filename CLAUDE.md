@@ -75,6 +75,11 @@ Programmatic access to Socket.dev's security analysis capabilities.
 - **Test single file**: ✅ CORRECT: `pnpm test path/to/file.test.ts`
   - ❌ WRONG: `pnpm test -- path/to/file.test.ts`
 - **Update snapshots**: `pnpm test -u`
+- **🚨 MANDATORY Coverage Requirements**: Before pushing commits, ensure test coverage is maintained or improved
+  - **Never decrease coverage**: All changes MUST maintain or increase existing coverage percentages
+  - **Check before push**: Run `pnpm run test` to verify coverage thresholds are met
+  - **Fix coverage drops**: If coverage decreases, add tests to restore or improve coverage before pushing
+  - **Rationale**: Declining coverage indicates untested code paths, which increases risk of bugs and regressions
 
 ### Test Naming Standards (Critical for Coverage)
 - **File names**: Use descriptive, specific names
