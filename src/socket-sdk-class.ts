@@ -92,7 +92,7 @@ export class SocketSdk {
     const agentAsGotOptions = agentOrObj as GotOptions
     const agent = (
       agentKeys.length && agentKeys.every(k => httpAgentNames.has(k))
-        ? /* v8 ignore next 3 - Got-style agent options compatibility layer */
+        ? /* c8 ignore next 3 - Got-style agent options compatibility layer */
           agentAsGotOptions.https ||
           agentAsGotOptions.http ||
           agentAsGotOptions.http2
@@ -127,7 +127,7 @@ export class SocketSdk {
           retries: 4,
           onRetryRethrow: true,
           onRetry(_attempt: number, error: unknown) {
-            /* v8 ignore next 3 - Early return for non-ResponseError types in retry logic, difficult to test without complex network error simulation. */
+            /* c8 ignore next 3 - Early return for non-ResponseError types in retry logic, difficult to test without complex network error simulation. */
             if (!(error instanceof ResponseError)) {
               return
             }
@@ -158,16 +158,16 @@ export class SocketSdk {
       const trimmed = line.trim()
       const artifact = trimmed
         ? (jsonParse(line, { throws: false }) as SocketArtifact)
-        : /* v8 ignore next - Empty line handling in batch streaming response parsing. */ null
+        : /* c8 ignore next - Empty line handling in batch streaming response parsing. */ null
       if (isObjectObject(artifact)) {
         yield this.#handleApiSuccess<'batchPackageFetch'>(
           isPublicToken
-            ? /* v8 ignore start - Public token artifact reshaping branch for policy compliance. */ reshapeArtifactForPublicPolicy(
+            ? /* c8 ignore start - Public token artifact reshaping branch for policy compliance. */ reshapeArtifactForPublicPolicy(
                 artifact!,
                 false,
                 queryParams?.['actions'] as string,
               )
-            : /* v8 ignore stop */
+            : /* c8 ignore stop */
               artifact!,
         )
       }
@@ -209,16 +209,16 @@ export class SocketSdk {
       const enhancedError = e as SyntaxError & {
         originalResponse?: string | undefined
       }
-      /* v8 ignore next - Defensive empty string fallback for originalResponse. */
+      /* c8 ignore next - Defensive empty string fallback for originalResponse. */
       let responseText = enhancedError.originalResponse || ''
 
-      /* v8 ignore next 5 - Empty response text fallback check for JSON parsing errors without originalResponse. */
+      /* c8 ignore next 5 - Empty response text fallback check for JSON parsing errors without originalResponse. */
       if (!responseText) {
         const match = e.message.match(/Invalid JSON response:\n([\s\S]*?)\n→/)
         responseText = match?.[1] || ''
       }
 
-      /* v8 ignore next - Defensive empty string fallback when slice returns empty. */
+      /* c8 ignore next - Defensive empty string fallback when slice returns empty. */
       const preview = responseText.slice(0, 100) || ''
       return {
         cause: `Please report this. JSON.parse threw an error over the following response: \`${preview.trim()}${responseText.length > 100 ? '...' : ''}\``,
@@ -229,7 +229,7 @@ export class SocketSdk {
       }
     }
 
-    /* v8 ignore start - Defensive error stringification fallback branches for edge cases. */
+    /* c8 ignore start - Defensive error stringification fallback branches for edge cases. */
     const errStr = e ? String(e).trim() : ''
     return {
       cause: errStr || UNKNOWN_ERROR,
@@ -238,7 +238,7 @@ export class SocketSdk {
       status: 0,
       success: false,
     }
-    /* v8 ignore stop */
+    /* c8 ignore stop */
   }
 
   /**
@@ -252,7 +252,7 @@ export class SocketSdk {
     const MAX = 50 * 1024 * 1024
     for await (const chunk of response) {
       size += chunk.length
-      /* v8 ignore next 3 - MAX size limit protection for edge cases */
+      /* c8 ignore next 3 - MAX size limit protection for edge cases */
       if (size > MAX) {
         throw new Error('Response body exceeds maximum size limit')
       }
@@ -317,7 +317,7 @@ export class SocketSdk {
       if (statusMessage && errorMessage.includes(statusMessage)) {
         errorMessage = errorMessage.replace(statusMessage, trimmedBody)
       } else {
-        /* v8 ignore next 2 - edge case where statusMessage is undefined or not in error message. */
+        /* c8 ignore next 2 - edge case where statusMessage is undefined or not in error message. */
         errorMessage = `${errorMessage}: ${trimmedBody}`
       }
     }
@@ -325,7 +325,7 @@ export class SocketSdk {
       cause: body,
       data: undefined,
       error: errorMessage,
-      /* v8 ignore next - fallback for missing status code in edge cases. */
+      /* c8 ignore next - fallback for missing status code in edge cases. */
       status: statusCode ?? 0,
       success: false,
     } as SocketSdkErrorResult<T>
@@ -403,17 +403,17 @@ export class SocketSdk {
       const trimmed = line.trim()
       const artifact = trimmed
         ? (jsonParse(line, { throws: false }) as SocketArtifact)
-        : /* v8 ignore next - Empty line handling in batch parsing. */ null
+        : /* c8 ignore next - Empty line handling in batch parsing. */ null
       if (isObjectObject(artifact)) {
         results.push(
           isPublicToken
-            ? /* v8 ignore start - Public token artifact reshaping for policy compliance. */
+            ? /* c8 ignore start - Public token artifact reshaping for policy compliance. */
               reshapeArtifactForPublicPolicy(
                 artifact!,
                 false,
                 queryParams?.['actions'] as string,
               )
-            : /* v8 ignore stop */
+            : /* c8 ignore stop */
               artifact!,
         )
       }
@@ -458,12 +458,12 @@ export class SocketSdk {
     // Increase abortSignal max listeners count to avoid Node's MaxListenersExceededWarning.
     const oldAbortSignalMaxListeners = events.getMaxListeners(abortSignal)
     let abortSignalMaxListeners = oldAbortSignalMaxListeners
-    /* v8 ignore start - EventTarget max listeners adjustment for high concurrency batch operations, difficult to test reliably. */
+    /* c8 ignore start - EventTarget max listeners adjustment for high concurrency batch operations, difficult to test reliably. */
     if (oldAbortSignalMaxListeners < neededMaxListeners) {
       abortSignalMaxListeners = oldAbortSignalMaxListeners + neededMaxListeners
       events.setMaxListeners(abortSignalMaxListeners, abortSignal)
     }
-    /* v8 ignore stop */
+    /* c8 ignore stop */
     const { components } = componentsObj
     const { length: componentsCount } = components
     const running: GeneratorEntry[] = []
@@ -513,7 +513,7 @@ export class SocketSdk {
       )
       // Remove generator with safe index lookup.
       const index = running.findIndex(entry => entry.generator === generator)
-      /* v8 ignore next 3 - Defensive check for concurrent generator cleanup edge case. */
+      /* c8 ignore next 3 - Defensive check for concurrent generator cleanup edge case. */
       if (index === -1) {
         continue
       }
@@ -531,11 +531,11 @@ export class SocketSdk {
       }
     }
     // Reset abortSignal max listeners count.
-    /* v8 ignore start - Reset EventTarget max listeners to original value after batch operations. */
+    /* c8 ignore start - Reset EventTarget max listeners to original value after batch operations. */
     if (abortSignalMaxListeners > oldAbortSignalMaxListeners) {
       events.setMaxListeners(oldAbortSignalMaxListeners, abortSignal)
     }
-    /* v8 ignore stop */
+    /* c8 ignore stop */
   }
 
   /**
@@ -694,7 +694,7 @@ export class SocketSdk {
           'report/upload',
           [
             ...createRequestBodyForFilepaths(absFilepaths, basePath),
-            /* v8 ignore next 3 - Optional issueRules parameter edge case. */
+            /* c8 ignore next 3 - Optional issueRules parameter edge case. */
             ...(issueRules
               ? createRequestBodyForJson(issueRules, 'issueRules')
               : []),
@@ -704,7 +704,7 @@ export class SocketSdk {
             method: 'PUT',
           },
         ),
-        /* v8 ignore next 3 - Success path return statement requires complex file upload mocking with authentication. */
+        /* c8 ignore next 3 - Success path return statement requires complex file upload mocking with authentication. */
       )
       return this.#handleApiSuccess<'createReport'>(data)
     } catch (e) {
@@ -932,7 +932,7 @@ export class SocketSdk {
         cause: undefined,
         data,
         error: undefined,
-        /* v8 ignore next - Defensive fallback: response.statusCode is always defined in Node.js http/https */
+        /* c8 ignore next - Defensive fallback: response.statusCode is always defined in Node.js http/https */
         status: response.statusCode ?? 200,
         success: true,
       }
@@ -941,7 +941,7 @@ export class SocketSdk {
         throw e
       }
 
-      /* v8 ignore start - Defensive fallback: ResponseError in catch block handled in try block (lines 897-910) */
+      /* c8 ignore start - Defensive fallback: ResponseError in catch block handled in try block (lines 897-910) */
       if (e instanceof ResponseError) {
         // Re-use existing error handling logic from the SDK
         const errorResult = await this.#handleApiError<never>(e)
@@ -953,9 +953,9 @@ export class SocketSdk {
           success: false,
         }
       }
-      /* v8 ignore stop */
+      /* c8 ignore stop */
 
-      /* v8 ignore next - Fallback error handling for non-ResponseError cases in getApi. */
+      /* c8 ignore next - Fallback error handling for non-ResponseError cases in getApi. */
       return this.#createQueryErrorResult<T>(e)
     }
   }
@@ -1721,7 +1721,7 @@ export class SocketSdk {
         cause: undefined,
         data,
         error: undefined,
-        /* v8 ignore next - Defensive fallback: response.statusCode is always defined in Node.js http/https */
+        /* c8 ignore next - Defensive fallback: response.statusCode is always defined in Node.js http/https */
         status: response.statusCode ?? 200,
         success: true,
       }
@@ -1730,7 +1730,7 @@ export class SocketSdk {
         throw e
       }
 
-      /* v8 ignore start - Defensive fallback: ResponseError in catch block handled in try block (lines 1686-1695) */
+      /* c8 ignore start - Defensive fallback: ResponseError in catch block handled in try block (lines 1686-1695) */
       if (e instanceof ResponseError) {
         // Re-use existing error handling logic from the SDK
         const errorResult = await this.#handleApiError<never>(e)
@@ -1742,9 +1742,9 @@ export class SocketSdk {
           success: false,
         }
       }
-      /* v8 ignore stop */
+      /* c8 ignore stop */
 
-      /* v8 ignore start - Defensive error stringification fallback branches for sendApi edge cases. */
+      /* c8 ignore start - Defensive error stringification fallback branches for sendApi edge cases. */
       const errStr = e ? String(e).trim() : ''
       return {
         cause: errStr || UNKNOWN_ERROR,
@@ -1753,7 +1753,7 @@ export class SocketSdk {
         status: 0,
         success: false,
       }
-      /* v8 ignore stop */
+      /* c8 ignore stop */
     }
   }
 
@@ -1857,7 +1857,7 @@ export class SocketSdk {
         })
 
         response.on('error', error => {
-          /* v8 ignore next - Streaming error handler, difficult to test reliably. */
+          /* c8 ignore next - Streaming error handler, difficult to test reliably. */
           controller.error(error)
         })
       },
@@ -2023,11 +2023,11 @@ export class SocketSdk {
         data,
       ) as unknown as UploadManifestFilesReturnType
     } catch (e) {
-      /* v8 ignore start - Error handling in uploadManifestFiles method for edge cases. */
+      /* c8 ignore start - Error handling in uploadManifestFiles method for edge cases. */
       return (await this.#handleApiError<never>(
         e,
       )) as unknown as UploadManifestFilesError
-      /* v8 ignore stop */
+      /* c8 ignore stop */
     }
   }
 
@@ -2051,9 +2051,9 @@ export class SocketSdk {
 }
 
 // Optional live heap trace.
-/* v8 ignore start - optional debug logging for heap monitoring */
+/* c8 ignore start - optional debug logging for heap monitoring */
 if (isDebugNs('heap')) {
   const used = process.memoryUsage()
   debugLog('heap', `heap used: ${Math.round(used.heapUsed / 1024 / 1024)}MB`)
 }
-/* v8 ignore stop - end debug logging */
+/* c8 ignore stop - end debug logging */
