@@ -246,11 +246,9 @@ export function isResponseOk(response: IncomingMessage): boolean {
  * Transform artifact data based on authentication status.
  * Filters and compacts response data for public/free-tier users.
  */
-export function reshapeArtifactForPublicPolicy<T extends Record<string, unknown>>(
-  data: T,
-  isAuthenticated: boolean,
-  actions?: string | undefined,
-): T {
+export function reshapeArtifactForPublicPolicy<
+  T extends Record<string, unknown>,
+>(data: T, isAuthenticated: boolean, actions?: string | undefined): T {
   /* c8 ignore start - Public policy artifact reshaping for unauthenticated users, difficult to test edge cases. */
   // If user is not authenticated, provide a different response structure
   // optimized for the public free-tier experience.
@@ -311,4 +309,117 @@ export function reshapeArtifactForPublicPolicy<T extends Record<string, unknown>
   }
   return data
   /* c8 ignore stop */
+}
+
+/**
+ * Retry helper for HTTP requests with exponential backoff.
+ * Wraps any async HTTP function and retries on failure.
+ *
+ * @param fn - Async function to retry
+ * @param retries - Number of retry attempts (default: 3)
+ * @param retryDelay - Initial delay in ms (default: 1000)
+ * @returns Result of the function call
+ * @throws {Error} Last error if all retries exhausted
+ */
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  retries: number = 3,
+  retryDelay: number = 1000,
+): Promise<T> {
+  let lastError: Error | undefined
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      return await fn()
+    } catch (error) {
+      lastError = error as Error
+
+      // Last attempt - throw error
+      if (attempt === retries) {
+        break
+      }
+
+      // Check if error is retryable (network errors, 5xx responses)
+      if (error instanceof ResponseError) {
+        const status = error.response.statusCode
+        // Don't retry client errors (4xx)
+        if (status && status >= 400 && status < 500) {
+          throw error
+        }
+      }
+
+      // Exponential backoff
+      const delayMs = retryDelay * Math.pow(2, attempt)
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise(resolve => setTimeout(resolve, delayMs))
+    }
+  }
+
+  throw lastError || new Error('Request failed after retries')
+}
+
+/**
+ * Create GET request with automatic retry logic.
+ * Retries on network errors and 5xx responses.
+ *
+ * @param retries - Number of retry attempts (default: 3)
+ * @param retryDelay - Initial delay in ms (default: 1000)
+ */
+export async function createGetRequestWithRetry(
+  baseUrl: string,
+  urlPath: string,
+  options: RequestOptions,
+  retries: number = 3,
+  retryDelay: number = 1000,
+): Promise<IncomingMessage> {
+  return await withRetry(
+    () => createGetRequest(baseUrl, urlPath, options),
+    retries,
+    retryDelay,
+  )
+}
+
+/**
+ * Create DELETE request with automatic retry logic.
+ * Retries on network errors and 5xx responses.
+ *
+ * @param retries - Number of retry attempts (default: 3)
+ * @param retryDelay - Initial delay in ms (default: 1000)
+ */
+export async function createDeleteRequestWithRetry(
+  baseUrl: string,
+  urlPath: string,
+  options: RequestOptions,
+  retries: number = 3,
+  retryDelay: number = 1000,
+): Promise<IncomingMessage> {
+  return await withRetry(
+    () => createDeleteRequest(baseUrl, urlPath, options),
+    retries,
+    retryDelay,
+  )
+}
+
+/**
+ * Create request with JSON payload and automatic retry logic.
+ * Retries on network errors and 5xx responses.
+ *
+ * @param retries - Number of retry attempts (default: 3)
+ * @param retryDelay - Initial delay in ms (default: 1000)
+ */
+export async function createRequestWithJsonAndRetry(
+  method: SendMethod,
+  baseUrl: string,
+  urlPath: string,
+  json: unknown,
+  options: RequestOptions,
+  retries: number = 3,
+  retryDelay: number = 1000,
+): Promise<IncomingMessage> {
+  return await withRetry(
+    () => createRequestWithJson(method, baseUrl, urlPath, json, options),
+    retries,
+    retryDelay,
+  )
 }
