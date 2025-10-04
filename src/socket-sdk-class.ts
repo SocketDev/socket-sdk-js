@@ -144,6 +144,7 @@ export class SocketSdk {
       return
     }
     // Validate response before processing.
+    /* c8 ignore next 3 - Defensive check, response should always be defined after successful request */
     if (!res) {
       throw new Error('Failed to get response from batch PURL request')
     }
@@ -388,6 +389,7 @@ export class SocketSdk {
       return await this.#handleApiError<'batchPackageFetch'>(e)
     }
     // Validate response before processing.
+    /* c8 ignore next 3 - Defensive check, response should always be defined after successful request */
     if (!res) {
       throw new Error('Failed to get response from batch PURL request')
     }
@@ -1788,6 +1790,7 @@ export class SocketSdk {
         // Stream to file with error handling.
         const writeStream = createWriteStream(output)
         res.pipe(writeStream)
+        /* c8 ignore next 4 - Write stream error handler, difficult to test reliably */
         writeStream.on('error', error => {
           throw new Error(`Failed to write to file: ${output}`, {
             cause: error,
@@ -1796,6 +1799,7 @@ export class SocketSdk {
       } else if (output === true) {
         // Stream to stdout with error handling.
         res.pipe(process.stdout)
+        /* c8 ignore next 3 - Stdout error handler, difficult to test reliably */
         process.stdout.on('error', error => {
           throw new Error('Failed to write to stdout', { cause: error })
         })

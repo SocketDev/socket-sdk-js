@@ -373,6 +373,7 @@ export async function withRetry<T>(
   }
 
   // Fallback error if lastError is somehow undefined.
+  /* c8 ignore next - Defensive fallback for undefined lastError */
   throw lastError || new Error('Request failed after retries')
 }
 
