@@ -143,6 +143,21 @@ describe('SocketSdk - Scanning APIs', () => {
         expect(res.data['supported']).toContain('yarn.lock')
       }
     })
+
+    it('should handle error in getSupportedScanFiles', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/report/supported')
+        .reply(404, { error: { message: 'Endpoint not found' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.getSupportedScanFiles()
+
+      expect(res.success).toBe(false)
+      if (!res.success) {
+        expect(res.status).toBe(404)
+        expect(res.error).toContain('Socket API Request failed (404)')
+      }
+    })
   })
 
   describe('Package Scoring', () => {
@@ -167,6 +182,24 @@ describe('SocketSdk - Scanning APIs', () => {
       if (res.success) {
         // The actual response has a different structure
         expect(res.data).toBeDefined()
+      }
+    })
+
+    it('should handle error in getScoreByNpmPackage', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/npm/nonexistent-pkg/1.0.0/score')
+        .reply(404, { error: { message: 'Package not found' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.getScoreByNpmPackage(
+        'nonexistent-pkg',
+        '1.0.0',
+      )
+
+      expect(res.success).toBe(false)
+      if (!res.success) {
+        expect(res.status).toBe(404)
+        expect(res.error).toContain('Socket API Request failed (404)')
       }
     })
   })
