@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.10.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.10.1) - 2025-10-04
+
+### Added
+- Automatic retry with exponential backoff to all HTTP API calls for improved reliability on transient failures
+
 ## [1.10.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.10.0) - 2025-10-04
 
 ### Added
