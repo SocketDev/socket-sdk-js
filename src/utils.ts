@@ -4,6 +4,7 @@
  */
 import path from 'node:path'
 
+import { memoize } from '@socketsecurity/registry/lib/memoization'
 import { normalizePath } from '@socketsecurity/registry/lib/path'
 
 import type { QueryParams } from './types'
@@ -14,10 +15,14 @@ export { createUserAgentFromPkgJson } from './user-agent'
 /**
  * Normalize base URL by ensuring it ends with a trailing slash.
  * Required for proper URL joining with relative paths.
+ * Memoized for performance since base URLs are typically reused.
  */
-export function normalizeBaseUrl(baseUrl: string): string {
-  return baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
-}
+export const normalizeBaseUrl = memoize(
+  (baseUrl: string): string => {
+    return baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
+  },
+  { name: 'normalizeBaseUrl' },
+)
 
 /**
  * Create a promise with externally accessible resolve/reject functions.
