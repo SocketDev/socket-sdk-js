@@ -46,417 +46,137 @@ const batchResult = await client.batchPackageFetch({
 })
 ```
 
-## Configuration
-
-```typescript
-interface SocketSdkOptions {
-  baseUrl?: string          // API base URL (default: 'https://api.socket.dev/v0/')
-  timeout?: number          // Request timeout in milliseconds
-  retries?: number          // Number of retry attempts (default: 0, disabled)
-  retryDelay?: number       // Initial retry delay in ms (default: 100ms)
-  userAgent?: string        // Custom user agent string
-  agent?: Agent             // Custom HTTP agent for advanced networking
-  cache?: boolean           // Enable response caching (default: false)
-  cacheTtl?: number         // Cache TTL in ms (default: 300000 = 5 minutes)
-}
-```
-
-**Retry Logic:**
-- Disabled by default (opt-in pattern following Node.js conventions)
-- Set `retries: 3` for production to automatically retry transient failures
-- Uses exponential backoff: 100ms, 200ms, 400ms, 800ms...
-- Does NOT retry 401/403 authentication errors
+**[→ Configuration Options](./docs/API.md#configuration)**
 
 ## API Methods
 
-The SDK provides 60+ methods organized into functional categories:
-
 <details>
-<summary><strong>Package Analysis</strong> - Security scanning and scoring</summary>
+<summary><strong>Package Analysis</strong> - Quick security checks</summary>
 
-- `batchPackageFetch()` - Analyze multiple packages in batch
-- `batchPackageStream()` - Stream package analysis with concurrency control
-- `getIssuesByNpmPackage()` - Get security issues for a package
-- `getScoreByNpmPackage()` - Get security score for a package
+`batchPackageFetch()` • `batchPackageStream()` • `getIssuesByNpmPackage()` • `getScoreByNpmPackage()`
 
-[→ View full documentation](./docs/API.md#package-analysis)
-
+[→ Documentation](./docs/API.md#package-analysis)
 </details>
 
 <details>
-<summary><strong>Scanning & Analysis</strong> - Project and dependency scanning</summary>
+<summary><strong>Scanning & Analysis</strong> - Project scanning</summary>
 
-- `createDependenciesSnapshot()` - Create dependency snapshot
-- `createOrgFullScan()` - Create full organization scan
-- `createScanFromFilepaths()` - Create security scan from files
-- `getScan()` - Get detailed scan results
-- `getScanList()` - List all accessible scans
-- `getSupportedScanFiles()` - Get supported file formats
+`createDependenciesSnapshot()` • `createOrgFullScan()` • `createScanFromFilepaths()` • `getScan()` • `getScanList()` • `getSupportedScanFiles()`
 
-[→ View full documentation](./docs/API.md#scanning--analysis)
-
+[→ Documentation](./docs/API.md#scanning--analysis)
 </details>
 
 <details>
-<summary><strong>Organization Management</strong> - Organizations and repositories</summary>
+<summary><strong>Organization Management</strong> - Orgs and repos</summary>
 
-- `getOrganizations()` - List accessible organizations
-- `createOrgRepo()` - Create new repository
-- `getOrgRepo()` - Get repository details
-- `getOrgRepoList()` - List organization repositories
-- `updateOrgRepo()` - Update repository configuration
-- `deleteOrgRepo()` - Delete repository
+`getOrganizations()` • `createOrgRepo()` • `getOrgRepo()` • `getOrgRepoList()` • `updateOrgRepo()` • `deleteOrgRepo()`
 
-[→ View full documentation](./docs/API.md#organization-management)
-
+[→ Documentation](./docs/API.md#organization-management)
 </details>
 
 <details>
-<summary><strong>Full Scan Management</strong> - Manage comprehensive scans</summary>
+<summary><strong>Policy & Settings</strong> - Security configuration</summary>
 
-- `getOrgFullScanList()` - List organization full scans
-- `getOrgFullScanMetadata()` - Get scan metadata
-- `getOrgFullScanBuffered()` - Get complete scan results in memory
-- `streamOrgFullScan()` - Stream scan results
-- `deleteOrgFullScan()` - Delete full scan
+`getOrgSecurityPolicy()` • `updateOrgSecurityPolicy()` • `getOrgLicensePolicy()` • `updateOrgLicensePolicy()` • `postSettings()`
 
-[→ View full documentation](./docs/API.md#full-scan-management)
-
+[→ Documentation](./docs/API.md#policy--settings)
 </details>
 
 <details>
-<summary><strong>Policy & Settings</strong> - Security and license policies</summary>
+<summary><strong>Full Scan Management</strong> - Deep analysis</summary>
 
-- `getOrgSecurityPolicy()` - Get security policy configuration
-- `updateOrgSecurityPolicy()` - Update security policy
-- `getOrgLicensePolicy()` - Get license policy configuration
-- `updateOrgLicensePolicy()` - Update license policy
-- `postSettings()` - Update settings
+`getOrgFullScanList()` • `getOrgFullScanMetadata()` • `getOrgFullScanBuffered()` • `streamOrgFullScan()` • `deleteOrgFullScan()`
 
-[→ View full documentation](./docs/API.md#policy--settings)
-
+[→ Documentation](./docs/API.md#full-scan-management)
 </details>
 
 <details>
-<summary><strong>Analytics & Monitoring</strong> - Usage metrics and audit logs</summary>
+<summary><strong>Diff Scans</strong> - Compare scans</summary>
 
-- `getQuota()` - Get current API quota usage
-- `getOrgAnalytics()` - Get organization analytics
-- `getRepoAnalytics()` - Get repository analytics
-- `getAuditLogEvents()` - Get audit log events
+`createOrgDiffScanFromIds()` • `getDiffScanById()` • `listOrgDiffScans()` • `deleteOrgDiffScan()`
 
-[→ View full documentation](./docs/API.md#analytics--monitoring)
-
+[→ Documentation](./docs/API.md#diff-scans)
 </details>
 
 <details>
-<summary><strong>Authentication & Access</strong> - API tokens and permissions</summary>
+<summary><strong>Patches & Vulnerabilities</strong> - Security fixes</summary>
 
-- `getAPITokens()` - List organization API tokens
-- `postAPIToken()` - Create new API token
-- `postAPITokensRotate()` - Rotate API token
-- `postAPITokensRevoke()` - Revoke API token
-- `postAPITokenUpdate()` - Update API token
+`streamPatchesFromScan()` • `viewPatch()`
 
-[→ View full documentation](./docs/API.md#authentication--access)
-
+[→ Documentation](./docs/API.md#patches--vulnerabilities)
 </details>
 
 <details>
-<summary><strong>Export & Integration</strong> - SBOM and data export</summary>
+<summary><strong>Alert & Triage</strong> - Alert management</summary>
 
-- `exportCDX()` - Export CycloneDX SBOM
-- `exportSPDX()` - Export SPDX SBOM
-- `searchDependencies()` - Search monitored dependencies
-- `uploadManifestFiles()` - Upload manifest files
+`getOrgTriage()` • `updateOrgAlertTriage()`
 
-[→ View full documentation](./docs/API.md#export--integration)
-
+[→ Documentation](./docs/API.md#alert--triage)
 </details>
 
 <details>
-<summary><strong>Diff Scans</strong> - Compare scans for changes</summary>
+<summary><strong>Export & Integration</strong> - SBOM export</summary>
 
-- `createOrgDiffScanFromIds()` - Create diff scan from IDs
-- `getDiffScanById()` - Get diff scan details
-- `listOrgDiffScans()` - List organization diff scans
-- `deleteOrgDiffScan()` - Delete diff scan
+`exportCDX()` • `exportSPDX()` • `searchDependencies()` • `uploadManifestFiles()`
 
-[→ View full documentation](./docs/API.md#diff-scans)
-
+[→ Documentation](./docs/API.md#export--integration)
 </details>
 
 <details>
-<summary><strong>Alert & Triage</strong> - Manage security alerts</summary>
+<summary><strong>Repository Labels</strong> - Categorization</summary>
 
-- `getOrgTriage()` - Get organization triage settings
-- `updateOrgAlertTriage()` - Update alert triage
+`createOrgRepoLabel()` • `getOrgRepoLabel()` • `getOrgRepoLabelList()` • `updateOrgRepoLabel()` • `deleteOrgRepoLabel()`
 
-[→ View full documentation](./docs/API.md#alert--triage)
-
+[→ Documentation](./docs/API.md#repository-labels)
 </details>
 
 <details>
-<summary><strong>Repository Labels</strong> - Repository categorization</summary>
+<summary><strong>Analytics & Monitoring</strong> - Usage metrics</summary>
 
-- `createOrgRepoLabel()` - Create repository label
-- `getOrgRepoLabel()` - Get label details
-- `getOrgRepoLabelList()` - List repository labels
-- `updateOrgRepoLabel()` - Update repository label
-- `deleteOrgRepoLabel()` - Delete repository label
+`getQuota()` • `getOrgAnalytics()` • `getRepoAnalytics()` • `getAuditLogEvents()`
 
-[→ View full documentation](./docs/API.md#repository-labels)
-
+[→ Documentation](./docs/API.md#analytics--monitoring)
 </details>
 
 <details>
-<summary><strong>Patches & Vulnerabilities</strong> - Security patches</summary>
+<summary><strong>Authentication & Access</strong> - API tokens</summary>
 
-- `streamPatchesFromScan()` - Stream patches from scan
-- `viewPatch()` - View patch details
+`getAPITokens()` • `postAPIToken()` • `postAPITokensRotate()` • `postAPITokensRevoke()` • `postAPITokenUpdate()`
 
-[→ View full documentation](./docs/API.md#patches--vulnerabilities)
-
+[→ Documentation](./docs/API.md#authentication--access)
 </details>
 
 <details>
-<summary><strong>Entitlements</strong> - Product access and features</summary>
+<summary><strong>Entitlements</strong> - Feature access</summary>
 
-- `getEnabledEntitlements()` - Get enabled entitlements
-- `getEntitlements()` - Get all organization entitlements
+`getEnabledEntitlements()` • `getEntitlements()`
 
-[→ View full documentation](./docs/API.md#entitlements)
-
+[→ Documentation](./docs/API.md#entitlements)
 </details>
 
 <details>
-<summary><strong>Advanced Query Methods</strong> - Raw API access</summary>
+<summary><strong>Quota Utilities</strong> - Cost helpers</summary>
 
-- `getApi()` - Execute raw GET request
-- `sendApi()` - Send POST/PUT with JSON body
+`getQuotaCost()` • `getRequiredPermissions()` • `calculateTotalQuotaCost()` • `hasQuotaForMethods()` • `getMethodsByQuotaCost()` • `getMethodsByPermissions()` • `getQuotaUsageSummary()` • `getAllMethodRequirements()`
 
-[→ View full documentation](./docs/API.md#advanced-query-methods)
-
+[→ Documentation](./docs/QUOTA.md)
 </details>
 
 <details>
-<summary><strong>Quota Utilities</strong> - Cost calculation and optimization</summary>
+<summary><strong>Advanced Query Methods</strong> - Raw API</summary>
 
-- `getQuotaCost()` - Get quota cost for any SDK method
-- `getRequiredPermissions()` - Get required permissions for SDK method
-- `calculateTotalQuotaCost()` - Calculate total cost for multiple methods
-- `hasQuotaForMethods()` - Check if quota is sufficient
-- `getMethodsByQuotaCost()` - Find methods by quota cost
-- `getMethodsByPermissions()` - Find methods requiring specific permissions
-- `getQuotaUsageSummary()` - Get summary grouped by quota cost
-- `getAllMethodRequirements()` - Get complete mapping of methods to costs
+`getApi()` • `sendApi()`
 
-[→ View full documentation](./docs/QUOTA.md)
-
+[→ Documentation](./docs/API.md#advanced-query-methods)
 </details>
 
 **[→ Complete API Reference](./docs/API.md)**
 
-## Usage Examples
+**[→ Usage Examples](./docs/EXAMPLES.md)**
 
-### Analyze Package Security
+**[→ Quota Management](./docs/QUOTA.md)** - Cost tiers: 0 units (free), 10 units (standard), 100 units (batch/uploads)
 
-```typescript
-// Get detailed security issues
-const issues = await client.getIssuesByNpmPackage('lodash', '4.17.20')
-if (issues.success) {
-  for (const issue of issues.data.issues) {
-    console.log(`[${issue.severity}] ${issue.type}: ${issue.description}`)
-  }
-}
-```
-
-### Stream Large Batch Operations
-
-```typescript
-// Analyze 100+ packages efficiently
-const stream = client.batchPackageStream(
-  { components: packages },
-  { concurrency: 10 }
-)
-
-for await (const result of stream) {
-  if (result.success && result.data.score < 70) {
-    console.log(`⚠️ Low score: ${result.data.name}`)
-  }
-}
-```
-
-### Create Full Project Scan
-
-```typescript
-const scan = await client.createOrgFullScan(
-  'my-org',
-  ['package.json', 'package-lock.json'],
-  process.cwd()
-)
-
-if (scan.success) {
-  console.log(`Scan created: ${scan.data.id}`)
-}
-```
-
-### Check Quota Before Operations
-
-```typescript
-import { getQuotaCost, hasQuotaForMethods } from '@socketsecurity/sdk'
-
-const operations = ['batchPackageFetch', 'uploadManifestFiles']
-const cost = getQuotaCost('batchPackageFetch') // 100 units
-
-const quota = await client.getQuota()
-if (quota.success && hasQuotaForMethods(quota.data.quota, operations)) {
-  // Proceed with operations
-}
-```
-
-**[→ More Examples](./docs/EXAMPLES.md)**
-
-## Quota Management
-
-Different operations have different costs:
-- **0 units**: Free tier (quota checks, organization lists, entitlements)
-- **10 units**: Standard operations (scans, reports, policies)
-- **100 units**: Resource-intensive (batch processing, file uploads)
-
-```typescript
-import {
-  getQuotaCost,
-  calculateTotalQuotaCost,
-  hasQuotaForMethods
-} from '@socketsecurity/sdk'
-
-// Check cost before running operations
-const batchCost = getQuotaCost('batchPackageFetch') // 100 units
-const scanCost = getQuotaCost('createOrgFullScan')  // 10 units
-
-// Calculate total for multiple operations
-const operations = ['batchPackageFetch', 'getOrgAnalytics']
-const total = calculateTotalQuotaCost(operations) // 110 units
-
-// Verify sufficient quota
-const quota = await client.getQuota()
-if (quota.success) {
-  if (hasQuotaForMethods(quota.data.quota, operations)) {
-    console.log('Sufficient quota available')
-  }
-}
-```
-
-**[→ Quota Management Guide](./docs/QUOTA.md)**
-
-## Testing Utilities
-
-The SDK includes comprehensive testing utilities:
-
-```typescript
-import {
-  mockSuccessResponse,
-  mockErrorResponse,
-  mockApiErrorBody,
-  mockSdkError,
-  fixtures,
-  isSuccessResult,
-  isErrorResult
-} from '@socketsecurity/sdk/testing'
-
-// Mock successful SDK calls
-const mockSdk = {
-  getOrgRepo: vi.fn().mockResolvedValue(
-    mockSuccessResponse(fixtures.repositories.basic)
-  )
-}
-
-// Mock API errors for integration tests
-nock('https://api.socket.dev')
-  .get('/v0/repo/org/repo')
-  .reply(404, mockApiErrorBody('Repository not found'))
-
-// Type-safe result checking
-const result = await client.getOrgRepo('org', 'repo')
-if (isSuccessResult(result)) {
-  console.log(result.data.name) // Type-safe access
-}
-```
-
-**[→ Testing Guide](./docs/TESTING.md)**
-
-## ESM / TypeScript
-
-```typescript
-import { SocketSdk } from '@socketsecurity/sdk'
-
-const client = new SocketSdk('your-api-key')
-```
-
-## CommonJS
-
-```javascript
-const { SocketSdk } = require('@socketsecurity/sdk')
-
-const client = new SocketSdk('your-api-key')
-```
-
-## Documentation
-
-- **[API Reference](./docs/API.md)** - Complete API documentation for all 60+ methods
-- **[Examples](./docs/EXAMPLES.md)** - Practical usage patterns and code samples
-- **[Quota Management](./docs/QUOTA.md)** - Cost optimization and quota utilities
-- **[Testing Utilities](./docs/TESTING.md)** - Mock helpers and testing patterns
-
-## Advanced Features
-
-### Custom User Agent
-
-```typescript
-import { createUserAgentFromPkgJson } from '@socketsecurity/sdk'
-
-const client = new SocketSdk('your-api-key', {
-  userAgent: createUserAgentFromPkgJson(pkgJson)
-})
-
-// Results in User-Agent header:
-// your-app/1.0.0 (http://example.com/) socketsecurity-sdk/1.11.0
-```
-
-### HTTP/2 Support and Custom Agents
-
-```typescript
-import http2 from 'http2'
-
-const client = new SocketSdk('your-api-key', {
-  agent: http2.connect('https://api.socket.dev')
-})
-```
-
-### Response Caching
-
-```typescript
-const client = new SocketSdk('your-api-key', {
-  cache: true,         // Enable TTL caching
-  cacheTtl: 300000     // 5 minute cache (default)
-})
-```
-
-### Raw API Access
-
-```typescript
-// Custom GET request
-const response = await client.getApi<MyType>('/custom/endpoint', {
-  responseType: 'json'
-})
-
-// Custom POST/PUT request
-const result = await client.sendApi('/custom/action', {
-  method: 'POST',
-  body: { action: 'process', data: 'value' }
-})
-```
+**[→ Testing Utilities](./docs/TESTING.md)** - Mock factories, fixtures, and type guards for SDK testing
 
 ## See Also
 
