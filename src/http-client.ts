@@ -318,15 +318,15 @@ export function reshapeArtifactForPublicPolicy<
  * Wraps any async HTTP function and retries on failure.
  *
  * @param fn - Async function to retry
- * @param retries - Number of retry attempts (default: 3)
- * @param retryDelay - Initial delay in ms (default: 1000)
+ * @param retries - Number of retry attempts (default: 0, retries disabled)
+ * @param retryDelay - Initial delay in ms (default: 100)
  * @returns Result of the function call
  * @throws {Error} Last error if all retries exhausted
  */
 export async function withRetry<T>(
   fn: () => Promise<T>,
-  retries = 3,
-  retryDelay = 1000,
+  retries = 0,
+  retryDelay = 100,
 ): Promise<T> {
   let lastError: Error | undefined
 
@@ -381,15 +381,15 @@ export async function withRetry<T>(
  * Create GET request with automatic retry logic.
  * Retries on network errors and 5xx responses.
  *
- * @param retries - Number of retry attempts (default: 3)
- * @param retryDelay - Initial delay in ms (default: 1000)
+ * @param retries - Number of retry attempts (default: 0, retries disabled)
+ * @param retryDelay - Initial delay in ms (default: 100)
  */
 export async function createGetRequestWithRetry(
   baseUrl: string,
   urlPath: string,
   options: RequestOptions,
-  retries = 3,
-  retryDelay = 1000,
+  retries = 0,
+  retryDelay = 100,
 ): Promise<IncomingMessage> {
   return await withRetry(
     () => createGetRequest(baseUrl, urlPath, options),
@@ -402,15 +402,15 @@ export async function createGetRequestWithRetry(
  * Create DELETE request with automatic retry logic.
  * Retries on network errors and 5xx responses.
  *
- * @param retries - Number of retry attempts (default: 3)
- * @param retryDelay - Initial delay in ms (default: 1000)
+ * @param retries - Number of retry attempts (default: 0, retries disabled)
+ * @param retryDelay - Initial delay in ms (default: 100)
  */
 export async function createDeleteRequestWithRetry(
   baseUrl: string,
   urlPath: string,
   options: RequestOptions,
-  retries = 3,
-  retryDelay = 1000,
+  retries = 0,
+  retryDelay = 100,
 ): Promise<IncomingMessage> {
   return await withRetry(
     () => createDeleteRequest(baseUrl, urlPath, options),
@@ -423,8 +423,8 @@ export async function createDeleteRequestWithRetry(
  * Create request with JSON payload and automatic retry logic.
  * Retries on network errors and 5xx responses.
  *
- * @param retries - Number of retry attempts (default: 3)
- * @param retryDelay - Initial delay in ms (default: 1000)
+ * @param retries - Number of retry attempts (default: 0, retries disabled)
+ * @param retryDelay - Initial delay in ms (default: 100)
  */
 export async function createRequestWithJsonAndRetry(
   method: SendMethod,
@@ -432,8 +432,8 @@ export async function createRequestWithJsonAndRetry(
   urlPath: string,
   json: unknown,
   options: RequestOptions,
-  retries = 3,
-  retryDelay = 1000,
+  retries = 0,
+  retryDelay = 100,
 ): Promise<IncomingMessage> {
   return await withRetry(
     () => createRequestWithJson(method, baseUrl, urlPath, json, options),
