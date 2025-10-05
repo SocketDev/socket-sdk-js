@@ -71,32 +71,189 @@ interface SocketSdkOptions {
 
 The SDK provides 60+ methods organized into functional categories:
 
-### Package Analysis
-- [Package Security Scanning](./docs/API.md#package-analysis) - Vulnerability reports, security scores, and issue details
-- [Batch Processing](./docs/API.md#package-analysis) - Efficient multi-package analysis with streaming support
+<details>
+<summary><strong>Package Analysis</strong> - Security scanning and scoring</summary>
 
-### Security Scanning
-- [Full Scans](./docs/API.md#scanning--analysis) - Comprehensive project security scans
-- [Diff Scans](./docs/API.md#diff-scans) - Compare scans to identify changes
-- [Dependencies](./docs/API.md#scanning--analysis) - Upload and analyze project dependencies
+- `batchPackageFetch()` - Analyze multiple packages in batch
+- `batchPackageStream()` - Stream package analysis with concurrency control
+- `getIssuesByNpmPackage()` - Get security issues for a package
+- `getScoreByNpmPackage()` - Get security score for a package
 
-### Organization Management
-- [Organizations](./docs/API.md#organization-management) - List and manage organizations
-- [Repositories](./docs/API.md#organization-management) - Create, update, and delete repositories
-- [Labels](./docs/API.md#organization-management) - Repository categorization and tagging
+[→ View full documentation](./docs/API.md#package-analysis)
 
-### Policy & Compliance
-- [Security Policies](./docs/API.md#policy--settings) - Configure security alert rules
-- [License Policies](./docs/API.md#policy--settings) - Manage license restrictions
-- [Audit Logs](./docs/API.md#analytics--monitoring) - Access security events
+</details>
 
-### Data Export
-- [SBOM Export](./docs/API.md#export--integration) - Generate CycloneDX and SPDX reports
-- [Streaming](./docs/API.md#full-scan-management) - Efficient large dataset handling
+<details>
+<summary><strong>Scanning & Analysis</strong> - Project and dependency scanning</summary>
 
-### Authentication & Quota
-- [API Tokens](./docs/API.md#authentication--access) - Create, rotate, and manage tokens
-- [Quota Management](./docs/QUOTA.md) - Monitor usage and optimize costs
+- `createDependenciesSnapshot()` - Create dependency snapshot
+- `createOrgFullScan()` - Create full organization scan
+- `createScanFromFilepaths()` - Create security scan from files
+- `getScan()` - Get detailed scan results
+- `getScanList()` - List all accessible scans
+- `getSupportedScanFiles()` - Get supported file formats
+
+[→ View full documentation](./docs/API.md#scanning--analysis)
+
+</details>
+
+<details>
+<summary><strong>Organization Management</strong> - Organizations and repositories</summary>
+
+- `getOrganizations()` - List accessible organizations
+- `createOrgRepo()` - Create new repository
+- `getOrgRepo()` - Get repository details
+- `getOrgRepoList()` - List organization repositories
+- `updateOrgRepo()` - Update repository configuration
+- `deleteOrgRepo()` - Delete repository
+
+[→ View full documentation](./docs/API.md#organization-management)
+
+</details>
+
+<details>
+<summary><strong>Full Scan Management</strong> - Manage comprehensive scans</summary>
+
+- `getOrgFullScanList()` - List organization full scans
+- `getOrgFullScanMetadata()` - Get scan metadata
+- `getOrgFullScanBuffered()` - Get complete scan results in memory
+- `streamOrgFullScan()` - Stream scan results
+- `deleteOrgFullScan()` - Delete full scan
+
+[→ View full documentation](./docs/API.md#full-scan-management)
+
+</details>
+
+<details>
+<summary><strong>Policy & Settings</strong> - Security and license policies</summary>
+
+- `getOrgSecurityPolicy()` - Get security policy configuration
+- `updateOrgSecurityPolicy()` - Update security policy
+- `getOrgLicensePolicy()` - Get license policy configuration
+- `updateOrgLicensePolicy()` - Update license policy
+- `postSettings()` - Update settings
+
+[→ View full documentation](./docs/API.md#policy--settings)
+
+</details>
+
+<details>
+<summary><strong>Analytics & Monitoring</strong> - Usage metrics and audit logs</summary>
+
+- `getQuota()` - Get current API quota usage
+- `getOrgAnalytics()` - Get organization analytics
+- `getRepoAnalytics()` - Get repository analytics
+- `getAuditLogEvents()` - Get audit log events
+
+[→ View full documentation](./docs/API.md#analytics--monitoring)
+
+</details>
+
+<details>
+<summary><strong>Authentication & Access</strong> - API tokens and permissions</summary>
+
+- `getAPITokens()` - List organization API tokens
+- `postAPIToken()` - Create new API token
+- `postAPITokensRotate()` - Rotate API token
+- `postAPITokensRevoke()` - Revoke API token
+- `postAPITokenUpdate()` - Update API token
+
+[→ View full documentation](./docs/API.md#authentication--access)
+
+</details>
+
+<details>
+<summary><strong>Export & Integration</strong> - SBOM and data export</summary>
+
+- `exportCDX()` - Export CycloneDX SBOM
+- `exportSPDX()` - Export SPDX SBOM
+- `searchDependencies()` - Search monitored dependencies
+- `uploadManifestFiles()` - Upload manifest files
+
+[→ View full documentation](./docs/API.md#export--integration)
+
+</details>
+
+<details>
+<summary><strong>Diff Scans</strong> - Compare scans for changes</summary>
+
+- `createOrgDiffScanFromIds()` - Create diff scan from IDs
+- `getDiffScanById()` - Get diff scan details
+- `listOrgDiffScans()` - List organization diff scans
+- `deleteOrgDiffScan()` - Delete diff scan
+
+[→ View full documentation](./docs/API.md#diff-scans)
+
+</details>
+
+<details>
+<summary><strong>Alert & Triage</strong> - Manage security alerts</summary>
+
+- `getOrgTriage()` - Get organization triage settings
+- `updateOrgAlertTriage()` - Update alert triage
+
+[→ View full documentation](./docs/API.md#alert--triage)
+
+</details>
+
+<details>
+<summary><strong>Repository Labels</strong> - Repository categorization</summary>
+
+- `createOrgRepoLabel()` - Create repository label
+- `getOrgRepoLabel()` - Get label details
+- `getOrgRepoLabelList()` - List repository labels
+- `updateOrgRepoLabel()` - Update repository label
+- `deleteOrgRepoLabel()` - Delete repository label
+
+[→ View full documentation](./docs/API.md#repository-labels)
+
+</details>
+
+<details>
+<summary><strong>Patches & Vulnerabilities</strong> - Security patches</summary>
+
+- `streamPatchesFromScan()` - Stream patches from scan
+- `viewPatch()` - View patch details
+
+[→ View full documentation](./docs/API.md#patches--vulnerabilities)
+
+</details>
+
+<details>
+<summary><strong>Entitlements</strong> - Product access and features</summary>
+
+- `getEnabledEntitlements()` - Get enabled entitlements
+- `getEntitlements()` - Get all organization entitlements
+
+[→ View full documentation](./docs/API.md#entitlements)
+
+</details>
+
+<details>
+<summary><strong>Advanced Query Methods</strong> - Raw API access</summary>
+
+- `getApi()` - Execute raw GET request
+- `sendApi()` - Send POST/PUT with JSON body
+
+[→ View full documentation](./docs/API.md#advanced-query-methods)
+
+</details>
+
+<details>
+<summary><strong>Quota Utilities</strong> - Cost calculation and optimization</summary>
+
+- `getQuotaCost()` - Get quota cost for any SDK method
+- `getRequiredPermissions()` - Get required permissions for SDK method
+- `calculateTotalQuotaCost()` - Calculate total cost for multiple methods
+- `hasQuotaForMethods()` - Check if quota is sufficient
+- `getMethodsByQuotaCost()` - Find methods by quota cost
+- `getMethodsByPermissions()` - Find methods requiring specific permissions
+- `getQuotaUsageSummary()` - Get summary grouped by quota cost
+- `getAllMethodRequirements()` - Get complete mapping of methods to costs
+
+[→ View full documentation](./docs/QUOTA.md)
+
+</details>
 
 **[→ Complete API Reference](./docs/API.md)**
 
