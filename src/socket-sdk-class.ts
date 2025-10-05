@@ -16,7 +16,6 @@ import { getOwn, isObjectObject } from '@socketsecurity/registry/lib/objects'
 import { pRetry } from '@socketsecurity/registry/lib/promises'
 import { urlSearchParamAsBoolean } from '@socketsecurity/registry/lib/url'
 
-
 import { DEFAULT_USER_AGENT, httpAgentNames } from './constants'
 import {
   createRequestBodyForFilepaths,
