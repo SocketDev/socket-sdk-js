@@ -20,8 +20,8 @@ pnpm add @socketsecurity/sdk
 import { SocketSdk } from '@socketsecurity/sdk'
 
 const client = new SocketSdk('yourApiKeyHere', {
-  retries: 3,        // Retry failed requests up to 3 times (default: 3)
-  retryDelay: 1000,  // Start with 1s delay, exponential backoff (default: 1000ms)
+  retries: 3,        // Retry failed requests up to 3 times (default: 0, disabled)
+  retryDelay: 1000,  // Start with 1s delay, exponential backoff (default: 100ms)
   timeout: 30000,    // Request timeout in milliseconds (optional)
 })
 
@@ -41,18 +41,19 @@ The SDK constructor accepts the following options:
 interface SocketSdkOptions {
   baseUrl?: string          // API base URL (default: 'https://api.socket.dev/v0/')
   timeout?: number          // Request timeout in milliseconds
-  retries?: number          // Number of retry attempts for failed requests (default: 3)
-  retryDelay?: number       // Initial retry delay in ms, with exponential backoff (default: 1000)
+  retries?: number          // Number of retry attempts for failed requests (default: 0, disabled)
+  retryDelay?: number       // Initial retry delay in ms, with exponential backoff (default: 100)
   userAgent?: string        // Custom user agent string
   agent?: Agent             // Custom HTTP agent for advanced networking
 }
 ```
 
 **Retry Logic:**
-- Automatically retries transient network errors and 5xx server responses
-- Uses exponential backoff: 1s, 2s, 4s, 8s... (configurable via `retryDelay`)
+- **Disabled by default** (opt-in pattern following Node.js fs.rm() convention)
+- Set `retries: 3` (recommended for production) to enable automatic retries
+- Retries transient network errors and 5xx server responses
+- Uses exponential backoff: 100ms, 200ms, 400ms, 800ms... (configurable via `retryDelay`)
 - Does NOT retry 401/403 authentication errors (immediate failure)
-- Set `retries: 0` to disable retry logic entirely
 
 ### Quota Management Example
 
