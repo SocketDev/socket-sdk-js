@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.11.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.11.0) - 2025-10-04
+
+### Added
+- Optional TTL caching for API responses with configurable cache duration
+- New `cache` option (default: false) to enable response caching
+- New `cacheTtl` option (default: 5 minutes) to customize cache duration
+
 ## [1.10.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.10.1) - 2025-10-04
 
 ### Added
