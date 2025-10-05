@@ -6,7 +6,7 @@
 [![Follow @SocketSecurity](https://img.shields.io/twitter/follow/SocketSecurity?style=social)](https://twitter.com/SocketSecurity)
 [![Follow @socket.dev on Bluesky](https://img.shields.io/badge/Follow-@socket.dev-1DA1F2?style=social&logo=bluesky)](https://bsky.app/profile/socket.dev)
 
-Official SDK for Socket.dev - Programmatic access to security analysis, vulnerability scanning, and compliance monitoring for your software supply chain.
+Official SDK for [Socket.dev](https://socket.dev/) - Programmatic access to security analysis, vulnerability scanning, and compliance monitoring for your software supply chain.
 
 ## Installation
 
@@ -180,8 +180,7 @@ const batchResult = await client.batchPackageFetch({
 
 ## See Also
 
-- [Socket API Reference](https://docs.socket.dev/reference) - Official API documentation
-- [Socket.dev](https://socket.dev/) - Socket security platform
+- [Socket.dev API Reference](https://docs.socket.dev/reference) - Official API documentation
 - [Socket CLI](https://github.com/SocketDev/socket-cli-js) - Command-line interface
 - [Socket GitHub App](https://github.com/apps/socket-security) - GitHub integration
 
