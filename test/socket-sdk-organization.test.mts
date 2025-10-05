@@ -386,5 +386,36 @@ describe('SocketSdk - Organization Management', () => {
         expect(res.data.organization_slug).toBe('test-org')
       }
     })
+
+    it('should handle HTTP error in streamOrgFullScan', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/full-scans/scan-error')
+        .reply(404, { error: { message: 'Scan not found' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.streamOrgFullScan('test-org', 'scan-error', {
+        output: true,
+      })
+
+      expect(res.success).toBe(false)
+      if (!res.success) {
+        expect(res.status).toBe(404)
+        expect(res.error).toContain('Socket API Request failed (404)')
+      }
+    })
+
+    it('should handle network error in streamOrgFullScan', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/full-scans/scan-network-error')
+        .replyWithError('Network error')
+
+      const client = new SocketSdk('test-token')
+
+      await expect(
+        client.streamOrgFullScan('test-org', 'scan-network-error', {
+          output: false,
+        }),
+      ).rejects.toThrow()
+    })
   })
 })
