@@ -2,6 +2,8 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
+import { memoize, once } from '@socketsecurity/registry/lib/memoization'
+
 import type { SocketSdkOperations } from './types'
 
 interface ApiRequirement {
@@ -13,17 +15,12 @@ interface Requirements {
   api: Record<string, ApiRequirement>
 }
 
-let requirements: Requirements | null = null
-
 /**
  * Load requirements.json data with caching.
  * Internal function for lazy loading quota requirements.
+ * Uses once() memoization to ensure file is only read once.
  */
-function loadRequirements(): Requirements {
-  if (requirements) {
-    return requirements
-  }
-
+const loadRequirements = once((): Requirements => {
   try {
     // Resolve path relative to this module file location.
     // When compiled, __dirname will point to dist/ directory.
@@ -31,12 +28,11 @@ function loadRequirements(): Requirements {
     // requirements.json is always in the parent directory of dist/ or src/.
     const requirementsPath = join(__dirname, '..', 'requirements.json')
     const data = readFileSync(requirementsPath, 'utf8')
-    requirements = JSON.parse(data) as Requirements
-    return requirements
+    return JSON.parse(data) as Requirements
   } catch (e) {
     throw new Error('Failed to load "requirements.json"', { cause: e })
   }
-}
+})
 
 /**
  * Calculate total quota cost for multiple SDK method calls.
@@ -53,6 +49,7 @@ export function calculateTotalQuotaCost(
 /**
  * Get all available SDK methods with their requirements.
  * Returns complete mapping of methods to quota and permissions.
+ * Creates a fresh deep copy each time to prevent external mutations.
  */
 export function getAllMethodRequirements(): Record<string, ApiRequirement> {
   const reqs = loadRequirements()
@@ -71,110 +68,130 @@ export function getAllMethodRequirements(): Record<string, ApiRequirement> {
 /**
  * Get complete requirement information for a SDK method.
  * Returns both quota cost and required permissions.
+ * Memoized to avoid repeated lookups for the same method.
  */
-export function getMethodRequirements(
-  methodName: SocketSdkOperations | string,
-): ApiRequirement {
-  const reqs = loadRequirements()
-  const requirement = reqs.api[methodName]
+export const getMethodRequirements = memoize(
+  (methodName: SocketSdkOperations | string): ApiRequirement => {
+    const reqs = loadRequirements()
+    const requirement = reqs.api[methodName]
 
-  if (!requirement) {
-    throw new Error(`Unknown SDK method: "${methodName}"`)
-  }
+    if (!requirement) {
+      throw new Error(`Unknown SDK method: "${methodName}"`)
+    }
 
-  return {
-    permissions: [...requirement.permissions],
-    quota: requirement.quota,
-  }
-}
+    return {
+      permissions: [...requirement.permissions],
+      quota: requirement.quota,
+    }
+  },
+  { name: 'getMethodRequirements' },
+)
 
 /**
  * Get all methods that require specific permissions.
  * Returns methods that need any of the specified permissions.
+ * Memoized since the same permission queries are often repeated.
  */
-export function getMethodsByPermissions(permissions: string[]): string[] {
-  const reqs = loadRequirements()
+export const getMethodsByPermissions = memoize(
+  (permissions: string[]): string[] => {
+    const reqs = loadRequirements()
 
-  return Object.entries(reqs.api)
-    .filter(([, requirement]) => {
-      return permissions.some(permission =>
-        requirement.permissions.includes(permission),
-      )
-    })
-    .map(([methodName]) => methodName)
-    .sort()
-}
+    return Object.entries(reqs.api)
+      .filter(([, requirement]) => {
+        return permissions.some(permission =>
+          requirement.permissions.includes(permission),
+        )
+      })
+      .map(([methodName]) => methodName)
+      .sort()
+  },
+  { name: 'getMethodsByPermissions' },
+)
 
 /**
  * Get all methods that consume a specific quota amount.
  * Useful for finding high-cost or free operations.
+ * Memoized to cache results for commonly queried quota costs.
  */
-export function getMethodsByQuotaCost(quotaCost: number): string[] {
-  const reqs = loadRequirements()
+export const getMethodsByQuotaCost = memoize(
+  (quotaCost: number): string[] => {
+    const reqs = loadRequirements()
 
-  return Object.entries(reqs.api)
-    .filter(([, requirement]) => requirement.quota === quotaCost)
-    .map(([methodName]) => methodName)
-    .sort()
-}
+    return Object.entries(reqs.api)
+      .filter(([, requirement]) => requirement.quota === quotaCost)
+      .map(([methodName]) => methodName)
+      .sort()
+  },
+  { name: 'getMethodsByQuotaCost' },
+)
 
 /**
  * Get quota cost for a specific SDK method.
  * Returns the number of quota units consumed by the method.
+ * Memoized since quota costs are frequently queried.
  */
-export function getQuotaCost(methodName: SocketSdkOperations | string): number {
-  const reqs = loadRequirements()
-  const requirement = reqs.api[methodName]
+export const getQuotaCost = memoize(
+  (methodName: SocketSdkOperations | string): number => {
+    const reqs = loadRequirements()
+    const requirement = reqs.api[methodName]
 
-  if (!requirement) {
-    throw new Error(`Unknown SDK method: "${methodName}"`)
-  }
+    if (!requirement) {
+      throw new Error(`Unknown SDK method: "${methodName}"`)
+    }
 
-  return requirement.quota
-}
+    return requirement.quota
+  },
+  { name: 'getQuotaCost' },
+)
 
 /**
  * Get quota usage summary grouped by cost levels.
  * Returns methods categorized by their quota consumption.
+ * Memoized since the summary structure is immutable after load.
  */
-export function getQuotaUsageSummary(): Record<string, string[]> {
-  const reqs = loadRequirements()
-  const summary: Record<string, string[]> = {}
+export const getQuotaUsageSummary = memoize(
+  (): Record<string, string[]> => {
+    const reqs = loadRequirements()
+    const summary: Record<string, string[]> = {}
 
-  Object.entries(reqs.api).forEach(([methodName, requirement]) => {
-    const costKey = `${requirement.quota} units`
+    Object.entries(reqs.api).forEach(([methodName, requirement]) => {
+      const costKey = `${requirement.quota} units`
 
-    if (!summary[costKey]) {
-      summary[costKey] = []
-    }
+      if (!summary[costKey]) {
+        summary[costKey] = []
+      }
 
-    summary[costKey].push(methodName)
-  })
+      summary[costKey].push(methodName)
+    })
 
-  // Sort methods within each cost level
-  Object.keys(summary).forEach(costKey => {
-    summary[costKey]?.sort()
-  })
+    // Sort methods within each cost level
+    Object.keys(summary).forEach(costKey => {
+      summary[costKey]?.sort()
+    })
 
-  return summary
-}
+    return summary
+  },
+  { name: 'getQuotaUsageSummary' },
+)
 
 /**
  * Get required permissions for a specific SDK method.
  * Returns array of permission strings needed to call the method.
+ * Memoized to cache permission lookups per method.
  */
-export function getRequiredPermissions(
-  methodName: SocketSdkOperations | string,
-): string[] {
-  const reqs = loadRequirements()
-  const requirement = reqs.api[methodName]
+export const getRequiredPermissions = memoize(
+  (methodName: SocketSdkOperations | string): string[] => {
+    const reqs = loadRequirements()
+    const requirement = reqs.api[methodName]
 
-  if (!requirement) {
-    throw new Error(`Unknown SDK method: "${methodName}"`)
-  }
+    if (!requirement) {
+      throw new Error(`Unknown SDK method: "${methodName}"`)
+    }
 
-  return [...requirement.permissions]
-}
+    return [...requirement.permissions]
+  },
+  { name: 'getRequiredPermissions' },
+)
 
 /**
  * Check if user has sufficient quota for method calls.
