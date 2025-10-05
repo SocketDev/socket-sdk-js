@@ -302,11 +302,19 @@ describe('SocketSdk - Retry Logic', () => {
     })
 
     it('should retry on timeout errors', async () => {
+      let attemptCount = 0
+
+      const timeoutError = new Error('Request timed out')
+      ;(timeoutError as NodeJS.ErrnoException).code = 'ETIMEDOUT'
+
       nock('https://api.socket.dev')
         .get('/v0/quota')
-        .replyWithError({ code: 'ETIMEDOUT' })
+        .replyWithError(timeoutError)
         .get('/v0/quota')
-        .reply(200, { quota: 6000 })
+        .reply(() => {
+          attemptCount = 2
+          return [200, { quota: 6000 }]
+        })
 
       const client = new SocketSdk('test-token', {
         retries: 3,
@@ -319,6 +327,7 @@ describe('SocketSdk - Retry Logic', () => {
       if (result.success) {
         expect(result.data.quota).toBe(6000)
       }
+      expect(attemptCount).toBe(2)
     })
   })
 
