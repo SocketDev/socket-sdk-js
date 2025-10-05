@@ -6,6 +6,7 @@ import events from 'node:events'
 import { createWriteStream } from 'node:fs'
 import readline from 'node:readline'
 
+import { createTtlCache } from '@socketsecurity/registry/lib/cache-with-ttl'
 import SOCKET_PUBLIC_API_TOKEN from '@socketsecurity/registry/lib/constants/SOCKET_PUBLIC_API_TOKEN'
 import UNKNOWN_ERROR from '@socketsecurity/registry/lib/constants/UNKNOWN_ERROR'
 import abortSignal from '@socketsecurity/registry/lib/constants/abort-signal'
@@ -14,6 +15,7 @@ import { jsonParse } from '@socketsecurity/registry/lib/json'
 import { getOwn, isObjectObject } from '@socketsecurity/registry/lib/objects'
 import { pRetry } from '@socketsecurity/registry/lib/promises'
 import { urlSearchParamAsBoolean } from '@socketsecurity/registry/lib/url'
+
 
 import { DEFAULT_USER_AGENT, httpAgentNames } from './constants'
 import {
@@ -71,6 +73,7 @@ import type {
   UploadManifestFilesOptions,
   UploadManifestFilesReturnType,
 } from './types'
+import type { TtlCache } from '@socketsecurity/registry/lib/cache-with-ttl'
 import type { IncomingMessage } from 'node:http'
 
 /**
@@ -80,18 +83,21 @@ import type { IncomingMessage } from 'node:http'
 export class SocketSdk {
   readonly #apiToken: string
   readonly #baseUrl: string
+  readonly #cache: TtlCache | undefined
   readonly #reqOptions: RequestOptions
   readonly #retries: number
   readonly #retryDelay: number
 
   /**
    * Initialize Socket SDK with API token and configuration options.
-   * Sets up authentication, base URL, HTTP client options, and retry behavior.
+   * Sets up authentication, base URL, HTTP client options, retry behavior, and caching.
    */
   constructor(apiToken: string, options?: SocketSdkOptions | undefined) {
     const {
       agent: agentOrObj,
       baseUrl = 'https://api.socket.dev/v0/',
+      cache = false,
+      cacheTtl = 5 * 60 * 1000,
       retries = 0,
       retryDelay = 100,
       timeout,
@@ -109,6 +115,13 @@ export class SocketSdk {
     ) as Agent | undefined
     this.#apiToken = apiToken
     this.#baseUrl = normalizeBaseUrl(baseUrl)
+    this.#cache = cache
+      ? createTtlCache({
+          memoize: true,
+          prefix: 'socket-sdk',
+          ttl: cacheTtl,
+        })
+      : undefined
     this.#retries = retries
     this.#retryDelay = retryDelay
     this.#reqOptions = {
@@ -148,6 +161,22 @@ export class SocketSdk {
       throw new Error('Request aborted')
     }
     return result
+  }
+
+  /**
+   * Execute a GET request with optional caching.
+   * Internal method for handling cached GET requests with retry logic.
+   */
+  async #getCached<T>(cacheKey: string, fetcher: () => Promise<T>): Promise<T> {
+    // If caching is disabled, just execute the request.
+    if (!this.#cache) {
+      return await this.#executeWithRetry(fetcher)
+    }
+
+    // Use cache with retry logic.
+    return await this.#cache.getOrFetch(cacheKey, async () => {
+      return await this.#executeWithRetry(fetcher)
+    })
   }
 
   /**
@@ -1223,7 +1252,8 @@ export class SocketSdk {
    */
   async getOrganizations(): Promise<SocketSdkResult<'getOrganizations'>> {
     try {
-      const data = await this.#executeWithRetry(
+      const data = await this.#getCached(
+        'organizations',
         async () =>
           await getResponseJson(
             await createGetRequest(
@@ -1516,7 +1546,8 @@ export class SocketSdk {
    */
   async getQuota(): Promise<SocketSdkResult<'getQuota'>> {
     try {
-      const data = await this.#executeWithRetry(
+      const data = await this.#getCached(
+        'quota',
         async () =>
           await getResponseJson(
             await createGetRequest(this.#baseUrl, 'quota', this.#reqOptions),
