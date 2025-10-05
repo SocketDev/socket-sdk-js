@@ -83,6 +83,21 @@ describe('SocketSdk - Scanning APIs', () => {
         // The actual data is an array of analytics records
       }
     })
+
+    it('should handle error in getRepoAnalytics', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/analytics/repo/test-repo/7d')
+        .reply(404, { error: { message: 'Repository not found' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.getRepoAnalytics('test-repo', '7d')
+
+      expect(res.success).toBe(false)
+      if (!res.success) {
+        expect(res.status).toBe(404)
+        expect(res.error).toContain('Socket API Request failed (404)')
+      }
+    })
   })
 
   describe('Scan and Report Operations', () => {
@@ -102,6 +117,21 @@ describe('SocketSdk - Scanning APIs', () => {
       expect(res.success).toBe(true)
       if (res.success) {
         expect(res.data.id).toBe('scan-123')
+      }
+    })
+
+    it('should handle error in getScan', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/report/view/invalid-scan')
+        .reply(404, { error: { message: 'Scan not found' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.getScan('invalid-scan')
+
+      expect(res.success).toBe(false)
+      if (!res.success) {
+        expect(res.status).toBe(404)
+        expect(res.error).toContain('Socket API Request failed (404)')
       }
     })
 
@@ -191,10 +221,7 @@ describe('SocketSdk - Scanning APIs', () => {
         .reply(404, { error: { message: 'Package not found' } })
 
       const client = new SocketSdk('test-token')
-      const res = await client.getScoreByNpmPackage(
-        'nonexistent-pkg',
-        '1.0.0',
-      )
+      const res = await client.getScoreByNpmPackage('nonexistent-pkg', '1.0.0')
 
       expect(res.success).toBe(false)
       if (!res.success) {
