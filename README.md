@@ -181,7 +181,7 @@ const batchResult = await client.batchPackageFetch({
 ## See Also
 
 - [Socket.dev API Reference](https://docs.socket.dev/reference) - Official API documentation
-- [Socket CLI](https://github.com/SocketDev/socket-cli-js) - Command-line interface
+- [Socket CLI](https://github.com/SocketDev/socket-cli) - Command-line interface
 - [Socket GitHub App](https://github.com/apps/socket-security) - GitHub integration
 
 ## License
