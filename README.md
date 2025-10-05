@@ -8,341 +8,306 @@
 
 Official SDK for Socket.dev - Programmatic access to security analysis, vulnerability scanning, and compliance monitoring for your software supply chain.
 
-## Usage
+## Installation
 
 ```bash
 pnpm add @socketsecurity/sdk
 ```
 
-### ESM / TypeScript
+## Quick Start
 
-```javascript
+```typescript
 import { SocketSdk } from '@socketsecurity/sdk'
 
-const client = new SocketSdk('yourApiKeyHere', {
-  retries: 3,        // Retry failed requests up to 3 times (default: 0, disabled)
-  retryDelay: 1000,  // Start with 1s delay, exponential backoff (default: 100ms)
-  timeout: 30000,    // Request timeout in milliseconds (optional)
+const client = new SocketSdk('your-api-key', {
+  retries: 3,        // Retry failed requests up to 3 times
+  retryDelay: 1000,  // Start with 1s delay, exponential backoff
+  timeout: 30000,    // 30 second timeout
 })
 
-const res = await client.getQuota()
-
-if (res.success) {
-  // Will output { quota: 123 } if the quota you have left is 123
-  console.log(res.data)
+// Check your quota
+const quota = await client.getQuota()
+if (quota.success) {
+  console.log(`Available quota: ${quota.data.quota} units`)
 }
+
+// Analyze a package
+const result = await client.getScoreByNpmPackage('express', '4.18.0')
+if (result.success) {
+  console.log(`Security Score: ${result.data.score}/100`)
+}
+
+// Batch analyze multiple packages
+const batchResult = await client.batchPackageFetch({
+  components: [
+    { purl: 'pkg:npm/express@4.18.0' },
+    { purl: 'pkg:npm/react@18.0.0' }
+  ]
+})
 ```
 
-### Configuration Options
-
-The SDK constructor accepts the following options:
+## Configuration
 
 ```typescript
 interface SocketSdkOptions {
   baseUrl?: string          // API base URL (default: 'https://api.socket.dev/v0/')
   timeout?: number          // Request timeout in milliseconds
-  retries?: number          // Number of retry attempts for failed requests (default: 0, disabled)
-  retryDelay?: number       // Initial retry delay in ms, with exponential backoff (default: 100)
+  retries?: number          // Number of retry attempts (default: 0, disabled)
+  retryDelay?: number       // Initial retry delay in ms (default: 100ms)
   userAgent?: string        // Custom user agent string
   agent?: Agent             // Custom HTTP agent for advanced networking
+  cache?: boolean           // Enable response caching (default: false)
+  cacheTtl?: number         // Cache TTL in ms (default: 300000 = 5 minutes)
 }
 ```
 
 **Retry Logic:**
-- **Disabled by default** (opt-in pattern following Node.js fs.rm() convention)
-- Set `retries: 3` (recommended for production) to enable automatic retries
-- Retries transient network errors and 5xx server responses
-- Uses exponential backoff: 100ms, 200ms, 400ms, 800ms... (configurable via `retryDelay`)
-- Does NOT retry 401/403 authentication errors (immediate failure)
+- Disabled by default (opt-in pattern following Node.js conventions)
+- Set `retries: 3` for production to automatically retry transient failures
+- Uses exponential backoff: 100ms, 200ms, 400ms, 800ms...
+- Does NOT retry 401/403 authentication errors
 
-### Quota Management Example
+## API Methods
 
-```javascript
+The SDK provides 60+ methods organized into functional categories:
+
+### Package Analysis
+- [Package Security Scanning](./docs/API.md#package-analysis) - Vulnerability reports, security scores, and issue details
+- [Batch Processing](./docs/API.md#package-analysis) - Efficient multi-package analysis with streaming support
+
+### Security Scanning
+- [Full Scans](./docs/API.md#scanning--analysis) - Comprehensive project security scans
+- [Diff Scans](./docs/API.md#diff-scans) - Compare scans to identify changes
+- [Dependencies](./docs/API.md#scanning--analysis) - Upload and analyze project dependencies
+
+### Organization Management
+- [Organizations](./docs/API.md#organization-management) - List and manage organizations
+- [Repositories](./docs/API.md#organization-management) - Create, update, and delete repositories
+- [Labels](./docs/API.md#organization-management) - Repository categorization and tagging
+
+### Policy & Compliance
+- [Security Policies](./docs/API.md#policy--settings) - Configure security alert rules
+- [License Policies](./docs/API.md#policy--settings) - Manage license restrictions
+- [Audit Logs](./docs/API.md#analytics--monitoring) - Access security events
+
+### Data Export
+- [SBOM Export](./docs/API.md#export--integration) - Generate CycloneDX and SPDX reports
+- [Streaming](./docs/API.md#full-scan-management) - Efficient large dataset handling
+
+### Authentication & Quota
+- [API Tokens](./docs/API.md#authentication--access) - Create, rotate, and manage tokens
+- [Quota Management](./docs/QUOTA.md) - Monitor usage and optimize costs
+
+**[→ Complete API Reference](./docs/API.md)**
+
+## Usage Examples
+
+### Analyze Package Security
+
+```typescript
+// Get detailed security issues
+const issues = await client.getIssuesByNpmPackage('lodash', '4.17.20')
+if (issues.success) {
+  for (const issue of issues.data.issues) {
+    console.log(`[${issue.severity}] ${issue.type}: ${issue.description}`)
+  }
+}
+```
+
+### Stream Large Batch Operations
+
+```typescript
+// Analyze 100+ packages efficiently
+const stream = client.batchPackageStream(
+  { components: packages },
+  { concurrency: 10 }
+)
+
+for await (const result of stream) {
+  if (result.success && result.data.score < 70) {
+    console.log(`⚠️ Low score: ${result.data.name}`)
+  }
+}
+```
+
+### Create Full Project Scan
+
+```typescript
+const scan = await client.createOrgFullScan(
+  'my-org',
+  ['package.json', 'package-lock.json'],
+  process.cwd()
+)
+
+if (scan.success) {
+  console.log(`Scan created: ${scan.data.id}`)
+}
+```
+
+### Check Quota Before Operations
+
+```typescript
+import { getQuotaCost, hasQuotaForMethods } from '@socketsecurity/sdk'
+
+const operations = ['batchPackageFetch', 'uploadManifestFiles']
+const cost = getQuotaCost('batchPackageFetch') // 100 units
+
+const quota = await client.getQuota()
+if (quota.success && hasQuotaForMethods(quota.data.quota, operations)) {
+  // Proceed with operations
+}
+```
+
+**[→ More Examples](./docs/EXAMPLES.md)**
+
+## Quota Management
+
+Different operations have different costs:
+- **0 units**: Free tier (quota checks, organization lists, entitlements)
+- **10 units**: Standard operations (scans, reports, policies)
+- **100 units**: Resource-intensive (batch processing, file uploads)
+
+```typescript
 import {
-  SocketSdk,
   getQuotaCost,
   calculateTotalQuotaCost,
   hasQuotaForMethods
 } from '@socketsecurity/sdk'
 
-const client = new SocketSdk('your-api-key')
+// Check cost before running operations
+const batchCost = getQuotaCost('batchPackageFetch') // 100 units
+const scanCost = getQuotaCost('createOrgFullScan')  // 10 units
 
-// Check quota cost before making API calls
-const batchCost = getQuotaCost('batchPackageFetch') // Returns: 100
-const analyticsCost = getQuotaCost('getOrgAnalytics') // Returns: 10
+// Calculate total for multiple operations
+const operations = ['batchPackageFetch', 'getOrgAnalytics']
+const total = calculateTotalQuotaCost(operations) // 110 units
 
-// Calculate total cost for multiple operations
-const operations = ['batchPackageFetch', 'getOrgAnalytics', 'uploadManifestFiles']
-const totalCost = calculateTotalQuotaCost(operations) // Returns: 210
-
-// Check if you have sufficient quota
-const quotaRes = await client.getQuota()
-if (quotaRes.success && hasQuotaForMethods(quotaRes.data.quota, operations)) {
-  // Proceed with API calls
-  console.log(`Sufficient quota available: ${quotaRes.data.quota} units`)
-} else {
-  console.log('Insufficient quota - consider using free alternatives')
+// Verify sufficient quota
+const quota = await client.getQuota()
+if (quota.success) {
+  if (hasQuotaForMethods(quota.data.quota, operations)) {
+    console.log('Sufficient quota available')
+  }
 }
 ```
 
-### CommonJS
+**[→ Quota Management Guide](./docs/QUOTA.md)**
+
+## Testing Utilities
+
+The SDK includes comprehensive testing utilities:
+
+```typescript
+import {
+  mockSuccessResponse,
+  mockErrorResponse,
+  mockApiErrorBody,
+  mockSdkError,
+  fixtures,
+  isSuccessResult,
+  isErrorResult
+} from '@socketsecurity/sdk/testing'
+
+// Mock successful SDK calls
+const mockSdk = {
+  getOrgRepo: vi.fn().mockResolvedValue(
+    mockSuccessResponse(fixtures.repositories.basic)
+  )
+}
+
+// Mock API errors for integration tests
+nock('https://api.socket.dev')
+  .get('/v0/repo/org/repo')
+  .reply(404, mockApiErrorBody('Repository not found'))
+
+// Type-safe result checking
+const result = await client.getOrgRepo('org', 'repo')
+if (isSuccessResult(result)) {
+  console.log(result.data.name) // Type-safe access
+}
+```
+
+**[→ Testing Guide](./docs/TESTING.md)**
+
+## ESM / TypeScript
+
+```typescript
+import { SocketSdk } from '@socketsecurity/sdk'
+
+const client = new SocketSdk('your-api-key')
+```
+
+## CommonJS
 
 ```javascript
 const { SocketSdk } = require('@socketsecurity/sdk')
+
+const client = new SocketSdk('your-api-key')
 ```
 
-## API Overview
+## Documentation
 
-The Socket SDK provides programmatic access to Socket.dev's security analysis platform through 60+ API methods organized into functional categories:
+- **[API Reference](./docs/API.md)** - Complete API documentation for all 60+ methods
+- **[Examples](./docs/EXAMPLES.md)** - Practical usage patterns and code samples
+- **[Quota Management](./docs/QUOTA.md)** - Cost optimization and quota utilities
+- **[Testing Utilities](./docs/TESTING.md)** - Mock helpers and testing patterns
 
-### Package Analysis
-- **Package Security**: Get vulnerability reports, security scores, and issue details for npm packages
-- **Batch Processing**: Analyze multiple packages efficiently with streaming and concurrent processing
-- **PURL Support**: Process Package URLs for comprehensive package identification
+## Advanced Features
 
-### Organization Management
-- **Organizations**: List, manage, and configure organization settings
-- **Repositories**: Create, update, and delete organization repositories
-- **Labels**: Manage repository categorization and tagging systems
+### Custom User Agent
 
-### Security Scanning & Analysis
-- **Full Scans**: Create comprehensive security scans from manifest files
-- **Diff Scans**: Compare scans to identify changes and new vulnerabilities
-- **Dependencies**: Upload and analyze project dependency files
-- **Reports**: Generate, retrieve, and manage detailed security reports
+```typescript
+import { createUserAgentFromPkgJson } from '@socketsecurity/sdk'
 
-### Policy & Compliance
-- **Security Policies**: Configure and update organization security policies
-- **License Policies**: Manage allowed/restricted license types
-- **Alert Triage**: Review and manage security alert statuses
-- **Audit Logs**: Access chronological security and administrative events
-
-### Data Export & Integration
-- **SBOM Export**: Generate CycloneDX and SPDX Software Bill of Materials
-- **Streaming**: Efficient data streaming for large datasets
-- **Analytics**: Access usage metrics and security trend data
-
-### Authentication & Access
-- **API Tokens**: Create, rotate, update, and revoke organization API tokens
-- **Entitlements**: View enabled Socket products and features
-- **Quota Management**: Monitor API usage limits, quotas, and plan method calls
-- **Quota Utilities**: Pre-calculate costs, check permissions, and optimize API usage
-
-### Advanced Features
-- **Patches**: View and stream security patches for vulnerabilities
-- **Custom Queries**: Raw API access with configurable response handling
-- **Cross-platform**: Full Windows, macOS, and Linux compatibility
-
-## SocketSdk Methods
-
-### Package Analysis Methods
-
-* `batchPackageFetch(componentsObj, queryParams?)` - Analyze multiple packages in batch
-  * Returns all results at once after processing is complete
-* `batchPackageStream(componentsObj, options?)` - Stream package analysis with concurrency control
-  * Returns results as they become available via async generator
-* `getIssuesByNpmPackage(packageName, version)` - Get security issues for a specific npm package
-  * Returns detailed vulnerability and security alert information
-* `getScoreByNpmPackage(packageName, version)` - Get security score for a package
-  * Returns numerical security rating and scoring breakdown
-
-### Scanning & Analysis Methods
-
-* `createDependenciesSnapshot(filepaths, pathsRelativeTo='.', queryParams?)` - Create dependency snapshot
-  * Analyzes dependency files to generate comprehensive security report
-* `createOrgFullScan(orgSlug, filepaths, pathsRelativeTo='.', queryParams?)` - Create full organization scan
-  * Uploads project files and initiates complete security analysis
-* `createScanFromFilepaths(filePaths, pathsRelativeTo='.', issueRules?)` - Create security scan from files
-  * Analyzes uploaded files for security vulnerabilities and policy violations
-* `getScan(id)` - Get detailed scan results
-  * Returns complete scan analysis including vulnerabilities and alerts
-* `getScanList()` - List all accessible scans
-  * Returns paginated list of scan metadata and status
-* `getSupportedScanFiles()` - Get supported file formats
-  * Returns supported manifest files, lockfiles, and configuration formats
-
-### Organization Management Methods
-
-* `createOrgRepo(orgSlug, queryParams?)` - Create new repository
-  * Registers repository for monitoring and security scanning
-* `deleteOrgRepo(orgSlug, repoSlug)` - Delete repository
-  * Removes repository monitoring and associated scan data
-* `getOrganizations()` - List accessible organizations
-  * Returns organization details and access permissions
-* `getOrgRepo(orgSlug, repoSlug)` - Get repository details
-  * Returns repository configuration, monitoring status, and metadata
-* `getOrgRepoList(orgSlug, queryParams?)` - List organization repositories
-  * Returns paginated list of repository metadata and status
-* `updateOrgRepo(orgSlug, repoSlug, queryParams?)` - Update repository configuration
-  * Modifies monitoring settings, branch configuration, and scan preferences
-
-### Full Scan Management Methods
-
-* `deleteOrgFullScan(orgSlug, fullScanId)` - Delete full scan
-  * Permanently removes scan data and results
-* `getOrgFullScanBuffered(orgSlug, fullScanId)` - Get complete scan results in memory
-  * Returns entire scan data as JSON for programmatic processing
-* `getOrgFullScanList(orgSlug, queryParams?)` - List organization full scans
-  * Returns paginated list of scan metadata and status
-* `getOrgFullScanMetadata(orgSlug, fullScanId)` - Get scan metadata
-  * Returns scan configuration, status, and summary information
-* `streamOrgFullScan(orgSlug, fullScanId, output?)` - Stream scan results
-  * Provides efficient streaming for large scan datasets to file or stdout
-
-### Policy & Settings Methods
-
-* `getOrgLicensePolicy(orgSlug)` - Get license policy configuration
-  * Returns allowed, restricted, and monitored license types
-* `getOrgSecurityPolicy(orgSlug)` - Get organization security policy
-  * Returns alert rules, severity thresholds, and enforcement settings
-* `postSettings(selectors)` - Update user or organization settings
-  * Configures preferences, notifications, and security policies
-* `updateOrgLicensePolicy(orgSlug, policyData, queryParams?)` - Update license policy
-  * Modifies allowed, restricted, and monitored license types
-* `updateOrgSecurityPolicy(orgSlug, policyData)` - Update security policy
-  * Modifies alert rules, severity thresholds, and enforcement settings
-
-### Analytics & Monitoring Methods
-
-* `getAuditLogEvents(orgSlug, queryParams?)` - Get audit log events
-  * Returns chronological log of security and administrative actions
-* `getOrgAnalytics(time)` - Get organization analytics
-  * Returns statistical analysis for specified time period
-* `getQuota()` - Get current API quota usage
-  * Returns remaining requests, rate limits, and quota reset times
-
-### Quota Utility Functions
-* `getQuotaCost(methodName)` - Get quota cost for any SDK method
-* `getRequiredPermissions(methodName)` - Get required permissions for SDK method
-* `calculateTotalQuotaCost(methodNames[])` - Calculate total cost for multiple methods
-* `hasQuotaForMethods(availableQuota, methodNames[])` - Check if quota is sufficient
-* `getMethodsByQuotaCost(cost)` - Find methods by quota cost (0, 10, 100 units)
-* `getMethodsByPermissions(permissions[])` - Find methods requiring specific permissions
-* `getQuotaUsageSummary()` - Get summary of all methods grouped by quota cost
-* `getAllMethodRequirements()` - Get complete mapping of methods to costs and permissions
-* `getRepoAnalytics(repo, time)` - Get repository analytics
-  * Returns security metrics, dependency trends, and vulnerability statistics
-
-### Authentication & Access Methods
-
-* `getAPITokens(orgSlug)` - List organization API tokens
-  * Returns organization API tokens with metadata and permissions
-* `postAPIToken(orgSlug, tokenData)` - Create new API token
-  * Generates API token with specified scopes and metadata
-* `postAPITokensRevoke(orgSlug, tokenId)` - Revoke API token
-  * Permanently disables the token and removes access
-* `postAPITokensRotate(orgSlug, tokenId)` - Rotate API token
-  * Generates new token value while preserving token metadata
-* `postAPITokenUpdate(orgSlug, tokenId, updateData)` - Update API token
-  * Modifies token metadata, scopes, or other properties
-
-### Export & Integration Methods
-
-* `exportCDX(orgSlug, fullScanId)` - Export CycloneDX SBOM
-  * Returns Software Bill of Materials compliant with CycloneDX standard
-* `exportSPDX(orgSlug, fullScanId)` - Export SPDX SBOM
-  * Returns Software Bill of Materials compliant with SPDX standard
-* `searchDependencies(queryParams?)` - Search monitored dependencies
-  * Returns matching packages with security information and usage patterns
-* `uploadManifestFiles(orgSlug, filepaths, pathsRelativeTo='.')` - Upload manifest files
-  * Processes package files to create dependency snapshots and security analysis
-
-### Alert & Triage Methods
-
-* `getOrgTriage(orgSlug)` - Get organization triage settings
-  * Returns alert triage configuration and current state
-* `updateOrgAlertTriage(orgSlug, alertId, triageData)` - Update alert triage
-  * Modifies alert resolution status and triage decisions
-
-### Repository Label Methods
-
-* `createOrgRepoLabel(orgSlug, repoSlug, labelData)` - Create repository label
-  * Adds label for repository categorization and management
-* `deleteOrgRepoLabel(orgSlug, repoSlug, labelSlug)` - Delete repository label
-  * Removes label and associated configuration
-* `getOrgRepoLabel(orgSlug, repoSlug, labelSlug)` - Get label details
-  * Returns label configuration and metadata
-* `getOrgRepoLabelList(orgSlug, repoSlug)` - List repository labels
-  * Returns all labels configured for repository management
-* `updateOrgRepoLabel(orgSlug, repoSlug, labelSlug, labelData)` - Update repository label
-  * Modifies label properties and configuration
-
-### Diff Scan Methods
-
-* `createOrgDiffScanFromIds(orgSlug, queryParams?)` - Create diff scan from IDs
-  * Compares two existing full scans to identify changes
-* `deleteOrgDiffScan(orgSlug, diffScanId)` - Delete diff scan
-  * Permanently removes diff scan data and results
-* `getDiffScanById(orgSlug, diffScanId)` - Get diff scan details
-  * Returns comparison between two full scans with artifact changes
-* `listOrgDiffScans(orgSlug)` - List organization diff scans
-  * Returns paginated list of diff scan metadata and status
-
-### Patch & Vulnerability Methods
-
-* `streamPatchesFromScan(orgSlug, scanId)` - Stream patches from scan
-  * Returns ReadableStream for processing large patch datasets
-* `viewPatch(orgSlug, uuid)` - View patch details
-  * Retrieves comprehensive patch information including files and vulnerabilities
-
-### Entitlement Methods
-
-* `getEnabledEntitlements(orgSlug)` - Get enabled entitlements
-  * Returns array of enabled Socket product keys
-* `getEntitlements(orgSlug)` - Get all organization entitlements
-  * Returns complete list of entitlements with their status
-
-### Advanced Query Methods
-
-* `getApi<T>(urlPath, options?)` - Execute raw GET request
-  * Direct API access with configurable response type (response, json, text)
-* `sendApi<T>(urlPath, options?)` - Send POST/PUT with JSON body
-  * Direct API access for POST/PUT operations with JSON responses
-
-### Legacy Methods (Deprecated Names)
-
-* `createReportFromFilepaths()` → Use `createScanFromFilepaths()`
-* `deleteReport(reportId)` → Use scan-specific delete methods
-* `getReport(id)` → Use `getScan(id)`
-* `getReportList()` → Use `getScanList()`
-* `getReportSupportedFiles()` → Use `getSupportedScanFiles()`
-
-## Additional exports
-
-* `createUserAgentFromPkgJson(pkgJson)`
-  * `pkgJson`: The content of the `package.json` you want to create a `User-Agent` string for
-
-## Advanced
-
-### Specifying custom user agent
-
-The `SocketSdk` constructor accepts an `options` object as its second argument and there a `userAgent` key with a string value can be specified. If specified then that user agent will be prepended to the SDK user agent. See this example:
-
-```js
-const client = new SocketSdk('yourApiKeyHere', {
-  userAgent: 'example/1.2.3 (http://example.com/)'
-})
-```
-
-Which results in the [HTTP `User-Agent` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent):
-
-```
-User-Agent: example/1.2.3 (http://example.com/) socketsecurity-sdk/0.5.2 (https://github.com/SocketDev/socket-sdk-js)
-```
-
-To easily create a user agent for your code you can use the additional export `createUserAgentFromPkgJson()` like this, assuming `pkgJson` contains your parsed `package.json`:
-
-```js
-const client = new SocketSdk('yourApiKeyHere', {
+const client = new SocketSdk('your-api-key', {
   userAgent: createUserAgentFromPkgJson(pkgJson)
 })
+
+// Results in User-Agent header:
+// your-app/1.0.0 (http://example.com/) socketsecurity-sdk/1.11.0
 ```
 
-Specifying a custom user agent is good practice when shipping a piece of code that others can use to make requests. Eg. [our CLI](https://github.com/SocketDev/socket-cli-js) uses this option to identify requests coming from it + mentioning which version of it that is used.
+### HTTP/2 Support and Custom Agents
 
-## See also
+```typescript
+import http2 from 'http2'
 
-* [Socket API Reference](https://docs.socket.dev/reference)
-* [Socket.dev](https://socket.dev/)
-* [Socket GitHub App](https://github.com/apps/socket-security)
-* [Socket CLI](https://github.com/SocketDev/socket-cli-js)
+const client = new SocketSdk('your-api-key', {
+  agent: http2.connect('https://api.socket.dev')
+})
+```
+
+### Response Caching
+
+```typescript
+const client = new SocketSdk('your-api-key', {
+  cache: true,         // Enable TTL caching
+  cacheTtl: 300000     // 5 minute cache (default)
+})
+```
+
+### Raw API Access
+
+```typescript
+// Custom GET request
+const response = await client.getApi<MyType>('/custom/endpoint', {
+  responseType: 'json'
+})
+
+// Custom POST/PUT request
+const result = await client.sendApi('/custom/action', {
+  method: 'POST',
+  body: { action: 'process', data: 'value' }
+})
+```
+
+## See Also
+
+- [Socket API Reference](https://docs.socket.dev/reference) - Official API documentation
+- [Socket.dev](https://socket.dev/) - Socket security platform
+- [Socket CLI](https://github.com/SocketDev/socket-cli-js) - Command-line interface
+- [Socket GitHub App](https://github.com/apps/socket-security) - GitHub integration
+
+## License
+
+MIT
