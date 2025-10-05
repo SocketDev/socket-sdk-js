@@ -298,6 +298,7 @@ describe('SocketSdk - Retry Logic', () => {
       if (result.success) {
         expect(result.data.quota).toBe(5000)
       }
+      expect(attemptCount).toBe(2)
     })
 
     it('should retry on timeout errors', async () => {
