@@ -92,8 +92,8 @@ export class SocketSdk {
     const {
       agent: agentOrObj,
       baseUrl = 'https://api.socket.dev/v0/',
-      retries = 3,
-      retryDelay = 1000,
+      retries = 0,
+      retryDelay = 100,
       timeout,
       userAgent,
     } = { __proto__: null, ...options } as SocketSdkOptions
