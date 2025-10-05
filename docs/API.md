@@ -51,6 +51,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `batchPackageStream(componentsObj, options?)`
 
 Stream package analysis results with concurrency control. Returns results as they become available via async generator.
@@ -81,6 +83,8 @@ for await (const result of stream) {
 
 </details>
 
+---
+
 #### `getIssuesByNpmPackage(packageName, version)`
 
 Get detailed security issues for a specific npm package version.
@@ -106,6 +110,8 @@ if (result.success) {
 ```
 
 </details>
+
+---
 
 #### `getScoreByNpmPackage(packageName, version)`
 
@@ -160,6 +166,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `createOrgFullScan(orgSlug, filepaths, pathsRelativeTo?, queryParams?)`
 
 Create a comprehensive security scan for an organization.
@@ -190,6 +198,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `getScan(id)`
 
 Retrieve complete scan results by scan ID.
@@ -213,6 +223,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `getScanList()`
 
 List all accessible scans with pagination support.
@@ -233,6 +245,8 @@ if (result.success) {
 ```
 
 </details>
+
+---
 
 #### `getSupportedScanFiles()`
 
@@ -276,6 +290,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `createOrgRepo(orgSlug, queryParams?)`
 
 Create a new repository for monitoring.
@@ -303,6 +319,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `getOrgRepo(orgSlug, repoSlug)`
 
 Get repository details and configuration.
@@ -326,6 +344,8 @@ if (result.success) {
 ```
 
 </details>
+
+---
 
 #### `getOrgRepoList(orgSlug, queryParams?)`
 
@@ -353,6 +373,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `updateOrgRepo(orgSlug, repoSlug, queryParams?)`
 
 Update repository configuration and settings.
@@ -379,6 +401,8 @@ if (result.success) {
 ```
 
 </details>
+
+---
 
 #### `deleteOrgRepo(orgSlug, repoSlug)`
 
@@ -433,6 +457,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `getOrgFullScanMetadata(orgSlug, fullScanId)`
 
 Get metadata for a specific full scan.
@@ -457,6 +483,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `getOrgFullScanBuffered(orgSlug, fullScanId)`
 
 Get complete scan results loaded into memory.
@@ -480,6 +508,8 @@ if (result.success) {
 ```
 
 </details>
+
+---
 
 #### `streamOrgFullScan(orgSlug, fullScanId, output?)`
 
@@ -512,6 +542,8 @@ if (result.success) {
 ```
 
 </details>
+
+---
 
 #### `deleteOrgFullScan(orgSlug, fullScanId)`
 
@@ -560,6 +592,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `updateOrgSecurityPolicy(orgSlug, policyData)`
 
 Update security policy rules and settings.
@@ -588,6 +622,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `getOrgLicensePolicy(orgSlug)`
 
 Get license policy configuration.
@@ -610,6 +646,8 @@ if (result.success) {
 ```
 
 </details>
+
+---
 
 #### `updateOrgLicensePolicy(orgSlug, policyData, queryParams?)`
 
@@ -660,6 +698,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `getOrgAnalytics(time)`
 
 Get organization analytics for a time period.
@@ -684,6 +724,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `getRepoAnalytics(repo, time)`
 
 Get repository-specific analytics.
@@ -707,6 +749,8 @@ if (result.success) {
 ```
 
 </details>
+
+---
 
 #### `getAuditLogEvents(orgSlug, queryParams?)`
 
@@ -762,6 +806,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `postAPIToken(orgSlug, tokenData)`
 
 Create a new API token.
@@ -789,6 +835,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `postAPITokensRotate(orgSlug, tokenId)`
 
 Rotate an existing API token.
@@ -811,6 +859,8 @@ if (result.success) {
 ```
 
 </details>
+
+---
 
 #### `postAPITokensRevoke(orgSlug, tokenId)`
 
@@ -860,6 +910,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `exportSPDX(orgSlug, fullScanId)`
 
 Export SPDX SBOM for a scan.
@@ -882,6 +934,8 @@ if (result.success) {
 ```
 
 </details>
+
+---
 
 #### `uploadManifestFiles(orgSlug, filepaths, pathsRelativeTo?)`
 
@@ -939,6 +993,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `getDiffScanById(orgSlug, diffScanId)`
 
 Get diff scan results.
@@ -964,6 +1020,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `listOrgDiffScans(orgSlug)`
 
 List all diff scans for an organization.
@@ -987,6 +1045,8 @@ if (result.success) {
 ```
 
 </details>
+
+---
 
 #### `deleteOrgDiffScan(orgSlug, diffScanId)`
 
@@ -1034,6 +1094,8 @@ if (result.success) {
 ```
 
 </details>
+
+---
 
 #### `updateOrgAlertTriage(orgSlug, alertId, triageData)`
 
@@ -1090,6 +1152,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `getOrgRepoLabel(orgSlug, repoSlug, labelSlug)`
 
 Get details for a specific label.
@@ -1114,6 +1178,8 @@ if (result.success) {
 ```
 
 </details>
+
+---
 
 #### `createOrgRepoLabel(orgSlug, repoSlug, labelData)`
 
@@ -1143,6 +1209,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `updateOrgRepoLabel(orgSlug, repoSlug, labelSlug, labelData)`
 
 Update an existing label.
@@ -1170,6 +1238,8 @@ if (result.success) {
 ```
 
 </details>
+
+---
 
 #### `deleteOrgRepoLabel(orgSlug, repoSlug, labelSlug)`
 
@@ -1226,6 +1296,8 @@ if (result.success) {
 
 </details>
 
+---
+
 #### `streamPatchesFromScan(orgSlug, scanId)`
 
 Stream available patches from a scan.
@@ -1278,6 +1350,8 @@ if (result.success) {
 ```
 
 </details>
+
+---
 
 #### `getEnabledEntitlements(orgSlug)`
 
@@ -1334,6 +1408,8 @@ const text = await client.getApi('/text', {
 ```
 
 </details>
+
+---
 
 #### `sendApi<T>(urlPath, options?)`
 
