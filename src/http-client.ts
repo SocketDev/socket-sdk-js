@@ -8,6 +8,7 @@ import https from 'node:https'
 
 import { debugLog } from '@socketsecurity/registry/lib/debug'
 import { jsonParse } from '@socketsecurity/registry/lib/json'
+import { perfTimer } from '@socketsecurity/registry/lib/performance'
 
 import type {
   RequestOptions,
@@ -65,6 +66,7 @@ export async function createDeleteRequest(
 /**
  * Create and execute an HTTP GET request.
  * Returns the response stream for further processing.
+ * Performance tracking enabled with DEBUG=perf.
  *
  * @throws {Error} When network or timeout errors occur
  */
@@ -73,18 +75,27 @@ export async function createGetRequest(
   urlPath: string,
   options: RequestOptions,
 ): Promise<IncomingMessage> {
-  const req = getHttpModule(baseUrl)
-    .request(`${baseUrl}${urlPath}`, {
-      method: 'GET',
-      ...options,
-    })
-    .end()
-  return await getResponse(req)
+  const stopTimer = perfTimer('http:get', { urlPath })
+  try {
+    const req = getHttpModule(baseUrl)
+      .request(`${baseUrl}${urlPath}`, {
+        method: 'GET',
+        ...options,
+      })
+      .end()
+    const response = await getResponse(req)
+    stopTimer({ statusCode: response.statusCode })
+    return response
+  } catch (error) {
+    stopTimer({ error: true })
+    throw error
+  }
 }
 
 /**
  * Create and execute an HTTP request with JSON payload.
  * Automatically sets appropriate content headers and serializes the body.
+ * Performance tracking enabled with DEBUG=perf.
  *
  * @throws {Error} When network or timeout errors occur
  */
@@ -95,21 +106,31 @@ export async function createRequestWithJson(
   json: unknown,
   options: RequestOptions,
 ): Promise<IncomingMessage> {
-  const body = JSON.stringify(json)
-  const req = getHttpModule(baseUrl).request(`${baseUrl}${urlPath}`, {
-    method,
-    ...options,
-    headers: {
-      ...options.headers,
-      'Content-Length': Buffer.byteLength(body, 'utf8'),
-      'Content-Type': 'application/json',
-    },
+  const stopTimer = perfTimer(`http:${method.toLowerCase()}`, {
+    urlPath,
   })
+  try {
+    const body = JSON.stringify(json)
+    const req = getHttpModule(baseUrl).request(`${baseUrl}${urlPath}`, {
+      method,
+      ...options,
+      headers: {
+        ...options.headers,
+        'Content-Length': Buffer.byteLength(body, 'utf8'),
+        'Content-Type': 'application/json',
+      },
+    })
 
-  req.write(body)
-  req.end()
+    req.write(body)
+    req.end()
 
-  return await getResponse(req)
+    const response = await getResponse(req)
+    stopTimer({ statusCode: response.statusCode })
+    return response
+  } catch (error) {
+    stopTimer({ error: true })
+    throw error
+  }
 }
 
 /**
@@ -175,6 +196,7 @@ export async function getResponse(
 /**
  * Parse HTTP response body as JSON.
  * Validates response status and handles empty responses gracefully.
+ * Performance tracking enabled with DEBUG=perf.
  *
  * @throws {ResponseError} When response has non-2xx status code
  * @throws {SyntaxError} When response body contains invalid JSON
@@ -183,53 +205,62 @@ export async function getResponseJson(
   response: IncomingMessage,
   method?: string | undefined,
 ) {
-  if (!isResponseOk(response)) {
-    throw new ResponseError(
-      response,
-      method ? `${method} Request failed` : undefined,
-    )
-  }
-  const responseBody = await getErrorResponseBody(response)
-
-  // Handle truly empty responses (not whitespace) as valid empty objects.
-  if (responseBody === '') {
-    debugLog('API response: empty response treated as {}')
-    return {}
-  }
-
+  const stopTimer = perfTimer('http:parse-json')
   try {
-    const responseJson = jsonParse(responseBody)
-    debugLog('API response:', responseJson)
-    return responseJson
-  } catch (e) {
-    if (e instanceof SyntaxError) {
-      // Attach the original response text for better error reporting.
-      const enhancedError = new Error(
-        `Socket API - Invalid JSON response:\n${responseBody}\n→ ${e.message}`,
-        { cause: e },
-      ) as SyntaxError & {
+    if (!isResponseOk(response)) {
+      throw new ResponseError(
+        response,
+        method ? `${method} Request failed` : undefined,
+      )
+    }
+    const responseBody = await getErrorResponseBody(response)
+
+    // Handle truly empty responses (not whitespace) as valid empty objects.
+    if (responseBody === '') {
+      debugLog('API response: empty response treated as {}')
+      stopTimer({ success: true })
+      return {}
+    }
+
+    try {
+      const responseJson = jsonParse(responseBody)
+      debugLog('API response:', responseJson)
+      stopTimer({ success: true })
+      return responseJson
+    } catch (e) {
+      stopTimer({ error: true })
+      if (e instanceof SyntaxError) {
+        // Attach the original response text for better error reporting.
+        const enhancedError = new Error(
+          `Socket API - Invalid JSON response:\n${responseBody}\n→ ${e.message}`,
+          { cause: e },
+        ) as SyntaxError & {
+          originalResponse?: string | undefined
+        }
+        enhancedError.name = 'SyntaxError'
+        enhancedError.originalResponse = responseBody
+        Object.setPrototypeOf(enhancedError, SyntaxError.prototype)
+        throw enhancedError
+      }
+      /* c8 ignore start - Error instanceof check and unknown error handling for JSON parsing edge cases. */
+      if (e instanceof Error) {
+        throw e
+      }
+      // Handle non-Error objects thrown by JSON parsing.
+      const unknownError = new Error('Unknown JSON parsing error', {
+        cause: e,
+      }) as SyntaxError & {
         originalResponse?: string | undefined
       }
-      enhancedError.name = 'SyntaxError'
-      enhancedError.originalResponse = responseBody
-      Object.setPrototypeOf(enhancedError, SyntaxError.prototype)
-      throw enhancedError
+      unknownError.name = 'SyntaxError'
+      unknownError.originalResponse = responseBody
+      Object.setPrototypeOf(unknownError, SyntaxError.prototype)
+      throw unknownError
+      /* c8 ignore stop */
     }
-    /* c8 ignore start - Error instanceof check and unknown error handling for JSON parsing edge cases. */
-    if (e instanceof Error) {
-      throw e
-    }
-    // Handle non-Error objects thrown by JSON parsing.
-    const unknownError = new Error('Unknown JSON parsing error', {
-      cause: e,
-    }) as SyntaxError & {
-      originalResponse?: string | undefined
-    }
-    unknownError.name = 'SyntaxError'
-    unknownError.originalResponse = responseBody
-    Object.setPrototypeOf(unknownError, SyntaxError.prototype)
-    throw unknownError
-    /* c8 ignore stop */
+  } catch (error) {
+    stopTimer({ error: true })
+    throw error
   }
 }
 
