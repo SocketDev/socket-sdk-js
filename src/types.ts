@@ -212,6 +212,16 @@ export interface SocketSdkOptions {
   /** Base URL for Socket API (default: 'https://api.socket.dev/v0/') */
   baseUrl?: string | undefined
   /**
+   * Enable TTL caching for API responses (default: false).
+   * When enabled, GET requests are cached with a 5-minute TTL.
+   */
+  cache?: boolean | undefined
+  /**
+   * Cache TTL in milliseconds (default: 300000 = 5 minutes).
+   * Only used when cache is enabled.
+   */
+  cacheTtl?: number | undefined
+  /**
    * Number of retry attempts on failure (default: 0, retries disabled).
    * Retries are opt-in following Node.js fs.rm() pattern.
    * Recommended: 3 for production, 0 for testing.
