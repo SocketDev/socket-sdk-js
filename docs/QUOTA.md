@@ -1,474 +1,216 @@
 # Quota Management
 
-Socket SDK provides comprehensive quota management utilities to help you optimize API usage and avoid quota exhaustion.
+API methods have different costs:
+- **0 units** - Free (quota checks, organization lists, entitlements)
+- **10 units** - Standard (scans, reports, policies)
+- **100 units** - Resource-intensive (batch processing, file uploads)
 
-## Overview
-
-Different API methods have different quota costs:
-- **0 units**: Free tier methods (basic info, public data)
-- **10 units**: Standard operations (scans, reports, policies)
-- **100 units**: Resource-intensive operations (batch processing, streaming)
-
-## Checking Your Quota
+## Check Quota
 
 ```typescript
 import { SocketSdk } from '@socketsecurity/sdk'
 
 const client = new SocketSdk('your-api-key')
+const quota = await client.getQuota()
 
-const quotaResult = await client.getQuota()
-
-if (quotaResult.success) {
-  console.log(`Available quota: ${quotaResult.data.quota} units`)
-  console.log(`Reset time: ${quotaResult.data.reset}`)
+if (quota.success) {
+  console.log(`Available: ${quota.data.quota} units`)
 }
 ```
 
-## Quota Utility Functions
+## Utilities
 
 ### `getQuotaCost(methodName)`
-
-Get the quota cost for a specific SDK method.
 
 ```typescript
 import { getQuotaCost } from '@socketsecurity/sdk'
 
-const batchCost = getQuotaCost('batchPackageFetch')
-console.log(`Batch fetch costs: ${batchCost} units`) // 100
-
-const scanCost = getQuotaCost('createOrgFullScan')
-console.log(`Full scan costs: ${scanCost} units`) // 10
-
-const quotaCost = getQuotaCost('getQuota')
-console.log(`Quota check costs: ${quotaCost} units`) // 0 (free!)
+getQuotaCost('batchPackageFetch')  // 100
+getQuotaCost('createOrgFullScan')  // 10
+getQuotaCost('getQuota')           // 0
 ```
 
 ### `calculateTotalQuotaCost(methodNames)`
 
-Calculate total cost for multiple operations.
-
 ```typescript
 import { calculateTotalQuotaCost } from '@socketsecurity/sdk'
 
-const operations = [
-  'batchPackageFetch',      // 100 units
-  'getOrgAnalytics',        // 10 units
-  'uploadManifestFiles',    // 100 units
-  'getQuota'                // 0 units
-]
-
-const totalCost = calculateTotalQuotaCost(operations)
-console.log(`Total cost: ${totalCost} units`) // 210
+const cost = calculateTotalQuotaCost([
+  'batchPackageFetch',    // 100
+  'getOrgAnalytics',      // 10
+  'getQuota'              // 0
+])
+// Returns: 110
 ```
 
 ### `hasQuotaForMethods(availableQuota, methodNames)`
-
-Check if you have sufficient quota for planned operations.
 
 ```typescript
 import { SocketSdk, hasQuotaForMethods } from '@socketsecurity/sdk'
 
 const client = new SocketSdk('your-api-key')
+const quota = await client.getQuota()
 
-const operations = [
-  'batchPackageFetch',
-  'createOrgFullScan',
-  'uploadManifestFiles'
-]
+if (quota.success) {
+  const canProceed = hasQuotaForMethods(quota.data.quota, [
+    'batchPackageFetch',
+    'createOrgFullScan'
+  ])
 
-const quotaResult = await client.getQuota()
-
-if (quotaResult.success) {
-  if (hasQuotaForMethods(quotaResult.data.quota, operations)) {
-    console.log('Sufficient quota available')
+  if (canProceed) {
     // Proceed with operations
-  } else {
-    console.log('Insufficient quota - use free alternatives')
   }
 }
 ```
 
 ### `getMethodsByQuotaCost(cost)`
 
-Find all methods with a specific quota cost.
-
 ```typescript
 import { getMethodsByQuotaCost } from '@socketsecurity/sdk'
 
-// Find all free methods (0 units)
-const freeMethods = getMethodsByQuotaCost(0)
-console.log('Free methods:', freeMethods)
-// ['getQuota', 'getOrganizations', 'getEnabledEntitlements', ...]
-
-// Find standard cost methods (10 units)
-const standardMethods = getMethodsByQuotaCost(10)
-console.log('Standard methods:', standardMethods)
-// ['createOrgFullScan', 'getScan', 'getOrgAnalytics', ...]
-
-// Find high-cost methods (100 units)
-const expensiveMethods = getMethodsByQuotaCost(100)
-console.log('Expensive methods:', expensiveMethods)
-// ['batchPackageFetch', 'uploadManifestFiles', ...]
+getMethodsByQuotaCost(0)    // ['getQuota', 'getOrganizations', ...]
+getMethodsByQuotaCost(10)   // ['createOrgFullScan', 'getScan', ...]
+getMethodsByQuotaCost(100)  // ['batchPackageFetch', ...]
 ```
 
 ### `getMethodsByPermissions(permissions)`
 
-Find methods requiring specific permissions.
-
 ```typescript
 import { getMethodsByPermissions } from '@socketsecurity/sdk'
 
-// Find methods that require read:scans permission
-const scanReadMethods = getMethodsByPermissions(['read:scans'])
-console.log('Methods requiring read:scans:', scanReadMethods)
-
-// Find methods requiring multiple permissions
-const adminMethods = getMethodsByPermissions(['write:policy', 'admin'])
-console.log('Admin methods:', adminMethods)
+getMethodsByPermissions(['read:scans'])  // Methods requiring read:scans
+getMethodsByPermissions(['admin'])       // Admin-only methods
 ```
 
 ### `getRequiredPermissions(methodName)`
 
-Get permissions required for a specific method.
-
 ```typescript
 import { getRequiredPermissions } from '@socketsecurity/sdk'
 
-const scanPerms = getRequiredPermissions('createOrgFullScan')
-console.log('Permissions:', scanPerms) // ['write:scans', 'read:repos']
-
-const policyPerms = getRequiredPermissions('updateOrgSecurityPolicy')
-console.log('Permissions:', policyPerms) // ['write:policy', 'admin']
+getRequiredPermissions('createOrgFullScan')        // ['write:scans', 'read:repos']
+getRequiredPermissions('updateOrgSecurityPolicy')  // ['write:policy', 'admin']
 ```
 
 ### `getQuotaUsageSummary()`
-
-Get a complete summary of all methods grouped by quota cost.
 
 ```typescript
 import { getQuotaUsageSummary } from '@socketsecurity/sdk'
 
 const summary = getQuotaUsageSummary()
 
-console.log(`Free methods (0 units): ${summary.free.length}`)
-for (const method of summary.free) {
-  console.log(`  - ${method}`)
-}
-
-console.log(`\nStandard methods (10 units): ${summary.standard.length}`)
-for (const method of summary.standard) {
-  console.log(`  - ${method}`)
-}
-
-console.log(`\nExpensive methods (100 units): ${summary.expensive.length}`)
-for (const method of summary.expensive) {
-  console.log(`  - ${method}`)
-}
+console.log(`Free: ${summary.free.length}`)
+console.log(`Standard: ${summary.standard.length}`)
+console.log(`Expensive: ${summary.expensive.length}`)
 ```
 
 ### `getAllMethodRequirements()`
-
-Get complete mapping of all methods to their costs and permissions.
 
 ```typescript
 import { getAllMethodRequirements } from '@socketsecurity/sdk'
 
 const requirements = getAllMethodRequirements()
-
-for (const [method, info] of Object.entries(requirements)) {
-  console.log(`${method}:`)
-  console.log(`  Cost: ${info.cost} units`)
-  console.log(`  Permissions: ${info.permissions.join(', ')}`)
-}
+// { methodName: { cost: number, permissions: string[] }, ... }
 ```
 
-## Practical Examples
+## Examples
 
-### Pre-flight Quota Check
+### Pre-flight Check
 
 ```typescript
-import {
-  SocketSdk,
-  calculateTotalQuotaCost,
-  hasQuotaForMethods
-} from '@socketsecurity/sdk'
+import { SocketSdk, calculateTotalQuotaCost, hasQuotaForMethods } from '@socketsecurity/sdk'
 
 const client = new SocketSdk('your-api-key')
 
-async function runBatchAnalysis(packages: string[]) {
-  // Calculate what we need
-  const operations = ['batchPackageFetch', 'uploadManifestFiles']
-  const requiredQuota = calculateTotalQuotaCost(operations)
+const operations = ['batchPackageFetch', 'uploadManifestFiles']
+const required = calculateTotalQuotaCost(operations)
 
-  console.log(`Operations will cost ${requiredQuota} units`)
-
-  // Check if we have enough
-  const quotaResult = await client.getQuota()
-
-  if (!quotaResult.success) {
-    throw new Error('Failed to check quota')
-  }
-
-  if (!hasQuotaForMethods(quotaResult.data.quota, operations)) {
-    throw new Error(
-      `Insufficient quota. Need ${requiredQuota}, have ${quotaResult.data.quota}`
-    )
-  }
-
-  // Proceed with operations
-  console.log('Sufficient quota, proceeding...')
-  // ... perform operations
+const quota = await client.getQuota()
+if (!quota.success || !hasQuotaForMethods(quota.data.quota, operations)) {
+  throw new Error(`Need ${required} units, have ${quota.data.quota}`)
 }
+
+// Proceed with operations
 ```
 
-### Optimize API Usage
+### Optimize Usage
 
 ```typescript
-import {
-  SocketSdk,
-  getMethodsByQuotaCost,
-  getQuotaCost
-} from '@socketsecurity/sdk'
+import { SocketSdk, getMethodsByQuotaCost } from '@socketsecurity/sdk'
 
 const client = new SocketSdk('your-api-key')
+const quota = await client.getQuota()
 
-async function optimizedAnalysis() {
-  // Get quota first (free!)
-  const quotaResult = await client.getQuota()
-
-  if (!quotaResult.success) {
-    throw new Error('Failed to check quota')
-  }
-
-  const available = quotaResult.data.quota
-
-  // Use free methods when possible
-  if (available < 100) {
-    console.log('Low quota - using free tier methods only')
+if (quota.success) {
+  if (quota.data.quota < 100) {
+    // Use free methods only
     const freeMethods = getMethodsByQuotaCost(0)
-    console.log('Available free methods:', freeMethods)
-
-    // Use getQuota, getOrganizations, etc.
-  } else if (available < 500) {
-    console.log('Medium quota - using standard methods')
-    // Use methods costing 10 units
+  } else if (quota.data.quota < 500) {
+    // Use standard methods (10 units)
   } else {
-    console.log('Plenty of quota - can use expensive operations')
-    // Use batch methods, streaming, etc.
+    // Can use expensive operations (100 units)
   }
 }
 ```
 
-### Monitor Quota Usage
+### Monitor Usage
 
 ```typescript
-import {
-  SocketSdk,
-  getQuotaCost,
-  calculateTotalQuotaCost
-} from '@socketsecurity/sdk'
-
-const client = new SocketSdk('your-api-key')
+import { SocketSdk, getQuotaCost } from '@socketsecurity/sdk'
 
 class QuotaTracker {
-  private usedQuota = 0
-  private operations: string[] = []
+  private used = 0
 
-  async trackOperation<T>(
-    methodName: string,
-    operation: () => Promise<T>
-  ): Promise<T> {
+  async track<T>(methodName: string, op: () => Promise<T>): Promise<T> {
     const cost = getQuotaCost(methodName)
-
-    console.log(`Executing ${methodName} (${cost} units)...`)
-
-    const result = await operation()
-
-    this.usedQuota += cost
-    this.operations.push(methodName)
-
-    console.log(`Total used: ${this.usedQuota} units`)
-
+    const result = await op()
+    this.used += cost
+    console.log(`Used ${this.used} units`)
     return result
   }
-
-  getSummary() {
-    return {
-      totalUsed: this.usedQuota,
-      operations: this.operations.length,
-      breakdown: this.operations.reduce((acc, op) => {
-        acc[op] = (acc[op] || 0) + 1
-        return acc
-      }, {} as Record<string, number>)
-    }
-  }
 }
 
-// Usage
 const tracker = new QuotaTracker()
-
-await tracker.trackOperation('batchPackageFetch', () =>
-  client.batchPackageFetch({ components: packages })
+await tracker.track('batchPackageFetch', () =>
+  client.batchPackageFetch({ components })
 )
-
-await tracker.trackOperation('createOrgFullScan', () =>
-  client.createOrgFullScan('my-org', files, '.')
-)
-
-const summary = tracker.getSummary()
-console.log('Quota usage summary:', summary)
 ```
 
-### Smart Fallback Strategy
+### Fallback Strategy
 
 ```typescript
-import {
-  SocketSdk,
-  getQuotaCost,
-  hasQuotaForMethods
-} from '@socketsecurity/sdk'
+import { SocketSdk, getQuotaCost } from '@socketsecurity/sdk'
 
 const client = new SocketSdk('your-api-key')
 
-async function smartBatchAnalysis(packages: string[]) {
-  const quotaResult = await client.getQuota()
+const quota = await client.getQuota()
+const batchCost = getQuotaCost('batchPackageFetch')
 
-  if (!quotaResult.success) {
-    throw new Error('Failed to check quota')
-  }
-
-  const available = quotaResult.data.quota
-  const batchCost = getQuotaCost('batchPackageFetch')
-
-  if (available >= batchCost) {
-    // Use efficient batch method
-    console.log('Using batchPackageFetch (efficient)')
-    return await client.batchPackageFetch({ components: packages })
-  } else {
-    // Fall back to free tier methods
-    console.log('Low quota - using individual package queries')
-    const results = []
-
-    for (const pkg of packages) {
-      const result = await client.getScoreByNpmPackage(pkg.name, pkg.version)
-      if (result.success) {
-        results.push(result.data)
-      }
-      // Add delay to respect rate limits
-      await new Promise(resolve => setTimeout(resolve, 1000))
-    }
-
-    return { success: true, data: results }
+if (quota.success && quota.data.quota >= batchCost) {
+  // Use efficient batch method
+  await client.batchPackageFetch({ components })
+} else {
+  // Fall back to individual queries
+  for (const pkg of packages) {
+    await client.getScoreByNpmPackage(pkg.name, pkg.version)
   }
 }
 ```
 
-### Quota Alerts
+## Costs Reference
 
-```typescript
-import { SocketSdk } from '@socketsecurity/sdk'
+**Free (0 units):** `getQuota`, `getOrganizations`, `getEnabledEntitlements`, `getEntitlements`
 
-const client = new SocketSdk('your-api-key')
+**Standard (10 units):** `createOrgFullScan`, `getScan`, `getScanList`, `getOrgAnalytics`, `getRepoAnalytics`, `getOrgSecurityPolicy`, `updateOrgSecurityPolicy`, `getOrgLicensePolicy`, `updateOrgLicensePolicy`, `getAuditLogEvents`
 
-async function checkQuotaHealth() {
-  const result = await client.getQuota()
-
-  if (!result.success) {
-    console.error('Failed to check quota')
-    return
-  }
-
-  const quota = result.data.quota
-
-  if (quota < 100) {
-    console.error('🚨 CRITICAL: Quota below 100 units!')
-    // Send alert, notify team, etc.
-  } else if (quota < 500) {
-    console.warn('⚠️ WARNING: Quota below 500 units')
-    // Consider optimizing usage
-  } else if (quota < 1000) {
-    console.info('ℹ️ INFO: Quota below 1000 units')
-    // Monitor usage
-  } else {
-    console.log('✅ Quota healthy:', quota, 'units')
-  }
-
-  return quota
-}
-
-// Run periodically
-setInterval(checkQuotaHealth, 60 * 60 * 1000) // Every hour
-```
-
-## Quota Costs Reference
-
-### Free Tier (0 units)
-- `getQuota()`
-- `getOrganizations()`
-- `getEnabledEntitlements()`
-- `getEntitlements()`
-
-### Standard Operations (10 units)
-- `createOrgFullScan()`
-- `getScan()`
-- `getScanList()`
-- `getOrgAnalytics()`
-- `getRepoAnalytics()`
-- `getOrgSecurityPolicy()`
-- `updateOrgSecurityPolicy()`
-- `getOrgLicensePolicy()`
-- `updateOrgLicensePolicy()`
-- `getAuditLogEvents()`
-
-### Resource-Intensive Operations (100 units)
-- `batchPackageFetch()`
-- `batchPackageStream()`
-- `uploadManifestFiles()`
-- `createDependenciesSnapshot()`
+**Expensive (100 units):** `batchPackageFetch`, `batchPackageStream`, `uploadManifestFiles`, `createDependenciesSnapshot`
 
 ## Best Practices
 
-1. **Always check quota before expensive operations**
-   ```typescript
-   const quota = await client.getQuota()
-   if (quota.success && quota.data.quota > 100) {
-     // Proceed with batch operation
-   }
-   ```
-
-2. **Use free methods for health checks**
-   ```typescript
-   // Free quota check
-   await client.getQuota()
-   // Free organization list
-   await client.getOrganizations()
-   ```
-
-3. **Batch operations when possible**
-   ```typescript
-   // Efficient: 100 units for all packages
-   await client.batchPackageFetch({ components: allPackages })
-
-   // Inefficient: 10 units per package
-   for (const pkg of allPackages) {
-     await client.getScoreByNpmPackage(pkg.name, pkg.version)
-   }
-   ```
-
-4. **Monitor quota usage in production**
-   ```typescript
-   // Track usage with custom wrapper
-   const tracker = new QuotaTracker()
-   await tracker.trackOperation('methodName', () => client.method())
-   ```
-
-5. **Implement quota-aware retry strategies**
-   ```typescript
-   const client = new SocketSdk('key', {
-     retries: 3, // Retry transient failures
-     retryDelay: 1000
-   })
-   ```
+- Check quota before expensive operations
+- Use free methods (`getQuota`, `getOrganizations`) for health checks
+- Batch operations when possible (100 units for all packages vs 10 per package)
+- Monitor quota usage in production with quota tracker
+- Configure retries for transient failures
 
 ## See Also
 
