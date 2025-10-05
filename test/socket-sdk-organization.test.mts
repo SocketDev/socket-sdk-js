@@ -75,6 +75,21 @@ describe('SocketSdk - Organization Management', () => {
       }
     })
 
+    it('should handle error in getOrgRepo', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/repos/nonexistent-repo')
+        .reply(404, { error: { message: 'Repository not found' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.getOrgRepo('test-org', 'nonexistent-repo')
+
+      expect(res.success).toBe(false)
+      if (!res.success) {
+        expect(res.status).toBe(404)
+        expect(res.error).toContain('Socket API Request failed (404)')
+      }
+    })
+
     it('should list organization repositories', async () => {
       nock('https://api.socket.dev')
         .get('/v0/orgs/test-org/repos')
@@ -93,6 +108,21 @@ describe('SocketSdk - Organization Management', () => {
       if (res.success) {
         expect(res.data.results).toHaveLength(2)
         expect(res.data.nextPage).toBe(null)
+      }
+    })
+
+    it('should handle error in getOrgRepoList', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/invalid-org/repos')
+        .reply(404, { error: { message: 'Organization not found' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.getOrgRepoList('invalid-org')
+
+      expect(res.success).toBe(false)
+      if (!res.success) {
+        expect(res.status).toBe(404)
+        expect(res.error).toContain('Socket API Request failed (404)')
       }
     })
 
@@ -155,6 +185,21 @@ describe('SocketSdk - Organization Management', () => {
       if (res.success) {
         expect(res.data['allowed']).toContain('MIT')
         expect(res.data['denied']).toContain('GPL-3.0')
+      }
+    })
+
+    it('should handle error in getOrgLicensePolicy', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/nonexistent-org/settings/license-policy')
+        .reply(404, { error: { message: 'Organization not found' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.getOrgLicensePolicy('nonexistent-org')
+
+      expect(res.success).toBe(false)
+      if (!res.success) {
+        expect(res.status).toBe(404)
+        expect(res.error).toContain('Socket API Request failed (404)')
       }
     })
 
@@ -241,6 +286,24 @@ describe('SocketSdk - Organization Management', () => {
       if (res.success) {
         expect(res.data.id).toBe('scan-123')
         // files_count property may not exist on the type
+      }
+    })
+
+    it('should handle error in getOrgFullScanMetadata', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/full-scans/nonexistent-scan/metadata')
+        .reply(404, { error: { message: 'Scan not found' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.getOrgFullScanMetadata(
+        'test-org',
+        'nonexistent-scan',
+      )
+
+      expect(res.success).toBe(false)
+      if (!res.success) {
+        expect(res.status).toBe(404)
+        expect(res.error).toContain('Socket API Request failed (404)')
       }
     })
 
