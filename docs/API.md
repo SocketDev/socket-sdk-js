@@ -21,7 +21,7 @@ Complete API reference for `@socketsecurity/sdk`. All methods return a result ob
 
 ## Package Analysis
 
-### `batchPackageFetch(componentsObj, queryParams?)`
+#### `batchPackageFetch(componentsObj, queryParams?)`
 
 Analyze multiple packages in a single batch request. Returns all results at once after processing is complete.
 
@@ -31,7 +31,9 @@ Analyze multiple packages in a single batch request. Returns all results at once
 
 **Returns:** Promise resolving to array of package analysis results
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.batchPackageFetch({
   components: [
@@ -47,7 +49,9 @@ if (result.success) {
 }
 ```
 
-### `batchPackageStream(componentsObj, options?)`
+</details>
+
+#### `batchPackageStream(componentsObj, options?)`
 
 Stream package analysis results with concurrency control. Returns results as they become available via async generator.
 
@@ -57,7 +61,9 @@ Stream package analysis results with concurrency control. Returns results as the
 
 **Returns:** AsyncGenerator yielding package results
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const stream = client.batchPackageStream({
   components: [
@@ -73,7 +79,9 @@ for await (const result of stream) {
 }
 ```
 
-### `getIssuesByNpmPackage(packageName, version)`
+</details>
+
+#### `getIssuesByNpmPackage(packageName, version)`
 
 Get detailed security issues for a specific npm package version.
 
@@ -83,7 +91,9 @@ Get detailed security issues for a specific npm package version.
 
 **Returns:** Promise with vulnerability and security alert information
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getIssuesByNpmPackage('express', '4.18.0')
 
@@ -95,7 +105,9 @@ if (result.success) {
 }
 ```
 
-### `getScoreByNpmPackage(packageName, version)`
+</details>
+
+#### `getScoreByNpmPackage(packageName, version)`
 
 Get security score and rating breakdown for a package.
 
@@ -105,7 +117,9 @@ Get security score and rating breakdown for a package.
 
 **Returns:** Promise with numerical security rating
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getScoreByNpmPackage('lodash', '4.17.21')
 
@@ -115,9 +129,11 @@ if (result.success) {
 }
 ```
 
+</details>
+
 ## Scanning & Analysis
 
-### `createDependenciesSnapshot(filepaths, pathsRelativeTo?, queryParams?)`
+#### `createDependenciesSnapshot(filepaths, pathsRelativeTo?, queryParams?)`
 
 Create a dependency snapshot from project files for security analysis.
 
@@ -128,7 +144,9 @@ Create a dependency snapshot from project files for security analysis.
 
 **Returns:** Promise with snapshot creation result
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.createDependenciesSnapshot(
   ['package.json', 'package-lock.json'],
@@ -140,7 +158,9 @@ if (result.success) {
 }
 ```
 
-### `createOrgFullScan(orgSlug, filepaths, pathsRelativeTo?, queryParams?)`
+</details>
+
+#### `createOrgFullScan(orgSlug, filepaths, pathsRelativeTo?, queryParams?)`
 
 Create a comprehensive security scan for an organization.
 
@@ -152,7 +172,9 @@ Create a comprehensive security scan for an organization.
 
 **Returns:** Promise with scan creation result
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.createOrgFullScan(
   'my-org',
@@ -166,7 +188,9 @@ if (result.success) {
 }
 ```
 
-### `getScan(id)`
+</details>
+
+#### `getScan(id)`
 
 Retrieve complete scan results by scan ID.
 
@@ -175,7 +199,9 @@ Retrieve complete scan results by scan ID.
 
 **Returns:** Promise with complete scan analysis
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getScan('scan_abc123')
 
@@ -185,13 +211,17 @@ if (result.success) {
 }
 ```
 
-### `getScanList()`
+</details>
+
+#### `getScanList()`
 
 List all accessible scans with pagination support.
 
 **Returns:** Promise with paginated list of scan metadata
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getScanList()
 
@@ -202,13 +232,17 @@ if (result.success) {
 }
 ```
 
-### `getSupportedScanFiles()`
+</details>
+
+#### `getSupportedScanFiles()`
 
 Get list of supported manifest files and formats.
 
 **Returns:** Promise with supported file types
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getSupportedScanFiles()
 
@@ -217,15 +251,19 @@ if (result.success) {
 }
 ```
 
+</details>
+
 ## Organization Management
 
-### `getOrganizations()`
+#### `getOrganizations()`
 
 List all accessible organizations with permissions.
 
 **Returns:** Promise with organization list
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getOrganizations()
 
@@ -236,7 +274,9 @@ if (result.success) {
 }
 ```
 
-### `createOrgRepo(orgSlug, queryParams?)`
+</details>
+
+#### `createOrgRepo(orgSlug, queryParams?)`
 
 Create a new repository for monitoring.
 
@@ -246,7 +286,9 @@ Create a new repository for monitoring.
 
 **Returns:** Promise with created repository details
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.createOrgRepo('my-org', {
   name: 'my-repo',
@@ -259,7 +301,9 @@ if (result.success) {
 }
 ```
 
-### `getOrgRepo(orgSlug, repoSlug)`
+</details>
+
+#### `getOrgRepo(orgSlug, repoSlug)`
 
 Get repository details and configuration.
 
@@ -269,7 +313,9 @@ Get repository details and configuration.
 
 **Returns:** Promise with repository details
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getOrgRepo('my-org', 'my-repo')
 
@@ -279,7 +325,9 @@ if (result.success) {
 }
 ```
 
-### `getOrgRepoList(orgSlug, queryParams?)`
+</details>
+
+#### `getOrgRepoList(orgSlug, queryParams?)`
 
 List all repositories in an organization.
 
@@ -289,7 +337,9 @@ List all repositories in an organization.
 
 **Returns:** Promise with repository list
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getOrgRepoList('my-org', {
   archived: false,
@@ -301,7 +351,9 @@ if (result.success) {
 }
 ```
 
-### `updateOrgRepo(orgSlug, repoSlug, queryParams?)`
+</details>
+
+#### `updateOrgRepo(orgSlug, repoSlug, queryParams?)`
 
 Update repository configuration and settings.
 
@@ -312,7 +364,9 @@ Update repository configuration and settings.
 
 **Returns:** Promise with updated repository details
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.updateOrgRepo('my-org', 'my-repo', {
   archived: true,
@@ -324,7 +378,9 @@ if (result.success) {
 }
 ```
 
-### `deleteOrgRepo(orgSlug, repoSlug)`
+</details>
+
+#### `deleteOrgRepo(orgSlug, repoSlug)`
 
 Delete a repository and its associated data.
 
@@ -334,7 +390,9 @@ Delete a repository and its associated data.
 
 **Returns:** Promise with deletion confirmation
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.deleteOrgRepo('my-org', 'old-repo')
 
@@ -343,9 +401,11 @@ if (result.success) {
 }
 ```
 
+</details>
+
 ## Full Scan Management
 
-### `getOrgFullScanList(orgSlug, queryParams?)`
+#### `getOrgFullScanList(orgSlug, queryParams?)`
 
 List all full scans for an organization.
 
@@ -355,7 +415,9 @@ List all full scans for an organization.
 
 **Returns:** Promise with scan list
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getOrgFullScanList('my-org', {
   limit: 20,
@@ -369,7 +431,9 @@ if (result.success) {
 }
 ```
 
-### `getOrgFullScanMetadata(orgSlug, fullScanId)`
+</details>
+
+#### `getOrgFullScanMetadata(orgSlug, fullScanId)`
 
 Get metadata for a specific full scan.
 
@@ -379,7 +443,9 @@ Get metadata for a specific full scan.
 
 **Returns:** Promise with scan metadata
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getOrgFullScanMetadata('my-org', 'scan_123')
 
@@ -389,7 +455,9 @@ if (result.success) {
 }
 ```
 
-### `getOrgFullScanBuffered(orgSlug, fullScanId)`
+</details>
+
+#### `getOrgFullScanBuffered(orgSlug, fullScanId)`
 
 Get complete scan results loaded into memory.
 
@@ -399,7 +467,9 @@ Get complete scan results loaded into memory.
 
 **Returns:** Promise with complete scan data
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getOrgFullScanBuffered('my-org', 'scan_123')
 
@@ -409,7 +479,9 @@ if (result.success) {
 }
 ```
 
-### `streamOrgFullScan(orgSlug, fullScanId, output?)`
+</details>
+
+#### `streamOrgFullScan(orgSlug, fullScanId, output?)`
 
 Stream large scan results efficiently.
 
@@ -420,7 +492,9 @@ Stream large scan results efficiently.
 
 **Returns:** Promise with streaming result
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 // Stream to file
 await client.streamOrgFullScan('my-org', 'scan_123', '/tmp/scan-data.json')
@@ -437,7 +511,9 @@ if (result.success) {
 }
 ```
 
-### `deleteOrgFullScan(orgSlug, fullScanId)`
+</details>
+
+#### `deleteOrgFullScan(orgSlug, fullScanId)`
 
 Delete a full scan and its data.
 
@@ -447,7 +523,9 @@ Delete a full scan and its data.
 
 **Returns:** Promise with deletion confirmation
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.deleteOrgFullScan('my-org', 'scan_old')
 
@@ -456,9 +534,11 @@ if (result.success) {
 }
 ```
 
+</details>
+
 ## Policy & Settings
 
-### `getOrgSecurityPolicy(orgSlug)`
+#### `getOrgSecurityPolicy(orgSlug)`
 
 Get organization security policy configuration.
 
@@ -467,7 +547,9 @@ Get organization security policy configuration.
 
 **Returns:** Promise with security policy
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getOrgSecurityPolicy('my-org')
 
@@ -476,7 +558,9 @@ if (result.success) {
 }
 ```
 
-### `updateOrgSecurityPolicy(orgSlug, policyData)`
+</details>
+
+#### `updateOrgSecurityPolicy(orgSlug, policyData)`
 
 Update security policy rules and settings.
 
@@ -486,7 +570,9 @@ Update security policy rules and settings.
 
 **Returns:** Promise with update confirmation
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.updateOrgSecurityPolicy('my-org', {
   securityPolicyRules: {
@@ -500,7 +586,9 @@ if (result.success) {
 }
 ```
 
-### `getOrgLicensePolicy(orgSlug)`
+</details>
+
+#### `getOrgLicensePolicy(orgSlug)`
 
 Get license policy configuration.
 
@@ -509,7 +597,9 @@ Get license policy configuration.
 
 **Returns:** Promise with license policy
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getOrgLicensePolicy('my-org')
 
@@ -519,7 +609,9 @@ if (result.success) {
 }
 ```
 
-### `updateOrgLicensePolicy(orgSlug, policyData, queryParams?)`
+</details>
+
+#### `updateOrgLicensePolicy(orgSlug, policyData, queryParams?)`
 
 Update license policy settings.
 
@@ -530,7 +622,9 @@ Update license policy settings.
 
 **Returns:** Promise with update confirmation
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.updateOrgLicensePolicy('my-org', {
   allowed: ['MIT', 'Apache-2.0'],
@@ -542,15 +636,19 @@ if (result.success) {
 }
 ```
 
+</details>
+
 ## Analytics & Monitoring
 
-### `getQuota()`
+#### `getQuota()`
 
 Get current API quota usage and limits.
 
 **Returns:** Promise with quota information
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getQuota()
 
@@ -560,7 +658,9 @@ if (result.success) {
 }
 ```
 
-### `getOrgAnalytics(time)`
+</details>
+
+#### `getOrgAnalytics(time)`
 
 Get organization analytics for a time period.
 
@@ -569,7 +669,9 @@ Get organization analytics for a time period.
 
 **Returns:** Promise with analytics data
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getOrgAnalytics('30d')
 
@@ -580,7 +682,9 @@ if (result.success) {
 }
 ```
 
-### `getRepoAnalytics(repo, time)`
+</details>
+
+#### `getRepoAnalytics(repo, time)`
 
 Get repository-specific analytics.
 
@@ -590,7 +694,9 @@ Get repository-specific analytics.
 
 **Returns:** Promise with repository analytics
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getRepoAnalytics('my-repo', '7d')
 
@@ -600,7 +706,9 @@ if (result.success) {
 }
 ```
 
-### `getAuditLogEvents(orgSlug, queryParams?)`
+</details>
+
+#### `getAuditLogEvents(orgSlug, queryParams?)`
 
 Get audit log events for an organization.
 
@@ -610,7 +718,9 @@ Get audit log events for an organization.
 
 **Returns:** Promise with audit log entries
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getAuditLogEvents('my-org', {
   limit: 100,
@@ -624,9 +734,11 @@ if (result.success) {
 }
 ```
 
+</details>
+
 ## Authentication & Access
 
-### `getAPITokens(orgSlug)`
+#### `getAPITokens(orgSlug)`
 
 List organization API tokens.
 
@@ -635,7 +747,9 @@ List organization API tokens.
 
 **Returns:** Promise with token list
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getAPITokens('my-org')
 
@@ -646,7 +760,9 @@ if (result.success) {
 }
 ```
 
-### `postAPIToken(orgSlug, tokenData)`
+</details>
+
+#### `postAPIToken(orgSlug, tokenData)`
 
 Create a new API token.
 
@@ -656,7 +772,9 @@ Create a new API token.
 
 **Returns:** Promise with created token details
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.postAPIToken('my-org', {
   name: 'CI Token',
@@ -669,7 +787,9 @@ if (result.success) {
 }
 ```
 
-### `postAPITokensRotate(orgSlug, tokenId)`
+</details>
+
+#### `postAPITokensRotate(orgSlug, tokenId)`
 
 Rotate an existing API token.
 
@@ -679,7 +799,9 @@ Rotate an existing API token.
 
 **Returns:** Promise with new token value
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.postAPITokensRotate('my-org', 'token_123')
 
@@ -688,7 +810,9 @@ if (result.success) {
 }
 ```
 
-### `postAPITokensRevoke(orgSlug, tokenId)`
+</details>
+
+#### `postAPITokensRevoke(orgSlug, tokenId)`
 
 Revoke an API token.
 
@@ -698,7 +822,9 @@ Revoke an API token.
 
 **Returns:** Promise with revocation confirmation
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.postAPITokensRevoke('my-org', 'token_old')
 
@@ -707,9 +833,11 @@ if (result.success) {
 }
 ```
 
+</details>
+
 ## Export & Integration
 
-### `exportCDX(orgSlug, fullScanId)`
+#### `exportCDX(orgSlug, fullScanId)`
 
 Export CycloneDX SBOM for a scan.
 
@@ -719,7 +847,9 @@ Export CycloneDX SBOM for a scan.
 
 **Returns:** Promise with CycloneDX SBOM
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.exportCDX('my-org', 'scan_123')
 
@@ -728,7 +858,9 @@ if (result.success) {
 }
 ```
 
-### `exportSPDX(orgSlug, fullScanId)`
+</details>
+
+#### `exportSPDX(orgSlug, fullScanId)`
 
 Export SPDX SBOM for a scan.
 
@@ -738,7 +870,9 @@ Export SPDX SBOM for a scan.
 
 **Returns:** Promise with SPDX SBOM
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.exportSPDX('my-org', 'scan_123')
 
@@ -747,7 +881,9 @@ if (result.success) {
 }
 ```
 
-### `uploadManifestFiles(orgSlug, filepaths, pathsRelativeTo?)`
+</details>
+
+#### `uploadManifestFiles(orgSlug, filepaths, pathsRelativeTo?)`
 
 Upload manifest files for dependency analysis.
 
@@ -758,7 +894,9 @@ Upload manifest files for dependency analysis.
 
 **Returns:** Promise with upload result
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.uploadManifestFiles(
   'my-org',
@@ -771,9 +909,11 @@ if (result.success) {
 }
 ```
 
+</details>
+
 ## Diff Scans
 
-### `createOrgDiffScanFromIds(orgSlug, queryParams?)`
+#### `createOrgDiffScanFromIds(orgSlug, queryParams?)`
 
 Create a diff scan comparing two full scans.
 
@@ -783,7 +923,9 @@ Create a diff scan comparing two full scans.
 
 **Returns:** Promise with diff scan creation result
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.createOrgDiffScanFromIds('my-org', {
   from: 'scan_old',
@@ -795,7 +937,9 @@ if (result.success) {
 }
 ```
 
-### `getDiffScanById(orgSlug, diffScanId)`
+</details>
+
+#### `getDiffScanById(orgSlug, diffScanId)`
 
 Get diff scan results.
 
@@ -805,7 +949,9 @@ Get diff scan results.
 
 **Returns:** Promise with diff scan results
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getDiffScanById('my-org', 'diff_123')
 
@@ -816,7 +962,9 @@ if (result.success) {
 }
 ```
 
-### `listOrgDiffScans(orgSlug)`
+</details>
+
+#### `listOrgDiffScans(orgSlug)`
 
 List all diff scans for an organization.
 
@@ -825,7 +973,9 @@ List all diff scans for an organization.
 
 **Returns:** Promise with diff scan list
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.listOrgDiffScans('my-org')
 
@@ -836,7 +986,9 @@ if (result.success) {
 }
 ```
 
-### `deleteOrgDiffScan(orgSlug, diffScanId)`
+</details>
+
+#### `deleteOrgDiffScan(orgSlug, diffScanId)`
 
 Delete a diff scan.
 
@@ -846,7 +998,9 @@ Delete a diff scan.
 
 **Returns:** Promise with deletion confirmation
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.deleteOrgDiffScan('my-org', 'diff_old')
 
@@ -855,9 +1009,11 @@ if (result.success) {
 }
 ```
 
+</details>
+
 ## Alert & Triage
 
-### `getOrgTriage(orgSlug)`
+#### `getOrgTriage(orgSlug)`
 
 Get organization triage settings and alert states.
 
@@ -866,7 +1022,9 @@ Get organization triage settings and alert states.
 
 **Returns:** Promise with triage configuration
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getOrgTriage('my-org')
 
@@ -875,7 +1033,9 @@ if (result.success) {
 }
 ```
 
-### `updateOrgAlertTriage(orgSlug, alertId, triageData)`
+</details>
+
+#### `updateOrgAlertTriage(orgSlug, alertId, triageData)`
 
 Update alert triage status and resolution.
 
@@ -886,7 +1046,9 @@ Update alert triage status and resolution.
 
 **Returns:** Promise with update confirmation
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.updateOrgAlertTriage('my-org', 'alert_123', {
   status: 'resolved',
@@ -899,9 +1061,11 @@ if (result.success) {
 }
 ```
 
+</details>
+
 ## Repository Labels
 
-### `getOrgRepoLabelList(orgSlug, repoSlug)`
+#### `getOrgRepoLabelList(orgSlug, repoSlug)`
 
 List all labels for a repository.
 
@@ -911,7 +1075,9 @@ List all labels for a repository.
 
 **Returns:** Promise with label list
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getOrgRepoLabelList('my-org', 'my-repo')
 
@@ -922,7 +1088,9 @@ if (result.success) {
 }
 ```
 
-### `getOrgRepoLabel(orgSlug, repoSlug, labelSlug)`
+</details>
+
+#### `getOrgRepoLabel(orgSlug, repoSlug, labelSlug)`
 
 Get details for a specific label.
 
@@ -933,7 +1101,9 @@ Get details for a specific label.
 
 **Returns:** Promise with label details
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getOrgRepoLabel('my-org', 'my-repo', 'critical')
 
@@ -943,7 +1113,9 @@ if (result.success) {
 }
 ```
 
-### `createOrgRepoLabel(orgSlug, repoSlug, labelData)`
+</details>
+
+#### `createOrgRepoLabel(orgSlug, repoSlug, labelData)`
 
 Create a new repository label.
 
@@ -954,7 +1126,9 @@ Create a new repository label.
 
 **Returns:** Promise with created label
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.createOrgRepoLabel('my-org', 'my-repo', {
   name: 'high-priority',
@@ -967,7 +1141,9 @@ if (result.success) {
 }
 ```
 
-### `updateOrgRepoLabel(orgSlug, repoSlug, labelSlug, labelData)`
+</details>
+
+#### `updateOrgRepoLabel(orgSlug, repoSlug, labelSlug, labelData)`
 
 Update an existing label.
 
@@ -979,7 +1155,9 @@ Update an existing label.
 
 **Returns:** Promise with updated label
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.updateOrgRepoLabel('my-org', 'my-repo', 'critical', {
   color: '#ff6600',
@@ -991,7 +1169,9 @@ if (result.success) {
 }
 ```
 
-### `deleteOrgRepoLabel(orgSlug, repoSlug, labelSlug)`
+</details>
+
+#### `deleteOrgRepoLabel(orgSlug, repoSlug, labelSlug)`
 
 Delete a repository label.
 
@@ -1002,7 +1182,9 @@ Delete a repository label.
 
 **Returns:** Promise with deletion confirmation
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.deleteOrgRepoLabel('my-org', 'my-repo', 'old-label')
 
@@ -1011,9 +1193,11 @@ if (result.success) {
 }
 ```
 
+</details>
+
 ## Patches & Vulnerabilities
 
-### `viewPatch(orgSlug, uuid)`
+#### `viewPatch(orgSlug, uuid)`
 
 View detailed information about a security patch.
 
@@ -1023,7 +1207,9 @@ View detailed information about a security patch.
 
 **Returns:** Promise with patch details
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.viewPatch('my-org', 'patch_uuid_123')
 
@@ -1038,7 +1224,9 @@ if (result.success) {
 }
 ```
 
-### `streamPatchesFromScan(orgSlug, scanId)`
+</details>
+
+#### `streamPatchesFromScan(orgSlug, scanId)`
 
 Stream available patches from a scan.
 
@@ -1048,7 +1236,9 @@ Stream available patches from a scan.
 
 **Returns:** ReadableStream of patch data
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.streamPatchesFromScan('my-org', 'scan_123')
 
@@ -1061,9 +1251,11 @@ if (result.success) {
 }
 ```
 
+</details>
+
 ## Entitlements
 
-### `getEntitlements(orgSlug)`
+#### `getEntitlements(orgSlug)`
 
 Get all organization entitlements with status.
 
@@ -1072,7 +1264,9 @@ Get all organization entitlements with status.
 
 **Returns:** Promise with complete entitlements list
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getEntitlements('my-org')
 
@@ -1083,7 +1277,9 @@ if (result.success) {
 }
 ```
 
-### `getEnabledEntitlements(orgSlug)`
+</details>
+
+#### `getEnabledEntitlements(orgSlug)`
 
 Get only enabled entitlements for an organization.
 
@@ -1092,7 +1288,9 @@ Get only enabled entitlements for an organization.
 
 **Returns:** Promise with enabled entitlements array
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.getEnabledEntitlements('my-org')
 
@@ -1101,9 +1299,11 @@ if (result.success) {
 }
 ```
 
+</details>
+
 ## Advanced Query Methods
 
-### `getApi<T>(urlPath, options?)`
+#### `getApi<T>(urlPath, options?)`
 
 Execute a raw GET request with full control.
 
@@ -1113,7 +1313,9 @@ Execute a raw GET request with full control.
 
 **Returns:** Promise with configurable response type
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 // Get JSON response
 const result = await client.getApi<MyType>('/custom/endpoint', {
@@ -1131,7 +1333,9 @@ const text = await client.getApi('/text', {
 })
 ```
 
-### `sendApi<T>(urlPath, options?)`
+</details>
+
+#### `sendApi<T>(urlPath, options?)`
 
 Send POST/PUT with JSON body.
 
@@ -1141,7 +1345,9 @@ Send POST/PUT with JSON body.
 
 **Returns:** Promise with JSON response
 
-**Example:**
+<details>
+<summary>Show example</summary>
+
 ```typescript
 const result = await client.sendApi('/custom/action', {
   method: 'POST',
@@ -1152,6 +1358,8 @@ if (result.success) {
   console.log('Action completed:', result.data)
 }
 ```
+
+</details>
 
 ## See Also
 
