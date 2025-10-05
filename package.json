@@ -75,14 +75,14 @@
     "update:socket": "pnpm -r update '@socketsecurity/*' --latest"
   },
   "dependencies": {
-    "@socketsecurity/registry": "1.4.6"
+    "@socketsecurity/registry": "1.5.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
     "@dotenvx/dotenvx": "1.49.0",
     "@eslint/compat": "1.3.2",
     "@eslint/js": "9.35.0",
-    "@types/node": "24.5.2",
+    "@types/node": "24.6.2",
     "@typescript-eslint/eslint-plugin": "8.44.1",
     "@typescript-eslint/parser": "8.44.1",
     "@typescript/native-preview": "7.0.0-dev.20250926.1",
