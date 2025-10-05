@@ -304,12 +304,9 @@ describe('SocketSdk - Retry Logic', () => {
     it('should retry on timeout errors', async () => {
       let attemptCount = 0
 
-      const timeoutError = new Error('Request timed out')
-      ;(timeoutError as NodeJS.ErrnoException).code = 'ETIMEDOUT'
-
       nock('https://api.socket.dev')
         .get('/v0/quota')
-        .replyWithError(timeoutError)
+        .replyWithError('ETIMEDOUT')
         .get('/v0/quota')
         .reply(() => {
           attemptCount = 2
