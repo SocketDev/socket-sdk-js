@@ -855,6 +855,252 @@ if (result.success) {
 }
 ```
 
+## Alert & Triage
+
+### `getOrgTriage(orgSlug)`
+
+Get organization triage settings and alert states.
+
+**Parameters:**
+- `orgSlug` - Organization identifier
+
+**Returns:** Promise with triage configuration
+
+**Example:**
+```typescript
+const result = await client.getOrgTriage('my-org')
+
+if (result.success) {
+  console.log('Triage settings:', result.data)
+}
+```
+
+### `updateOrgAlertTriage(orgSlug, alertId, triageData)`
+
+Update alert triage status and resolution.
+
+**Parameters:**
+- `orgSlug` - Organization identifier
+- `alertId` - Alert identifier
+- `triageData` - Updated triage information
+
+**Returns:** Promise with update confirmation
+
+**Example:**
+```typescript
+const result = await client.updateOrgAlertTriage('my-org', 'alert_123', {
+  status: 'resolved',
+  resolution: 'false_positive',
+  notes: 'Verified as safe dependency'
+})
+
+if (result.success) {
+  console.log('Alert triage updated')
+}
+```
+
+## Repository Labels
+
+### `getOrgRepoLabelList(orgSlug, repoSlug)`
+
+List all labels for a repository.
+
+**Parameters:**
+- `orgSlug` - Organization identifier
+- `repoSlug` - Repository identifier
+
+**Returns:** Promise with label list
+
+**Example:**
+```typescript
+const result = await client.getOrgRepoLabelList('my-org', 'my-repo')
+
+if (result.success) {
+  for (const label of result.data.labels) {
+    console.log(`${label.name}: ${label.color}`)
+  }
+}
+```
+
+### `getOrgRepoLabel(orgSlug, repoSlug, labelSlug)`
+
+Get details for a specific label.
+
+**Parameters:**
+- `orgSlug` - Organization identifier
+- `repoSlug` - Repository identifier
+- `labelSlug` - Label identifier
+
+**Returns:** Promise with label details
+
+**Example:**
+```typescript
+const result = await client.getOrgRepoLabel('my-org', 'my-repo', 'critical')
+
+if (result.success) {
+  console.log(`Label: ${result.data.name}`)
+  console.log(`Color: ${result.data.color}`)
+}
+```
+
+### `createOrgRepoLabel(orgSlug, repoSlug, labelData)`
+
+Create a new repository label.
+
+**Parameters:**
+- `orgSlug` - Organization identifier
+- `repoSlug` - Repository identifier
+- `labelData` - Label configuration
+
+**Returns:** Promise with created label
+
+**Example:**
+```typescript
+const result = await client.createOrgRepoLabel('my-org', 'my-repo', {
+  name: 'high-priority',
+  color: '#ff0000',
+  description: 'High priority repositories'
+})
+
+if (result.success) {
+  console.log(`Label created: ${result.data.id}`)
+}
+```
+
+### `updateOrgRepoLabel(orgSlug, repoSlug, labelSlug, labelData)`
+
+Update an existing label.
+
+**Parameters:**
+- `orgSlug` - Organization identifier
+- `repoSlug` - Repository identifier
+- `labelSlug` - Label identifier
+- `labelData` - Updated label data
+
+**Returns:** Promise with updated label
+
+**Example:**
+```typescript
+const result = await client.updateOrgRepoLabel('my-org', 'my-repo', 'critical', {
+  color: '#ff6600',
+  description: 'Updated description'
+})
+
+if (result.success) {
+  console.log('Label updated')
+}
+```
+
+### `deleteOrgRepoLabel(orgSlug, repoSlug, labelSlug)`
+
+Delete a repository label.
+
+**Parameters:**
+- `orgSlug` - Organization identifier
+- `repoSlug` - Repository identifier
+- `labelSlug` - Label identifier
+
+**Returns:** Promise with deletion confirmation
+
+**Example:**
+```typescript
+const result = await client.deleteOrgRepoLabel('my-org', 'my-repo', 'old-label')
+
+if (result.success) {
+  console.log('Label deleted')
+}
+```
+
+## Patches & Vulnerabilities
+
+### `viewPatch(orgSlug, uuid)`
+
+View detailed information about a security patch.
+
+**Parameters:**
+- `orgSlug` - Organization identifier
+- `uuid` - Patch UUID
+
+**Returns:** Promise with patch details
+
+**Example:**
+```typescript
+const result = await client.viewPatch('my-org', 'patch_uuid_123')
+
+if (result.success) {
+  console.log(`Patch: ${result.data.description}`)
+  console.log(`Published: ${result.data.publishedAt}`)
+  console.log(`Tier: ${result.data.tier}`)
+
+  for (const [cve, vuln] of Object.entries(result.data.vulnerabilities)) {
+    console.log(`${cve}: ${vuln.description}`)
+  }
+}
+```
+
+### `streamPatchesFromScan(orgSlug, scanId)`
+
+Stream available patches from a scan.
+
+**Parameters:**
+- `orgSlug` - Organization identifier
+- `scanId` - Scan identifier
+
+**Returns:** ReadableStream of patch data
+
+**Example:**
+```typescript
+const result = await client.streamPatchesFromScan('my-org', 'scan_123')
+
+if (result.success) {
+  const patches = []
+  for await (const chunk of result.data) {
+    patches.push(chunk)
+  }
+  console.log(`Found ${patches.length} available patches`)
+}
+```
+
+## Entitlements
+
+### `getEntitlements(orgSlug)`
+
+Get all organization entitlements with status.
+
+**Parameters:**
+- `orgSlug` - Organization identifier
+
+**Returns:** Promise with complete entitlements list
+
+**Example:**
+```typescript
+const result = await client.getEntitlements('my-org')
+
+if (result.success) {
+  for (const entitlement of result.data.items) {
+    console.log(`${entitlement.key}: ${entitlement.enabled ? 'enabled' : 'disabled'}`)
+  }
+}
+```
+
+### `getEnabledEntitlements(orgSlug)`
+
+Get only enabled entitlements for an organization.
+
+**Parameters:**
+- `orgSlug` - Organization identifier
+
+**Returns:** Promise with enabled entitlements array
+
+**Example:**
+```typescript
+const result = await client.getEnabledEntitlements('my-org')
+
+if (result.success) {
+  console.log('Enabled products:', result.data.join(', '))
+}
+```
+
 ## Advanced Query Methods
 
 ### `getApi<T>(urlPath, options?)`
