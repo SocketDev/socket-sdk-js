@@ -203,12 +203,28 @@ export type SocketSdkGenericResult<T> =
       success: false
     }
 
+/**
+ * Configuration options for SocketSdk.
+ */
 export interface SocketSdkOptions {
+  /** HTTP agent for connection pooling and proxy support */
   agent?: Agent | GotOptions | undefined
+  /** Base URL for Socket API (default: 'https://api.socket.dev/v0/') */
   baseUrl?: string | undefined
+  /**
+   * Number of retry attempts on failure (default: 0, retries disabled).
+   * Retries are opt-in following Node.js fs.rm() pattern.
+   * Recommended: 3 for production, 0 for testing.
+   */
   retries?: number | undefined
+  /**
+   * Initial delay in milliseconds between retries (default: 100).
+   * Uses exponential backoff: 100ms, 200ms, 400ms, etc.
+   */
   retryDelay?: number | undefined
+  /** Request timeout in milliseconds */
   timeout?: number | undefined
+  /** Custom User-Agent header */
   userAgent?: string | undefined
 }
 
