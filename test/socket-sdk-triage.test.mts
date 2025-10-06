@@ -1,22 +1,19 @@
 /** @fileoverview Tests for alert triage status management operations. */
 import nock from 'nock'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../dist/index'
+import type { SocketSdk } from '../dist/index'
+
+import { assertError, assertSuccess } from './utils/assertions.mts'
+import { createTestClient, setupTestEnvironment } from './utils/environment.mts'
 
 describe('Socket SDK - Alert Triage', () => {
+  setupTestEnvironment()
+
   let client: SocketSdk
 
   beforeEach(() => {
-    nock.cleanAll()
-    nock.disableNetConnect()
-    client = new SocketSdk('test-api-token')
-  })
-
-  afterEach(() => {
-    if (!nock.isDone()) {
-      throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
-    }
+    client = createTestClient()
   })
 
   describe('getOrgTriage', () => {
@@ -34,11 +31,7 @@ describe('Socket SDK - Alert Triage', () => {
         .reply(200, mockTriage)
 
       const result = await client.getOrgTriage('test-org')
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockTriage)
-      }
+      assertSuccess(result)
     })
 
     it('should handle empty triage settings', async () => {
@@ -49,11 +42,7 @@ describe('Socket SDK - Alert Triage', () => {
         .reply(200, mockTriage)
 
       const result = await client.getOrgTriage('empty-org')
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockTriage)
-      }
+      assertSuccess(result)
     })
 
     it('should handle URL encoding for organization slug', async () => {
@@ -64,8 +53,7 @@ describe('Socket SDK - Alert Triage', () => {
         .reply(200, mockTriage)
 
       const result = await client.getOrgTriage('test@org')
-
-      expect(result.success).toBe(true)
+      assertSuccess(result)
     })
 
     it('should handle malformed JSON responses by throwing', async () => {
@@ -95,11 +83,7 @@ describe('Socket SDK - Alert Triage', () => {
         'alert-123',
         triageData,
       )
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockResponse)
-      }
+      assertSuccess(result)
     })
 
     it('should handle URL encoding for alert ID', async () => {
@@ -115,8 +99,7 @@ describe('Socket SDK - Alert Triage', () => {
         'alert@123',
         triageData,
       )
-
-      expect(result.success).toBe(true)
+      assertSuccess(result)
     })
 
     it('should handle invalid triage status', async () => {
@@ -131,11 +114,7 @@ describe('Socket SDK - Alert Triage', () => {
         'alert-123',
         triageData,
       )
-
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error).toContain('Invalid triage status')
-      }
+      assertError(result, 400, 'Invalid triage status')
     })
 
     it('should handle 404 for non-existent alert', async () => {
@@ -150,11 +129,7 @@ describe('Socket SDK - Alert Triage', () => {
         'nonexistent',
         triageData,
       )
-
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error).toContain('Alert not found')
-      }
+      assertError(result, 404, 'Alert not found')
     })
   })
 })
