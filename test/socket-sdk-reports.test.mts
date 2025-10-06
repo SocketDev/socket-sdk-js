@@ -1,3 +1,4 @@
+/** @fileoverview Tests for scan report creation and management operations. */
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 

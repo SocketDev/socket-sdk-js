@@ -1,3 +1,4 @@
+/** @fileoverview Tests for SBOM export functionality in CycloneDX and SPDX formats. */
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 

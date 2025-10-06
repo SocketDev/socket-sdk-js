@@ -1,3 +1,4 @@
+/** @fileoverview Tests for organization entitlements and enabled products. */
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 

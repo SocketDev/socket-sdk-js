@@ -1,3 +1,4 @@
+/** @fileoverview Tests for HTTP response text processing and body handling. */
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
