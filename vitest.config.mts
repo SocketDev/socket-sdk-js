@@ -2,26 +2,9 @@
  * @fileoverview Vitest configuration for Socket SDK test suite.
  * Configures test environment, coverage, and module resolution.
  */
-import path from 'node:path'
-
 import { defineConfig } from 'vitest/config'
 
-const isCoverage = process.argv.includes('--coverage')
-
 export default defineConfig({
-  resolve: {
-    // Map dist imports to src when running coverage, use dist otherwise.
-    alias: isCoverage
-      ? {
-          '../dist/index': path.resolve(__dirname, './src/index.ts'),
-          '../dist/http-client.js': path.resolve(
-            __dirname,
-            './src/http-client.ts',
-          ),
-          '../dist/testing': path.resolve(__dirname, './src/testing.ts'),
-        }
-      : {},
-  },
   test: {
     globals: false,
     environment: 'node',

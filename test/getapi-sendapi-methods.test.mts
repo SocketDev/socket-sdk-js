@@ -3,9 +3,9 @@
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../dist/index'
+import { SocketSdk } from '../src/index'
 
-import type { SocketSdkGenericResult } from '../dist/index'
+import type { SocketSdkGenericResult } from '../src/index'
 import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
 
 describe('getApi and sendApi Methods', () => {
