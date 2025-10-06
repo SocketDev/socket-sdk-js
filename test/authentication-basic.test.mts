@@ -3,7 +3,7 @@
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../dist/index'
+import { SocketSdk } from '../src/index'
 import { setupTestEnvironment } from './utils/environment.mts'
 
 import type { IncomingHttpHeaders } from 'node:http'

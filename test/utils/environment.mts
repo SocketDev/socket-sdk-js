@@ -2,7 +2,7 @@
 import nock from 'nock'
 import { afterEach, beforeEach } from 'vitest'
 
-import { SocketSdk } from '../../dist/index'
+import { SocketSdk } from '../../src/index'
 
 export function setupTestEnvironment() {
   beforeEach(() => {

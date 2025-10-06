@@ -1,11 +1,11 @@
 /** @fileoverview Tests for organization API token management operations. */
 import nock from 'nock'
-import { beforeEach, describe, it } from 'vitest'
-
-import type { SocketSdk } from '../dist/index'
+import { beforeEach, describe, expect, it } from 'vitest'
 
 import { assertError, assertSuccess } from './utils/assertions.mts'
 import { createTestClient, setupTestEnvironment } from './utils/environment.mts'
+
+import type { SocketSdk } from '../src/index'
 
 describe('Socket SDK - API Token Management', () => {
   setupTestEnvironment()
@@ -52,6 +52,16 @@ describe('Socket SDK - API Token Management', () => {
       const result = await client.getAPITokens('forbidden-org')
       assertError(result, 403, 'Forbidden')
     })
+
+    it('should handle server errors by throwing', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/tokens')
+        .reply(500, { error: { message: 'Internal server error' } })
+
+      await expect(client.getAPITokens('test-org')).rejects.toThrow(
+        'Socket API server error (500)',
+      )
+    })
   })
 
   describe('postAPIToken', () => {
@@ -79,6 +89,18 @@ describe('Socket SDK - API Token Management', () => {
 
       const result = await client.postAPIToken('test-org', tokenData)
       assertError(result, 400, 'Invalid token data')
+    })
+
+    it('should handle server errors by throwing', async () => {
+      const tokenData = { name: 'New Token', scopes: ['packages:list'] }
+
+      nock('https://api.socket.dev')
+        .post('/v0/orgs/test-org/tokens', tokenData)
+        .reply(500, { error: { message: 'Internal server error' } })
+
+      await expect(client.postAPIToken('test-org', tokenData)).rejects.toThrow(
+        'Socket API server error (500)',
+      )
     })
   })
 
@@ -116,6 +138,16 @@ describe('Socket SDK - API Token Management', () => {
       const result = await client.postAPITokensRotate('test-org', 'nonexistent')
       assertError(result, 404, 'Token not found')
     })
+
+    it('should handle server errors by throwing', async () => {
+      nock('https://api.socket.dev')
+        .post('/v0/orgs/test-org/tokens/token-123/rotate', {})
+        .reply(500, { error: { message: 'Internal server error' } })
+
+      await expect(
+        client.postAPITokensRotate('test-org', 'token-123'),
+      ).rejects.toThrow('Socket API server error (500)')
+    })
   })
 
   describe('postAPITokensRevoke', () => {
@@ -140,6 +172,16 @@ describe('Socket SDK - API Token Management', () => {
         'revoked-token',
       )
       assertError(result, 409, 'Token already revoked')
+    })
+
+    it('should handle server errors by throwing', async () => {
+      nock('https://api.socket.dev')
+        .post('/v0/orgs/test-org/tokens/token-123/revoke', {})
+        .reply(500, { error: { message: 'Internal server error' } })
+
+      await expect(
+        client.postAPITokensRevoke('test-org', 'token-123'),
+      ).rejects.toThrow('Socket API server error (500)')
     })
   })
 
@@ -175,6 +217,18 @@ describe('Socket SDK - API Token Management', () => {
         updateData,
       )
       assertError(result, 400, 'Invalid scope')
+    })
+
+    it('should handle server errors by throwing', async () => {
+      const updateData = { name: 'Updated Token Name' }
+
+      nock('https://api.socket.dev')
+        .post('/v0/orgs/test-org/tokens/token-123/update', updateData)
+        .reply(500, { error: { message: 'Internal server error' } })
+
+      await expect(
+        client.postAPITokenUpdate('test-org', 'token-123', updateData),
+      ).rejects.toThrow('Socket API server error (500)')
     })
   })
 })

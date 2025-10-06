@@ -2,10 +2,10 @@
 import nock from 'nock'
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import type { SocketSdk } from '../dist/index'
-
 import { assertError, assertSuccess } from './utils/assertions.mts'
 import { createTestClient, setupTestEnvironment } from './utils/environment.mts'
+
+import type { SocketSdk } from '../src/index'
 
 describe('Socket SDK - Alert Triage', () => {
   setupTestEnvironment()
@@ -63,6 +63,16 @@ describe('Socket SDK - Alert Triage', () => {
 
       await expect(client.getOrgTriage('malformed')).rejects.toThrow(
         'Unexpected Socket API error',
+      )
+    })
+
+    it('should handle server errors by throwing', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/triage')
+        .reply(500, { error: { message: 'Internal server error' } })
+
+      await expect(client.getOrgTriage('test-org')).rejects.toThrow(
+        'Socket API server error (500)',
       )
     })
   })
@@ -130,6 +140,18 @@ describe('Socket SDK - Alert Triage', () => {
         triageData,
       )
       assertError(result, 404, 'Alert not found')
+    })
+
+    it('should handle server errors by throwing', async () => {
+      const triageData = { status: 'resolved' }
+
+      nock('https://api.socket.dev')
+        .put('/v0/orgs/test-org/triage/alert-123', triageData)
+        .reply(500, { error: { message: 'Internal server error' } })
+
+      await expect(
+        client.updateOrgAlertTriage('test-org', 'alert-123', triageData),
+      ).rejects.toThrow('Socket API server error (500)')
     })
   })
 })

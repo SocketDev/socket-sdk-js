@@ -19,7 +19,7 @@ import {
   packageFixtures,
   repositoryFixtures,
   scanFixtures,
-} from '../dist/testing'
+} from '../src/testing'
 
 describe('Testing Utilities', () => {
   describe('mockSuccessResponse', () => {

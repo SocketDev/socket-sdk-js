@@ -2,10 +2,10 @@
 import nock from 'nock'
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import type { SocketSdk } from '../dist/index'
-
 import { assertError, assertSuccess } from './utils/assertions.mts'
 import { createTestClient, setupTestEnvironment } from './utils/environment.mts'
+
+import type { SocketSdk } from '../src/index'
 
 describe('Socket SDK - SBOM Export', () => {
   setupTestEnvironment()
@@ -63,6 +63,16 @@ describe('Socket SDK - SBOM Export', () => {
         'Unexpected Socket API error',
       )
     })
+
+    it('should handle server errors by throwing', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/full-scans/scan-123/sbom/export/cdx')
+        .reply(500, { error: { message: 'Internal server error' } })
+
+      await expect(client.exportCDX('test-org', 'scan-123')).rejects.toThrow(
+        'Socket API server error (500)',
+      )
+    })
   })
 
   describe('exportSPDX', () => {
@@ -111,6 +121,16 @@ describe('Socket SDK - SBOM Export', () => {
 
       const result = await client.exportSPDX('test-org', 'nonexistent')
       assertError(result, 404, 'Full scan not found')
+    })
+
+    it('should handle server errors by throwing', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/full-scans/scan-123/sbom/export/spdx')
+        .reply(500, { error: { message: 'Internal server error' } })
+
+      await expect(client.exportSPDX('test-org', 'scan-123')).rejects.toThrow(
+        'Socket API server error (500)',
+      )
     })
   })
 })
