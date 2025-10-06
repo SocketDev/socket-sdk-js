@@ -139,6 +139,9 @@ jobs:
 
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@4b73a528b3ec989dea83ed38e4f46cd470461c73 # main
 
+      - name: Build SDK
+        run: pnpm build
+
       - name: Validate TypeScript types
         run: pnpm run check:tsc
 
