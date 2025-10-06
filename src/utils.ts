@@ -62,7 +62,7 @@ export function queryToSearchParams(
   const params = new URLSearchParams(
     init as ConstructorParameters<typeof URLSearchParams>[0],
   )
-  const normalized = Object.create(null) as unknown as QueryParams
+  const normalized = { __proto__: null } as unknown as QueryParams
   const entries: Iterable<[string, string]> = params.entries()
   for (const entry of entries) {
     let key: string = entry[0]
