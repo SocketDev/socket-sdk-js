@@ -121,7 +121,7 @@
     "nock": "14.0.10",
     "npm-run-all2": "8.0.4",
     "openapi-typescript": "6.7.6",
-    "oxlint": "1.15.0",
+    "oxlint": "1.18.0",
     "rollup": "4.50.1",
     "taze": "19.6.0",
     "trash": "10.0.0",
