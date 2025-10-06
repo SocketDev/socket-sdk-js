@@ -3,6 +3,7 @@ import nock from 'nock'
 import { beforeEach, describe, it } from 'vitest'
 
 import type { SocketSdk } from '../dist/index'
+
 import { assertError, assertSuccess } from './utils/assertions.mts'
 import { createTestClient, setupTestEnvironment } from './utils/environment.mts'
 
