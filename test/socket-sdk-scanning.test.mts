@@ -481,4 +481,59 @@ describe('SocketSdk - Scanning APIs', () => {
       expect(sbomData.components).toHaveLength(1)
     })
   })
+
+  describe('createScanFromFilepaths', () => {
+    it('should create scan from filepaths without issueRules', async () => {
+      nock('https://api.socket.dev').put('/v0/report/upload').reply(200, {
+        id: 'report-123',
+        status: 'complete',
+        issues: [],
+      })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.createScanFromFilepaths([packageJsonPath], {
+        pathsRelativeTo: tempDir,
+      })
+
+      expect(res.success).toBe(true)
+      if (res.success) {
+        expect(res.data.id).toBe('report-123')
+      }
+    })
+
+    it('should create scan from filepaths with issueRules', async () => {
+      nock('https://api.socket.dev').put('/v0/report/upload').reply(200, {
+        id: 'report-456',
+        status: 'complete',
+        issues: [],
+      })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.createScanFromFilepaths([packageJsonPath], {
+        issueRules: {
+          'npm-install-scripts': false,
+          'npm-outdated-dependency': true,
+        },
+        pathsRelativeTo: tempDir,
+      })
+
+      expect(res.success).toBe(true)
+      if (res.success) {
+        expect(res.data.id).toBe('report-456')
+      }
+    })
+
+    it('should handle error in createScanFromFilepaths', async () => {
+      nock('https://api.socket.dev')
+        .put('/v0/report/upload')
+        .reply(400, { error: { message: 'Invalid file format' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.createScanFromFilepaths([packageJsonPath], {
+        pathsRelativeTo: tempDir,
+      })
+
+      assertApiError(res, 400)
+    })
+  })
 })
