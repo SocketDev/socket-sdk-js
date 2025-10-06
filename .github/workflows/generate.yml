@@ -140,15 +140,18 @@ jobs:
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@4b73a528b3ec989dea83ed38e4f46cd470461c73 # main
 
       - name: Build SDK
-        run: pnpm build
+        run: pnpm run build
 
-      - name: Validate TypeScript types
-        run: pnpm run check:tsc
+      - name: Type check
+        run: pnpm run type-ci
 
-      - name: Run tests
-        run: pnpm test
+      - name: Lint
+        run: pnpm run lint-ci
 
-      - name: Check for breaking changes
+      - name: Test
+        run: pnpm run test-ci
+
+      - name: Check for API breaking changes
         run: |
           if git diff origin/main...HEAD --name-only | grep -q 'types/api.d.ts'; then
             echo "⚠️ API types have changed. Please review for breaking changes."
