@@ -14,6 +14,7 @@ export default defineConfig({
             __dirname,
             './src/http-client.ts',
           ),
+          '../dist/testing': path.resolve(__dirname, './src/testing.ts'),
         }
       : {},
   },
