@@ -1,3 +1,4 @@
+/** @fileoverview Tests for SocketSdk network request handling and API calls. */
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 

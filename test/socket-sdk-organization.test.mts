@@ -1,3 +1,4 @@
+/** @fileoverview Tests for organization management and full scan operations. */
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import * as path from 'node:path'
@@ -403,7 +404,7 @@ describe('SocketSdk - Organization Management', () => {
       const client = new SocketSdk('test-token')
       const originalWrite = process.stdout.write
       let wasCalled = false
-      process.stdout.write = (_chunk: any) => {
+      process.stdout.write = (_chunk: string | Uint8Array) => {
         wasCalled = true
         return true
       }
@@ -463,7 +464,7 @@ describe('SocketSdk - Organization Management', () => {
       const client = new SocketSdk('test-token')
       const originalWrite = process.stdout.write
       let wasCalled = false
-      process.stdout.write = (_chunk: any) => {
+      process.stdout.write = (_chunk: string | Uint8Array) => {
         wasCalled = true
         return true
       }

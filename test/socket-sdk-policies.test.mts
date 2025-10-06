@@ -1,3 +1,4 @@
+/** @fileoverview Tests for organization security and license policy management. */
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
