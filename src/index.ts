@@ -3,7 +3,7 @@
  * Provides the SocketSdk class and utility functions for Socket security analysis API interactions.
  */
 
-// Import from our modules
+// Import from our modules.
 import { DEFAULT_USER_AGENT, httpAgentNames, publicPolicy } from './constants'
 import {
   normalizeBaseUrl,
@@ -13,13 +13,13 @@ import {
   resolveBasePath,
 } from './utils'
 
-// Re-export file upload functions
+// Re-export file upload functions.
 export {
   createRequestBodyForFilepaths,
   createRequestBodyForJson,
   createUploadRequest,
 } from './file-upload'
-// Re-export HTTP client functions
+// Re-export HTTP client functions.
 export {
   createDeleteRequest,
   createGetRequest,
@@ -32,7 +32,7 @@ export {
   ResponseError,
   reshapeArtifactForPublicPolicy,
 } from './http-client'
-// Re-export quota utility functions
+// Re-export quota utility functions.
 export {
   calculateTotalQuotaCost,
   getAllMethodRequirements,
@@ -44,14 +44,14 @@ export {
   getRequiredPermissions,
   hasQuotaForMethods,
 } from './quota-utils'
-// Re-export the main SocketSdk class
+// Re-export the main SocketSdk class.
 export { SocketSdk } from './socket-sdk-class'
-// Re-export types from modules
+// Re-export types from modules.
 export type * from './types'
-// Re-export functions from modules
+// Re-export functions from modules.
 export { createUserAgentFromPkgJson } from './user-agent'
 
-// Re-export utility functions
+// Re-export utility functions.
 export {
   normalizeBaseUrl,
   promiseWithResolvers,
@@ -60,5 +60,5 @@ export {
   resolveBasePath,
 }
 
-// Re-export constants
+// Re-export constants.
 export { DEFAULT_USER_AGENT, httpAgentNames, publicPolicy }
