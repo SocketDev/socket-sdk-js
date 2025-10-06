@@ -8,7 +8,6 @@ import {
 } from '@eslint/compat'
 import jsPlugin from '@eslint/js'
 import constants from '@socketsecurity/registry/lib/constants'
-import tsParser from '@typescript-eslint/parser'
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript'
 import { flatConfigs as origImportXFlatConfigs } from 'eslint-plugin-import-x'
 import jsdocPlugin from 'eslint-plugin-jsdoc'
@@ -197,7 +196,7 @@ export default [
         BufferEncoding: 'readonly',
         NodeJS: 'readonly',
       },
-      parser: tsParser,
+      parser: tsEslint.parser,
       parserOptions: {
         ...jsPlugin.configs.recommended.languageOptions?.parserOptions,
         ...importFlatConfigsForModule.typescript.languageOptions?.parserOptions,
