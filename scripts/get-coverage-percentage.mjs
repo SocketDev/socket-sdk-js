@@ -3,7 +3,7 @@ import path from 'node:path'
 import constants from '@socketsecurity/registry/lib/constants'
 import { logger } from '@socketsecurity/registry/lib/logger'
 import yargsParser from 'yargs-parser'
-import colors from 'yoctocolors'
+import colors from 'yoctocolors-cjs'
 
 import { getCodeCoverage } from './utils/get-code-coverage.mjs'
 import { getTypeCoverage } from './utils/get-type-coverage.mjs'
