@@ -132,27 +132,45 @@ describe('SocketSdk - Caching', () => {
     })
 
     it('should respect custom cache TTL', async () => {
-      // Mock the endpoint only once
+      // Mock the endpoint twice - once for initial, once after expiration
       const scope = nock('https://api.socket.dev')
         .get('/v0/quota')
         .reply(200, { quota: 5000 })
+        .get('/v0/quota')
+        .reply(200, { quota: 6000 })
 
-      // Create client with very short TTL (10ms)
+      // Create client with very short TTL (50ms)
       const client = new SocketSdk('test-token', {
         cache: true,
-        cacheTtl: 10,
+        cacheTtl: 50,
       })
 
       // First call - fetches from API
       const res1 = await client.getQuota()
       expect(res1.success).toBe(true)
-
-      // Verify the mock was called once
-      expect(scope.isDone()).toBe(true)
+      if (res1.success) {
+        expect(res1.data.quota).toBe(5000)
+      }
 
       // Immediate second call - should use cache
       const res2 = await client.getQuota()
       expect(res2.success).toBe(true)
+      if (res2.success) {
+        expect(res2.data.quota).toBe(5000)
+      }
+
+      // Wait for cache to expire (60ms > 50ms TTL)
+      await new Promise(resolve => setTimeout(resolve, 60))
+
+      // Third call - cache expired, should fetch from API with new value
+      const res3 = await client.getQuota()
+      expect(res3.success).toBe(true)
+      if (res3.success) {
+        expect(res3.data.quota).toBe(6000)
+      }
+
+      // Verify both mocks were called
+      expect(scope.isDone()).toBe(true)
     })
   })
 
