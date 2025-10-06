@@ -2,10 +2,10 @@
 import nock from 'nock'
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import type { SocketSdk } from '../dist/index'
-
 import { assertError, assertSuccess } from './utils/assertions.mts'
 import { createTestClient, setupTestEnvironment } from './utils/environment.mts'
+
+import type { SocketSdk } from '../src/index'
 
 describe('Socket SDK - Diff Scans', () => {
   setupTestEnvironment()
@@ -65,6 +65,18 @@ describe('Socket SDK - Diff Scans', () => {
       )
       assertError(result, 404, 'One or both scans not found')
     })
+
+    it('should handle server errors by throwing', async () => {
+      const queryParams = { before: 'scan-1', after: 'scan-2' }
+
+      nock('https://api.socket.dev')
+        .post('/v0/orgs/test-org/diff-scans?before=scan-1&after=scan-2', {})
+        .reply(500, { error: { message: 'Internal server error' } })
+
+      await expect(
+        client.createOrgDiffScanFromIds('test-org', queryParams),
+      ).rejects.toThrow('Socket API server error (500)')
+    })
   })
 
   describe('deleteOrgDiffScan', () => {
@@ -97,6 +109,16 @@ describe('Socket SDK - Diff Scans', () => {
 
       const result = await client.deleteOrgDiffScan('test-org', 'nonexistent')
       assertError(result, 404, 'Diff scan not found')
+    })
+
+    it('should handle server errors by throwing', async () => {
+      nock('https://api.socket.dev')
+        .delete('/v0/orgs/test-org/diff-scans/diff-123')
+        .reply(500, { error: { message: 'Internal server error' } })
+
+      await expect(
+        client.deleteOrgDiffScan('test-org', 'diff-123'),
+      ).rejects.toThrow('Socket API server error (500)')
     })
   })
 
@@ -159,6 +181,16 @@ describe('Socket SDK - Diff Scans', () => {
       const result = await client.getDiffScanById('forbidden-org', 'diff-123')
       assertError(result, 403, 'Unauthorized')
     })
+
+    it('should handle server errors by throwing', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/diff-scans/diff-123')
+        .reply(500, { error: { message: 'Internal server error' } })
+
+      await expect(
+        client.getDiffScanById('test-org', 'diff-123'),
+      ).rejects.toThrow('Socket API server error (500)')
+    })
   })
 
   describe('listOrgDiffScans', () => {
@@ -216,6 +248,16 @@ describe('Socket SDK - Diff Scans', () => {
         expect(result.data).toEqual(largeDiffScanList)
         expect(result.data.results).toHaveLength(100)
       }
+    })
+
+    it('should handle server errors by throwing', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/diff-scans')
+        .reply(500, { error: { message: 'Internal server error' } })
+
+      await expect(client.listOrgDiffScans('test-org')).rejects.toThrow(
+        'Socket API server error (500)',
+      )
     })
   })
 })

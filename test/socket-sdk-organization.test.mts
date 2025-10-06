@@ -6,7 +6,7 @@ import * as path from 'node:path'
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../dist/index'
+import { SocketSdk } from '../src/index'
 import { assertApiError } from './utils/assertions.mts'
 import { TEST_PACKAGE_CONFIGS } from './utils/fixtures.mts'
 

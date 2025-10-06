@@ -2,10 +2,10 @@
 import nock from 'nock'
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import type { SocketSdk } from '../dist/index'
-
 import { assertError, assertSuccess } from './utils/assertions.mts'
 import { createTestClient, setupTestEnvironment } from './utils/environment.mts'
+
+import type { SocketSdk } from '../src/index'
 
 describe('Socket SDK - Report Management', () => {
   setupTestEnvironment()
