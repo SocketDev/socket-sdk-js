@@ -1,22 +1,19 @@
 /** @fileoverview Tests for organization security and license policy management. */
 import nock from 'nock'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, it } from 'vitest'
 
-import { SocketSdk } from '../dist/index'
+import type { SocketSdk } from '../dist/index'
+
+import { assertError, assertSuccess } from './utils/assertions.mts'
+import { createTestClient, setupTestEnvironment } from './utils/environment.mts'
 
 describe('Socket SDK - Policy Management', () => {
+  setupTestEnvironment()
+
   let client: SocketSdk
 
   beforeEach(() => {
-    nock.cleanAll()
-    nock.disableNetConnect()
-    client = new SocketSdk('test-api-token')
-  })
-
-  afterEach(() => {
-    if (!nock.isDone()) {
-      throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
-    }
+    client = createTestClient()
   })
 
   describe('updateOrgSecurityPolicy', () => {
@@ -37,11 +34,7 @@ describe('Socket SDK - Policy Management', () => {
         'test-org',
         policyData,
       )
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockResponse)
-      }
+      assertSuccess(result)
     })
 
     it('should handle invalid policy data', async () => {
@@ -55,11 +48,7 @@ describe('Socket SDK - Policy Management', () => {
         'test-org',
         policyData,
       )
-
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error).toContain('Invalid policy rule')
-      }
+      assertError(result, 400, 'Invalid policy rule')
     })
 
     it('should handle URL encoding for organization slug', async () => {
@@ -74,8 +63,7 @@ describe('Socket SDK - Policy Management', () => {
         'test@org',
         policyData,
       )
-
-      expect(result.success).toBe(true)
+      assertSuccess(result)
     })
   })
 
@@ -100,11 +88,7 @@ describe('Socket SDK - Policy Management', () => {
         policyData,
         queryParams,
       )
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockResponse)
-      }
+      assertSuccess(result)
     })
 
     it('should work without query parameters', async () => {
@@ -116,11 +100,7 @@ describe('Socket SDK - Policy Management', () => {
         .reply(200, mockResponse)
 
       const result = await client.updateOrgLicensePolicy('test-org', policyData)
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockResponse)
-      }
+      assertSuccess(result)
     })
 
     it('should handle invalid license names', async () => {
@@ -131,11 +111,7 @@ describe('Socket SDK - Policy Management', () => {
         .reply(400, { error: { message: 'Invalid license identifier' } })
 
       const result = await client.updateOrgLicensePolicy('test-org', policyData)
-
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error).toContain('Invalid license identifier')
-      }
+      assertError(result, 400, 'Invalid license identifier')
     })
   })
 })
