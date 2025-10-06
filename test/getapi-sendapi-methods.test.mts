@@ -1,10 +1,12 @@
+/** @fileoverview Tests for generic getApi and sendApi method functionality. */
+import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
+
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../dist/index'
 
 import type { SocketSdkGenericResult } from '../dist/index'
-import type { IncomingMessage } from 'node:http'
 
 describe('getApi and sendApi Methods', () => {
   let client: SocketSdk
@@ -400,7 +402,7 @@ describe('getApi and sendApi Methods', () => {
 
     it('should include Content-Type header for JSON requests', async () => {
       const requestData = { test: true }
-      let capturedHeaders: any = {}
+      let capturedHeaders: IncomingHttpHeaders = {}
 
       nock('https://api.socket.dev')
         .post('/v0/headers-test', requestData)
@@ -699,7 +701,7 @@ describe('getApi and sendApi Methods', () => {
       const customClient = new SocketSdk('test-token', {
         userAgent: 'CustomApp/1.0.0',
       })
-      let capturedHeaders: any = {}
+      let capturedHeaders: IncomingHttpHeaders = {}
 
       nock('https://api.socket.dev')
         .get('/v0/user-agent-test')

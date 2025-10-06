@@ -1,3 +1,4 @@
+/** @fileoverview Tests for network error handling and connection failures. */
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 

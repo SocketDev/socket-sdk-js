@@ -1,3 +1,6 @@
+/** @fileoverview Tests for SocketSdk authentication and basic API operations. */
+import type { IncomingHttpHeaders } from 'node:http'
+
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
@@ -49,7 +52,7 @@ describe('SocketSdk Authentication and Basic Operations', () => {
   describe('API authentication and authorization', () => {
     it('includes proper Basic auth header with API token', async () => {
       const apiToken = 'test-api-token-123'
-      let capturedHeaders: any = {}
+      let capturedHeaders: IncomingHttpHeaders = {}
 
       nock('https://api.socket.dev')
         .get('/v0/quota')

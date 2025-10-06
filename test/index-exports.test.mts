@@ -1,3 +1,4 @@
+/** @fileoverview Tests for main module exports and public API surface. */
 import { describe, expect, it } from 'vitest'
 
 import * as sdk from '../dist/index'

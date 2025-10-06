@@ -1,4 +1,6 @@
+/** @fileoverview Tests for batch package fetch and streaming operations. */
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import type { IncomingHttpHeaders } from 'node:http'
 import { tmpdir } from 'node:os'
 import * as path from 'node:path'
 
@@ -394,7 +396,7 @@ describe('SocketSdk - Batch Operations', () => {
     })
 
     it('should upload files with createDependenciesSnapshot', async () => {
-      let capturedHeaders: any = {}
+      let capturedHeaders: IncomingHttpHeaders = {}
 
       nock('https://api.socket.dev')
         .post('/v0/dependencies/upload')
@@ -433,7 +435,7 @@ describe('SocketSdk - Batch Operations', () => {
     })
 
     it('should upload files with createOrgFullScan', async () => {
-      let capturedHeaders: any = {}
+      let capturedHeaders: IncomingHttpHeaders = {}
 
       nock('https://api.socket.dev')
         .post('/v0/orgs/test-org/full-scans')
