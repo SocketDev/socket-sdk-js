@@ -1,5 +1,4 @@
 /** @fileoverview Tests for generic getApi and sendApi method functionality. */
-import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
 
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -7,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { SocketSdk } from '../dist/index'
 
 import type { SocketSdkGenericResult } from '../dist/index'
+import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
 
 describe('getApi and sendApi Methods', () => {
   let client: SocketSdk

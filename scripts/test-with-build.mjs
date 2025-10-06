@@ -21,7 +21,7 @@ if (!existsSync(distIndexPath)) {
   try {
     execSync('pnpm run build', {
       cwd: projectRoot,
-      stdio: 'inherit'
+      stdio: 'inherit',
     })
   } catch (error) {
     console.error('Build failed')
@@ -33,7 +33,7 @@ if (!existsSync(distIndexPath)) {
 try {
   execSync('pnpm test', {
     cwd: projectRoot,
-    stdio: 'inherit'
+    stdio: 'inherit',
   })
 } catch (error) {
   process.exit(1)
