@@ -1,6 +1,5 @@
 /** @fileoverview Tests for batch package fetch and streaming operations. */
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import type { IncomingHttpHeaders } from 'node:http'
 import { tmpdir } from 'node:os'
 import * as path from 'node:path'
 
@@ -8,6 +7,8 @@ import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../dist/index'
+
+import type { IncomingHttpHeaders } from 'node:http'
 
 describe('SocketSdk - Batch Operations', () => {
   beforeEach(() => {
