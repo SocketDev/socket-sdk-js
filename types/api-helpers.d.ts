@@ -1,3 +1,8 @@
+/**
+ * @fileoverview TypeScript type helpers for OpenAPI operation responses.
+ * Utility types for extracting return types and error types from OpenAPI operations.
+ * Based on openapi-typescript-fetch patterns.
+ */
 declare type ValueOf<
   ObjectType,
   ValueType extends keyof ObjectType = keyof ObjectType,
