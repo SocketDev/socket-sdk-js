@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Vitest configuration for Socket SDK test suite.
+ * Configures test environment, coverage, and module resolution.
+ */
 import path from 'node:path'
 
 import { defineConfig } from 'vitest/config'
