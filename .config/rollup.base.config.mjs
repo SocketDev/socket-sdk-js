@@ -10,7 +10,7 @@ import commonjsPlugin from '@rollup/plugin-commonjs'
 import jsonPlugin from '@rollup/plugin-json'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 
-const EXTERNAL_PACKAGES = ['@socketsecurity/registry']
+const EXTERNAL_PACKAGES = new Set(['@socketsecurity/registry'])
 
 function isBuiltin(id) {
   return (
@@ -68,7 +68,7 @@ export default function baseConfig(extendConfig = {}) {
         id.endsWith('.d.cts') ||
         id.endsWith('.d.mts') ||
         id.endsWith('.d.ts') ||
-        EXTERNAL_PACKAGES.includes(pkgName) ||
+        EXTERNAL_PACKAGES.has(pkgName) ||
         isBuiltin(rawId)
       )
     },
