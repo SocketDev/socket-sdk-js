@@ -4,9 +4,6 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "noEmit": true,
-    "paths": {
-      "./../dist/*": ["./../src/*"]
-    },
     "skipLibCheck": true,
     "types": ["vitest/globals", "node"],
     "verbatimModuleSyntax": false
