@@ -6,6 +6,7 @@ import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../dist/index'
+import { assertApiError } from './utils/assertions.mts'
 import { TEST_PACKAGE_CONFIGS } from './utils/fixtures.mts'
 
 describe('SocketSdk - Scanning APIs', () => {
@@ -58,6 +59,49 @@ describe('SocketSdk - Scanning APIs', () => {
       }
     })
 
+    it('should handle error in getOrgAnalytics', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/analytics/org/invalid')
+        .reply(400, { error: { message: 'Invalid time period' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.getOrgAnalytics('invalid')
+
+      assertApiError(res, 400)
+    })
+
+    it('should get issues by NPM package', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/npm/lodash/4.17.21/issues')
+        .reply(200, [
+          {
+            id: 'issue-1',
+            type: 'vulnerability',
+            severity: 'high',
+            title: 'Prototype Pollution',
+          },
+        ])
+
+      const client = new SocketSdk('test-token')
+      const res = await client.getIssuesByNpmPackage('lodash', '4.17.21')
+
+      expect(res.success).toBe(true)
+      if (res.success) {
+        expect(Array.isArray(res.data)).toBe(true)
+      }
+    })
+
+    it('should handle error in getIssuesByNpmPackage', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/npm/invalid-pkg/1.0.0/issues')
+        .reply(404, { error: { message: 'Package not found' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.getIssuesByNpmPackage('invalid-pkg', '1.0.0')
+
+      assertApiError(res, 404)
+    })
+
     it('should get repository analytics', async () => {
       nock('https://api.socket.dev')
         .get('/v0/analytics/repo/test-repo/7d')
@@ -92,11 +136,7 @@ describe('SocketSdk - Scanning APIs', () => {
       const client = new SocketSdk('test-token')
       const res = await client.getRepoAnalytics('test-repo', '7d')
 
-      expect(res.success).toBe(false)
-      if (!res.success) {
-        expect(res.status).toBe(404)
-        expect(res.error).toContain('Socket API Request failed (404)')
-      }
+      assertApiError(res, 404)
     })
   })
 
@@ -128,11 +168,7 @@ describe('SocketSdk - Scanning APIs', () => {
       const client = new SocketSdk('test-token')
       const res = await client.getScan('invalid-scan')
 
-      expect(res.success).toBe(false)
-      if (!res.success) {
-        expect(res.status).toBe(404)
-        expect(res.error).toContain('Socket API Request failed (404)')
-      }
+      assertApiError(res, 404)
     })
 
     it('should get scan list', async () => {
@@ -182,11 +218,7 @@ describe('SocketSdk - Scanning APIs', () => {
       const client = new SocketSdk('test-token')
       const res = await client.getSupportedScanFiles()
 
-      expect(res.success).toBe(false)
-      if (!res.success) {
-        expect(res.status).toBe(404)
-        expect(res.error).toContain('Socket API Request failed (404)')
-      }
+      assertApiError(res, 404)
     })
   })
 
@@ -223,11 +255,7 @@ describe('SocketSdk - Scanning APIs', () => {
       const client = new SocketSdk('test-token')
       const res = await client.getScoreByNpmPackage('nonexistent-pkg', '1.0.0')
 
-      expect(res.success).toBe(false)
-      if (!res.success) {
-        expect(res.status).toBe(404)
-        expect(res.error).toContain('Socket API Request failed (404)')
-      }
+      assertApiError(res, 404)
     })
   })
 
