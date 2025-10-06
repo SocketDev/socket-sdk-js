@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.11.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.11.1) - 2025-10-06
+
+### Added
+- Performance optimizations with memoization for `normalizeBaseUrl` and quota utility functions
+- Performance tracking to HTTP client functions
+- Comprehensive error handling tests for SDK methods across organization, scanning, and batch APIs
+- Reusable assertion helpers for SDK tests
+
+### Changed
+- Improved test coverage and reliability with additional test cases
+- Streamlined documentation (README, TESTING.md, QUOTA.md, EXAMPLES.md) for better clarity and discoverability
+
 ## [1.11.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.11.0) - 2025-10-04
 
 ### Added
