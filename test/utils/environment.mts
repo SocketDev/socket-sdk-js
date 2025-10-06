@@ -18,7 +18,6 @@ export function setupTestEnvironment() {
 
 // Handle unhandled rejections in tests.
 process.on('unhandledRejection', cause => {
-  const error = new Error('Unhandled rejection')
-  ;(error as any).cause = cause
+  const error = new Error('Unhandled rejection', { cause })
   throw error
 })
