@@ -70,7 +70,7 @@
     "prepare": "husky",
     "prepublishOnly": "echo 'ERROR: Use GitHub Actions workflow for publishing' && exit 1",
     "pretest:unit": "pnpm run build",
-    "test": "run-s check test:*",
+    "test": "run-s check test:run",
     "test:run": "node scripts/test.mjs",
     "test:unit": "dotenvx -q run -f .env.test -- vitest --run",
     "test:unit:update": "dotenvx -q run -f .env.test -- vitest --run --update",
