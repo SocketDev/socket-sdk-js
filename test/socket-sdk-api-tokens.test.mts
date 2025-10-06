@@ -1,22 +1,18 @@
 /** @fileoverview Tests for organization API token management operations. */
 import nock from 'nock'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, it } from 'vitest'
 
-import { SocketSdk } from '../dist/index'
+import type { SocketSdk } from '../dist/index'
+import { assertError, assertSuccess } from './utils/assertions.mts'
+import { createTestClient, setupTestEnvironment } from './utils/environment.mts'
 
 describe('Socket SDK - API Token Management', () => {
+  setupTestEnvironment()
+
   let client: SocketSdk
 
   beforeEach(() => {
-    nock.cleanAll()
-    nock.disableNetConnect()
-    client = new SocketSdk('test-api-token')
-  })
-
-  afterEach(() => {
-    if (!nock.isDone()) {
-      throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
-    }
+    client = createTestClient()
   })
 
   describe('getAPITokens', () => {
@@ -33,11 +29,7 @@ describe('Socket SDK - API Token Management', () => {
         .reply(200, mockTokens)
 
       const result = await client.getAPITokens('test-org')
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockTokens)
-      }
+      assertSuccess(result)
     })
 
     it('should handle URL encoding for organization slug', async () => {
@@ -48,8 +40,7 @@ describe('Socket SDK - API Token Management', () => {
         .reply(200, mockTokens)
 
       const result = await client.getAPITokens('test@org')
-
-      expect(result.success).toBe(true)
+      assertSuccess(result)
     })
 
     it('should handle 403 unauthorized access', async () => {
@@ -58,11 +49,7 @@ describe('Socket SDK - API Token Management', () => {
         .reply(403, { error: { message: 'Forbidden' } })
 
       const result = await client.getAPITokens('forbidden-org')
-
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error).toContain('Forbidden')
-      }
+      assertError(result, 403, 'Forbidden')
     })
   })
 
@@ -79,11 +66,7 @@ describe('Socket SDK - API Token Management', () => {
         .reply(200, mockResponse)
 
       const result = await client.postAPIToken('test-org', tokenData)
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockResponse)
-      }
+      assertSuccess(result)
     })
 
     it('should handle invalid token data', async () => {
@@ -94,11 +77,7 @@ describe('Socket SDK - API Token Management', () => {
         .reply(400, { error: { message: 'Invalid token data' } })
 
       const result = await client.postAPIToken('test-org', tokenData)
-
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error).toContain('Invalid token data')
-      }
+      assertError(result, 400, 'Invalid token data')
     })
   })
 
@@ -114,11 +93,7 @@ describe('Socket SDK - API Token Management', () => {
         .reply(200, mockResponse)
 
       const result = await client.postAPITokensRotate('test-org', 'token-123')
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockResponse)
-      }
+      assertSuccess(result)
     })
 
     it('should handle URL encoding for token ID', async () => {
@@ -129,8 +104,7 @@ describe('Socket SDK - API Token Management', () => {
         .reply(200, mockResponse)
 
       const result = await client.postAPITokensRotate('test-org', 'token@123')
-
-      expect(result.success).toBe(true)
+      assertSuccess(result)
     })
 
     it('should handle 404 for non-existent token', async () => {
@@ -139,11 +113,7 @@ describe('Socket SDK - API Token Management', () => {
         .reply(404, { error: { message: 'Token not found' } })
 
       const result = await client.postAPITokensRotate('test-org', 'nonexistent')
-
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error).toContain('Token not found')
-      }
+      assertError(result, 404, 'Token not found')
     })
   })
 
@@ -156,11 +126,7 @@ describe('Socket SDK - API Token Management', () => {
         .reply(200, mockResponse)
 
       const result = await client.postAPITokensRevoke('test-org', 'token-123')
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockResponse)
-      }
+      assertSuccess(result)
     })
 
     it('should handle already revoked token', async () => {
@@ -172,11 +138,7 @@ describe('Socket SDK - API Token Management', () => {
         'test-org',
         'revoked-token',
       )
-
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error).toContain('Token already revoked')
-      }
+      assertError(result, 409, 'Token already revoked')
     })
   })
 
@@ -196,11 +158,7 @@ describe('Socket SDK - API Token Management', () => {
         'token-123',
         updateData,
       )
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockResponse)
-      }
+      assertSuccess(result)
     })
 
     it('should handle invalid update data', async () => {
@@ -215,11 +173,7 @@ describe('Socket SDK - API Token Management', () => {
         'token-123',
         updateData,
       )
-
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error).toContain('Invalid scope')
-      }
+      assertError(result, 400, 'Invalid scope')
     })
   })
 })
