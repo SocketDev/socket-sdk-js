@@ -22,6 +22,7 @@ export function setupTestEnvironment() {
  * Create a test client with a standard token.
  *
  * @param token - Optional API token (default: 'test-api-token')
+ * @param options - Optional SDK configuration
  * @returns SocketSdk instance for testing
  *
  * @example
@@ -32,8 +33,11 @@ export function setupTestEnvironment() {
  * })
  * ```
  */
-export function createTestClient(token = 'test-api-token'): SocketSdk {
-  return new SocketSdk(token)
+export function createTestClient(
+  token = 'test-api-token',
+  options?: ConstructorParameters<typeof SocketSdk>[1],
+): SocketSdk {
+  return new SocketSdk(token, options)
 }
 
 // Handle unhandled rejections in tests.

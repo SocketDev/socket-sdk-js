@@ -1,25 +1,19 @@
 /** @fileoverview Tests for SBOM export functionality in CycloneDX and SPDX formats. */
 import nock from 'nock'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../dist/index'
+import type { SocketSdk } from '../dist/index'
+
+import { assertError, assertSuccess } from './utils/assertions.mts'
+import { createTestClient, setupTestEnvironment } from './utils/environment.mts'
 
 describe('Socket SDK - SBOM Export', () => {
+  setupTestEnvironment()
+
   let client: SocketSdk
 
   beforeEach(() => {
-    nock.cleanAll()
-    nock.disableNetConnect()
-    client = new SocketSdk('test-api-token', {
-      // Disable retries for network error tests
-      retries: 0,
-    })
-  })
-
-  afterEach(() => {
-    if (!nock.isDone()) {
-      throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
-    }
+    client = createTestClient('test-api-token', { retries: 0 })
   })
 
   describe('exportCDX', () => {
@@ -37,11 +31,7 @@ describe('Socket SDK - SBOM Export', () => {
         .reply(200, mockSBOM)
 
       const result = await client.exportCDX('test-org', 'scan-123')
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockSBOM)
-      }
+      assertSuccess(result)
     })
 
     it('should handle URL encoding for org slug and scan ID', async () => {
@@ -52,8 +42,7 @@ describe('Socket SDK - SBOM Export', () => {
         .reply(200, mockSBOM)
 
       const result = await client.exportCDX('test@org', 'scan#123')
-
-      expect(result.success).toBe(true)
+      assertSuccess(result)
     })
 
     it('should handle 403 unauthorized access', async () => {
@@ -62,11 +51,7 @@ describe('Socket SDK - SBOM Export', () => {
         .reply(403, { error: { message: 'Unauthorized' } })
 
       const result = await client.exportCDX('unauthorized-org', 'scan-123')
-
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error).toContain('Unauthorized')
-      }
+      assertError(result, 403, 'Unauthorized')
     })
 
     it('should handle network errors by throwing', async () => {
@@ -95,11 +80,7 @@ describe('Socket SDK - SBOM Export', () => {
         .reply(200, mockSBOM)
 
       const result = await client.exportSPDX('test-org', 'scan-123')
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockSBOM)
-      }
+      assertSuccess(result)
     })
 
     it('should handle URL encoding for parameters', async () => {
@@ -110,8 +91,7 @@ describe('Socket SDK - SBOM Export', () => {
         .reply(200, mockSBOM)
 
       const result = await client.exportSPDX('test@org', 'scan+456')
-
-      expect(result.success).toBe(true)
+      assertSuccess(result)
     })
 
     it('should handle network errors by throwing', async () => {
@@ -130,11 +110,7 @@ describe('Socket SDK - SBOM Export', () => {
         .reply(404, { error: { message: 'Full scan not found' } })
 
       const result = await client.exportSPDX('test-org', 'nonexistent')
-
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error).toContain('Full scan not found')
-      }
+      assertError(result, 404, 'Full scan not found')
     })
   })
 })
