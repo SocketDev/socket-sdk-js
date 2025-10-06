@@ -1,3 +1,4 @@
+/** @fileoverview Tests for JSON request body creation utilities. */
 import { describe, expect, it } from 'vitest'
 
 import { createRequestBodyForJson } from '../dist/index'
