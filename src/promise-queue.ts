@@ -1,5 +1,6 @@
 /**
- * A promise queue that limits concurrent execution of async tasks.
+ * @fileoverview Promise queue implementation for concurrent task management.
+ * Provides a promise queue that limits concurrent execution of async tasks.
  * Based on patterns from coana-package-manager for resource-aware async operations.
  */
 
