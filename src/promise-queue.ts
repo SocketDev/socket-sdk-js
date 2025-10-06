@@ -50,7 +50,7 @@ export class PromiseQueue {
   }
 
   private runNext(): void {
-    if (this.running >= this.maxConcurrency || this.queue.length === 0) {
+    if (this.running >= this.maxConcurrency || !this.queue.length) {
       return
     }
 
@@ -60,14 +60,14 @@ export class PromiseQueue {
       return
     }
 
-    this.running++
+    this.running += 1
 
     task
       .fn()
       .then(task.resolve)
       .catch(task.reject)
       .finally(() => {
-        this.running--
+        this.running -= 1
         this.runNext()
       })
   }
@@ -78,7 +78,7 @@ export class PromiseQueue {
   async onIdle(): Promise<void> {
     return await new Promise<void>(resolve => {
       const check = () => {
-        if (this.running === 0 && this.queue.length === 0) {
+        if (this.running === 0 && !this.queue.length) {
           resolve()
         } else {
           setImmediate(check)
