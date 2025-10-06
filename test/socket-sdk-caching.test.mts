@@ -139,10 +139,10 @@ describe('SocketSdk - Caching', () => {
         .get('/v0/quota')
         .reply(200, { quota: 6000 })
 
-      // Create client with very short TTL (50ms)
+      // Create client with short TTL (200ms)
       const client = new SocketSdk('test-token', {
         cache: true,
-        cacheTtl: 50,
+        cacheTtl: 200,
       })
 
       // First call - fetches from API
@@ -159,8 +159,8 @@ describe('SocketSdk - Caching', () => {
         expect(res2.data.quota).toBe(5000)
       }
 
-      // Wait for cache to expire (60ms > 50ms TTL)
-      await new Promise(resolve => setTimeout(resolve, 60))
+      // Wait for cache to expire (250ms > 200ms TTL)
+      await new Promise(resolve => setTimeout(resolve, 250))
 
       // Third call - cache expired, should fetch from API with new value
       const res3 = await client.getQuota()
