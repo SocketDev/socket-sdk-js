@@ -1,11 +1,12 @@
 /** @fileoverview Tests for SocketSdk authentication and basic API operations. */
-import type { IncomingHttpHeaders } from 'node:http'
 
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../dist/index'
 import { setupTestEnvironment } from './utils/environment.mts'
+
+import type { IncomingHttpHeaders } from 'node:http'
 
 describe('SocketSdk Authentication and Basic Operations', () => {
   setupTestEnvironment()
