@@ -10,6 +10,7 @@
 import { spawn } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import WIN32 from '@socketsecurity/registry/lib/constants/WIN32'
 import { logger } from '@socketsecurity/registry/lib/logger'
 import fastGlob from 'fast-glob'
 
@@ -18,8 +19,6 @@ import { getDirname } from './utils/path-helpers.mjs'
 const __dirname = getDirname(import.meta.url)
 const rootPath = path.join(__dirname, '..')
 const nodeModulesBinPath = path.join(rootPath, 'node_modules', '.bin')
-
-const WIN32 = process.platform === 'win32'
 
 async function main() {
   try {
@@ -69,12 +68,10 @@ async function main() {
     // Pass remaining arguments to vitest.
     const vitestArgs = ['run', ...expandedArgs]
 
-    // On Windows, .cmd files need to be executed with shell: true.
     const spawnOptions = {
       cwd: rootPath,
-      stdio: 'inherit',
       env: spawnEnv,
-      ...(WIN32 ? { shell: true } : {}),
+      stdio: 'inherit',
     }
 
     const child = spawn(vitestPath, vitestArgs, spawnOptions)
