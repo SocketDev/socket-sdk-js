@@ -2,10 +2,10 @@
 import nock from 'nock'
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import type { SocketSdk } from '../dist/index'
-
 import { assertError, assertSuccess } from './utils/assertions.mts'
 import { createTestClient, setupTestEnvironment } from './utils/environment.mts'
+
+import type { SocketSdk } from '../src/index'
 
 describe('Socket SDK - Repository Labels', () => {
   setupTestEnvironment()
@@ -65,6 +65,18 @@ describe('Socket SDK - Repository Labels', () => {
       )
       assertError(result, 409, 'Label already exists')
     })
+
+    it('should handle server errors by throwing', async () => {
+      const labelData = { name: 'New Label' }
+
+      nock('https://api.socket.dev')
+        .post('/v0/orgs/test-org/repos/test-repo/labels', labelData)
+        .reply(500, { error: { message: 'Internal server error' } })
+
+      await expect(
+        client.createOrgRepoLabel('test-org', 'test-repo', labelData),
+      ).rejects.toThrow('Socket API server error (500)')
+    })
   })
 
   describe('deleteOrgRepoLabel', () => {
@@ -94,6 +106,16 @@ describe('Socket SDK - Repository Labels', () => {
         'nonexistent',
       )
       assertError(result, 404, 'Label not found')
+    })
+
+    it('should handle server errors by throwing', async () => {
+      nock('https://api.socket.dev')
+        .delete('/v0/orgs/test-org/repos/test-repo/labels/critical')
+        .reply(500, { error: { message: 'Internal server error' } })
+
+      await expect(
+        client.deleteOrgRepoLabel('test-org', 'test-repo', 'critical'),
+      ).rejects.toThrow('Socket API server error (500)')
     })
   })
 
@@ -180,6 +202,16 @@ describe('Socket SDK - Repository Labels', () => {
       )
       assertError(result, 403, 'Access denied')
     })
+
+    it('should handle server errors by throwing', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/repos/test-repo/labels')
+        .reply(500, { error: { message: 'Internal server error' } })
+
+      await expect(
+        client.getOrgRepoLabelList('test-org', 'test-repo'),
+      ).rejects.toThrow('Socket API server error (500)')
+    })
   })
 
   describe('updateOrgRepoLabel', () => {
@@ -235,6 +267,23 @@ describe('Socket SDK - Repository Labels', () => {
         labelData,
       )
       assertSuccess(result)
+    })
+
+    it('should handle server errors by throwing', async () => {
+      const labelData = { name: 'Updated Label' }
+
+      nock('https://api.socket.dev')
+        .put('/v0/orgs/test-org/repos/test-repo/labels/critical', labelData)
+        .reply(500, { error: { message: 'Internal server error' } })
+
+      await expect(
+        client.updateOrgRepoLabel(
+          'test-org',
+          'test-repo',
+          'critical',
+          labelData,
+        ),
+      ).rejects.toThrow('Socket API server error (500)')
     })
   })
 })

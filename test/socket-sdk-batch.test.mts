@@ -6,7 +6,7 @@ import * as path from 'node:path'
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../dist/index'
+import { SocketSdk } from '../src/index'
 
 import type { IncomingHttpHeaders } from 'node:http'
 
