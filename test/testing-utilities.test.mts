@@ -182,6 +182,18 @@ describe('Testing Utilities', () => {
         expect(result.cause).toBe(cause)
       }
     })
+
+    it('should create error result with default status', () => {
+      const error = 'Operation failed'
+      const result = mockSdkResult<'getOrgRepo'>(false, error)
+
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe(error)
+        expect(result.status).toBe(500)
+        expect(result.data).toBeUndefined()
+      }
+    })
   })
 
   describe('mockSdkError', () => {
