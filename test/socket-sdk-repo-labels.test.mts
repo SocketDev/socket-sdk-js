@@ -1,22 +1,19 @@
 /** @fileoverview Tests for organization repository label management operations. */
 import nock from 'nock'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../dist/index'
+import type { SocketSdk } from '../dist/index'
+
+import { assertError, assertSuccess } from './utils/assertions.mts'
+import { createTestClient, setupTestEnvironment } from './utils/environment.mts'
 
 describe('Socket SDK - Repository Labels', () => {
+  setupTestEnvironment()
+
   let client: SocketSdk
 
   beforeEach(() => {
-    nock.cleanAll()
-    nock.disableNetConnect()
-    client = new SocketSdk('test-api-token')
-  })
-
-  afterEach(() => {
-    if (!nock.isDone()) {
-      throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
-    }
+    client = createTestClient()
   })
 
   describe('createOrgRepoLabel', () => {
@@ -35,11 +32,7 @@ describe('Socket SDK - Repository Labels', () => {
         'test-repo',
         labelData,
       )
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockResponse)
-      }
+      assertSuccess(result)
     })
 
     it('should handle URL encoding for parameters', async () => {
@@ -55,8 +48,7 @@ describe('Socket SDK - Repository Labels', () => {
         'test+repo',
         labelData,
       )
-
-      expect(result.success).toBe(true)
+      assertSuccess(result)
     })
 
     it('should handle duplicate label names', async () => {
@@ -71,11 +63,7 @@ describe('Socket SDK - Repository Labels', () => {
         'test-repo',
         labelData,
       )
-
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error).toContain('Label already exists')
-      }
+      assertError(result, 409, 'Label already exists')
     })
   })
 
@@ -92,11 +80,7 @@ describe('Socket SDK - Repository Labels', () => {
         'test-repo',
         'critical',
       )
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockResponse)
-      }
+      assertSuccess(result)
     })
 
     it('should handle 404 for non-existent label', async () => {
@@ -109,11 +93,7 @@ describe('Socket SDK - Repository Labels', () => {
         'test-repo',
         'nonexistent',
       )
-
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error).toContain('Label not found')
-      }
+      assertError(result, 404, 'Label not found')
     })
   })
 
@@ -132,11 +112,7 @@ describe('Socket SDK - Repository Labels', () => {
         'test-repo',
         'critical',
       )
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockLabel)
-      }
+      assertSuccess(result)
     })
 
     it('should handle URL encoding for all parameters', async () => {
@@ -151,8 +127,7 @@ describe('Socket SDK - Repository Labels', () => {
         'test+repo',
         'special+label',
       )
-
-      expect(result.success).toBe(true)
+      assertSuccess(result)
     })
 
     it('should handle server errors gracefully', async () => {
@@ -180,11 +155,7 @@ describe('Socket SDK - Repository Labels', () => {
         .reply(200, mockLabels)
 
       const result = await client.getOrgRepoLabelList('test-org', 'test-repo')
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockLabels)
-      }
+      assertSuccess(result)
     })
 
     it('should handle empty label list', async () => {
@@ -195,11 +166,7 @@ describe('Socket SDK - Repository Labels', () => {
         .reply(200, mockLabels)
 
       const result = await client.getOrgRepoLabelList('empty-org', 'empty-repo')
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockLabels)
-      }
+      assertSuccess(result)
     })
 
     it('should handle 403 unauthorized access', async () => {
@@ -211,11 +178,7 @@ describe('Socket SDK - Repository Labels', () => {
         'forbidden-org',
         'test-repo',
       )
-
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error).toContain('Access denied')
-      }
+      assertError(result, 403, 'Access denied')
     })
   })
 
@@ -236,11 +199,7 @@ describe('Socket SDK - Repository Labels', () => {
         'critical',
         labelData,
       )
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockResponse)
-      }
+      assertSuccess(result)
     })
 
     it('should handle invalid color format', async () => {
@@ -256,11 +215,7 @@ describe('Socket SDK - Repository Labels', () => {
         'critical',
         labelData,
       )
-
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error).toContain('Invalid color format')
-      }
+      assertError(result, 400, 'Invalid color format')
     })
 
     it('should handle partial updates', async () => {
@@ -279,11 +234,7 @@ describe('Socket SDK - Repository Labels', () => {
         'critical',
         labelData,
       )
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockResponse)
-      }
+      assertSuccess(result)
     })
   })
 })
