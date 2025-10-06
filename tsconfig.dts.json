@@ -1,0 +1,14 @@
+{
+  "extends": "./.config/tsconfig.base.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": false,
+    "emitDeclarationOnly": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "verbatimModuleSyntax": false
+  },
+  "include": ["src/**/*.ts"]
+}
