@@ -6,6 +6,7 @@ import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../dist/index'
+import { assertApiError } from './utils/assertions.mts'
 import { TEST_PACKAGE_CONFIGS } from './utils/fixtures.mts'
 
 describe('SocketSdk - Organization Management', () => {
@@ -55,6 +56,20 @@ describe('SocketSdk - Organization Management', () => {
       }
     })
 
+    it('should handle error in createOrgRepo', async () => {
+      nock('https://api.socket.dev')
+        .post('/v0/orgs/test-org/repos')
+        .reply(400, { error: { message: 'Invalid repository URL' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.createOrgRepo('test-org', {
+        name: 'invalid-repo',
+        url: 'not-a-valid-url',
+      })
+
+      assertApiError(res, 400)
+    })
+
     it('should get organization repository details', async () => {
       nock('https://api.socket.dev')
         .get('/v0/orgs/test-org/repos/test-repo')
@@ -83,11 +98,7 @@ describe('SocketSdk - Organization Management', () => {
       const client = new SocketSdk('test-token')
       const res = await client.getOrgRepo('test-org', 'nonexistent-repo')
 
-      expect(res.success).toBe(false)
-      if (!res.success) {
-        expect(res.status).toBe(404)
-        expect(res.error).toContain('Socket API Request failed (404)')
-      }
+      assertApiError(res, 404)
     })
 
     it('should list organization repositories', async () => {
@@ -119,11 +130,7 @@ describe('SocketSdk - Organization Management', () => {
       const client = new SocketSdk('test-token')
       const res = await client.getOrgRepoList('invalid-org')
 
-      expect(res.success).toBe(false)
-      if (!res.success) {
-        expect(res.status).toBe(404)
-        expect(res.error).toContain('Socket API Request failed (404)')
-      }
+      assertApiError(res, 404)
     })
 
     it('should update organization repository', async () => {
@@ -169,6 +176,17 @@ describe('SocketSdk - Organization Management', () => {
       expect(res.success).toBe(true)
     })
 
+    it('should handle error in deleteOrgRepo', async () => {
+      nock('https://api.socket.dev')
+        .delete('/v0/orgs/test-org/repos/invalid-repo')
+        .reply(404, { error: { message: 'Repository not found' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.deleteOrgRepo('test-org', 'invalid-repo')
+
+      assertApiError(res, 404)
+    })
+
     it('should get organization license policy', async () => {
       nock('https://api.socket.dev')
         .get('/v0/orgs/test-org/settings/license-policy')
@@ -196,11 +214,7 @@ describe('SocketSdk - Organization Management', () => {
       const client = new SocketSdk('test-token')
       const res = await client.getOrgLicensePolicy('nonexistent-org')
 
-      expect(res.success).toBe(false)
-      if (!res.success) {
-        expect(res.status).toBe(404)
-        expect(res.error).toContain('Socket API Request failed (404)')
-      }
+      assertApiError(res, 404)
     })
 
     it('should get audit log events', async () => {
@@ -226,6 +240,17 @@ describe('SocketSdk - Organization Management', () => {
         expect(res.data.results).toHaveLength(1)
         // Action property may not exist on the type
       }
+    })
+
+    it('should handle error in getAuditLogEvents', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/invalid-org/audit-log')
+        .reply(403, { error: { message: 'Access denied' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.getAuditLogEvents('invalid-org')
+
+      assertApiError(res, 403)
     })
 
     it('should get organization security policy', async () => {
@@ -269,6 +294,17 @@ describe('SocketSdk - Organization Management', () => {
       }
     })
 
+    it('should handle error in getOrgFullScanList', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/full-scans')
+        .reply(403, { error: { message: 'Access denied' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.getOrgFullScanList('test-org')
+
+      assertApiError(res, 403)
+    })
+
     it('should get full scan metadata', async () => {
       nock('https://api.socket.dev')
         .get('/v0/orgs/test-org/full-scans/scan-123/metadata')
@@ -300,11 +336,7 @@ describe('SocketSdk - Organization Management', () => {
         'nonexistent-scan',
       )
 
-      expect(res.success).toBe(false)
-      if (!res.success) {
-        expect(res.status).toBe(404)
-        expect(res.error).toContain('Socket API Request failed (404)')
-      }
+      assertApiError(res, 404)
     })
 
     it('should delete full scan', async () => {
@@ -316,6 +348,17 @@ describe('SocketSdk - Organization Management', () => {
       const res = await client.deleteOrgFullScan('test-org', 'scan-123')
 
       expect(res.success).toBe(true)
+    })
+
+    it('should handle error in deleteOrgFullScan', async () => {
+      nock('https://api.socket.dev')
+        .delete('/v0/orgs/test-org/full-scans/invalid-scan')
+        .reply(404, { error: { message: 'Scan not found' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.deleteOrgFullScan('test-org', 'invalid-scan')
+
+      assertApiError(res, 404)
     })
 
     it('should stream full scan using streamOrgFullScan to stdout', async () => {
@@ -397,6 +440,20 @@ describe('SocketSdk - Organization Management', () => {
       }
     })
 
+    it('should handle error in getOrgFullScanBuffered', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/full-scans/invalid-scan')
+        .reply(404, { error: { message: 'Scan not found' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.getOrgFullScanBuffered(
+        'test-org',
+        'invalid-scan',
+      )
+
+      assertApiError(res, 404)
+    })
+
     it('should handle undefined output in streamOrgFullScan', async () => {
       const scanData = 'Full scan data with undefined output'
       nock('https://api.socket.dev')
@@ -450,6 +507,27 @@ describe('SocketSdk - Organization Management', () => {
       }
     })
 
+    it('should handle error in createOrgFullScan', async () => {
+      const errorTempDir = mkdtempSync(path.join(tmpdir(), 'socket-sdk-test-'))
+      const errorPackageJsonPath = path.join(errorTempDir, 'package.json')
+      writeFileSync(errorPackageJsonPath, '{ "name": "test" }')
+
+      nock('https://api.socket.dev')
+        .post('/v0/orgs/invalid-org/full-scans')
+        .reply(403, { error: { message: 'Access denied' } })
+
+      const client = new SocketSdk('test-token')
+      const res = await client.createOrgFullScan(
+        'invalid-org',
+        [errorPackageJsonPath],
+        { pathsRelativeTo: errorTempDir },
+      )
+
+      assertApiError(res, 403)
+
+      rmSync(errorTempDir, { force: true, recursive: true })
+    })
+
     it('should handle HTTP error in streamOrgFullScan', async () => {
       nock('https://api.socket.dev')
         .get('/v0/orgs/test-org/full-scans/scan-error')
@@ -460,11 +538,7 @@ describe('SocketSdk - Organization Management', () => {
         output: true,
       })
 
-      expect(res.success).toBe(false)
-      if (!res.success) {
-        expect(res.status).toBe(404)
-        expect(res.error).toContain('Socket API Request failed (404)')
-      }
+      assertApiError(res, 404)
     })
 
     it('should handle network error in streamOrgFullScan', async () => {
