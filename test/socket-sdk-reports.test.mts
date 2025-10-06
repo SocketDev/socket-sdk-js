@@ -1,25 +1,22 @@
 /** @fileoverview Tests for scan report creation and management operations. */
 import nock from 'nock'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../dist/index'
+import type { SocketSdk } from '../dist/index'
+
+import { assertError, assertSuccess } from './utils/assertions.mts'
+import { createTestClient, setupTestEnvironment } from './utils/environment.mts'
 
 describe('Socket SDK - Report Management', () => {
+  setupTestEnvironment()
+
   let client: SocketSdk
 
   beforeEach(() => {
-    nock.cleanAll()
-    nock.disableNetConnect()
-    client = new SocketSdk('test-api-token', {
+    client = createTestClient('test-api-token', {
       // Disable retries for network error tests
       retries: 0,
     })
-  })
-
-  afterEach(() => {
-    if (!nock.isDone()) {
-      throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
-    }
   })
 
   describe('deleteReport', () => {
@@ -31,11 +28,7 @@ describe('Socket SDK - Report Management', () => {
         .reply(200, mockResponse)
 
       const result = await client.deleteReport('report-123')
-
-      expect(result.success).toBe(true)
-      if (result.success) {
-        expect(result.data).toEqual(mockResponse)
-      }
+      assertSuccess(result)
     })
 
     it('should handle 404 for non-existent report', async () => {
@@ -44,11 +37,7 @@ describe('Socket SDK - Report Management', () => {
         .reply(404, { error: { message: 'Report not found' } })
 
       const result = await client.deleteReport('nonexistent')
-
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error).toContain('Report not found')
-      }
+      assertError(result, 404, 'Report not found')
     })
 
     it('should URL encode report ID', async () => {
@@ -59,8 +48,7 @@ describe('Socket SDK - Report Management', () => {
         .reply(200, mockResponse)
 
       const result = await client.deleteReport('report@123')
-
-      expect(result.success).toBe(true)
+      assertSuccess(result)
     })
 
     it('should handle server errors by throwing', async () => {
