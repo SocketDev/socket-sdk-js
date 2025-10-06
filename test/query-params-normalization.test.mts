@@ -1,3 +1,4 @@
+/** @fileoverview Tests for query parameter normalization and URL encoding. */
 import { describe, expect, it } from 'vitest'
 
 import { queryToSearchParams } from '../dist/index'

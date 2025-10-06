@@ -1,4 +1,5 @@
-import { Agent as HttpAgent } from 'node:http'
+/** @fileoverview Tests for SocketSdk agent configuration and HTTP client setup. */
+import { Agent as HttpAgent, type IncomingHttpHeaders } from 'node:http'
 import { Agent as HttpsAgent } from 'node:https'
 
 import nock from 'nock'
@@ -98,7 +99,7 @@ describe('SocketSdk Agent Configuration', () => {
   describe('Custom user agent configuration', () => {
     it('configures SDK with custom user agent string', async () => {
       const customUserAgent = 'MyCustomApp/1.0.0'
-      let capturedHeaders: any = {}
+      let capturedHeaders: IncomingHttpHeaders = {}
 
       nock('https://api.socket.dev')
         .get('/v0/quota')
@@ -121,7 +122,7 @@ describe('SocketSdk Agent Configuration', () => {
     })
 
     it('uses default user agent when not specified', async () => {
-      let capturedHeaders: any = {}
+      let capturedHeaders: IncomingHttpHeaders = {}
 
       nock('https://api.socket.dev')
         .get('/v0/quota')
