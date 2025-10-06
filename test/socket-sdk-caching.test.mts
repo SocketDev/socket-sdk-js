@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import * as cacache from '@socketsecurity/registry/lib/cacache'
 
-import { SocketSdk } from '../dist/index'
+import { SocketSdk } from '../src/index'
 
 describe('SocketSdk - Caching', () => {
   beforeEach(async () => {

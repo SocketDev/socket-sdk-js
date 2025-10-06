@@ -2,9 +2,9 @@
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../dist/index'
+import { SocketSdk } from '../src/index'
 
-import type { Entitlement, EntitlementsResponse } from '../dist/index'
+import type { Entitlement, EntitlementsResponse } from '../src/index'
 
 describe('Entitlements API', () => {
   let client: SocketSdk

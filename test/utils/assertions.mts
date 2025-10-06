@@ -5,7 +5,7 @@
 
 import { expect } from 'vitest'
 
-import type { SocketSdkGenericResult } from '../../dist/index'
+import type { SocketSdkGenericResult } from '../../src/index'
 
 /**
  * Assert that an SDK result is a successful response.

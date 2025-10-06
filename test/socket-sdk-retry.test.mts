@@ -5,7 +5,7 @@
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../dist/index'
+import { SocketSdk } from '../src/index'
 
 describe('SocketSdk - Retry Logic', () => {
   beforeEach(() => {
