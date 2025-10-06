@@ -92,7 +92,7 @@ jobs:
         run: |
           git checkout -b automated/open-api
           git add .
-          git commit -m "fix(openapi): sync with openapi definition"
+          git commit --no-verify -m "fix(openapi): sync with openapi definition"
           git push origin automated/open-api -fu --no-verify
 
       - name: Create Pull Request
