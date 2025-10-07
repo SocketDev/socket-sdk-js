@@ -92,6 +92,21 @@ export class SocketSdk {
    * Sets up authentication, base URL, HTTP client options, retry behavior, and caching.
    */
   constructor(apiToken: string, options?: SocketSdkOptions | undefined) {
+    // Input validation for API token.
+    const MAX_API_TOKEN_LENGTH = 1024
+    if (typeof apiToken !== 'string') {
+      throw new TypeError('"apiToken" is required and must be a string')
+    }
+    const trimmedToken = apiToken.trim()
+    if (!trimmedToken) {
+      throw new Error('"apiToken" cannot be empty or whitespace-only')
+    }
+    if (trimmedToken.length > MAX_API_TOKEN_LENGTH) {
+      throw new Error(
+        `"apiToken" exceeds maximum length of ${MAX_API_TOKEN_LENGTH} characters`,
+      )
+    }
+
     const {
       agent: agentOrObj,
       baseUrl = 'https://api.socket.dev/v0/',
@@ -112,7 +127,7 @@ export class SocketSdk {
           agentAsGotOptions.http2
         : agentOrObj
     ) as Agent | undefined
-    this.#apiToken = apiToken
+    this.#apiToken = trimmedToken
     this.#baseUrl = normalizeBaseUrl(baseUrl)
     this.#cache = cache
       ? createTtlCache({
@@ -126,7 +141,7 @@ export class SocketSdk {
     this.#reqOptions = {
       ...(agent ? { agent } : {}),
       headers: {
-        Authorization: `Basic ${btoa(`${apiToken}:`)}`,
+        Authorization: `Basic ${btoa(`${trimmedToken}:`)}`,
         'User-Agent': userAgent ?? DEFAULT_USER_AGENT,
       },
       signal: abortSignal,

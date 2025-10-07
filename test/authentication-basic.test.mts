@@ -16,6 +16,48 @@ describe('SocketSdk Authentication and Basic Operations', () => {
       const client = new SocketSdk('yetAnotherApiKey')
       expect(client).toBeTruthy()
     })
+
+    it('rejects empty string API token', () => {
+      expect(() => new SocketSdk('')).toThrow(
+        '"apiToken" cannot be empty or whitespace-only',
+      )
+    })
+
+    it('rejects whitespace-only API token', () => {
+      expect(() => new SocketSdk('   ')).toThrow(
+        '"apiToken" cannot be empty or whitespace-only',
+      )
+    })
+
+    it('rejects null API token', () => {
+      expect(() => new SocketSdk(null as any)).toThrow(
+        '"apiToken" is required and must be a string',
+      )
+    })
+
+    it('rejects undefined API token', () => {
+      expect(() => new SocketSdk(undefined as any)).toThrow(
+        '"apiToken" is required and must be a string',
+      )
+    })
+
+    it('rejects API token exceeding maximum length', () => {
+      const longToken = 'x'.repeat(1025)
+      expect(() => new SocketSdk(longToken)).toThrow(
+        '"apiToken" exceeds maximum length of 1024 characters',
+      )
+    })
+
+    it('accepts API token at maximum length', () => {
+      const maxToken = 'x'.repeat(1024)
+      const client = new SocketSdk(maxToken)
+      expect(client).toBeTruthy()
+    })
+
+    it('trims whitespace from valid API token', () => {
+      const client = new SocketSdk('  validToken  ')
+      expect(client).toBeTruthy()
+    })
   })
 
   describe('Quota management endpoints', () => {
