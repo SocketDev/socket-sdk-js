@@ -33,6 +33,13 @@ const CORE_FILES = [
 function mapSourceToTests(filepath) {
   const normalized = normalizePath(filepath)
 
+  // Skip non-code files
+  const ext = path.extname(normalized)
+  const codeExtensions = ['.js', '.mjs', '.cjs', '.ts', '.cts', '.mts', '.json']
+  if (!codeExtensions.includes(ext)) {
+    return []
+  }
+
   // Core files affect all tests
   if (CORE_FILES.some(f => normalized.includes(f))) {
     return ['all']
