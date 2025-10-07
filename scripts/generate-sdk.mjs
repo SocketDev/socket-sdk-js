@@ -15,7 +15,7 @@ import { spawn } from 'node:child_process'
 import { resolve } from 'node:path'
 import { logger } from '@socketsecurity/registry/lib/logger'
 import { getRootPath } from './utils/path-helpers.mjs'
-import { runPnpmScript } from './utils/run-command.mjs'
+import { runCommand, runPnpmScript } from './utils/run-command.mjs'
 
 const rootPath = getRootPath(import.meta.url)
 const typesPath = resolve(rootPath, 'types/api.d.ts')
@@ -57,9 +57,7 @@ async function main() {
 
     // Step 1: Prettify OpenAPI JSON
     logger.log('  1. Prettifying OpenAPI JSON...')
-    let exitCode = await runPnpmScript('run', [
-      'scripts/prettify-base-json.mjs',
-    ])
+    let exitCode = await runCommand('node', ['scripts/prettify-base-json.mjs'])
     if (exitCode !== 0) {
       process.exitCode = exitCode
       return
