@@ -63,18 +63,26 @@ export default function baseConfig(extendConfig = {}) {
     // but is actually accessed dynamically or through other means.
     treeshake: false,
     external(rawId) {
+      // Order checks by likelihood for better performance.
+      // Externalize Node.js built-ins (most common case).
+      if (isBuiltin(rawId)) {
+        return true
+      }
       const id = normalizeId(rawId)
+      // Externalize TypeScript declaration files.
+      if (
+        id.endsWith('.d.ts') ||
+        id.endsWith('.d.mts') ||
+        id.endsWith('.d.cts')
+      ) {
+        return true
+      }
+      // Externalize specific external packages.
       const pkgName = getPackageName(
         id,
         path.isAbsolute(id) ? nmPath.length + 1 : 0,
       )
-      return (
-        id.endsWith('.d.cts') ||
-        id.endsWith('.d.mts') ||
-        id.endsWith('.d.ts') ||
-        EXTERNAL_PACKAGES.has(pkgName) ||
-        isBuiltin(rawId)
-      )
+      return EXTERNAL_PACKAGES.has(pkgName)
     },
     onwarn(warning, warn) {
       // Suppress warnings.
