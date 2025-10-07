@@ -16,8 +16,8 @@ export function runCommand(command, args = [], options = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       stdio: 'inherit',
-      ...options,
       ...(WIN32 && { shell: true }),
+      ...options,
     })
 
     child.on('exit', code => {
@@ -40,8 +40,8 @@ export function runCommand(command, args = [], options = {}) {
 export function runCommandSync(command, args = [], options = {}) {
   const result = spawnSync(command, args, {
     stdio: 'inherit',
-    ...options,
     ...(WIN32 && { shell: true }),
+    ...options,
   })
 
   return result.status || 0
@@ -64,7 +64,7 @@ export async function runPnpmScript(scriptName, extraArgs = [], options = {}) {
  * @returns {Promise<number>} Exit code of first failing command, or 0 if all succeed
  */
 export async function runSequence(commands) {
-  for (const { command, args = [], options = {} } of commands) {
+  for (const { args = [], command, options = {} } of commands) {
     const exitCode = await runCommand(command, args, options)
     if (exitCode !== 0) {
       return exitCode
@@ -79,7 +79,7 @@ export async function runSequence(commands) {
  * @returns {Promise<number[]>} Array of exit codes
  */
 export async function runParallel(commands) {
-  const promises = commands.map(({ command, args = [], options = {} }) =>
+  const promises = commands.map(({ args = [], command, options = {} }) =>
     runCommand(command, args, options),
   )
   return Promise.all(promises)
@@ -98,9 +98,9 @@ export function runCommandQuiet(command, args = [], options = {}) {
     let stderr = ''
 
     const child = spawn(command, args, {
-      ...options,
       stdio: ['inherit', 'pipe', 'pipe'],
       ...(WIN32 && { shell: true }),
+      ...options,
     })
 
     child.stdout?.on('data', data => {
