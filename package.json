@@ -80,7 +80,7 @@
     "update:socket": "pnpm -r update '@socketsecurity/*' --latest"
   },
   "dependencies": {
-    "@socketsecurity/registry": "1.5.2"
+    "@socketsecurity/registry": "1.5.3"
   },
   "devDependencies": {
     "@babel/core": "7.28.4",
