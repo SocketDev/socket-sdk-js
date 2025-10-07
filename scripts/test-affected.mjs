@@ -1,7 +1,8 @@
 /**
- * @fileoverview Test runner for the project.
+ * @fileoverview Affected test runner for the project.
  * Handles test execution with Vitest, including:
- * - Force flag processing for running all tests
+ * - Affected test running based on changed files
+ * - --all flag for running all tests
  * - Glob pattern expansion for test file selection
  * - Cross-platform compatibility (Windows/Unix)
  * - Memory optimization for CI environments
@@ -15,6 +16,7 @@ import { logger } from '@socketsecurity/registry/lib/logger'
 import fastGlob from 'fast-glob'
 
 import { getDirname } from './utils/path-helpers.mjs'
+import { getTestsToRun } from './utils/affected-test-mapper.mjs'
 
 const __dirname = getDirname(import.meta.url)
 const rootPath = path.join(__dirname, '..')
@@ -22,7 +24,7 @@ const nodeModulesBinPath = path.join(rootPath, 'node_modules', '.bin')
 
 async function main() {
   try {
-    // Separate force flag from other arguments.
+    // Parse flags from arguments.
     let args = process.argv.slice(2)
 
     // Remove the -- separator if it's the first argument.
@@ -30,18 +32,52 @@ async function main() {
       args = args.slice(1)
     }
 
-    // Check if --force is present anywhere in the arguments.
+    // Check if --all is present anywhere in the arguments.
+    const allIndex = args.indexOf('--all')
+    const hasAll = allIndex !== -1
+
+    if (hasAll) {
+      args.splice(allIndex, 1)
+    }
+
+    // Check if --force is present (alias for --all).
     const forceIndex = args.indexOf('--force')
     const hasForce = forceIndex !== -1
 
     if (hasForce) {
-      // Remove --force from arguments.
       args.splice(forceIndex, 1)
+    }
+
+    // Check if --staged is present.
+    const stagedIndex = args.indexOf('--staged')
+    const hasStaged = stagedIndex !== -1
+
+    if (hasStaged) {
+      args.splice(stagedIndex, 1)
+    }
+
+    const runAll = hasAll || hasForce
+
+    // If no specific test files provided, use affected testing.
+    if (args.length === 0 || args.every(arg => arg.startsWith('-'))) {
+      const testsToRun = getTestsToRun({ staged: hasStaged, all: runAll })
+
+      if (testsToRun === null) {
+        logger.info('No relevant changes detected, skipping tests')
+        return
+      }
+
+      if (testsToRun !== 'all') {
+        logger.info(`Running affected tests: ${testsToRun.join(', ')}`)
+        args.push(...testsToRun)
+      } else {
+        logger.info('Running all tests')
+      }
     }
 
     const spawnEnv = {
       ...process.env,
-      ...(hasForce ? { FORCE_TEST: '1' } : {}),
+      ...(runAll ? { FORCE_TEST: '1' } : {}),
       // Increase Node.js heap size to prevent out of memory errors in tests.
       // Use 8GB in CI environments, 4GB locally.
       // Add --max-semi-space-size to improve GC performance for RegExp-heavy tests.

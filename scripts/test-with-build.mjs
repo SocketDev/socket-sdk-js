@@ -2,6 +2,7 @@
 /**
  * @fileoverview Test script that ensures dist/ is built before running tests.
  * Used by pre-commit hooks to ensure tests can import from ../dist/index.
+ * Uses affected testing based on staged changes.
  */
 
 import { existsSync } from 'node:fs'
@@ -29,9 +30,9 @@ if (!existsSync(distIndexPath)) {
   }
 }
 
-// Run tests
+// Run affected tests based on staged changes
 try {
-  execSync('pnpm test', {
+  execSync('node scripts/test-affected.mjs --staged', {
     cwd: projectRoot,
     stdio: 'inherit',
   })
