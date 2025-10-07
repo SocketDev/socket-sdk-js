@@ -23,6 +23,7 @@ async function main() {
     const linters = [
       {
         args: [
+          'exec',
           'oxlint',
           '-c=.config/.oxlintrc.json',
           '--ignore-path=.config/.oxlintignore',
@@ -34,11 +35,12 @@ async function main() {
         name: 'oxlint',
       },
       {
-        args: ['biome', 'format', '--log-level=none', '--fix', '.'],
+        args: ['exec', 'biome', 'format', '--log-level=none', '--fix', '.'],
         name: 'biome',
       },
       {
         args: [
+          'exec',
           'eslint',
           '--config',
           '.config/eslint.config.mjs',
@@ -54,7 +56,7 @@ async function main() {
 
     for (const { args, name } of linters) {
       logger.log(`  - Running ${name}...`)
-      const result = await runCommandQuiet(args[0], args.slice(1))
+      const result = await runCommandQuiet('pnpm', args)
 
       // These linters can exit with non-zero when they make fixes
       // So we don't treat that as an error
