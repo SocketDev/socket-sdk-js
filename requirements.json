@@ -50,7 +50,7 @@
     },
     "getOrgAnalytics": {
       "quota": 10,
-      "permissions": ["analytics:read"]
+      "permissions": ["report:write"]
     },
     "getOrganizations": {
       "quota": 0,
@@ -98,7 +98,7 @@
     },
     "getRepoAnalytics": {
       "quota": 10,
-      "permissions": ["analytics:read"]
+      "permissions": ["report:write"]
     },
     "getScan": {
       "quota": 0,
