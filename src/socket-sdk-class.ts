@@ -16,7 +16,11 @@ import { getOwn, isObjectObject } from '@socketsecurity/registry/lib/objects'
 import { pRetry } from '@socketsecurity/registry/lib/promises'
 import { urlSearchParamAsBoolean } from '@socketsecurity/registry/lib/url'
 
-import { DEFAULT_USER_AGENT, httpAgentNames } from './constants'
+import {
+  DEFAULT_HTTP_TIMEOUT,
+  DEFAULT_USER_AGENT,
+  httpAgentNames,
+} from './constants'
 import {
   createRequestBodyForFilepaths,
   createRequestBodyForJson,
@@ -114,7 +118,7 @@ export class SocketSdk {
       cacheTtl = 5 * 60 * 1000,
       retries = 0,
       retryDelay = 100,
-      timeout,
+      timeout = DEFAULT_HTTP_TIMEOUT,
       userAgent,
     } = { __proto__: null, ...options } as SocketSdkOptions
     const agentKeys = agentOrObj ? Object.keys(agentOrObj) : []
