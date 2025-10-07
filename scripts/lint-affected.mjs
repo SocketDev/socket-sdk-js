@@ -8,10 +8,10 @@ import path from 'node:path'
 
 import { promises as fs } from 'node:fs'
 
-import { logger } from '../dist/logger.js'
-import { spawn } from '../dist/utils/spawn.js'
+import WIN32 from '@socketsecurity/registry/lib/constants/WIN32'
+import { logger } from '@socketsecurity/registry/lib/logger'
+import { spawn } from '@socketsecurity/registry/lib/spawn'
 
-import constants from './constants.mjs'
 import { getChangedFiles, getStagedFiles } from './utils/git.mjs'
 import { runCommandQuiet } from './utils/run-command.mjs'
 
@@ -64,10 +64,7 @@ function shouldRunAllLinters(changedFiles) {
     }
 
     // Core types.
-    if (
-      file.includes('src/types.ts') ||
-      file.includes('types/api.d.ts')
-    ) {
+    if (file.includes('src/types.ts') || file.includes('types/api.d.ts')) {
       return true
     }
   }
@@ -119,32 +116,6 @@ async function runLintersOnFiles(files, options = {}) {
     {
       args: [
         'exec',
-        'oxlint',
-        '-c=.config/oxlintrc.json',
-        '--ignore-path=.config/.oxlintignore',
-        '--tsconfig=tsconfig.json',
-        ...(fix ? ['--fix'] : []),
-        ...files,
-      ],
-      name: 'oxlint',
-      enabled: true,
-    },
-    {
-      args: [
-        'exec',
-        'biome',
-        'format',
-        '--log-level=none',
-        ...(fix ? ['--write'] : ['--check']),
-        ...files,
-      ],
-      name: 'biome',
-      // Only run biome when fixing.
-      enabled: fix,
-    },
-    {
-      args: [
-        'exec',
         'eslint',
         '--config',
         '.config/eslint.config.mjs',
@@ -165,7 +136,7 @@ async function runLintersOnFiles(files, options = {}) {
     }
 
     logger.log(`  - Running ${name}...`)
-    // eslint-disable-next-line no-await-in-loop
+
     const result = await runCommandQuiet('pnpm', args)
 
     if (result.exitCode !== 0) {
@@ -197,32 +168,6 @@ async function runLintersOnAll(options = {}) {
     {
       args: [
         'exec',
-        'oxlint',
-        '-c=.config/oxlintrc.json',
-        '--ignore-path=.config/.oxlintignore',
-        '--tsconfig=tsconfig.json',
-        ...(fix ? ['--fix'] : []),
-        '.',
-      ],
-      name: 'oxlint',
-      enabled: true,
-    },
-    {
-      args: [
-        'exec',
-        'biome',
-        'format',
-        '--log-level=none',
-        ...(fix ? ['--write'] : ['--check']),
-        '.',
-      ],
-      name: 'biome',
-      // Only run biome when fixing.
-      enabled: fix,
-    },
-    {
-      args: [
-        'exec',
         'eslint',
         '--config',
         '.config/eslint.config.mjs',
@@ -243,7 +188,7 @@ async function runLintersOnAll(options = {}) {
     }
 
     logger.log(`  - Running ${name}...`)
-    // eslint-disable-next-line no-await-in-loop
+
     const result = await runCommandQuiet('pnpm', args)
 
     if (result.exitCode !== 0) {
@@ -369,7 +314,6 @@ async function main() {
 
         // Check if project exists.
         try {
-          // eslint-disable-next-line no-await-in-loop
           await fs.access(absolutePath)
         } catch {
           logger.log(`  - Skipping ${projectName} (not found)`)
@@ -379,7 +323,7 @@ async function main() {
         logger.log(`  - Linting ${projectName}...`)
 
         // Run lint-affected in the project.
-        // eslint-disable-next-line no-await-in-loop
+
         const result = await spawn(
           'pnpm',
           [
@@ -390,7 +334,7 @@ async function main() {
           ],
           {
             cwd: absolutePath,
-            shell: constants.WIN32,
+            shell: WIN32,
             stdio: 'inherit',
           },
         )
