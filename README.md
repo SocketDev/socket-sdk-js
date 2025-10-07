@@ -6,7 +6,7 @@
 [![Follow @SocketSecurity](https://img.shields.io/twitter/follow/SocketSecurity?style=social)](https://twitter.com/SocketSecurity)
 [![Follow @socket.dev on Bluesky](https://img.shields.io/badge/Follow-@socket.dev-1DA1F2?style=social&logo=bluesky)](https://bsky.app/profile/socket.dev)
 
-Official SDK for [Socket.dev](https://socket.dev/) - Programmatic access to security analysis, vulnerability scanning, and compliance monitoring for your software supply chain.
+JavaScript SDK for [Socket.dev](https://socket.dev/) API - Security analysis, vulnerability scanning, and compliance monitoring for software supply chains.
 
 ## Installation
 
@@ -46,137 +46,107 @@ const batchResult = await client.batchPackageFetch({
 })
 ```
 
-**[→ Configuration Options](./docs/API.md#configuration)**
+**[→ Configuration](./docs/API.md#configuration)**
 
 ## API Methods
 
-<details>
-<summary><strong>Package Analysis</strong> - Quick security checks</summary>
+### Package Analysis
 
-`batchPackageFetch()` • `batchPackageStream()` • `getIssuesByNpmPackage()` • `getScoreByNpmPackage()`
+Quick security checks: `batchPackageFetch()` • `batchPackageStream()` • `getIssuesByNpmPackage()` • `getScoreByNpmPackage()`
 
 [→ Documentation](./docs/API.md#package-analysis)
-</details>
 
-<details>
-<summary><strong>Scanning & Analysis</strong> - Project scanning</summary>
+### Scanning & Analysis
 
-`createDependenciesSnapshot()` • `createOrgFullScan()` • `createScanFromFilepaths()` • `getScan()` • `getScanList()` • `getSupportedScanFiles()`
+Project scanning: `createDependenciesSnapshot()` • `createOrgFullScan()` • `createScanFromFilepaths()` • `getScan()` • `getScanList()` • `getSupportedScanFiles()`
 
 [→ Documentation](./docs/API.md#scanning--analysis)
-</details>
 
-<details>
-<summary><strong>Organization Management</strong> - Orgs and repos</summary>
+### Organization Management
 
-`getOrganizations()` • `createOrgRepo()` • `getOrgRepo()` • `getOrgRepoList()` • `updateOrgRepo()` • `deleteOrgRepo()`
+Organizations and repositories: `getOrganizations()` • `createOrgRepo()` • `getOrgRepo()` • `getOrgRepoList()` • `updateOrgRepo()` • `deleteOrgRepo()`
 
 [→ Documentation](./docs/API.md#organization-management)
-</details>
 
-<details>
-<summary><strong>Policy & Settings</strong> - Security configuration</summary>
+### Policy & Settings
 
-`getOrgSecurityPolicy()` • `updateOrgSecurityPolicy()` • `getOrgLicensePolicy()` • `updateOrgLicensePolicy()` • `postSettings()`
+Security configuration: `getOrgSecurityPolicy()` • `updateOrgSecurityPolicy()` • `getOrgLicensePolicy()` • `updateOrgLicensePolicy()` • `postSettings()`
 
 [→ Documentation](./docs/API.md#policy--settings)
-</details>
 
-<details>
-<summary><strong>Full Scan Management</strong> - Deep analysis</summary>
+### Full Scan Management
 
-`getOrgFullScanList()` • `getOrgFullScanMetadata()` • `getOrgFullScanBuffered()` • `streamOrgFullScan()` • `deleteOrgFullScan()`
+Deep analysis: `getOrgFullScanList()` • `getOrgFullScanMetadata()` • `getOrgFullScanBuffered()` • `streamOrgFullScan()` • `deleteOrgFullScan()`
 
 [→ Documentation](./docs/API.md#full-scan-management)
-</details>
 
-<details>
-<summary><strong>Diff Scans</strong> - Compare scans</summary>
+### Diff Scans
 
-`createOrgDiffScanFromIds()` • `getDiffScanById()` • `listOrgDiffScans()` • `deleteOrgDiffScan()`
+Scan comparison: `createOrgDiffScanFromIds()` • `getDiffScanById()` • `listOrgDiffScans()` • `deleteOrgDiffScan()`
 
 [→ Documentation](./docs/API.md#diff-scans)
-</details>
 
-<details>
-<summary><strong>Patches & Vulnerabilities</strong> - Security fixes</summary>
+### Patches & Vulnerabilities
 
-`streamPatchesFromScan()` • `viewPatch()`
+Security fixes: `streamPatchesFromScan()` • `viewPatch()`
 
 [→ Documentation](./docs/API.md#patches--vulnerabilities)
-</details>
 
-<details>
-<summary><strong>Alert & Triage</strong> - Alert management</summary>
+### Alert & Triage
 
-`getOrgTriage()` • `updateOrgAlertTriage()`
+Alert management: `getOrgTriage()` • `updateOrgAlertTriage()`
 
 [→ Documentation](./docs/API.md#alert--triage)
-</details>
 
-<details>
-<summary><strong>Export & Integration</strong> - SBOM export</summary>
+### Export & Integration
 
-`exportCDX()` • `exportSPDX()` • `searchDependencies()` • `uploadManifestFiles()`
+SBOM export: `exportCDX()` • `exportSPDX()` • `searchDependencies()` • `uploadManifestFiles()`
 
 [→ Documentation](./docs/API.md#export--integration)
-</details>
 
-<details>
-<summary><strong>Repository Labels</strong> - Categorization</summary>
+### Repository Labels
 
-`createOrgRepoLabel()` • `getOrgRepoLabel()` • `getOrgRepoLabelList()` • `updateOrgRepoLabel()` • `deleteOrgRepoLabel()`
+Categorization: `createOrgRepoLabel()` • `getOrgRepoLabel()` • `getOrgRepoLabelList()` • `updateOrgRepoLabel()` • `deleteOrgRepoLabel()`
 
 [→ Documentation](./docs/API.md#repository-labels)
-</details>
 
-<details>
-<summary><strong>Analytics & Monitoring</strong> - Usage metrics</summary>
+### Analytics & Monitoring
 
-`getQuota()` • `getOrgAnalytics()` • `getRepoAnalytics()` • `getAuditLogEvents()`
+Usage metrics: `getQuota()` • `getOrgAnalytics()` • `getRepoAnalytics()` • `getAuditLogEvents()`
 
 [→ Documentation](./docs/API.md#analytics--monitoring)
-</details>
 
-<details>
-<summary><strong>Authentication & Access</strong> - API tokens</summary>
+### Authentication & Access
 
-`getAPITokens()` • `postAPIToken()` • `postAPITokensRotate()` • `postAPITokensRevoke()` • `postAPITokenUpdate()`
+API tokens: `getAPITokens()` • `postAPIToken()` • `postAPITokensRotate()` • `postAPITokensRevoke()` • `postAPITokenUpdate()`
 
 [→ Documentation](./docs/API.md#authentication--access)
-</details>
 
-<details>
-<summary><strong>Entitlements</strong> - Feature access</summary>
+### Entitlements
 
-`getEnabledEntitlements()` • `getEntitlements()`
+Feature access: `getEnabledEntitlements()` • `getEntitlements()`
 
 [→ Documentation](./docs/API.md#entitlements)
-</details>
 
-<details>
-<summary><strong>Quota Utilities</strong> - Cost helpers</summary>
+### Quota Utilities
 
-`getQuotaCost()` • `getRequiredPermissions()` • `calculateTotalQuotaCost()` • `hasQuotaForMethods()` • `getMethodsByQuotaCost()` • `getMethodsByPermissions()` • `getQuotaUsageSummary()` • `getAllMethodRequirements()`
+Cost helpers: `getQuotaCost()` • `getRequiredPermissions()` • `calculateTotalQuotaCost()` • `hasQuotaForMethods()` • `getMethodsByQuotaCost()` • `getMethodsByPermissions()` • `getQuotaUsageSummary()` • `getAllMethodRequirements()`
 
 [→ Documentation](./docs/QUOTA.md)
-</details>
 
-<details>
-<summary><strong>Advanced Query Methods</strong> - Raw API</summary>
+### Advanced Query Methods
 
-`getApi()` • `sendApi()`
+Raw API access: `getApi()` • `sendApi()`
 
 [→ Documentation](./docs/API.md#advanced-query-methods)
-</details>
 
-**[→ Complete API Reference](./docs/API.md)**
+**[→ API Reference](./docs/API.md)**
 
-**[→ Usage Examples](./docs/EXAMPLES.md)**
+**[→ Examples](./docs/EXAMPLES.md)**
 
-**[→ Quota Management](./docs/QUOTA.md)** - Cost tiers: 0 units (free), 10 units (standard), 100 units (batch/uploads)
+**[→ Quota Management](./docs/QUOTA.md)** - Cost tiers: 0 (free), 10 (standard), 100 (batch/uploads)
 
-**[→ Testing Utilities](./docs/TESTING.md)** - Mock factories, fixtures, and type guards for SDK testing
+**[→ Testing Utilities](./docs/TESTING.md)** - Mock factories, fixtures, type guards
 
 ## See Also
 
