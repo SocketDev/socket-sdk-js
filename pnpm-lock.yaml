@@ -12,8 +12,8 @@ importers:
   .:
     dependencies:
       '@socketsecurity/registry':
-        specifier: 1.5.2
-        version: 1.5.2
+        specifier: 1.5.3
+        version: 1.5.3
     devDependencies:
       '@babel/core':
         specifier: 7.28.4
@@ -987,8 +987,8 @@ packages:
     resolution: {integrity: sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==}
     engines: {node: '>=18'}
 
-  '@socketsecurity/registry@1.5.2':
-    resolution: {integrity: sha512-gUCtvOeNxez1U7YzwKjwZsGXHCJYcNfbQiMcK133T/3KuGagoRw2gYTVXKEmIJjthHwFVhLMMNx6hTb2WhI2pg==}
+  '@socketsecurity/registry@1.5.3':
+    resolution: {integrity: sha512-0/o4RFTgqqIl5bKBuacp4HiYq0KttXkvGti2fN4lXqGh7FEe39gcX/dxFlhk2eoTuZ21Nbx/I3GPe5EDdMaYVA==}
     engines: {node: '>=18', pnpm: '>=10.16.0'}
 
   '@stroncium/procfs@1.2.1':
@@ -3683,7 +3683,7 @@ snapshots:
 
   '@sindresorhus/merge-streams@2.3.0': {}
 
-  '@socketsecurity/registry@1.5.2': {}
+  '@socketsecurity/registry@1.5.3': {}
 
   '@stroncium/procfs@1.2.1': {}
 
