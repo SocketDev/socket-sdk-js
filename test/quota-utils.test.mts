@@ -140,7 +140,7 @@ describe('Quota Utils', () => {
     })
 
     it('should return methods requiring analytics permissions', () => {
-      const methods = getMethodsByPermissions(['analytics:read'])
+      const methods = getMethodsByPermissions(['report:write'])
       expect(methods).toContain('getOrgAnalytics')
       expect(methods).toContain('getRepoAnalytics')
     })
