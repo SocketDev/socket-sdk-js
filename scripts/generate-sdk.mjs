@@ -67,18 +67,18 @@ async function main() {
     logger.log('  2. Generating TypeScript types...')
     await generateTypes()
 
-    // Step 3: Format and lint generated code (run twice for stability)
-    logger.log('  3. Formatting generated code...')
-    exitCode = await runPnpmScript('fix')
-    if (exitCode !== 0 && exitCode !== 1) {
-      // Exit code 1 is okay - it means linters made fixes
-      process.exitCode = exitCode
-      return
-    }
-
-    logger.log('  4. Final formatting pass...')
-    exitCode = await runPnpmScript('fix')
-    if (exitCode !== 0 && exitCode !== 1) {
+    // Step 3: Format generated files only (no linting)
+    logger.log('  3. Formatting generated files...')
+    exitCode = await runCommand('pnpm', [
+      'exec',
+      'biome',
+      'format',
+      '--log-level=none',
+      '--fix',
+      'openapi.json',
+      'types/api.d.ts',
+    ])
+    if (exitCode !== 0) {
       process.exitCode = exitCode
       return
     }
