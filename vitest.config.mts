@@ -4,6 +4,12 @@
  */
 import { defineConfig } from 'vitest/config'
 
+// Check if coverage is enabled via CLI flags or environment.
+const isCoverageEnabled =
+  process.env['COVERAGE'] === 'true' ||
+  process.env['npm_lifecycle_event']?.includes('coverage') ||
+  process.argv.some(arg => arg.includes('coverage'))
+
 export default defineConfig({
   test: {
     globals: false,
@@ -15,15 +21,16 @@ export default defineConfig({
     pool: 'forks',
     poolOptions: {
       forks: {
-        singleFork: true,
-        maxForks: 1,
+        // Use single fork for coverage to reduce memory, parallel otherwise.
+        singleFork: isCoverageEnabled,
+        maxForks: isCoverageEnabled ? 1 : undefined,
         // Isolate tests to prevent memory leaks between test files.
         isolate: true,
       },
       threads: {
-        singleThread: true,
-        // Limit thread concurrency to prevent RegExp compiler exhaustion.
-        maxThreads: 1,
+        // Use single thread for coverage to reduce memory, parallel otherwise.
+        singleThread: isCoverageEnabled,
+        maxThreads: isCoverageEnabled ? 1 : undefined,
       },
     },
     testTimeout: 60_000,
