@@ -18,17 +18,19 @@ async function main() {
 
     const checks = [
       {
-        args: ['--noEmit', '-p', '.config/tsconfig.check.json'],
-        command: 'tsgo',
+        args: ['exec', 'tsgo', '--noEmit', '-p', '.config/tsconfig.check.json'],
+        command: 'pnpm',
       },
       {
         args: [
+          'exec',
+          'eslint',
           '--config',
           '.config/eslint.config.mjs',
           '--report-unused-disable-directives',
           '.',
         ],
-        command: 'eslint',
+        command: 'pnpm',
       },
     ]
 
