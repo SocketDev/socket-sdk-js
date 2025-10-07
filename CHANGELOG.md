@@ -6,7 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [1.11.2](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.11.2) - 2025-10-07
 
-### Changed
+### Fixed
+- Fixed typos in requirements.json
 - Updated @socketsecurity/registry to fix bugs related to inlined runtime-dependent expressions
 
 ## [1.11.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.11.1) - 2025-10-06
