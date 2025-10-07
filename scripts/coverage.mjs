@@ -34,7 +34,7 @@ async function main() {
     if (values['type-only']) {
       logger.log('Collecting type coverage...')
       const exitCode = await runSequence([
-        { args: [], command: 'type-coverage' },
+        { args: ['exec', 'type-coverage'], command: 'pnpm' },
       ])
       process.exitCode = exitCode
       return
@@ -70,7 +70,7 @@ async function main() {
     }
 
     const typeExitCode = await runSequence([
-      { args: [], command: 'type-coverage' },
+      { args: ['exec', 'type-coverage'], command: 'pnpm' },
     ])
 
     process.exitCode = typeExitCode
