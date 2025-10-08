@@ -1,5 +1,0 @@
-{
-  "entry": ["scripts/*.mjs", "test/*.test.mts"],
-  "project": ["scripts/**", "src/**", "test/**"],
-  "ignore": ["dist/**"]
-}
