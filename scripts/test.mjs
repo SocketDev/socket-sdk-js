@@ -163,11 +163,10 @@ async function runTests(options) {
     stdio: 'inherit',
   }
 
-  // Use dotenvx to load test environment
-  const dotenvxCmd = WIN32 ? 'dotenvx.cmd' : 'dotenvx'
-  const dotenvxPath = path.join(nodeModulesBinPath, dotenvxCmd)
-
-  return runCommand(dotenvxPath, [
+  // Use dotenvx to load test environment via pnpm exec
+  return runCommand('pnpm', [
+    'exec',
+    'dotenvx',
     '-q',
     'run',
     '-f',
