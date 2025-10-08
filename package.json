@@ -37,8 +37,6 @@
     "check:lint": "node scripts/lint-affected.mjs --all",
     "check:tsc": "tsgo --noEmit -p .config/tsconfig.check.json",
     "lint": "node scripts/lint.mjs",
-    "lint:affected": "node scripts/lint-affected.mjs",
-    "lint:cross": "node scripts/lint-affected.mjs --cross-repo",
     "lint-ci": "pnpm run check:lint",
     "coverage": "node scripts/coverage.mjs",
     "coverage:test": "node scripts/coverage.mjs --code-only",
@@ -123,7 +121,6 @@
   ],
   "lint-staged": {
     "*.{cjs,js,json,md,mjs,mts,ts}": [
-      "oxlint -c=.config/.oxlintrc.json --ignore-path=.config/.oxlintignore --tsconfig=.config/tsconfig.json --quiet --fix",
       "biome format --log-level=none --fix --no-errors-on-unmatched --files-ignore-unknown=true --colors=off"
     ]
   },
