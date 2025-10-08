@@ -214,6 +214,6 @@ if (quota.success && quota.data.quota >= batchCost) {
 
 ## See Also
 
-- [API Reference](./API.md) - Complete API documentation
-- [Examples](./EXAMPLES.md) - Usage examples and patterns
-- [Testing Utilities](./TESTING.md) - Testing helpers and mocks
+- [API Reference](./api-reference.md) - Complete API documentation
+- [Examples](./usage-examples.md) - Usage examples and patterns
+- [Testing Utilities](./dev/testing.md) - Testing helpers and mocks

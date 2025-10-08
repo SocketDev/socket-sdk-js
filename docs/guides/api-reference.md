@@ -1439,7 +1439,7 @@ if (result.success) {
 
 ## See Also
 
-- [Examples](./EXAMPLES.md) - Usage examples and patterns
-- [Quota Management](./QUOTA.md) - Quota utilities and cost management
-- [Testing Utilities](./TESTING.md) - Testing helpers and mocks
+- [Examples](./usage-examples.md) - Usage examples and patterns
+- [Quota Management](./quota-management.md) - Quota utilities and cost management
+- [Testing Utilities](./dev/testing.md) - Testing helpers and mocks
 - [Socket API Reference](https://docs.socket.dev/reference) - Official API documentation

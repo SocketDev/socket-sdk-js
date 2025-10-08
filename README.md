@@ -46,7 +46,7 @@ const batchResult = await client.batchPackageFetch({
 })
 ```
 
-**[→ Configuration](./docs/API.md#configuration)**
+**[→ Configuration](./docs/guides/api-reference.md#configuration)**
 
 ## API Methods
 
@@ -54,99 +54,99 @@ const batchResult = await client.batchPackageFetch({
 
 Quick security checks: `batchPackageFetch()` • `batchPackageStream()` • `getIssuesByNpmPackage()` • `getScoreByNpmPackage()`
 
-[→ Documentation](./docs/API.md#package-analysis)
+[→ Documentation](./docs/guides/api-reference.md#package-analysis)
 
 ### Scanning & Analysis
 
 Project scanning: `createDependenciesSnapshot()` • `createOrgFullScan()` • `createScanFromFilepaths()` • `getScan()` • `getScanList()` • `getSupportedScanFiles()`
 
-[→ Documentation](./docs/API.md#scanning--analysis)
+[→ Documentation](./docs/guides/api-reference.md#scanning--analysis)
 
 ### Organization Management
 
 Organizations and repositories: `getOrganizations()` • `createOrgRepo()` • `getOrgRepo()` • `getOrgRepoList()` • `updateOrgRepo()` • `deleteOrgRepo()`
 
-[→ Documentation](./docs/API.md#organization-management)
+[→ Documentation](./docs/guides/api-reference.md#organization-management)
 
 ### Policy & Settings
 
 Security configuration: `getOrgSecurityPolicy()` • `updateOrgSecurityPolicy()` • `getOrgLicensePolicy()` • `updateOrgLicensePolicy()` • `postSettings()`
 
-[→ Documentation](./docs/API.md#policy--settings)
+[→ Documentation](./docs/guides/api-reference.md#policy--settings)
 
 ### Full Scan Management
 
 Deep analysis: `getOrgFullScanList()` • `getOrgFullScanMetadata()` • `getOrgFullScanBuffered()` • `streamOrgFullScan()` • `deleteOrgFullScan()`
 
-[→ Documentation](./docs/API.md#full-scan-management)
+[→ Documentation](./docs/guides/api-reference.md#full-scan-management)
 
 ### Diff Scans
 
 Scan comparison: `createOrgDiffScanFromIds()` • `getDiffScanById()` • `listOrgDiffScans()` • `deleteOrgDiffScan()`
 
-[→ Documentation](./docs/API.md#diff-scans)
+[→ Documentation](./docs/guides/api-reference.md#diff-scans)
 
 ### Patches & Vulnerabilities
 
 Security fixes: `streamPatchesFromScan()` • `viewPatch()`
 
-[→ Documentation](./docs/API.md#patches--vulnerabilities)
+[→ Documentation](./docs/guides/api-reference.md#patches--vulnerabilities)
 
 ### Alert & Triage
 
 Alert management: `getOrgTriage()` • `updateOrgAlertTriage()`
 
-[→ Documentation](./docs/API.md#alert--triage)
+[→ Documentation](./docs/guides/api-reference.md#alert--triage)
 
 ### Export & Integration
 
 SBOM export: `exportCDX()` • `exportSPDX()` • `searchDependencies()` • `uploadManifestFiles()`
 
-[→ Documentation](./docs/API.md#export--integration)
+[→ Documentation](./docs/guides/api-reference.md#export--integration)
 
 ### Repository Labels
 
 Categorization: `createOrgRepoLabel()` • `getOrgRepoLabel()` • `getOrgRepoLabelList()` • `updateOrgRepoLabel()` • `deleteOrgRepoLabel()`
 
-[→ Documentation](./docs/API.md#repository-labels)
+[→ Documentation](./docs/guides/api-reference.md#repository-labels)
 
 ### Analytics & Monitoring
 
 Usage metrics: `getQuota()` • `getOrgAnalytics()` • `getRepoAnalytics()` • `getAuditLogEvents()`
 
-[→ Documentation](./docs/API.md#analytics--monitoring)
+[→ Documentation](./docs/guides/api-reference.md#analytics--monitoring)
 
 ### Authentication & Access
 
 API tokens: `getAPITokens()` • `postAPIToken()` • `postAPITokensRotate()` • `postAPITokensRevoke()` • `postAPITokenUpdate()`
 
-[→ Documentation](./docs/API.md#authentication--access)
+[→ Documentation](./docs/guides/api-reference.md#authentication--access)
 
 ### Entitlements
 
 Feature access: `getEnabledEntitlements()` • `getEntitlements()`
 
-[→ Documentation](./docs/API.md#entitlements)
+[→ Documentation](./docs/guides/api-reference.md#entitlements)
 
 ### Quota Utilities
 
 Cost helpers: `getQuotaCost()` • `getRequiredPermissions()` • `calculateTotalQuotaCost()` • `hasQuotaForMethods()` • `getMethodsByQuotaCost()` • `getMethodsByPermissions()` • `getQuotaUsageSummary()` • `getAllMethodRequirements()`
 
-[→ Documentation](./docs/QUOTA.md)
+[→ Documentation](./docs/guides/quota-management.md)
 
 ### Advanced Query Methods
 
 Raw API access: `getApi()` • `sendApi()`
 
-[→ Documentation](./docs/API.md#advanced-query-methods)
+[→ Documentation](./docs/guides/api-reference.md#advanced-query-methods)
 
-**[→ API Reference](./docs/API.md)**
+**[→ API Reference](./docs/guides/api-reference.md)**
 
-**[→ Examples](./docs/EXAMPLES.md)**
+**[→ Examples](./docs/guides/usage-examples.md)**
 
-**[→ Quota Management](./docs/QUOTA.md)** - Cost tiers: 0 (free), 10 (standard), 100 (batch/uploads)
+**[→ Quota Management](./docs/guides/quota-management.md)** - Cost tiers: 0 (free), 10 (standard), 100 (batch/uploads)
 
-**[→ Testing Utilities](./docs/TESTING.md)** - Mock factories, fixtures, type guards
+**[→ Testing Utilities](./docs/guides/dev/testing.md)** - Mock factories, fixtures, type guards
 
 ## See Also
 
