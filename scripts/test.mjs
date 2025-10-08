@@ -113,44 +113,25 @@ async function runBuild() {
   return 0
 }
 
-async function runTests(options) {
-  const { all, coverage, force, staged, update } = options
-  const runAll = all || force
-
-  // Get tests to run
-  const testInfo = getTestsToRun({ staged, all: runAll })
-  const { reason, tests: testsToRun } = testInfo
-
-  // No tests needed
-  if (testsToRun === null) {
-    log.substep('No relevant changes detected, skipping tests')
-    return 0
-  }
-
-  // Prepare vitest command
+async function runVitestWithArgs(args, options = {}) {
   const vitestCmd = WIN32 ? 'vitest.cmd' : 'vitest'
   const vitestPath = path.join(nodeModulesBinPath, vitestCmd)
 
   const vitestArgs = ['--config', '.config/vitest.config.mts', 'run']
 
   // Add coverage if requested
-  if (coverage) {
+  if (options.coverage) {
     vitestArgs.push('--coverage')
   }
 
   // Add update if requested
-  if (update) {
+  if (options.update) {
     vitestArgs.push('--update')
   }
 
-  // Add test patterns if not running all
-  if (testsToRun === 'all') {
-    const reasonText = reason ? ` (${reason})` : ''
-    log.step(`Running all tests${reasonText}`)
-  } else {
-    log.step(`Running affected tests:`)
-    testsToRun.forEach(test => log.substep(test))
-    vitestArgs.push(...testsToRun)
+  // Add provided arguments
+  if (args && args.length > 0) {
+    vitestArgs.push(...args)
   }
 
   const spawnOptions = {
@@ -177,10 +158,42 @@ async function runTests(options) {
   ], spawnOptions)
 }
 
+async function runTests(options) {
+  const { all, coverage, force, positionals, staged, update } = options
+  const runAll = all || force
+
+  // If positional arguments provided, use them directly
+  if (positionals && positionals.length > 0) {
+    log.step(`Running specified tests: ${positionals.join(', ')}`)
+    return runVitestWithArgs(positionals, { coverage, update })
+  }
+
+  // Get tests to run based on changes
+  const testInfo = getTestsToRun({ staged, all: runAll })
+  const { reason, tests: testsToRun } = testInfo
+
+  // No tests needed
+  if (testsToRun === null) {
+    log.substep('No relevant changes detected, skipping tests')
+    return 0
+  }
+
+  // Add test patterns if not running all
+  if (testsToRun === 'all') {
+    const reasonText = reason ? ` (${reason})` : ''
+    log.step(`Running all tests${reasonText}`)
+    return runVitestWithArgs([], { coverage, update })
+  } else {
+    log.step(`Running affected tests:`)
+    testsToRun.forEach(test => log.substep(test))
+    return runVitestWithArgs(testsToRun, { coverage, update })
+  }
+}
+
 async function main() {
   try {
     // Parse arguments
-    const { values } = parseArgs({
+    const { positionals, values } = parseArgs({
       options: {
         help: {
           type: 'boolean',
@@ -195,6 +208,10 @@ async function main() {
           default: false,
         },
         'skip-build': {
+          type: 'boolean',
+          default: false,
+        },
+        'skip-checks': {
           type: 'boolean',
           default: false,
         },
@@ -223,36 +240,55 @@ async function main() {
           default: false,
         },
       },
-      allowPositionals: false,
+      allowPositionals: true,
       strict: false,
     })
 
     // Show help if requested
     if (values.help) {
       printHelpHeader('Test Runner')
-      console.log('\nUsage: pnpm test [options]')
+      console.log('\nUsage: pnpm test [options] [test-files...]')
       console.log('\nOptions:')
       console.log('  --help              Show this help message')
       console.log('  --fast, --quick     Skip lint/type checks for faster execution')
+      console.log('  --skip-checks       Skip lint/type checks (same as --fast)')
+      console.log('  --skip-build        Skip the build step')
       console.log('  --cover, --coverage Run tests with code coverage')
       console.log('  --update            Update test snapshots')
       console.log('  --all, --force      Run all tests regardless of changes')
       console.log('  --staged            Run tests affected by staged changes')
-      console.log('  --skip-build        Skip the build step')
       console.log('\nExamples:')
-      console.log('  pnpm test                  # Run checks, build, and tests')
-      console.log('  pnpm test --fast           # Skip checks for quick testing')
-      console.log('  pnpm test --cover          # Run with coverage report')
-      console.log('  pnpm test --fast --cover   # Quick test with coverage')
-      console.log('  pnpm test --update         # Update test snapshots')
+      console.log('  pnpm test                      # Run checks, build, and tests')
+      console.log('  pnpm test --fast               # Skip checks for quick testing')
+      console.log('  pnpm test --cover              # Run with coverage report')
+      console.log('  pnpm test --all                # Force run all tests')
+      console.log('  pnpm test --staged             # Run tests for staged changes')
+      console.log('  pnpm test "**/*.test.mts"      # Run specific test pattern')
+      console.log('\nWhen called as test:run:')
+      console.log('  pnpm test:run                  # Run only changed tests, no checks/build')
+      console.log('  pnpm test:run --all            # Run all tests, no checks/build')
       process.exitCode = 0
       return
+    }
+
+    // Detect if called as test:run (from npm_lifecycle_event)
+    const isTestRun = process.env.npm_lifecycle_event === 'test:run'
+
+    // When called as test:run, default to skipping checks and build
+    if (isTestRun && !values.help) {
+      // Override defaults when called as test:run
+      if (!values['skip-checks'] && !values.fast && !values.quick) {
+        values['skip-checks'] = true
+      }
+      if (!values['skip-build']) {
+        values['skip-build'] = true
+      }
     }
 
     printHeader('Test Runner')
 
     // Handle aliases
-    const skipChecks = values.fast || values.quick
+    const skipChecks = values.fast || values.quick || values['skip-checks']
     const withCoverage = values.cover || values.coverage
 
     let exitCode = 0
@@ -279,7 +315,7 @@ async function main() {
     }
 
     // Run tests
-    exitCode = await runTests({ ...values, coverage: withCoverage })
+    exitCode = await runTests({ ...values, coverage: withCoverage, positionals })
 
     if (exitCode !== 0) {
       log.error('Tests failed')
