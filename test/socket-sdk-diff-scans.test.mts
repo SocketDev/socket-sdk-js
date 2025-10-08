@@ -246,7 +246,7 @@ describe('Socket SDK - Diff Scans', () => {
       assertSuccess(result)
       if (result.success) {
         expect(result.data).toEqual(largeDiffScanList)
-        expect(result.data.results).toHaveLength(100)
+        expect((result.data as any).results).toHaveLength(100)
       }
     })
 

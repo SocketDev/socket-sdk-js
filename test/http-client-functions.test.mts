@@ -36,7 +36,7 @@ describe('HTTP Client - Module Selection', () => {
 
   describe('getErrorResponseBody', () => {
     it('should read normal response body successfully', async () => {
-      const mockResponse = new PassThrough() as IncomingMessage
+      const mockResponse = new PassThrough() as unknown as IncomingMessage
       const testBody = 'Hello, World!'
 
       const bodyPromise = getErrorResponseBody(mockResponse)
@@ -50,7 +50,7 @@ describe('HTTP Client - Module Selection', () => {
     })
 
     it('should accumulate multiple chunks correctly', async () => {
-      const mockResponse = new PassThrough() as IncomingMessage
+      const mockResponse = new PassThrough() as unknown as IncomingMessage
       const chunks = ['Part 1', ' - ', 'Part 2', ' - ', 'Part 3']
 
       const bodyPromise = getErrorResponseBody(mockResponse)
@@ -66,7 +66,7 @@ describe('HTTP Client - Module Selection', () => {
     })
 
     it('should reject when response exceeds size limit', async () => {
-      const mockResponse = new PassThrough() as IncomingMessage
+      const mockResponse = new PassThrough() as unknown as IncomingMessage
       mockResponse.destroy = () => {
         // Mock destroy method
         return mockResponse
@@ -86,7 +86,7 @@ describe('HTTP Client - Module Selection', () => {
     })
 
     it('should reject when accumulated chunks exceed size limit', async () => {
-      const mockResponse = new PassThrough() as IncomingMessage
+      const mockResponse = new PassThrough() as unknown as IncomingMessage
       mockResponse.destroy = () => {
         // Mock destroy method
         return mockResponse
@@ -110,7 +110,7 @@ describe('HTTP Client - Module Selection', () => {
     })
 
     it('should handle response at exactly the size limit', async () => {
-      const mockResponse = new PassThrough() as IncomingMessage
+      const mockResponse = new PassThrough() as unknown as IncomingMessage
 
       // Create a chunk exactly at the limit
       const exactSizeChunk = 'x'.repeat(MAX_RESPONSE_SIZE)
@@ -125,7 +125,7 @@ describe('HTTP Client - Module Selection', () => {
     })
 
     it('should correctly handle multi-byte UTF-8 characters in size calculation', async () => {
-      const mockResponse = new PassThrough() as IncomingMessage
+      const mockResponse = new PassThrough() as unknown as IncomingMessage
       mockResponse.destroy = () => {
         // Mock destroy method
         return mockResponse
