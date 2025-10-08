@@ -30,8 +30,6 @@ const RUN_ALL_PATTERNS = [
   'package.json',
   'pnpm-lock.yaml',
   'tsconfig*.json',
-  '.oxlintignore',
-  'oxlintrc.json',
   'eslint.config.*',
   'biome.json',
 ]
@@ -325,10 +323,9 @@ async function main() {
         // Run lint-affected in the project.
         // eslint-disable-next-line no-await-in-loop
         const result = await spawn(
-          'pnpm',
+          'node',
           [
-            'run',
-            'lint-affected',
+            path.join(absolutePath, 'scripts', 'lint-affected.mjs'),
             ...(hasStaged ? ['--staged'] : []),
             ...(hasFix ? ['--fix'] : []),
           ],
