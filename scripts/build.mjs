@@ -93,7 +93,7 @@ async function buildTypes(options = {}) {
   }
 
   commands.push({
-    args: ['exec', 'tsgo', '--project', 'tsconfig.dts.json'],
+    args: ['exec', 'tsgo', '--project', '.config/tsconfig.dts.json'],
     command: 'pnpm',
   })
 

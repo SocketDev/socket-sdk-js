@@ -38,7 +38,7 @@ const CONFIG_PATTERNS = [
   'pnpm-lock.yaml',
   'tsconfig*.json',
   'eslint.config.*',
-  'biome.json',
+  '.config/biome.json',
 ]
 
 /**
