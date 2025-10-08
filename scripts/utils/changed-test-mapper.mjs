@@ -18,16 +18,12 @@ const rootPath = path.resolve(process.cwd())
  * Core files that require running all tests when changed.
  */
 const CORE_FILES = [
-  'src/helpers.ts',
-  'src/strings.ts',
   'src/constants.ts',
-  'src/lang.ts',
-  'src/error.ts',
-  'src/validate.ts',
-  'src/normalize.ts',
-  'src/encode.ts',
-  'src/decode.ts',
-  'src/objects.ts',
+  'src/http-client.ts',
+  'src/types.ts',
+  'src/utils.ts',
+  'src/quota-utils.ts',
+  'src/index.ts',
 ]
 
 /**
@@ -59,18 +55,22 @@ function mapSourceToTests(filepath) {
     return [testFile]
   }
 
-  // Special mappings
-  if (normalized.includes('src/package-url.ts')) {
-    return ['test/package-url.test.mts', 'test/integration.test.mts']
+  // Special mappings for SDK files
+  if (normalized.includes('src/socket-sdk-class.ts')) {
+    // Main SDK class affects most tests
+    return ['all']
   }
-  if (normalized.includes('src/package-url-builder.ts')) {
-    return ['test/package-url-builder.test.mts', 'test/integration.test.mts']
+  if (normalized.includes('src/file-upload.ts')) {
+    return ['test/socket-sdk-upload-simple.test.mts', 'test/create-request-body-json.test.mts']
   }
-  if (normalized.includes('src/url-converter.ts')) {
-    return ['test/url-converter.test.mts']
+  if (normalized.includes('src/user-agent.ts')) {
+    return ['test/authentication-basic.test.mts']
   }
-  if (normalized.includes('src/result.ts')) {
-    return ['test/result.test.mts']
+  if (normalized.includes('src/promise-queue.ts')) {
+    return ['test/promise-queue.test.mts']
+  }
+  if (normalized.includes('src/testing.ts')) {
+    return ['test/testing-utilities.test.mts']
   }
 
   // If no specific mapping, run all tests to be safe
@@ -145,10 +145,19 @@ export function getTestsToRun(options = {}) {
       break
     }
 
-    // Data changes run integration tests
-    if (normalized.startsWith('data/')) {
-      testFiles.add('test/integration.test.mts')
-      testFiles.add('test/purl-types.test.mts')
+    // Package.json changes might affect tests
+    if (normalized === 'package.json') {
+      runAllTests = true
+      runAllReason = 'package.json changed'
+      break
+    }
+
+    // Test fixtures/data changes
+    if (normalized.startsWith('test/fixtures/') || normalized.startsWith('test/data/')) {
+      // Run all tests as fixtures might be used across multiple tests
+      runAllTests = true
+      runAllReason = 'test fixtures changed'
+      break
     }
   }
 

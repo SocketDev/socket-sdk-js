@@ -3,7 +3,7 @@
  * Uses git utilities to detect changes and maps them to relevant test files.
  */
 
-import { spawn } from 'node:child_process'
+import { execSync, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -83,7 +83,6 @@ async function main() {
     const distIndexPath = path.join(rootPath, 'dist', 'index.js')
     if (!existsSync(distIndexPath)) {
       logger.info('Building project before tests...')
-      const { execSync } = await import('node:child_process')
       execSync('pnpm run build', {
         cwd: rootPath,
         stdio: 'inherit',
