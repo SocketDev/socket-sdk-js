@@ -46,7 +46,7 @@
     "prepare": "husky",
     "prepublishOnly": "echo 'ERROR: Use GitHub Actions workflow for publishing' && exit 1",
     "test": "node scripts/test.mjs",
-    "test:run": "node scripts/test-changed.mjs",
+    "test:run": "node scripts/test.mjs",
     "test-ci": "dotenvx -q run -f .env.test -- vitest --run --config .config/vitest.config.mts",
     "type-ci": "pnpm run check:tsc",
     "update": "run-p --aggregate-output update:*",
