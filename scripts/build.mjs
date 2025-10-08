@@ -1,94 +1,103 @@
 /**
- * @fileoverview Unified build runner with flag-based configuration.
- * Orchestrates the complete build process with flexible options.
+ * @fileoverview Fast build runner using esbuild for smaller bundles and faster builds.
  */
 
+import { build } from 'esbuild'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
 
-import colors from 'yoctocolors-cjs'
+import {
+  getRootPath,
+  isQuiet,
+  log,
+  printFooter,
+  printHeader,
+  printHelpHeader
+} from './utils/common.mjs'
+import { runSequence } from './utils/run-command.mjs'
+import { buildConfig, watchConfig, analyzeMetafile } from '../.config/esbuild.config.mjs'
 
-import { runCommand, runSequence } from './utils/run-command.mjs'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.join(__dirname, '..')
-
-// Simple clean logging without prefixes
-const log = {
-  info: msg => console.log(msg),
-  error: msg => console.error(`${colors.red('✗')} ${msg}`),
-  success: msg => console.log(`${colors.green('✓')} ${msg}`),
-  step: msg => console.log(`\n${msg}`),
-  substep: msg => console.log(`  ${msg}`),
-  progress: msg => {
-    // Write progress message without newline for in-place updates
-    process.stdout.write(`  ∴ ${msg}`)
-  },
-  done: msg => {
-    // Clear current line and write success message
-    // Carriage return + clear line
-    process.stdout.write('\r\x1b[K')
-    console.log(`  ${colors.green('✓')} ${msg}`)
-  },
-  failed: msg => {
-    // Clear current line and write failure message
-    // Carriage return + clear line
-    process.stdout.write('\r\x1b[K')
-    console.log(`  ${colors.red('✗')} ${msg}`)
-  }
-}
+const rootPath = getRootPath(import.meta.url)
 
 /**
- * Build source code with Rollup.
+ * Build source code with esbuild.
  */
 async function buildSource(options = {}) {
-  const { quiet = false } = options
+  const { quiet = false, skipClean = false, analyze = false, verbose = false } = options
 
   if (!quiet) {
     log.progress('Building source code')
   }
 
-  const exitCode = await runSequence([
-    { args: ['run', 'clean:dist'], command: 'pnpm' },
-    {
-      args: ['exec', 'rollup', '-c', '.config/rollup.dist.config.mjs'],
-      command: 'pnpm',
-    },
-  ])
+  // Clean dist directory if needed
+  if (!skipClean) {
+    const exitCode = await runSequence([
+      { args: ['exec', 'node', 'scripts/clean.mjs', '--dist', '--quiet'], command: 'pnpm' }
+    ])
+    if (exitCode !== 0) {
+      if (!quiet) {
+        log.failed('Clean failed')
+      }
+      return exitCode
+    }
+  }
 
-  if (exitCode !== 0) {
+  try {
+    const startTime = Date.now()
+    // Determine log level based on verbosity
+    const logLevel = quiet ? 'silent' : verbose ? 'info' : 'warning'
+    const result = await build({
+      ...buildConfig,
+      logLevel
+    })
+    const buildTime = Date.now() - startTime
+
+    if (!quiet) {
+      log.done(`Source build complete in ${buildTime}ms`)
+
+      if (analyze && result.metafile) {
+        const analysis = analyzeMetafile(result.metafile)
+        log.info('Build output:')
+        for (const file of analysis.files) {
+          log.substep(`${file.name}: ${file.size}`)
+        }
+        log.step(`Total bundle size: ${analysis.totalSize}`)
+      }
+    }
+
+    return 0
+  } catch (error) {
     if (!quiet) {
       log.failed('Source build failed')
+      console.error(error)
     }
-    return exitCode
+    return 1
   }
-
-  if (!quiet) {
-    log.done('Source build complete')
-  }
-
-  return 0
 }
 
 /**
  * Build TypeScript declarations.
  */
 async function buildTypes(options = {}) {
-  const { quiet = false } = options
+  const { quiet = false, skipClean = false, verbose = false } = options
 
   if (!quiet) {
     log.progress('Building TypeScript declarations')
   }
 
-  const exitCode = await runSequence([
-    { args: ['run', 'clean:dist:types'], command: 'pnpm' },
-    {
-      args: ['exec', 'tsgo', '--project', 'tsconfig.dts.json'],
-      command: 'pnpm',
-    },
-  ])
+  const commands = []
+
+  if (!skipClean) {
+    commands.push({ args: ['exec', 'node', 'scripts/clean.mjs', '--types', '--quiet'], command: 'pnpm' })
+  }
+
+  commands.push({
+    args: ['exec', 'tsgo', '--project', 'tsconfig.dts.json'],
+    command: 'pnpm',
+  })
+
+  const exitCode = await runSequence(commands)
 
   if (exitCode !== 0) {
     if (!quiet) {
@@ -108,22 +117,36 @@ async function buildTypes(options = {}) {
  * Watch mode for development.
  */
 async function watchBuild(options = {}) {
-  const { quiet = false } = options
+  const { quiet = false, verbose = false } = options
 
   if (!quiet) {
     log.step('Starting watch mode')
     log.substep('Watching for file changes...')
   }
 
-  const exitCode = await runCommand(
-    'pnpm',
-    ['exec', 'rollup', '-c', '.config/rollup.dist.config.mjs', '--watch'],
-    {
-      stdio: 'inherit'
-    }
-  )
+  try {
+    // Determine log level based on verbosity
+    const logLevel = quiet ? 'silent' : verbose ? 'debug' : 'warning'
+    const ctx = await build({
+      ...watchConfig,
+      logLevel
+    })
 
-  return exitCode
+    // Keep the process alive
+    process.on('SIGINT', () => {
+      ctx.stop()
+      process.exitCode = 0
+      throw new Error('Watch mode interrupted')
+    })
+
+    // Wait indefinitely
+    await new Promise(() => {})
+  } catch (error) {
+    if (!quiet) {
+      log.error('Watch mode failed:', error)
+    }
+    return 1
+  }
 }
 
 /**
@@ -131,7 +154,7 @@ async function watchBuild(options = {}) {
  */
 function isBuildNeeded() {
   const distPath = path.join(rootPath, 'dist', 'index.js')
-  const distTypesPath = path.join(rootPath, 'dist', 'types', 'index.d.ts')
+  const distTypesPath = path.join(rootPath, 'dist', 'index.d.ts')
 
   return !existsSync(distPath) || !existsSync(distTypesPath)
 }
@@ -161,11 +184,19 @@ async function main() {
           type: 'boolean',
           default: false,
         },
+        analyze: {
+          type: 'boolean',
+          default: false,
+        },
         silent: {
           type: 'boolean',
           default: false,
         },
         quiet: {
+          type: 'boolean',
+          default: false,
+        },
+        verbose: {
           type: 'boolean',
           default: false,
         },
@@ -176,7 +207,7 @@ async function main() {
 
     // Show help if requested
     if (values.help) {
-      console.log('Socket PackageURL Build Runner')
+      printHelpHeader('Build Runner')
       console.log('\nUsage: pnpm build [options]')
       console.log('\nOptions:')
       console.log('  --help       Show this help message')
@@ -184,19 +215,21 @@ async function main() {
       console.log('  --types      Build TypeScript declarations only')
       console.log('  --watch      Watch mode for development')
       console.log('  --needed     Only build if dist files are missing')
+      console.log('  --analyze    Show bundle size analysis')
       console.log('  --quiet, --silent  Suppress progress messages')
+      console.log('  --verbose    Show detailed build output')
       console.log('\nExamples:')
       console.log('  pnpm build              # Full build (source + types)')
       console.log('  pnpm build --src        # Build source only')
       console.log('  pnpm build --types      # Build types only')
       console.log('  pnpm build --watch      # Watch mode')
-      console.log('  pnpm build --needed     # Build only if needed')
+      console.log('  pnpm build --analyze    # Build with size analysis')
       process.exitCode = 0
       return
     }
 
-    // Handle aliases
-    const quiet = values.quiet || values.silent
+    const quiet = isQuiet(values)
+    const verbose = values.verbose
 
     // Check if build is needed
     if (values.needed && !isBuildNeeded()) {
@@ -208,30 +241,28 @@ async function main() {
     }
 
     if (!quiet) {
-      console.log('═══════════════════════════════════════════════════════')
-      console.log('  Socket PackageURL Build Runner')
-      console.log('═══════════════════════════════════════════════════════')
+      printHeader('Socket SDK Build Runner')
     }
 
     let exitCode = 0
 
     // Handle watch mode
     if (values.watch) {
-      exitCode = await watchBuild({ quiet })
+      exitCode = await watchBuild({ quiet, verbose })
     }
     // Build types only
     else if (values.types && !values.src) {
       if (!quiet) {
         log.step('Building TypeScript declarations only')
       }
-      exitCode = await buildTypes({ quiet })
+      exitCode = await buildTypes({ quiet, verbose })
     }
     // Build source only
     else if (values.src && !values.types) {
       if (!quiet) {
         log.step('Building source only')
       }
-      exitCode = await buildSource({ quiet })
+      exitCode = await buildSource({ quiet, verbose, analyze: values.analyze })
     }
     // Build everything (default)
     else {
@@ -239,18 +270,29 @@ async function main() {
         log.step('Building package (source + types)')
       }
 
-      // Build source first
-      exitCode = await buildSource({ quiet })
+      // Clean all directories first (once)
+      if (!quiet) {
+        log.progress('Cleaning build directories')
+      }
+      exitCode = await runSequence([
+        { args: ['exec', 'node', 'scripts/clean.mjs', '--dist', '--types', '--quiet'], command: 'pnpm' }
+      ])
       if (exitCode !== 0) {
         if (!quiet) {
-          log.error('Build failed')
+          log.failed('Clean failed')
         }
         process.exitCode = exitCode
         return
       }
 
-      // Then build types
-      exitCode = await buildTypes({ quiet })
+      // Run source and types builds in parallel
+      const buildPromises = [
+        buildSource({ quiet, verbose, skipClean: true, analyze: values.analyze }),
+        buildTypes({ quiet, verbose, skipClean: true })
+      ]
+
+      const results = await Promise.all(buildPromises)
+      exitCode = results.find(code => code !== 0) || 0
     }
 
     if (exitCode !== 0) {
@@ -260,9 +302,7 @@ async function main() {
       process.exitCode = exitCode
     } else {
       if (!quiet) {
-        console.log('\n═══════════════════════════════════════════════════════')
-        log.success('Build completed successfully!')
-        console.log('═══════════════════════════════════════════════════════')
+        printFooter('Build completed successfully!')
       }
     }
   } catch (error) {
