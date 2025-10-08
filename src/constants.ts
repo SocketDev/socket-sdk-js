@@ -13,6 +13,9 @@ export const DEFAULT_USER_AGENT = createUserAgentFromPkgJson(rootPkgJson)
 // Default timeout for HTTP requests (30 seconds)
 export const DEFAULT_HTTP_TIMEOUT = 30_000
 
+// Maximum response body size (10MB)
+export const MAX_RESPONSE_SIZE = 10 * 1024 * 1024
+
 // https://github.com/sindresorhus/got/blob/v14.4.6/documentation/2-options.md#agent
 // Valid HTTP agent names for Got-style agent configuration compatibility.
 export const httpAgentNames = new Set(['http', 'https', 'http2'])
