@@ -41,7 +41,7 @@ const loadRequirements = once((): Requirements => {
 export function calculateTotalQuotaCost(
   methodNames: Array<SocketSdkOperations | string>,
 ): number {
-  return methodNames.reduce((total, methodName) => {
+  return methodNames.reduce<number>((total, methodName) => {
     return total + getQuotaCost(methodName)
   }, 0)
 }
@@ -73,10 +73,10 @@ export function getAllMethodRequirements(): Record<string, ApiRequirement> {
 export const getMethodRequirements = memoize(
   (methodName: SocketSdkOperations | string): ApiRequirement => {
     const reqs = loadRequirements()
-    const requirement = reqs.api[methodName]
+    const requirement = reqs.api[methodName as string]
 
     if (!requirement) {
-      throw new Error(`Unknown SDK method: "${methodName}"`)
+      throw new Error(`Unknown SDK method: "${String(methodName)}"`)
     }
 
     return {
@@ -133,10 +133,10 @@ export const getMethodsByQuotaCost = memoize(
 export const getQuotaCost = memoize(
   (methodName: SocketSdkOperations | string): number => {
     const reqs = loadRequirements()
-    const requirement = reqs.api[methodName]
+    const requirement = reqs.api[methodName as string]
 
     if (!requirement) {
-      throw new Error(`Unknown SDK method: "${methodName}"`)
+      throw new Error(`Unknown SDK method: "${String(methodName)}"`)
     }
 
     return requirement.quota
@@ -182,10 +182,10 @@ export const getQuotaUsageSummary = memoize(
 export const getRequiredPermissions = memoize(
   (methodName: SocketSdkOperations | string): string[] => {
     const reqs = loadRequirements()
-    const requirement = reqs.api[methodName]
+    const requirement = reqs.api[methodName as string]
 
     if (!requirement) {
-      throw new Error(`Unknown SDK method: "${methodName}"`)
+      throw new Error(`Unknown SDK method: "${String(methodName)}"`)
     }
 
     return [...requirement.permissions]

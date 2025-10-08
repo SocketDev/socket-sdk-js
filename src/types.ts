@@ -5,7 +5,7 @@
 /* c8 ignore start - Type definitions only, no runtime code to test. */
 
 import type { components, operations } from '../types/api'
-import type { OpErrorType, OpReturnType } from '../types/api-helpers'
+import type { OpReturnType } from '../types/api-helpers'
 import type { Remap } from '@socketsecurity/registry/lib/objects'
 import type { ClientHttp2Session } from 'http2-wrapper'
 import type {
@@ -167,19 +167,22 @@ export type SocketArtifactAlert = Remap<
 
 export type SocketSdkOperations = keyof operations
 
-export type SocketSdkSuccessResult<T extends SocketSdkOperations> =
-  OpReturnType<operations[T]> & {
-    cause?: undefined
-    error?: undefined
-  }
+export type SocketSdkSuccessResult<T extends SocketSdkOperations> = {
+  cause?: undefined
+  data: OpReturnType<operations[T]>
+  error?: undefined
+  status: number
+  success: true
+}
 
-export type SocketSdkErrorResult<T extends SocketSdkOperations> = Omit<
-  OpErrorType<operations[T]>,
-  'error'
-> & {
+export type SocketSdkErrorResult<T extends SocketSdkOperations> = {
   cause?: string | undefined
   data?: undefined
   error: string
+  status: number
+  success: false
+  // Phantom type to use T
+  _operation?: T
 }
 
 export type SocketSdkResult<T extends SocketSdkOperations> =

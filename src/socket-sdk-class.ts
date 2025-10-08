@@ -1037,7 +1037,7 @@ export class SocketSdk {
           cause: errorResult.cause,
           data: undefined,
           error: errorResult.error,
-          status: errorResult.status,
+          status: errorResult['status'],
           success: false,
         }
       }
@@ -1072,7 +1072,7 @@ export class SocketSdk {
           cause: errorResult.cause,
           data: undefined,
           error: errorResult.error,
-          status: errorResult.status,
+          status: errorResult['status'],
           success: false,
         }
       }
@@ -1960,7 +1960,7 @@ export class SocketSdk {
           cause: errorResult.cause,
           data: undefined,
           error: errorResult.error,
-          status: errorResult.status,
+          status: errorResult['status'],
           success: false,
         }
       }
