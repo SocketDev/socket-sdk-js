@@ -133,7 +133,7 @@ async function runLintersOnFiles(files, options = {}) {
     }
 
     logger.log(`  - Running ${name}...`)
-    // eslint-disable-next-line no-await-in-loop
+     
     const result = await runCommandQuiet('pnpm', args)
 
     if (result.exitCode !== 0) {
@@ -185,7 +185,7 @@ async function runLintersOnAll(options = {}) {
     }
 
     logger.log(`  - Running ${name}...`)
-    // eslint-disable-next-line no-await-in-loop
+     
     const result = await runCommandQuiet('pnpm', args)
 
     if (result.exitCode !== 0) {
@@ -311,7 +311,7 @@ async function main() {
 
         // Check if project exists.
         try {
-          // eslint-disable-next-line no-await-in-loop
+           
           await fs.access(absolutePath)
         } catch {
           logger.log(`  - Skipping ${projectName} (not found)`)
@@ -321,7 +321,7 @@ async function main() {
         logger.log(`  - Linting ${projectName}...`)
 
         // Run lint-affected in the project.
-        // eslint-disable-next-line no-await-in-loop
+         
         const result = await spawn(
           'node',
           [

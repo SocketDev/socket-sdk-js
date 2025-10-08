@@ -241,7 +241,7 @@ async function main() {
     }
 
     if (!quiet) {
-      printHeader('Socket SDK Build Runner')
+      printHeader('Build Runner')
     }
 
     let exitCode = 0

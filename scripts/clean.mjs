@@ -162,7 +162,7 @@ async function main() {
     }
 
     if (!quiet) {
-      printHeader('Socket SDK Clean Runner')
+      printHeader('Clean Runner')
       log.step('Cleaning project directories')
     }
 

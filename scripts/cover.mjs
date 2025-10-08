@@ -4,7 +4,7 @@
  * Collects both code coverage and type coverage.
  *
  * Usage:
- *   node scripts/coverage.mjs [--code-only|--type-only|--percent]
+ *   node scripts/cover.mjs [--code-only|--type-only|--percent]
  */
 
 import { parseArgs } from 'node:util'
@@ -43,9 +43,9 @@ async function main() {
     if (values['code-only']) {
       logger.log('Collecting code coverage...')
       const exitCode = await runSequence([
-        { args: ['run', 'pretest:unit'], command: 'pnpm' },
+        { args: ['run', 'build'], command: 'pnpm' },
         {
-          args: ['run', 'test:unit:coverage'],
+          args: ['exec', 'vitest', '--run', '--coverage'],
           command: 'pnpm',
         },
       ])
@@ -57,9 +57,9 @@ async function main() {
     logger.log('Collecting coverage (code + type)...')
 
     const codeExitCode = await runSequence([
-      { args: ['run', 'pretest:unit'], command: 'pnpm' },
+      { args: ['run', 'build'], command: 'pnpm' },
       {
-        args: ['run', 'test:unit:coverage'],
+        args: ['exec', 'vitest', '--run', '--coverage'],
         command: 'pnpm',
       },
     ])

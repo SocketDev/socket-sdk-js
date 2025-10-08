@@ -60,7 +60,7 @@ export function printFooter(message, success = true) {
 
 // Standard help header
 export function printHelpHeader(name) {
-  console.log(`Socket PackageURL ${name}`)
+  console.log(`${name}`)
 }
 
 // Handle quiet options

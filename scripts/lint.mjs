@@ -287,7 +287,7 @@ async function main() {
     const quiet = isQuiet(values)
 
     if (!quiet) {
-      printHeader('Socket PackageURL Lint Runner')
+      printHeader('Lint Runner')
     }
 
     let exitCode = 0

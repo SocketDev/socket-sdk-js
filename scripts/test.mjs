@@ -250,7 +250,7 @@ async function main() {
       return
     }
 
-    printHeader('Socket PackageURL Test Runner')
+    printHeader('Test Runner')
 
     // Handle aliases
     const skipChecks = values.fast || values.quick
