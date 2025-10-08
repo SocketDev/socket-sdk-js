@@ -4,7 +4,7 @@
  * Collects both code coverage and type coverage.
  *
  * Usage:
- *   node scripts/cover.mjs [--code-only|--type-only|--percent]
+ *   node scripts/cover.mjs [--code-only|--type-only|--percent|--summary]
  */
 
 import { parseArgs } from 'node:util'
@@ -17,13 +17,14 @@ async function main() {
       options: {
         'code-only': { type: 'boolean', default: false },
         percent: { type: 'boolean', default: false },
+        summary: { type: 'boolean', default: false },
         'type-only': { type: 'boolean', default: false },
       },
       strict: false,
     })
 
-    if (values.percent) {
-      // Just get coverage percentage
+    if (values.percent || values.summary) {
+      // Just get coverage percentage/summary
       const exitCode = await runSequence([
         { args: ['scripts/get-coverage-percentage.mjs'], command: 'node' },
       ])
@@ -45,7 +46,7 @@ async function main() {
       const exitCode = await runSequence([
         { args: ['run', 'build'], command: 'pnpm' },
         {
-          args: ['exec', 'vitest', '--run', '--coverage'],
+          args: ['exec', 'vitest', '--run', '--coverage', '--config', '.config/vitest.config.mts'],
           command: 'pnpm',
         },
       ])
@@ -59,7 +60,7 @@ async function main() {
     const codeExitCode = await runSequence([
       { args: ['run', 'build'], command: 'pnpm' },
       {
-        args: ['exec', 'vitest', '--run', '--coverage'],
+        args: ['exec', 'vitest', '--run', '--coverage', '--config', '.config/vitest.config.mts'],
         command: 'pnpm',
       },
     ])

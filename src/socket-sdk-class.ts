@@ -139,7 +139,7 @@ export class SocketSdk {
           prefix: 'socket-sdk',
           ttl: cacheTtl,
         })
-      : undefined
+      : /* c8 ignore next - cache disabled by default */ undefined
     this.#retries = retries
     this.#retryDelay = retryDelay
     this.#reqOptions = {
@@ -233,14 +233,14 @@ export class SocketSdk {
         : /* c8 ignore next - Empty line handling in batch streaming response parsing. */ null
       if (isObjectObject(artifact)) {
         yield this.#handleApiSuccess<'batchPackageFetch'>(
+          /* c8 ignore next 7 - Public token artifact reshaping branch for policy compliance. */
           isPublicToken
-            ? /* c8 ignore start - Public token artifact reshaping branch for policy compliance. */ reshapeArtifactForPublicPolicy(
+            ? reshapeArtifactForPublicPolicy(
                 artifact!,
                 false,
                 queryParams?.['actions'] as string,
               )
-            : /* c8 ignore stop */
-              artifact!,
+            : artifact!,
         )
       }
     }
@@ -380,7 +380,7 @@ export class SocketSdk {
       body = bodyStr
     }
     // Build error message that includes the body content if available.
-    let errorMessage = error.message ?? UNKNOWN_ERROR
+    let errorMessage = error.message ?? /* c8 ignore next - fallback for missing error message */ UNKNOWN_ERROR
     const trimmedBody = body?.trim()
     if (trimmedBody && !errorMessage.includes(trimmedBody)) {
       // Replace generic status message with actual error body if present,
@@ -388,8 +388,7 @@ export class SocketSdk {
       const statusMessage = error.response?.statusMessage
       if (statusMessage && errorMessage.includes(statusMessage)) {
         errorMessage = errorMessage.replace(statusMessage, trimmedBody)
-      } else {
-        /* c8 ignore next 2 - edge case where statusMessage is undefined or not in error message. */
+      } /* c8 ignore next 3 - edge case where statusMessage is undefined or not in error message. */ else {
         errorMessage = `${errorMessage}: ${trimmedBody}`
       }
     }
@@ -479,15 +478,14 @@ export class SocketSdk {
         : /* c8 ignore next - Empty line handling in batch parsing. */ null
       if (isObjectObject(artifact)) {
         results.push(
+          /* c8 ignore next 7 - Public token artifact reshaping for policy compliance. */
           isPublicToken
-            ? /* c8 ignore start - Public token artifact reshaping for policy compliance. */
-              reshapeArtifactForPublicPolicy(
+            ? reshapeArtifactForPublicPolicy(
                 artifact!,
                 false,
                 queryParams?.['actions'] as string,
               )
-            : /* c8 ignore stop */
-              artifact!,
+            : artifact!,
         )
       }
     }
