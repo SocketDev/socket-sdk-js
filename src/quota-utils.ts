@@ -25,8 +25,13 @@ const loadRequirements = once((): Requirements => {
     // Resolve path relative to this module file location.
     // When compiled, __dirname will point to dist/ directory.
     // In source, __dirname points to src/ directory.
-    // requirements.json is always in the parent directory of dist/ or src/.
-    const requirementsPath = join(__dirname, '..', 'requirements.json')
+    // requirements.json is in the .config directory at the project root.
+    const requirementsPath = join(
+      __dirname,
+      '..',
+      '.config',
+      'requirements.json',
+    )
     const data = readFileSync(requirementsPath, 'utf8')
     return JSON.parse(data) as Requirements
   } catch (e) {

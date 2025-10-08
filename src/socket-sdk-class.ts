@@ -380,7 +380,9 @@ export class SocketSdk {
       body = bodyStr
     }
     // Build error message that includes the body content if available.
-    let errorMessage = error.message ?? /* c8 ignore next - fallback for missing error message */ UNKNOWN_ERROR
+    let errorMessage =
+      error.message ??
+      /* c8 ignore next - fallback for missing error message */ UNKNOWN_ERROR
     const trimmedBody = body?.trim()
     if (trimmedBody && !errorMessage.includes(trimmedBody)) {
       // Replace generic status message with actual error body if present,
