@@ -1,5 +1,5 @@
 /** @fileoverview Quota utility functions for Socket SDK method cost lookup. */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { memoize, once } from '@socketsecurity/registry/lib/memoization'
@@ -32,6 +32,12 @@ const loadRequirements = once((): Requirements => {
       '.config',
       'requirements.json',
     )
+
+    // Check if the requirements file exists before attempting to read.
+    if (!existsSync(requirementsPath)) {
+      throw new Error(`Requirements file not found at: ${requirementsPath}`)
+    }
+
     const data = readFileSync(requirementsPath, 'utf8')
     return JSON.parse(data) as Requirements
   } catch (e) {
