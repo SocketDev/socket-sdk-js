@@ -14,6 +14,7 @@ import colors from 'yoctocolors-cjs'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
 const WIN32 = process.platform === 'win32'
+const CI = !!process.env.CI
 
 // Simple inline logger.
 const log = {
@@ -157,6 +158,14 @@ async function versionExists(packageName, version) {
 }
 
 /**
+ * Check if this is the registry package.
+ */
+function isRegistryPackage() {
+  // socket-registry has a registry subdirectory with hundreds of packages.
+  return existsSync(path.join(rootPath, 'registry', 'package.json'))
+}
+
+/**
  * Run pre-publish checks.
  */
 async function runPrePublishChecks(options = {}) {
@@ -268,7 +277,7 @@ async function publishSimple(options = {}) {
   // Prepare publish args.
   const publishArgs = ['publish', '--access', access, '--tag', tag]
 
-  // Add provenance if available (npm >= 9.5.0).
+  // Add provenance by default (works with trusted publishers).
   if (!dryRun) {
     publishArgs.push('--provenance')
   }
@@ -323,57 +332,46 @@ async function publishComplex(options = {}) {
 }
 
 /**
- * Create git tag for the release.
+ * Push existing git tag if it exists locally but not remotely.
+ * Tags should be created with version bump commits, not by this script.
  */
-async function createGitTag(version, options = {}) {
-  const { push = false, force = false } = options
+async function pushExistingTag(version, options = {}) {
+  const { force = false } = options
 
   const tagName = `v${version}`
 
-  log.step('Creating git tag')
+  log.step('Checking git tag')
 
-  // Check if tag already exists.
-  log.progress(`Checking for tag ${tagName}`)
-  const tagCheckResult = await runCommandWithOutput('git', ['tag', '-l', tagName])
-  if (tagCheckResult.stdout.trim()) {
-    if (!force) {
-      log.warn(`Tag ${tagName} already exists`)
-      return false
-    }
-    log.warn(`Tag ${tagName} already exists (will overwrite)`)
-  } else {
-    log.done('Tag does not exist')
+  // Check if tag exists locally.
+  log.progress(`Checking for local tag ${tagName}`)
+  const localTagResult = await runCommandWithOutput('git', ['tag', '-l', tagName])
+  if (!localTagResult.stdout.trim()) {
+    log.done('No local tag to push')
+    return true
+  }
+  log.done(`Local tag ${tagName} exists`)
+
+  // Check if tag exists on remote.
+  log.progress(`Checking remote for tag ${tagName}`)
+  const remoteTagResult = await runCommandWithOutput('git', ['ls-remote', '--tags', 'origin', tagName])
+  if (remoteTagResult.stdout.trim()) {
+    log.done('Tag already exists on remote')
+    return true
   }
 
-  // Create tag.
-  log.progress(`Creating tag ${tagName}`)
-  const tagArgs = ['tag', tagName, '-m', `Release ${tagName}`]
+  // Push existing tag to remote.
+  log.progress(`Pushing tag ${tagName} to remote`)
+  const pushArgs = ['push', 'origin', tagName]
   if (force) {
-    tagArgs.push('-f')
+    pushArgs.push('-f')
   }
 
-  const tagCode = await runCommand('git', tagArgs)
-  if (tagCode !== 0) {
-    log.failed('Tag creation failed')
+  const pushCode = await runCommand('git', pushArgs)
+  if (pushCode !== 0) {
+    log.failed('Tag push failed')
     return false
   }
-  log.done(`Created tag ${tagName}`)
-
-  // Push tag if requested.
-  if (push) {
-    log.progress('Pushing tag to remote')
-    const pushArgs = ['push', 'origin', tagName]
-    if (force) {
-      pushArgs.push('-f')
-    }
-
-    const pushCode = await runCommand('git', pushArgs)
-    if (pushCode !== 0) {
-      log.failed('Tag push failed')
-      return false
-    }
-    log.done('Pushed tag to remote')
-  }
+  log.done('Pushed tag to remote')
 
   return true
 }
@@ -439,9 +437,9 @@ async function main() {
       console.log('  --dry-run      Perform a dry-run without publishing')
       console.log('  --force        Force publish even with warnings')
       console.log('  --skip-checks  Skip pre-publish checks')
-      console.log('  --skip-build   Skip build step')
+      console.log('  --skip-build   Skip build step (not allowed in CI)')
       console.log('  --skip-git     Skip git status checks')
-      console.log('  --skip-tag     Skip git tag creation')
+      console.log('  --skip-tag     Skip git tag push')
       console.log('  --complex      Use complex multi-package flow')
       console.log('  --tag <tag>    npm dist-tag (default: latest)')
       console.log('  --access <access>  Package access level (default: public)')
@@ -452,6 +450,13 @@ async function main() {
       console.log('  pnpm publish --complex    # Multi-package publish')
       console.log('  pnpm publish --otp 123456 # Publish with OTP')
       process.exitCode = 0
+      return
+    }
+
+    // Check CI restrictions.
+    if (CI && values['skip-build']) {
+      log.error('--skip-build is not allowed in CI')
+      process.exitCode = 1
       return
     }
 
@@ -511,10 +516,10 @@ async function main() {
       return
     }
 
-    // Create git tag unless skipped or dry-run.
-    if (!values['skip-tag'] && !values['dry-run']) {
-      await createGitTag(version, {
-        push: true,
+    // Push git tag if it exists (but not for registry packages with hundreds of packages).
+    // Tags are created by version bump commits, not by this script.
+    if (!values['skip-tag'] && !values['dry-run'] && !isRegistryPackage()) {
+      await pushExistingTag(version, {
         force: values.force
       })
     }
