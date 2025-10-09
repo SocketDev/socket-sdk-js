@@ -18,7 +18,12 @@ import { urlSearchParamAsBoolean } from '@socketsecurity/registry/lib/url'
 
 import {
   DEFAULT_HTTP_TIMEOUT,
+  DEFAULT_RETRIES,
+  DEFAULT_RETRY_DELAY,
   DEFAULT_USER_AGENT,
+  MAX_HTTP_TIMEOUT,
+  MAX_STREAM_SIZE,
+  MIN_HTTP_TIMEOUT,
   httpAgentNames,
 } from './constants'
 import {
@@ -116,11 +121,19 @@ export class SocketSdk {
       baseUrl = 'https://api.socket.dev/v0/',
       cache = false,
       cacheTtl = 5 * 60 * 1000,
-      retries = 0,
-      retryDelay = 100,
+      retries = DEFAULT_RETRIES,
+      retryDelay = DEFAULT_RETRY_DELAY,
       timeout = DEFAULT_HTTP_TIMEOUT,
       userAgent,
     } = { __proto__: null, ...options } as SocketSdkOptions
+
+    // Validate timeout parameter.
+    if (timeout !== undefined) {
+      if (typeof timeout !== 'number' || timeout < MIN_HTTP_TIMEOUT || timeout > MAX_HTTP_TIMEOUT) {
+        throw new TypeError(`"timeout" must be a number between ${MIN_HTTP_TIMEOUT} and ${MAX_HTTP_TIMEOUT} milliseconds`)
+      }
+    }
+
     const agentKeys = agentOrObj ? Object.keys(agentOrObj) : []
     const agentAsGotOptions = agentOrObj as GotOptions
     const agent = (
@@ -2026,8 +2039,20 @@ export class SocketSdk {
       }
 
       if (typeof output === 'string') {
-        // Stream to file with error handling.
+        // Stream to file with size limit and error handling.
         const writeStream = createWriteStream(output)
+        let bytesWritten = 0
+
+        // Monitor stream size to prevent excessive disk usage.
+        res.on('data', (chunk: Buffer) => {
+          bytesWritten += chunk.length
+          if (bytesWritten > MAX_STREAM_SIZE) {
+            res.destroy()
+            writeStream.destroy()
+            throw new Error(`Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`)
+          }
+        })
+
         res.pipe(writeStream)
         /* c8 ignore next 4 - Write stream error handler, difficult to test reliably */
         writeStream.on('error', error => {
@@ -2036,7 +2061,18 @@ export class SocketSdk {
           })
         })
       } else if (output === true) {
-        // Stream to stdout with error handling.
+        // Stream to stdout with size limit and error handling.
+        let bytesWritten = 0
+
+        // Monitor stream size for stdout as well.
+        res.on('data', (chunk: Buffer) => {
+          bytesWritten += chunk.length
+          if (bytesWritten > MAX_STREAM_SIZE) {
+            res.destroy()
+            throw new Error(`Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`)
+          }
+        })
+
         res.pipe(process.stdout)
         /* c8 ignore next 3 - Stdout error handler, difficult to test reliably */
         process.stdout.on('error', error => {

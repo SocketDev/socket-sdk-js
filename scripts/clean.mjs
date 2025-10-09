@@ -5,17 +5,14 @@
 
 import { parseArgs } from 'node:util'
 
-import { runCommand } from './utils/run-command.mjs'
+import { deleteAsync } from 'del'
 import {
-  getRootPath,
   log,
   printHeader,
   printFooter,
   printHelpHeader,
   isQuiet
 } from './utils/common.mjs'
-
-const rootPath = getRootPath(import.meta.url)
 
 /**
  * Clean specific directories.
@@ -30,10 +27,7 @@ async function cleanDirectories(patterns, options = {}) {
 
     let exitCode = 0
     try {
-      exitCode = await runCommand('npx', ['del-cli', pattern], {
-        stdio: quiet ? 'pipe' : 'inherit',
-        cwd: rootPath
-      })
+      exitCode = await deleteAsync(pattern)
     } catch (error) {
       if (!quiet) {
         log.failed(`Failed to clean ${name}: ${error.message}`)
@@ -124,8 +118,6 @@ async function main() {
       return
     }
 
-    const quiet = isQuiet(values)
-
     // Determine what to clean
     const cleanAll = values.all ||
       (!values.cache && !values.coverage && !values.dist && !values.types && !values.modules)
@@ -152,6 +144,7 @@ async function main() {
       tasks.push({ name: 'node_modules', pattern: '**/node_modules' })
     }
 
+    const quiet = isQuiet(values)
     // Check if there's anything to clean
     if (tasks.length === 0) {
       if (!quiet) {
