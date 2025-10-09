@@ -46,6 +46,7 @@
     "prepare": "husky",
     "prepublishOnly": "echo 'ERROR: Use GitHub Actions workflow for publishing' && exit 1",
     "publish": "node scripts/publish.mjs",
+    "sync-claude": "node scripts/sync-claude.mjs",
     "test": "node scripts/test.mjs",
     "test-ci": "pnpm run test --all",
     "type": "tsgo --noEmit -p .config/tsconfig.check.json",
