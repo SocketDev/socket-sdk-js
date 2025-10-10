@@ -173,31 +173,19 @@ export class SocketSdk {
   async #executeWithRetry<T>(operation: () => Promise<T>): Promise<T> {
     const result = await pRetry(operation, {
       baseDelayMs: this.#retryDelay,
-      onRetry(attempt: number, error: unknown) {
+      onRetry(_attempt: number, error: unknown) {
         /* c8 ignore next 3 - Early return for non-ResponseError types in retry logic */
         if (!(error instanceof ResponseError)) {
           return
         }
-        const { statusCode, headers } = error.response
+        const { statusCode } = error.response
         // Don't retry authentication/authorization errors - they won't succeed.
         if (statusCode === 401 || statusCode === 403) {
           throw error
         }
-
-        // Handle rate limiting with Retry-After header.
-        if (statusCode === 429) {
-          const retryAfter = headers?.['retry-after']
-          if (retryAfter) {
-            const delaySeconds = parseInt(retryAfter as string, 10)
-            if (!isNaN(delaySeconds)) {
-              // Override the default delay with server-specified delay.
-              // Convert seconds to milliseconds and add small buffer.
-              const delayMs = delaySeconds * 1000 + 100
-              // pRetry will use this delay instead of exponential backoff.
-              return delayMs
-            }
-          }
-        }
+        // Note: Rate limiting (429) will be retried with exponential backoff.
+        // TODO: Consider implementing custom delay based on Retry-After header
+        // if the pRetry library adds support for dynamic delays in the future.
       },
       onRetryRethrow: true,
       retries: this.#retries,
