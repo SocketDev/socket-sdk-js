@@ -58,6 +58,29 @@ describe('SocketSdk Authentication and Basic Operations', () => {
       const client = new SocketSdk('  validToken  ')
       expect(client).toBeTruthy()
     })
+
+    it('rejects timeout below minimum value', () => {
+      expect(() => new SocketSdk('apiKey', { timeout: 4999 })).toThrow(
+        '"timeout" must be a number between 5000 and 300000 milliseconds',
+      )
+    })
+
+    it('rejects timeout above maximum value', () => {
+      expect(() => new SocketSdk('apiKey', { timeout: 300001 })).toThrow(
+        '"timeout" must be a number between 5000 and 300000 milliseconds',
+      )
+    })
+
+    it('rejects non-numeric timeout', () => {
+      expect(() => new SocketSdk('apiKey', { timeout: '5000' as any })).toThrow(
+        '"timeout" must be a number between 5000 and 300000 milliseconds',
+      )
+    })
+
+    it('accepts valid timeout within range', () => {
+      const client = new SocketSdk('apiKey', { timeout: 5000 })
+      expect(client).toBeTruthy()
+    })
   })
 
   describe('Quota management endpoints', () => {
