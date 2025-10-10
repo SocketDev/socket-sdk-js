@@ -144,10 +144,9 @@ async function runVitestWithArgs(args, options = {}) {
     stdio: 'inherit',
   }
 
-  // Use dotenvx to load test environment via pnpm exec
-  return runCommand('pnpm', [
-    'exec',
-    'dotenvx',
+  // Use dotenvx to load test environment
+  const dotenvxPath = path.join(nodeModulesBinPath, WIN32 ? 'dotenvx.cmd' : 'dotenvx')
+  return runCommand(dotenvxPath, [
     '-q',
     'run',
     '-f',

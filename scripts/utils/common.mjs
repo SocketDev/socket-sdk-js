@@ -10,7 +10,10 @@ import colors from 'yoctocolors-cjs'
 // Get root path
 export const getRootPath = (importMetaUrl) => {
   const __dirname = path.dirname(fileURLToPath(importMetaUrl))
-  return path.join(__dirname, '..', '..')
+  // If called from scripts/utils/, go up 2 directories
+  // If called from scripts/, go up 1 directory
+  const isInUtils = __dirname.endsWith(path.join('scripts', 'utils'))
+  return isInUtils ? path.join(__dirname, '..', '..') : path.join(__dirname, '..')
 }
 
 // Console logging utilities
