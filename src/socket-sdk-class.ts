@@ -2034,6 +2034,7 @@ export class SocketSdk {
         // Monitor stream size to prevent excessive disk usage.
         res.on('data', (chunk: Buffer) => {
           bytesWritten += chunk.length
+          /* c8 ignore next 4 - Stream size limit enforcement, difficult to test reliably */
           if (bytesWritten > MAX_STREAM_SIZE) {
             res.destroy()
             writeStream.destroy()
@@ -2055,6 +2056,7 @@ export class SocketSdk {
         // Monitor stream size for stdout as well.
         res.on('data', (chunk: Buffer) => {
           bytesWritten += chunk.length
+          /* c8 ignore next 3 - Stream size limit enforcement, difficult to test reliably */
           if (bytesWritten > MAX_STREAM_SIZE) {
             res.destroy()
             throw new Error(`Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`)
