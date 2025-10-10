@@ -214,7 +214,7 @@ async function runProjectUpdates() {
   for (const { name, script } of updates) {
     log.progress(`Updating ${name}`)
 
-    // eslint-disable-next-line no-await-in-loop
+     
     const exitCode = await runCommand('node', [script], {
       stdio: 'pipe'
     })
