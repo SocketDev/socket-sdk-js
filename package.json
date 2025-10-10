@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/sdk",
-  "version": "1.11.2",
+  "version": "2.0.0",
   "license": "MIT",
   "description": "SDK for the Socket API client",
   "author": {
@@ -13,17 +13,17 @@
     "type": "git",
     "url": "git://github.com/SocketDev/socket-sdk-js.git"
   },
-  "type": "commonjs",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
     },
     "./testing": {
-      "types": "./dist/testing.d.ts",
-      "default": "./dist/testing.js"
+      "types": "./dist/testing.d.mts",
+      "default": "./dist/testing.mjs"
     },
     "./types/api-helpers": "./types/api-helpers.d.ts",
     "./types/api-helpers.d.ts": "./types/api-helpers.d.ts",

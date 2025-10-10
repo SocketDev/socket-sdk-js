@@ -106,6 +106,30 @@ async function buildTypes(options = {}) {
     return exitCode
   }
 
+  // Rename .d.ts files to .d.mts for ESM
+  if (!quiet) {
+    log.progress('Renaming declaration files to .d.mts')
+  }
+
+  const { promises: fs } = await import('node:fs')
+  const distPath = path.join(rootPath, 'dist')
+
+  try {
+    const files = await fs.readdir(distPath)
+    for (const file of files) {
+      if (file.endsWith('.d.ts')) {
+        const oldPath = path.join(distPath, file)
+        const newPath = path.join(distPath, file.replace('.d.ts', '.d.mts'))
+        await fs.rename(oldPath, newPath)
+      }
+    }
+  } catch (error) {
+    if (!quiet) {
+      log.error('Failed to rename declaration files:', error)
+    }
+    return 1
+  }
+
   if (!quiet) {
     log.done('Type declarations built')
   }
@@ -153,8 +177,8 @@ async function watchBuild(options = {}) {
  * Check if build is needed.
  */
 function isBuildNeeded() {
-  const distPath = path.join(rootPath, 'dist', 'index.js')
-  const distTypesPath = path.join(rootPath, 'dist', 'index.d.ts')
+  const distPath = path.join(rootPath, 'dist', 'index.mjs')
+  const distTypesPath = path.join(rootPath, 'dist', 'index.d.mts')
 
   return !existsSync(distPath) || !existsSync(distTypesPath)
 }

@@ -4,6 +4,35 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.0.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v2.0.0) - 2025-10-10
+
+### Changed
+- **BREAKING**: Migrated to ESM-only module format
+  - Package is now ESM-only (`"type": "module"` in package.json)
+  - All output files use `.mjs` extension for JavaScript
+  - TypeScript declaration files use `.d.mts` extension
+  - CommonJS (`require()`) is no longer supported
+- Simplified build process for ESM-only output
+- Updated TypeScript configuration to use ESM module resolution
+- Improved code splitting for better tree-shaking with ESM
+
+### Removed
+- **BREAKING**: Removed CommonJS support and exports
+- Removed CommonJS-specific build configurations
+
+### Migration Guide
+To migrate from v1.x to v2.0:
+1. Ensure your project supports ESM modules (Node.js 14+ with `"type": "module"` or `.mjs` extensions)
+2. Update imports from CommonJS `require()` to ESM `import` statements:
+   ```javascript
+   // Before (v1.x)
+   const { SocketSdk } = require('@socketsecurity/sdk');
+
+   // After (v2.0)
+   import { SocketSdk } from '@socketsecurity/sdk';
+   ```
+3. If your project still requires CommonJS, consider staying on v1.x or using a transpiler
+
 ## [1.11.2](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.11.2) - 2025-10-07
 
 ### Fixed

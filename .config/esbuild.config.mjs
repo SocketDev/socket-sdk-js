@@ -12,7 +12,7 @@ const distPath = path.join(rootPath, 'dist')
 // External packages that should not be bundled
 const EXTERNAL_PACKAGES = new Set(['@socketsecurity/registry'])
 
-// Build configuration for CommonJS output
+// Build configuration for ESM output
 export const buildConfig = {
   entryPoints: [
     `${srcPath}/index.ts`,
@@ -20,7 +20,7 @@ export const buildConfig = {
   ],
   outdir: distPath,
   bundle: true,
-  format: 'cjs',
+  format: 'esm',
   platform: 'node',
   // Minimum Node version from package.json
   target: 'node18',
@@ -30,9 +30,10 @@ export const buildConfig = {
   // For bundle analysis
   metafile: true,
   logLevel: 'info',
+  outExtension: { '.js': '.mjs' },
 
-  // Preserve module structure for better tree-shaking
-  splitting: false,
+  // Enable code splitting for ESM
+  splitting: true,
 
   // External dependencies
   external: [
@@ -45,7 +46,7 @@ export const buildConfig = {
 
   // Banner for generated code
   banner: {
-    js: '/* Socket SDK - Built with esbuild */'
+    js: '/* Socket SDK ESM - Built with esbuild */'
   },
 
   // TypeScript configuration

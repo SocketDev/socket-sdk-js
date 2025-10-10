@@ -14,6 +14,8 @@ JavaScript SDK for [Socket.dev](https://socket.dev/) API - Security analysis, vu
 pnpm add @socketsecurity/sdk
 ```
 
+**Note:** Version 2.0+ is ESM-only. For CommonJS support, use version 1.x.
+
 ## Quick Start
 
 ```typescript
