@@ -25,21 +25,13 @@ async function cleanDirectories(patterns, options = {}) {
       log.progress(`Cleaning ${name}`)
     }
 
-    let exitCode = 0
     try {
-      exitCode = await deleteAsync(pattern)
+      await deleteAsync(pattern)
     } catch (error) {
       if (!quiet) {
         log.failed(`Failed to clean ${name}: ${error.message}`)
       }
       return 1
-    }
-
-    if (exitCode !== 0) {
-      if (!quiet) {
-        log.failed(`Failed to clean ${name}`)
-      }
-      return exitCode
     }
 
     if (!quiet) {
