@@ -16,7 +16,7 @@ interface Requirements {
 }
 
 /**
- * Load requirements.json data with caching.
+ * Load sdk-method-requirements.json data with caching.
  * Internal function for lazy loading quota requirements.
  * Uses once() memoization to ensure file is only read once.
  */
@@ -25,12 +25,12 @@ const loadRequirements = once((): Requirements => {
     // Resolve path relative to this module file location.
     // When compiled, __dirname will point to dist/ directory.
     // In source, __dirname points to src/ directory.
-    // requirements.json is in the .config directory at the project root.
+    // sdk-method-requirements.json is in the data directory at the project root.
     const requirementsPath = join(
       __dirname,
       '..',
-      '.config',
-      'requirements.json',
+      'data',
+      'sdk-method-requirements.json',
     )
 
     // Check if the requirements file exists before attempting to read.
@@ -41,7 +41,7 @@ const loadRequirements = once((): Requirements => {
     const data = readFileSync(requirementsPath, 'utf8')
     return JSON.parse(data) as Requirements
   } catch (e) {
-    throw new Error('Failed to load "requirements.json"', { cause: e })
+    throw new Error('Failed to load SDK method requirements', { cause: e })
   }
 })
 
