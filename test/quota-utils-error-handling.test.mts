@@ -45,6 +45,21 @@ describe('Quota Utils - Error Handling', () => {
         'Failed to load SDK method requirements',
       )
     })
+
+    it('should throw error when requirements.json file does not exist', async () => {
+      // Mock fs.existsSync to return false
+      vi.doMock('node:fs', () => ({
+        existsSync: vi.fn(() => false),
+        readFileSync: vi.fn(),
+      }))
+
+      const { getQuotaCost } = await import('../src/quota-utils')
+
+      // The error is caught and wrapped, so we expect the wrapper message
+      expect(() => getQuotaCost('someMethod')).toThrow(
+        'Failed to load SDK method requirements',
+      )
+    })
   })
 
   describe('method validation error paths', () => {
