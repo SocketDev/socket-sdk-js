@@ -10,7 +10,7 @@ import { getRootPath } from './utils/path-helpers.mjs'
 const rootPath = getRootPath(import.meta.url)
 const openApiJsonPath = path.join(rootPath, 'openapi.json')
 
-void (async () => {
+async function main() {
   try {
     const openApiData = await fs.readFile(openApiJsonPath, 'utf8')
     await fs.writeFile(
@@ -21,4 +21,6 @@ void (async () => {
     process.exitCode = 1
     console.error('Failed with error:', e.message)
   }
-})()
+}
+
+main().catch(console.error)

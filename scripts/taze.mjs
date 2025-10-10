@@ -21,7 +21,7 @@ function includesProvenanceDowngradeWarning(output) {
   )
 }
 
-void (async () => {
+async function main() {
   // Run with command line arguments.
   const args = process.argv.slice(2)
 
@@ -60,4 +60,6 @@ void (async () => {
     )
     process.exit(1)
   }
-})()
+}
+
+main().catch(console.error)
