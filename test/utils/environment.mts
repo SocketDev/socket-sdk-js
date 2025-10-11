@@ -2,6 +2,7 @@
 import nock from 'nock'
 import { afterEach, beforeEach } from 'vitest'
 
+import { FAST_TEST_CONFIG } from './fast-test-config.mts'
 import { SocketSdk } from '../../src/index'
 
 export function setupTestEnvironment() {
@@ -37,7 +38,7 @@ export function createTestClient(
   token = 'test-api-token',
   options?: ConstructorParameters<typeof SocketSdk>[1],
 ): SocketSdk {
-  return new SocketSdk(token, options)
+  return new SocketSdk(token, { ...FAST_TEST_CONFIG, ...options })
 }
 
 // Handle unhandled rejections in tests.
