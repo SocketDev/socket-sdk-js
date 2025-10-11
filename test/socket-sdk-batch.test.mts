@@ -4,9 +4,10 @@ import { tmpdir } from 'node:os'
 import * as path from 'node:path'
 
 import nock from 'nock'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { SocketSdk } from '../src/index'
+import { FAST_TEST_CONFIG } from './utils/fast-test-config.mts'
 
 import type { IncomingHttpHeaders } from 'node:http'
 
@@ -65,7 +66,7 @@ describe('SocketSdk - Batch Operations', () => {
         .post('/v0/purl')
         .reply(200, JSON.stringify(mockResponse) + '\n')
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.batchPackageFetch({
         components: [{ purl: 'pkg:npm/express@4.19.2' }],
       })
@@ -110,7 +111,7 @@ describe('SocketSdk - Batch Operations', () => {
         .post('/v0/purl')
         .reply(200, JSON.stringify(mockResponse) + '\n')
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.batchPackageFetch({
         components: [{ purl: 'pkg:npm/lodash@4.17.21' }],
       })
@@ -153,7 +154,7 @@ describe('SocketSdk - Batch Operations', () => {
         .post('/v0/purl')
         .reply(200, responses.map(r => JSON.stringify(r)).join('\n'))
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.batchPackageFetch({
         components: [
           { purl: 'pkg:npm/react@18.0.0' },
@@ -173,28 +174,37 @@ describe('SocketSdk - Batch Operations', () => {
     })
 
     it('should handle network timeouts for reachability checks', async () => {
+      // Use fake timers to avoid actual delay
+      vi.useFakeTimers()
+
       nock('https://api.socket.dev')
         .post('/v0/purl')
         .delayConnection(6000)
         .reply(200, {})
 
       const client = new SocketSdk('test-token', {
+        ...FAST_TEST_CONFIG,
         timeout: 5000,
       })
 
-      await expect(
-        client.batchPackageFetch({
-          components: [{ purl: 'pkg:npm/test@1.0.0' }],
-        }),
-      ).rejects.toThrow()
-    }, 10000)
+      const promise = client.batchPackageFetch({
+        components: [{ purl: 'pkg:npm/test@1.0.0' }],
+      })
+
+      // Advance timers to trigger timeout
+      await vi.advanceTimersByTimeAsync(5001)
+
+      await expect(promise).rejects.toThrow()
+
+      vi.useRealTimers()
+    })
 
     it('should handle partial response data', async () => {
       nock('https://api.socket.dev')
         .post('/v0/purl')
         .reply(200, '{"purl":"pkg:npm/test@1.0.0","na')
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.batchPackageFetch({
         components: [{ purl: 'pkg:npm/test@1.0.0' }],
       })
@@ -215,7 +225,7 @@ describe('SocketSdk - Batch Operations', () => {
         .post('/v0/purl')
         .reply(200, JSON.stringify(errorResponse) + '\n')
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
 
       // Use the streaming method directly
       const stream = client.batchPackageStream({
@@ -238,7 +248,7 @@ describe('SocketSdk - Batch Operations', () => {
     it('should handle empty batch response', async () => {
       nock('https://api.socket.dev').post('/v0/purl').reply(200, '')
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.batchPackageFetch({
         components: [{ purl: 'pkg:npm/empty@1.0.0' }],
       })
@@ -259,7 +269,7 @@ describe('SocketSdk - Batch Operations', () => {
         .post('/v0/purl')
         .reply(200, responses.map(r => JSON.stringify(r)).join('\n') + '\n')
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.batchPackageFetch({
         components: [
           { purl: 'pkg:npm/pkg1@1.0.0' },
@@ -287,7 +297,7 @@ describe('SocketSdk - Batch Operations', () => {
         .post('/v0/purl?compact=true')
         .reply(200, JSON.stringify(mockResponse) + '\n')
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.batchPackageFetch(
         {
           components: [{ purl: 'pkg:npm/express@4.19.2' }],
@@ -318,7 +328,7 @@ describe('SocketSdk - Batch Operations', () => {
 
       nock('https://api.socket.dev').post('/v0/purl').reply(200, responseText)
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.batchPackageFetch({
         components: [
           { purl: 'pkg:npm/pkg1@1.0.0' },
@@ -413,7 +423,7 @@ describe('SocketSdk - Batch Operations', () => {
           ]
         })
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.createDependenciesSnapshot(
         [packageJsonPath, packageLockPath],
         { pathsRelativeTo: tempDir },
@@ -453,7 +463,7 @@ describe('SocketSdk - Batch Operations', () => {
           ]
         })
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.createOrgFullScan(
         'test-org',
         [packageJsonPath, packageLockPath],
@@ -479,26 +489,26 @@ describe('SocketSdk - Batch Operations', () => {
         .post('/v0/dependencies/upload')
         .replyWithError(new Error('socket hang up'))
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
 
       await expect(
         client.createDependenciesSnapshot([packageJsonPath], {
           pathsRelativeTo: tempDir,
         }),
       ).rejects.toThrow()
-    }, 20000)
+    })
 
     it('should handle non-existent file paths', async () => {
       const nonExistentPath = path.join(tempDir, 'non-existent.json')
 
       // The SDK will attempt to read the file and fail with ENOENT
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
 
       await expect(
         client.createDependenciesSnapshot([nonExistentPath], {
           pathsRelativeTo: tempDir,
         }),
       ).rejects.toThrow()
-    }, 20000)
+    })
   })
 })
