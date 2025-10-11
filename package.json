@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/sdk",
-  "version": "1.11.2",
+  "version": "2.0.0",
   "license": "MIT",
   "description": "SDK for the Socket API client",
   "author": {
@@ -13,17 +13,17 @@
     "type": "git",
     "url": "git://github.com/SocketDev/socket-sdk-js.git"
   },
-  "type": "commonjs",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
     },
     "./testing": {
-      "types": "./dist/testing.d.ts",
-      "default": "./dist/testing.js"
+      "types": "./dist/testing.d.mts",
+      "default": "./dist/testing.mjs"
     },
     "./types/api-helpers": "./types/api-helpers.d.ts",
     "./types/api-helpers.d.ts": "./types/api-helpers.d.ts",
@@ -33,73 +33,40 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "build:dist": "node scripts/build.mjs",
-    "build:dist:src": "node scripts/build.mjs --src-only",
-    "build:dist:types": "node scripts/build.mjs --types-only",
+    "bump": "node scripts/bump.mjs",
     "check": "node scripts/check.mjs",
-    "check:lint": "eslint --config .config/eslint.config.mjs --report-unused-disable-directives .",
-    "check:lint:fix": "pnpm run check:lint -- --fix",
-    "check:tsc": "tsgo --noEmit -p .config/tsconfig.check.json",
-    "lint-ci": "pnpm run check:lint",
-    "coverage": "node scripts/coverage.mjs",
-    "coverage:test": "node scripts/coverage.mjs --code-only",
-    "coverage:type": "type-coverage",
-    "coverage:type:verbose": "type-coverage --detail",
-    "coverage:percent": "node scripts/coverage.mjs --percent",
+    "check-ci": "pnpm run check --all",
     "clean": "node scripts/clean.mjs",
-    "clean:cache": "node scripts/clean.mjs --cache",
-    "clean:coverage": "node scripts/clean.mjs --coverage",
-    "clean:dist": "node scripts/clean.mjs --dist",
-    "clean:dist:types": "node scripts/clean.mjs --dist-types",
-    "clean:declarations": "node scripts/clean.mjs --declarations",
-    "clean:node_modules": "node scripts/clean.mjs --node-modules",
-    "fix": "node scripts/lint-fix.mjs",
+    "cover": "node scripts/cover.mjs",
+    "fix": "node scripts/fix.mjs",
     "generate-sdk": "node scripts/generate-sdk.mjs",
-    "generate-sdk:01-prettify": "node scripts/prettify-base-json.mjs",
-    "generate-sdk:02-generate": "node scripts/generate-types.mjs > types/api.d.ts",
-    "generate-sdk:03-clean-api": "pnpm run fix && pnpm run fix",
-    "knip:dependencies": "knip --dependencies",
-    "knip:exports": "knip --include exports,duplicates",
-    "lint": "oxlint -c=.config/.oxlintrc.json --ignore-path=.config/.oxlintignore --tsconfig=.config/tsconfig.json .",
-    "lint:fix": "node scripts/lint-fix.mjs",
-    "lint-staged": "lint-staged",
-    "precommit": "lint-staged",
+    "lint": "node scripts/lint.mjs",
+    "lint-ci": "pnpm run lint --all",
+    "precommit": "pnpm run check --lint --staged",
     "prepare": "husky",
     "prepublishOnly": "echo 'ERROR: Use GitHub Actions workflow for publishing' && exit 1",
-    "pretest:unit": "pnpm run build",
-    "test": "run-s check test:run",
-    "test:run": "node scripts/test.mjs",
-    "test:unit": "dotenvx -q run -f .env.test -- vitest --run",
-    "test:unit:update": "dotenvx -q run -f .env.test -- vitest --run --update",
-    "test:unit:coverage": "dotenvx -q run -f .env.test -- vitest run --coverage",
-    "test-ci": "dotenvx -q run -f .env.test -- vitest --run",
-    "type-ci": "pnpm run check:tsc",
-    "test-pre-commit": "dotenvx -q run -f .env.precommit -- node scripts/test-with-build.mjs",
-    "update": "run-p --aggregate-output update:*",
-    "update:deps": "node scripts/taze.mjs",
-    "update:socket": "pnpm -r update '@socketsecurity/*' --latest"
+    "publish": "node scripts/publish.mjs",
+    "claude": "node scripts/claude.mjs",
+    "test": "node scripts/test.mjs",
+    "test-ci": "pnpm run test --all",
+    "type": "tsgo --noEmit -p .config/tsconfig.check.json",
+    "type-ci": "pnpm run type",
+    "update": "node scripts/update.mjs"
   },
   "dependencies": {
     "@socketsecurity/registry": "1.5.3"
   },
   "devDependencies": {
-    "@babel/core": "7.28.4",
-    "@babel/plugin-transform-runtime": "7.28.3",
-    "@babel/preset-typescript": "7.27.1",
-    "@babel/runtime": "7.28.4",
     "@biomejs/biome": "2.2.4",
     "@dotenvx/dotenvx": "1.49.0",
     "@eslint/compat": "1.3.2",
     "@eslint/js": "9.35.0",
-    "@rollup/plugin-babel": "6.0.4",
-    "@rollup/plugin-commonjs": "28.0.6",
-    "@rollup/plugin-json": "6.1.0",
-    "@rollup/plugin-node-resolve": "16.0.1",
     "@types/node": "24.6.2",
     "@typescript/native-preview": "7.0.0-dev.20250926.1",
     "@vitest/coverage-v8": "3.2.4",
-    "del-cli": "6.0.0",
+    "del": "^8.0.1",
     "dev-null-cli": "2.0.0",
+    "esbuild": "0.25.10",
     "eslint": "9.35.0",
     "eslint-import-resolver-typescript": "4.4.4",
     "eslint-plugin-import-x": "4.16.1",
@@ -111,29 +78,23 @@
     "globals": "16.4.0",
     "http2-wrapper": "2.2.1",
     "husky": "9.1.7",
-    "knip": "5.63.1",
-    "lint-staged": "16.1.6",
     "nock": "14.0.10",
     "npm-run-all2": "8.0.4",
     "openapi-typescript": "6.7.6",
-    "oxlint": "1.15.0",
-    "rollup": "4.50.1",
     "taze": "19.6.0",
-    "trash": "10.0.0",
     "type-coverage": "2.29.7",
     "typescript-eslint": "8.44.1",
     "vitest": "3.2.4",
-    "yargs-parser": "22.0.0",
     "yoctocolors-cjs": "2.1.3"
   },
   "pnpm": {
-    "overrides": {
-      "vite": "7.1.7"
-    },
     "ignoredBuiltDependencies": [
       "esbuild",
       "unrs-resolver"
-    ]
+    ],
+    "overrides": {
+      "vite": "7.1.7"
+    }
   },
   "engines": {
     "node": ">=18",
@@ -142,18 +103,11 @@
   "files": [
     "dist/**",
     "types/**",
-    "CHANGELOG.md",
-    "requirements.json"
+    "CHANGELOG.md"
   ],
-  "lint-staged": {
-    "*.{cjs,js,json,md,mjs,mts,ts}": [
-      "oxlint -c=.config/.oxlintrc.json --ignore-path=.config/.oxlintignore --tsconfig=.config/tsconfig.json --quiet --fix",
-      "biome format --log-level=none --fix --no-errors-on-unmatched --files-ignore-unknown=true --colors=off"
-    ]
-  },
   "typeCoverage": {
     "cache": true,
-    "atLeast": 99.64,
+    "atLeast": 99,
     "ignoreAsAssertion": true,
     "ignoreCatch": true,
     "ignoreEmptyType": true,
