@@ -7,7 +7,7 @@ import { spawn } from '@socketsecurity/registry/lib/spawn'
  * @throws {Error} When type coverage command fails.
  */
 export async function getTypeCoverage() {
-  const result = await spawn('pnpm', ['run', 'coverage:type'], {
+  const result = await spawn('pnpm', ['exec', 'type-coverage'], {
     stdio: 'pipe',
     shell: constants.WIN32,
   })
