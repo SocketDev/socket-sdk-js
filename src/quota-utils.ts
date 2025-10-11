@@ -1,5 +1,5 @@
 /** @fileoverview Quota utility functions for Socket SDK method cost lookup. */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { memoize, once } from '@socketsecurity/registry/lib/memoization'
@@ -16,7 +16,7 @@ interface Requirements {
 }
 
 /**
- * Load requirements.json data with caching.
+ * Load sdk-method-requirements.json data with caching.
  * Internal function for lazy loading quota requirements.
  * Uses once() memoization to ensure file is only read once.
  */
@@ -25,12 +25,23 @@ const loadRequirements = once((): Requirements => {
     // Resolve path relative to this module file location.
     // When compiled, __dirname will point to dist/ directory.
     // In source, __dirname points to src/ directory.
-    // requirements.json is always in the parent directory of dist/ or src/.
-    const requirementsPath = join(__dirname, '..', 'requirements.json')
+    // sdk-method-requirements.json is in the data directory at the project root.
+    const requirementsPath = join(
+      __dirname,
+      '..',
+      'data',
+      'sdk-method-requirements.json',
+    )
+
+    // Check if the requirements file exists before attempting to read.
+    if (!existsSync(requirementsPath)) {
+      throw new Error(`Requirements file not found at: ${requirementsPath}`)
+    }
+
     const data = readFileSync(requirementsPath, 'utf8')
     return JSON.parse(data) as Requirements
   } catch (e) {
-    throw new Error('Failed to load "requirements.json"', { cause: e })
+    throw new Error('Failed to load SDK method requirements', { cause: e })
   }
 })
 
@@ -41,7 +52,7 @@ const loadRequirements = once((): Requirements => {
 export function calculateTotalQuotaCost(
   methodNames: Array<SocketSdkOperations | string>,
 ): number {
-  return methodNames.reduce((total, methodName) => {
+  return methodNames.reduce<number>((total, methodName) => {
     return total + getQuotaCost(methodName)
   }, 0)
 }
@@ -73,10 +84,10 @@ export function getAllMethodRequirements(): Record<string, ApiRequirement> {
 export const getMethodRequirements = memoize(
   (methodName: SocketSdkOperations | string): ApiRequirement => {
     const reqs = loadRequirements()
-    const requirement = reqs.api[methodName]
+    const requirement = reqs.api[methodName as string]
 
     if (!requirement) {
-      throw new Error(`Unknown SDK method: "${methodName}"`)
+      throw new Error(`Unknown SDK method: "${String(methodName)}"`)
     }
 
     return {
@@ -133,10 +144,10 @@ export const getMethodsByQuotaCost = memoize(
 export const getQuotaCost = memoize(
   (methodName: SocketSdkOperations | string): number => {
     const reqs = loadRequirements()
-    const requirement = reqs.api[methodName]
+    const requirement = reqs.api[methodName as string]
 
     if (!requirement) {
-      throw new Error(`Unknown SDK method: "${methodName}"`)
+      throw new Error(`Unknown SDK method: "${String(methodName)}"`)
     }
 
     return requirement.quota
@@ -182,10 +193,10 @@ export const getQuotaUsageSummary = memoize(
 export const getRequiredPermissions = memoize(
   (methodName: SocketSdkOperations | string): string[] => {
     const reqs = loadRequirements()
-    const requirement = reqs.api[methodName]
+    const requirement = reqs.api[methodName as string]
 
     if (!requirement) {
-      throw new Error(`Unknown SDK method: "${methodName}"`)
+      throw new Error(`Unknown SDK method: "${String(methodName)}"`)
     }
 
     return [...requirement.permissions]
