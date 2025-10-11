@@ -35,13 +35,13 @@ const log = {
   warn: msg => console.log(`${colors.yellow('⚠')} ${msg}`)
 }
 
-function printHeader(title) {
+function console.log(createHeader(title) {
   console.log(`\n${'─'.repeat(60)}`)
   console.log(`  ${title}`)
   console.log(`${'─'.repeat(60)}`)
 }
 
-function printFooter(message) {
+function console.log(createFooter(message) {
   console.log(`\n${'─'.repeat(60)}`)
   if (message) {
     console.log(`  ${colors.green('✓')} ${message}`)
@@ -460,7 +460,7 @@ async function main() {
       return
     }
 
-    printHeader('Publish Runner')
+    console.log(createHeader('Publish Runner', { width: 56, borderChar: '=' })
 
     // Get current version.
     const version = await getCurrentVersion()
@@ -524,7 +524,7 @@ async function main() {
       })
     }
 
-    printFooter('Publish completed successfully!')
+    console.log(createFooter('Publish completed successfully!', { width: 56, borderChar: '=', color: 'green' })
     process.exitCode = 0
   } catch (error) {
     log.error(`Publish runner failed: ${error.message}`)

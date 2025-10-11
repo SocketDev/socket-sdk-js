@@ -12,7 +12,7 @@
 import colors from 'yoctocolors-cjs'
 
 import { logger } from '@socketsecurity/registry/lib/logger'
-import { printHeader } from './utils/common.mjs'
+import { printHeader } from '@socketsecurity/registry/lib/cli/output'
 import { runParallel } from './utils/run-command.mjs'
 
 async function main() {

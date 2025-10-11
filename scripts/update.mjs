@@ -33,13 +33,13 @@ const log = {
   }
 }
 
-function printHeader(title) {
+function console.log(createHeader(title) {
   console.log(`\n${'─'.repeat(60)}`)
   console.log(`  ${title}`)
   console.log(`${'─'.repeat(60)}`)
 }
 
-function printFooter(message) {
+function console.log(createFooter(message) {
   console.log(`\n${'─'.repeat(60)}`)
   if (message) {console.log(`  ${colors.green('✓')} ${message}`)}
 }
@@ -284,7 +284,7 @@ async function main() {
       return
     }
 
-    printHeader('Update Runner')
+    console.log(createHeader('Update Runner', { width: 56, borderChar: '=' })
 
     let exitCode = 0
     const runAll = !values.deps && !values.socket && !values.project
@@ -325,7 +325,7 @@ async function main() {
       }
     }
 
-    printFooter('All updates completed successfully!')
+    console.log(createFooter('All updates completed successfully!', { width: 56, borderChar: '=', color: 'green' })
     process.exitCode = 0
   } catch (error) {
     log.error(`Update runner failed: ${error.message}`)
