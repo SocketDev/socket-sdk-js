@@ -28,7 +28,7 @@ const nodeGlobalsConfig = Object.fromEntries(
   Object.entries(globals.node).map(([k]) => [k, 'readonly']),
 )
 
-const biomeConfigPath = path.join(rootPath, 'biome.json')
+const biomeConfigPath = path.join(rootPath, '.config', 'biome.json')
 const biomeConfig = require(biomeConfigPath)
 const biomeIgnores = {
   name: 'Imported biome.json ignore patterns',
@@ -211,9 +211,7 @@ export default [
             '*.config.mts',
             'test/*.mts',
             'test/utils/*.mts',
-            'src/*.ts',
             'src/*.mts',
-            'types/*.ts',
           ],
           defaultProject: rootTsConfigPath,
           tsconfigRootDir: rootPath,
