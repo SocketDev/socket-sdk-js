@@ -1,61 +1,49 @@
 /**
- * @fileoverview TypeScript type helpers for OpenAPI operation responses.
- * Utility types for extracting return types and error types from OpenAPI operations.
- * Based on openapi-typescript-fetch patterns.
+ * @fileoverview Helper types for working with generated OpenAPI types.
  */
-declare type ValueOf<
-  ObjectType,
-  ValueType extends keyof ObjectType = keyof ObjectType,
-> = ObjectType[ValueType]
 
-// Based on openapi-typescript-fetch.
-// https://socket.dev/npm/package/openapi-typescript-fetch/overview/2.2.1
-// MIT License
-// Copyright 2021 Ajai Shankar
-declare type Coalesce<T, D> = [T] extends [never] ? D : T
-
-declare type OpResponseTypes<OP> = OP extends {
-  responses: infer R
-}
-  ? {
-      [S in keyof R]: R[S] extends {
-        schema?: infer S
-      }
-        ? S
-        : R[S] extends {
-              content: {
-                'application/json': infer C
-              }
-            }
-          ? C
-          : S extends 'default'
-            ? R[S]
-            : unknown
-    }
-  : never
-
-declare type _OpReturnType<T> = 200 extends keyof T
-  ? T[200]
-  : 201 extends keyof T
-    ? T[201]
-    : 'default' extends keyof T
-      ? T['default']
-      : unknown
-
-declare type _OpErrorType<T> = {
-  [S in Exclude<keyof T, 200 | 201>]: T[S] & {
-    success: false
-    status: S extends 'default' ? never : S
+/**
+ * Extract the successful response type from an operation.
+ * Maps to the data property of the success result.
+ */
+export type OpReturnType<T> = T extends {
+  responses: {
+    200?: { content?: { 'application/json': infer U } }
   }
 }
+  ? U
+  : T extends {
+      responses: {
+        201?: { content?: { 'application/json': infer U } }
+      }
+    }
+    ? U
+    : T extends {
+        responses: {
+          204?: unknown
+        }
+      }
+      ? undefined
+      : unknown
 
-export declare type OpReturnType<OP> = {
-  success: true
-  status: 200
-  data: _OpReturnType<OpResponseTypes<OP>>
+/**
+ * Extract the error response type from an operation.
+ * Maps to the error structure of the error result.
+ */
+export type OpErrorType<T> = T extends {
+  responses: infer R
 }
-
-type OpErrorType<OP> = Coalesce<
-  ValueOf<_OpErrorType<OpResponseTypes<OP>>>,
-  { success: false; status: number }
->
+  ? R extends Record<string | number, unknown>
+    ? {
+        [K in keyof R as K extends 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500 | 502 | 503
+          ? K
+          : never]: R[K]
+      }[keyof {
+        [K in keyof R as K extends 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500 | 502 | 503
+          ? K
+          : never]: R[K]
+      }] extends { content?: { 'application/json': infer E } }
+      ? E
+      : { error?: string }
+    : { error?: string }
+  : { error?: string }
