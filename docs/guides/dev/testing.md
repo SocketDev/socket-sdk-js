@@ -234,6 +234,6 @@ for await (const result of mockSdk.batchPackageStream({ components: [] })) {
 
 ## See Also
 
-- [API Reference](./API.md) - Complete API documentation
-- [Examples](./EXAMPLES.md) - Usage examples and patterns
-- [Quota Management](./QUOTA.md) - Quota utilities and cost management
+- [API Reference](../api-reference.md) - Complete API documentation
+- [Examples](../usage-examples.md) - Usage examples and patterns
+- [Quota Management](../quota-management.md) - Quota utilities and cost management
