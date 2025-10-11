@@ -11,16 +11,13 @@ import { parseArgs } from 'node:util'
 import WIN32 from '@socketsecurity/registry/lib/constants/WIN32'
 
 import { getTestsToRun } from './utils/changed-test-mapper.mjs'
-import {
-  getRootPath,
-  log,
-  printHeader,
-  printFooter,
-  printHelpHeader,
-  isQuiet
-} from './utils/common.mjs'
+import { fileURLToPath } from 'node:url'
 
-const rootPath = getRootPath(import.meta.url)
+import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
+import { log, printHeader, printFooter } from '@socketsecurity/registry/lib/cli/output'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const rootPath = path.resolve(__dirname, '..')
 const nodeModulesBinPath = path.join(rootPath, 'node_modules', '.bin')
 
 async function runCommand(command, args = [], options = {}) {
@@ -245,7 +242,7 @@ async function main() {
 
     // Show help if requested
     if (values.help) {
-      printHelpHeader('Test Runner')
+      console.log('Test Runner')
       console.log('\nUsage: pnpm test [options] [test-files...]')
       console.log('\nOptions:')
       console.log('  --help              Show this help message')
@@ -284,7 +281,7 @@ async function main() {
       }
     }
 
-    printHeader('Test Runner')
+    printHeader('Test Runner', { width: 56, borderChar: '=' })
 
     // Handle aliases
     const skipChecks = values.fast || values.quick || values['skip-checks']
@@ -320,7 +317,7 @@ async function main() {
       log.error('Tests failed')
       process.exitCode = exitCode
     } else {
-      printFooter('All tests passed!')
+      printFooter('All tests passed!', { width: 56, borderChar: '=', color: 'green' })
     }
   } catch (error) {
     log.error(`Test runner failed: ${error.message}`)

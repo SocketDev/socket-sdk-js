@@ -61,13 +61,13 @@ const log = {
   warn: msg => console.log(`${colors.yellow('⚠')} ${msg}`)
 }
 
-function printHeader(title) {
+function console.log(createHeader(title) {
   console.log(`\n${'─'.repeat(60)}`)
   console.log(`  ${title}`)
   console.log(`${'─'.repeat(60)}`)
 }
 
-function printFooter(message) {
+function console.log(createFooter(message) {
   console.log(`\n${'─'.repeat(60)}`)
   if (message) {
     console.log(`  ${colors.green('✓')} ${message}`)
@@ -674,7 +674,7 @@ async function main() {
       return
     }
 
-    printHeader('Version Bump')
+    console.log(createHeader('Version Bump', { width: 56, borderChar: '=' })
 
     // Handle interactive mode conflicts
     if (values['no-interactive']) {
@@ -814,7 +814,7 @@ async function main() {
       }
     }
 
-    printFooter(`Version bumped to ${newVersion}!`)
+    console.log(createFooter(`Version bumped to ${newVersion}!`)
 
     log.info('\nNext steps:')
     log.substep('1. Run `pnpm publish` to publish to npm')

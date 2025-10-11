@@ -6,19 +6,15 @@ import { build } from 'esbuild'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { parseArgs } from 'node:util'
+import { fileURLToPath } from 'node:url'
 
-import {
-  getRootPath,
-  isQuiet,
-  log,
-  printFooter,
-  printHeader,
-  printHelpHeader
-} from './utils/common.mjs'
+import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
+import { log, printHeader, printFooter, printHelpHeader } from '@socketsecurity/registry/lib/cli/output'
 import { runSequence } from './utils/run-command.mjs'
 import { buildConfig, watchConfig, analyzeMetafile } from '../.config/esbuild.config.mjs'
 
-const rootPath = getRootPath(import.meta.url)
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const rootPath = path.resolve(__dirname, '..')
 
 /**
  * Build source code with esbuild.
