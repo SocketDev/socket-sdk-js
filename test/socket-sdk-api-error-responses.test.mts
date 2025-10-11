@@ -3,6 +3,7 @@ import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../src/index'
+import { FAST_TEST_CONFIG } from './utils/fast-test-config.mts'
 
 describe('SocketSdk - Edge Cases', () => {
   beforeEach(() => {
@@ -24,7 +25,7 @@ describe('SocketSdk - Edge Cases', () => {
           'content-type': 'text/plain',
         })
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.getQuota()
 
       expect(res.success).toBe(false)
@@ -41,7 +42,7 @@ describe('SocketSdk - Edge Cases', () => {
           'content-type': 'application/json',
         })
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.getQuota()
 
       expect(res.success).toBe(false)
@@ -56,7 +57,7 @@ describe('SocketSdk - Edge Cases', () => {
         .get('/v0/quota')
         .reply(400, { someOtherField: 'value' })
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.getQuota()
 
       expect(res.success).toBe(false)
@@ -68,7 +69,7 @@ describe('SocketSdk - Edge Cases', () => {
         .get('/v0/organizations')
         .reply(401, { error: { message: 'Invalid API key' } })
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.getOrganizations()
 
       expect(res.success).toBe(false)
@@ -81,7 +82,7 @@ describe('SocketSdk - Edge Cases', () => {
     it('should handle 400 bad request without error message in response', async () => {
       nock('https://api.socket.dev').get('/v0/quota').reply(400)
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.getQuota()
 
       expect(res.success).toBe(false)
