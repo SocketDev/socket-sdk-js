@@ -16,7 +16,16 @@ import { getOwn, isObjectObject } from '@socketsecurity/registry/lib/objects'
 import { pRetry } from '@socketsecurity/registry/lib/promises'
 import { urlSearchParamAsBoolean } from '@socketsecurity/registry/lib/url'
 
-import { DEFAULT_USER_AGENT, httpAgentNames } from './constants'
+import {
+  DEFAULT_HTTP_TIMEOUT,
+  DEFAULT_RETRIES,
+  DEFAULT_RETRY_DELAY,
+  DEFAULT_USER_AGENT,
+  MAX_HTTP_TIMEOUT,
+  MAX_STREAM_SIZE,
+  MIN_HTTP_TIMEOUT,
+  httpAgentNames,
+} from './constants'
 import {
   createRequestBodyForFilepaths,
   createRequestBodyForJson,
@@ -92,16 +101,39 @@ export class SocketSdk {
    * Sets up authentication, base URL, HTTP client options, retry behavior, and caching.
    */
   constructor(apiToken: string, options?: SocketSdkOptions | undefined) {
+    // Input validation for API token.
+    const MAX_API_TOKEN_LENGTH = 1024
+    if (typeof apiToken !== 'string') {
+      throw new TypeError('"apiToken" is required and must be a string')
+    }
+    const trimmedToken = apiToken.trim()
+    if (!trimmedToken) {
+      throw new Error('"apiToken" cannot be empty or whitespace-only')
+    }
+    if (trimmedToken.length > MAX_API_TOKEN_LENGTH) {
+      throw new Error(
+        `"apiToken" exceeds maximum length of ${MAX_API_TOKEN_LENGTH} characters`,
+      )
+    }
+
     const {
       agent: agentOrObj,
       baseUrl = 'https://api.socket.dev/v0/',
       cache = false,
       cacheTtl = 5 * 60 * 1000,
-      retries = 0,
-      retryDelay = 100,
-      timeout,
+      retries = DEFAULT_RETRIES,
+      retryDelay = DEFAULT_RETRY_DELAY,
+      timeout = DEFAULT_HTTP_TIMEOUT,
       userAgent,
     } = { __proto__: null, ...options } as SocketSdkOptions
+
+    // Validate timeout parameter.
+    if (timeout !== undefined) {
+      if (typeof timeout !== 'number' || timeout < MIN_HTTP_TIMEOUT || timeout > MAX_HTTP_TIMEOUT) {
+        throw new TypeError(`"timeout" must be a number between ${MIN_HTTP_TIMEOUT} and ${MAX_HTTP_TIMEOUT} milliseconds`)
+      }
+    }
+
     const agentKeys = agentOrObj ? Object.keys(agentOrObj) : []
     const agentAsGotOptions = agentOrObj as GotOptions
     const agent = (
@@ -112,7 +144,7 @@ export class SocketSdk {
           agentAsGotOptions.http2
         : agentOrObj
     ) as Agent | undefined
-    this.#apiToken = apiToken
+    this.#apiToken = trimmedToken
     this.#baseUrl = normalizeBaseUrl(baseUrl)
     this.#cache = cache
       ? createTtlCache({
@@ -120,13 +152,13 @@ export class SocketSdk {
           prefix: 'socket-sdk',
           ttl: cacheTtl,
         })
-      : undefined
+      : /* c8 ignore next - cache disabled by default */ undefined
     this.#retries = retries
     this.#retryDelay = retryDelay
     this.#reqOptions = {
       ...(agent ? { agent } : {}),
       headers: {
-        Authorization: `Basic ${btoa(`${apiToken}:`)}`,
+        Authorization: `Basic ${btoa(`${trimmedToken}:`)}`,
         'User-Agent': userAgent ?? DEFAULT_USER_AGENT,
       },
       signal: abortSignal,
@@ -151,6 +183,9 @@ export class SocketSdk {
         if (statusCode === 401 || statusCode === 403) {
           throw error
         }
+        // Note: Rate limiting (429) will be retried with exponential backoff.
+        // TODO: Consider implementing custom delay based on Retry-After header
+        // if the pRetry library adds support for dynamic delays in the future.
       },
       onRetryRethrow: true,
       retries: this.#retries,
@@ -214,14 +249,14 @@ export class SocketSdk {
         : /* c8 ignore next - Empty line handling in batch streaming response parsing. */ null
       if (isObjectObject(artifact)) {
         yield this.#handleApiSuccess<'batchPackageFetch'>(
+          /* c8 ignore next 7 - Public token artifact reshaping branch for policy compliance. */
           isPublicToken
-            ? /* c8 ignore start - Public token artifact reshaping branch for policy compliance. */ reshapeArtifactForPublicPolicy(
+            ? reshapeArtifactForPublicPolicy(
                 artifact!,
                 false,
                 queryParams?.['actions'] as string,
               )
-            : /* c8 ignore stop */
-              artifact!,
+            : artifact!,
         )
       }
     }
@@ -361,7 +396,9 @@ export class SocketSdk {
       body = bodyStr
     }
     // Build error message that includes the body content if available.
-    let errorMessage = error.message ?? UNKNOWN_ERROR
+    let errorMessage =
+      error.message ??
+      /* c8 ignore next - fallback for missing error message */ UNKNOWN_ERROR
     const trimmedBody = body?.trim()
     if (trimmedBody && !errorMessage.includes(trimmedBody)) {
       // Replace generic status message with actual error body if present,
@@ -369,8 +406,7 @@ export class SocketSdk {
       const statusMessage = error.response?.statusMessage
       if (statusMessage && errorMessage.includes(statusMessage)) {
         errorMessage = errorMessage.replace(statusMessage, trimmedBody)
-      } else {
-        /* c8 ignore next 2 - edge case where statusMessage is undefined or not in error message. */
+      } /* c8 ignore next 3 - edge case where statusMessage is undefined or not in error message. */ else {
         errorMessage = `${errorMessage}: ${trimmedBody}`
       }
     }
@@ -460,15 +496,14 @@ export class SocketSdk {
         : /* c8 ignore next - Empty line handling in batch parsing. */ null
       if (isObjectObject(artifact)) {
         results.push(
+          /* c8 ignore next 7 - Public token artifact reshaping for policy compliance. */
           isPublicToken
-            ? /* c8 ignore start - Public token artifact reshaping for policy compliance. */
-              reshapeArtifactForPublicPolicy(
+            ? reshapeArtifactForPublicPolicy(
                 artifact!,
                 false,
                 queryParams?.['actions'] as string,
               )
-            : /* c8 ignore stop */
-              artifact!,
+            : artifact!,
         )
       }
     }
@@ -1018,7 +1053,7 @@ export class SocketSdk {
           cause: errorResult.cause,
           data: undefined,
           error: errorResult.error,
-          status: errorResult.status,
+          status: errorResult['status'],
           success: false,
         }
       }
@@ -1053,7 +1088,7 @@ export class SocketSdk {
           cause: errorResult.cause,
           data: undefined,
           error: errorResult.error,
-          status: errorResult.status,
+          status: errorResult['status'],
           success: false,
         }
       }
@@ -1941,7 +1976,7 @@ export class SocketSdk {
           cause: errorResult.cause,
           data: undefined,
           error: errorResult.error,
-          status: errorResult.status,
+          status: errorResult['status'],
           success: false,
         }
       }
@@ -1992,8 +2027,21 @@ export class SocketSdk {
       }
 
       if (typeof output === 'string') {
-        // Stream to file with error handling.
+        // Stream to file with size limit and error handling.
         const writeStream = createWriteStream(output)
+        let bytesWritten = 0
+
+        // Monitor stream size to prevent excessive disk usage.
+        res.on('data', (chunk: Buffer) => {
+          bytesWritten += chunk.length
+          /* c8 ignore next 4 - Stream size limit enforcement, difficult to test reliably */
+          if (bytesWritten > MAX_STREAM_SIZE) {
+            res.destroy()
+            writeStream.destroy()
+            throw new Error(`Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`)
+          }
+        })
+
         res.pipe(writeStream)
         /* c8 ignore next 4 - Write stream error handler, difficult to test reliably */
         writeStream.on('error', error => {
@@ -2002,7 +2050,19 @@ export class SocketSdk {
           })
         })
       } else if (output === true) {
-        // Stream to stdout with error handling.
+        // Stream to stdout with size limit and error handling.
+        let bytesWritten = 0
+
+        // Monitor stream size for stdout as well.
+        res.on('data', (chunk: Buffer) => {
+          bytesWritten += chunk.length
+          /* c8 ignore next 3 - Stream size limit enforcement, difficult to test reliably */
+          if (bytesWritten > MAX_STREAM_SIZE) {
+            res.destroy()
+            throw new Error(`Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`)
+          }
+        })
+
         res.pipe(process.stdout)
         /* c8 ignore next 3 - Stdout error handler, difficult to test reliably */
         process.stdout.on('error', error => {

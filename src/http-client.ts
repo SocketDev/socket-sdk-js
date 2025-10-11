@@ -10,6 +10,8 @@ import { debugLog } from '@socketsecurity/registry/lib/debug'
 import { jsonParse } from '@socketsecurity/registry/lib/json'
 import { perfTimer } from '@socketsecurity/registry/lib/performance'
 
+import { MAX_RESPONSE_SIZE } from './constants'
+
 import type {
   RequestOptions,
   SendMethod,
@@ -136,16 +138,39 @@ export async function createRequestWithJson(
 /**
  * Read the response body from an HTTP error response.
  * Accumulates all chunks into a complete string for error handling.
+ * Enforces maximum response size to prevent memory exhaustion.
  *
  * @throws {Error} When stream errors occur during reading
+ * @throws {Error} When response exceeds maximum size limit
  */
 export async function getErrorResponseBody(
   response: IncomingMessage,
 ): Promise<string> {
   return await new Promise((resolve, reject) => {
     let body = ''
+    let totalBytes = 0
+
     response.setEncoding('utf8')
-    response.on('data', (chunk: string) => (body += chunk))
+
+    response.on('data', (chunk: string) => {
+      // Track size in bytes (not characters) for accurate limit enforcement
+      const chunkBytes = Buffer.byteLength(chunk, 'utf8')
+      totalBytes += chunkBytes
+
+      if (totalBytes > MAX_RESPONSE_SIZE) {
+        // Destroy the response stream to stop receiving data
+        response.destroy()
+        reject(
+          new Error(
+            `Response exceeds maximum size limit of ${MAX_RESPONSE_SIZE} bytes`,
+          ),
+        )
+        return
+      }
+
+      body += chunk
+    })
+
     response.on('end', () => resolve(body))
     /* c8 ignore next - Extremely rare network or stream error during error response reading. */
     response.on('error', e => reject(e))
@@ -289,11 +314,11 @@ export function reshapeArtifactForPublicPolicy<
     const allowedActions = actions ? actions.split(',') : undefined
 
     const reshapeArtifact = (artifact: SocketArtifactWithExtras) => ({
-      name: artifact.name,
-      version: artifact.version,
-      size: artifact.size,
-      author: artifact.author,
-      type: artifact.type,
+      name: artifact['name'],
+      version: artifact['version'],
+      size: artifact['size'],
+      author: artifact['author'],
+      type: artifact['type'],
       supplyChainRisk: artifact.supplyChainRisk,
       scorecards: artifact.scorecards,
       topLevelAncestors: artifact.topLevelAncestors,
@@ -302,7 +327,7 @@ export function reshapeArtifactForPublicPolicy<
       alerts: artifact.alerts
         ?.filter((alert: SocketArtifactAlert) => {
           // Filter by severity (remove low severity alerts).
-          if (alert.severity === 'low') {
+          if (alert['severity'] === 'low') {
             return false
           }
           // Filter by actions if specified.
@@ -317,8 +342,8 @@ export function reshapeArtifactForPublicPolicy<
         })
         .map((alert: SocketArtifactAlert) => ({
           type: alert.type,
-          severity: alert.severity,
-          key: alert.key,
+          severity: alert['severity'],
+          key: alert['key'],
         })),
     })
 
