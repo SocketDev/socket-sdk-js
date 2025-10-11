@@ -11,7 +11,7 @@ import { getRootPath } from './utils/path-helpers.mjs'
 const rootPath = getRootPath(import.meta.url)
 const openApiJsonPath = path.join(rootPath, 'openapi.json')
 
-void (async () => {
+async function main() {
   try {
     const output = await openapiTS(openApiJsonPath, {
       transform(schemaObject) {
@@ -25,4 +25,6 @@ void (async () => {
     process.exitCode = 1
     console.error('Failed with error:', e.message)
   }
-})()
+}
+
+main().catch(console.error)
