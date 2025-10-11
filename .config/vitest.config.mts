@@ -17,12 +17,14 @@ export default defineConfig({
     include: ['test/**/*.test.{js,ts,mjs,mts,cjs}'],
     reporters: ['default'],
     setupFiles: ['./test/utils/setup.mts'],
-    // Improve memory usage by running tests sequentially in CI.
+    // Optimize test execution with parallel processing
     pool: 'forks',
     poolOptions: {
       forks: {
         // Use single fork for coverage to reduce memory, parallel otherwise.
         singleFork: isCoverageEnabled,
+        // Increase parallelism when not doing coverage
+        ...(!isCoverageEnabled && { maxForks: 8 }),
         ...(isCoverageEnabled && { maxForks: 1 }),
         // Isolate tests to prevent memory leaks between test files.
         isolate: true,
@@ -30,6 +32,7 @@ export default defineConfig({
       threads: {
         // Use single thread for coverage to reduce memory, parallel otherwise.
         singleThread: isCoverageEnabled,
+        ...(!isCoverageEnabled && { maxThreads: 8 }),
         ...(isCoverageEnabled && { maxThreads: 1 }),
       },
     },
