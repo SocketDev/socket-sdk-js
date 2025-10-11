@@ -1,6 +1,6 @@
 # API Reference
 
-Complete API reference for `@socketsecurity/sdk`. All methods return a result object with the following structure:
+API reference for `@socketsecurity/sdk`. All methods return a result object:
 
 ```typescript
 // Success result
@@ -23,7 +23,7 @@ Complete API reference for `@socketsecurity/sdk`. All methods return a result ob
 
 #### `batchPackageFetch(componentsObj, queryParams?)`
 
-Analyze multiple packages in a single batch request. Returns all results at once after processing is complete.
+Analyze multiple packages in a single batch request. Returns all results after processing completes.
 
 **Parameters:**
 - `componentsObj` - Object containing array of package components with PURLs
@@ -55,7 +55,7 @@ if (result.success) {
 
 #### `batchPackageStream(componentsObj, options?)`
 
-Stream package analysis results with concurrency control. Returns results as they become available via async generator.
+Stream package analysis with concurrency control via async generator.
 
 **Parameters:**
 - `componentsObj` - Object containing array of package components
@@ -87,7 +87,7 @@ for await (const result of stream) {
 
 #### `getIssuesByNpmPackage(packageName, version)`
 
-Get detailed security issues for a specific npm package version.
+Get security issues for an npm package version.
 
 **Parameters:**
 - `packageName` - Package name (e.g., 'express')
@@ -115,7 +115,7 @@ if (result.success) {
 
 #### `getScoreByNpmPackage(packageName, version)`
 
-Get security score and rating breakdown for a package.
+Get security score for a package.
 
 **Parameters:**
 - `packageName` - Package name
@@ -141,7 +141,7 @@ if (result.success) {
 
 #### `createDependenciesSnapshot(filepaths, pathsRelativeTo?, queryParams?)`
 
-Create a dependency snapshot from project files for security analysis.
+Create dependency snapshot from project files.
 
 **Parameters:**
 - `filepaths` - Array of file paths to analyze
@@ -170,7 +170,7 @@ if (result.success) {
 
 #### `createOrgFullScan(orgSlug, filepaths, pathsRelativeTo?, queryParams?)`
 
-Create a comprehensive security scan for an organization.
+Create full security scan for organization.
 
 **Parameters:**
 - `orgSlug` - Organization identifier
@@ -1439,7 +1439,7 @@ if (result.success) {
 
 ## See Also
 
-- [Examples](./EXAMPLES.md) - Usage examples and patterns
-- [Quota Management](./QUOTA.md) - Quota utilities and cost management
-- [Testing Utilities](./TESTING.md) - Testing helpers and mocks
+- [Examples](./usage-examples.md) - Usage examples and patterns
+- [Quota Management](./quota-management.md) - Quota utilities and cost management
+- [Testing Utilities](./dev/testing.md) - Testing helpers and mocks
 - [Socket API Reference](https://docs.socket.dev/reference) - Official API documentation

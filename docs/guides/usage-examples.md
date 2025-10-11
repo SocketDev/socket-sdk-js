@@ -260,6 +260,6 @@ if (response.success) {
 
 ## See Also
 
-- [API Reference](./API.md) - Complete API documentation
-- [Quota Management](./QUOTA.md) - Quota utilities and cost management
-- [Testing Utilities](./TESTING.md) - Testing helpers and mocks
+- [API Reference](./api-reference.md) - Complete API documentation
+- [Quota Management](./quota-management.md) - Quota utilities and cost management
+- [Testing Utilities](./dev/testing.md) - Testing helpers and mocks

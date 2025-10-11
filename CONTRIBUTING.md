@@ -1,7 +1,8 @@
-# Publishing a new version
+# Publishing
 
-This repository uses `pnpm` and npm provenance through GitHub Actions. To publish a new version:
+**Requirements**: `pnpm` and npm provenance via GitHub Actions
 
-1. Update the version in `package.json`
-2. Create a release using GitHub with an appropriate tag
-3. The `.github/workflows/provenance.yml` action will automatically publish it to npm
+**Steps**:
+1. Update version in `package.json`
+2. Create GitHub release with tag
+3. `.github/workflows/provenance.yml` auto-publishes to npm
