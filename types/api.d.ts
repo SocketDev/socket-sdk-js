@@ -12480,6 +12480,7 @@ export interface operations {
           | 'UpdateAutopatchCurated'
           | 'UpdateLabel'
           | 'UpdateLabelSetting'
+          | 'UpdateLicenseOverlay'
           | 'UpdateOrganizationSetting'
           | 'UpdateWebhook'
           | 'UpgradeOrganizationPlan'
@@ -13141,6 +13142,7 @@ export interface operations {
           | 'maven'
           | 'npm'
           | 'nuget'
+          | 'vscode'
           | 'pypi'
           | 'gem'
       }
@@ -13244,6 +13246,7 @@ export interface operations {
           | 'maven'
           | 'npm'
           | 'nuget'
+          | 'vscode'
           | 'pypi'
           | 'gem'
       }

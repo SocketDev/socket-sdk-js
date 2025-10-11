@@ -3,7 +3,7 @@
   "info": {
     "description": "Specification of the Socket API endpoints",
     "title": "API Endpoints",
-    "version": "0.1.0"
+    "version": "0"
   },
   "servers": [
     {
@@ -31943,6 +31943,7 @@
                 "UpdateAutopatchCurated",
                 "UpdateLabel",
                 "UpdateLabelSetting",
+                "UpdateLicenseOverlay",
                 "UpdateOrganizationSetting",
                 "UpdateWebhook",
                 "UpgradeOrganizationPlan"
@@ -33260,6 +33261,7 @@
                 "maven",
                 "npm",
                 "nuget",
+                "vscode",
                 "pypi",
                 "gem"
               ]
@@ -33541,6 +33543,7 @@
                 "maven",
                 "npm",
                 "nuget",
+                "vscode",
                 "pypi",
                 "gem"
               ]
