@@ -3,6 +3,7 @@ import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../src/index'
+import { FAST_TEST_CONFIG } from './utils/fast-test-config.mts'
 
 describe('Error Details Handling', () => {
   let client: SocketSdk
@@ -10,7 +11,7 @@ describe('Error Details Handling', () => {
   beforeEach(() => {
     nock.cleanAll()
     nock.disableNetConnect()
-    client = new SocketSdk('test-api-token')
+    client = new SocketSdk('test-api-token', FAST_TEST_CONFIG)
   })
 
   afterEach(() => {

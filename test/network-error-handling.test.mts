@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../src/index'
 import { setupTestEnvironment } from './utils/environment.mts'
+import { FAST_TEST_CONFIG, NO_RETRY_CONFIG } from './utils/fast-test-config.mts'
 
 describe('SocketSdk Network and Error Handling', () => {
   setupTestEnvironment()
@@ -14,7 +15,7 @@ describe('SocketSdk Network and Error Handling', () => {
         .post('/v0/purl')
         .reply(200, '{"purl":"pkg:npm/test@1.0.0","na')
 
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.batchPackageFetch({
         components: [{ purl: 'pkg:npm/test@1.0.0' }],
       })
@@ -28,10 +29,7 @@ describe('SocketSdk Network and Error Handling', () => {
 
   describe('Network error recovery strategies', () => {
     it('handles POST settings network failures gracefully', async () => {
-      const client = new SocketSdk('test-token', {
-        // Disable retries for network error tests
-        retries: 0,
-      })
+      const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
 
       // Mock a network error for postSettings.
       nock('https://api.socket.dev')
@@ -45,10 +43,7 @@ describe('SocketSdk Network and Error Handling', () => {
     })
 
     it('handles dependency search connection failures', async () => {
-      const client = new SocketSdk('test-token', {
-        // Disable retries for network error tests
-        retries: 0,
-      })
+      const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
 
       // Mock a network error for searchDependencies.
       nock('https://api.socket.dev')
@@ -62,7 +57,7 @@ describe('SocketSdk Network and Error Handling', () => {
     })
 
     it('handles POST settings 400 bad request errors', async () => {
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
 
       // Mock a 400 error for postSettings.
       nock('https://api.socket.dev')
@@ -75,7 +70,7 @@ describe('SocketSdk Network and Error Handling', () => {
     })
 
     it('handles dependency search 500 server errors', async () => {
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
 
       // Mock a 500 error for searchDependencies.
       nock('https://api.socket.dev')
@@ -91,7 +86,7 @@ describe('SocketSdk Network and Error Handling', () => {
 
   describe('Error message formatting and details', () => {
     it('replaces statusMessage with response body in errors', async () => {
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
 
       // Mock a response that includes statusMessage in the error message.
       nock('https://api.socket.dev')
@@ -110,7 +105,7 @@ describe('SocketSdk Network and Error Handling', () => {
     })
 
     it('appends response body when statusMessage not in error', async () => {
-      const client = new SocketSdk('test-token')
+      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
 
       // Mock a response with body content - use a custom error message without statusMessage.
       nock('https://api.socket.dev')
