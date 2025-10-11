@@ -6,13 +6,8 @@
 import { parseArgs } from 'node:util'
 
 import { deleteAsync } from 'del'
-import {
-  log,
-  printHeader,
-  printFooter,
-  printHelpHeader,
-  isQuiet
-} from './utils/common.mjs'
+import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
+import { log } from '@socketsecurity/registry/lib/cli/output'
 
 /**
  * Clean specific directories.
@@ -90,7 +85,7 @@ async function main() {
 
     // Show help if requested
     if (values.help) {
-      printHelpHeader('Clean Runner')
+      console.log('Clean Runner')
       console.log('\nUsage: pnpm clean [options]')
       console.log('\nOptions:')
       console.log('  --help              Show this help message')
@@ -147,7 +142,7 @@ async function main() {
     }
 
     if (!quiet) {
-      printHeader('Clean Runner')
+      console.log(createHeader('Clean Runner', { width: 56, borderChar: '=' })
       log.step('Cleaning project directories')
     }
 
@@ -161,7 +156,7 @@ async function main() {
       process.exitCode = exitCode
     } else {
       if (!quiet) {
-        printFooter('Clean completed successfully!')
+        console.log(createFooter('Clean completed successfully!', { width: 56, borderChar: '=', color: 'green' })
       }
     }
   } catch (error) {

@@ -3,6 +3,8 @@
 Thumbs.db
 /.claude
 /.env
+/.env.local
+/.pnpmfile.cjs
 /.nvm
 /.type-coverage
 /.vscode

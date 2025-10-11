@@ -5,8 +5,8 @@ import { logger } from '@socketsecurity/registry/lib/logger'
 import { parseArgs } from '@socketsecurity/registry/lib/parse-args'
 import colors from 'yoctocolors-cjs'
 
-import { getCodeCoverage } from './utils/get-code-coverage.mjs'
-import { getTypeCoverage } from './utils/get-type-coverage.mjs'
+import { getCodeCoverage } from '@socketsecurity/registry/lib/cover/code'
+import { getTypeCoverage } from '@socketsecurity/registry/lib/cover/type'
 
 const indent = '  '
 
