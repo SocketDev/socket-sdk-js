@@ -7,6 +7,7 @@ import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../src/index'
+import { FAST_TEST_CONFIG } from './utils/fast-test-config.mts'
 
 describe('SocketSdk - Upload Manifest Coverage', () => {
   let tempDir: string
@@ -25,7 +26,7 @@ describe('SocketSdk - Upload Manifest Coverage', () => {
       JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
     )
 
-    sdk = new SocketSdk('test-token')
+    sdk = new SocketSdk('test-token', FAST_TEST_CONFIG)
   })
 
   afterEach(() => {
