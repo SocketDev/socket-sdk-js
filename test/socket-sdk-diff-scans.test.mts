@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import { assertError, assertSuccess } from './utils/assertions.mts'
 import { createTestClient, setupTestEnvironment } from './utils/environment.mts'
+import { testServerError } from './utils/error-test-helpers.mts'
 
 import type { SocketSdk } from '../src/index'
 
@@ -68,14 +69,12 @@ describe('Socket SDK - Diff Scans', () => {
 
     it('should handle server errors by throwing', async () => {
       const queryParams = { before: 'scan-1', after: 'scan-2' }
-
-      nock('https://api.socket.dev')
-        .post('/v0/orgs/test-org/diff-scans?before=scan-1&after=scan-2', {})
-        .reply(500, { error: { message: 'Internal server error' } })
-
-      await expect(
-        client.createOrgDiffScanFromIds('test-org', queryParams),
-      ).rejects.toThrow('Socket API server error (500)')
+      await testServerError(client, {
+        method: 'createOrgDiffScanFromIds',
+        endpoint: '/v0/orgs/test-org/diff-scans?before=scan-1&after=scan-2',
+        args: ['test-org', queryParams],
+        httpMethod: 'post',
+      })
     })
   })
 
@@ -246,7 +245,7 @@ describe('Socket SDK - Diff Scans', () => {
       assertSuccess(result)
       if (result.success) {
         expect(result.data).toEqual(largeDiffScanList)
-        expect(result.data.results).toHaveLength(100)
+        expect((result.data as any).results).toHaveLength(100)
       }
     })
 

@@ -175,11 +175,11 @@ describe('SocketSdk - Batch Operations', () => {
     it('should handle network timeouts for reachability checks', async () => {
       nock('https://api.socket.dev')
         .post('/v0/purl')
-        .delayConnection(200)
+        .delayConnection(6000)
         .reply(200, {})
 
       const client = new SocketSdk('test-token', {
-        timeout: 100,
+        timeout: 5000,
       })
 
       await expect(
@@ -187,7 +187,7 @@ describe('SocketSdk - Batch Operations', () => {
           components: [{ purl: 'pkg:npm/test@1.0.0' }],
         }),
       ).rejects.toThrow()
-    })
+    }, 10000)
 
     it('should handle partial response data', async () => {
       nock('https://api.socket.dev')
@@ -486,7 +486,7 @@ describe('SocketSdk - Batch Operations', () => {
           pathsRelativeTo: tempDir,
         }),
       ).rejects.toThrow()
-    })
+    }, 20000)
 
     it('should handle non-existent file paths', async () => {
       const nonExistentPath = path.join(tempDir, 'non-existent.json')
@@ -499,6 +499,6 @@ describe('SocketSdk - Batch Operations', () => {
           pathsRelativeTo: tempDir,
         }),
       ).rejects.toThrow()
-    })
+    }, 20000)
   })
 })

@@ -144,7 +144,7 @@ describe('Testing Utilities', () => {
       expect(result.success).toBe(true)
       if (result.success) {
         expect(result.data).toEqual(data)
-        expect(result.status).toBe(200)
+        expect(result['status']).toBe(200)
         expect(result.error).toBeUndefined()
       }
     })
@@ -155,7 +155,7 @@ describe('Testing Utilities', () => {
 
       expect(result.success).toBe(true)
       if (result.success) {
-        expect(result.status).toBe(201)
+        expect(result['status']).toBe(201)
       }
     })
 
@@ -163,10 +163,10 @@ describe('Testing Utilities', () => {
       const error = 'Repository not found'
       const result = mockSdkResult<'getOrgRepo'>(false, error, 404)
 
-      expect(result.success).toBe(false)
-      if (!result.success) {
+      expect(result['success']).toBe(false)
+      if (!result['success']) {
         expect(result.error).toBe(error)
-        expect(result.status).toBe(404)
+        expect(result['status']).toBe(404)
         expect(result.data).toBeUndefined()
       }
     })
@@ -176,8 +176,8 @@ describe('Testing Utilities', () => {
       const cause = 'Connection timeout'
       const result = mockSdkResult<'getOrgRepo'>(false, error, 500, cause)
 
-      expect(result.success).toBe(false)
-      if (!result.success) {
+      expect(result['success']).toBe(false)
+      if (!result['success']) {
         expect(result.error).toBe(error)
         expect(result.cause).toBe(cause)
       }
@@ -187,10 +187,10 @@ describe('Testing Utilities', () => {
       const error = 'Operation failed'
       const result = mockSdkResult<'getOrgRepo'>(false, error)
 
-      expect(result.success).toBe(false)
-      if (!result.success) {
+      expect(result['success']).toBe(false)
+      if (!result['success']) {
         expect(result.error).toBe(error)
-        expect(result.status).toBe(500)
+        expect(result['status']).toBe(500)
         expect(result.data).toBeUndefined()
       }
     })
@@ -299,7 +299,7 @@ describe('Testing Utilities', () => {
         if (isErrorResult(result)) {
           // TypeScript should allow accessing error fields
           expect(result.error).toBe('Not found')
-          expect(result.status).toBe(404)
+          expect(result['status']).toBe(404)
           expect(result.cause).toBe('Resource missing')
           // data is undefined on error result
           expect(result.data).toBeUndefined()
@@ -502,10 +502,10 @@ describe('Testing Utilities', () => {
 
       const result = await mockMethod('org', 'missing-repo')
 
-      expect(result.success).toBe(false)
-      if (!result.success) {
+      expect(result['success']).toBe(false)
+      if (!result['success']) {
         expect(result.error).toBe('Not found')
-        expect(result.status).toBe(404)
+        expect(result['status']).toBe(404)
       }
     })
 
