@@ -19,6 +19,7 @@ describe('Quota Utils - Error Handling', () => {
     it('should throw error when requirements.json file cannot be read', async () => {
       // Mock fs.readFileSync to throw an error
       vi.doMock('node:fs', () => ({
+        existsSync: vi.fn(() => true),
         readFileSync: vi.fn(() => {
           throw new Error('ENOENT: no such file or directory')
         }),
@@ -27,20 +28,36 @@ describe('Quota Utils - Error Handling', () => {
       const { getQuotaCost } = await import('../src/quota-utils')
 
       expect(() => getQuotaCost('someMethod')).toThrow(
-        'Failed to load "requirements.json"',
+        'Failed to load SDK method requirements',
       )
     })
 
     it('should throw error when requirements.json contains invalid JSON', async () => {
       // Mock fs.readFileSync to return invalid JSON
       vi.doMock('node:fs', () => ({
+        existsSync: vi.fn(() => true),
         readFileSync: vi.fn(() => 'invalid json content {'),
       }))
 
       const { getQuotaCost } = await import('../src/quota-utils')
 
       expect(() => getQuotaCost('someMethod')).toThrow(
-        'Failed to load "requirements.json"',
+        'Failed to load SDK method requirements',
+      )
+    })
+
+    it('should throw error when requirements.json file does not exist', async () => {
+      // Mock fs.existsSync to return false
+      vi.doMock('node:fs', () => ({
+        existsSync: vi.fn(() => false),
+        readFileSync: vi.fn(),
+      }))
+
+      const { getQuotaCost } = await import('../src/quota-utils')
+
+      // The error is caught and wrapped, so we expect the wrapper message
+      expect(() => getQuotaCost('someMethod')).toThrow(
+        'Failed to load SDK method requirements',
       )
     })
   })
@@ -49,6 +66,7 @@ describe('Quota Utils - Error Handling', () => {
     it('should throw error when method not found in getMethodRequirements', async () => {
       // Mock valid requirements but without the requested method
       vi.doMock('node:fs', () => ({
+        existsSync: vi.fn(() => true),
         readFileSync: vi.fn(() =>
           JSON.stringify({
             api: {
@@ -68,6 +86,7 @@ describe('Quota Utils - Error Handling', () => {
     it('should throw error when method not found in getRequiredPermissions', async () => {
       // Mock valid requirements but without the requested method
       vi.doMock('node:fs', () => ({
+        existsSync: vi.fn(() => true),
         readFileSync: vi.fn(() =>
           JSON.stringify({
             api: {
