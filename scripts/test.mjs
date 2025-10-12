@@ -166,7 +166,7 @@ async function runTests(options) {
 
   // Get tests to run based on changes
   const testInfo = getTestsToRun({ staged, all: runAll })
-  const { reason, tests: testsToRun } = testInfo
+  const { reason, tests: testsToRun, mode } = testInfo
 
   // No tests needed
   if (testsToRun === null) {
@@ -176,11 +176,11 @@ async function runTests(options) {
 
   // Add test patterns if not running all
   if (testsToRun === 'all') {
-    const reasonText = reason ? ` (${reason})` : ''
-    log.step(`Running all tests${reasonText}`)
+    log.step(`Running all tests (${reason})`)
     return runVitestWithArgs([], { coverage, update })
   } else {
-    log.step(`Running affected tests:`)
+    const modeText = mode === 'staged' ? 'staged' : 'changed'
+    log.step(`Running tests for ${modeText} files:`)
     testsToRun.forEach(test => log.substep(test))
     return runVitestWithArgs(testsToRun, { coverage, update })
   }
@@ -254,10 +254,10 @@ async function main() {
       console.log('  --all, --force      Run all tests regardless of changes')
       console.log('  --staged            Run tests affected by staged changes')
       console.log('\nExamples:')
-      console.log('  pnpm test                      # Run checks, build, and tests')
+      console.log('  pnpm test                      # Run checks, build, and tests for changed files')
       console.log('  pnpm test --fast               # Skip checks for quick testing')
       console.log('  pnpm test --cover              # Run with coverage report')
-      console.log('  pnpm test --all                # Force run all tests')
+      console.log('  pnpm test --all                # Run all tests')
       console.log('  pnpm test --staged             # Run tests for staged changes')
       console.log('  pnpm test "**/*.test.mts"      # Run specific test pattern')
       console.log('\nWhen called as test:run:')

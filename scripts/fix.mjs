@@ -1,28 +1,43 @@
 /**
- * @fileoverview Fix script that runs lint with auto-fix enabled.
+ * @fileoverview Auto-fix script for the SDK.
+ * Runs linting with auto-fix enabled.
+ *
+ * Usage:
+ *   node scripts/fix.mjs
  */
 
-import { spawn } from 'node:child_process'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import {
+  printError,
+  printFooter,
+  printHeader,
+  printSuccess,
+} from './utils/cli-helpers.mjs'
+import { runSequence } from './utils/run-command.mjs'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.join(__dirname, '..')
+async function main() {
+  try {
+    printHeader('Running Auto-fix')
 
-// Pass through to lint.mjs with --fix flag.
-const args = ['run', 'lint', '--fix', ...process.argv.slice(2)]
+    const commands = [
+      {
+        args: ['run', 'lint', '--fix'],
+        command: 'pnpm',
+      },
+    ]
 
-const child = spawn('pnpm', args, {
-  stdio: 'inherit',
-  cwd: rootPath,
-  ...(process.platform === 'win32' && { shell: true }),
-})
+    const exitCode = await runSequence(commands)
 
-child.on('exit', code => {
-  process.exitCode = code || 0
-})
+    if (exitCode !== 0) {
+      printError('Some fixes could not be applied')
+      process.exitCode = 1
+    } else {
+      printSuccess('Linting passed')
+      printFooter()
+    }
+  } catch (error) {
+    printError(`Fix failed: ${error.message}`)
+    process.exitCode = 1
+  }
+}
 
-child.on('error', error => {
-  console.error(`Fix script failed: ${error.message}`)
-  process.exitCode = 1
-})
+main().catch(console.error)

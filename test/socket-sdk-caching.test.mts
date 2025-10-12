@@ -11,7 +11,8 @@ describe('SocketSdk - Caching', () => {
     nock.cleanAll()
     nock.disableNetConnect()
     // Clear the cache between tests
-    await cacache.clear()
+    // eslint-disable-next-line import-x/namespace
+    await cacache['clear']()
   })
 
   afterEach(() => {

@@ -185,40 +185,47 @@ async function getFilesToLint(options) {
 
   // If --all, return early
   if (all) {
-    return { files: 'all', reason: 'all flag specified' }
+    return { files: 'all', reason: 'all flag specified', mode: 'all' }
   }
 
   // Get changed files
   let changedFiles = []
+  let mode = 'changed' // Track what mode we're in
 
   if (staged) {
+    mode = 'staged'
     changedFiles = await getStagedFiles({ absolute: false })
     if (!changedFiles.length) {
-      return { files: null, reason: 'no staged files' }
+      return { files: null, reason: 'no staged files', mode }
     }
   } else if (changed) {
+    mode = 'changed'
     changedFiles = await getChangedFiles({ absolute: false })
     if (!changedFiles.length) {
-      return { files: null, reason: 'no changed files' }
+      return { files: null, reason: 'no changed files', mode }
     }
   } else {
-    // Default to all if no specific flag
-    return { files: 'all', reason: 'no target specified' }
+    // Default to changed files if no specific flag
+    mode = 'changed'
+    changedFiles = await getChangedFiles({ absolute: false })
+    if (!changedFiles.length) {
+      return { files: null, reason: 'no changed files', mode }
+    }
   }
 
   // Check if we should run all based on changed files
   const { reason, runAll } = shouldRunAllLinters(changedFiles)
   if (runAll) {
-    return { files: 'all', reason }
+    return { files: 'all', reason, mode: 'all' }
   }
 
   // Filter to lintable files
   const lintableFiles = filterLintableFiles(changedFiles)
   if (!lintableFiles.length) {
-    return { files: null, reason: 'no lintable files changed' }
+    return { files: null, reason: 'no lintable files changed', mode }
   }
 
-  return { files: lintableFiles, reason: null }
+  return { files: lintableFiles, reason: null, mode }
 }
 
 async function main() {
@@ -266,14 +273,14 @@ async function main() {
       console.log('\nOptions:')
       console.log('  --help         Show this help message')
       console.log('  --fix          Automatically fix problems')
-      console.log('  --all          Lint all files (default if no target specified)')
-      console.log('  --changed      Lint changed files')
+      console.log('  --all          Lint all files')
+      console.log('  --changed      Lint changed files (default behavior)')
       console.log('  --staged       Lint staged files')
       console.log('  --quiet, --silent  Suppress progress messages')
       console.log('\nExamples:')
-      console.log('  pnpm lint                   # Lint all files')
-      console.log('  pnpm lint --fix             # Fix all linting issues')
-      console.log('  pnpm lint --changed         # Lint changed files')
+      console.log('  pnpm lint                   # Lint changed files (default)')
+      console.log('  pnpm lint --fix             # Fix issues in changed files')
+      console.log('  pnpm lint --all             # Lint all files')
       console.log('  pnpm lint --staged --fix    # Fix issues in staged files')
       console.log('  pnpm lint src/index.ts      # Lint specific file(s)')
       process.exitCode = 0
@@ -300,7 +307,7 @@ async function main() {
       })
     } else {
       // Get files to lint based on flags
-      const { files, reason } = await getFilesToLint(values)
+      const { files, reason, mode } = await getFilesToLint(values)
 
       if (files === null) {
         if (!quiet) {
@@ -310,8 +317,7 @@ async function main() {
         exitCode = 0
       } else if (files === 'all') {
         if (!quiet) {
-          const reasonText = reason ? ` (${reason})` : ''
-          log.step(`Linting all files${reasonText}`)
+          log.step(`Linting all files (${reason})`)
         }
         exitCode = await runLintOnAll({
           fix: values.fix,
@@ -319,7 +325,8 @@ async function main() {
         })
       } else {
         if (!quiet) {
-          log.step('Linting affected files')
+          const modeText = mode === 'staged' ? 'staged' : 'changed'
+          log.step(`Linting ${modeText} files`)
         }
         exitCode = await runLintOnFiles(files, {
           fix: values.fix,
