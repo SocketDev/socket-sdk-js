@@ -142,7 +142,7 @@ async function main() {
     }
 
     if (!quiet) {
-      console.log(createHeader('Clean Runner', { width: 56, borderChar: '=' })
+      console.log(createHeader('Clean Runner', { width: 56, borderChar: '=' }))
       log.step('Cleaning project directories')
     }
 
@@ -156,7 +156,7 @@ async function main() {
       process.exitCode = exitCode
     } else {
       if (!quiet) {
-        console.log(createFooter('Clean completed successfully!', { width: 56, borderChar: '=', color: 'green' })
+        console.log(createFooter('Clean completed successfully!', { width: 56, borderChar: '=', color: 'green' }))
       }
     }
   } catch (error) {
