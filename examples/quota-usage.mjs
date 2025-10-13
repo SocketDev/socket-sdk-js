@@ -8,15 +8,15 @@
  */
 
 import {
+  SocketSdk,
   calculateTotalQuotaCost,
-  getAllMethodRequirements,
+  getMethodsByPermissions,
   getMethodsByQuotaCost,
   getQuotaCost,
   getQuotaUsageSummary,
   getRequiredPermissions,
   hasQuotaForMethods,
-  SocketSdk,
-} from '../dist/index.js'
+} from '../dist/index.js' // eslint-disable-line import-x/no-unresolved -- dist is built separately
 
 // Example usage of quota utilities
 function demonstrateQuotaUtils() {

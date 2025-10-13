@@ -5,11 +5,13 @@
  */
 
 // Re-export from registry once it's built
+// eslint-disable-next-line import-x/no-unresolved -- not yet implemented in registry
 export { attachOutputMask, createKeyboardHandler, createOutputMask, clearLine, writeOutput } from '@socketsecurity/registry/lib/stdio/mask'
 
 // For now, provide a local implementation until registry is rebuilt
 import { spawn } from 'node:child_process'
 import readline from 'node:readline'
+
 import { spinner } from '@socketsecurity/registry/lib/spinner'
 
 /**
@@ -19,11 +21,11 @@ import { spinner } from '@socketsecurity/registry/lib/spinner'
 export async function runInteractive(command, args = [], options = {}) {
   return new Promise((resolve, reject) => {
     const {
-      message = 'Running...',
-      toggleText = 'to see full output',
-      env = process.env,
       cwd = process.cwd(),
-      showOutput = false
+      env = process.env,
+      message = 'Running...',
+      showOutput = false,
+      toggleText = 'to see full output'
     } = options
 
     let verbose = showOutput
@@ -154,7 +156,7 @@ export async function runInteractive(command, args = [], options = {}) {
  */
 export async function runInteractiveSequence(commands) {
   for (const cmd of commands) {
-    const { command, args, message, ...options } = cmd
+    const { args, command, message, ...options } = cmd
     const exitCode = await runInteractive(command, args, { message, ...options })
     if (exitCode !== 0) {
       return exitCode

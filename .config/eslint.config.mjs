@@ -7,7 +7,6 @@ import {
   includeIgnoreFile,
 } from '@eslint/compat'
 import jsPlugin from '@eslint/js'
-import constants from '@socketsecurity/registry/lib/constants'
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript'
 import { flatConfigs as origImportXFlatConfigs } from 'eslint-plugin-import-x'
 import jsdocPlugin from 'eslint-plugin-jsdoc'
@@ -16,6 +15,8 @@ import sortDestructureKeysPlugin from 'eslint-plugin-sort-destructure-keys'
 import unicornPlugin from 'eslint-plugin-unicorn'
 import globals from 'globals'
 import tsEslint from 'typescript-eslint'
+
+import constants from '@socketsecurity/registry/lib/constants'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -52,6 +53,7 @@ const sharedPlugins = {
 const sharedRules = {
   'n/exports-style': ['error', 'module.exports'],
   'n/no-missing-require': ['off'],
+  'n/no-process-exit': 'error',
   // The n/no-unpublished-bin rule does does not support non-trivial glob
   // patterns used in package.json "files" fields. In those cases we simplify
   // the glob patterns used.
@@ -208,6 +210,7 @@ export default [
           allowDefaultProject: [
             // Allow configs.
             '.config/*.config.mts',
+            '.config/*.config.isolated.mts',
             '*.config.mts',
             'test/*.mts',
             'test/utils/*.mts',
@@ -286,6 +289,39 @@ export default [
       ...importFlatConfigsForScript.recommended.rules,
       ...nodePlugin.configs['flat/recommended-script'].rules,
       ...sharedRules,
+    },
+  },
+  {
+    files: ['**/*.mjs'],
+    ...jsPlugin.configs.recommended,
+    ...importFlatConfigsForModule.recommended,
+    languageOptions: {
+      ...jsPlugin.configs.recommended.languageOptions,
+      ...importFlatConfigsForModule.recommended.languageOptions,
+      globals: {
+        ...jsPlugin.configs.recommended.languageOptions?.globals,
+        ...importFlatConfigsForModule.recommended.languageOptions?.globals,
+        ...nodeGlobalsConfig,
+      },
+      sourceType: 'module',
+    },
+    plugins: {
+      ...jsPlugin.configs.recommended.plugins,
+      ...importFlatConfigsForModule.recommended.plugins,
+      ...sharedPlugins,
+    },
+    rules: {
+      ...jsPlugin.configs.recommended.rules,
+      ...importFlatConfigsForModule.recommended.rules,
+      ...sharedRules,
+    },
+  },
+  {
+    // Relax rules for script files
+    files: ['scripts/**/*.mjs'],
+    rules: {
+      'n/no-process-exit': 'off',
+      'no-await-in-loop': 'off',
     },
   },
   {
