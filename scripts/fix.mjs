@@ -6,12 +6,8 @@
  *   node scripts/fix.mjs
  */
 
-import {
-  printError,
-  printFooter,
-  printHeader,
-  printSuccess,
-} from './utils/cli-helpers.mjs'
+import { logger } from '@socketsecurity/registry/lib/logger'
+import { printFooter, printHeader } from '@socketsecurity/registry/lib/stdio/header'
 import { runSequence } from './utils/run-command.mjs'
 
 async function main() {
@@ -28,14 +24,14 @@ async function main() {
     const exitCode = await runSequence(commands)
 
     if (exitCode !== 0) {
-      printError('Some fixes could not be applied')
+      logger.error('Some fixes could not be applied')
       process.exitCode = 1
     } else {
-      printSuccess('Linting passed')
+      logger.success('Linting passed')
       printFooter()
     }
   } catch (error) {
-    printError(`Fix failed: ${error.message}`)
+    logger.error(`Fix failed: ${error.message}`)
     process.exitCode = 1
   }
 }

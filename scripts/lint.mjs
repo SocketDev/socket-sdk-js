@@ -11,7 +11,7 @@ import { getChangedFiles, getStagedFiles } from '@socketsecurity/registry/lib/gi
 import { runCommandQuiet } from './utils/run-command.mjs'
 import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
 import { logger } from '@socketsecurity/registry/lib/logger'
-import { createSectionHeader } from '@socketsecurity/registry/lib/stdio/header'
+import { printFooter, printHeader } from '@socketsecurity/registry/lib/stdio/header'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.resolve(__dirname, '..')
@@ -114,7 +114,7 @@ async function runLintOnFiles(files, options = {}) {
     // When fixing, non-zero exit codes are normal if fixes were applied
     if (!fix || (result.stderr && result.stderr.trim().length > 0)) {
       if (!quiet) {
-        logger.failed(`Linting failed`)
+        logger.error(`Linting failed`)
       }
       if (result.stderr) {
         console.error(result.stderr)
@@ -128,6 +128,7 @@ async function runLintOnFiles(files, options = {}) {
 
   if (!quiet) {
     logger.done(`Linting passed`)
+    console.log() // Add newline after spinner completes
   }
 
   return 0
@@ -159,7 +160,7 @@ async function runLintOnAll(options = {}) {
     // When fixing, non-zero exit codes are normal if fixes were applied
     if (!fix || (result.stderr && result.stderr.trim().length > 0)) {
       if (!quiet) {
-        logger.failed('Linting failed')
+        logger.error('Linting failed')
       }
       if (result.stderr) {
         console.error(result.stderr)
@@ -173,6 +174,7 @@ async function runLintOnAll(options = {}) {
 
   if (!quiet) {
     logger.done('Linting passed')
+    console.log() // Add newline after spinner completes
   }
 
   return 0
@@ -291,7 +293,7 @@ async function main() {
     const quiet = isQuiet(values)
 
     if (!quiet) {
-      console.log(createSectionHeader('Running Linter'))
+      printHeader('Running Linter')
       console.log()
     }
 

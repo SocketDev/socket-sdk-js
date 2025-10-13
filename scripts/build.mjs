@@ -10,8 +10,7 @@ import { fileURLToPath } from 'node:url'
 
 import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
 import { logger } from '@socketsecurity/registry/lib/logger'
-import { createHeader, createSectionHeader } from '@socketsecurity/registry/lib/stdio/header'
-import { createFooter } from '@socketsecurity/registry/lib/stdio/footer'
+import { printFooter, printHeader } from '@socketsecurity/registry/lib/stdio/header'
 import { runSequence } from './utils/run-command.mjs'
 import { buildConfig, watchConfig, analyzeMetafile } from '../.config/esbuild.config.mjs'
 
@@ -229,7 +228,7 @@ async function main() {
 
     // Show help if requested
     if (values.help) {
-      console.log(createSectionHeader('Build Runner'))
+      printHeader('Build Runner')
       console.log('\nUsage: pnpm build [options]')
       console.log('\nOptions:')
       console.log('  --help       Show this help message')
@@ -263,7 +262,7 @@ async function main() {
     }
 
     if (!quiet) {
-      console.log(createHeader('Build Runner'))
+      printHeader('Build Runner')
     }
 
     let exitCode = 0
@@ -324,7 +323,7 @@ async function main() {
       process.exitCode = exitCode
     } else {
       if (!quiet) {
-        console.log(createFooter('Build completed successfully!'))
+        printFooter('Build completed successfully!')
       }
     }
   } catch (error) {

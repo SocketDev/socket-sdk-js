@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url'
 import WIN32 from '@socketsecurity/registry/lib/constants/WIN32'
 import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
 import { logger } from '@socketsecurity/registry/lib/logger'
-import { createSectionHeader } from '@socketsecurity/registry/lib/stdio/header'
+import { printHeader } from '@socketsecurity/registry/lib/stdio/header'
 import { onExit } from '@socketsecurity/registry/lib/signal-exit'
 import { spinner } from '@socketsecurity/registry/lib/spinner'
 
@@ -27,6 +27,11 @@ const runningProcesses = new Set()
 
 // Setup exit handler
 const removeExitHandler = onExit((_code, signal) => {
+  // Stop spinner first
+  try {
+    spinner.stop()
+  } catch {}
+
   // Kill all running processes
   for (const child of runningProcesses) {
     try {
@@ -114,7 +119,10 @@ async function runCheck(options = {}) {
     if (result.stderr) console.error(result.stderr)
     return result.code
   }
-  if (!quiet) spinner.success('Code formatted')
+  if (!quiet) {
+    spinner.stop()
+    logger.success('Code formatted')
+  }
 
   // Run ESLint
   if (!quiet) spinner.start('Running ESLint...')
@@ -131,7 +139,10 @@ async function runCheck(options = {}) {
     if (result.stdout) console.log(result.stdout)
     return result.code
   }
-  if (!quiet) spinner.success('ESLint passed')
+  if (!quiet) {
+    spinner.stop()
+    logger.success('ESLint passed')
+  }
 
   // Run TypeScript check
   if (!quiet) spinner.start('Checking TypeScript...')
@@ -147,7 +158,10 @@ async function runCheck(options = {}) {
     if (result.stdout) console.log(result.stdout)
     return result.code
   }
-  if (!quiet) spinner.success('TypeScript check passed')
+  if (!quiet) {
+    spinner.stop()
+    logger.success('TypeScript check passed')
+  }
 
   return 0
 }
@@ -389,7 +403,7 @@ async function main() {
     const verbose = values.verbose
 
     if (!quiet) {
-      console.log(createSectionHeader('Running Tests'))
+      printHeader('Running Tests')
       console.log()
     }
 
@@ -451,10 +465,18 @@ async function main() {
       }
     }
   } catch (error) {
+    // Ensure spinner is stopped
+    try {
+      spinner.stop()
+    } catch {}
     logger.error('')
     console.log(`Test runner failed: ${error.message}`)
     process.exitCode = 1
   } finally {
+    // Ensure spinner is stopped
+    try {
+      spinner.stop()
+    } catch {}
     removeExitHandler()
   }
 }
