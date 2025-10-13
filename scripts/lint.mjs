@@ -10,7 +10,9 @@ import { fileURLToPath } from 'node:url'
 import { getChangedFiles, getStagedFiles } from '@socketsecurity/registry/lib/git'
 import { runCommandQuiet } from './utils/run-command.mjs'
 import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
-import { log, printHeader, printFooter } from '@socketsecurity/registry/lib/cli/output'
+import { logger } from '@socketsecurity/registry/lib/logger'
+import { createHeader } from '@socketsecurity/registry/lib/stdio/header'
+import { createFooter } from '@socketsecurity/registry/lib/stdio/footer'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.resolve(__dirname, '..')
@@ -89,12 +91,12 @@ async function runLintOnFiles(files, options = {}) {
   const { fix = false, quiet = false } = options
 
   if (!files.length) {
-    log.substep('No files to lint')
+    logger.substep('No files to lint')
     return 0
   }
 
   if (!quiet) {
-    log.progress(`Linting ${files.length} file(s)`)
+    logger.progress(`Linting ${files.length} file(s)`)
   }
 
   const args = [
@@ -113,7 +115,7 @@ async function runLintOnFiles(files, options = {}) {
     // When fixing, non-zero exit codes are normal if fixes were applied
     if (!fix || (result.stderr && result.stderr.trim().length > 0)) {
       if (!quiet) {
-        log.failed(`Linting failed`)
+        logger.failed(`Linting failed`)
       }
       if (result.stderr) {
         console.error(result.stderr)
@@ -126,7 +128,7 @@ async function runLintOnFiles(files, options = {}) {
   }
 
   if (!quiet) {
-    log.done(`Linting passed`)
+    logger.done(`Linting passed`)
   }
 
   return 0
@@ -139,7 +141,7 @@ async function runLintOnAll(options = {}) {
   const { fix = false, quiet = false } = options
 
   if (!quiet) {
-    log.progress('Linting all files')
+    logger.progress('Linting all files')
   }
 
   const args = [
@@ -158,7 +160,7 @@ async function runLintOnAll(options = {}) {
     // When fixing, non-zero exit codes are normal if fixes were applied
     if (!fix || (result.stderr && result.stderr.trim().length > 0)) {
       if (!quiet) {
-        log.failed('Linting failed')
+        logger.failed('Linting failed')
       }
       if (result.stderr) {
         console.error(result.stderr)
@@ -171,7 +173,7 @@ async function runLintOnAll(options = {}) {
   }
 
   if (!quiet) {
-    log.done('Linting passed')
+    logger.done('Linting passed')
   }
 
   return 0
@@ -290,7 +292,7 @@ async function main() {
     const quiet = isQuiet(values)
 
     if (!quiet) {
-      printHeader('Lint Runner', { width: 56, borderChar: '=' })
+      console.log(createHeader('Lint Runner', { width: 56, borderChar: '=' }))
     }
 
     let exitCode = 0
@@ -299,7 +301,7 @@ async function main() {
     if (positionals.length > 0) {
       const files = filterLintableFiles(positionals)
       if (!quiet) {
-        log.step('Linting specified files')
+        logger.step('Linting specified files')
       }
       exitCode = await runLintOnFiles(files, {
         fix: values.fix,
@@ -311,13 +313,13 @@ async function main() {
 
       if (files === null) {
         if (!quiet) {
-          log.step('Skipping lint')
-          log.substep(reason)
+          logger.step('Skipping lint')
+          logger.substep(reason)
         }
         exitCode = 0
       } else if (files === 'all') {
         if (!quiet) {
-          log.step(`Linting all files (${reason})`)
+          logger.step(`Linting all files (${reason})`)
         }
         exitCode = await runLintOnAll({
           fix: values.fix,
@@ -326,7 +328,7 @@ async function main() {
       } else {
         if (!quiet) {
           const modeText = mode === 'staged' ? 'staged' : 'changed'
-          log.step(`Linting ${modeText} files`)
+          logger.step(`Linting ${modeText} files`)
         }
         exitCode = await runLintOnFiles(files, {
           fix: values.fix,
@@ -337,16 +339,16 @@ async function main() {
 
     if (exitCode !== 0) {
       if (!quiet) {
-        log.error('Lint failed')
+        logger.error('Lint failed')
       }
       process.exitCode = exitCode
     } else {
       if (!quiet) {
-        printFooter('All lint checks passed!', { width: 56, borderChar: '=', color: 'green' })
+        console.log(createFooter('All lint checks passed!', { width: 56, borderChar: '=', color: 'green' }))
       }
     }
   } catch (error) {
-    log.error(`Lint runner failed: ${error.message}`)
+    logger.error(`Lint runner failed: ${error.message}`)
     process.exitCode = 1
   }
 }

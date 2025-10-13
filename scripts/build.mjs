@@ -9,7 +9,9 @@ import { parseArgs } from 'node:util'
 import { fileURLToPath } from 'node:url'
 
 import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
-import { log, printHeader, printFooter, printHelpHeader } from '@socketsecurity/registry/lib/cli/output'
+import { logger } from '@socketsecurity/registry/lib/logger'
+import { createHeader, createSectionHeader } from '@socketsecurity/registry/lib/stdio/header'
+import { createFooter } from '@socketsecurity/registry/lib/stdio/footer'
 import { runSequence } from './utils/run-command.mjs'
 import { buildConfig, watchConfig, analyzeMetafile } from '../.config/esbuild.config.mjs'
 
@@ -23,7 +25,7 @@ async function buildSource(options = {}) {
   const { quiet = false, skipClean = false, analyze = false, verbose = false } = options
 
   if (!quiet) {
-    log.progress('Building source code')
+    logger.progress('Building source code')
   }
 
   // Clean dist directory if needed
@@ -33,7 +35,7 @@ async function buildSource(options = {}) {
     ])
     if (exitCode !== 0) {
       if (!quiet) {
-        log.failed('Clean failed')
+        logger.failed('Clean failed')
       }
       return exitCode
     }
@@ -50,22 +52,22 @@ async function buildSource(options = {}) {
     const buildTime = Date.now() - startTime
 
     if (!quiet) {
-      log.done(`Source build complete in ${buildTime}ms`)
+      logger.done(`Source build complete in ${buildTime}ms`)
 
       if (analyze && result.metafile) {
         const analysis = analyzeMetafile(result.metafile)
-        log.info('Build output:')
+        logger.info('Build output:')
         for (const file of analysis.files) {
-          log.substep(`${file.name}: ${file.size}`)
+          logger.substep(`${file.name}: ${file.size}`)
         }
-        log.step(`Total bundle size: ${analysis.totalSize}`)
+        logger.step(`Total bundle size: ${analysis.totalSize}`)
       }
     }
 
     return 0
   } catch (error) {
     if (!quiet) {
-      log.failed('Source build failed')
+      logger.failed('Source build failed')
       console.error(error)
     }
     return 1
@@ -79,7 +81,7 @@ async function buildTypes(options = {}) {
   const { quiet = false, skipClean = false, verbose = false } = options
 
   if (!quiet) {
-    log.progress('Building TypeScript declarations')
+    logger.progress('Building TypeScript declarations')
   }
 
   const commands = []
@@ -97,14 +99,14 @@ async function buildTypes(options = {}) {
 
   if (exitCode !== 0) {
     if (!quiet) {
-      log.failed('Type declarations build failed')
+      logger.failed('Type declarations build failed')
     }
     return exitCode
   }
 
   // Rename .d.ts files to .d.mts for ESM
   if (!quiet) {
-    log.progress('Renaming declaration files to .d.mts')
+    logger.progress('Renaming declaration files to .d.mts')
   }
 
   const { promises: fs } = await import('node:fs')
@@ -121,13 +123,13 @@ async function buildTypes(options = {}) {
     }
   } catch (error) {
     if (!quiet) {
-      log.error('Failed to rename declaration files:', error)
+      logger.error('Failed to rename declaration files:', error)
     }
     return 1
   }
 
   if (!quiet) {
-    log.done('Type declarations built')
+    logger.done('Type declarations built')
   }
 
   return 0
@@ -140,8 +142,8 @@ async function watchBuild(options = {}) {
   const { quiet = false, verbose = false } = options
 
   if (!quiet) {
-    log.step('Starting watch mode')
-    log.substep('Watching for file changes...')
+    logger.step('Starting watch mode')
+    logger.substep('Watching for file changes...')
   }
 
   try {
@@ -163,7 +165,7 @@ async function watchBuild(options = {}) {
     await new Promise(() => {})
   } catch (error) {
     if (!quiet) {
-      log.error('Watch mode failed:', error)
+      logger.error('Watch mode failed:', error)
     }
     return 1
   }
@@ -227,7 +229,7 @@ async function main() {
 
     // Show help if requested
     if (values.help) {
-      printHelpHeader('Build Runner')
+      console.log(createSectionHeader('Build Runner'))
       console.log('\nUsage: pnpm build [options]')
       console.log('\nOptions:')
       console.log('  --help       Show this help message')
@@ -254,14 +256,14 @@ async function main() {
     // Check if build is needed
     if (values.needed && !isBuildNeeded()) {
       if (!quiet) {
-        log.info('Build artifacts exist, skipping build')
+        logger.info('Build artifacts exist, skipping build')
       }
       process.exitCode = 0
       return
     }
 
     if (!quiet) {
-      printHeader('Build Runner')
+      console.log(createHeader('Build Runner'))
     }
 
     let exitCode = 0
@@ -273,33 +275,33 @@ async function main() {
     // Build types only
     else if (values.types && !values.src) {
       if (!quiet) {
-        log.step('Building TypeScript declarations only')
+        logger.step('Building TypeScript declarations only')
       }
       exitCode = await buildTypes({ quiet, verbose })
     }
     // Build source only
     else if (values.src && !values.types) {
       if (!quiet) {
-        log.step('Building source only')
+        logger.step('Building source only')
       }
       exitCode = await buildSource({ quiet, verbose, analyze: values.analyze })
     }
     // Build everything (default)
     else {
       if (!quiet) {
-        log.step('Building package (source + types)')
+        logger.step('Building package (source + types)')
       }
 
       // Clean all directories first (once)
       if (!quiet) {
-        log.progress('Cleaning build directories')
+        logger.progress('Cleaning build directories')
       }
       exitCode = await runSequence([
         { args: ['exec', 'node', 'scripts/clean.mjs', '--dist', '--types', '--quiet'], command: 'pnpm' }
       ])
       if (exitCode !== 0) {
         if (!quiet) {
-          log.failed('Clean failed')
+          logger.failed('Clean failed')
         }
         process.exitCode = exitCode
         return
@@ -317,16 +319,16 @@ async function main() {
 
     if (exitCode !== 0) {
       if (!quiet) {
-        log.error('Build failed')
+        logger.error('Build failed')
       }
       process.exitCode = exitCode
     } else {
       if (!quiet) {
-        printFooter('Build completed successfully!')
+        console.log(createFooter('Build completed successfully!'))
       }
     }
   } catch (error) {
-    log.error(`Build runner failed: ${error.message}`)
+    logger.error(`Build runner failed: ${error.message}`)
     process.exitCode = 1
   }
 }
