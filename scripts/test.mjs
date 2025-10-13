@@ -14,7 +14,9 @@ import { getTestsToRun } from './utils/changed-test-mapper.mjs'
 import { fileURLToPath } from 'node:url'
 
 import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
-import { log, printHeader, printFooter } from '@socketsecurity/registry/lib/cli/output'
+import { logger } from '@socketsecurity/registry/lib/logger'
+import { createHeader } from '@socketsecurity/registry/lib/stdio/header'
+import { createFooter } from '@socketsecurity/registry/lib/stdio/footer'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.resolve(__dirname, '..')
@@ -39,23 +41,23 @@ async function runCommand(command, args = [], options = {}) {
 }
 
 async function runCheck() {
-  log.step('Running checks')
+  logger.step('Running checks')
 
   // Run fix (auto-format) quietly since it has its own output
-  log.progress('Formatting code')
+  logger.progress('Formatting code')
   let exitCode = await runCommand('pnpm', ['run', 'fix'], {
     stdio: 'pipe'
   })
   if (exitCode !== 0) {
-    log.failed('Formatting failed')
+    logger.failed('Formatting failed')
     // Re-run with output to show errors
     await runCommand('pnpm', ['run', 'fix'])
     return exitCode
   }
-  log.done('Code formatted')
+  logger.done('Code formatted')
 
   // Run ESLint to check for remaining issues
-  log.progress('Checking ESLint')
+  logger.progress('Checking ESLint')
   exitCode = await runCommand('eslint', [
     '--config',
     '.config/eslint.config.mjs',
@@ -65,7 +67,7 @@ async function runCheck() {
     stdio: 'pipe'
   })
   if (exitCode !== 0) {
-    log.failed('ESLint failed')
+    logger.failed('ESLint failed')
     // Re-run with output to show errors
     await runCommand('eslint', [
       '--config',
@@ -75,10 +77,10 @@ async function runCheck() {
     ])
     return exitCode
   }
-  log.done('ESLint passed')
+  logger.done('ESLint passed')
 
   // Run TypeScript check
-  log.progress('Checking TypeScript')
+  logger.progress('Checking TypeScript')
   exitCode = await runCommand('tsgo', [
     '--noEmit',
     '-p',
@@ -87,7 +89,7 @@ async function runCheck() {
     stdio: 'pipe'
   })
   if (exitCode !== 0) {
-    log.failed('TypeScript check failed')
+    logger.failed('TypeScript check failed')
     // Re-run with output to show errors
     await runCommand('tsgo', [
       '--noEmit',
@@ -96,7 +98,7 @@ async function runCheck() {
     ])
     return exitCode
   }
-  log.done('TypeScript check passed')
+  logger.done('TypeScript check passed')
 
   return exitCode
 }
@@ -104,7 +106,7 @@ async function runCheck() {
 async function runBuild() {
   const distIndexPath = path.join(rootPath, 'dist', 'index.js')
   if (!existsSync(distIndexPath)) {
-    log.step('Building project')
+    logger.step('Building project')
     return runCommand('pnpm', ['run', 'build'])
   }
   return 0
@@ -160,7 +162,7 @@ async function runTests(options) {
 
   // If positional arguments provided, use them directly
   if (positionals && positionals.length > 0) {
-    log.step(`Running specified tests: ${positionals.join(', ')}`)
+    logger.step(`Running specified tests: ${positionals.join(', ')}`)
     return runVitestWithArgs(positionals, { coverage, update })
   }
 
@@ -170,18 +172,18 @@ async function runTests(options) {
 
   // No tests needed
   if (testsToRun === null) {
-    log.substep('No relevant changes detected, skipping tests')
+    logger.substep('No relevant changes detected, skipping tests')
     return 0
   }
 
   // Add test patterns if not running all
   if (testsToRun === 'all') {
-    log.step(`Running all tests (${reason})`)
+    logger.step(`Running all tests (${reason})`)
     return runVitestWithArgs([], { coverage, update })
   } else {
     const modeText = mode === 'staged' ? 'staged' : 'changed'
-    log.step(`Running tests for ${modeText} files:`)
-    testsToRun.forEach(test => log.substep(test))
+    logger.step(`Running tests for ${modeText} files:`)
+    testsToRun.forEach(test => logger.substep(test))
     return runVitestWithArgs(testsToRun, { coverage, update })
   }
 }
@@ -281,7 +283,7 @@ async function main() {
       }
     }
 
-    printHeader('Test Runner', { width: 56, borderChar: '=' })
+    console.log(createHeader('Test Runner', { width: 56, borderChar: '=' }))
 
     // Handle aliases
     const skipChecks = values.fast || values.quick || values['skip-checks']
@@ -293,18 +295,18 @@ async function main() {
     if (!skipChecks) {
       exitCode = await runCheck()
       if (exitCode !== 0) {
-        log.error('Checks failed')
+        logger.error('Checks failed')
         process.exitCode = exitCode
         return
       }
-      log.success('All checks passed')
+      logger.success('All checks passed')
     }
 
     // Run build unless skipped
     if (!values['skip-build']) {
       exitCode = await runBuild()
       if (exitCode !== 0) {
-        log.error('Build failed')
+        logger.error('Build failed')
         process.exitCode = exitCode
         return
       }
@@ -314,13 +316,13 @@ async function main() {
     exitCode = await runTests({ ...values, coverage: withCoverage, positionals })
 
     if (exitCode !== 0) {
-      log.error('Tests failed')
+      logger.error('Tests failed')
       process.exitCode = exitCode
     } else {
-      printFooter('All tests passed!', { width: 56, borderChar: '=', color: 'green' })
+      console.log(createFooter('All tests passed!', { width: 56, borderChar: '=', color: 'green' }))
     }
   } catch (error) {
-    log.error(`Test runner failed: ${error.message}`)
+    logger.error(`Test runner failed: ${error.message}`)
     process.exitCode = 1
   }
 }
