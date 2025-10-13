@@ -7,7 +7,9 @@ import { parseArgs } from 'node:util'
 
 import { deleteAsync } from 'del'
 import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
-import { log } from '@socketsecurity/registry/lib/cli/output'
+import { logger } from '@socketsecurity/registry/lib/logger'
+import { createHeader } from '@socketsecurity/registry/lib/stdio/header'
+import { createFooter } from '@socketsecurity/registry/lib/stdio/footer'
 
 /**
  * Clean specific directories.
@@ -17,20 +19,20 @@ async function cleanDirectories(patterns, options = {}) {
 
   for (const { name, pattern } of patterns) {
     if (!quiet) {
-      log.progress(`Cleaning ${name}`)
+      logger.progress(`Cleaning ${name}`)
     }
 
     try {
       await deleteAsync(pattern)
     } catch (error) {
       if (!quiet) {
-        log.failed(`Failed to clean ${name}: ${error.message}`)
+        logger.fail(`Failed to clean ${name}: ${error.message}`)
       }
       return 1
     }
 
     if (!quiet) {
-      log.done(`Cleaned ${name}`)
+      logger.done(`Cleaned ${name}`)
     }
   }
 
@@ -135,7 +137,7 @@ async function main() {
     // Check if there's anything to clean
     if (tasks.length === 0) {
       if (!quiet) {
-        log.info('Nothing to clean')
+        logger.info('Nothing to clean')
       }
       process.exitCode = 0
       return
@@ -143,7 +145,7 @@ async function main() {
 
     if (!quiet) {
       console.log(createHeader('Clean Runner', { width: 56, borderChar: '=' }))
-      log.step('Cleaning project directories')
+      logger.step('Cleaning project directories')
     }
 
     // Clean directories
@@ -151,7 +153,7 @@ async function main() {
 
     if (exitCode !== 0) {
       if (!quiet) {
-        log.error('Clean failed')
+        logger.error('Clean failed')
       }
       process.exitCode = exitCode
     } else {
@@ -160,7 +162,7 @@ async function main() {
       }
     }
   } catch (error) {
-    log.error(`Clean runner failed: ${error.message}`)
+    logger.error(`Clean runner failed: ${error.message}`)
     process.exitCode = 1
   }
 }

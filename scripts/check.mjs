@@ -12,12 +12,12 @@
 import colors from 'yoctocolors-cjs'
 
 import { logger } from '@socketsecurity/registry/lib/logger'
-import { printHeader } from '@socketsecurity/registry/lib/cli/output'
+import { createHeader } from '@socketsecurity/registry/lib/stdio/header'
 import { runParallel } from './utils/run-command.mjs'
 
 async function main() {
   try {
-    printHeader('Check Runner')
+    console.log(createHeader('Check Runner'))
     logger.log('Running checks...')
 
     const checks = [
