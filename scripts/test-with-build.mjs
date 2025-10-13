@@ -5,10 +5,10 @@
  * Uses affected testing based on staged changes.
  */
 
-import { existsSync } from 'node:fs'
 import { execSync } from 'node:child_process'
-import { fileURLToPath } from 'node:url'
+import { existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -24,7 +24,7 @@ if (!existsSync(distIndexPath)) {
       cwd: projectRoot,
       stdio: 'inherit',
     })
-  } catch (error) {
+  } catch {
     console.error('Build failed')
     process.exit(1)
   }
@@ -36,6 +36,6 @@ try {
     cwd: projectRoot,
     stdio: 'inherit',
   })
-} catch (error) {
+} catch {
   process.exit(1)
 }

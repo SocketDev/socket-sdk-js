@@ -13,7 +13,7 @@ import {
   printHeader,
   printSuccess,
 } from './utils/cli-helpers.mjs'
-import { runCommandQuiet, runSequence } from './utils/run-command.mjs'
+import { runCommandQuiet } from './utils/run-command.mjs'
 
 async function main() {
   try {
