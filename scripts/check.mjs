@@ -12,12 +12,12 @@
 import colors from 'yoctocolors-cjs'
 
 import { logger } from '@socketsecurity/registry/lib/logger'
-import { createHeader } from '@socketsecurity/registry/lib/stdio/header'
+import { printFooter, printHeader } from '@socketsecurity/registry/lib/stdio/header'
 import { runParallel } from './utils/run-command.mjs'
 
 async function main() {
   try {
-    console.log(createHeader('Check Runner'))
+    printHeader('Running Checks')
     logger.log('Running checks...')
 
     const checks = [
@@ -46,6 +46,7 @@ async function main() {
       process.exitCode = 1
     } else {
       logger.log(colors.green('✓ All checks passed'))
+      printFooter()
     }
   } catch (error) {
     logger.error('Check failed:', error.message)
