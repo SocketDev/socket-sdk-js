@@ -11,8 +11,7 @@ import { getChangedFiles, getStagedFiles } from '@socketsecurity/registry/lib/gi
 import { runCommandQuiet } from './utils/run-command.mjs'
 import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
 import { logger } from '@socketsecurity/registry/lib/logger'
-import { createHeader } from '@socketsecurity/registry/lib/stdio/header'
-import { createFooter } from '@socketsecurity/registry/lib/stdio/footer'
+import { createSectionHeader } from '@socketsecurity/registry/lib/stdio/header'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.resolve(__dirname, '..')
@@ -292,7 +291,8 @@ async function main() {
     const quiet = isQuiet(values)
 
     if (!quiet) {
-      console.log(createHeader('Lint Runner', { width: 56, borderChar: '=' }))
+      console.log(createSectionHeader('Running Linter'))
+      console.log()
     }
 
     let exitCode = 0
@@ -339,12 +339,14 @@ async function main() {
 
     if (exitCode !== 0) {
       if (!quiet) {
-        logger.error('Lint failed')
+        logger.error('')
+        console.log('Lint failed')
       }
       process.exitCode = exitCode
     } else {
       if (!quiet) {
-        console.log(createFooter('All lint checks passed!', { width: 56, borderChar: '=', color: 'green' }))
+        console.log()
+        logger.success('All lint checks passed!')
       }
     }
   } catch (error) {
