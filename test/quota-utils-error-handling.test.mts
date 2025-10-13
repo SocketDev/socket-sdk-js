@@ -1,16 +1,18 @@
-/** @fileoverview Tests for quota utility error handling and edge cases. */
+/**
+ * @fileoverview Tests for quota utility error handling and edge cases.
+ *
+ * NOTE: These tests use vi.doMock() for module mocking which requires proper
+ * isolation. They run with isolate: false like other tests but rely on
+ * vi.resetModules() to clear state between tests.
+ */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('Quota Utils - Error Handling', () => {
-  let originalCwd: string
-
   beforeEach(() => {
-    originalCwd = process.cwd()
     vi.resetModules()
   })
 
   afterEach(() => {
-    process.chdir(originalCwd)
     vi.restoreAllMocks()
     vi.resetModules()
   })
@@ -23,6 +25,12 @@ describe('Quota Utils - Error Handling', () => {
         readFileSync: vi.fn(() => {
           throw new Error('ENOENT: no such file or directory')
         }),
+      }))
+
+      // Also mock the registry memoization to prevent caching issues
+      vi.doMock('@socketsecurity/registry/lib/memoization', () => ({
+        memoize: (fn: unknown) => fn,
+        once: (fn: unknown) => fn,
       }))
 
       const { getQuotaCost } = await import('../src/quota-utils')
@@ -39,6 +47,12 @@ describe('Quota Utils - Error Handling', () => {
         readFileSync: vi.fn(() => 'invalid json content {'),
       }))
 
+      // Also mock the registry memoization to prevent caching issues
+      vi.doMock('@socketsecurity/registry/lib/memoization', () => ({
+        memoize: (fn: unknown) => fn,
+        once: (fn: unknown) => fn,
+      }))
+
       const { getQuotaCost } = await import('../src/quota-utils')
 
       expect(() => getQuotaCost('someMethod')).toThrow(
@@ -51,6 +65,12 @@ describe('Quota Utils - Error Handling', () => {
       vi.doMock('node:fs', () => ({
         existsSync: vi.fn(() => false),
         readFileSync: vi.fn(),
+      }))
+
+      // Also mock the registry memoization to prevent caching issues
+      vi.doMock('@socketsecurity/registry/lib/memoization', () => ({
+        memoize: (fn: unknown) => fn,
+        once: (fn: unknown) => fn,
       }))
 
       const { getQuotaCost } = await import('../src/quota-utils')

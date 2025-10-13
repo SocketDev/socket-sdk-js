@@ -1,12 +1,14 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-import constants from '@socketsecurity/registry/lib/constants'
-import { logger } from '@socketsecurity/registry/lib/logger'
-import { parseArgs } from '@socketsecurity/registry/lib/parse-args'
+
 import colors from 'yoctocolors-cjs'
 
+import constants from '@socketsecurity/registry/lib/constants'
 import { getCodeCoverage } from '@socketsecurity/registry/lib/cover/code'
 import { getTypeCoverage } from '@socketsecurity/registry/lib/cover/type'
+import { logger } from '@socketsecurity/registry/lib/logger'
+import { parseArgs } from '@socketsecurity/registry/lib/parse-args'
+
 
 const indent = '  '
 

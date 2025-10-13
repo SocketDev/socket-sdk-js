@@ -1,18 +1,17 @@
 #!/usr/bin/env node
 /**
  * @fileoverview Interactive command runner with Ctrl+O toggle for verbose output.
- * Wrapper around the registry's interactive-output utility.
+ * Uses registry/lib/stdio/mask when available, falls back to local implementation.
  */
 
-// Re-export from registry once it's built
-// eslint-disable-next-line import-x/no-unresolved -- not yet implemented in registry
-export { attachOutputMask, createKeyboardHandler, createOutputMask, clearLine, writeOutput } from '@socketsecurity/registry/lib/stdio/mask'
-
-// For now, provide a local implementation until registry is rebuilt
 import { spawn } from 'node:child_process'
 import readline from 'node:readline'
 
 import { spinner } from '@socketsecurity/registry/lib/spinner'
+
+// TODO: Use registry exports once built and available:
+// import { runWithMask } from '@socketsecurity/registry/lib/stdio/mask'
+// export { runWithMask as runInteractive }
 
 /**
  * Run a command with interactive output control.
@@ -73,7 +72,7 @@ export async function runInteractive(command, args = [], options = {}) {
             // Hide output and show spinner
             process.stdout.write('\r\x1b[K')
             if (!isSpinning) {
-              spinner.start(`${message} (Press Ctrl+O to toggle output)`)
+              spinner.start(`${message} (Ctrl+O ${toggleText})`)
               isSpinning = true
             }
           }
@@ -81,6 +80,9 @@ export async function runInteractive(command, args = [], options = {}) {
         // Ctrl+C to cancel
         else if (key && key.ctrl && key.name === 'c') {
           child.kill('SIGTERM')
+          if (process.stdin.isTTY) {
+            process.stdin.setRawMode(false)
+          }
           process.exit(130)
         }
       }
@@ -89,8 +91,10 @@ export async function runInteractive(command, args = [], options = {}) {
 
       // Cleanup on exit
       child.on('exit', () => {
-        process.stdin.setRawMode(false)
-        process.stdin.removeListener('keypress', keypressHandler)
+        if (process.stdin.isTTY) {
+          process.stdin.setRawMode(false)
+          process.stdin.removeListener('keypress', keypressHandler)
+        }
       })
     }
 
@@ -126,6 +130,10 @@ export async function runInteractive(command, args = [], options = {}) {
     }
 
     child.on('exit', code => {
+      if (process.stdin.isTTY) {
+        process.stdin.setRawMode(false)
+      }
+
       if (isSpinning) {
         if (code === 0) {
           spinner.success(`${message} completed`)
@@ -143,6 +151,10 @@ export async function runInteractive(command, args = [], options = {}) {
     })
 
     child.on('error', error => {
+      if (process.stdin.isTTY) {
+        process.stdin.setRawMode(false)
+      }
+
       if (isSpinning) {
         spinner.fail(`${message} error`)
       }
