@@ -54,7 +54,7 @@
     "update": "node scripts/update.mjs"
   },
   "dependencies": {
-    "@socketsecurity/registry": "1.6.0"
+    "@socketsecurity/registry": "workspace:*"
   },
   "devDependencies": {
     "@babel/parser": "7.26.3",
