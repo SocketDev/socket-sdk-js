@@ -15,29 +15,38 @@ export default defineConfig({
     globals: false,
     environment: 'node',
     include: ['test/**/*.test.{js,ts,mjs,mts,cjs}'],
-    reporters: ['default'],
+    reporters: process.env.TEST_REPORTER === 'json'
+      ? ['json', 'default']
+      : ['default'],
     setupFiles: ['./test/utils/setup.mts'],
-    // Optimize test execution with parallel processing
-    pool: 'forks',
+    // Optimize test execution for speed
+    // Threads are faster than forks
+    pool: 'threads',
     poolOptions: {
-      forks: {
-        // Use single fork for coverage to reduce memory, parallel otherwise.
-        singleFork: isCoverageEnabled,
-        // Increase parallelism when not doing coverage
-        ...(!isCoverageEnabled && { maxForks: 8 }),
-        ...(isCoverageEnabled && { maxForks: 1 }),
-        // Isolate tests to prevent memory leaks between test files.
-        isolate: true,
-      },
       threads: {
-        // Use single thread for coverage to reduce memory, parallel otherwise.
+        // Maximize parallelism for speed
         singleThread: isCoverageEnabled,
-        ...(!isCoverageEnabled && { maxThreads: 8 }),
-        ...(isCoverageEnabled && { maxThreads: 1 }),
+        maxThreads: isCoverageEnabled ? 1 : 16,
+        minThreads: isCoverageEnabled ? 1 : 4,
+        // Don't isolate to reduce overhead
+        isolate: false,
+        // Use worker threads for better performance
+        useAtomics: true,
       },
     },
-    testTimeout: 60_000,
-    hookTimeout: 60_000,
+    // Reduce timeouts for faster failures
+    testTimeout: 10_000,
+    hookTimeout: 10_000,
+    // Speed optimizations
+    cache: {
+      dir: './.cache/vitest'
+    },
+    sequence: {
+      // Run tests concurrently within suites
+      concurrent: true,
+    },
+    // Bail early on first failure in CI
+    bail: process.env.CI ? 1 : 0,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov', 'clover'],

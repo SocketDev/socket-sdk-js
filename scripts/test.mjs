@@ -1,26 +1,44 @@
+#!/usr/bin/env node
 /**
- * @fileoverview Unified test runner that provides a smooth, single-script experience.
- * Combines check, build, and test steps with clean, consistent output.
+ * @fileoverview Improved test runner with progress bar and optimized performance.
+ * Provides a smooth, single-script experience with minimal output by default.
  */
 
 import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { parseArgs } from 'node:util'
-
-import WIN32 from '@socketsecurity/registry/lib/constants/WIN32'
-
-import { getTestsToRun } from './utils/changed-test-mapper.mjs'
 import { fileURLToPath } from 'node:url'
-
+import WIN32 from '@socketsecurity/registry/lib/constants/WIN32'
 import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
 import { logger } from '@socketsecurity/registry/lib/logger'
-import { createHeader } from '@socketsecurity/registry/lib/stdio/header'
-import { createFooter } from '@socketsecurity/registry/lib/stdio/footer'
+import { createSectionHeader } from '@socketsecurity/registry/lib/stdio/header'
+import { onExit } from '@socketsecurity/registry/lib/signal-exit'
+import { spinner } from '@socketsecurity/registry/lib/spinner'
+
+import { getTestsToRun } from './utils/changed-test-mapper.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.resolve(__dirname, '..')
 const nodeModulesBinPath = path.join(rootPath, 'node_modules', '.bin')
+
+// Track running processes for cleanup
+const runningProcesses = new Set()
+
+// Setup exit handler
+const removeExitHandler = onExit((_code, signal) => {
+  // Kill all running processes
+  for (const child of runningProcesses) {
+    try {
+      child.kill('SIGTERM')
+    } catch {}
+  }
+
+  if (signal) {
+    console.log(`\nReceived ${signal}, cleaning up...`)
+    process.exit(128 + (signal === 'SIGINT' ? 2 : 15))
+  }
+})
 
 async function runCommand(command, args = [], options = {}) {
   return new Promise((resolve, reject) => {
@@ -30,77 +48,108 @@ async function runCommand(command, args = [], options = {}) {
       ...options,
     })
 
+    runningProcesses.add(child)
+
     child.on('exit', code => {
+      runningProcesses.delete(child)
       resolve(code || 0)
     })
 
     child.on('error', error => {
+      runningProcesses.delete(child)
       reject(error)
     })
   })
 }
 
-async function runCheck() {
-  logger.step('Running checks')
+async function runCommandWithOutput(command, args = [], options = {}) {
+  return new Promise((resolve, reject) => {
+    let stdout = ''
+    let stderr = ''
 
-  // Run fix (auto-format) quietly since it has its own output
-  logger.progress('Formatting code')
-  let exitCode = await runCommand('pnpm', ['run', 'fix'], {
-    stdio: 'pipe'
+    const child = spawn(command, args, {
+      ...(WIN32 && { shell: true }),
+      ...options,
+    })
+
+    runningProcesses.add(child)
+
+    if (child.stdout) {
+      child.stdout.on('data', data => {
+        stdout += data.toString()
+      })
+    }
+
+    if (child.stderr) {
+      child.stderr.on('data', data => {
+        stderr += data.toString()
+      })
+    }
+
+    child.on('exit', code => {
+      runningProcesses.delete(child)
+      resolve({ code: code || 0, stdout, stderr })
+    })
+
+    child.on('error', error => {
+      runningProcesses.delete(child)
+      reject(error)
+    })
   })
-  if (exitCode !== 0) {
-    logger.failed('Formatting failed')
-    // Re-run with output to show errors
-    await runCommand('pnpm', ['run', 'fix'])
-    return exitCode
-  }
-  logger.done('Code formatted')
+}
 
-  // Run ESLint to check for remaining issues
-  logger.progress('Checking ESLint')
-  exitCode = await runCommand('eslint', [
+async function runCheck(options = {}) {
+  const { quiet = false } = options
+
+  if (!quiet) {
+    logger.step('Running checks')
+  }
+
+  // Run fix (auto-format) quietly
+  if (!quiet) spinner.start('Formatting code...')
+
+  let result = await runCommandWithOutput('pnpm', ['run', 'fix'])
+  if (result.code !== 0) {
+    if (!quiet) spinner.fail('Formatting failed')
+    if (result.stderr) console.error(result.stderr)
+    return result.code
+  }
+  if (!quiet) spinner.success('Code formatted')
+
+  // Run ESLint
+  if (!quiet) spinner.start('Running ESLint...')
+  result = await runCommandWithOutput('eslint', [
     '--config',
     '.config/eslint.config.mjs',
     '--report-unused-disable-directives',
     '.'
-  ], {
-    stdio: 'pipe'
-  })
-  if (exitCode !== 0) {
-    logger.failed('ESLint failed')
-    // Re-run with output to show errors
-    await runCommand('eslint', [
-      '--config',
-      '.config/eslint.config.mjs',
-      '--report-unused-disable-directives',
-      '.'
-    ])
-    return exitCode
+  ])
+
+  if (result.code !== 0) {
+    if (!quiet) spinner.fail('ESLint failed')
+    if (result.stderr) console.error(result.stderr)
+    if (result.stdout) console.log(result.stdout)
+    return result.code
   }
-  logger.done('ESLint passed')
+  if (!quiet) spinner.success('ESLint passed')
 
   // Run TypeScript check
-  logger.progress('Checking TypeScript')
-  exitCode = await runCommand('tsgo', [
+  if (!quiet) spinner.start('Checking TypeScript...')
+  result = await runCommandWithOutput('tsgo', [
     '--noEmit',
     '-p',
     '.config/tsconfig.check.json'
-  ], {
-    stdio: 'pipe'
-  })
-  if (exitCode !== 0) {
-    logger.failed('TypeScript check failed')
-    // Re-run with output to show errors
-    await runCommand('tsgo', [
-      '--noEmit',
-      '-p',
-      '.config/tsconfig.check.json'
-    ])
-    return exitCode
-  }
-  logger.done('TypeScript check passed')
+  ])
 
-  return exitCode
+  if (result.code !== 0) {
+    if (!quiet) spinner.fail('TypeScript check failed')
+    if (result.stderr) console.error(result.stderr)
+    if (result.stdout) console.log(result.stdout)
+    return result.code
+  }
+  if (!quiet) spinner.success('TypeScript check passed')
+
+  return 0
 }
 
 async function runBuild() {
@@ -112,19 +161,24 @@ async function runBuild() {
   return 0
 }
 
-async function runVitestWithArgs(args, options = {}) {
+async function runVitestSimple(args, options = {}) {
+  const { coverage = false, update = false, quiet = false, interactive = true } = options
+
   const vitestCmd = WIN32 ? 'vitest.cmd' : 'vitest'
   const vitestPath = path.join(nodeModulesBinPath, vitestCmd)
 
-  const vitestArgs = ['--config', '.config/vitest.config.mts', 'run']
+  const vitestArgs = [
+    '--config', '.config/vitest.config.mts',
+    'run'
+  ]
 
   // Add coverage if requested
-  if (options.coverage) {
+  if (coverage) {
     vitestArgs.push('--coverage')
   }
 
   // Add update if requested
-  if (options.update) {
+  if (update) {
     vitestArgs.push('--update')
   }
 
@@ -133,18 +187,41 @@ async function runVitestWithArgs(args, options = {}) {
     vitestArgs.push(...args)
   }
 
-  const spawnOptions = {
-    cwd: rootPath,
-    env: {
-      ...process.env,
-      NODE_OPTIONS:
-        `${process.env.NODE_OPTIONS || ''} --max-old-space-size=${process.env.CI ? 8192 : 4096}`.trim(),
-    },
-    stdio: 'inherit',
+  const dotenvxPath = path.join(nodeModulesBinPath, WIN32 ? 'dotenvx.cmd' : 'dotenvx')
+
+  // Clean environment for tests
+  const env = { ...process.env }
+  delete env.DEBUG
+  delete env.NODE_DEBUG
+  delete env.NODE_COMPILE_CACHE
+
+  // Suppress debug output unless specifically requested
+  env.LOG_LEVEL = 'error'
+  env.DEBUG_HIDE_DATE = '1'
+
+  // Set optimized memory settings
+  env.NODE_OPTIONS = '--max-old-space-size=2048'
+
+  // Use unified runner if not quiet and TTY available
+  if (!quiet && interactive && process.stdin.isTTY) {
+    // Dynamically import the unified runner
+    const { runTests } = await import('./utils/unified-runner.mjs')
+
+    return runTests(dotenvxPath, [
+      '-q',
+      'run',
+      '-f',
+      '.env.test',
+      '--',
+      vitestPath,
+      ...vitestArgs
+    ], {
+      cwd: rootPath,
+      env
+    })
   }
 
-  // Use dotenvx to load test environment
-  const dotenvxPath = path.join(nodeModulesBinPath, WIN32 ? 'dotenvx.cmd' : 'dotenvx')
+  // Fallback to simple execution
   return runCommand(dotenvxPath, [
     '-q',
     'run',
@@ -153,17 +230,23 @@ async function runVitestWithArgs(args, options = {}) {
     '--',
     vitestPath,
     ...vitestArgs
-  ], spawnOptions)
+  ], {
+    cwd: rootPath,
+    env,
+    stdio: quiet ? 'pipe' : 'inherit'
+  })
 }
 
 async function runTests(options) {
-  const { all, coverage, force, positionals, staged, update } = options
+  const { all, coverage, force, positionals, staged, update, verbose, quiet } = options
   const runAll = all || force
 
   // If positional arguments provided, use them directly
   if (positionals && positionals.length > 0) {
-    logger.step(`Running specified tests: ${positionals.join(', ')}`)
-    return runVitestWithArgs(positionals, { coverage, update })
+    if (!quiet) {
+      logger.step(`Running specified tests: ${positionals.join(', ')}`)
+    }
+    return runVitestSimple(positionals, { coverage, update, quiet })
   }
 
   // Get tests to run based on changes
@@ -172,19 +255,25 @@ async function runTests(options) {
 
   // No tests needed
   if (testsToRun === null) {
-    logger.substep('No relevant changes detected, skipping tests')
+    if (!quiet) {
+      logger.substep('No relevant changes detected, skipping tests')
+    }
     return 0
   }
 
-  // Add test patterns if not running all
+  // Run tests
   if (testsToRun === 'all') {
-    logger.step(`Running all tests (${reason})`)
-    return runVitestWithArgs([], { coverage, update })
+    if (!quiet) {
+      logger.step(`Running all tests (${reason})`)
+    }
+    return runVitestSimple([], { coverage, update, quiet })
   } else {
     const modeText = mode === 'staged' ? 'staged' : 'changed'
-    logger.step(`Running tests for ${modeText} files:`)
-    testsToRun.forEach(test => logger.substep(test))
-    return runVitestWithArgs(testsToRun, { coverage, update })
+    if (!quiet) {
+      logger.step(`Running tests for ${modeText} files:`)
+      testsToRun.forEach(test => logger.substep(test))
+    }
+    return runVitestSimple(testsToRun, { coverage, update, quiet })
   }
 }
 
@@ -237,6 +326,18 @@ async function main() {
           type: 'boolean',
           default: false,
         },
+        verbose: {
+          type: 'boolean',
+          default: false,
+        },
+        quiet: {
+          type: 'boolean',
+          default: false,
+        },
+        silent: {
+          type: 'boolean',
+          default: false,
+        },
       },
       allowPositionals: true,
       strict: false,
@@ -255,6 +356,8 @@ async function main() {
       console.log('  --update            Update test snapshots')
       console.log('  --all, --force      Run all tests regardless of changes')
       console.log('  --staged            Run tests affected by staged changes')
+      console.log('  --verbose           Show detailed test output')
+      console.log('  --quiet, --silent   Minimal output')
       console.log('\nExamples:')
       console.log('  pnpm test                      # Run checks, build, and tests for changed files')
       console.log('  pnpm test --fast               # Skip checks for quick testing')
@@ -262,19 +365,18 @@ async function main() {
       console.log('  pnpm test --all                # Run all tests')
       console.log('  pnpm test --staged             # Run tests for staged changes')
       console.log('  pnpm test "**/*.test.mts"      # Run specific test pattern')
-      console.log('\nWhen called as test:run:')
-      console.log('  pnpm test:run                  # Run only changed tests, no checks/build')
-      console.log('  pnpm test:run --all            # Run all tests, no checks/build')
+      console.log('\nWhile tests are running:')
+      console.log('  Press Ctrl+O to toggle verbose output')
+      console.log('  Press Ctrl+C to cancel')
       process.exitCode = 0
       return
     }
 
-    // Detect if called as test:run (from npm_lifecycle_event)
+    // Detect if called as test:run
     const isTestRun = process.env.npm_lifecycle_event === 'test:run'
 
     // When called as test:run, default to skipping checks and build
     if (isTestRun && !values.help) {
-      // Override defaults when called as test:run
       if (!values['skip-checks'] && !values.fast && !values.quick) {
         values['skip-checks'] = true
       }
@@ -283,7 +385,13 @@ async function main() {
       }
     }
 
-    console.log(createHeader('Test Runner', { width: 56, borderChar: '=' }))
+    const quiet = isQuiet(values)
+    const verbose = values.verbose
+
+    if (!quiet) {
+      console.log(createSectionHeader('Running Tests'))
+      console.log()
+    }
 
     // Handle aliases
     const skipChecks = values.fast || values.quick || values['skip-checks']
@@ -293,38 +401,65 @@ async function main() {
 
     // Run checks unless skipped
     if (!skipChecks) {
-      exitCode = await runCheck()
+      exitCode = await runCheck({ quiet })
       if (exitCode !== 0) {
-        logger.error('Checks failed')
+        if (!quiet) {
+          logger.error('')
+          console.log('Checks failed')
+        }
         process.exitCode = exitCode
         return
       }
-      logger.success('All checks passed')
+      if (!quiet) {
+        logger.success('All checks passed')
+        console.log()
+      }
     }
 
     // Run build unless skipped
     if (!values['skip-build']) {
       exitCode = await runBuild()
       if (exitCode !== 0) {
-        logger.error('Build failed')
+        if (!quiet) {
+          logger.error('')
+          console.log('Build failed')
+        }
         process.exitCode = exitCode
         return
       }
     }
 
     // Run tests
-    exitCode = await runTests({ ...values, coverage: withCoverage, positionals })
+    exitCode = await runTests({
+      ...values,
+      coverage: withCoverage,
+      positionals,
+      verbose,
+      quiet
+    })
 
     if (exitCode !== 0) {
-      logger.error('Tests failed')
+      if (!quiet) {
+        logger.error('')
+        console.log('Tests failed')
+      }
       process.exitCode = exitCode
     } else {
-      console.log(createFooter('All tests passed!', { width: 56, borderChar: '=', color: 'green' }))
+      if (!quiet) {
+        console.log()
+        logger.success('All tests passed!')
+      }
     }
   } catch (error) {
-    logger.error(`Test runner failed: ${error.message}`)
+    logger.error('')
+    console.log(`Test runner failed: ${error.message}`)
     process.exitCode = 1
+  } finally {
+    removeExitHandler()
   }
 }
 
-main().catch(console.error)
+main().catch(error => {
+  console.error(error)
+  process.exitCode = 1
+})
