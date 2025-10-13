@@ -24,7 +24,7 @@ async function buildSource(options = {}) {
   const { quiet = false, skipClean = false, analyze = false, verbose = false } = options
 
   if (!quiet) {
-    logger.progress('Building source code')
+    logger.step('Building source code')
   }
 
   // Clean dist directory if needed
@@ -34,7 +34,7 @@ async function buildSource(options = {}) {
     ])
     if (exitCode !== 0) {
       if (!quiet) {
-        logger.failed('Clean failed')
+        logger.fail('Clean failed')
       }
       return exitCode
     }
@@ -51,7 +51,7 @@ async function buildSource(options = {}) {
     const buildTime = Date.now() - startTime
 
     if (!quiet) {
-      logger.done(`Source build complete in ${buildTime}ms`)
+      logger.success(`Source build complete in ${buildTime}ms`)
 
       if (analyze && result.metafile) {
         const analysis = analyzeMetafile(result.metafile)
@@ -66,7 +66,7 @@ async function buildSource(options = {}) {
     return 0
   } catch (error) {
     if (!quiet) {
-      logger.failed('Source build failed')
+      logger.fail('Source build failed')
       console.error(error)
     }
     return 1
@@ -80,7 +80,7 @@ async function buildTypes(options = {}) {
   const { quiet = false, skipClean = false, verbose = false } = options
 
   if (!quiet) {
-    logger.progress('Building TypeScript declarations')
+    logger.step('Building TypeScript declarations')
   }
 
   const commands = []
@@ -98,14 +98,14 @@ async function buildTypes(options = {}) {
 
   if (exitCode !== 0) {
     if (!quiet) {
-      logger.failed('Type declarations build failed')
+      logger.fail('Type declarations build failed')
     }
     return exitCode
   }
 
   // Rename .d.ts files to .d.mts for ESM
   if (!quiet) {
-    logger.progress('Renaming declaration files to .d.mts')
+    logger.substep('Renaming declaration files to .d.mts')
   }
 
   const { promises: fs } = await import('node:fs')
@@ -128,7 +128,7 @@ async function buildTypes(options = {}) {
   }
 
   if (!quiet) {
-    logger.done('Type declarations built')
+    logger.success('Type declarations built')
   }
 
   return 0
@@ -293,14 +293,14 @@ async function main() {
 
       // Clean all directories first (once)
       if (!quiet) {
-        logger.progress('Cleaning build directories')
+        logger.substep('Cleaning build directories')
       }
       exitCode = await runSequence([
         { args: ['exec', 'node', 'scripts/clean.mjs', '--dist', '--types', '--quiet'], command: 'pnpm' }
       ])
       if (exitCode !== 0) {
         if (!quiet) {
-          logger.failed('Clean failed')
+          logger.fail('Clean failed')
         }
         process.exitCode = exitCode
         return
