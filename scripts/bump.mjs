@@ -11,8 +11,9 @@ import readline from 'node:readline'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
 
-import colors from 'yoctocolors-cjs'
+// eslint-disable-next-line import-x/no-unresolved -- external dependency
 import semver from 'semver'
+import colors from 'yoctocolors-cjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
@@ -613,7 +614,8 @@ async function main() {
         },
         interactive: {
           type: 'boolean',
-          default: hasInteractivePrompts,  // Default to true when prompts are available
+          // Default to true when prompts are available
+          default: hasInteractivePrompts,
         },
         'no-interactive': {
           type: 'boolean',

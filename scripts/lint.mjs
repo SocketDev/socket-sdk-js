@@ -4,17 +4,17 @@
  */
 
 import path from 'node:path'
-import { parseArgs } from 'node:util'
 import { fileURLToPath } from 'node:url'
+import { parseArgs } from 'node:util'
 
-import { getChangedFiles, getStagedFiles } from '@socketsecurity/registry/lib/git'
-import { runCommandQuiet } from './utils/run-command.mjs'
 import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
+import { getChangedFiles, getStagedFiles } from '@socketsecurity/registry/lib/git'
 import { logger } from '@socketsecurity/registry/lib/logger'
-import { printFooter, printHeader } from '@socketsecurity/registry/lib/stdio/header'
+import { printHeader } from '@socketsecurity/registry/lib/stdio/header'
+
+import { runCommandQuiet } from './utils/run-command.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.resolve(__dirname, '..')
 
 // Files that trigger a full lint when changed
 const CORE_FILES = new Set([
@@ -128,7 +128,8 @@ async function runLintOnFiles(files, options = {}) {
 
   if (!quiet) {
     logger.done(`Linting passed`)
-    console.log() // Add newline after spinner completes
+    // Add newline after spinner completes
+    console.log()
   }
 
   return 0
@@ -174,7 +175,8 @@ async function runLintOnAll(options = {}) {
 
   if (!quiet) {
     logger.done('Linting passed')
-    console.log() // Add newline after spinner completes
+    // Add newline after spinner completes
+    console.log()
   }
 
   return 0
@@ -193,7 +195,8 @@ async function getFilesToLint(options) {
 
   // Get changed files
   let changedFiles = []
-  let mode = 'changed' // Track what mode we're in
+  // Track what mode we're in
+  let mode = 'changed'
 
   if (staged) {
     mode = 'staged'
@@ -311,7 +314,7 @@ async function main() {
       })
     } else {
       // Get files to lint based on flags
-      const { files, reason, mode } = await getFilesToLint(values)
+      const { files, mode, reason } = await getFilesToLint(values)
 
       if (files === null) {
         if (!quiet) {
