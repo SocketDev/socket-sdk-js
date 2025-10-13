@@ -111,21 +111,28 @@ async function runCheck(options = {}) {
   }
 
   // Run fix (auto-format) quietly
-  if (!quiet) spinner.start('Formatting code...')
+  if (!quiet) {
+    spinner.start('Formatting code...')
+  }
 
   let result = await runCommandWithOutput('pnpm', ['run', 'fix'])
   if (result.code !== 0) {
-    if (!quiet) spinner.fail('Formatting failed')
-    if (result.stderr) console.error(result.stderr)
+    if (!quiet) {
+      spinner.fail('Formatting failed')
+    }
+    if (result.stderr) {
+      console.error(result.stderr)
+    }
     return result.code
   }
   if (!quiet) {
-    spinner.stop()
-    logger.success('Code formatted')
+    spinner.success('Code formatted')
   }
 
   // Run ESLint
-  if (!quiet) spinner.start('Running ESLint...')
+  if (!quiet) {
+    spinner.start('Running ESLint...')
+  }
   result = await runCommandWithOutput('eslint', [
     '--config',
     '.config/eslint.config.mjs',
@@ -134,18 +141,25 @@ async function runCheck(options = {}) {
   ])
 
   if (result.code !== 0) {
-    if (!quiet) spinner.fail('ESLint failed')
-    if (result.stderr) console.error(result.stderr)
-    if (result.stdout) console.log(result.stdout)
+    if (!quiet) {
+      spinner.fail('Lint check failed')
+    }
+    if (result.stderr) {
+      console.error(result.stderr)
+    }
+    if (result.stdout) {
+      console.log(result.stdout)
+    }
     return result.code
   }
   if (!quiet) {
-    spinner.stop()
-    logger.success('ESLint passed')
+    spinner.success('Lint check passed')
   }
 
   // Run TypeScript check
-  if (!quiet) spinner.start('Checking TypeScript...')
+  if (!quiet) {
+    spinner.start('Checking TypeScript...')
+  }
   result = await runCommandWithOutput('tsgo', [
     '--noEmit',
     '-p',
@@ -153,14 +167,19 @@ async function runCheck(options = {}) {
   ])
 
   if (result.code !== 0) {
-    if (!quiet) spinner.fail('TypeScript check failed')
-    if (result.stderr) console.error(result.stderr)
-    if (result.stdout) console.log(result.stdout)
+    if (!quiet) {
+      spinner.fail('TypeScript check failed')
+    }
+    if (result.stderr) {
+      console.error(result.stderr)
+    }
+    if (result.stdout) {
+      console.log(result.stdout)
+    }
     return result.code
   }
   if (!quiet) {
-    spinner.stop()
-    logger.success('TypeScript check passed')
+    spinner.success('TypeScript check passed')
   }
 
   return 0
