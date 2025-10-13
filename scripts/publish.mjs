@@ -169,7 +169,7 @@ function isRegistryPackage() {
  * Run pre-publish checks.
  */
 async function runPrePublishChecks(options = {}) {
-  const { skipGitCheck = false, skipBranchCheck = false } = options
+  const { skipBranchCheck = false, skipGitCheck = false } = options
 
   log.step('Running pre-publish checks')
 
@@ -255,7 +255,7 @@ async function buildProject() {
  * Publish a single package (simple flow).
  */
 async function publishSimple(options = {}) {
-  const { dryRun = false, tag = 'latest', access = 'public', otp } = options
+  const { access = 'public', dryRun = false, otp, tag = 'latest' } = options
 
   const pkgJson = await readPackageJson()
   const packageName = pkgJson.name

@@ -2,17 +2,19 @@
  * @fileoverview Fast build runner using esbuild for smaller bundles and faster builds.
  */
 
-import { build } from 'esbuild'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-import { parseArgs } from 'node:util'
 import { fileURLToPath } from 'node:url'
+import { parseArgs } from 'node:util'
+
+import { build } from 'esbuild'
 
 import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
 import { logger } from '@socketsecurity/registry/lib/logger'
 import { printFooter, printHeader } from '@socketsecurity/registry/lib/stdio/header'
+
 import { runSequence } from './utils/run-command.mjs'
-import { buildConfig, watchConfig, analyzeMetafile } from '../.config/esbuild.config.mjs'
+import { analyzeMetafile, buildConfig, watchConfig } from '../.config/esbuild.config.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.resolve(__dirname, '..')
@@ -21,7 +23,7 @@ const rootPath = path.resolve(__dirname, '..')
  * Build source code with esbuild.
  */
 async function buildSource(options = {}) {
-  const { quiet = false, skipClean = false, analyze = false, verbose = false } = options
+  const { analyze = false, quiet = false, skipClean = false, verbose = false } = options
 
   if (!quiet) {
     logger.step('Building source code')
@@ -77,7 +79,7 @@ async function buildSource(options = {}) {
  * Build TypeScript declarations.
  */
 async function buildTypes(options = {}) {
-  const { quiet = false, skipClean = false, verbose = false } = options
+  const { quiet = false, skipClean = false } = options
 
   if (!quiet) {
     logger.step('Building TypeScript declarations')

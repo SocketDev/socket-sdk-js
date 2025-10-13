@@ -8,10 +8,10 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 
 import WIN32 from '@socketsecurity/registry/lib/constants/WIN32'
+import { getChangedFiles, getStagedFiles } from '@socketsecurity/registry/lib/git'
 import { logger } from '@socketsecurity/registry/lib/logger'
 import { spawn } from '@socketsecurity/registry/lib/spawn'
 
-import { getChangedFiles, getStagedFiles } from '@socketsecurity/registry/lib/git'
 import { runCommandQuiet } from './utils/run-command.mjs'
 
 const CORE_LIB_FILES = new Set([

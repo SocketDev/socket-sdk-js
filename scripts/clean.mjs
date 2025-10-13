@@ -6,10 +6,11 @@
 import { parseArgs } from 'node:util'
 
 import { deleteAsync } from 'del'
+
 import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
 import { logger } from '@socketsecurity/registry/lib/logger'
-import { createHeader } from '@socketsecurity/registry/lib/stdio/header'
 import { createFooter } from '@socketsecurity/registry/lib/stdio/footer'
+import { createHeader } from '@socketsecurity/registry/lib/stdio/header'
 
 /**
  * Clean specific directories.

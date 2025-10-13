@@ -11,10 +11,23 @@ const isCoverageEnabled =
   process.argv.some(arg => arg.includes('coverage'))
 
 export default defineConfig({
+  cacheDir: './.cache/vitest',
   test: {
     globals: false,
     environment: 'node',
     include: ['test/**/*.test.{js,ts,mjs,mts,cjs}'],
+    // Exclude tests that need isolation (they use separate config)
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      'test/quota-utils-error-handling.test.mts',
+      'test/json-parsing-edge-cases.test.mts',
+      'test/socket-sdk-retry.test.mts',
+      'test/http-client-retry.test.mts',
+      'test/getapi-sendapi-methods.test.mts',
+      'test/entitlements.test.mts',
+      'test/socket-sdk-upload-simple.test.mts',
+    ],
     reporters: process.env.TEST_REPORTER === 'json'
       ? ['json', 'default']
       : ['default'],
@@ -23,12 +36,32 @@ export default defineConfig({
     // Threads are faster than forks
     pool: 'threads',
     poolOptions: {
+      forks: {
+        // Configuration for tests that opt into fork isolation via { pool: 'forks' }
+        singleFork: isCoverageEnabled,
+        maxForks: isCoverageEnabled ? 1 : 16,
+        minForks: isCoverageEnabled ? 1 : 2,
+      },
       threads: {
         // Maximize parallelism for speed
         singleThread: isCoverageEnabled,
         maxThreads: isCoverageEnabled ? 1 : 16,
         minThreads: isCoverageEnabled ? 1 : 4,
-        // Don't isolate to reduce overhead
+        // IMPORTANT: isolate: false for performance and test compatibility
+        //
+        // Tradeoff Analysis:
+        // - isolate: true  = Full isolation, slower, breaks nock/module mocking
+        // - isolate: false = Shared worker context, faster, mocking works
+        //
+        // We choose isolate: false because:
+        // 1. Significant performance improvement (faster test runs)
+        // 2. Nock HTTP mocking works correctly across all test files
+        // 3. Vi.mock() module mocking functions properly
+        // 4. Test state pollution is prevented through proper beforeEach/afterEach
+        // 5. Our tests are designed to clean up after themselves
+        //
+        // Tests requiring true isolation should use pool: 'forks' or be marked
+        // with { pool: 'forks' } in the test file itself.
         isolate: false,
         // Use worker threads for better performance
         useAtomics: true,
@@ -38,9 +71,7 @@ export default defineConfig({
     testTimeout: 10_000,
     hookTimeout: 10_000,
     // Speed optimizations
-    cache: {
-      dir: './.cache/vitest'
-    },
+    // Note: cache is now configured via Vite's cacheDir
     sequence: {
       // Run tests concurrently within suites
       concurrent: true,
