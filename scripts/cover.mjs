@@ -34,7 +34,7 @@ async function main() {
     }
 
     // Show header for coverage collection
-    console.log(createSectionHeader('Running Coverage'))
+    console.log(createSectionHeader('Running Coverage', { width: 55, borderChar: '═' }))
     console.log()
 
     if (values['type-only']) {

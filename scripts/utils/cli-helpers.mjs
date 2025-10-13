@@ -6,6 +6,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import colors from 'yoctocolors-cjs'
+import { createSectionHeader } from '@socketsecurity/registry/lib/stdio/header'
 
 // Get root path.
 export const getRootPath = importMetaUrl => {
@@ -17,9 +18,7 @@ export const getRootPath = importMetaUrl => {
 
 export const printDivider = (char = '═') => console.log(char.repeat(55))
 export const printHeader = title => {
-  printDivider()
-  console.log(`  ${title}`)
-  printDivider()
+  console.log(createSectionHeader(title, { width: 55, borderChar: '═' }))
 }
 export const printFooterLine = () => console.log('─'.repeat(55))
 export const printDottedLine = () => console.log('·'.repeat(55))
