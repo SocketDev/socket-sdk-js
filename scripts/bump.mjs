@@ -11,7 +11,6 @@ import readline from 'node:readline'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
 
-// eslint-disable-next-line import-x/no-unresolved -- external dependency
 import semver from 'semver'
 import colors from 'yoctocolors-cjs'
 

@@ -6,6 +6,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import colors from 'yoctocolors-cjs'
+
 import { createSectionHeader } from '@socketsecurity/registry/lib/stdio/header'
 
 // Get root path.
