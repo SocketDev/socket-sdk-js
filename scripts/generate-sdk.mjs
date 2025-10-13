@@ -10,16 +10,19 @@
  *   node scripts/generate-sdk.mjs
  */
 
-import { readFileSync, writeFileSync } from 'node:fs'
 import { spawn } from 'node:child_process'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+
 import * as parser from '@babel/parser'
 import traverse from '@babel/traverse'
 import * as t from '@babel/types'
 import MagicString from 'magic-string'
+
 import { logger } from '@socketsecurity/registry/lib/logger'
+
 import { getRootPath } from './utils/path-helpers.mjs'
-import { runCommand, runPnpmScript } from './utils/run-command.mjs'
+import { runCommand } from './utils/run-command.mjs'
 
 const rootPath = getRootPath(import.meta.url)
 const typesPath = resolve(rootPath, 'types/api.d.ts')
@@ -116,7 +119,7 @@ function fixArraySyntax(filePath) {
       const start = node.start
       const end = node.end
 
-      if (start === null || end === null) return
+      if (start === null || end === null) {return}
 
       // Get the text of the element type
       const elementText = content.slice(elementType.start, elementType.end)
@@ -125,7 +128,7 @@ function fixArraySyntax(filePath) {
         // Use magic-string to replace T[] with Array<T>
         magicString.overwrite(start, end, `Array<${elementText}>`)
         transformCount++
-      } catch (err) {
+      } catch {
         // Skip if already transformed (overlapping transformations)
         skipCount++
       }
