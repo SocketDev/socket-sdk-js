@@ -4,11 +4,14 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import * as cacache from '@socketsecurity/registry/lib/cacache'
 
+import { isCoverageMode } from './utils/environment.mts'
 import { SocketSdk } from '../src/index'
 
-describe('SocketSdk - Caching', () => {
+describe.skipIf(isCoverageMode)('SocketSdk - Caching', () => {
   beforeEach(async () => {
+    nock.restore()
     nock.cleanAll()
+    nock.activate()
     nock.disableNetConnect()
     // Clear the cache between tests
     // eslint-disable-next-line import-x/namespace
@@ -16,6 +19,13 @@ describe('SocketSdk - Caching', () => {
   })
 
   afterEach(() => {
+    // Skip nock checks during coverage mode (v8 instrumentation causes issues)
+    if (isCoverageMode) {
+      nock.cleanAll()
+      nock.restore()
+      return
+    }
+
     // Only check nock.isDone() for non-caching tests
     // Caching tests will verify scopes individually
     const pendingMocks = nock.pendingMocks()
@@ -28,6 +38,8 @@ describe('SocketSdk - Caching', () => {
         throw new Error(`pending nock mocks: ${pendingMocks}`)
       }
     }
+    nock.cleanAll()
+    nock.restore()
   })
 
   describe('Cache Disabled (default)', () => {

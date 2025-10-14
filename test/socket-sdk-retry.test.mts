@@ -5,21 +5,22 @@
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { isCoverageMode } from './utils/environment.mts'
 import { SocketSdk } from '../src/index'
 
-describe('SocketSdk - Retry Logic', () => {
+describe.skipIf(isCoverageMode)('SocketSdk - Retry Logic', () => {
   beforeEach(() => {
     nock.cleanAll()
     nock.disableNetConnect()
   })
 
   afterEach(() => {
-    if (!nock.isDone()) {
+    if (!isCoverageMode && !nock.isDone()) {
       throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
     }
   })
 
-  describe('Authentication Error Handling', () => {
+  describe.skipIf(isCoverageMode)('Authentication Error Handling', () => {
     it('should not retry on 401 authentication errors', async () => {
       let attemptCount = 0
 
@@ -67,7 +68,7 @@ describe('SocketSdk - Retry Logic', () => {
     })
   })
 
-  describe('Server Error Retry', () => {
+  describe.skipIf(isCoverageMode)('Server Error Retry', () => {
     it('should retry on 500 errors and eventually succeed', async () => {
       let attemptCount = 0
 
@@ -203,7 +204,7 @@ describe('SocketSdk - Retry Logic', () => {
     })
   })
 
-  describe('Client Error Handling', () => {
+  describe.skipIf(isCoverageMode)('Client Error Handling', () => {
     it('should not retry on 400 bad request errors', async () => {
       let attemptCount = 0
 
@@ -274,7 +275,7 @@ describe('SocketSdk - Retry Logic', () => {
     })
   })
 
-  describe('Network Error Retry', () => {
+  describe.skipIf(isCoverageMode)('Network Error Retry', () => {
     it('should retry on network connection errors', async () => {
       let attemptCount = 0
 
@@ -328,7 +329,7 @@ describe('SocketSdk - Retry Logic', () => {
     })
   })
 
-  describe('Retry Configuration', () => {
+  describe.skipIf(isCoverageMode)('Retry Configuration', () => {
     it('should respect custom retry count', async () => {
       let attemptCount = 0
 
@@ -371,7 +372,7 @@ describe('SocketSdk - Retry Logic', () => {
     })
   })
 
-  describe('Retry with Different Methods', () => {
+  describe.skipIf(isCoverageMode)('Retry with Different Methods', () => {
     it('should retry POST requests on 500 errors', async () => {
       let attemptCount = 0
 

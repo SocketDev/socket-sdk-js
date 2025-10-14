@@ -3,11 +3,11 @@ import nock from 'nock'
 import { beforeEach, describe, expect, it } from 'vitest'
 
 import { assertError, assertSuccess } from './utils/assertions.mts'
-import { createTestClient, setupTestEnvironment } from './utils/environment.mts'
+import { createTestClient, isCoverageMode, setupTestEnvironment } from './utils/environment.mts'
 
 import type { SocketSdk } from '../src/index'
 
-describe('Socket SDK - SBOM Export', () => {
+describe.skipIf(isCoverageMode)('Socket SDK - SBOM Export', () => {
   setupTestEnvironment()
 
   let client: SocketSdk

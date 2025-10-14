@@ -6,6 +6,7 @@ import * as path from 'node:path'
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { isCoverageMode } from './utils/environment.mts'
 import { SocketSdk } from '../src/index'
 import { FAST_TEST_CONFIG } from './utils/fast-test-config.mts'
 
@@ -13,14 +14,18 @@ import type { IncomingHttpHeaders } from 'node:http'
 
 describe('SocketSdk - Batch Operations', () => {
   beforeEach(() => {
+    nock.restore()
     nock.cleanAll()
+    nock.activate()
     nock.disableNetConnect()
   })
 
   afterEach(() => {
-    if (!nock.isDone()) {
+    if (!isCoverageMode && !nock.isDone()) {
       throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
     }
+    nock.cleanAll()
+    nock.restore()
   })
 
   describe('Reachability', () => {

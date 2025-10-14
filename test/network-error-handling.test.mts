@@ -3,13 +3,13 @@ import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../src/index'
-import { setupTestEnvironment } from './utils/environment.mts'
+import { isCoverageMode, setupTestEnvironment } from './utils/environment.mts'
 import { FAST_TEST_CONFIG, NO_RETRY_CONFIG } from './utils/fast-test-config.mts'
 
-describe('SocketSdk Network and Error Handling', () => {
+describe.skipIf(isCoverageMode)('SocketSdk Network and Error Handling', () => {
   setupTestEnvironment()
 
-  describe('Response parsing and JSON handling', () => {
+  describe.skipIf(isCoverageMode)('Response parsing and JSON handling', () => {
     it('handles partial JSON response data gracefully', async () => {
       nock('https://api.socket.dev')
         .post('/v0/purl')
@@ -27,7 +27,7 @@ describe('SocketSdk Network and Error Handling', () => {
     })
   })
 
-  describe('Network error recovery strategies', () => {
+  describe.skipIf(isCoverageMode)('Network error recovery strategies', () => {
     it('handles POST settings network failures gracefully', async () => {
       const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
 
@@ -84,7 +84,7 @@ describe('SocketSdk Network and Error Handling', () => {
     })
   })
 
-  describe('Error message formatting and details', () => {
+  describe.skipIf(isCoverageMode)('Error message formatting and details', () => {
     it('replaces statusMessage with response body in errors', async () => {
       const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
 

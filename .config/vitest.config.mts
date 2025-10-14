@@ -10,6 +10,11 @@ const isCoverageEnabled =
   process.env['npm_lifecycle_event']?.includes('coverage') ||
   process.argv.some(arg => arg.includes('coverage'))
 
+// Set environment variable so tests can detect coverage mode
+if (isCoverageEnabled) {
+  process.env['COVERAGE'] = 'true'
+}
+
 export default defineConfig({
   cacheDir: './.cache/vitest',
   test: {
@@ -35,15 +40,19 @@ export default defineConfig({
     // Optimize test execution for speed
     // Threads are faster than forks
     pool: 'threads',
+    // No special pool matching needed - nock issues are handled in test setup
     poolOptions: {
       forks: {
         // Configuration for tests that opt into fork isolation via { pool: 'forks' }
-        singleFork: isCoverageEnabled,
-        maxForks: isCoverageEnabled ? 1 : 16,
+        // During coverage, use multiple forks for better isolation
+        singleFork: false,
+        maxForks: isCoverageEnabled ? 4 : 16,
         minForks: isCoverageEnabled ? 1 : 2,
+        isolate: true,
       },
       threads: {
         // Maximize parallelism for speed
+        // During coverage, use single thread for remaining tests
         singleThread: isCoverageEnabled,
         maxThreads: isCoverageEnabled ? 1 : 16,
         minThreads: isCoverageEnabled ? 1 : 4,

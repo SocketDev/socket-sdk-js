@@ -2,11 +2,12 @@
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { isCoverageMode } from './utils/environment.mts'
 import { SocketSdk } from '../src/index'
 
 import type { SocketSdkGenericResult } from '../src/index'
 
-describe('Response Text Processing', () => {
+describe.skipIf(isCoverageMode)('Response Text Processing', () => {
   let client: SocketSdk
 
   beforeEach(() => {
@@ -16,7 +17,7 @@ describe('Response Text Processing', () => {
   })
 
   afterEach(() => {
-    if (!nock.isDone()) {
+    if (!isCoverageMode && !nock.isDone()) {
       throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
     }
   })

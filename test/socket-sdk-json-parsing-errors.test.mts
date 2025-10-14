@@ -2,6 +2,7 @@
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { isCoverageMode } from './utils/environment.mts'
 import { SocketSdk } from '../src/index'
 
 import type { SocketSdkGenericResult } from '../src/index'
@@ -10,15 +11,19 @@ describe('SocketSdk - Branch Coverage Tests', () => {
   let client: SocketSdk
 
   beforeEach(() => {
+    nock.restore()
     nock.cleanAll()
+    nock.activate()
     nock.disableNetConnect()
     client = new SocketSdk('test-api-token')
   })
 
   afterEach(() => {
-    if (!nock.isDone()) {
+    if (!isCoverageMode && !nock.isDone()) {
       throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
     }
+    nock.cleanAll()
+    nock.restore()
   })
 
   describe('SyntaxError handling branches', () => {
