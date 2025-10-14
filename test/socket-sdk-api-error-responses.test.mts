@@ -2,22 +2,23 @@
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { isCoverageMode } from './utils/environment.mts'
 import { SocketSdk } from '../src/index'
 import { FAST_TEST_CONFIG } from './utils/fast-test-config.mts'
 
-describe('SocketSdk - Edge Cases', () => {
+describe.skipIf(isCoverageMode)('SocketSdk - Edge Cases', () => {
   beforeEach(() => {
     nock.cleanAll()
     nock.disableNetConnect()
   })
 
   afterEach(() => {
-    if (!nock.isDone()) {
+    if (!isCoverageMode && !nock.isDone()) {
       throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
     }
   })
 
-  describe('Error Response Edge Cases', () => {
+  describe.skipIf(isCoverageMode)('Error Response Edge Cases', () => {
     it('should handle text/plain response in error handler', async () => {
       nock('https://api.socket.dev')
         .get('/v0/quota')

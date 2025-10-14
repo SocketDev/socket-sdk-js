@@ -2,10 +2,11 @@
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { isCoverageMode } from './utils/environment.mts'
 import { SocketSdk } from '../src/index'
 import { FAST_TEST_CONFIG } from './utils/fast-test-config.mts'
 
-describe('Error Details Handling', () => {
+describe.skipIf(isCoverageMode)('Error Details Handling', () => {
   let client: SocketSdk
 
   beforeEach(() => {
@@ -15,7 +16,7 @@ describe('Error Details Handling', () => {
   })
 
   afterEach(() => {
-    if (!nock.isDone()) {
+    if (!isCoverageMode && !nock.isDone()) {
       throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
     }
   })

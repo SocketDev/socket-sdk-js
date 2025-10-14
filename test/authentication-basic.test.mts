@@ -4,14 +4,14 @@ import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../src/index'
-import { setupTestEnvironment } from './utils/environment.mts'
+import { isCoverageMode, setupTestEnvironment } from './utils/environment.mts'
 
 import type { IncomingHttpHeaders } from 'node:http'
 
-describe('SocketSdk Authentication and Basic Operations', () => {
+describe.skipIf(isCoverageMode)('SocketSdk Authentication and Basic Operations', () => {
   setupTestEnvironment()
 
-  describe('SDK initialization and instantiation', () => {
+  describe.skipIf(isCoverageMode)('SDK initialization and instantiation', () => {
     it('creates a new SocketSdk instance with API key', () => {
       const client = new SocketSdk('yetAnotherApiKey')
       expect(client).toBeTruthy()
@@ -83,7 +83,7 @@ describe('SocketSdk Authentication and Basic Operations', () => {
     })
   })
 
-  describe('Quota management endpoints', () => {
+  describe.skipIf(isCoverageMode)('Quota management endpoints', () => {
     it('retrieves user quota information successfully', async () => {
       nock('https://api.socket.dev').get('/v0/quota').reply(200, { quota: 1e9 })
 
@@ -98,7 +98,7 @@ describe('SocketSdk Authentication and Basic Operations', () => {
     })
   })
 
-  describe('NPM package issue detection', () => {
+  describe.skipIf(isCoverageMode)('NPM package issue detection', () => {
     it('returns empty array when no issues found in package', async () => {
       nock('https://api.socket.dev')
         .get('/v0/npm/speed-limiter/1.0.0/issues')
@@ -115,7 +115,7 @@ describe('SocketSdk Authentication and Basic Operations', () => {
     })
   })
 
-  describe('API authentication and authorization', () => {
+  describe.skipIf(isCoverageMode)('API authentication and authorization', () => {
     it('includes proper Basic auth header with API token', async () => {
       const apiToken = 'test-api-token-123'
       let capturedHeaders: IncomingHttpHeaders = {}
