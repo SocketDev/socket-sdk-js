@@ -13,7 +13,7 @@ import {
   printHeader,
   printSuccess,
 } from './utils/cli-helpers.mjs'
-import { runCommandQuiet } from './utils/run-command.mjs'
+import { runCommand, runCommandQuiet } from './utils/run-command.mjs'
 
 async function main() {
   try {
@@ -34,6 +34,30 @@ async function main() {
       return
     }
     log.done('Updated pnpm-lock.yaml')
+
+    // Update Socket packages.
+    log.progress('Updating Socket packages...')
+    const socketResult = await runCommand(
+      'pnpm',
+      [
+        'update',
+        '@socketsecurity/*',
+        '@socketregistry/*',
+        '--latest',
+        '--no-workspace',
+      ],
+      {
+        cwd: process.cwd(),
+        stdio: 'pipe',
+      },
+    )
+
+    if (socketResult !== 0) {
+      log.failed('Failed to update Socket packages')
+      process.exitCode = 1
+      return
+    }
+    log.done('Updated Socket packages')
 
     // Update dependencies.
     log.progress('Checking for outdated dependencies...')
