@@ -450,7 +450,7 @@ describe('getApi and sendApi Methods', () => {
       expect(result.success).toBe(false)
       if (!result.success) {
         expect(result.error).toBe('Server returned invalid JSON')
-        expect(result.cause).toContain('...')
+        expect(result.cause).toContain('…')
       }
     })
 

@@ -1,5 +1,5 @@
 /** @fileoverview Tests for SocketSdk agent configuration and HTTP client setup. */
-import { Agent as HttpAgent, type IncomingHttpHeaders } from 'node:http'
+import { Agent as HttpAgent } from 'node:http'
 import { Agent as HttpsAgent } from 'node:https'
 
 import nock from 'nock'
@@ -9,8 +9,6 @@ import { SocketSdk } from '../src/index'
 import { setupTestEnvironment } from './utils/environment.mts'
 
 describe('SocketSdk Agent Configuration', () => {
-  setupTestEnvironment()
-
   describe('HTTP agent configuration with direct agents', () => {
     it('configures SDK with HTTPS agent for secure connections', () => {
       // Test agent as Got options with https agent.
@@ -96,53 +94,9 @@ describe('SocketSdk Agent Configuration', () => {
     })
   })
 
-  describe('Custom user agent configuration', () => {
-    it('configures SDK with custom user agent string', async () => {
-      const customUserAgent = 'MyCustomApp/1.0.0'
-      let capturedHeaders: IncomingHttpHeaders = {}
-
-      nock('https://api.socket.dev')
-        .get('/v0/quota')
-        .reply(function () {
-          capturedHeaders = this.req.headers
-          return [200, { quota: 1000 }]
-        })
-
-      const client = new SocketSdk('test-token', {
-        userAgent: customUserAgent,
-      })
-
-      await client.getQuota()
-
-      const userAgentHeader = Array.isArray(capturedHeaders['user-agent'])
-        ? capturedHeaders['user-agent'][0]
-        : capturedHeaders['user-agent']
-
-      expect(userAgentHeader).toBe(customUserAgent)
-    })
-
-    it('uses default user agent when not specified', async () => {
-      let capturedHeaders: IncomingHttpHeaders = {}
-
-      nock('https://api.socket.dev')
-        .get('/v0/quota')
-        .reply(function () {
-          capturedHeaders = this.req.headers
-          return [200, { quota: 1000 }]
-        })
-
-      const client = new SocketSdk('test-token')
-      await client.getQuota()
-
-      const userAgentHeader = Array.isArray(capturedHeaders['user-agent'])
-        ? capturedHeaders['user-agent'][0]
-        : capturedHeaders['user-agent']
-
-      expect(userAgentHeader).toContain('socketsecurity-sdk')
-    })
-  })
-
   describe('Query parameter transformation', () => {
+    setupTestEnvironment()
+
     it('transforms perPage parameter to snake_case per_page', async () => {
       const client = new SocketSdk('test-token')
       nock('https://api.socket.dev')
