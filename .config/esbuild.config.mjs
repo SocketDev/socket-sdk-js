@@ -2,6 +2,7 @@
  * @fileoverview esbuild configuration for fast builds with smaller bundles
  */
 
+import { existsSync } from 'node:fs'
 import { builtinModules } from 'node:module'
 import path from 'node:path'
 
@@ -9,8 +10,19 @@ const rootPath = path.join(import.meta.dirname, '..')
 const srcPath = path.join(rootPath, 'src')
 const distPath = path.join(rootPath, 'dist')
 
-// External packages that should not be bundled
-const EXTERNAL_PACKAGES = new Set(['@socketsecurity/registry'])
+// Check for local sibling projects to use in development.
+// Falls back to published versions in CI.
+function getLocalPackageAliases() {
+  const aliases = {}
+
+  // Check for ../socket-registry/registry
+  const registryPath = path.join(rootPath, '..', 'socket-registry', 'registry')
+  if (existsSync(path.join(registryPath, 'package.json'))) {
+    aliases['@socketsecurity/registry'] = registryPath
+  }
+
+  return aliases
+}
 
 // Build configuration for ESM output
 export const buildConfig = {
@@ -35,13 +47,14 @@ export const buildConfig = {
   // Enable code splitting for ESM
   splitting: true,
 
+  // Alias local packages when available (dev mode).
+  alias: getLocalPackageAliases(),
+
   // External dependencies
   external: [
     // Node.js built-ins
     ...builtinModules,
-    ...builtinModules.map(m => `node:${m}`),
-    // External packages
-    ...Array.from(EXTERNAL_PACKAGES)
+    ...builtinModules.map(m => `node:${m}`)
   ],
 
   // Banner for generated code
