@@ -309,7 +309,7 @@ export class SocketSdk {
       /* c8 ignore next - Defensive empty string fallback when slice returns empty. */
       const preview = responseText.slice(0, 100) || ''
       return {
-        cause: `Please report this. JSON.parse threw an error over the following response: \`${preview.trim()}${responseText.length > 100 ? '...' : ''}\``,
+        cause: `Please report this. JSON.parse threw an error over the following response: \`${preview.trim()}${responseText.length > 100 ? '…' : ''}\``,
         data: undefined,
         error: 'Server returned invalid JSON',
         status: 0,
