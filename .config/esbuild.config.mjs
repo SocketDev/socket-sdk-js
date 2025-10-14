@@ -15,9 +15,15 @@ const distPath = path.join(rootPath, 'dist')
 function getLocalPackageAliases() {
   const aliases = {}
 
-  // Check for ../socket-registry/registry
-  const registryPath = path.join(rootPath, '..', 'socket-registry', 'registry')
-  if (existsSync(path.join(registryPath, 'package.json'))) {
+  // Check for ../socket-registry/registry/dist
+  const registryPath = path.join(
+    rootPath,
+    '..',
+    'socket-registry',
+    'registry',
+    'dist',
+  )
+  if (existsSync(registryPath)) {
     aliases['@socketsecurity/registry'] = registryPath
   }
 
