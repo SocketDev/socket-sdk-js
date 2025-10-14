@@ -2,6 +2,9 @@
  * @fileoverview Vitest configuration for Socket SDK test suite.
  * Configures test environment, coverage, and module resolution.
  */
+import { existsSync } from 'node:fs'
+import path from 'node:path'
+
 import { defineConfig } from 'vitest/config'
 
 // Check if coverage is enabled via CLI flags or environment.
@@ -15,8 +18,32 @@ if (isCoverageEnabled) {
   process.env['COVERAGE'] = 'true'
 }
 
+// Check for local sibling projects to use in development.
+// Falls back to published versions in CI.
+function getLocalPackageAliases() {
+  const aliases = {}
+  const rootDir = path.join(import.meta.dirname, '..')
+
+  // Check for ../socket-registry/registry/dist
+  const registryPath = path.join(rootDir, '..', 'socket-registry', 'registry', 'dist')
+  if (existsSync(path.join(registryPath, '../package.json'))) {
+    aliases['@socketsecurity/registry'] = registryPath
+  }
+
+  // Check for ../socket-packageurl-js/dist
+  const packageurlPath = path.join(rootDir, '..', 'socket-packageurl-js', 'dist')
+  if (existsSync(path.join(packageurlPath, '../package.json'))) {
+    aliases['@socketregistry/packageurl-js'] = packageurlPath
+  }
+
+  return aliases
+}
+
 export default defineConfig({
   cacheDir: './.cache/vitest',
+  resolve: {
+    alias: getLocalPackageAliases(),
+  },
   test: {
     globals: false,
     environment: 'node',
