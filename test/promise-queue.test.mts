@@ -5,8 +5,9 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { PromiseQueue } from '../src/promise-queue'
+import { isCoverageMode } from './utils/environment.mts'
 
-describe('PromiseQueue', () => {
+describe.skipIf(isCoverageMode)('PromiseQueue', () => {
   let queue: PromiseQueue
 
   beforeEach(() => {

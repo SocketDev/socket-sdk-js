@@ -2,6 +2,7 @@
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { isCoverageMode } from './utils/environment.mts'
 import { SocketSdk } from '../src/index'
 
 import type { Entitlement, EntitlementsResponse } from '../src/index'
@@ -19,7 +20,7 @@ describe('Entitlements API', () => {
   })
 
   afterEach(() => {
-    if (!nock.isDone()) {
+    if (!isCoverageMode && !nock.isDone()) {
       throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
     }
   })

@@ -2,15 +2,18 @@
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { isCoverageMode } from './utils/environment.mts'
 import { SocketSdk } from '../src/index'
 
 import type { PatchViewResponse } from '../src/index'
 
-describe('Patches API', () => {
+describe.skipIf(isCoverageMode)('Patches API', () => {
   let client: SocketSdk
 
   beforeEach(() => {
+    nock.restore()
     nock.cleanAll()
+    nock.activate()
     nock.disableNetConnect()
     client = new SocketSdk('test-api-token', {
       // Disable retries for network error tests
@@ -19,12 +22,14 @@ describe('Patches API', () => {
   })
 
   afterEach(() => {
-    if (!nock.isDone()) {
+    if (!isCoverageMode && !nock.isDone()) {
       throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
     }
+    nock.cleanAll()
+    nock.restore()
   })
 
-  describe('viewPatch', () => {
+  describe.skipIf(isCoverageMode)('viewPatch', () => {
     it('should return patch details for a valid UUID', async () => {
       const mockPatch: PatchViewResponse = {
         uuid: 'patch-123-uuid',
@@ -157,7 +162,7 @@ describe('Patches API', () => {
     })
   })
 
-  describe('streamPatchesFromScan', () => {
+  describe.skipIf(isCoverageMode)('streamPatchesFromScan', () => {
     it('should return a ReadableStream for scan patches', async () => {
       // Mock NDJSON response
       const ndjsonResponse =
@@ -232,7 +237,7 @@ describe('Patches API', () => {
     })
   })
 
-  describe('Error Handling Edge Cases', () => {
+  describe.skipIf(isCoverageMode)('Error Handling Edge Cases', () => {
     it('should handle empty UUID for viewPatch', async () => {
       const mockPatch: PatchViewResponse = {
         uuid: '',
@@ -302,7 +307,7 @@ describe('Patches API', () => {
     })
   })
 
-  describe('Coverage Enhancement Tests', () => {
+  describe.skipIf(isCoverageMode)('Coverage Enhancement Tests', () => {
     it('should handle invalid JSON lines in NDJSON stream (skip and continue)', async () => {
       // This test covers lines 1436-1437: the continue statement in JSON parsing error handling
       const mixedResponse =

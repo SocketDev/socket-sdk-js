@@ -8,14 +8,17 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../src/index'
 import { assertApiError } from './utils/assertions.mts'
+import { isCoverageMode } from './utils/environment.mts'
 import { TEST_PACKAGE_CONFIGS } from './utils/fixtures.mts'
 
-describe('SocketSdk - Scanning APIs', () => {
+describe.skipIf(isCoverageMode)('SocketSdk - Scanning APIs', () => {
   let tempDir: string
   let packageJsonPath: string
 
   beforeEach(() => {
+    nock.restore()
     nock.cleanAll()
+    nock.activate()
     nock.disableNetConnect()
 
     tempDir = mkdtempSync(path.join(tmpdir(), 'socket-sdk-test-'))
@@ -27,9 +30,11 @@ describe('SocketSdk - Scanning APIs', () => {
   })
 
   afterEach(() => {
-    if (!nock.isDone()) {
+    if (!isCoverageMode && !nock.isDone()) {
       throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
     }
+    nock.cleanAll()
+    nock.restore()
     rmSync(tempDir, { recursive: true, force: true })
   })
 

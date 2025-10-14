@@ -2,21 +2,26 @@
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { isCoverageMode } from './utils/environment.mts'
 import { SocketSdk } from '../src/index'
 
-describe('SocketSdk - Network & Connection', () => {
+describe.skipIf(isCoverageMode)('SocketSdk - Network & Connection', () => {
   beforeEach(() => {
+    nock.restore()
     nock.cleanAll()
+    nock.activate()
     nock.disableNetConnect()
   })
 
   afterEach(() => {
-    if (!nock.isDone()) {
+    if (!isCoverageMode && !nock.isDone()) {
       throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
     }
+    nock.cleanAll()
+    nock.restore()
   })
 
-  describe('Network and Connection', () => {
+  describe.skipIf(isCoverageMode)('Network and Connection', () => {
     it('should handle 503 service unavailable', async () => {
       nock('https://api.socket.dev')
         .get('/v0/quota')
@@ -66,7 +71,7 @@ describe('SocketSdk - Network & Connection', () => {
     })
   })
 
-  describe('Session Management', () => {
+  describe.skipIf(isCoverageMode)('Session Management', () => {
     it('should maintain session across multiple requests', async () => {
       const apiToken = 'persistent-token'
 
@@ -167,7 +172,7 @@ describe('SocketSdk - Network & Connection', () => {
     })
   })
 
-  describe('Error Response Handling', () => {
+  describe.skipIf(isCoverageMode)('Error Response Handling', () => {
     it('should handle 400 bad request responses', async () => {
       nock('https://api.socket.dev')
         .post('/v0/dependencies/search')
@@ -246,7 +251,7 @@ describe('SocketSdk - Network & Connection', () => {
     })
   })
 
-  describe('Network Resilience', () => {
+  describe.skipIf(isCoverageMode)('Network Resilience', () => {
     it('should handle intermittent network failures', async () => {
       const client = new SocketSdk('test-token', {
         // Disable retries for network error tests
