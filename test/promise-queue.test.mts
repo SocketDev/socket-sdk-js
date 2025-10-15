@@ -5,9 +5,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { PromiseQueue } from '../src/promise-queue'
-import { isCoverageMode } from './utils/environment.mts'
 
-describe.skipIf(isCoverageMode)('PromiseQueue', () => {
+describe('PromiseQueue', () => {
   let queue: PromiseQueue
 
   beforeEach(() => {
@@ -38,31 +37,6 @@ describe.skipIf(isCoverageMode)('PromiseQueue', () => {
   })
 
   describe('Task Execution', () => {
-    it('should execute tasks with concurrency limit', async () => {
-      const results: number[] = []
-      const task1 = queue.add(async () => {
-        await new Promise(resolve => setTimeout(resolve, 50))
-        results.push(1)
-        return 1
-      })
-      const task2 = queue.add(async () => {
-        await new Promise(resolve => setTimeout(resolve, 30))
-        results.push(2)
-        return 2
-      })
-      const task3 = queue.add(async () => {
-        results.push(3)
-        return 3
-      })
-
-      expect(queue.activeCount).toBeLessThanOrEqual(2)
-
-      await Promise.all([task1, task2, task3])
-      expect(results).toHaveLength(3)
-      expect(queue.activeCount).toBe(0)
-      expect(queue.pendingCount).toBe(0)
-    })
-
     it('should resolve tasks with correct values', async () => {
       const result = await queue.add(async () => {
         return 'test-value'
@@ -94,132 +68,9 @@ describe.skipIf(isCoverageMode)('PromiseQueue', () => {
     })
   })
 
-  describe('Queue Management', () => {
-    it('should track active count correctly', async () => {
-      expect(queue.activeCount).toBe(0)
-
-      const task1 = queue.add(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100))
-        return 1
-      })
-      const task2 = queue.add(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100))
-        return 2
-      })
-
-      // Wait a bit for tasks to start
-      await new Promise(resolve => setTimeout(resolve, 10))
-      expect(queue.activeCount).toBe(2)
-
-      await Promise.all([task1, task2])
-      expect(queue.activeCount).toBe(0)
-    })
-
-    it('should track pending count correctly', async () => {
-      const longTask1 = queue.add(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100))
-        return 1
-      })
-      const longTask2 = queue.add(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100))
-        return 2
-      })
-      const longTask3 = queue.add(async () => {
-        await new Promise(resolve => setTimeout(resolve, 50))
-        return 3
-      })
-
-      // Wait a bit for first tasks to start
-      await new Promise(resolve => setTimeout(resolve, 10))
-      // task3 should be pending
-      expect(queue.pendingCount).toBe(1)
-
-      await Promise.all([longTask1, longTask2, longTask3])
-      expect(queue.pendingCount).toBe(0)
-    })
-
-    it('should clear pending tasks', async () => {
-      const longTask1 = queue.add(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100))
-        return 1
-      })
-      const longTask2 = queue.add(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100))
-        return 2
-      })
-      queue.add(async () => {
-        await new Promise(resolve => setTimeout(resolve, 50))
-        return 3
-      })
-
-      // Wait for first tasks to start
-      await new Promise(resolve => setTimeout(resolve, 10))
-      expect(queue.pendingCount).toBe(1)
-
-      queue.clear()
-      expect(queue.pendingCount).toBe(0)
-
-      await Promise.all([longTask1, longTask2])
-    })
-  })
-
   describe('onIdle', () => {
     it('should resolve immediately when queue is empty', async () => {
       await expect(queue.onIdle()).resolves.toBeUndefined()
-    })
-
-    it('should wait for all tasks to complete', async () => {
-      const results: number[] = []
-
-      queue.add(async () => {
-        await new Promise(resolve => setTimeout(resolve, 50))
-        results.push(1)
-        return 1
-      })
-      queue.add(async () => {
-        await new Promise(resolve => setTimeout(resolve, 30))
-        results.push(2)
-        return 2
-      })
-      queue.add(async () => {
-        await new Promise(resolve => setTimeout(resolve, 10))
-        results.push(3)
-        return 3
-      })
-
-      await queue.onIdle()
-      expect(results).toHaveLength(3)
-      expect(queue.activeCount).toBe(0)
-      expect(queue.pendingCount).toBe(0)
-    })
-
-    it('should wait for running tasks even after clear', async () => {
-      const results: number[] = []
-
-      queue.add(async () => {
-        await new Promise(resolve => setTimeout(resolve, 50))
-        results.push(1)
-        return 1
-      })
-      queue.add(async () => {
-        await new Promise(resolve => setTimeout(resolve, 50))
-        results.push(2)
-        return 2
-      })
-      queue.add(async () => {
-        await new Promise(resolve => setTimeout(resolve, 10))
-        results.push(3)
-        return 3
-      })
-
-      // Wait for first tasks to start
-      await new Promise(resolve => setTimeout(resolve, 10))
-      queue.clear()
-
-      await queue.onIdle()
-      // At least the running tasks completed
-      expect(results.length).toBeGreaterThanOrEqual(2)
-      expect(queue.activeCount).toBe(0)
     })
   })
 

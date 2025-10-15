@@ -1,0 +1,665 @@
+/**
+ * @fileoverview Coverage tests for Socket SDK API methods using local HTTP server.
+ *
+ * APPROACH: Instead of nock (which bleeds state in coverage mode), we use a real
+ * HTTP server that starts/stops cleanly. This works in coverage mode because we're
+ * using actual HTTP, not module patching.
+ */
+import { createServer } from 'node:http'
+
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+
+import { SocketSdk } from '../src/index'
+
+import type { IncomingMessage, Server, ServerResponse } from 'node:http'
+
+describe('SocketSdk - API Methods Coverage', () => {
+  let server: Server
+  let baseUrl: string
+  let client: SocketSdk
+
+  beforeAll(async () => {
+    // Start local HTTP server on random port
+    server = createServer((req: IncomingMessage, res: ServerResponse) => {
+      // Parse URL to determine response
+      const url = req.url || ''
+
+      // Consume request body for POST/PUT/PATCH requests
+      if (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') {
+        let body = ''
+        req.on('data', chunk => {
+          body += chunk.toString()
+        })
+        req.on('end', () => {
+          // Body consumed, now respond
+          respondToRequest()
+        })
+        return
+      }
+
+      // For GET/DELETE, respond immediately
+      respondToRequest()
+
+      function respondToRequest() {
+        // Set common headers
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+
+        // Route requests to appropriate responses
+        if (url.includes('/package/batch')) {
+        // Batch package fetch endpoint
+        res.end(JSON.stringify({ data: [{ name: 'lodash', version: '4.17.21', score: 95 }] }))
+      } else if (url.includes('/npm/')) {
+        // Package analysis endpoints
+        if (url.includes('/issues')) {
+          res.end(JSON.stringify({ data: { issues: [] } }))
+        } else if (url.includes('/score')) {
+          res.end(JSON.stringify({ data: { score: 95 } }))
+        } else {
+          res.end(JSON.stringify({ data: {} }))
+        }
+      } else if (url.includes('/organizations')) {
+        // Organization endpoints
+        if (url.includes('/repos')) {
+          if (req.method === 'DELETE') {
+            res.end(JSON.stringify({ success: true }))
+          } else if (req.method === 'PUT' || req.method === 'POST') {
+            res.end(JSON.stringify({ data: { id: 'repo-1', name: 'test-repo' } }))
+          } else {
+            res.end(JSON.stringify({ data: [] }))
+          }
+        } else if (url.includes('/full-scans')) {
+          if (req.method === 'DELETE') {
+            res.end(JSON.stringify({ success: true }))
+          } else if (req.method === 'POST') {
+            res.end(JSON.stringify({ data: { id: 'scan-1' } }))
+          } else if (url.includes('/metadata')) {
+            res.end(JSON.stringify({ data: { id: 'scan-1', status: 'complete' } }))
+          } else {
+            res.end(JSON.stringify({ data: [] }))
+          }
+        } else if (url.includes('/diff-scans')) {
+          if (req.method === 'DELETE') {
+            res.end(JSON.stringify({ success: true }))
+          } else if (req.method === 'POST') {
+            res.end(JSON.stringify({ data: { id: 'diff-1' } }))
+          } else {
+            res.end(JSON.stringify({ data: [] }))
+          }
+        } else if (url.includes('/labels')) {
+          if (req.method === 'DELETE') {
+            res.end(JSON.stringify({ success: true }))
+          } else if (req.method === 'PUT' || req.method === 'POST') {
+            res.end(JSON.stringify({ data: { id: 'label-1', name: 'test' } }))
+          } else {
+            res.end(JSON.stringify({ data: [] }))
+          }
+        } else if (url.includes('/analytics')) {
+          res.end(JSON.stringify({ data: {} }))
+        } else if (url.includes('/security-policy')) {
+          if (req.method === 'PUT') {
+            res.end(JSON.stringify({ data: { enabled: true } }))
+          } else {
+            res.end(JSON.stringify({ data: { enabled: false } }))
+          }
+        } else if (url.includes('/license-policy')) {
+          if (req.method === 'PUT') {
+            res.end(JSON.stringify({ data: { enabled: true } }))
+          } else {
+            res.end(JSON.stringify({ data: { enabled: false } }))
+          }
+        } else if (url.includes('/triage')) {
+          res.end(JSON.stringify({ data: [] }))
+        } else {
+          res.end(JSON.stringify({ data: [] }))
+        }
+      } else if (url.includes('/scan')) {
+        // Scanning endpoints
+        if (req.method === 'POST') {
+          res.end(JSON.stringify({ data: { id: 'scan-1', status: 'queued' } }))
+        } else {
+          res.end(JSON.stringify({ data: { id: 'scan-1', status: 'complete' } }))
+        }
+      } else if (url.includes('/sbom/export')) {
+        // SBOM endpoints
+        res.end(JSON.stringify({ data: { format: 'cyclonedx' } }))
+      } else if (url.includes('/patches')) {
+        // Patches endpoint
+        res.end(JSON.stringify({ data: [] }))
+      } else if (url.includes('/quota')) {
+        // Quota endpoint
+        res.end(JSON.stringify({ data: { limit: 1000, used: 100 } }))
+      } else if (url.includes('/settings')) {
+        // Settings endpoint
+        res.end(JSON.stringify({ data: { success: true } }))
+      } else if (url.includes('/dependencies')) {
+        // Dependencies endpoints
+        if (url.includes('/search')) {
+          res.end(JSON.stringify({ data: [] }))
+        } else if (url.includes('/snapshot')) {
+          res.end(JSON.stringify({ data: { id: 'snapshot-1' } }))
+        } else {
+          res.end(JSON.stringify({ data: {} }))
+        }
+      } else if (url.includes('/api-tokens')) {
+        // API tokens
+        if (req.method === 'DELETE' || url.includes('/revoke')) {
+          res.end(JSON.stringify({ success: true }))
+        } else if (req.method === 'POST' || url.includes('/rotate')) {
+          res.end(JSON.stringify({ data: { token: 'new-token' } }))
+        } else if (req.method === 'PUT') {
+          res.end(JSON.stringify({ data: { token: 'updated-token' } }))
+        } else {
+          res.end(JSON.stringify({ data: [] }))
+        }
+      } else if (url.includes('/entitlements')) {
+        // Entitlements
+        if (url.includes('/enabled')) {
+          res.end(JSON.stringify({ data: [] }))
+        } else {
+          res.end(JSON.stringify({ data: [] }))
+        }
+      } else if (url.includes('/alert-triage')) {
+        // Alert triage
+        if (req.method === 'PUT') {
+          res.end(JSON.stringify({ data: { status: 'resolved' } }))
+        } else {
+          res.end(JSON.stringify({ data: {} }))
+        }
+      } else if (url.includes('/report')) {
+        // Reports
+        if (req.method === 'DELETE') {
+          res.end(JSON.stringify({ success: true }))
+        } else {
+          res.end(JSON.stringify({ data: {} }))
+        }
+      } else if (url.includes('/audit-logs')) {
+        // Audit logs
+        res.end(JSON.stringify({ data: [] }))
+      } else if (url.includes('/supported-files')) {
+        // Supported files
+        res.end(JSON.stringify({ data: [] }))
+      } else if (url.includes('/upload-manifest-files')) {
+        // Upload manifest files
+        res.end(JSON.stringify({ data: { uploadId: 'upload-123', status: 'success' } }))
+        } else {
+          // Default response
+          res.end(JSON.stringify({ data: {} }))
+        }
+      }
+    })
+
+    await new Promise<void>(resolve => {
+      server.listen(0, () => {
+        const address = server.address()
+        if (address && typeof address === 'object') {
+          const { port } = address
+          baseUrl = `http://127.0.0.1:${port}`
+          client = new SocketSdk('test-token', { baseUrl, timeout: 5_000 })
+          resolve()
+        }
+      })
+    })
+  })
+
+  afterAll(() => {
+    server.close()
+  })
+
+  describe('Package Analysis Methods', () => {
+    it('covers getIssuesByNpmPackage', async () => {
+      const result = await client.getIssuesByNpmPackage('lodash', '4.17.21')
+      expect(result.success).toBe(true)
+      expect(result.data).toBeDefined()
+    })
+
+    it('covers getScoreByNpmPackage', async () => {
+      const result = await client.getScoreByNpmPackage('lodash', '4.17.21')
+      expect(result.success).toBe(true)
+      expect(result.data).toBeDefined()
+    })
+
+    it('covers batchPackageFetch', async () => {
+      const result = await client.batchPackageFetch({
+        components: [{ purl: 'pkg:npm/lodash@4.17.21' }],
+      })
+      expect(result.success).toBe(true)
+      expect(result.data).toBeDefined()
+    })
+
+    it('covers batchPackageStream', async () => {
+      const componentsObj = {
+        components: [
+          { purl: 'pkg:npm/lodash@4.17.21' },
+          { purl: 'pkg:npm/react@18.0.0' },
+        ],
+      }
+      const generator = client.batchPackageStream(componentsObj)
+
+      // Consume the generator
+      const results = []
+      for await (const result of generator) {
+        results.push(result)
+      }
+
+      expect(results.length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('Scanning Methods', () => {
+    it('covers createScanFromFilepaths', async () => {
+      const result = await client.createScanFromFilepaths([], {
+        pathsRelativeTo: '.',
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('covers getScan', async () => {
+      const result = await client.getScan('scan-1')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers getScanList', async () => {
+      const result = await client.getScanList()
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('Organization Methods', () => {
+    it('covers getOrganizations', async () => {
+      const result = await client.getOrganizations()
+      expect(result.success).toBe(true)
+      expect(result.data).toBeDefined()
+    })
+
+    it('covers createOrgRepo', async () => {
+      const result = await client.createOrgRepo('test-org', {
+        name: 'test-repo',
+        description: 'Test repository',
+        homepage: 'https://example.com',
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('covers getOrgRepo', async () => {
+      const result = await client.getOrgRepo('test-org', 'test-repo')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers getOrgRepoList', async () => {
+      const result = await client.getOrgRepoList('test-org')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers updateOrgRepo', async () => {
+      const result = await client.updateOrgRepo('test-org', 'test-repo', {
+        description: 'Updated',
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('covers deleteOrgRepo', async () => {
+      const result = await client.deleteOrgRepo('test-org', 'test-repo')
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('Full Scan Methods', () => {
+    it('covers getOrgFullScanList', async () => {
+      const result = await client.getOrgFullScanList('test-org')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers getOrgFullScanMetadata', async () => {
+      const result = await client.getOrgFullScanMetadata('test-org', 'scan-1')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers createOrgFullScan', async () => {
+      const result = await client.createOrgFullScan('test-org', [], {
+        queryParams: {
+          branch: 'main',
+          commit_message: 'test',
+          make_default_branch: false,
+        },
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('covers deleteOrgFullScan', async () => {
+      const result = await client.deleteOrgFullScan('test-org', 'scan-1')
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('Diff Scan Methods', () => {
+    it('covers createOrgDiffScanFromIds', async () => {
+      const result = await client.createOrgDiffScanFromIds('test-org', {
+        from: 'from-id',
+        to: 'to-id',
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('covers getDiffScanById', async () => {
+      const result = await client.getDiffScanById('test-org', 'diff-1')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers listOrgDiffScans', async () => {
+      const result = await client.listOrgDiffScans('test-org')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers deleteOrgDiffScan', async () => {
+      const result = await client.deleteOrgDiffScan('test-org', 'diff-1')
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('SBOM Methods', () => {
+    it('covers exportCDX', async () => {
+      const result = await client.exportCDX('test-org', 'scan-1')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers exportSPDX', async () => {
+      const result = await client.exportSPDX('test-org', 'scan-1')
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('Patches Methods', () => {
+    it('covers viewPatch', async () => {
+      const result = await client.viewPatch('test-org', 'patch-uuid-123')
+      // viewPatch returns the patch data directly, not wrapped in success/data
+      expect(result).toBeDefined()
+    })
+  })
+
+  describe('Quota Methods', () => {
+    it('covers getQuota', async () => {
+      const result = await client.getQuota()
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('Settings Methods', () => {
+    it('covers postSettings', async () => {
+      const result = await client.postSettings([
+        {
+          organization: 'test-org',
+        },
+      ])
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('Dependencies Methods', () => {
+    it('covers searchDependencies', async () => {
+      const result = await client.searchDependencies({
+        limit: 10,
+        orgSlug: 'test-org',
+        repoName: 'test-repo',
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('covers createDependenciesSnapshot', async () => {
+      const result = await client.createDependenciesSnapshot([], {
+        queryParams: {
+          orgSlug: 'test-org',
+          repoName: 'test-repo',
+          branch: 'main',
+        },
+      })
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('Analytics Methods', () => {
+    it('covers getOrgAnalytics', async () => {
+      const result = await client.getOrgAnalytics('test-org')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers getRepoAnalytics', async () => {
+      const result = await client.getRepoAnalytics('test-org', 'test-repo')
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('Policy Methods', () => {
+    it('covers getOrgSecurityPolicy', async () => {
+      const result = await client.getOrgSecurityPolicy('test-org')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers updateOrgSecurityPolicy', async () => {
+      const result = await client.updateOrgSecurityPolicy('test-org', {
+        enabled: true,
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('covers getOrgLicensePolicy', async () => {
+      const result = await client.getOrgLicensePolicy('test-org')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers updateOrgLicensePolicy', async () => {
+      const result = await client.updateOrgLicensePolicy('test-org', {
+        enabled: true,
+      })
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('API Token Methods', () => {
+    it('covers getAPITokens', async () => {
+      const result = await client.getAPITokens('test-org')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers postAPIToken', async () => {
+      const result = await client.postAPIToken('test-org', { name: 'test-token' })
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('Triage Methods', () => {
+    it('covers getOrgTriage', async () => {
+      const result = await client.getOrgTriage('test-org')
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('Reports Methods', () => {
+    it('covers deleteReport', async () => {
+      const result = await client.deleteReport('report-1')
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('Repository Labels Methods', () => {
+    it('covers createOrgRepoLabel', async () => {
+      const result = await client.createOrgRepoLabel('test-org', 'test-repo', {
+        name: 'test-label',
+        color: '#ff0000',
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('covers getOrgRepoLabel', async () => {
+      const result = await client.getOrgRepoLabel(
+        'test-org',
+        'test-repo',
+        'label-1',
+      )
+      expect(result.success).toBe(true)
+    })
+
+    it('covers getOrgRepoLabelList', async () => {
+      const result = await client.getOrgRepoLabelList('test-org', 'test-repo')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers updateOrgRepoLabel', async () => {
+      const result = await client.updateOrgRepoLabel(
+        'test-org',
+        'test-repo',
+        'label-1',
+        {
+          name: 'updated-label',
+        },
+      )
+      expect(result.success).toBe(true)
+    })
+
+    it('covers deleteOrgRepoLabel', async () => {
+      const result = await client.deleteOrgRepoLabel(
+        'test-org',
+        'test-repo',
+        'label-1',
+      )
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('Audit Logs Methods', () => {
+    it('covers getAuditLogEvents', async () => {
+      const result = await client.getAuditLogEvents('test-org')
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('Supported Files Methods', () => {
+    it('covers getSupportedScanFiles', async () => {
+      const result = await client.getSupportedScanFiles()
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('Entitlements Methods', () => {
+    it('covers getEntitlements', async () => {
+      const result = await client.getEntitlements('test-org')
+      expect(Array.isArray(result)).toBe(true)
+    })
+
+    it('covers getEnabledEntitlements', async () => {
+      const result = await client.getEnabledEntitlements('test-org')
+      expect(Array.isArray(result)).toBe(true)
+    })
+  })
+
+  describe('Advanced API Token Methods', () => {
+    it('covers postAPITokensRevoke', async () => {
+      const result = await client.postAPITokensRevoke('test-org', 'token-id')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers postAPITokensRotate', async () => {
+      const result = await client.postAPITokensRotate('test-org', 'token-id')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers postAPITokenUpdate', async () => {
+      const result = await client.postAPITokenUpdate('test-org', 'token-id', {
+        name: 'updated-token',
+      })
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('Alert Triage Methods', () => {
+    it('covers updateOrgAlertTriage', async () => {
+      const result = await client.updateOrgAlertTriage('test-org', 'alert-id', {
+        status: 'resolved',
+      })
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('Streaming Methods', () => {
+    it('covers streamOrgFullScan', async () => {
+      // This method returns a Promise<SocketSdkResult>
+      // Just verify it executes without throwing
+      const result = await client.streamOrgFullScan('test-org', 'scan-1')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers streamPatchesFromScan', async () => {
+      // This method returns a Promise<ReadableStream>
+      // Just verify it executes without throwing
+      const stream = await client.streamPatchesFromScan('test-org', 'scan-1')
+      expect(stream).toBeDefined()
+    })
+
+    it('covers getOrgFullScanBuffered', async () => {
+      const result = await client.getOrgFullScanBuffered('test-org', 'scan-1')
+      expect(result.success).toBe(true)
+      expect(result.data).toBeDefined()
+    })
+  })
+
+  describe('Response Type Variations', () => {
+    it('covers getApi with response type', async () => {
+      const result = await client.getIssuesByNpmPackage('lodash', '4.17.21')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers getApi with text response type', async () => {
+      const result = await client.getIssuesByNpmPackage('lodash', '4.17.21')
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('Upload Methods', () => {
+    it('covers uploadManifestFiles', async () => {
+      // Create a temporary test file
+      const { mkdtempSync, rmSync, writeFileSync } = await import('node:fs')
+      const { tmpdir } = await import('node:os')
+      const { join } = await import('node:path')
+
+      const tempDir = mkdtempSync(join(tmpdir(), 'socket-test-'))
+      const testFile = join(tempDir, 'package.json')
+      writeFileSync(testFile, JSON.stringify({ name: 'test-pkg', version: '1.0.0' }))
+
+      try {
+        const result = await client.uploadManifestFiles('test-org', [testFile], {
+          pathsRelativeTo: tempDir,
+        })
+        expect(result.success).toBe(true)
+      } finally {
+        rmSync(tempDir, { recursive: true })
+      }
+    })
+  })
+
+  describe('Error Handling Paths', () => {
+    it('covers retry logic through timeout', async () => {
+      // This will succeed but exercise retry preparation code
+      const result = await client.getOrganizations()
+      expect(result.success).toBe(true)
+    })
+
+    it('covers cache when enabled', async () => {
+      const cachedClient = new SocketSdk('test-token', {
+        baseUrl,
+        cache: true,
+        timeout: 5_000,
+      })
+      const result1 = await cachedClient.getOrganizations()
+      const result2 = await cachedClient.getOrganizations()
+      expect(result1.success).toBe(true)
+      expect(result2.success).toBe(true)
+    })
+
+    it('covers methods with query parameters', async () => {
+      const result = await client.getOrgFullScanList('test-org', {
+        limit: 10,
+        offset: 0,
+      })
+      expect(result.success).toBe(true)
+    })
+  })
+})

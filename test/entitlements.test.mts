@@ -1,28 +1,14 @@
 /** @fileoverview Tests for organization entitlements and enabled products. */
 import nock from 'nock'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
-import { isCoverageMode } from './utils/environment.mts'
-import { SocketSdk } from '../src/index'
+import { setupTestClient } from './utils/environment.mts'
 
 import type { Entitlement, EntitlementsResponse } from '../src/index'
 
 describe('Entitlements API', () => {
-  let client: SocketSdk
-
-  beforeEach(() => {
-    nock.cleanAll()
-    nock.disableNetConnect()
-    client = new SocketSdk('test-api-token', {
-      // Disable retries for network error tests
-      retries: 0,
-    })
-  })
-
-  afterEach(() => {
-    if (!isCoverageMode && !nock.isDone()) {
-      throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
-    }
+  const getClient = setupTestClient('test-api-token', {
+    retries: 0,
   })
 
   describe('getEntitlements', () => {
@@ -39,7 +25,7 @@ describe('Entitlements API', () => {
         .get('/v0/orgs/test-org/entitlements')
         .reply(200, mockResponse)
 
-      const result = await client.getEntitlements('test-org')
+      const result = await getClient().getEntitlements('test-org')
 
       expect(result).toHaveLength(3)
       expect(result).toEqual([
@@ -58,7 +44,7 @@ describe('Entitlements API', () => {
         .get('/v0/orgs/empty-org/entitlements')
         .reply(200, mockResponse)
 
-      const result = await client.getEntitlements('empty-org')
+      const result = await getClient().getEntitlements('empty-org')
 
       expect(result).toHaveLength(0)
       expect(result).toEqual([])
@@ -80,7 +66,7 @@ describe('Entitlements API', () => {
         .get('/v0/orgs/test-org/entitlements')
         .reply(200, mockResponse)
 
-      const result = await client.getEnabledEntitlements('test-org')
+      const result = await getClient().getEnabledEntitlements('test-org')
 
       expect(result).toHaveLength(2)
       expect(result).toEqual(['firewall', 'alerts'])
@@ -98,7 +84,7 @@ describe('Entitlements API', () => {
         .get('/v0/orgs/no-enabled-org/entitlements')
         .reply(200, mockResponse)
 
-      const result = await client.getEnabledEntitlements('no-enabled-org')
+      const result = await getClient().getEnabledEntitlements('no-enabled-org')
 
       expect(result).toHaveLength(0)
       expect(result).toEqual([])
@@ -113,7 +99,7 @@ describe('Entitlements API', () => {
         .get('/v0/orgs/empty-org/entitlements')
         .reply(200, mockResponse)
 
-      const result = await client.getEnabledEntitlements('empty-org')
+      const result = await getClient().getEnabledEntitlements('empty-org')
 
       expect(result).toHaveLength(0)
       expect(result).toEqual([])
@@ -128,7 +114,7 @@ describe('Entitlements API', () => {
         .get('/v0/orgs/test%40org/entitlements')
         .reply(200, mockResponse)
 
-      const result = await client.getEnabledEntitlements('test@org')
+      const result = await getClient().getEnabledEntitlements('test@org')
 
       expect(result).toEqual(['firewall'])
     })
@@ -145,7 +131,7 @@ describe('Entitlements API', () => {
         .get('/v0/orgs/my-org%2Btest%23123/entitlements')
         .reply(200, mockResponse)
 
-      const result = await client.getEnabledEntitlements('my-org+test#123')
+      const result = await getClient().getEnabledEntitlements('my-org+test#123')
 
       expect(result).toEqual(['firewall'])
     })
@@ -157,7 +143,7 @@ describe('Entitlements API', () => {
         .get('/v0/orgs/error-org/entitlements')
         .replyWithError('Network error')
 
-      await expect(client.getEntitlements('error-org')).rejects.toThrow(
+      await expect(getClient().getEntitlements('error-org')).rejects.toThrow(
         'Network error',
       )
     })
@@ -167,7 +153,7 @@ describe('Entitlements API', () => {
         .get('/v0/orgs/error-org/entitlements')
         .replyWithError('Connection refused')
 
-      await expect(client.getEnabledEntitlements('error-org')).rejects.toThrow(
+      await expect(getClient().getEnabledEntitlements('error-org')).rejects.toThrow(
         'Connection refused',
       )
     })
@@ -177,7 +163,7 @@ describe('Entitlements API', () => {
         .get('/v0/orgs/auth-error-org/entitlements')
         .reply(401, { error: { message: 'Unauthorized' } })
 
-      await expect(client.getEntitlements('auth-error-org')).rejects.toThrow()
+      await expect(getClient().getEntitlements('auth-error-org')).rejects.toThrow()
     })
 
     it('should handle 403 forbidden errors', async () => {
@@ -186,7 +172,7 @@ describe('Entitlements API', () => {
         .reply(403, { error: { message: 'Forbidden' } })
 
       await expect(
-        client.getEnabledEntitlements('forbidden-org'),
+        getClient().getEnabledEntitlements('forbidden-org'),
       ).rejects.toThrow()
     })
 
@@ -195,7 +181,7 @@ describe('Entitlements API', () => {
         .get('/v0/orgs/nonexistent-org/entitlements')
         .reply(404, { error: { message: 'Organization not found' } })
 
-      await expect(client.getEntitlements('nonexistent-org')).rejects.toThrow()
+      await expect(getClient().getEntitlements('nonexistent-org')).rejects.toThrow()
     })
 
     it('should handle 500 server errors', async () => {
@@ -204,7 +190,7 @@ describe('Entitlements API', () => {
         .reply(500, { error: { message: 'Internal server error' } })
 
       await expect(
-        client.getEnabledEntitlements('server-error-org'),
+        getClient().getEnabledEntitlements('server-error-org'),
       ).rejects.toThrow()
     })
 
@@ -213,7 +199,7 @@ describe('Entitlements API', () => {
         .get('/v0/orgs/malformed-org/entitlements')
         .reply(200, 'invalid json{')
 
-      await expect(client.getEntitlements('malformed-org')).rejects.toThrow()
+      await expect(getClient().getEntitlements('malformed-org')).rejects.toThrow()
     })
 
     it('should handle null response data', async () => {
@@ -222,8 +208,8 @@ describe('Entitlements API', () => {
         .times(2)
         .reply(200, '')
 
-      const entitlements = await client.getEntitlements('null-org')
-      const enabledProducts = await client.getEnabledEntitlements('null-org')
+      const entitlements = await getClient().getEntitlements('null-org')
+      const enabledProducts = await getClient().getEnabledEntitlements('null-org')
 
       expect(entitlements).toEqual([])
       expect(enabledProducts).toEqual([])
@@ -235,9 +221,9 @@ describe('Entitlements API', () => {
         .times(2)
         .reply(200, {})
 
-      const entitlements = await client.getEntitlements('no-items-org')
+      const entitlements = await getClient().getEntitlements('no-items-org')
       const enabledProducts =
-        await client.getEnabledEntitlements('no-items-org')
+        await getClient().getEnabledEntitlements('no-items-org')
 
       expect(entitlements).toEqual([])
       expect(enabledProducts).toEqual([])
@@ -265,9 +251,9 @@ describe('Entitlements API', () => {
         .times(2)
         .reply(200, mockResponse)
 
-      const entitlements = await client.getEntitlements('incomplete-org')
+      const entitlements = await getClient().getEntitlements('incomplete-org')
       const enabledProducts =
-        await client.getEnabledEntitlements('incomplete-org')
+        await getClient().getEnabledEntitlements('incomplete-org')
 
       expect(entitlements).toHaveLength(5)
       // Only the first complete enabled item
@@ -289,8 +275,8 @@ describe('Entitlements API', () => {
         .times(2)
         .reply(200, mockResponse)
 
-      const entitlements = await client.getEntitlements('large-org')
-      const enabledProducts = await client.getEnabledEntitlements('large-org')
+      const entitlements = await getClient().getEntitlements('large-org')
+      const enabledProducts = await getClient().getEnabledEntitlements('large-org')
 
       expect(entitlements).toHaveLength(100)
       // Half enabled
@@ -313,7 +299,7 @@ describe('Entitlements API', () => {
         .reply(200, mockResponse)
 
       const enabledProducts =
-        await client.getEnabledEntitlements('special-keys-org')
+        await getClient().getEnabledEntitlements('special-keys-org')
 
       expect(enabledProducts).toEqual([
         'fire-wall',
@@ -331,7 +317,7 @@ describe('Entitlements API', () => {
         .get('/v0/orgs//entitlements')
         .reply(200, mockResponse)
 
-      const result = await client.getEnabledEntitlements('')
+      const result = await getClient().getEnabledEntitlements('')
 
       expect(result).toEqual(['firewall'])
     })
@@ -348,7 +334,7 @@ describe('Entitlements API', () => {
         .get(`/v0/orgs/${encodedSlug}/entitlements`)
         .reply(200, mockResponse)
 
-      const result = await client.getEnabledEntitlements(longSlug)
+      const result = await getClient().getEnabledEntitlements(longSlug)
 
       expect(result).toEqual(['firewall'])
     })
@@ -368,6 +354,7 @@ describe('Entitlements API', () => {
         .times(5)
         .reply(200, mockResponse)
 
+      const client = getClient();
       const promises = Array.from(
         { length: 5 },
         (): Promise<string[]> =>
@@ -390,6 +377,7 @@ describe('Entitlements API', () => {
           })
       }
 
+      const client = getClient();
       const promises = Array.from(
         { length: 10 },
         (_: unknown, i: number): Promise<string[]> =>
@@ -417,7 +405,7 @@ describe('Entitlements API', () => {
         .get('/v0/orgs/type-test-org/entitlements')
         .reply(200, mockResponse)
 
-      const entitlements = await client.getEntitlements('type-test-org')
+      const entitlements = await getClient().getEntitlements('type-test-org')
 
       // Verify TypeScript types are preserved
       entitlements.forEach((entitlement: Entitlement) => {
