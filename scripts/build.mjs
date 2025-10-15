@@ -5,11 +5,11 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { parseArgs } from 'node:util'
 
 import { build } from 'esbuild'
 
 import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
+import { parseArgs } from '@socketsecurity/registry/lib/argv/parse'
 import { logger } from '@socketsecurity/registry/lib/logger'
 import { printFooter, printHeader } from '@socketsecurity/registry/lib/stdio/header'
 
@@ -320,15 +320,19 @@ async function main() {
 
     if (exitCode !== 0) {
       if (!quiet) {
+        logger.log('')
         logger.error('Build failed')
       }
       process.exitCode = exitCode
     } else {
       if (!quiet) {
-        printFooter('Build completed successfully!')
+        logger.log('')
+        logger.success('Build completed successfully!')
+        printFooter()
       }
     }
   } catch (error) {
+    logger.log('')
     logger.error(`Build runner failed: ${error.message}`)
     process.exitCode = 1
   }

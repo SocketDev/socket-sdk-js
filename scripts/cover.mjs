@@ -7,10 +7,9 @@
  *   node scripts/cover.mjs [--code-only|--type-only|--percent|--summary]
  */
 
-import { parseArgs } from 'node:util'
-
+import { parseArgs } from '@socketsecurity/registry/lib/argv/parse'
 import { logger } from '@socketsecurity/registry/lib/logger'
-import { createSectionHeader } from '@socketsecurity/registry/lib/stdio/header'
+import { printHeader } from '@socketsecurity/registry/lib/stdio/header'
 
 import { runSequence } from './utils/run-command.mjs'
 
@@ -36,8 +35,8 @@ async function main() {
     }
 
     // Show header for coverage collection
-    console.log(createSectionHeader('Running Coverage', { width: 55, borderChar: '═' }))
-    console.log()
+    printHeader('Running Coverage')
+    logger.log('')
 
     if (values['type-only']) {
       logger.step('Collecting type coverage...')
@@ -45,7 +44,7 @@ async function main() {
         { args: ['exec', 'type-coverage'], command: 'pnpm' },
       ])
       if (exitCode === 0) {
-        console.log()
+        logger.log('')
         logger.success('Type coverage complete!')
       }
       process.exitCode = exitCode
@@ -59,7 +58,7 @@ async function main() {
         { args: ['scripts/test.mjs', '--skip-checks', '--cover', '--all'], command: 'node' },
       ])
       if (exitCode === 0) {
-        console.log()
+        logger.log('')
         logger.success('Code coverage complete!')
       }
       process.exitCode = exitCode
@@ -76,6 +75,7 @@ async function main() {
     ])
 
     if (codeExitCode !== 0) {
+      logger.log('')
       logger.error('Code coverage failed')
       process.exitCode = codeExitCode
       return
@@ -87,12 +87,13 @@ async function main() {
     ])
 
     if (typeExitCode === 0) {
-      console.log()
+      logger.log('')
       logger.success('Full coverage complete!')
     }
     process.exitCode = typeExitCode
   } catch (error) {
-    logger.error('Coverage collection failed:', error.message)
+    logger.log('')
+    logger.error(`Coverage collection failed: ${error.message}`)
     process.exitCode = 1
   }
 }

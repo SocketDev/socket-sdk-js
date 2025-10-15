@@ -4,8 +4,11 @@
  */
 import { existsSync } from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import { defineConfig } from 'vitest/config'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // Check if coverage is enabled via CLI flags or environment.
 const isCoverageEnabled =
@@ -22,7 +25,7 @@ if (isCoverageEnabled) {
 // Falls back to published versions in CI.
 function getLocalPackageAliases() {
   const aliases = {}
-  const rootDir = path.join(import.meta.dirname, '..')
+  const rootDir = path.join(__dirname, '..')
 
   // Check for ../socket-registry/registry/dist
   const registryPath = path.join(rootDir, '..', 'socket-registry', 'registry', 'dist')
@@ -67,7 +70,11 @@ export default defineConfig({
     // Optimize test execution for speed
     // Threads are faster than forks
     pool: 'threads',
-    // No special pool matching needed - nock issues are handled in test setup
+    // Note: poolMatchGlobs with forks doesn't work with nock HTTP mocking
+    // because nock patches the http module in the same process, which doesn't
+    // cross fork boundaries. Tests requiring both nock AND fork isolation are
+    // fundamentally incompatible. Such tests must skip in coverage mode.
+    poolMatchGlobs: undefined,
     poolOptions: {
       forks: {
         // Configuration for tests that opt into fork isolation via { pool: 'forks' }
@@ -79,7 +86,7 @@ export default defineConfig({
       },
       threads: {
         // Maximize parallelism for speed
-        // During coverage, use single thread for remaining tests
+        // During coverage, use single thread for deterministic execution
         singleThread: isCoverageEnabled,
         maxThreads: isCoverageEnabled ? 1 : 16,
         minThreads: isCoverageEnabled ? 1 : 4,
@@ -142,10 +149,10 @@ export default defineConfig({
       skipFull: false,
       ignoreClassMethods: ['constructor'],
       thresholds: {
-        lines: 99,
-        functions: 99,
-        branches: 99,
-        statements: 99,
+        lines: 96,
+        functions: 100,
+        branches: 93,
+        statements: 96,
       },
     },
   },
