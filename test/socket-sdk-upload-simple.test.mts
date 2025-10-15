@@ -6,18 +6,18 @@ import * as path from 'node:path'
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { setupNockEnvironment } from './utils/environment.mts'
 import { SocketSdk } from '../src/index'
 import { FAST_TEST_CONFIG } from './utils/fast-test-config.mts'
 
 describe('SocketSdk - Upload Manifest Coverage', () => {
+  setupNockEnvironment()
+
   let tempDir: string
   let packageJsonPath: string
   let sdk: SocketSdk
 
   beforeEach(() => {
-    nock.cleanAll()
-    nock.disableNetConnect()
-
     tempDir = mkdtempSync(path.join(tmpdir(), 'socket-sdk-upload-coverage-'))
     packageJsonPath = path.join(tempDir, 'package.json')
 
@@ -30,7 +30,6 @@ describe('SocketSdk - Upload Manifest Coverage', () => {
   })
 
   afterEach(() => {
-    nock.cleanAll()
     if (tempDir) {
       rmSync(tempDir, { recursive: true, force: true })
     }
@@ -38,11 +37,11 @@ describe('SocketSdk - Upload Manifest Coverage', () => {
 
   describe('uploadManifestFiles', () => {
     it('should successfully execute upload manifest files method', async () => {
-      nock('https://api.socket.dev')
+      const scope = nock('https://api.socket.dev')
         .post('/v0/orgs/test-org/upload-manifest-files')
         .reply(200, {
-          success: true,
-          uploadId: 'test-upload-123',
+          tarHash: 'abc123def456',
+          unmatchedFiles: [],
         })
 
       const result = await sdk.uploadManifestFiles('test-org', [
@@ -51,14 +50,20 @@ describe('SocketSdk - Upload Manifest Coverage', () => {
 
       expect(result.success).toBe(true)
       expect(result.status).toBe(200)
+      if (result.success) {
+        expect(result.data.tarHash).toBe('abc123def456')
+        expect(result.data.unmatchedFiles).toEqual([])
+      }
+      expect(scope.isDone()).toBe(true)
     })
 
     it('should handle errors in uploadManifestFiles', async () => {
-      nock('https://api.socket.dev')
+      const scope = nock('https://api.socket.dev')
         .post('/v0/orgs/test-org/upload-manifest-files')
         .reply(400, {
-          error: 'Bad Request',
-          message: 'Invalid manifest files',
+          error: {
+            message: 'Invalid manifest files',
+          },
         })
 
       const result = await sdk.uploadManifestFiles('test-org', [
@@ -68,7 +73,9 @@ describe('SocketSdk - Upload Manifest Coverage', () => {
       expect(result.success).toBe(false)
       if (!result.success) {
         expect(result.status).toBe(400)
+        expect(result.error).toContain('Invalid manifest files')
       }
+      expect(scope.isDone()).toBe(true)
     })
   })
 })
