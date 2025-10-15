@@ -51,7 +51,7 @@ async function main() {
 
   // Check after process completes to ensure all output has been captured.
   if (hasProvenanceDowngrade) {
-    logger.error('')
+    logger.log('')
     logger.fail(
       'ERROR: Provenance downgrade detected! Failing build to maintain security.',
     )

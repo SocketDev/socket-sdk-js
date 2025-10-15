@@ -2,7 +2,7 @@
 
 import { spawn, spawnSync } from 'node:child_process'
 
-import WIN32 from '@socketsecurity/registry/lib/constants/WIN32'
+import { WIN32 } from '@socketsecurity/registry/constants/platform'
 import { logger } from '@socketsecurity/registry/lib/logger'
 
 /**

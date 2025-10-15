@@ -3,12 +3,11 @@ import path from 'node:path'
 
 import colors from 'yoctocolors-cjs'
 
-import constants from '@socketsecurity/registry/lib/constants'
+import { getSpinner } from '@socketsecurity/registry/constants/process'
 import { getCodeCoverage } from '@socketsecurity/registry/lib/cover/code'
 import { getTypeCoverage } from '@socketsecurity/registry/lib/cover/type'
 import { logger } from '@socketsecurity/registry/lib/logger'
 import { parseArgs } from '@socketsecurity/registry/lib/parse-args'
-
 
 const indent = '  '
 
@@ -17,7 +16,7 @@ const indent = '  '
  * Supports multiple output formats: default (formatted), JSON, and simple.
  */
 async function logCoveragePercentage(argv) {
-  const { spinner } = constants
+  const spinner = getSpinner()
 
   // Check if coverage data exists to determine whether to generate or read it.
   const coverageJsonPath = path.join(

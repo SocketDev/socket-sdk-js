@@ -3,11 +3,10 @@
  * Removes build artifacts, caches, and other generated files.
  */
 
-import { parseArgs } from 'node:util'
-
 import { deleteAsync } from 'del'
 
 import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
+import { parseArgs } from '@socketsecurity/registry/lib/argv/parse'
 import { logger } from '@socketsecurity/registry/lib/logger'
 import { createFooter } from '@socketsecurity/registry/lib/stdio/footer'
 import { createHeader } from '@socketsecurity/registry/lib/stdio/header'
@@ -33,7 +32,7 @@ async function cleanDirectories(patterns, options = {}) {
     }
 
     if (!quiet) {
-      logger.done(`Cleaned ${name}`)
+      logger.clearLine().done(`Cleaned ${name}`)
     }
   }
 
@@ -154,15 +153,18 @@ async function main() {
 
     if (exitCode !== 0) {
       if (!quiet) {
+        logger.log('')
         logger.error('Clean failed')
       }
       process.exitCode = exitCode
     } else {
       if (!quiet) {
+        logger.log('')
         console.log(createFooter('Clean completed successfully!', { width: 56, borderChar: '=', color: 'green' }))
       }
     }
   } catch (error) {
+    logger.log('')
     logger.error(`Clean runner failed: ${error.message}`)
     process.exitCode = 1
   }

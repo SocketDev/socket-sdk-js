@@ -8,10 +8,10 @@ import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { parseArgs } from 'node:util'
 
+import { WIN32 } from '@socketsecurity/registry/constants/platform'
 import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
-import WIN32 from '@socketsecurity/registry/lib/constants/WIN32'
+import { parseArgs } from '@socketsecurity/registry/lib/argv/parse'
 import { logger } from '@socketsecurity/registry/lib/logger'
 import { onExit } from '@socketsecurity/registry/lib/signal-exit'
 import { spinner } from '@socketsecurity/registry/lib/spinner'
@@ -143,6 +143,8 @@ async function runCheck(options = {}) {
   }
   if (!quiet) {
     spinner.success('Code formatted')
+    // Ensure spinner is fully cleared and we're on a fresh line
+    process.stdout.write('\r\x1b[K')
   }
 
   // Run ESLint
@@ -170,6 +172,8 @@ async function runCheck(options = {}) {
   }
   if (!quiet) {
     spinner.success('Lint check passed')
+    // Ensure spinner is fully cleared and we're on a fresh line
+    process.stdout.write('\r\x1b[K')
   }
 
   // Run TypeScript check
@@ -196,6 +200,8 @@ async function runCheck(options = {}) {
   }
   if (!quiet) {
     spinner.success('TypeScript check passed')
+    // Ensure spinner is fully cleared and we're on a fresh line
+    process.stdout.write('\r\x1b[K')
   }
 
   return 0
@@ -252,10 +258,10 @@ async function runVitestSimple(args, options = {}) {
   // Suppress unhandled rejections from worker thread cleanup
   env.NODE_OPTIONS = '--max-old-space-size=2048 --unhandled-rejections=warn'
 
-  // Use unified runner if not quiet and TTY available
+  // Use interactive runner if not quiet and TTY available
   if (!quiet && interactive && process.stdin.isTTY) {
-    // Dynamically import the unified runner
-    const { runTests } = await import('./utils/unified-runner.mjs')
+    // Dynamically import the interactive runner
+    const { runTests } = await import('./utils/interactive-runner.mjs')
 
     const exitCode = await runTests(dotenvxPath, [
       '-q',
@@ -563,8 +569,7 @@ async function main() {
     const verbose = values.verbose
 
     if (!quiet) {
-      printHeader('Running Tests')
-      console.log()
+      printHeader('Test Runner')
     }
 
     // Handle aliases
@@ -578,15 +583,15 @@ async function main() {
       exitCode = await runCheck({ quiet })
       if (exitCode !== 0) {
         if (!quiet) {
-          logger.error('')
+          logger.log('')
           console.log('Checks failed')
         }
         process.exitCode = exitCode
         return
       }
       if (!quiet) {
+        logger.log('')
         logger.success('All checks passed')
-        console.log()
       }
     }
 
@@ -595,7 +600,7 @@ async function main() {
       exitCode = await runBuild()
       if (exitCode !== 0) {
         if (!quiet) {
-          logger.error('')
+          logger.log('')
           console.log('Build failed')
         }
         process.exitCode = exitCode
@@ -614,13 +619,13 @@ async function main() {
 
     if (exitCode !== 0) {
       if (!quiet) {
-        logger.error('')
+        logger.log('')
         console.log('Tests failed')
       }
       process.exitCode = exitCode
     } else {
       if (!quiet) {
-        console.log()
+        logger.log('')
         logger.success('All tests passed!')
       }
     }
@@ -629,7 +634,7 @@ async function main() {
     try {
       spinner.stop()
     } catch {}
-    logger.error('')
+    logger.log('')
     console.log(`Test runner failed: ${error.message}`)
     process.exitCode = 1
   } finally {

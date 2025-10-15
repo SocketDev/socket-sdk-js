@@ -5,8 +5,10 @@
 import { existsSync } from 'node:fs'
 import { builtinModules } from 'node:module'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const rootPath = path.join(import.meta.dirname, '..')
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const rootPath = path.join(__dirname, '..')
 const srcPath = path.join(rootPath, 'src')
 const distPath = path.join(rootPath, 'dist')
 
