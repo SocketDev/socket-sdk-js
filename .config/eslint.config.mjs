@@ -85,7 +85,7 @@ const sharedRules = {
   curly: 'error',
   'line-comment-position': ['error', { position: 'above' }],
   'no-await-in-loop': 'error',
-  'no-control-regex': 'error',
+  'no-control-regex': 'off',
   'no-empty': ['error', { allowEmptyCatch: true }],
   'no-new': 'error',
   'no-proto': 'error',
