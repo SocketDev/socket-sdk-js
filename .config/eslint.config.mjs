@@ -263,6 +263,7 @@ export default [
       // a slightly more comprehensive stack trace upon promise rejection.
       '@typescript-eslint/return-await': ['error', 'always'],
       // Disable the following rules because they don't play well with TypeScript.
+      'dot-notation': 'off',
       'no-redeclare': 'off',
       'no-unused-vars': 'off',
     },
