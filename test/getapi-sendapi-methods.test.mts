@@ -1,36 +1,24 @@
 /** @fileoverview Tests for generic getApi and sendApi method functionality. */
 
 import nock from 'nock'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
-import { isCoverageMode } from './utils/environment.mts'
 import { SocketSdk } from '../src/index'
+import { setupTestClient } from './utils/environment.mts'
 
 import type { SocketSdkGenericResult } from '../src/index'
 import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
 
-describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
-  let client: SocketSdk
+describe('getApi and sendApi Methods', () => {
+  const getClient = setupTestClient('test-api-token', { retries: 0 })
 
-  beforeEach(() => {
-    nock.cleanAll()
-    nock.disableNetConnect()
-    client = new SocketSdk('test-api-token')
-  })
-
-  afterEach(() => {
-    if (!isCoverageMode && !nock.isDone()) {
-      throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
-    }
-  })
-
-  describe.skipIf(isCoverageMode)('getApi', () => {
+  describe('getApi', () => {
     it('should return IncomingMessage when throws=true (default)', async () => {
       nock('https://api.socket.dev')
         .get('/v0/test-endpoint')
         .reply(200, 'success')
 
-      const result = await client.getApi('test-endpoint')
+      const result = await getClient().getApi('test-endpoint')
 
       expect(result).toBeDefined()
       expect((result as IncomingMessage).statusCode).toBe(200)
@@ -41,7 +29,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .get('/v0/test-endpoint')
         .reply(200, 'success')
 
-      const result = (await client.getApi('test-endpoint', {
+      const result = (await getClient().getApi('test-endpoint', {
         throws: false,
       })) as SocketSdkGenericResult<IncomingMessage>
 
@@ -53,11 +41,11 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
     })
 
     it('should throw error when throws=true and request fails', async () => {
-      await expect(client.getApi('nonexistent-endpoint')).rejects.toThrow()
+      await expect(getClient().getApi('nonexistent-endpoint')).rejects.toThrow()
     })
 
     it('should return error CResult when throws=false and request fails', async () => {
-      const result = (await client.getApi('nonexistent-endpoint', {
+      const result = (await getClient().getApi('nonexistent-endpoint', {
         throws: false,
       })) as SocketSdkGenericResult<IncomingMessage>
 
@@ -93,13 +81,13 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
     })
   })
 
-  describe.skipIf(isCoverageMode)('getApi with responseType: text', () => {
+  describe('getApi with responseType: text', () => {
     it('should return text when throws=true (default) and request succeeds', async () => {
       nock('https://api.socket.dev')
         .get('/v0/test-text')
         .reply(200, 'Hello, world!')
 
-      const result = await client.getApi<string>('test-text', {
+      const result = await getClient().getApi<string>('test-text', {
         responseType: 'text',
       })
 
@@ -111,7 +99,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .get('/v0/test-text')
         .reply(200, 'Hello, world!')
 
-      const result = (await client.getApi<string>('test-text', {
+      const result = (await getClient().getApi<string>('test-text', {
         responseType: 'text',
         throws: false,
       })) as SocketSdkGenericResult<string>
@@ -128,7 +116,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .reply(404, 'Not found')
 
       await expect(
-        client.getApi<string>('test-error', { responseType: 'text' }),
+        getClient().getApi<string>('test-error', { responseType: 'text' }),
       ).rejects.toThrow(/Socket API Request failed \(404\)/)
     })
 
@@ -137,7 +125,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .get('/v0/test-error')
         .reply(404, 'Not found')
 
-      const result = (await client.getApi<string>('test-error', {
+      const result = (await getClient().getApi<string>('test-error', {
         responseType: 'text',
         throws: false,
       })) as SocketSdkGenericResult<string>
@@ -153,7 +141,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
     it('should handle empty response body', async () => {
       nock('https://api.socket.dev').get('/v0/empty').reply(200, '')
 
-      const result = (await client.getApi<string>('empty', {
+      const result = (await getClient().getApi<string>('empty', {
         responseType: 'text',
         throws: false,
       })) as SocketSdkGenericResult<string>
@@ -165,7 +153,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
     })
 
     it('should handle network errors gracefully with throws=false', async () => {
-      const result = (await client.getApi<string>('network-error', {
+      const result = (await getClient().getApi<string>('network-error', {
         responseType: 'text',
         throws: false,
       })) as SocketSdkGenericResult<string>
@@ -178,12 +166,12 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
     })
   })
 
-  describe.skipIf(isCoverageMode)('getApi with responseType: json', () => {
+  describe('getApi with responseType: json', () => {
     it('should return parsed JSON when throws=true (default)', async () => {
       const testData = { message: 'Hello, JSON!' }
       nock('https://api.socket.dev').get('/v0/test-json').reply(200, testData)
 
-      const result = await client.getApi<typeof testData>('test-json', {
+      const result = await getClient().getApi<typeof testData>('test-json', {
         responseType: 'json',
       })
 
@@ -194,7 +182,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
       const testData = { message: 'Hello, JSON!' }
       nock('https://api.socket.dev').get('/v0/test-json').reply(200, testData)
 
-      const result = (await client.getApi<typeof testData>('test-json', {
+      const result = (await getClient().getApi<typeof testData>('test-json', {
         responseType: 'json',
         throws: false,
       })) as SocketSdkGenericResult<typeof testData>
@@ -217,7 +205,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .get('/v0/complex-json')
         .reply(200, complexData)
 
-      const result = (await client.getApi<typeof complexData>('complex-json', {
+      const result = (await getClient().getApi<typeof complexData>('complex-json', {
         responseType: 'json',
         throws: false,
       })) as SocketSdkGenericResult<typeof complexData>
@@ -234,7 +222,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .reply(200, 'invalid json content')
 
       await expect(
-        client.getApi('invalid-json', { responseType: 'json' }),
+        getClient().getApi('invalid-json', { responseType: 'json' }),
       ).rejects.toThrow()
     })
 
@@ -243,7 +231,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .get('/v0/invalid-json')
         .reply(200, 'invalid json content')
 
-      const result = (await client.getApi('invalid-json', {
+      const result = (await getClient().getApi('invalid-json', {
         responseType: 'json',
         throws: false,
       })) as SocketSdkGenericResult<unknown>
@@ -260,7 +248,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .get('/v0/api-error')
         .reply(400, { error: 'Bad Request' })
 
-      const result = (await client.getApi('api-error', {
+      const result = (await getClient().getApi('api-error', {
         responseType: 'json',
         throws: false,
       })) as SocketSdkGenericResult<unknown>
@@ -273,7 +261,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
     })
   })
 
-  describe.skipIf(isCoverageMode)('sendApi', () => {
+  describe('sendApi', () => {
     it('should send POST request with JSON body when throws=true (default)', async () => {
       const requestData = { name: 'Test', value: 42 }
       const responseData = { id: 123, status: 'created' }
@@ -282,7 +270,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .post('/v0/create', requestData)
         .reply(201, responseData)
 
-      const result = await client.sendApi<typeof responseData>('create', {
+      const result = await getClient().sendApi<typeof responseData>('create', {
         method: 'POST',
         body: requestData,
       })
@@ -298,7 +286,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .post('/v0/create', requestData)
         .reply(201, responseData)
 
-      const result = (await client.sendApi<typeof responseData>('create', {
+      const result = (await getClient().sendApi<typeof responseData>('create', {
         method: 'POST',
         body: requestData,
         throws: false,
@@ -318,7 +306,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .put('/v0/update/123', requestData)
         .reply(200, responseData)
 
-      const result = (await client.sendApi<typeof responseData>('update/123', {
+      const result = (await getClient().sendApi<typeof responseData>('update/123', {
         method: 'PUT',
         body: requestData,
         throws: false,
@@ -337,7 +325,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .post('/v0/process')
         .reply(200, responseData)
 
-      const result = (await client.sendApi<typeof responseData>('process', {
+      const result = (await getClient().sendApi<typeof responseData>('process', {
         body: {},
         throws: false,
       })) as SocketSdkGenericResult<typeof responseData>
@@ -356,7 +344,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .reply(400, { error: 'Validation failed' })
 
       await expect(
-        client.sendApi('fail', {
+        getClient().sendApi('fail', {
           body: requestData,
         }),
       ).rejects.toThrow(/Socket API Request failed \(400\)/)
@@ -369,7 +357,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .post('/v0/fail', requestData)
         .reply(422, { error: 'Unprocessable Entity' })
 
-      const result = (await client.sendApi('fail', {
+      const result = (await getClient().sendApi('fail', {
         body: requestData,
         throws: false,
       })) as SocketSdkGenericResult<unknown>
@@ -389,7 +377,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .post('/v0/invalid-response')
         .reply(200, 'not valid json')
 
-      const result = (await client.sendApi('invalid-response', {
+      const result = (await getClient().sendApi('invalid-response', {
         body: { test: true },
         throws: false,
       })) as SocketSdkGenericResult<unknown>
@@ -412,7 +400,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
           return [200, { received: true }]
         })
 
-      await client.sendApi('headers-test', {
+      await getClient().sendApi('headers-test', {
         body: requestData,
         throws: false,
       })
@@ -421,7 +409,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
     })
 
     it('should handle network errors gracefully', async () => {
-      const result = (await client.sendApi('network-fail', {
+      const result = (await getClient().sendApi('network-fail', {
         throws: false,
       })) as SocketSdkGenericResult<unknown>
 
@@ -433,7 +421,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
     })
   })
 
-  describe.skipIf(isCoverageMode)('Edge case error handling for coverage', () => {
+  describe('Edge case error handling for coverage', () => {
     it('should handle error with long response text in JSON parsing error', async () => {
       nock('https://api.socket.dev')
         .get('/v0/long-invalid-json')
@@ -443,7 +431,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
             ' - this is a very long invalid json response that should be truncated',
         )
 
-      const result = (await client.getApi('long-invalid-json', {
+      const result = (await getClient().getApi('long-invalid-json', {
         responseType: 'json',
         throws: false,
       })) as SocketSdkGenericResult<unknown>
@@ -460,7 +448,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .get('/v0/no-match-json')
         .reply(200, 'invalid json')
 
-      const result = (await client.getApi('no-match-json', {
+      const result = (await getClient().getApi('no-match-json', {
         responseType: 'json',
         throws: false,
       })) as SocketSdkGenericResult<unknown>
@@ -473,7 +461,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
     })
 
     it('should handle null/undefined errors in sendApi', async () => {
-      const result = (await client.sendApi('null-error', {
+      const result = (await getClient().sendApi('null-error', {
         throws: false,
       })) as SocketSdkGenericResult<unknown>
 
@@ -489,7 +477,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .get('/v0/empty-preview-json')
         .reply(200, '')
 
-      const result = (await client.getApi('empty-preview-json', {
+      const result = (await getClient().getApi('empty-preview-json', {
         responseType: 'json',
         throws: false,
       })) as SocketSdkGenericResult<unknown>
@@ -507,7 +495,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .get('/v0/falsy-error')
         .reply(400, 'Bad Request')
 
-      const result = (await client.getApi('falsy-error', {
+      const result = (await getClient().getApi('falsy-error', {
         throws: false,
       })) as SocketSdkGenericResult<unknown>
 
@@ -523,7 +511,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .get('/v0/short-invalid-json')
         .reply(200, 'short response')
 
-      const result = (await client.getApi('short-invalid-json', {
+      const result = (await getClient().getApi('short-invalid-json', {
         responseType: 'json',
         throws: false,
       })) as SocketSdkGenericResult<unknown>
@@ -538,7 +526,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
 
     it('should handle undefined errors in error result creation', async () => {
       // Test the null/undefined error path more specifically
-      const result = (await client.sendApi('nonexistent-endpoint', {
+      const result = (await getClient().sendApi('nonexistent-endpoint', {
         throws: false,
       })) as SocketSdkGenericResult<unknown>
 
@@ -555,7 +543,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .get('/v0/no-match-error')
         .reply(200, 'invalid')
 
-      const result = (await client.getApi('no-match-error', {
+      const result = (await getClient().getApi('no-match-error', {
         responseType: 'json',
         throws: false,
       })) as SocketSdkGenericResult<unknown>
@@ -571,7 +559,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
       // Test when responseText.slice(0, 100) returns empty string
       nock('https://api.socket.dev').get('/v0/empty-slice').reply(200, '')
 
-      const result = (await client.getApi('empty-slice', {
+      const result = (await getClient().getApi('empty-slice', {
         responseType: 'json',
         throws: false,
       })) as SocketSdkGenericResult<unknown>
@@ -582,7 +570,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
 
     it('should handle null error in sendApi error creation', async () => {
       // Simulate a scenario that creates an error that becomes null when stringified
-      const result = (await client.sendApi('null-error-path', {
+      const result = (await getClient().sendApi('null-error-path', {
         throws: false,
       })) as SocketSdkGenericResult<unknown>
 
@@ -595,7 +583,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
 
     it('should handle empty error string in sendApi', async () => {
       // This will test the errStr || UNKNOWN_ERROR branch
-      const result = (await client.sendApi('empty-error-string', {
+      const result = (await getClient().sendApi('empty-error-string', {
         throws: false,
       })) as SocketSdkGenericResult<unknown>
 
@@ -608,7 +596,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
 
     it('should handle falsy error parameter in getApi error creation', async () => {
       // Test the e ? String(e).trim() : '' branch with falsy e
-      const result = (await client.getApi('falsy-error-param', {
+      const result = (await getClient().getApi('falsy-error-param', {
         throws: false,
       })) as SocketSdkGenericResult<unknown>
 
@@ -625,7 +613,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
         .get('/v0/no-capture-group')
         .reply(200, 'malformed json {')
 
-      const result = (await client.getApi('no-capture-group', {
+      const result = (await getClient().getApi('no-capture-group', {
         responseType: 'json',
         throws: false,
       })) as SocketSdkGenericResult<unknown>
@@ -641,7 +629,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
       // Create a scenario that tests trim() on an empty response
       nock('https://api.socket.dev').get('/v0/empty-trim').reply(200, '   ')
 
-      const result = (await client.getApi('empty-trim', {
+      const result = (await getClient().getApi('empty-trim', {
         responseType: 'json',
         throws: false,
       })) as SocketSdkGenericResult<unknown>
@@ -657,7 +645,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
       // Test responseText.slice(0, 100) || '' where slice returns empty
       nock('https://api.socket.dev').get('/v0/preview-edge').reply(200, '')
 
-      const result = (await client.getApi('preview-edge', {
+      const result = (await getClient().getApi('preview-edge', {
         responseType: 'json',
         throws: false,
       })) as SocketSdkGenericResult<unknown>
@@ -668,7 +656,7 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
 
     it('should handle error that becomes empty string when converted', async () => {
       // Test the errStr || UNKNOWN_ERROR branches more directly
-      const result = (await client.sendApi('trigger-empty-string-error', {
+      const result = (await getClient().sendApi('trigger-empty-string-error', {
         throws: false,
       })) as SocketSdkGenericResult<unknown>
 
@@ -680,13 +668,13 @@ describe.skipIf(isCoverageMode)('getApi and sendApi Methods', () => {
     })
   })
 
-  describe.skipIf(isCoverageMode)('Integration with existing patterns', () => {
+  describe('Integration with existing patterns', () => {
     it('should handle fallback responseType for default response handling', async () => {
       nock('https://api.socket.dev')
         .get('/v0/fallback-test')
         .reply(200, 'fallback response')
 
-      const result = (await client.getApi('fallback-test', {
+      const result = (await getClient().getApi('fallback-test', {
         responseType: 'invalid' as any,
         throws: false,
       })) as SocketSdkGenericResult<IncomingMessage>
