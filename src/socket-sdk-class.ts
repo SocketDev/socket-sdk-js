@@ -26,6 +26,7 @@ import {
   MAX_HTTP_TIMEOUT,
   MAX_STREAM_SIZE,
   MIN_HTTP_TIMEOUT,
+  SOCKET_PUBLIC_BLOB_STORE_URL,
   httpAgentNames,
 } from './constants'
 import {
@@ -2440,6 +2441,73 @@ export class SocketSdk {
     )
 
     return data as PatchViewResponse
+  }
+
+  /**
+   * Download patch file content by hash.
+   *
+   * Downloads the actual patched file content from the public Socket blob store.
+   * This is used after calling viewPatch() to get the patch metadata.
+   * No authentication is required as patch blobs are publicly accessible.
+   *
+   * @param hash - The blob hash in SSRI (sha256-base64) or hex format
+   * @param options - Optional configuration
+   * @param options.baseUrl - Override blob store URL (for testing)
+   * @returns Promise<string> - The patch file content as UTF-8 string
+   * @throws Error if blob not found (404) or download fails
+   *
+   * @example
+   * ```typescript
+   * const sdk = new SocketSdk('your-api-token')
+   * // First get patch metadata
+   * const patch = await sdk.viewPatch('my-org', 'patch-uuid')
+   * // Then download the actual patched file
+   * const fileContent = await sdk.downloadPatch(patch.files['index.js'].socketBlob)
+   * ```
+   */
+  async downloadPatch(
+    hash: string,
+    options?: { baseUrl?: string },
+  ): Promise<string> {
+    const https = await import('node:https')
+    const http = await import('node:http')
+    const blobPath = `/blob/${encodeURIComponent(hash)}`
+    const blobBaseUrl = options?.baseUrl || SOCKET_PUBLIC_BLOB_STORE_URL
+    const url = `${blobBaseUrl}${blobPath}`
+    const isHttps = url.startsWith('https:')
+
+    return await new Promise((resolve, reject) => {
+      const client = isHttps ? https : http
+      client
+        .get(url, res => {
+          if (res.statusCode === 404) {
+            reject(new Error(`Blob not found: ${hash}`))
+            return
+          }
+          if (res.statusCode !== 200) {
+            reject(
+              new Error(
+                `Failed to download blob: ${res.statusCode} ${res.statusMessage}`,
+              ),
+            )
+            return
+          }
+
+          let data = ''
+          res.on('data', chunk => {
+            data += chunk
+          })
+          res.on('end', () => {
+            resolve(data)
+          })
+          res.on('error', err => {
+            reject(err)
+          })
+        })
+        .on('error', err => {
+          reject(new Error(`Error downloading blob ${hash}: ${err.message}`))
+        })
+    })
   }
 }
 
