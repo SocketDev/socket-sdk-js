@@ -115,7 +115,10 @@ export function getTestsToRun(options = {}) {
 
     // Test files always run themselves
     if (normalized.startsWith('test/') && normalized.includes('.test.')) {
-      testFiles.add(file)
+      // Skip deleted files.
+      if (existsSync(path.join(rootPath, file))) {
+        testFiles.add(file)
+      }
       continue
     }
 
@@ -128,7 +131,10 @@ export function getTestsToRun(options = {}) {
         break
       }
       for (const test of tests) {
-        testFiles.add(test)
+        // Skip deleted files.
+        if (existsSync(path.join(rootPath, test))) {
+          testFiles.add(test)
+        }
       }
       continue
     }
