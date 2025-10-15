@@ -8,14 +8,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { setupNockEnvironment } from './utils/environment.mts'
 import { SocketSdk } from '../src/index'
-import { FAST_TEST_CONFIG } from './utils/fast-test-config.mts'
+import { FAST_TEST_CONFIG, NO_RETRY_CONFIG } from './utils/fast-test-config.mts'
 
 import type { IncomingHttpHeaders } from 'node:http'
 
-describe('SocketSdk - Batch Operations', () => {
-  setupNockEnvironment()
-
+describe.sequential('SocketSdk - Batch Operations', () => {
   describe('Reachability', () => {
+    setupNockEnvironment()
+
     it('should detect reachable packages in batch fetch', async () => {
       const mockResponse = {
         purl: 'pkg:npm/express@4.19.2',
@@ -103,7 +103,7 @@ describe('SocketSdk - Batch Operations', () => {
         .post('/v0/purl')
         .reply(200, JSON.stringify(mockResponse) + '\n')
 
-      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
+      const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
       const res = await client.batchPackageFetch({
         components: [{ purl: 'pkg:npm/lodash@4.17.21' }],
       })
@@ -146,7 +146,7 @@ describe('SocketSdk - Batch Operations', () => {
         .post('/v0/purl')
         .reply(200, responses.map(r => JSON.stringify(r)).join('\n'))
 
-      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
+      const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
       const res = await client.batchPackageFetch({
         components: [
           { purl: 'pkg:npm/react@18.0.0' },
@@ -196,7 +196,7 @@ describe('SocketSdk - Batch Operations', () => {
         .post('/v0/purl')
         .reply(200, '{"purl":"pkg:npm/test@1.0.0","na')
 
-      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
+      const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
       const res = await client.batchPackageFetch({
         components: [{ purl: 'pkg:npm/test@1.0.0' }],
       })
@@ -320,7 +320,7 @@ describe('SocketSdk - Batch Operations', () => {
 
       nock('https://api.socket.dev').post('/v0/purl').reply(200, responseText)
 
-      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
+      const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
       const res = await client.batchPackageFetch({
         components: [
           { purl: 'pkg:npm/pkg1@1.0.0' },
@@ -338,6 +338,8 @@ describe('SocketSdk - Batch Operations', () => {
   })
 
   describe('Multi-part Upload', () => {
+    setupNockEnvironment()
+
     let tempDir: string
     let packageJsonPath: string
     let packageLockPath: string
@@ -415,7 +417,7 @@ describe('SocketSdk - Batch Operations', () => {
           ]
         })
 
-      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
+      const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
       const res = await client.createDependenciesSnapshot(
         [packageJsonPath, packageLockPath],
         { pathsRelativeTo: tempDir },
@@ -455,7 +457,7 @@ describe('SocketSdk - Batch Operations', () => {
           ]
         })
 
-      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
+      const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
       const res = await client.createOrgFullScan(
         'test-org',
         [packageJsonPath, packageLockPath],
@@ -481,7 +483,7 @@ describe('SocketSdk - Batch Operations', () => {
         .post('/v0/dependencies/upload')
         .replyWithError(new Error('socket hang up'))
 
-      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
+      const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
 
       await expect(
         client.createDependenciesSnapshot([packageJsonPath], {
@@ -494,7 +496,7 @@ describe('SocketSdk - Batch Operations', () => {
       const nonExistentPath = path.join(tempDir, 'non-existent.json')
 
       // The SDK will attempt to read the file and fail with ENOENT
-      const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
+      const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
 
       await expect(
         client.createDependenciesSnapshot([nonExistentPath], {
