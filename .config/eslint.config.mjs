@@ -16,7 +16,7 @@ import unicornPlugin from 'eslint-plugin-unicorn'
 import globals from 'globals'
 import tsEslint from 'typescript-eslint'
 
-import constants from '@socketsecurity/registry/lib/constants'
+import { getMaintainedNodeVersions } from '@socketsecurity/registry/constants/node'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -64,15 +64,20 @@ const sharedRules = {
     {
       ignores: ['promise-withresolvers'],
       // Lazily access constants.maintainedNodeVersions.
-      version: constants.maintainedNodeVersions.current,
+      version: getMaintainedNodeVersions().current,
     },
   ],
   'n/no-unsupported-features/node-builtins': [
     'error',
     {
-      ignores: ['test', 'test.describe'],
+      ignores: [
+        'test',
+        'test.describe',
+        'ReadableStream',
+        'events.getMaxListeners',
+      ],
       // Lazily access constants.maintainedNodeVersions.
-      version: constants.maintainedNodeVersions.current,
+      version: getMaintainedNodeVersions().current,
     },
   ],
   'n/prefer-node-protocol': 'error',

@@ -63,12 +63,70 @@ Documentation organized alphabetically within functional categories
 - **Destructuring**: Alphabetical (`const { apiKey, baseUrl, timeout }`)
 
 ### Testing
-- **Structure**: `test/unit/`, `test/integration/`, `test/fixtures/`, `test/utils/`
-- **Utils**: `environment.mts`, `fixtures.mts`, `mock-helpers.mts`, `constants.mts`
+
+#### Test Structure
+- **Directories**: `test/` - Test files, `test/utils/` - Shared utilities
 - **Naming**: Descriptive names
   - ✅ `socket-sdk-upload-manifest.test.mts`, `describe('SocketSdk - Upload Manifest')`
   - ❌ `test1.test.mts`, `describe('tests')`
-- **Best practices**: Clean HTTP mocks (nock), test success + error paths, cross-platform
+- **Consolidated files**: `socket-sdk-api-methods.coverage.test.mts` - Comprehensive API method tests
+
+#### Test Helpers (`test/utils/environment.mts`)
+
+**setupTestClient(token?, options?)** - Combined nock setup + client creation (RECOMMENDED)
+```typescript
+import { setupTestClient } from './utils/environment.mts'
+
+describe('My tests', () => {
+  const getClient = setupTestClient('test-api-token', { retries: 0 })
+
+  it('should work', async () => {
+    const client = getClient()
+    // ... test code
+  })
+})
+```
+
+**setupTestEnvironment()** - Just nock setup (for custom client creation)
+```typescript
+import { setupTestEnvironment, createTestClient } from './utils/environment.mts'
+
+describe('My tests', () => {
+  setupTestEnvironment()
+
+  it('should work', async () => {
+    const client = createTestClient('custom-token')
+    // ... test code
+  })
+})
+```
+
+**createTestClient(token?, options?)** - Just client creation (no nock setup)
+```typescript
+const client = createTestClient('test-token', { retries: 0 })
+```
+
+**isCoverageMode** - Flag for coverage detection
+```typescript
+if (isCoverageMode) {
+  // Skip tests that don't work well in coverage mode
+}
+```
+
+#### Running Tests
+- **All tests**: `pnpm test`
+- **Specific file**: `pnpm run test:run <file>` (glob support)
+- **Coverage**: `pnpm run cover` or `pnpm run test:unit:coverage`
+- **Coverage percentage**: `pnpm run coverage:percent`
+
+#### Best Practices
+- **Use setupTestClient()**: Combines nock setup and client creation in one call
+- **Use getClient() pattern**: Access client instance returned by setupTestClient()
+- **Mock HTTP with nock**: All HTTP requests must be mocked
+- **Auto cleanup**: Nock mocks cleaned automatically in beforeEach/afterEach
+- **Test both paths**: Success + error paths for all methods
+- **Cross-platform**: Test path handling on Windows and Unix
+- **Follow patterns**: See `test/getapi-sendapi-methods.test.mts` for examples
 
 ### CI Testing
 - **🚨 MANDATORY**: `SocketDev/socket-registry/.github/workflows/ci.yml@<SHA>` with full SHA

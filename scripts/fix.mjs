@@ -1,40 +1,34 @@
 /**
- * @fileoverview Auto-fix script for the SDK.
- * Runs linting with auto-fix enabled.
- *
- * Usage:
- *   node scripts/fix.mjs
+ * @fileoverview Fix script that runs lint with auto-fix enabled.
  */
 
-import { logger } from '@socketsecurity/registry/lib/logger'
-import { printFooter, printHeader } from '@socketsecurity/registry/lib/stdio/header'
+import { spawn } from 'node:child_process'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-import { runSequence } from './utils/run-command.mjs'
+import colors from 'yoctocolors-cjs'
 
-async function main() {
-  try {
-    printHeader('Running Auto-fix')
+import { printHeader } from '@socketsecurity/registry/lib/stdio/header'
 
-    const commands = [
-      {
-        args: ['run', 'lint', '--fix'],
-        command: 'pnpm',
-      },
-    ]
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const rootPath = path.join(__dirname, '..')
 
-    const exitCode = await runSequence(commands)
+printHeader('Running Auto-fix')
 
-    if (exitCode !== 0) {
-      logger.error('Some fixes could not be applied')
-      process.exitCode = 1
-    } else {
-      logger.success('Linting passed')
-      printFooter()
-    }
-  } catch (error) {
-    logger.error(`Fix failed: ${error.message}`)
-    process.exitCode = 1
-  }
-}
+// Pass through to lint.mjs with --fix flag.
+const args = ['run', 'lint', '--fix', ...process.argv.slice(2)]
 
-main().catch(console.error)
+const child = spawn('pnpm', args, {
+  stdio: 'inherit',
+  cwd: rootPath,
+  ...(process.platform === 'win32' && { shell: true }),
+})
+
+child.on('exit', code => {
+  process.exitCode = code || 0
+})
+
+child.on('error', error => {
+  console.error(colors.red(`✗ Fix script failed: ${error.message}`))
+  process.exitCode = 1
+})

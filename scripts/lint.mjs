@@ -5,9 +5,9 @@
 
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { parseArgs } from 'node:util'
 
 import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
+import { parseArgs } from '@socketsecurity/registry/lib/argv/parse'
 import { getChangedFiles, getStagedFiles } from '@socketsecurity/registry/lib/git'
 import { logger } from '@socketsecurity/registry/lib/logger'
 import { printHeader } from '@socketsecurity/registry/lib/stdio/header'
@@ -101,7 +101,7 @@ async function runLintOnFiles(files, options = {}) {
   const args = [
     'exec',
     'eslint',
-    '--config',
+    '-c',
     '.config/eslint.config.mjs',
     '--report-unused-disable-directives',
     ...(fix ? ['--fix'] : []),
@@ -114,7 +114,7 @@ async function runLintOnFiles(files, options = {}) {
     // When fixing, non-zero exit codes are normal if fixes were applied
     if (!fix || (result.stderr && result.stderr.trim().length > 0)) {
       if (!quiet) {
-        logger.error(`Linting failed`)
+        logger.error('Linting failed')
       }
       if (result.stderr) {
         console.error(result.stderr)
@@ -127,9 +127,8 @@ async function runLintOnFiles(files, options = {}) {
   }
 
   if (!quiet) {
-    logger.done(`Linting passed`)
-    // Add newline after spinner completes
-    console.log()
+    logger.clearLine().done('Linting passed')
+    logger.log('')
   }
 
   return 0
@@ -148,7 +147,7 @@ async function runLintOnAll(options = {}) {
   const args = [
     'exec',
     'eslint',
-    '--config',
+    '-c',
     '.config/eslint.config.mjs',
     '--report-unused-disable-directives',
     ...(fix ? ['--fix'] : []),
@@ -174,9 +173,8 @@ async function runLintOnAll(options = {}) {
   }
 
   if (!quiet) {
-    logger.done('Linting passed')
-    // Add newline after spinner completes
-    console.log()
+    logger.clearLine().done('Linting passed')
+    logger.log('')
   }
 
   return 0
@@ -296,8 +294,7 @@ async function main() {
     const quiet = isQuiet(values)
 
     if (!quiet) {
-      printHeader('Running Linter')
-      console.log()
+      printHeader('Lint Runner')
     }
 
     let exitCode = 0
@@ -344,13 +341,13 @@ async function main() {
 
     if (exitCode !== 0) {
       if (!quiet) {
-        logger.error('')
+        logger.log('')
         console.log('Lint failed')
       }
       process.exitCode = exitCode
     } else {
       if (!quiet) {
-        console.log()
+        logger.log('')
         logger.success('All lint checks passed!')
       }
     }
