@@ -12,6 +12,20 @@ describe('Query Parameter Normalization', () => {
       expect(result.toString()).toBe('default_branch=main&other=value')
     })
 
+    it('should convert perPage parameter to per_page', () => {
+      const params = { perPage: '50', other: 'value' }
+      const result = queryToSearchParams(params)
+
+      expect(result.toString()).toBe('per_page=50&other=value')
+    })
+
+    it('should filter out empty string values', () => {
+      const params = { key1: '', key2: 'value', key3: '' }
+      const result = queryToSearchParams(params)
+
+      expect(result.toString()).toBe('key2=value')
+    })
+
     it('should handle multiple parameters including defaultBranch', () => {
       const params = {
         defaultBranch: 'develop',

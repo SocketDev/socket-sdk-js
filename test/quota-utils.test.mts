@@ -233,4 +233,24 @@ describe('Quota Utils', () => {
       }
     })
   })
+
+  describe('Error handling', () => {
+    it('should throw for unknown method in getMethodRequirements', () => {
+      expect(() => getMethodRequirements('unknownMethodName')).toThrow(
+        'Unknown SDK method',
+      )
+    })
+
+    it('should throw for unknown method in getQuotaCost', () => {
+      expect(() => getQuotaCost('anotherUnknownMethod')).toThrow(
+        'Unknown SDK method',
+      )
+    })
+
+    it('should throw for unknown method in getRequiredPermissions', () => {
+      expect(() => getRequiredPermissions('yetAnotherUnknownMethod')).toThrow(
+        'Unknown SDK method',
+      )
+    })
+  })
 })
