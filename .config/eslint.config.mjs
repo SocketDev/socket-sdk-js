@@ -16,11 +16,12 @@ import unicornPlugin from 'eslint-plugin-unicorn'
 import globals from 'globals'
 import tsEslint from 'typescript-eslint'
 
-import { getMaintainedNodeVersions } from '@socketsecurity/registry/constants/node'
-
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const require = createRequire(import.meta.url)
+
+// Get maintained Node versions - inline to avoid registry dependency
+const getMaintainedNodeVersions = () => ['18', '20', '22', '24']
 
 const rootPath = path.dirname(__dirname)
 const rootTsConfigPath = path.join(__dirname, 'tsconfig.json')
@@ -115,6 +116,13 @@ const sharedRulesForImportX = {
       js: 'ignorePackages',
       json: 'always',
       mjs: 'ignorePackages',
+    },
+  ],
+  'import-x/no-unresolved': [
+    'error',
+    {
+      // Ignore @socketsecurity/registry subpaths - resolved by runtime loader
+      ignore: ['^@socketsecurity/registry/'],
     },
   ],
   'import-x/order': [
