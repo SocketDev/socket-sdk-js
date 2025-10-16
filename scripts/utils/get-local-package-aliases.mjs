@@ -13,7 +13,7 @@ import path from 'node:path'
  * Falls back to published versions in CI or when packages don't exist.
  *
  * @param {string} [rootDir] - The root directory of the current project. Defaults to inferring from caller location.
- * @returns {Record<string, string>} Package aliases mapping (package root, not dist).
+ * @returns {Record<string, string>} Package aliases mapping (to dist folders for build tools).
  */
 export function getLocalPackageAliases(rootDir) {
   const aliases = {}
@@ -21,21 +21,21 @@ export function getLocalPackageAliases(rootDir) {
   // If no rootDir provided, try to infer from stack trace or use process.cwd().
   const baseDir = rootDir || process.cwd()
 
-  // Check for ../socket-registry/registry.
-  const registryPath = path.join(baseDir, '..', 'socket-registry', 'registry')
-  if (existsSync(path.join(registryPath, 'package.json'))) {
+  // Check for ../socket-registry/registry/dist.
+  const registryPath = path.join(baseDir, '..', 'socket-registry', 'registry', 'dist')
+  if (existsSync(path.join(registryPath, '../package.json'))) {
     aliases['@socketsecurity/registry'] = registryPath
   }
 
-  // Check for ../socket-packageurl-js.
-  const packageurlPath = path.join(baseDir, '..', 'socket-packageurl-js')
-  if (existsSync(path.join(packageurlPath, 'package.json'))) {
+  // Check for ../socket-packageurl-js/dist.
+  const packageurlPath = path.join(baseDir, '..', 'socket-packageurl-js', 'dist')
+  if (existsSync(path.join(packageurlPath, '../package.json'))) {
     aliases['@socketregistry/packageurl-js'] = packageurlPath
   }
 
-  // Check for ../socket-sdk-js.
-  const sdkPath = path.join(baseDir, '..', 'socket-sdk-js')
-  if (existsSync(path.join(sdkPath, 'package.json'))) {
+  // Check for ../socket-sdk-js/dist.
+  const sdkPath = path.join(baseDir, '..', 'socket-sdk-js', 'dist')
+  if (existsSync(path.join(sdkPath, '../package.json'))) {
     aliases['@socketsecurity/sdk'] = sdkPath
   }
 
