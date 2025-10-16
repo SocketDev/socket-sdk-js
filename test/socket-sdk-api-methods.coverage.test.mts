@@ -41,7 +41,14 @@ describe('SocketSdk - API Methods Coverage', () => {
       respondToRequest()
 
       function respondToRequest() {
-        // Set common headers
+        // Handle error cases first
+        if (url.includes('/patches') && url.includes('invalid-scan')) {
+          res.writeHead(404, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ error: 'Not Found' }))
+          return
+        }
+
+        // Set common headers for success responses
         res.writeHead(200, { 'Content-Type': 'application/json' })
 
         // Route requests to appropriate responses
@@ -592,6 +599,54 @@ describe('SocketSdk - API Methods Coverage', () => {
       // Just verify it executes without throwing
       const stream = await client.streamPatchesFromScan('test-org', 'scan-1')
       expect(stream).toBeDefined()
+    })
+
+    it('covers streamPatchesFromScan error path', async () => {
+      // The server returns 404 for invalid-scan
+      await expect(
+        client.streamPatchesFromScan('test-org', 'invalid-scan'),
+      ).rejects.toThrow('GET Request failed')
+    })
+
+    it('covers sendApi method', async () => {
+      // Test the generic sendApi method with POST
+      const result = await client.sendApi('/scan', {
+        body: { repo: 'test' },
+        method: 'POST',
+      })
+      expect(result).toBeDefined()
+    })
+
+    it('covers batchPackageStream generator', async () => {
+      // Test the async generator method
+      const componentsObj = {
+        components: [{ purl: 'pkg:npm/lodash@4.17.21' }],
+      }
+      const generator = client.batchPackageStream(componentsObj)
+      const first = await generator.next()
+      expect(first).toBeDefined()
+    })
+
+    it('covers cache path with cacheTtl', async () => {
+      // Create client with cache enabled to test cache code path
+      const clientWithCache = new SocketSdk('test-token', {
+        baseUrl,
+        cacheTtl: 5000,
+        retries: 0,
+      })
+
+      // Make two identical requests - second should use cache
+      const result1 = await clientWithCache.getIssuesByNpmPackage(
+        'lodash',
+        '4.17.21',
+      )
+      const result2 = await clientWithCache.getIssuesByNpmPackage(
+        'lodash',
+        '4.17.21',
+      )
+
+      expect(result1.success).toBe(true)
+      expect(result2.success).toBe(true)
     })
 
     it('covers getOrgFullScanBuffered', async () => {
