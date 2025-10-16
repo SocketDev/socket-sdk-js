@@ -186,7 +186,19 @@ export default [
   biomeIgnores,
   gitIgnores,
   {
-    ignores: ['coverage/**'],
+    ignores: [
+      // Dot folders.
+      '.*/**',
+      // Nested directories.
+      '**/coverage/**',
+      '**/dist/**',
+      '**/external/**',
+      '**/node_modules/**',
+      // Generated TypeScript files.
+      '**/*.d.ts',
+      '**/*.d.ts.map',
+      '**/*.tsbuildinfo',
+    ],
   },
   {
     files: ['**/*.{cts,mts,ts}'],
