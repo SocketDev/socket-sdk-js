@@ -55,7 +55,7 @@ async function main() {
       logger.step('Collecting code coverage...')
       // Use the test runner with coverage flag for consistent experience
       const exitCode = await runSequence([
-        { args: ['scripts/test.mjs', '--skip-checks', '--cover', '--all'], command: 'node' },
+        { args: ['exec', 'bash', 'scripts/node-with-loader.sh', 'scripts/test.mjs', '--skip-checks', '--cover', '--all'], command: 'pnpm' },
       ])
       if (exitCode === 0) {
         logger.log('')
@@ -71,7 +71,7 @@ async function main() {
     // Use test runner for code coverage
     logger.substep('Running tests with code coverage')
     const codeExitCode = await runSequence([
-      { args: ['scripts/test.mjs', '--skip-checks', '--cover', '--all'], command: 'node' },
+      { args: ['exec', 'bash', 'scripts/node-with-loader.sh', 'scripts/test.mjs', '--skip-checks', '--cover', '--all'], command: 'pnpm' },
     ])
 
     if (codeExitCode !== 0) {

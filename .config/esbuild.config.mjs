@@ -2,35 +2,16 @@
  * @fileoverview esbuild configuration for fast builds with smaller bundles
  */
 
-import { existsSync } from 'node:fs'
 import { builtinModules } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+import { getLocalPackageAliases } from '../scripts/utils/get-local-package-aliases.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
 const srcPath = path.join(rootPath, 'src')
 const distPath = path.join(rootPath, 'dist')
-
-// Check for local sibling projects to use in development.
-// Falls back to published versions in CI.
-function getLocalPackageAliases() {
-  const aliases = {}
-
-  // Check for ../socket-registry/registry/dist
-  const registryPath = path.join(
-    rootPath,
-    '..',
-    'socket-registry',
-    'registry',
-    'dist',
-  )
-  if (existsSync(registryPath)) {
-    aliases['@socketsecurity/registry'] = registryPath
-  }
-
-  return aliases
-}
 
 // Build configuration for ESM output
 export const buildConfig = {
@@ -56,7 +37,7 @@ export const buildConfig = {
   splitting: true,
 
   // Alias local packages when available (dev mode).
-  alias: getLocalPackageAliases(),
+  alias: getLocalPackageAliases(rootPath),
 
   // External dependencies
   external: [

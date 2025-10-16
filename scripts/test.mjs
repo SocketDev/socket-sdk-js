@@ -9,7 +9,29 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { WIN32 } from '@socketsecurity/registry/constants/platform'
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const rootPath = path.resolve(__dirname, '..')
+
+// Check if we need to re-exec with loader
+const registryPath = path.join(rootPath, '..', 'socket-registry', 'registry', 'dist')
+if (existsSync(registryPath) && !process.env.SOCKET_LOADER_REGISTERED) {
+  const loaderPath = path.join(__dirname, 'register-loader.mjs')
+  const { spawnSync } = await import('node:child_process')
+  const result = spawnSync(process.execPath, [
+    '--import',
+    loaderPath,
+    ...process.execArgv,
+    process.argv[1],
+    ...process.argv.slice(2),
+  ], {
+    env: { ...process.env, SOCKET_LOADER_REGISTERED: '1' },
+    stdio: 'inherit',
+  })
+  process.exit(result.status ?? 1)
+}
+
+// Now safe to import from registry (either with loader or published version)
+
 import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
 import { parseArgs } from '@socketsecurity/registry/lib/argv/parse'
 import { logger } from '@socketsecurity/registry/lib/logger'
@@ -18,6 +40,8 @@ import { spinner } from '@socketsecurity/registry/lib/spinner'
 import { printHeader } from '@socketsecurity/registry/lib/stdio/header'
 
 import { getTestsToRun } from './utils/changed-test-mapper.mjs'
+
+const WIN32 = process.platform === 'win32'
 
 // Suppress non-fatal worker termination unhandled rejections
 process.on('unhandledRejection', (reason, _promise) => {
@@ -34,8 +58,6 @@ process.on('unhandledRejection', (reason, _promise) => {
   throw reason
 })
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.resolve(__dirname, '..')
 const nodeModulesBinPath = path.join(rootPath, 'node_modules', '.bin')
 
 // Track running processes for cleanup
