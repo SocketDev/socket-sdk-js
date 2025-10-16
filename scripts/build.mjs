@@ -32,7 +32,7 @@ async function buildSource(options = {}) {
   // Clean dist directory if needed
   if (!skipClean) {
     const exitCode = await runSequence([
-      { args: ['exec', 'node', 'scripts/clean.mjs', '--dist', '--quiet'], command: 'pnpm' }
+      { args: ['exec', 'bash', 'scripts/node-with-loader.sh', 'scripts/clean.mjs', '--dist', '--quiet'], command: 'pnpm' }
     ])
     if (exitCode !== 0) {
       if (!quiet) {
@@ -88,7 +88,7 @@ async function buildTypes(options = {}) {
   const commands = []
 
   if (!skipClean) {
-    commands.push({ args: ['exec', 'node', 'scripts/clean.mjs', '--types', '--quiet'], command: 'pnpm' })
+    commands.push({ args: ['exec', 'bash', 'scripts/node-with-loader.sh', 'scripts/clean.mjs', '--types', '--quiet'], command: 'pnpm' })
   }
 
   commands.push({
@@ -329,7 +329,7 @@ async function main() {
         logger.substep('Cleaning build directories')
       }
       exitCode = await runSequence([
-        { args: ['exec', 'node', 'scripts/clean.mjs', '--dist', '--types', '--quiet'], command: 'pnpm' }
+        { args: ['exec', 'bash', 'scripts/node-with-loader.sh', 'scripts/clean.mjs', '--dist', '--types', '--quiet'], command: 'pnpm' }
       ])
       if (exitCode !== 0) {
         if (!quiet) {

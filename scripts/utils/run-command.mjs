@@ -2,8 +2,9 @@
 
 import { spawn, spawnSync } from 'node:child_process'
 
-import { WIN32 } from '@socketsecurity/registry/constants/platform'
 import { logger } from '@socketsecurity/registry/lib/logger'
+
+const WIN32 = process.platform === 'win32'
 
 /**
  * Run a command and return a promise that resolves with the exit code.
