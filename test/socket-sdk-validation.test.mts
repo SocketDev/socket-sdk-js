@@ -119,6 +119,11 @@ describe('SocketSdk Validation & Error Handling', () => {
       const client = new SocketSdk('token', { agent: { https: agent } })
       expect(client).toBeInstanceOf(SocketSdk)
     })
+
+    it('accepts cacheTtl option', () => {
+      const client = new SocketSdk('token', { cacheTtl: 5000 })
+      expect(client).toBeInstanceOf(SocketSdk)
+    })
   })
 
   describe('Public Method Existence', () => {
