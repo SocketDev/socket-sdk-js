@@ -54,6 +54,12 @@ describe('SocketSdk - downloadPatch', () => {
         } else if (hash === 'sha256-abc+def/ghi=') {
           res.writeHead(200, { 'Content-Type': 'text/plain' })
           res.end('content')
+        } else if (hash === 'sha256-responseerror') {
+          // Simulate response error after headers.
+          res.writeHead(200, { 'Content-Type': 'text/plain' })
+          res.write('partial')
+          // Destroy the response stream to trigger error event.
+          res.destroy(new Error('Simulated response error'))
         } else {
           res.writeHead(200, { 'Content-Type': 'text/plain' })
           res.end('mock content')
@@ -161,5 +167,23 @@ describe('SocketSdk - downloadPatch', () => {
     const result = await client.downloadPatch(hash, { baseUrl })
 
     expect(result).toBe(utf8Content)
+  })
+
+  it('should handle response stream errors', async () => {
+    const hash = 'sha256-responseerror'
+
+    await expect(client.downloadPatch(hash, { baseUrl })).rejects.toThrow(
+      /Error downloading blob|socket hang up/,
+    )
+  })
+
+  it('should handle request errors', async () => {
+    const hash = 'sha256-test'
+    // Use invalid URL to trigger request error.
+    const invalidBaseUrl = 'http://localhost:1'
+
+    await expect(
+      client.downloadPatch(hash, { baseUrl: invalidBaseUrl }),
+    ).rejects.toThrow('Error downloading blob')
   })
 })
