@@ -2,7 +2,14 @@
  * @fileoverview Vitest configuration for tests requiring full isolation.
  * Used for tests that need vi.doMock() or other module-level mocking.
  */
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
 import { defineConfig } from 'vitest/config'
+
+import { getLocalPackageAliases } from '../scripts/utils/get-local-package-aliases.mjs'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // Check if coverage is enabled via CLI flags or environment.
 const isCoverageEnabled =
@@ -12,6 +19,9 @@ const isCoverageEnabled =
 
 export default defineConfig({
   cacheDir: './.cache/vitest',
+  resolve: {
+    alias: getLocalPackageAliases(path.join(__dirname, '..')),
+  },
   test: {
     globals: false,
     environment: 'node',
