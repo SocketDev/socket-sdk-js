@@ -19,3 +19,4 @@ Thumbs.db
 
 !/.vscode/extensions.json
 !api*.d.ts
+!src/types/**/*.d.ts
