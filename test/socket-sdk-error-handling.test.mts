@@ -6,93 +6,42 @@
  */
 import { createServer } from 'node:http'
 
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../src/index'
+import { createRouteHandler, jsonResponse, setupLocalHttpServer } from './utils/local-server-helpers.mts'
 
 import type { SocketSdkGenericResult } from '../src/types'
-import type { IncomingMessage, Server, ServerResponse } from 'node:http'
+import type { IncomingMessage } from 'node:http'
 
 describe('SocketSdk - Error Handling', () => {
-  let server: Server
-  let baseUrl: string
-  let client: SocketSdk
+  const getBaseUrl = setupLocalHttpServer(
+    createRouteHandler({
+      '/500-error': jsonResponse(500, { error: 'Internal Server Error' }),
+      '/503-error': jsonResponse(503, { error: 'Service Unavailable' }),
+      '/401-error': jsonResponse(401, { error: 'Unauthorized' }),
+      '/403-error': jsonResponse(403, { error: 'Forbidden' }),
+      '/404-with-details': jsonResponse(404, {
+        error: {
+          details: { id: 'nonexistent', resource: 'package' },
+          message: 'Resource not found',
+        },
+      }),
+      '/404-with-string-details': jsonResponse(404, {
+        error: {
+          details: 'Package does not exist in registry',
+          message: 'Not found',
+        },
+      }),
+    }),
+  )
 
-  beforeAll(async () => {
-    // Start local HTTP server on random port
-    server = createServer((req: IncomingMessage, res: ServerResponse) => {
-      const url = req.url || ''
-
-      // Route to different error scenarios
-      if (url.includes('/500-error')) {
-        res.writeHead(500, { 'Content-Type': 'application/json' })
-        res.end(JSON.stringify({ error: 'Internal Server Error' }))
-      } else if (url.includes('/503-error')) {
-        res.writeHead(503, { 'Content-Type': 'application/json' })
-        res.end(JSON.stringify({ error: 'Service Unavailable' }))
-      } else if (url.includes('/401-error')) {
-        res.writeHead(401, { 'Content-Type': 'application/json' })
-        res.end(JSON.stringify({ error: 'Unauthorized' }))
-      } else if (url.includes('/403-error')) {
-        res.writeHead(403, { 'Content-Type': 'application/json' })
-        res.end(JSON.stringify({ error: 'Forbidden' }))
-      } else if (url.includes('/404-with-details')) {
-        res.writeHead(404, { 'Content-Type': 'application/json' })
-        res.end(
-          JSON.stringify({
-            error: {
-              message: 'Resource not found',
-              details: { resource: 'package', id: 'nonexistent' },
-            },
-          }),
-        )
-      } else if (url.includes('/404-with-string-details')) {
-        res.writeHead(404, { 'Content-Type': 'application/json' })
-        res.end(
-          JSON.stringify({
-            error: {
-              message: 'Not found',
-              details: 'Package does not exist in registry',
-            },
-          }),
-        )
-      } else {
-        res.writeHead(200, { 'Content-Type': 'application/json' })
-        res.end(JSON.stringify({ data: {} }))
-      }
-    })
-
-    await new Promise<void>(resolve => {
-      server.listen(0, () => {
-        const address = server.address()
-        if (address && typeof address === 'object') {
-          const { port } = address
-          baseUrl = `http://127.0.0.1:${port}`
-          resolve()
-        }
-      })
-    })
-
-    // Create client pointing to local server with retries disabled for faster tests
-    client = new SocketSdk('test-token', { baseUrl, retries: 0 })
-  })
-
-  afterAll(async () => {
-    await new Promise<void>((resolve, reject) => {
-      server.close(err => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve()
-        }
-      })
-    })
-  })
+  const getClient = () => new SocketSdk('test-token', { baseUrl: getBaseUrl(), retries: 0 })
 
   describe('5xx Server Errors', () => {
     it('should handle 500 Internal Server Error with throws=false', async () => {
       // In non-throwing mode, #handleApiError throws for 5xx but catch block wraps it
-      const result = (await client.getApi('/500-error', {
+      const result = (await getClient().getApi('/500-error', {
         throws: false,
       })) as SocketSdkGenericResult<IncomingMessage>
       expect(result.success).toBe(false)
@@ -103,7 +52,7 @@ describe('SocketSdk - Error Handling', () => {
     })
 
     it('should handle 503 Service Unavailable with throws=false', async () => {
-      const result = (await client.getApi('/503-error', {
+      const result = (await getClient().getApi('/503-error', {
         throws: false,
       })) as SocketSdkGenericResult<IncomingMessage>
       expect(result.success).toBe(false)
@@ -113,7 +62,7 @@ describe('SocketSdk - Error Handling', () => {
     })
 
     it('should throw ResponseError for 500 in throwing mode', async () => {
-      await expect(client.getApi('/500-error')).rejects.toThrow(
+      await expect(getClient().getApi('/500-error')).rejects.toThrow(
         'Request failed (500)',
       )
     })
@@ -121,7 +70,7 @@ describe('SocketSdk - Error Handling', () => {
 
   describe('4xx Client Errors', () => {
     it('should handle 401 Unauthorized errors', async () => {
-      const result = (await client.getApi('/401-error', {
+      const result = (await getClient().getApi('/401-error', {
         throws: false,
       })) as SocketSdkGenericResult<IncomingMessage>
       expect(result.success).toBe(false)
@@ -132,7 +81,7 @@ describe('SocketSdk - Error Handling', () => {
     })
 
     it('should handle 403 Forbidden errors', async () => {
-      const result = (await client.getApi('/403-error', {
+      const result = (await getClient().getApi('/403-error', {
         throws: false,
       })) as SocketSdkGenericResult<IncomingMessage>
       expect(result.success).toBe(false)
@@ -145,7 +94,7 @@ describe('SocketSdk - Error Handling', () => {
 
   describe('Error Response Body Parsing', () => {
     it('should parse error responses with detailed object', async () => {
-      const result = (await client.getApi('/404-with-details', {
+      const result = (await getClient().getApi('/404-with-details', {
         throws: false,
       })) as SocketSdkGenericResult<IncomingMessage>
       expect(result.success).toBe(false)
@@ -158,7 +107,7 @@ describe('SocketSdk - Error Handling', () => {
     })
 
     it('should parse error responses with string details', async () => {
-      const result = (await client.getApi('/404-with-string-details', {
+      const result = (await getClient().getApi('/404-with-string-details', {
         throws: false,
       })) as SocketSdkGenericResult<IncomingMessage>
       expect(result.success).toBe(false)
@@ -173,7 +122,7 @@ describe('SocketSdk - Error Handling', () => {
   describe('Auth Error Retry Behavior', () => {
     it('should not retry 401 errors', async () => {
       const clientWithRetries = new SocketSdk('test-token', {
-        baseUrl,
+        baseUrl: getBaseUrl(),
         retries: 3,
       })
 
@@ -190,7 +139,7 @@ describe('SocketSdk - Error Handling', () => {
 
     it('should not retry 403 errors', async () => {
       const clientWithRetries = new SocketSdk('test-token', {
-        baseUrl,
+        baseUrl: getBaseUrl(),
         retries: 3,
       })
 
