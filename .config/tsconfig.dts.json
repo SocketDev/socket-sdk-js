@@ -7,6 +7,12 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "outDir": "../dist",
+    "paths": {
+      "@socketsecurity/registry/*": [
+        "../../socket-registry/registry/dist/*",
+        "../node_modules/@socketsecurity/registry/*"
+      ]
+    },
     "rootDir": "../src",
     "noPropertyAccessFromIndexSignature": false,
     "skipLibCheck": true

@@ -6,7 +6,13 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "noPropertyAccessFromIndexSignature": false,
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@socketsecurity/registry/*": [
+        "../socket-registry/registry/dist/*",
+        "./node_modules/@socketsecurity/registry/*"
+      ]
+    }
   },
   "include": ["src/**/*.ts"]
 }
