@@ -4,6 +4,12 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "noEmit": true,
+    "paths": {
+      "@socketsecurity/registry/*": [
+        "../../socket-registry/registry/dist/*",
+        "../node_modules/@socketsecurity/registry/*"
+      ]
+    },
     "skipLibCheck": true,
     "types": ["vitest/globals", "node"],
     "verbatimModuleSyntax": false
