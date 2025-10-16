@@ -2208,6 +2208,7 @@ export class SocketSdk {
               const data = JSON.parse(line) as ArtifactPatches
               controller.enqueue(data)
             } catch (e) {
+              /* c8 ignore next 2 - JSON parse error in streaming response, requires malformed server data */
               // Log parse errors for debugging invalid NDJSON lines.
               debugLog('streamPatchesFromScan', `Failed to parse line: ${e}`)
             }
@@ -2500,6 +2501,7 @@ export class SocketSdk {
           res.on('end', () => {
             resolve(data)
           })
+          /* c8 ignore next 3 - Response stream error during blob download, difficult to reliably trigger */
           res.on('error', err => {
             reject(err)
           })

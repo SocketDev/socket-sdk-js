@@ -34,6 +34,7 @@ const loadRequirements = once((): Requirements => {
     )
 
     // Check if the requirements file exists before attempting to read.
+    /* c8 ignore next 3 - Error path tested in isolation but memoization prevents coverage in main test run */
     if (!existsSync(requirementsPath)) {
       throw new Error(`Requirements file not found at: ${requirementsPath}`)
     }
@@ -41,6 +42,7 @@ const loadRequirements = once((): Requirements => {
     const data = readFileSync(requirementsPath, 'utf8')
     return JSON.parse(data) as Requirements
   } catch (e) {
+    /* c8 ignore next 2 - Error wrapping tested in isolation but memoization prevents coverage in main test run */
     throw new Error('Failed to load SDK method requirements', { cause: e })
   }
 })

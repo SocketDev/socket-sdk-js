@@ -28,13 +28,16 @@ Socket SDK for JavaScript/TypeScript - Programmatic access to Socket.dev securit
 **Features**: Full TypeScript support, API client, package analysis, security scanning, org/repo management, SBOM support, batch operations, file uploads
 
 ### Commands
-- **Build**: `pnpm build`
+- **Build**: `pnpm build` (production build)
+- **Watch**: `pnpm build --watch` (dev mode with 68% faster incremental builds)
 - **Test**: `pnpm test`
 - **Test runner**: `pnpm run test:run` (glob support)
 - **Type check**: `pnpm tsc`
 - **Lint**: `pnpm check:lint`
 - **Check all**: `pnpm check`
 - **Coverage**: `pnpm run test:unit:coverage`, `pnpm run coverage:percent`
+
+**Development tip:** Use `pnpm build --watch` for 68% faster rebuilds (9ms vs 27ms). See `docs/INCREMENTAL_BUILDS.md` for details.
 
 ### SDK-Specific Patterns
 

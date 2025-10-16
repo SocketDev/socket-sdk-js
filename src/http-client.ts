@@ -172,7 +172,6 @@ export async function getErrorResponseBody(
     })
 
     response.on('end', () => resolve(body))
-    /* c8 ignore next - Extremely rare network or stream error during error response reading. */
     response.on('error', e => reject(e))
   })
 }
@@ -208,13 +207,11 @@ export async function getResponse(
       req.destroy()
       reject(new Error('Request timed out'))
     })
-    /* c8 ignore start - Network error handling during request, difficult to test reliably. */
     req.on('error', e => {
       if (!timedOut) {
         reject(e)
       }
     })
-    /* c8 ignore stop */
   })
 }
 

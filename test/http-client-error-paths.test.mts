@@ -37,6 +37,14 @@ describe('HTTP Client - Error Paths', () => {
         // Return null to trigger JSON.parse error path
         res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end('null')
+      } else if (url.includes('/empty-response')) {
+        // Return empty response to test empty response handling
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end('')
+      } else if (url.includes('/non-ok-response')) {
+        // Return non-OK response
+        res.writeHead(404, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify({ error: 'Not Found' }))
       } else {
         // Default success response
         res.writeHead(200, { 'Content-Type': 'application/json' })
@@ -122,6 +130,33 @@ describe('HTTP Client - Error Paths', () => {
           return await getResponseJson(response)
         })(),
       ).rejects.toThrow()
+    })
+
+    it('should handle empty response as empty object', async () => {
+      const response = await createGetRequest(baseUrl, '/empty-response', {
+        timeout: 1000,
+      })
+
+      const result = await getResponseJson(response)
+      expect(result).toEqual({})
+    })
+
+    it('should throw ResponseError for non-OK responses with method parameter', async () => {
+      const response = await createGetRequest(baseUrl, '/non-ok-response', {
+        timeout: 1000,
+      })
+
+      await expect(getResponseJson(response, 'GET')).rejects.toThrow(
+        'GET Request failed',
+      )
+    })
+
+    it('should throw ResponseError for non-OK responses without method parameter', async () => {
+      const response = await createGetRequest(baseUrl, '/non-ok-response', {
+        timeout: 1000,
+      })
+
+      await expect(getResponseJson(response)).rejects.toThrow(/Request failed/)
     })
   })
 
