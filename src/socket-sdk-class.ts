@@ -2183,7 +2183,7 @@ export class SocketSdk {
       async () =>
         await createGetRequest(
           this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/patches/scan/${encodeURIComponent(scanId)}`,
+          `orgs/${encodeURIComponent(orgSlug)}/patches/scan?scan_id=${encodeURIComponent(scanId)}`,
           this.#reqOptions,
         ),
     )
@@ -2193,19 +2193,25 @@ export class SocketSdk {
       throw new ResponseError(response, 'GET Request failed')
     }
 
-    // The response itself is the readable stream for NDJSON data
-    // Convert the Node.js readable stream to a Web ReadableStream
+    // Use readline for proper line buffering across chunks.
+    // This prevents issues when NDJSON lines are split across multiple network chunks.
+    const rli = readline.createInterface({
+      input: response,
+      crlfDelay: Number.POSITIVE_INFINITY,
+    })
+
+    // Convert the Node.js readable stream to a Web ReadableStream.
     return new ReadableStream<ArtifactPatches>({
-      start(controller) {
-        response.on('data', (chunk: Buffer) => {
-          // Parse NDJSON chunks line by line
-          const lines = chunk
-            .toString()
-            .split('\n')
-            .filter(line => line.trim())
-          for (const line of lines) {
+      async start(controller) {
+        try {
+          for await (const line of rli) {
+            const trimmed = line.trim()
+            if (!trimmed) {
+              continue
+            }
+
             try {
-              const data = JSON.parse(line) as ArtifactPatches
+              const data = JSON.parse(trimmed) as ArtifactPatches
               controller.enqueue(data)
             } catch (e) {
               /* c8 ignore next 2 - JSON parse error in streaming response, requires malformed server data */
@@ -2213,16 +2219,12 @@ export class SocketSdk {
               debugLog('streamPatchesFromScan', `Failed to parse line: ${e}`)
             }
           }
-        })
-
-        response.on('end', () => {
-          controller.close()
-        })
-
-        response.on('error', error => {
+        } catch (error) {
           /* c8 ignore next - Streaming error handler, difficult to test reliably. */
           controller.error(error)
-        })
+        } finally {
+          controller.close()
+        }
       },
     })
   }
