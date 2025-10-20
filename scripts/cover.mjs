@@ -1,101 +1,116 @@
 #!/usr/bin/env node
 /**
- * @fileoverview Coverage script for the SDK.
- * Collects both code coverage and type coverage.
- *
- * Usage:
- *   node scripts/cover.mjs [--code-only|--type-only|--percent|--summary]
+ * @fileoverview Coverage script that runs tests with coverage reporting.
+ * Masks test output and shows only the coverage summary.
  */
 
-import { parseArgs } from '@socketsecurity/registry/lib/argv/parse'
-import { logger } from '@socketsecurity/registry/lib/logger'
-import { printHeader } from '@socketsecurity/registry/lib/stdio/header'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-import { runSequence } from './utils/run-command.mjs'
+import { printError, printHeader, printSuccess } from './utils/cli-helpers.mjs'
+import { runCommandQuiet } from './utils/run-command.mjs'
 
-async function main() {
-  try {
-    const { values } = parseArgs({
-      options: {
-        'code-only': { type: 'boolean', default: false },
-        percent: { type: 'boolean', default: false },
-        summary: { type: 'boolean', default: false },
-        'type-only': { type: 'boolean', default: false },
-      },
-      strict: false,
-    })
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const rootPath = path.join(__dirname, '..')
 
-    if (values.percent || values.summary) {
-      // Just get coverage percentage/summary
-      const exitCode = await runSequence([
-        { args: ['scripts/get-coverage-percentage.mjs'], command: 'node' },
-      ])
-      process.exitCode = exitCode
-      return
-    }
+printHeader('Running Coverage')
 
-    // Show header for coverage collection
-    printHeader('Running Coverage')
-    logger.log('')
+// Run vitest with coverage enabled via test runner, capturing output
+const vitestArgs = [
+  'exec',
+  'bash',
+  'scripts/node-with-loader.sh',
+  'scripts/test.mjs',
+  '--skip-checks',
+  '--cover',
+  '--all',
+  ...process.argv.slice(2),
+]
+const typeCoverageArgs = ['exec', 'type-coverage']
 
-    if (values['type-only']) {
-      logger.step('Collecting type coverage...')
-      const exitCode = await runSequence([
-        { args: ['exec', 'type-coverage'], command: 'pnpm' },
-      ])
-      if (exitCode === 0) {
-        logger.log('')
-        logger.success('Type coverage complete!')
-      }
-      process.exitCode = exitCode
-      return
-    }
+try {
+  const { exitCode, stdout, stderr } = await runCommandQuiet('pnpm', vitestArgs, {
+    cwd: rootPath,
+  })
 
-    if (values['code-only']) {
-      logger.step('Collecting code coverage...')
-      // Use the test runner with coverage flag for consistent experience
-      const exitCode = await runSequence([
-        { args: ['exec', 'bash', 'scripts/node-with-loader.sh', 'scripts/test.mjs', '--skip-checks', '--cover', '--all'], command: 'pnpm' },
-      ])
-      if (exitCode === 0) {
-        logger.log('')
-        logger.success('Code coverage complete!')
-      }
-      process.exitCode = exitCode
-      return
-    }
+  // Run type coverage
+  const typeCoverageResult = await runCommandQuiet('pnpm', typeCoverageArgs, {
+    cwd: rootPath,
+  })
 
-    // Collect both code and type coverage
-    logger.step('Collecting full coverage (code + type)...')
+  // Combine and clean output - remove ANSI color codes and spinner artifacts
+  const ansiRegex = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g')
+  const output = (stdout + stderr)
+    .replace(ansiRegex, '') // Remove ANSI color codes
+    .replace(/(?:✧|︎|⚡)\s*/g, '') // Remove spinner artifacts
+    .trim()
 
-    // Use test runner for code coverage
-    logger.substep('Running tests with code coverage')
-    const codeExitCode = await runSequence([
-      { args: ['exec', 'bash', 'scripts/node-with-loader.sh', 'scripts/test.mjs', '--skip-checks', '--cover', '--all'], command: 'pnpm' },
-    ])
+  // Extract test summary (Test Files ... Duration)
+  const testSummaryMatch = output.match(
+    /Test Files\s+\d+[^\n]*\n[\s\S]*?Duration\s+[\d.]+m?s[^\n]*/,
+  )
 
-    if (codeExitCode !== 0) {
-      logger.log('')
-      logger.error('Code coverage failed')
-      process.exitCode = codeExitCode
-      return
-    }
+  // Extract coverage summary: header + All files row
+  // Match from "% Coverage" header through the All files line and closing border
+  const coverageHeaderMatch = output.match(
+    / % Coverage report from v8\n([-|]+)\n([^\n]+)\n\1/,
+  )
+  const allFilesMatch = output.match(/All files\s+\|\s+([\d.]+)\s+\|[^\n]*/)
 
-    logger.substep('Collecting type coverage')
-    const typeExitCode = await runSequence([
-      { args: ['exec', 'type-coverage'], command: 'pnpm' },
-    ])
+  // Extract type coverage percentage
+  const typeCoverageOutput = (
+    typeCoverageResult.stdout + typeCoverageResult.stderr
+  ).trim()
+  const typeCoverageMatch = typeCoverageOutput.match(/\([\d\s/]+\)\s+([\d.]+)%/)
 
-    if (typeExitCode === 0) {
-      logger.log('')
-      logger.success('Full coverage complete!')
-    }
-    process.exitCode = typeExitCode
-  } catch (error) {
-    logger.log('')
-    logger.error(`Coverage collection failed: ${error.message}`)
-    process.exitCode = 1
+  // Display clean output
+  if (testSummaryMatch) {
+    console.log()
+    console.log(testSummaryMatch[0])
+    console.log()
   }
-}
 
-main().catch(console.error)
+  if (coverageHeaderMatch && allFilesMatch) {
+    console.log(' % Coverage report from v8')
+    console.log(coverageHeaderMatch[1]) // Top border
+    console.log(coverageHeaderMatch[2]) // Header row
+    console.log(coverageHeaderMatch[1]) // Middle border
+    console.log(allFilesMatch[0]) // All files row
+    console.log(coverageHeaderMatch[1]) // Bottom border
+    console.log()
+
+    // Display type coverage and cumulative summary
+    if (typeCoverageMatch) {
+      const codeCoveragePercent = parseFloat(allFilesMatch[1])
+      const typeCoveragePercent = parseFloat(typeCoverageMatch[1])
+      const cumulativePercent = (
+        (codeCoveragePercent + typeCoveragePercent) /
+        2
+      ).toFixed(2)
+
+      console.log(' Coverage Summary')
+      console.log(' ───────────────────────────────')
+      console.log(` Type Coverage: ${typeCoveragePercent.toFixed(2)}%`)
+      console.log(` Code Coverage: ${codeCoveragePercent.toFixed(2)}%`)
+      console.log(' ───────────────────────────────')
+      console.log(` Cumulative:    ${cumulativePercent}%`)
+      console.log()
+    }
+  }
+
+  if (exitCode === 0) {
+    printSuccess('Coverage completed successfully')
+  } else {
+    printError('Coverage failed')
+    // Show relevant output on failure for debugging
+    if (!testSummaryMatch && !coverageHeaderMatch) {
+      console.log('\n--- Output ---')
+      console.log(output)
+    }
+  }
+
+  process.exitCode = exitCode
+} catch (error) {
+  printError(`Coverage script failed: ${error.message}`)
+  process.exitCode = 1
+}
