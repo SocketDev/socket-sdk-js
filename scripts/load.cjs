@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 'use strict'
 
 /**
@@ -6,7 +5,6 @@
  *
  * Usage as wrapper:
  *   node scripts/load <script-name> [flags]
- *   ./scripts/load <script-name> [flags]
  *   node scripts/load build --clean
  */
 
