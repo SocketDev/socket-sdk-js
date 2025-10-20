@@ -6,9 +6,9 @@
 import http from 'node:http'
 import https from 'node:https'
 
-import { debugLog } from '@socketsecurity/registry/lib/debug'
-import { jsonParse } from '@socketsecurity/registry/lib/json'
-import { perfTimer } from '@socketsecurity/registry/lib/performance'
+import { debugLog } from '@socketsecurity/lib/debug'
+import { jsonParse } from '@socketsecurity/lib/json'
+import { perfTimer } from '@socketsecurity/lib/performance'
 
 import { MAX_RESPONSE_SIZE } from './constants'
 

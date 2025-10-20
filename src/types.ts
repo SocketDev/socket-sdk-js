@@ -6,7 +6,7 @@
 
 import type { components, operations } from '../types/api'
 import type { OpReturnType } from '../types/api-helpers'
-import type { Remap } from '@socketsecurity/registry/lib/objects'
+import type { Remap } from '@socketsecurity/lib/objects'
 import type { ClientHttp2Session } from 'http2-wrapper'
 import type {
   Agent as HttpAgent,

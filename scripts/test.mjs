@@ -32,12 +32,12 @@ if (existsSync(registryPath) && !process.env.SOCKET_LOADER_REGISTERED) {
 
 // Now safe to import from registry (either with loader or published version)
 
-import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
-import { parseArgs } from '@socketsecurity/registry/lib/argv/parse'
-import { logger } from '@socketsecurity/registry/lib/logger'
-import { onExit } from '@socketsecurity/registry/lib/signal-exit'
-import { spinner } from '@socketsecurity/registry/lib/spinner'
-import { printHeader } from '@socketsecurity/registry/lib/stdio/header'
+import { isQuiet } from '@socketsecurity/lib/argv/flags'
+import { parseArgs } from '@socketsecurity/lib/argv/parse'
+import { logger } from '@socketsecurity/lib/logger'
+import { onExit } from '@socketsecurity/lib/signal-exit'
+import { spinner } from '@socketsecurity/lib/spinner'
+import { printHeader } from '@socketsecurity/lib/stdio/header'
 
 import { getTestsToRun } from './utils/changed-test-mapper.mjs'
 

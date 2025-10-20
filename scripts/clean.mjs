@@ -5,11 +5,11 @@
 
 import { deleteAsync } from 'del'
 
-import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
-import { parseArgs } from '@socketsecurity/registry/lib/argv/parse'
-import { logger } from '@socketsecurity/registry/lib/logger'
-import { createFooter } from '@socketsecurity/registry/lib/stdio/footer'
-import { createHeader } from '@socketsecurity/registry/lib/stdio/header'
+import { isQuiet } from '@socketsecurity/lib/argv/flags'
+import { parseArgs } from '@socketsecurity/lib/argv/parse'
+import { logger } from '@socketsecurity/lib/logger'
+import { createFooter } from '@socketsecurity/lib/stdio/footer'
+import { createHeader } from '@socketsecurity/lib/stdio/header'
 
 /**
  * Clean specific directories.
