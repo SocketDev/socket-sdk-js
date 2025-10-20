@@ -10,10 +10,6 @@ import { fileURLToPath } from 'node:url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.resolve(__dirname, '..')
 
-// Check for local socket-registry build
-const registryPath = path.join(rootPath, '..', 'socket-registry', 'registry', 'dist')
-const useLocalRegistry = existsSync(registryPath)
-
 // Check for local socket-lib build
 const libPath = path.join(rootPath, '..', 'socket-lib', 'dist')
 const useLocalLib = existsSync(libPath)

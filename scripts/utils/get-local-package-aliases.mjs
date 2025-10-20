@@ -27,16 +27,16 @@ export function getLocalPackageAliases(rootDir) {
     aliases['@socketsecurity/lib'] = libPath
   }
 
-  // Check for ../socket-registry/registry/dist for @socketsecurity/registry.
-  const registryPath = path.join(baseDir, '..', 'socket-registry', 'registry', 'dist')
-  if (existsSync(path.join(registryPath, '../package.json'))) {
-    aliases['@socketsecurity/registry'] = registryPath
-  }
-
   // Check for ../socket-packageurl-js/dist.
   const packageurlPath = path.join(baseDir, '..', 'socket-packageurl-js', 'dist')
   if (existsSync(path.join(packageurlPath, '../package.json'))) {
     aliases['@socketregistry/packageurl-js'] = packageurlPath
+  }
+
+  // Check for ../socket-registry/registry/dist for @socketsecurity/registry.
+  const registryPath = path.join(baseDir, '..', 'socket-registry', 'registry', 'dist')
+  if (existsSync(path.join(registryPath, '../package.json'))) {
+    aliases['@socketsecurity/registry'] = registryPath
   }
 
   // Check for ../socket-sdk-js/dist.
