@@ -6,8 +6,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { logger } from '@socketsecurity/registry/lib/logger';
-import { printHeader } from '@socketsecurity/registry/lib/stdio/header';
+import { logger } from '@socketsecurity/lib/logger';
+import { printHeader } from '@socketsecurity/lib/stdio/header';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootPath = path.resolve(__dirname, '..');

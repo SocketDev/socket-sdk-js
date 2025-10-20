@@ -8,10 +8,10 @@ import { fileURLToPath } from 'node:url'
 
 import { build, context } from 'esbuild'
 
-import { isQuiet } from '@socketsecurity/registry/lib/argv/flags'
-import { parseArgs } from '@socketsecurity/registry/lib/argv/parse'
-import { logger } from '@socketsecurity/registry/lib/logger'
-import { printFooter, printHeader } from '@socketsecurity/registry/lib/stdio/header'
+import { isQuiet } from '@socketsecurity/lib/argv/flags'
+import { parseArgs } from '@socketsecurity/lib/argv/parse'
+import { logger } from '@socketsecurity/lib/logger'
+import { printFooter, printHeader } from '@socketsecurity/lib/stdio/header'
 
 import { runSequence } from './utils/run-command.mjs'
 import { analyzeMetafile, buildConfig, watchConfig } from '../.config/esbuild.config.mjs'

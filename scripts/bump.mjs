@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url'
 import semver from 'semver'
 import colors from 'yoctocolors-cjs'
 
-import { parseArgs } from '@socketsecurity/registry/lib/argv/parse'
+import { parseArgs } from '@socketsecurity/lib/argv/parse'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
@@ -670,7 +670,7 @@ async function main() {
         console.log('\nInteractive mode: Available ✓ (default)')
       } else {
         console.log('\nInteractive mode: Not available')
-        console.log('  (install @socketsecurity/registry or build local registry)')
+        console.log('  (install @socketsecurity/lib or build local registry)')
       }
       process.exitCode = 0
       return
@@ -761,7 +761,7 @@ async function main() {
     if (values.interactive && !hasInteractivePrompts) {
       if (explicitlyRequestedInteractive) {
         log.warn('Interactive mode requested but prompts not available')
-        log.info('To enable: install @socketsecurity/registry or build local registry')
+        log.info('To enable: install @socketsecurity/lib or build local registry')
       }
       values.interactive = false
     }
