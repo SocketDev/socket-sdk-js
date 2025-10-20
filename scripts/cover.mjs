@@ -10,9 +10,9 @@
 
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { parseArgs } from 'node:util'
 
-import { printError, printHeader, printSuccess } from './utils/cli-helpers.mjs'
+import { parseArgs } from '@socketsecurity/lib/argv/parse'
+
 import { runCommandQuiet } from './utils/run-command.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -26,8 +26,6 @@ const { values } = parseArgs({
   },
   strict: false,
 })
-
-printHeader('Running Coverage')
 
 // Run vitest with coverage enabled via test runner, capturing output
 // Filter out custom flags that vitest doesn't understand
@@ -199,14 +197,8 @@ try {
     }
   }
 
-  if (exitCode === 0) {
-    printSuccess('Coverage completed successfully')
-  } else {
-    printError('Coverage failed')
-  }
-
   process.exitCode = exitCode
 } catch (error) {
-  printError(`Coverage script failed: ${error.message}`)
+  console.error(`Coverage script failed: ${error.message}`)
   process.exitCode = 1
 }
