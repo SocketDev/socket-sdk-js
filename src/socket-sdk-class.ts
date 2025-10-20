@@ -5,16 +5,16 @@
 import { createWriteStream } from 'node:fs'
 import readline from 'node:readline'
 
-import { UNKNOWN_ERROR } from '@socketsecurity/registry/constants/core'
-import { getAbortSignal } from '@socketsecurity/registry/constants/process'
-import { SOCKET_PUBLIC_API_TOKEN } from '@socketsecurity/registry/constants/socket'
-import { createTtlCache } from '@socketsecurity/registry/lib/cache-with-ttl'
-import { debugLog, isDebugNs } from '@socketsecurity/registry/lib/debug'
-import { jsonParse } from '@socketsecurity/registry/lib/json'
-import { getOwn, isObjectObject } from '@socketsecurity/registry/lib/objects'
-import { pRetry } from '@socketsecurity/registry/lib/promises'
-import { setMaxEventTargetListeners } from '@socketsecurity/registry/lib/suppress-warnings'
-import { urlSearchParamAsBoolean } from '@socketsecurity/registry/lib/url'
+import { createTtlCache } from '@socketsecurity/lib/cache-with-ttl'
+import { UNKNOWN_ERROR } from '@socketsecurity/lib/constants/core'
+import { getAbortSignal } from '@socketsecurity/lib/constants/process'
+import { SOCKET_PUBLIC_API_TOKEN } from '@socketsecurity/lib/constants/socket'
+import { debugLog, isDebugNs } from '@socketsecurity/lib/debug'
+import { jsonParse } from '@socketsecurity/lib/json'
+import { getOwn, isObjectObject } from '@socketsecurity/lib/objects'
+import { pRetry } from '@socketsecurity/lib/promises'
+import { setMaxEventTargetListeners } from '@socketsecurity/lib/suppress-warnings'
+import { urlSearchParamAsBoolean } from '@socketsecurity/lib/url'
 
 const abortSignal = getAbortSignal()
 
@@ -84,7 +84,7 @@ import type {
   UploadManifestFilesOptions,
   UploadManifestFilesReturnType,
 } from './types'
-import type { TtlCache } from '@socketsecurity/registry/lib/cache-with-ttl'
+import type { TtlCache } from '@socketsecurity/lib/cache-with-ttl'
 import type { IncomingMessage } from 'node:http'
 
 /**

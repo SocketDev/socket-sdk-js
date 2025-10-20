@@ -9,8 +9,8 @@
  */
 
 import path from 'node:path'
-import { parseArgs } from 'node:util'
 import { fileURLToPath } from 'node:url'
+import { parseArgs } from 'node:util'
 
 import { printError, printHeader, printSuccess } from './utils/cli-helpers.mjs'
 import { runCommandQuiet } from './utils/run-command.mjs'

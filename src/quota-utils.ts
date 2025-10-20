@@ -2,7 +2,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { memoize, once } from '@socketsecurity/registry/lib/memoization'
+import { memoize, once } from '@socketsecurity/lib/memoization'
 
 import type { SocketSdkOperations } from './types'
 

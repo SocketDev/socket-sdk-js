@@ -4,8 +4,8 @@
  */
 import path from 'node:path'
 
-import { memoize } from '@socketsecurity/registry/lib/memoization'
-import { normalizePath } from '@socketsecurity/registry/lib/path'
+import { memoize } from '@socketsecurity/lib/memoization'
+import { normalizePath } from '@socketsecurity/lib/path'
 
 import type { QueryParams } from './types'
 

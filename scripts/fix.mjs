@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url'
 
 import colors from 'yoctocolors-cjs'
 
-import { printHeader } from '@socketsecurity/registry/lib/stdio/header'
+import { printHeader } from '@socketsecurity/lib/stdio/header'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')

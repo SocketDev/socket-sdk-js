@@ -1,5 +1,5 @@
 /**
- * @fileoverview Node.js loader to alias @socketsecurity/registry to local build when available.
+ * @fileoverview Node.js loader to alias @socketsecurity/lib to local socket-lib build when available.
  * This allows scripts to use the latest local version during development.
  */
 
@@ -14,18 +14,26 @@ const rootPath = path.resolve(__dirname, '..')
 const registryPath = path.join(rootPath, '..', 'socket-registry', 'registry', 'dist')
 const useLocalRegistry = existsSync(registryPath)
 
+// Check for local socket-lib build
+const libPath = path.join(rootPath, '..', 'socket-lib', 'dist')
+const useLocalLib = existsSync(libPath)
+
 export function resolve(specifier, context, nextResolve) {
-  // Rewrite @socketsecurity/registry imports to local dist if available
-  if (useLocalRegistry && specifier.startsWith('@socketsecurity/registry')) {
-    const subpath = specifier.slice('@socketsecurity/registry'.length) || '/index.js'
-    const localPath = path.join(registryPath, subpath.startsWith('/') ? subpath.slice(1) : subpath)
+  // Rewrite @socketsecurity/lib imports to local dist if available
+  if (useLocalLib && specifier.startsWith('@socketsecurity/lib')) {
+    const subpath = specifier.slice('@socketsecurity/lib'.length) || '/index.js'
+    // Map @socketsecurity/lib to ../socket-lib/dist/
+    const localPath = path.join(libPath, subpath.startsWith('/') ? subpath.slice(1) : subpath)
 
     // Add .js extension if not present
     const resolvedPath = localPath.endsWith('.js') ? localPath : `${localPath}.js`
 
-    return {
-      url: `file://${resolvedPath}`,
-      shortCircuit: true
+    // Only use local path if file actually exists
+    if (existsSync(resolvedPath)) {
+      return {
+        url: `file://${resolvedPath}`,
+        shortCircuit: true
+      }
     }
   }
 

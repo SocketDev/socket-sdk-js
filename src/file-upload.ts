@@ -4,7 +4,7 @@ import { createReadStream } from 'node:fs'
 import path from 'node:path'
 import { Readable } from 'node:stream'
 
-import { normalizePath } from '@socketsecurity/registry/lib/path'
+import { normalizePath } from '@socketsecurity/lib/path'
 
 import { getHttpModule, getResponse } from './http-client'
 

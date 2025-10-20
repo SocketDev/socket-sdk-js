@@ -6,8 +6,8 @@
  *   node scripts/update.mjs
  */
 
-import { logger } from '@socketsecurity/registry/lib/logger'
-import { printFooter, printHeader } from '@socketsecurity/registry/lib/stdio/header'
+import { logger } from '@socketsecurity/lib/logger'
+import { printFooter, printHeader } from '@socketsecurity/lib/stdio/header'
 
 import { runCommand, runCommandQuiet } from './utils/run-command.mjs'
 
