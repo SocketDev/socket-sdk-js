@@ -121,8 +121,8 @@ const sharedRulesForImportX = {
   'import-x/no-unresolved': [
     'error',
     {
-      // Ignore @socketsecurity/registry subpaths - resolved by runtime loader
-      ignore: ['^@socketsecurity/registry/'],
+      // Ignore @socketsecurity/registry and @socketsecurity/lib subpaths - resolved by runtime loader
+      ignore: ['^@socketsecurity/registry/', '^@socketsecurity/lib/'],
     },
   ],
   'import-x/order': [
