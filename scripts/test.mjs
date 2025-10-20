@@ -166,7 +166,7 @@ async function runCheck(options = {}) {
   if (!quiet) {
     spinner.success('Code formatted')
     // Ensure spinner is fully cleared and we're on a fresh line
-    process.stdout.write('\r\x1b[K')
+    process.stdout.write('\r\x1b[K\n')
   }
 
   // Run ESLint
@@ -195,7 +195,7 @@ async function runCheck(options = {}) {
   if (!quiet) {
     spinner.success('Lint check passed')
     // Ensure spinner is fully cleared and we're on a fresh line
-    process.stdout.write('\r\x1b[K')
+    process.stdout.write('\r\x1b[K\n')
   }
 
   // Run TypeScript check
@@ -223,7 +223,7 @@ async function runCheck(options = {}) {
   if (!quiet) {
     spinner.success('TypeScript check passed')
     // Ensure spinner is fully cleared and we're on a fresh line
-    process.stdout.write('\r\x1b[K')
+    process.stdout.write('\r\x1b[K\n')
   }
 
   return 0
