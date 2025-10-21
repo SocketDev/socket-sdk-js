@@ -3,36 +3,62 @@
  * Removes build artifacts, caches, and other generated files.
  */
 
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
 import { deleteAsync } from 'del'
+import fastGlob from 'fast-glob'
 
 import { isQuiet } from '@socketsecurity/lib/argv/flags'
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
 import { logger } from '@socketsecurity/lib/logger'
-import { createFooter } from '@socketsecurity/lib/stdio/footer'
-import { createHeader } from '@socketsecurity/lib/stdio/header'
+import { createSectionHeader } from '@socketsecurity/lib/stdio/header'
+
+const rootPath = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+)
 
 /**
  * Clean specific directories.
  */
-async function cleanDirectories(patterns, options = {}) {
+async function cleanDirectories(tasks, options = {}) {
   const { quiet = false } = options
 
-  for (const { name, pattern } of patterns) {
+  for (const task of tasks) {
+    const { name, pattern, patterns } = task
+    const patternsToDelete = patterns || [pattern]
+
     if (!quiet) {
       logger.progress(`Cleaning ${name}`)
     }
 
     try {
-      await deleteAsync(pattern)
+      // Find all files/dirs matching the patterns
+      const files = await fastGlob(patternsToDelete, {
+        cwd: rootPath,
+        absolute: true,
+        dot: true,
+        onlyFiles: false,
+        markDirectories: true,
+      })
+
+      // Delete each file/directory
+      await deleteAsync(files)
+
+      if (!quiet) {
+        if (files.length > 0) {
+          logger.done(`Cleaned ${name} (${files.length} items)`)
+        } else {
+          logger.done(`Cleaned ${name} (already clean)`)
+        }
+      }
     } catch (error) {
       if (!quiet) {
-        logger.fail(`Failed to clean ${name}: ${error.message}`)
+        logger.error(`Failed to clean ${name}`)
+        console.error(error.message)
       }
       return 1
-    }
-
-    if (!quiet) {
-      logger.clearLine().done(`Cleaned ${name}`)
     }
   }
 
@@ -91,7 +117,9 @@ async function main() {
       console.log('\nUsage: pnpm clean [options]')
       console.log('\nOptions:')
       console.log('  --help              Show this help message')
-      console.log('  --all               Clean everything (default if no flags)')
+      console.log(
+        '  --all               Clean everything (default if no flags)',
+      )
       console.log('  --cache             Clean cache directories')
       console.log('  --coverage          Clean coverage reports')
       console.log('  --dist              Clean build output')
@@ -99,17 +127,28 @@ async function main() {
       console.log('  --modules           Clean node_modules')
       console.log('  --quiet, --silent   Suppress progress messages')
       console.log('\nExamples:')
-      console.log('  pnpm clean                  # Clean everything except node_modules')
+      console.log(
+        '  pnpm clean                  # Clean everything except node_modules',
+      )
       console.log('  pnpm clean --dist           # Clean build output only')
       console.log('  pnpm clean --cache --coverage  # Clean cache and coverage')
-      console.log('  pnpm clean --all --modules  # Clean everything including node_modules')
+      console.log(
+        '  pnpm clean --all --modules  # Clean everything including node_modules',
+      )
       process.exitCode = 0
       return
     }
 
+    const quiet = isQuiet(values)
+
     // Determine what to clean
-    const cleanAll = values.all ||
-      (!values.cache && !values.coverage && !values.dist && !values.types && !values.modules)
+    const cleanAll =
+      values.all ||
+      (!values.cache &&
+        !values.coverage &&
+        !values.dist &&
+        !values.types &&
+        !values.modules)
 
     const tasks = []
 
@@ -123,17 +162,18 @@ async function main() {
     }
 
     if (cleanAll || values.dist) {
-      tasks.push({ name: 'dist', pattern: 'dist' })
-      tasks.push({ name: 'tsbuildinfo files', pattern: '**/*.tsbuildinfo' })
+      tasks.push({
+        name: 'dist',
+        patterns: ['dist', '*.tsbuildinfo', '.tsbuildinfo'],
+      })
     } else if (values.types) {
-      tasks.push({ name: 'dist/types', pattern: 'dist/types' })
+      tasks.push({ name: 'dist/types', patterns: ['dist/types'] })
     }
 
     if (values.modules) {
       tasks.push({ name: 'node_modules', pattern: '**/node_modules' })
     }
 
-    const quiet = isQuiet(values)
     // Check if there's anything to clean
     if (tasks.length === 0) {
       if (!quiet) {
@@ -144,7 +184,9 @@ async function main() {
     }
 
     if (!quiet) {
-      console.log(createHeader('Clean Runner', { width: 56, borderChar: '=' }))
+      console.log(
+        createSectionHeader('Clean Runner', { width: 56, borderChar: '=' }),
+      )
       logger.step('Cleaning project directories')
     }
 
@@ -153,18 +195,15 @@ async function main() {
 
     if (exitCode !== 0) {
       if (!quiet) {
-        logger.log('')
         logger.error('Clean failed')
       }
       process.exitCode = exitCode
     } else {
       if (!quiet) {
-        logger.log('')
-        console.log(createFooter('Clean completed successfully!', { width: 56, borderChar: '=', color: 'green' }))
+        logger.success('Clean completed successfully!')
       }
     }
   } catch (error) {
-    logger.log('')
     logger.error(`Clean runner failed: ${error.message}`)
     process.exitCode = 1
   }

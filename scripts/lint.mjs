@@ -5,7 +5,6 @@
 
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import { isQuiet } from '@socketsecurity/lib/argv/flags'
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
@@ -15,18 +14,16 @@ import { printHeader } from '@socketsecurity/lib/stdio/header'
 
 import { runCommandQuiet } from './utils/run-command.mjs'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
 // Files that trigger a full lint when changed
 const CORE_FILES = new Set([
-  'src/logger.ts',
-  'src/spawn.ts',
-  'src/fs.ts',
-  'src/promises.ts',
+  'src/constants.ts',
+  'src/error.ts',
+  'src/helpers.ts',
+  'src/lang.ts',
   'src/objects.ts',
-  'src/arrays.ts',
   'src/strings.ts',
-  'src/types.ts',
+  'src/validate.ts',
+  'src/purl-type.ts',
 ])
 
 // Config patterns that trigger a full lint
@@ -36,7 +33,6 @@ const CONFIG_PATTERNS = [
   'pnpm-lock.yaml',
   'tsconfig*.json',
   'eslint.config.*',
-  '.config/biome.json',
 ]
 
 /**
@@ -155,7 +151,8 @@ async function runLintOnFiles(files, options = {}) {
 
   if (!quiet) {
     logger.clearLine().done('Linting passed')
-    logger.log('')
+    // Add newline after message (use error to write to same stream)
+    logger.error('')
   }
 
   return 0
@@ -218,7 +215,8 @@ async function runLintOnAll(options = {}) {
 
   if (!quiet) {
     logger.clearLine().done('Linting passed')
-    logger.log('')
+    // Add newline after message (use error to write to same stream)
+    logger.error('')
   }
 
   return 0
@@ -326,7 +324,9 @@ async function main() {
       console.log('  --staged       Lint staged files')
       console.log('  --quiet, --silent  Suppress progress messages')
       console.log('\nExamples:')
-      console.log('  pnpm lint                   # Lint changed files (default)')
+      console.log(
+        '  pnpm lint                   # Lint changed files (default)',
+      )
       console.log('  pnpm lint --fix             # Fix issues in changed files')
       console.log('  pnpm lint --all             # Lint all files')
       console.log('  pnpm lint --staged --fix    # Fix issues in staged files')
@@ -339,6 +339,7 @@ async function main() {
 
     if (!quiet) {
       printHeader('Lint Runner')
+      console.log('')
     }
 
     let exitCode = 0
@@ -351,7 +352,7 @@ async function main() {
       }
       exitCode = await runLintOnFiles(files, {
         fix: values.fix,
-        quiet
+        quiet,
       })
     } else {
       // Get files to lint based on flags
@@ -369,7 +370,7 @@ async function main() {
         }
         exitCode = await runLintOnAll({
           fix: values.fix,
-          quiet
+          quiet,
         })
       } else {
         if (!quiet) {
@@ -378,20 +379,20 @@ async function main() {
         }
         exitCode = await runLintOnFiles(files, {
           fix: values.fix,
-          quiet
+          quiet,
         })
       }
     }
 
     if (exitCode !== 0) {
       if (!quiet) {
-        logger.log('')
+        logger.error('')
         console.log('Lint failed')
       }
       process.exitCode = exitCode
     } else {
       if (!quiet) {
-        logger.log('')
+        console.log('')
         logger.success('All lint checks passed!')
       }
     }
