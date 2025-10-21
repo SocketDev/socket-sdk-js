@@ -17,9 +17,8 @@ import { resolve } from 'node:path'
 import * as parser from '@babel/parser'
 import traverse from '@babel/traverse'
 import * as t from '@babel/types'
-import MagicString from 'magic-string'
-
 import { logger } from '@socketsecurity/lib/logger'
+import MagicString from 'magic-string'
 
 import { getRootPath } from './utils/path-helpers.mjs'
 import { runCommand } from './utils/run-command.mjs'

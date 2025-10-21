@@ -4,10 +4,6 @@
  */
 /* c8 ignore start - Type definitions only, no runtime code to test. */
 
-import type { components, operations } from '../types/api'
-import type { OpReturnType } from '../types/api-helpers'
-import type { Remap } from '@socketsecurity/lib/objects'
-import type { ClientHttp2Session } from 'http2-wrapper'
 import type {
   Agent as HttpAgent,
   RequestOptions as HttpRequestOptions,
@@ -17,6 +13,10 @@ import type {
   Agent as HttpsAgent,
   RequestOptions as HttpsRequestOptions,
 } from 'node:https'
+import type { Remap } from '@socketsecurity/lib/objects'
+import type { ClientHttp2Session } from 'http2-wrapper'
+import type { components, operations } from '../types/api'
+import type { OpReturnType } from '../types/api-helpers'
 
 export type ALERT_ACTION = 'error' | 'monitor' | 'warn' | 'ignore'
 

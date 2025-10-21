@@ -1,9 +1,8 @@
 /** @fileoverview Test environment setup and cleanup utilities. */
 import nock from 'nock'
 import { afterEach, beforeEach } from 'vitest'
-
-import { FAST_TEST_CONFIG } from './fast-test-config.mts'
 import { SocketSdk } from '../../src/index'
+import { FAST_TEST_CONFIG } from './fast-test-config.mts'
 
 // Check if running in coverage mode
 // This is set in vitest.config.mts when coverage is enabled
