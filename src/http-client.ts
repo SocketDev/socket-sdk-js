@@ -3,22 +3,19 @@
  * Provides low-level HTTP request handling with proper error management and response parsing.
  */
 
+import type { ClientRequest, IncomingMessage } from 'node:http'
 import http from 'node:http'
 import https from 'node:https'
-
 import { debugLog } from '@socketsecurity/lib/debug'
 import { jsonParse } from '@socketsecurity/lib/json'
 import { perfTimer } from '@socketsecurity/lib/performance'
-
 import { MAX_RESPONSE_SIZE } from './constants'
-
 import type {
   RequestOptions,
   SendMethod,
   SocketArtifactAlert,
   SocketArtifactWithExtras,
 } from './types'
-import type { ClientRequest, IncomingMessage } from 'node:http'
 
 /**
  * HTTP response error for Socket API requests.

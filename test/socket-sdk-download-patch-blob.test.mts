@@ -5,12 +5,10 @@
  * patch files from the public Socket blob store.
  */
 
+import type { IncomingMessage, ServerResponse } from 'node:http'
 import { describe, expect, it } from 'vitest'
-
 import { SocketSdk } from '../src/index'
 import { setupLocalHttpServer } from './utils/local-server-helpers.mts'
-
-import type { IncomingMessage, ServerResponse } from 'node:http'
 
 describe('SocketSdk - downloadPatch', () => {
   const getBaseUrl = setupLocalHttpServer(

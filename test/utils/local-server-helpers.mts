@@ -5,16 +5,14 @@
  * for testing HTTP client behavior without mocking.
  */
 
-import { createServer } from 'node:http'
-
-import { afterAll, beforeAll } from 'vitest'
-
 import type {
   IncomingMessage,
   RequestListener,
   Server,
   ServerResponse,
 } from 'node:http'
+import { createServer } from 'node:http'
+import { afterAll, beforeAll } from 'vitest'
 
 /**
  * Sets up a local HTTP server for testing.

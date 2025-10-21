@@ -4,9 +4,8 @@
  */
 
 import rootPkgJson from '../package.json'
-import { createUserAgentFromPkgJson } from './user-agent'
-
 import type { ALERT_ACTION, ALERT_TYPE } from './types'
+import { createUserAgentFromPkgJson } from './user-agent'
 
 export const DEFAULT_USER_AGENT = createUserAgentFromPkgJson(rootPkgJson)
 
