@@ -3397,7 +3397,15 @@ Let's work through this together to get CI passing.`
         currentSha = newShaResult.stdout.trim()
         pushTime = Date.now()
 
-        retryCount++
+        // Reset retry count for new commit - it deserves its own attempts
+        log.substep(
+          `New commit ${currentSha.substring(0, 7)}, resetting retry counter`,
+        )
+        retryCount = 0
+
+        // Wait for new CI run to start
+        log.substep('Waiting 15 seconds for new CI run to start...')
+        await new Promise(resolve => setTimeout(resolve, 15_000))
         continue
       }
 
@@ -3591,6 +3599,8 @@ Fix all issues by making necessary file changes. Be direct, don't ask questions.
           },
         )
 
+        let pushedNewCommit = false
+
         if (fixStatusResult.stdout.trim()) {
           log.progress('Committing CI fixes')
 
@@ -3638,6 +3648,17 @@ Fix all issues by making necessary file changes. Be direct, don't ask questions.
             )
             currentSha = newShaResult.stdout.trim()
             pushTime = Date.now()
+            pushedNewCommit = true
+
+            // Reset retry count for new commit - it deserves its own attempts
+            log.substep(
+              `New commit ${currentSha.substring(0, 7)}, resetting retry counter`,
+            )
+            retryCount = 0
+
+            // Wait for new CI run to start
+            log.substep('Waiting 15 seconds for new CI run to start...')
+            await new Promise(resolve => setTimeout(resolve, 15_000))
           } else {
             log.warn(
               `Git commit failed: ${commitResult.stderr || commitResult.stdout}`,
@@ -3645,7 +3666,10 @@ Fix all issues by making necessary file changes. Be direct, don't ask questions.
           }
         }
 
-        retryCount++
+        // Only increment retry count if we didn't push a new commit
+        if (!pushedNewCommit) {
+          retryCount++
+        }
       } else {
         log.error(`CI still failing after ${maxRetries} attempts`)
         log.substep(
