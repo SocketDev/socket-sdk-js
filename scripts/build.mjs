@@ -7,38 +7,49 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { build, context } from 'esbuild'
+import colors from 'yoctocolors-cjs'
 
 import { isQuiet } from '@socketsecurity/lib/argv/flags'
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
 import { logger } from '@socketsecurity/lib/logger'
 import { printFooter, printHeader } from '@socketsecurity/lib/stdio/header'
 
+import {
+  analyzeMetafile,
+  buildConfig,
+  watchConfig,
+} from '../.config/esbuild.config.mjs'
 import { runSequence } from './utils/run-command.mjs'
-import { analyzeMetafile, buildConfig, watchConfig } from '../.config/esbuild.config.mjs'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.resolve(__dirname, '..')
+const rootPath = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+)
 
 /**
  * Build source code with esbuild.
+ * Returns { exitCode, buildTime, result } for external logging.
  */
 async function buildSource(options = {}) {
-  const { analyze = false, quiet = false, skipClean = false, verbose = false } = options
+  const { quiet = false, skipClean = false, verbose = false } = options
 
   if (!quiet) {
-    logger.step('Building source code')
+    logger.substep('Building source code')
   }
 
   // Clean dist directory if needed
   if (!skipClean) {
     const exitCode = await runSequence([
-      { args: ['exec', 'bash', 'scripts/node-with-loader.sh', 'scripts/clean.mjs', '--dist', '--quiet'], command: 'pnpm' }
+      {
+        args: ['scripts/load.cjs', 'clean', '--dist', '--quiet'],
+        command: 'node',
+      },
     ])
     if (exitCode !== 0) {
       if (!quiet) {
-        logger.fail('Clean failed')
+        logger.error('Clean failed')
       }
-      return exitCode
+      return { exitCode, buildTime: 0, result: null }
     }
   }
 
@@ -48,47 +59,42 @@ async function buildSource(options = {}) {
     const logLevel = quiet ? 'silent' : verbose ? 'info' : 'warning'
     const result = await build({
       ...buildConfig,
-      logLevel
+      logLevel,
     })
     const buildTime = Date.now() - startTime
 
-    if (!quiet) {
-      logger.success(`Source build complete in ${buildTime}ms`)
-
-      if (analyze && result.metafile) {
-        const analysis = analyzeMetafile(result.metafile)
-        logger.info('Build output:')
-        for (const file of analysis.files) {
-          logger.substep(`${file.name}: ${file.size}`)
-        }
-        logger.step(`Total bundle size: ${analysis.totalSize}`)
-      }
-    }
-
-    return 0
+    return { exitCode: 0, buildTime, result }
   } catch (error) {
     if (!quiet) {
-      logger.fail('Source build failed')
+      logger.error('Source build failed')
       console.error(error)
     }
-    return 1
+    return { exitCode: 1, buildTime: 0, result: null }
   }
 }
 
 /**
  * Build TypeScript declarations.
+ * Returns exitCode for external logging.
  */
 async function buildTypes(options = {}) {
-  const { quiet = false, skipClean = false } = options
+  const {
+    quiet = false,
+    skipClean = false,
+    verbose: _verbose = false,
+  } = options
 
   if (!quiet) {
-    logger.step('Building TypeScript declarations')
+    logger.substep('Building TypeScript declarations')
   }
 
   const commands = []
 
   if (!skipClean) {
-    commands.push({ args: ['exec', 'bash', 'scripts/node-with-loader.sh', 'scripts/clean.mjs', '--types', '--quiet'], command: 'pnpm' })
+    commands.push({
+      args: ['scripts/load.cjs', 'clean', '--types', '--quiet'],
+      command: 'node',
+    })
   }
 
   commands.push({
@@ -100,44 +106,15 @@ async function buildTypes(options = {}) {
 
   if (exitCode !== 0) {
     if (!quiet) {
-      logger.fail('Type declarations build failed')
+      logger.error('Type declarations build failed')
     }
-    return exitCode
   }
 
-  // Rename .d.ts files to .d.mts for ESM
-  if (!quiet) {
-    logger.substep('Renaming declaration files to .d.mts')
-  }
-
-  const { promises: fs } = await import('node:fs')
-  const distPath = path.join(rootPath, 'dist')
-
-  try {
-    const files = await fs.readdir(distPath)
-    for (const file of files) {
-      if (file.endsWith('.d.ts')) {
-        const oldPath = path.join(distPath, file)
-        const newPath = path.join(distPath, file.replace('.d.ts', '.d.mts'))
-        await fs.rename(oldPath, newPath)
-      }
-    }
-  } catch (error) {
-    if (!quiet) {
-      logger.error('Failed to rename declaration files:', error)
-    }
-    return 1
-  }
-
-  if (!quiet) {
-    logger.success('Type declarations built')
-  }
-
-  return 0
+  return exitCode
 }
 
 /**
- * Watch mode for development with incremental builds.
+ * Watch mode for development with incremental builds (68% faster rebuilds).
  */
 async function watchBuild(options = {}) {
   const { quiet = false, verbose = false } = options
@@ -162,7 +139,7 @@ async function watchBuild(options = {}) {
         {
           name: 'rebuild-logger',
           setup(build) {
-            build.onEnd((result) => {
+            build.onEnd(result => {
               if (result.errors.length > 0) {
                 if (!quiet) {
                   logger.error('Rebuild failed')
@@ -177,9 +154,9 @@ async function watchBuild(options = {}) {
                 }
               }
             })
-          }
-        }
-      ]
+          },
+        },
+      ],
     })
 
     // Enable watch mode
@@ -206,8 +183,8 @@ async function watchBuild(options = {}) {
  * Check if build is needed.
  */
 function isBuildNeeded() {
-  const distPath = path.join(rootPath, 'dist', 'index.mjs')
-  const distTypesPath = path.join(rootPath, 'dist', 'index.d.mts')
+  const distPath = path.join(rootPath, 'dist', 'index.js')
+  const distTypesPath = path.join(rootPath, 'dist', 'types', 'index.d.ts')
 
   return !existsSync(distPath) || !existsSync(distTypesPath)
 }
@@ -260,13 +237,15 @@ async function main() {
 
     // Show help if requested
     if (values.help) {
-      printHeader('Build Runner')
+      console.log('Build Runner')
       console.log('\nUsage: pnpm build [options]')
       console.log('\nOptions:')
       console.log('  --help       Show this help message')
       console.log('  --src        Build source code only')
       console.log('  --types      Build TypeScript declarations only')
-      console.log('  --watch      Watch mode with incremental builds (68% faster rebuilds)')
+      console.log(
+        '  --watch      Watch mode with incremental builds (68% faster rebuilds)',
+      )
       console.log('  --needed     Only build if dist files are missing')
       console.log('  --analyze    Show bundle size analysis')
       console.log('  --quiet, --silent  Suppress progress messages')
@@ -275,9 +254,13 @@ async function main() {
       console.log('  pnpm build              # Full build (source + types)')
       console.log('  pnpm build --src        # Build source only')
       console.log('  pnpm build --types      # Build types only')
-      console.log('  pnpm build --watch      # Watch mode (incremental rebuilds)')
+      console.log(
+        '  pnpm build --watch      # Watch mode with incremental builds',
+      )
       console.log('  pnpm build --analyze    # Build with size analysis')
-      console.log('\nNote: Watch mode uses esbuild context API for 68% faster rebuilds')
+      console.log(
+        '\nNote: Watch mode uses esbuild context API for 68% faster rebuilds',
+      )
       process.exitCode = 0
       return
     }
@@ -310,13 +293,33 @@ async function main() {
         logger.step('Building TypeScript declarations only')
       }
       exitCode = await buildTypes({ quiet, verbose })
+      if (exitCode === 0 && !quiet) {
+        logger.substep('Type declarations built')
+      }
     }
     // Build source only
     else if (values.src && !values.types) {
       if (!quiet) {
         logger.step('Building source only')
       }
-      exitCode = await buildSource({ quiet, verbose, analyze: values.analyze })
+      const {
+        buildTime,
+        exitCode: srcExitCode,
+        result,
+      } = await buildSource({ quiet, verbose, analyze: values.analyze })
+      exitCode = srcExitCode
+      if (exitCode === 0 && !quiet) {
+        logger.substep(`Source build complete in ${buildTime}ms`)
+
+        if (values.analyze && result?.metafile) {
+          const analysis = analyzeMetafile(result.metafile)
+          logger.info('Build output:')
+          for (const file of analysis.files) {
+            logger.substep(`${file.name}: ${file.size}`)
+          }
+          logger.step(`Total bundle size: ${analysis.totalSize}`)
+        }
+      }
     }
     // Build everything (default)
     else {
@@ -329,41 +332,67 @@ async function main() {
         logger.substep('Cleaning build directories')
       }
       exitCode = await runSequence([
-        { args: ['exec', 'bash', 'scripts/node-with-loader.sh', 'scripts/clean.mjs', '--dist', '--types', '--quiet'], command: 'pnpm' }
+        {
+          args: ['scripts/load.cjs', 'clean', '--dist', '--types', '--quiet'],
+          command: 'node',
+        },
       ])
       if (exitCode !== 0) {
         if (!quiet) {
-          logger.fail('Clean failed')
+          logger.error('Clean failed')
         }
         process.exitCode = exitCode
         return
       }
 
       // Run source and types builds in parallel
-      const buildPromises = [
-        buildSource({ quiet, verbose, skipClean: true, analyze: values.analyze }),
-        buildTypes({ quiet, verbose, skipClean: true })
-      ]
+      const [srcResult, typesExitCode] = await Promise.all([
+        buildSource({
+          quiet,
+          verbose,
+          skipClean: true,
+          analyze: values.analyze,
+        }),
+        buildTypes({ quiet, verbose, skipClean: true }),
+      ])
 
-      const results = await Promise.all(buildPromises)
-      exitCode = results.find(code => code !== 0) || 0
+      // Log completion messages in order
+      if (!quiet) {
+        if (srcResult.exitCode === 0) {
+          logger.substep(`Source build complete in ${srcResult.buildTime}ms`)
+
+          if (values.analyze && srcResult.result?.metafile) {
+            const analysis = analyzeMetafile(srcResult.result.metafile)
+            logger.info('Build output:')
+            for (const file of analysis.files) {
+              logger.substep(`${file.name}: ${file.size}`)
+            }
+            logger.step(`Total bundle size: ${analysis.totalSize}`)
+          }
+        }
+
+        if (typesExitCode === 0) {
+          logger.substep('Type declarations built')
+        }
+      }
+
+      exitCode = srcResult.exitCode !== 0 ? srcResult.exitCode : typesExitCode
+    }
+
+    // Print final status and footer
+    if (!quiet) {
+      if (exitCode === 0) {
+        console.log(colors.green('✓ Build completed successfully!'))
+      } else {
+        console.error(colors.red('✗ Build failed'))
+      }
+      printFooter()
     }
 
     if (exitCode !== 0) {
-      if (!quiet) {
-        logger.log('')
-        logger.error('Build failed')
-      }
       process.exitCode = exitCode
-    } else {
-      if (!quiet) {
-        logger.log('')
-        logger.success('Build completed successfully!')
-        printFooter()
-      }
     }
   } catch (error) {
-    logger.log('')
     logger.error(`Build runner failed: ${error.message}`)
     process.exitCode = 1
   }

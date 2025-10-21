@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * @fileoverview Interactive runner for commands with ctrl+o toggle.
  * Standardized across all socket-* repositories.
@@ -32,7 +31,7 @@ export async function runWithOutput(command, args = [], options = {}) {
     message = 'Running',
     showOnError = true,
     toggleText = 'to see output',
-    verbose = false
+    verbose = false,
   } = options
 
   return new Promise((resolve, reject) => {
@@ -51,7 +50,7 @@ export async function runWithOutput(command, args = [], options = {}) {
     const child = spawn(command, args, {
       cwd,
       env,
-      stdio: ['inherit', 'pipe', 'pipe']
+      stdio: ['inherit', 'pipe', 'pipe'],
     })
 
     // Setup keyboard handling for TTY
@@ -61,7 +60,7 @@ export async function runWithOutput(command, args = [], options = {}) {
 
       const keypressHandler = (_str, key) => {
         // ctrl+o toggles output
-        if (key && key.ctrl && key.name === 'o') {
+        if (key?.ctrl && key.name === 'o') {
           showOutput = !showOutput
 
           if (showOutput) {
@@ -88,7 +87,7 @@ export async function runWithOutput(command, args = [], options = {}) {
           }
         }
         // ctrl+c to cancel
-        else if (key && key.ctrl && key.name === 'c') {
+        else if (key?.ctrl && key.name === 'c') {
           child.kill('SIGTERM')
           if (process.stdin.isTTY) {
             process.stdin.setRawMode(false)
@@ -204,13 +203,15 @@ export async function runWithOutput(command, args = [], options = {}) {
 
       if (isSpinning) {
         if (finalCode === 0) {
+          spinner.stop()
           spinner.success(`${message} completed`)
           // Ensure spinner is fully cleared and we're on a fresh line
-          process.stdout.write('\r\x1b[K\n')
+          process.stdout.write('\r\x1b[K')
         } else {
+          spinner.stop()
           spinner.fail(`${message} failed`)
           // Ensure spinner is fully cleared and we're on a fresh line
-          process.stdout.write('\r\x1b[K\n')
+          process.stdout.write('\r\x1b[K')
           // Show output on error if configured
           if (showOnError && outputBuffer.length > 0) {
             console.log('\n--- Output ---')
@@ -228,9 +229,10 @@ export async function runWithOutput(command, args = [], options = {}) {
       }
 
       if (isSpinning) {
+        spinner.stop()
         spinner.fail(`${message} error: ${error.message}`)
         // Ensure spinner is fully cleared and we're on a fresh line
-        process.stdout.write('\r\x1b[K\n')
+        process.stdout.write('\r\x1b[K')
       }
       reject(error)
     })
@@ -244,7 +246,7 @@ export async function runTests(command, args, options = {}) {
   return runWithOutput(command, args, {
     message: 'Running tests',
     toggleText: 'to see test output',
-    ...options
+    ...options,
   })
 }
 
@@ -255,7 +257,7 @@ export async function runLint(command, args, options = {}) {
   return runWithOutput(command, args, {
     message: 'Running linter',
     toggleText: 'to see lint results',
-    ...options
+    ...options,
   })
 }
 
@@ -266,6 +268,6 @@ export async function runBuild(command, args, options = {}) {
   return runWithOutput(command, args, {
     message: 'Building',
     toggleText: 'to see build output',
-    ...options
+    ...options,
   })
 }
