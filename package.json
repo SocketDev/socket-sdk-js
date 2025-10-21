@@ -97,7 +97,7 @@
       "unrs-resolver"
     ],
     "overrides": {
-      "vite": "7.1.7"
+      "vite": "7.1.11"
     }
   },
   "engines": {
