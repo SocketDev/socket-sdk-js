@@ -77,9 +77,13 @@ function fixArraySyntax(filePath) {
   })
 
   // Helper to determine if a type is simple
-  const isSimpleType = (node) => {
+  const isSimpleType = node => {
     // Check for keyword types
-    if (t.isTSStringKeyword(node) || t.isTSNumberKeyword(node) || t.isTSBooleanKeyword(node)) {
+    if (
+      t.isTSStringKeyword(node) ||
+      t.isTSNumberKeyword(node) ||
+      t.isTSBooleanKeyword(node)
+    ) {
       return true
     }
 
@@ -119,7 +123,9 @@ function fixArraySyntax(filePath) {
       const start = node.start
       const end = node.end
 
-      if (start === null || end === null) {return}
+      if (start === null || end === null) {
+        return
+      }
 
       // Get the text of the element type
       const elementText = content.slice(elementType.start, elementType.end)
@@ -135,8 +141,12 @@ function fixArraySyntax(filePath) {
     },
   })
 
-  logger.log(`    Found ${transformCount + skipCount} complex arrays to transform`)
-  logger.log(`    Transformed ${transformCount}, skipped ${skipCount} (overlaps)`)
+  logger.log(
+    `    Found ${transformCount + skipCount} complex arrays to transform`,
+  )
+  logger.log(
+    `    Transformed ${transformCount}, skipped ${skipCount} (overlaps)`,
+  )
 
   if (transformCount > 0) {
     const transformed = magicString.toString()
@@ -144,7 +154,9 @@ function fixArraySyntax(filePath) {
     // Verify transformations were actually applied
     const objectArrayCount = (transformed.match(/\}\[\]/g) || []).length
     const arrayGenericCount = (transformed.match(/Array</g) || []).length
-    logger.log(`    Final check: ${objectArrayCount} object arrays with }[], ${arrayGenericCount} Array< generics`)
+    logger.log(
+      `    Final check: ${objectArrayCount} object arrays with }[], ${arrayGenericCount} Array< generics`,
+    )
 
     writeFileSync(filePath, transformed, 'utf8')
   }

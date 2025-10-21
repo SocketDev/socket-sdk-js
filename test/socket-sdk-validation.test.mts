@@ -30,12 +30,12 @@ describe('SocketSdk Validation & Error Handling', () => {
     })
 
     it('rejects excessively long API token', () => {
-      const longToken = 'a'.repeat(1_025)
+      const longToken = 'a'.repeat(1025)
       expect(() => new SocketSdk(longToken)).toThrow('exceeds maximum length')
     })
 
     it('accepts maximum length API token', () => {
-      const maxToken = 'a'.repeat(1_024)
+      const maxToken = 'a'.repeat(1024)
       const client = new SocketSdk(maxToken)
       expect(client).toBeInstanceOf(SocketSdk)
     })
@@ -53,7 +53,7 @@ describe('SocketSdk Validation & Error Handling', () => {
     })
 
     it('rejects timeout below minimum', () => {
-      expect(() => new SocketSdk('token', { timeout: 4_999 })).toThrow(
+      expect(() => new SocketSdk('token', { timeout: 4999 })).toThrow(
         'must be a number between',
       )
     })
@@ -65,7 +65,7 @@ describe('SocketSdk Validation & Error Handling', () => {
     })
 
     it('accepts minimum timeout', () => {
-      const client = new SocketSdk('token', { timeout: 5_000 })
+      const client = new SocketSdk('token', { timeout: 5000 })
       expect(client).toBeInstanceOf(SocketSdk)
     })
 
@@ -95,7 +95,9 @@ describe('SocketSdk Validation & Error Handling', () => {
     })
 
     it('accepts baseUrl option', () => {
-      const client = new SocketSdk('token', { baseUrl: 'https://custom.api.com' })
+      const client = new SocketSdk('token', {
+        baseUrl: 'https://custom.api.com',
+      })
       expect(client).toBeInstanceOf(SocketSdk)
     })
 

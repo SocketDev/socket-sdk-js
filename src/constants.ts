@@ -23,7 +23,7 @@ export const DEFAULT_RETRY_DELAY = 1000
 export const MAX_HTTP_TIMEOUT = 5 * 60 * 1000
 
 // Minimum timeout for HTTP requests (5 seconds)
-export const MIN_HTTP_TIMEOUT = 5_000
+export const MIN_HTTP_TIMEOUT = 5000
 
 // Maximum response body size (10MB)
 export const MAX_RESPONSE_SIZE = 10 * 1024 * 1024

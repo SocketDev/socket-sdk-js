@@ -30,7 +30,7 @@ const nodeGlobalsConfig = Object.fromEntries(
   Object.entries(globals.node).map(([k]) => [k, 'readonly']),
 )
 
-const biomeConfigPath = path.join(rootPath, '.config', 'biome.json')
+const biomeConfigPath = path.join(rootPath, 'biome.json')
 const biomeConfig = require(biomeConfigPath)
 const biomeIgnores = {
   name: 'Imported biome.json ignore patterns',
@@ -91,6 +91,7 @@ const sharedRules = {
   'no-new': 'error',
   'no-proto': 'error',
   'no-undef': 'error',
+  'no-unexpected-multiline': 'off',
   'no-unused-vars': [
     'error',
     {
@@ -103,7 +104,7 @@ const sharedRules = {
   'no-warning-comments': ['warn', { terms: ['fixme'] }],
   'prefer-const': 'error',
   'sort-destructure-keys/sort-destructure-keys': 'error',
-  'sort-imports': ['error', { ignoreDeclarationSort: true }],
+  'sort-imports': 'off',
 }
 
 const sharedRulesForImportX = {

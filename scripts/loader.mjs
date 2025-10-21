@@ -19,16 +19,21 @@ export function resolve(specifier, context, nextResolve) {
   if (useLocalLib && specifier.startsWith('@socketsecurity/lib')) {
     const subpath = specifier.slice('@socketsecurity/lib'.length) || '/index.js'
     // Map @socketsecurity/lib to ../socket-lib/dist/
-    const localPath = path.join(libPath, subpath.startsWith('/') ? subpath.slice(1) : subpath)
+    const localPath = path.join(
+      libPath,
+      subpath.startsWith('/') ? subpath.slice(1) : subpath,
+    )
 
     // Add .js extension if not present
-    const resolvedPath = localPath.endsWith('.js') ? localPath : `${localPath}.js`
+    const resolvedPath = localPath.endsWith('.js')
+      ? localPath
+      : `${localPath}.js`
 
     // Only use local path if file actually exists
     if (existsSync(resolvedPath)) {
       return {
         url: `file://${resolvedPath}`,
-        shortCircuit: true
+        shortCircuit: true,
       }
     }
   }

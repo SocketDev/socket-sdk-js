@@ -22,7 +22,9 @@ if (require.main === module) {
   }
 
   // Add .mjs extension if not present.
-  const scriptFile = scriptName.endsWith('.mjs') ? scriptName : `${scriptName}.mjs`
+  const scriptFile = scriptName.endsWith('.mjs')
+    ? scriptName
+    : `${scriptName}.mjs`
   const scriptPath = path.join(__dirname, scriptFile)
 
   // Run the script with the alias loader.

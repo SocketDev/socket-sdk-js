@@ -1,4 +1,5 @@
 /** @fileoverview Tests for JSON parsing edge cases in HTTP client. */
+
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { IncomingMessage } from 'node:http'

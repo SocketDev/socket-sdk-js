@@ -13,16 +13,16 @@ export type OpReturnType<T> = T extends {
 }
   ? U
   : T extends {
-      responses: {
-        201?: { content?: { 'application/json': infer U } }
-      }
-    }
-    ? U
-    : T extends {
         responses: {
-          204?: unknown
+          201?: { content?: { 'application/json': infer U } }
         }
       }
+    ? U
+    : T extends {
+          responses: {
+            204?: unknown
+          }
+        }
       ? undefined
       : unknown
 
@@ -35,11 +35,31 @@ export type OpErrorType<T> = T extends {
 }
   ? R extends Record<string | number, unknown>
     ? {
-        [K in keyof R as K extends 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500 | 502 | 503
+        [K in keyof R as K extends
+          | 400
+          | 401
+          | 403
+          | 404
+          | 409
+          | 422
+          | 429
+          | 500
+          | 502
+          | 503
           ? K
           : never]: R[K]
       }[keyof {
-        [K in keyof R as K extends 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500 | 502 | 503
+        [K in keyof R as K extends
+          | 400
+          | 401
+          | 403
+          | 404
+          | 409
+          | 422
+          | 429
+          | 500
+          | 502
+          | 503
           ? K
           : never]: R[K]
       }] extends { content?: { 'application/json': infer E } }

@@ -12,8 +12,8 @@
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
-import { isCoverageMode, setupTestClient } from './utils/environment.mts'
 import { SocketSdk } from '../src/index'
+import { isCoverageMode, setupTestClient } from './utils/environment.mts'
 
 import type { SocketSdkGenericResult } from '../src/index'
 
@@ -68,7 +68,7 @@ describe.skipIf(isCoverageMode)('SocketSdk - Optional Configuration', () => {
       // 10 second timeout
       const client = new SocketSdk('test-token', {
         retries: 0,
-        timeout: 10000,
+        timeout: 10_000,
       })
 
       const result = (await client.getApi('test-timeout', {
@@ -80,12 +80,9 @@ describe.skipIf(isCoverageMode)('SocketSdk - Optional Configuration', () => {
     })
   })
 
-
   describe('Empty response handling', () => {
     it('should handle truly empty response bodies', async () => {
-      nock('https://api.socket.dev')
-        .get('/v0/empty-test')
-        .reply(200, '')
+      nock('https://api.socket.dev').get('/v0/empty-test').reply(200, '')
 
       const result = (await getClient().getApi('empty-test', {
         responseType: 'json',
@@ -114,9 +111,7 @@ describe.skipIf(isCoverageMode)('SocketSdk - Optional Configuration', () => {
         JSON.stringify(mockResponses[1]) +
         '\n'
 
-      nock('https://api.socket.dev')
-        .post('/v0/purl')
-        .reply(200, responseText)
+      nock('https://api.socket.dev').post('/v0/purl').reply(200, responseText)
 
       const result = await getClient().batchPackageFetch({
         components: [

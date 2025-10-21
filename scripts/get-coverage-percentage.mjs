@@ -63,10 +63,10 @@ async function logCoveragePercentage(argv) {
 
   // Calculate overall percentage (average of all metrics including type coverage if available).
   const codeCoverageMetrics = [
-    parseFloat(codeCoverage.statements.percent),
-    parseFloat(codeCoverage.branches.percent),
-    parseFloat(codeCoverage.functions.percent),
-    parseFloat(codeCoverage.lines.percent),
+    Number.parseFloat(codeCoverage.statements.percent),
+    Number.parseFloat(codeCoverage.branches.percent),
+    Number.parseFloat(codeCoverage.functions.percent),
+    Number.parseFloat(codeCoverage.lines.percent),
   ]
 
   let overall
@@ -96,7 +96,7 @@ async function logCoveragePercentage(argv) {
     { threshold: 0, emoji: ' ⚠️' },
   ]
 
-  const overallNum = parseFloat(overall)
+  const overallNum = Number.parseFloat(overall)
   const emoji =
     COVERAGE_EMOJI_THRESHOLDS.find(({ threshold }) => overallNum >= threshold)
       ?.emoji || ''

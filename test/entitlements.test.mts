@@ -153,9 +153,9 @@ describe('Entitlements API', () => {
         .get('/v0/orgs/error-org/entitlements')
         .replyWithError('Connection refused')
 
-      await expect(getClient().getEnabledEntitlements('error-org')).rejects.toThrow(
-        'Connection refused',
-      )
+      await expect(
+        getClient().getEnabledEntitlements('error-org'),
+      ).rejects.toThrow('Connection refused')
     })
 
     it('should handle 401 unauthorized errors', async () => {
@@ -163,7 +163,9 @@ describe('Entitlements API', () => {
         .get('/v0/orgs/auth-error-org/entitlements')
         .reply(401, { error: { message: 'Unauthorized' } })
 
-      await expect(getClient().getEntitlements('auth-error-org')).rejects.toThrow()
+      await expect(
+        getClient().getEntitlements('auth-error-org'),
+      ).rejects.toThrow()
     })
 
     it('should handle 403 forbidden errors', async () => {
@@ -181,7 +183,9 @@ describe('Entitlements API', () => {
         .get('/v0/orgs/nonexistent-org/entitlements')
         .reply(404, { error: { message: 'Organization not found' } })
 
-      await expect(getClient().getEntitlements('nonexistent-org')).rejects.toThrow()
+      await expect(
+        getClient().getEntitlements('nonexistent-org'),
+      ).rejects.toThrow()
     })
 
     it('should handle 500 server errors', async () => {
@@ -199,7 +203,9 @@ describe('Entitlements API', () => {
         .get('/v0/orgs/malformed-org/entitlements')
         .reply(200, 'invalid json{')
 
-      await expect(getClient().getEntitlements('malformed-org')).rejects.toThrow()
+      await expect(
+        getClient().getEntitlements('malformed-org'),
+      ).rejects.toThrow()
     })
 
     it('should handle null response data', async () => {
@@ -209,7 +215,8 @@ describe('Entitlements API', () => {
         .reply(200, '')
 
       const entitlements = await getClient().getEntitlements('null-org')
-      const enabledProducts = await getClient().getEnabledEntitlements('null-org')
+      const enabledProducts =
+        await getClient().getEnabledEntitlements('null-org')
 
       expect(entitlements).toEqual([])
       expect(enabledProducts).toEqual([])
@@ -276,7 +283,8 @@ describe('Entitlements API', () => {
         .reply(200, mockResponse)
 
       const entitlements = await getClient().getEntitlements('large-org')
-      const enabledProducts = await getClient().getEnabledEntitlements('large-org')
+      const enabledProducts =
+        await getClient().getEnabledEntitlements('large-org')
 
       expect(entitlements).toHaveLength(100)
       // Half enabled
@@ -323,7 +331,7 @@ describe('Entitlements API', () => {
     })
 
     it('should handle very long organization slug', async () => {
-      const longSlug = 'very-long-organization-slug-' + 'x'.repeat(100)
+      const longSlug = `very-long-organization-slug-${'x'.repeat(100)}`
       const encodedSlug = encodeURIComponent(longSlug)
 
       const mockResponse: EntitlementsResponse = {
@@ -354,7 +362,7 @@ describe('Entitlements API', () => {
         .times(5)
         .reply(200, mockResponse)
 
-      const client = getClient();
+      const client = getClient()
       const promises = Array.from(
         { length: 5 },
         (): Promise<string[]> =>
@@ -377,7 +385,7 @@ describe('Entitlements API', () => {
           })
       }
 
-      const client = getClient();
+      const client = getClient()
       const promises = Array.from(
         { length: 10 },
         (_: unknown, i: number): Promise<string[]> =>

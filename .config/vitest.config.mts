@@ -13,13 +13,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // Check if coverage is enabled via CLI flags or environment.
 const isCoverageEnabled =
-  process.env['COVERAGE'] === 'true' ||
-  process.env['npm_lifecycle_event']?.includes('coverage') ||
+  process.env.COVERAGE === 'true' ||
+  process.env.npm_lifecycle_event?.includes('coverage') ||
   process.argv.some(arg => arg.includes('coverage'))
 
 // Set environment variable so tests can detect coverage mode
 if (isCoverageEnabled) {
-  process.env['COVERAGE'] = 'true'
+  process.env.COVERAGE = 'true'
 }
 
 export default defineConfig({
@@ -43,9 +43,8 @@ export default defineConfig({
       'test/entitlements.test.mts',
       'test/socket-sdk-upload-simple.test.mts',
     ],
-    reporters: process.env.TEST_REPORTER === 'json'
-      ? ['json', 'default']
-      : ['default'],
+    reporters:
+      process.env.TEST_REPORTER === 'json' ? ['json', 'default'] : ['default'],
     setupFiles: ['./test/utils/setup.mts'],
     // Optimize test execution for speed
     // Threads are faster than forks

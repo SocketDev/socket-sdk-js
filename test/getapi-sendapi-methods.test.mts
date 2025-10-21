@@ -205,10 +205,13 @@ describe('getApi and sendApi Methods', () => {
         .get('/v0/complex-json')
         .reply(200, complexData)
 
-      const result = (await getClient().getApi<typeof complexData>('complex-json', {
-        responseType: 'json',
-        throws: false,
-      })) as SocketSdkGenericResult<typeof complexData>
+      const result = (await getClient().getApi<typeof complexData>(
+        'complex-json',
+        {
+          responseType: 'json',
+          throws: false,
+        },
+      )) as SocketSdkGenericResult<typeof complexData>
 
       expect(result.success).toBe(true)
       if (result.success) {
@@ -306,11 +309,14 @@ describe('getApi and sendApi Methods', () => {
         .put('/v0/update/123', requestData)
         .reply(200, responseData)
 
-      const result = (await getClient().sendApi<typeof responseData>('update/123', {
-        method: 'PUT',
-        body: requestData,
-        throws: false,
-      })) as SocketSdkGenericResult<typeof responseData>
+      const result = (await getClient().sendApi<typeof responseData>(
+        'update/123',
+        {
+          method: 'PUT',
+          body: requestData,
+          throws: false,
+        },
+      )) as SocketSdkGenericResult<typeof responseData>
 
       expect(result.success).toBe(true)
       if (result.success) {
@@ -325,10 +331,13 @@ describe('getApi and sendApi Methods', () => {
         .post('/v0/process')
         .reply(200, responseData)
 
-      const result = (await getClient().sendApi<typeof responseData>('process', {
-        body: {},
-        throws: false,
-      })) as SocketSdkGenericResult<typeof responseData>
+      const result = (await getClient().sendApi<typeof responseData>(
+        'process',
+        {
+          body: {},
+          throws: false,
+        },
+      )) as SocketSdkGenericResult<typeof responseData>
 
       expect(result.success).toBe(true)
       if (result.success) {
