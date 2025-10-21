@@ -1,8 +1,8 @@
 /** @fileoverview Vitest setup file for test utilities. */
 import nock from 'nock'
 
-import { getAbortSignal } from '@socketsecurity/registry/constants/process'
-import { setMaxEventTargetListeners } from '@socketsecurity/registry/lib/suppress-warnings'
+import { getAbortSignal } from '@socketsecurity/lib/constants/process'
+import { setMaxEventTargetListeners } from '@socketsecurity/lib/suppress-warnings'
 
 const abortSignal = getAbortSignal()
 
