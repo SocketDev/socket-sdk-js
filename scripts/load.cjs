@@ -26,8 +26,14 @@ if (require.main === module) {
   const scriptPath = path.join(__dirname, scriptFile)
 
   // Run the script with the alias loader.
-  const loaderPath = path.join(__dirname, 'utils', 'alias-loader.mjs')
-  const args = [`--loader=${loaderPath}`, scriptPath, ...flags]
+  // Convert register path to file:// URL for cross-platform ESM loader support (Windows requires file:// URLs)
+  const { pathToFileURL } = require('node:url')
+  const registerPath = path.join(__dirname, 'register-loader.mjs')
+  const args = [
+    `--import=${pathToFileURL(registerPath).href}`,
+    scriptPath,
+    ...flags,
+  ]
 
   const child = spawn(process.execPath, args, {
     stdio: 'inherit',
