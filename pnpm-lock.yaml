@@ -32,6 +32,9 @@ importers:
       '@eslint/js':
         specifier: 9.35.0
         version: 9.35.0
+      '@socketsecurity/lib':
+        specifier: link:../socket-lib
+        version: link:../socket-lib
       '@socketsecurity/registry':
         specifier: 1.5.3
         version: 1.5.3
