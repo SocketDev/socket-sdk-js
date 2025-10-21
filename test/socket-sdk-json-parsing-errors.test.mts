@@ -1,10 +1,8 @@
 /** @fileoverview Tests for JSON parsing and syntax error handling in HTTP client. */
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
-
-import { isCoverageMode, setupTestClient } from './utils/environment.mts'
-
 import type { SocketSdkGenericResult } from '../src/index'
+import { isCoverageMode, setupTestClient } from './utils/environment.mts'
 
 describe('SocketSdk - Branch Coverage Tests', () => {
   const getClient = setupTestClient('test-api-token', { retries: 0 })

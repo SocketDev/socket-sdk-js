@@ -1,17 +1,14 @@
 /** @fileoverview File upload utilities for Socket API with multipart form data support. */
 import events from 'node:events'
-import { createReadStream } from 'node:fs'
-import path from 'node:path'
-import { Readable } from 'node:stream'
-
-import { normalizePath } from '@socketsecurity/lib/path'
-
-import { getHttpModule, getResponse } from './http-client'
-
-import type { RequestOptions } from './types'
 import type { ReadStream } from 'node:fs'
+import { createReadStream } from 'node:fs'
 import type { ClientRequest, IncomingMessage } from 'node:http'
 import type { RequestOptions as HttpsRequestOptions } from 'node:https'
+import path from 'node:path'
+import { Readable } from 'node:stream'
+import { normalizePath } from '@socketsecurity/lib/path'
+import { getHttpModule, getResponse } from './http-client'
+import type { RequestOptions } from './types'
 
 /**
  * Create multipart form-data body parts for file uploads.

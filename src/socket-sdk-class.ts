@@ -18,6 +18,8 @@ import { urlSearchParamAsBoolean } from '@socketsecurity/lib/url'
 
 const abortSignal = getAbortSignal()
 
+import type { IncomingMessage } from 'node:http'
+import type { TtlCache } from '@socketsecurity/lib/cache-with-ttl'
 import {
   DEFAULT_HTTP_TIMEOUT,
   DEFAULT_RETRIES,
@@ -46,14 +48,6 @@ import {
   ResponseError,
   reshapeArtifactForPublicPolicy,
 } from './http-client'
-import {
-  normalizeBaseUrl,
-  promiseWithResolvers,
-  queryToSearchParams,
-  resolveAbsPaths,
-  resolveBasePath,
-} from './utils'
-
 import type {
   Agent,
   ArtifactPatches,
@@ -84,8 +78,13 @@ import type {
   UploadManifestFilesOptions,
   UploadManifestFilesReturnType,
 } from './types'
-import type { TtlCache } from '@socketsecurity/lib/cache-with-ttl'
-import type { IncomingMessage } from 'node:http'
+import {
+  normalizeBaseUrl,
+  promiseWithResolvers,
+  queryToSearchParams,
+  resolveAbsPaths,
+  resolveBasePath,
+} from './utils'
 
 /**
  * Socket SDK for programmatic access to Socket.dev security analysis APIs.

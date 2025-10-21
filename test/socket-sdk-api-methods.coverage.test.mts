@@ -6,13 +6,10 @@
  * using actual HTTP, not module patching.
  */
 
-import { createServer } from 'node:http'
-
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-
-import { SocketSdk } from '../src/index'
-
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'
+import { createServer } from 'node:http'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { SocketSdk } from '../src/index'
 
 describe('SocketSdk - API Methods Coverage', () => {
   let server: Server
