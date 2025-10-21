@@ -135,6 +135,9 @@ export interface paths {
      *
      * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 67 MB.
      *
+     * **Query Parameters:**
+     * - `scan_type` (optional): The type of scan to perform. Defaults to 'socket'. Must be 32 characters or less. Used for categorizing multiple SBOM heads per repository branch.
+     *
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
@@ -1615,7 +1618,7 @@ export interface components {
           /** @default */
           url?: string
         }
-        ratings?: Array<{
+        ratings?: {
           source?: {
             /** @default */
             name?: string
@@ -1630,7 +1633,7 @@ export interface components {
           method?: string
           /** @default */
           vector?: string
-        }>
+        }[]
         cwes?: number[]
         /** @default */
         description?: string
@@ -1638,28 +1641,28 @@ export interface components {
         detail?: string
         /** @default */
         recommendation?: string
-        advisories?: Array<{
+        advisories?: {
           /** @default */
           url: string
           /** @default */
           title?: string
-        }>
+        }[]
         /** @default */
         created?: string
         /** @default */
         published?: string
         /** @default */
         updated?: string
-        affects?: Array<{
+        affects?: {
           /** @default */
           ref: string
-          versions?: Array<{
+          versions?: {
             /** @default */
             version?: string
             /** @default */
             status?: string
-          }>
-        }>
+          }[]
+        }[]
         analysis?: {
           /** @default */
           state?: string
@@ -1713,20 +1716,20 @@ export interface components {
         homepage: string
         /** @default NOASSERTION */
         licenseDeclared: string
-        externalRefs: Array<{
+        externalRefs: {
           /** @default PACKAGE-MANAGER */
           referenceCategory: string
           /** @default purl */
           referenceType: string
           /** @default */
           referenceLocator: string
-        }>
-        checksums?: Array<{
+        }[]
+        checksums?: {
           /** @default */
           algorithm: string
           /** @default */
           checksumValue: string
-        }>
+        }[]
       }>
       relationships: Array<{
         /** @default SPDXRef-DOCUMENT */
@@ -2065,7 +2068,7 @@ export interface components {
        * @default
        */
       attribText: string
-      attribData: Array<{
+      attribData: {
         /**
          * @description Package URL this attribution applies to
          * @default
@@ -2083,7 +2086,7 @@ export interface components {
         spdxExpr: string
         /** @description Authors mentioned in this attribution */
         foundAuthors: string[]
-      }>
+      }[]
     }>
     SocketArtifactLink: {
       /**
@@ -4223,12 +4226,12 @@ export interface components {
         | {
             /** @enum {string} */
             type?: 'function-level'
-            value?: Array<Array<components['schemas']['CallStackItem']>>
+            value?: Array<components['schemas']['CallStackItem'][]>
           }
         | {
             /** @enum {string} */
             type?: 'class-level'
-            value?: Array<Array<components['schemas']['ClassStackItem']>>
+            value?: Array<components['schemas']['ClassStackItem'][]>
           }
       /**
        * @description Path to the workspace root for multi-workspace projects
@@ -4783,8 +4786,12 @@ export interface operations {
         direction?: 'asc' | 'desc'
         /** @description Specify the maximum number of results to return per page. */
         per_page?: number
-        /** @description The token specifying which page to return. */
+        /** @description The page number to return when using offset-style pagination. Ignored when cursor pagination is used. */
         page?: number
+        /** @description Cursor token for pagination. Pass the returned nextPageCursor from previous responses to fetch the next set of results. */
+        startAfterCursor?: string
+        /** @description Set to true on the first request to opt into cursor-based pagination. */
+        use_cursor?: boolean
         /** @description A Unix timestamp in seconds that filters full-scans prior to the date. */
         from?: string
         /** @description A repository slug to filter full-scans by. */
@@ -4855,6 +4862,8 @@ export interface operations {
                */
               scan_state?: 'pending' | 'precrawl' | 'resolve' | 'scan' | null
             }>
+            /** @default */
+            nextPageCursor: string | null
             /** @default 0 */
             nextPage: number | null
           }
@@ -4874,6 +4883,9 @@ export interface operations {
    * To get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getsupportedfiles) endpoint.
    *
    * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 67 MB.
+   *
+   * **Query Parameters:**
+   * - `scan_type` (optional): The type of scan to perform. Defaults to 'socket'. Must be 32 characters or less. Used for categorizing multiple SBOM heads per repository branch.
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -4905,6 +4917,8 @@ export interface operations {
         set_as_pending_head?: boolean
         /** @description Create a temporary full-scan that is not listed in the reports dashboard. Cannot be used when set_as_pending_head=true. */
         tmp?: boolean
+        /** @description The type of scan to perform. Defaults to 'socket'. Must be 32 characters or less. Used for categorizing multiple SBOM heads per repository branch. */
+        scan_type?: string
       }
       path: {
         /** @description The slug of the organization */
@@ -8989,14 +9003,14 @@ export interface operations {
             error: string
             /** @default */
             sent_at: string
-            retry_info: Array<{
+            retry_info: {
               /** @default 0 */
               status_code: number
               /** @default */
               error: string
               /** @default */
               sent_at: string
-            }>
+            }[]
             /** @default */
             created_at: string
             /** @default */
@@ -11867,9 +11881,9 @@ export interface operations {
                 dev: boolean
                 /** @default false */
                 dead: boolean
-                manifestFiles?: Array<components['schemas']['SocketManifestReference']>
-                topLevelAncestors?: Array<components['schemas']['SocketId']>
-                dependencies?: Array<components['schemas']['SocketId']>
+                manifestFiles?: components['schemas']['SocketManifestReference'][]
+                topLevelAncestors?: components['schemas']['SocketId'][]
+                dependencies?: components['schemas']['SocketId'][]
               }
             }>
             meta: {
@@ -12097,13 +12111,13 @@ export interface operations {
               date: string
               /** @default 0 */
               startOfDayTimestamp: number
-              dataPoints: Array<{
+              dataPoints: {
                 aggregationGroup: string[]
                 /** @default 0 */
                 count: number
                 /** @default 0 */
                 countDelta: number
-              }>
+              }[]
             }>
           }
         }
@@ -12186,7 +12200,7 @@ export interface operations {
               date: string
               /** @default 0 */
               startOfDayTimestamp: number
-              dataPoints: Array<{
+              dataPoints: {
                 aggregationGroup: string[]
                 /** @default 0 */
                 count: number
@@ -12258,7 +12272,7 @@ export interface operations {
                     countIndirectDelta: number
                   }
                 }
-              }>
+              }[]
             }>
           }
         }
@@ -12478,6 +12492,7 @@ export interface operations {
           | 'UpdateAutopatchCurated'
           | 'UpdateLabel'
           | 'UpdateLabelSetting'
+          | 'UpdateLicenseOverlay'
           | 'UpdateOrganizationSetting'
           | 'UpdateWebhook'
           | 'UpgradeOrganizationPlan'
@@ -12572,7 +12587,7 @@ export interface operations {
         content: {
           'application/json': {
             tokens: Array<{
-              committers: Array<{
+              committers: {
                 /** @default */
                 email?: string
                 /**
@@ -12584,7 +12599,7 @@ export interface operations {
                 providerLoginName?: string
                 /** @default */
                 providerUserId?: string
-              }>
+              }[]
               /**
                * Format: date
                * @default
@@ -12607,7 +12622,8 @@ export interface operations {
                * @default api token
                */
               name: string | null
-              scopes: Array<| 'alerts'
+              scopes: (
+                | 'alerts'
                 | 'alerts:list'
                 | 'alerts:trend'
                 | 'api-tokens'
@@ -12671,7 +12687,8 @@ export interface operations {
                 | 'threat-feed:list'
                 | 'triage'
                 | 'triage:alerts-list'
-                | 'triage:alerts-update'>
+                | 'triage:alerts-update'
+              )[]
               /**
                * @description The obfuscated token of the API Token
                * @default
@@ -13137,6 +13154,7 @@ export interface operations {
           | 'maven'
           | 'npm'
           | 'nuget'
+          | 'vscode'
           | 'pypi'
           | 'gem'
       }
@@ -13240,6 +13258,7 @@ export interface operations {
           | 'maven'
           | 'npm'
           | 'nuget'
+          | 'vscode'
           | 'pypi'
           | 'gem'
       }
