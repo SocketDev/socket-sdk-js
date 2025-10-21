@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.0.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v2.0.1) - 2025-10-21
+
+### Changed
+- Use `@socketsecurity/lib` under the hood
+- Synced OpenAPI type definitions with latest API specification
+  - Added documentation for `scan_type` query parameter on manifest upload endpoint (used for categorizing multiple SBOM heads per repository branch)
+  - Improved TypeScript helper types (`OpReturnType`, `OpErrorType`) for better type inference and error handling
+
 ## [2.0.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v2.0.0) - 2025-10-10
 
 ### Changed
