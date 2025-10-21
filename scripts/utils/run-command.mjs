@@ -4,8 +4,6 @@ import { spawn, spawnSync } from 'node:child_process'
 
 import { logger } from '@socketsecurity/lib/logger'
 
-const WIN32 = process.platform === 'win32'
-
 /**
  * Run a command and return a promise that resolves with the exit code.
  * @param {string} command - The command to run
@@ -17,7 +15,7 @@ export function runCommand(command, args = [], options = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       stdio: 'inherit',
-      ...(WIN32 && { shell: true }),
+      ...(process.platform === 'win32' && { shell: true }),
       ...options,
     })
 
@@ -41,7 +39,7 @@ export function runCommand(command, args = [], options = {}) {
 export function runCommandSync(command, args = [], options = {}) {
   const result = spawnSync(command, args, {
     stdio: 'inherit',
-    ...(WIN32 && { shell: true }),
+    ...(process.platform === 'win32' && { shell: true }),
     ...options,
   })
 
@@ -99,9 +97,9 @@ export function runCommandQuiet(command, args = [], options = {}) {
     let stderr = ''
 
     const child = spawn(command, args, {
-      stdio: ['inherit', 'pipe', 'pipe'],
-      ...(WIN32 && { shell: true }),
       ...options,
+      ...(process.platform === 'win32' && { shell: true }),
+      stdio: ['inherit', 'pipe', 'pipe'],
     })
 
     child.stdout?.on('data', data => {
