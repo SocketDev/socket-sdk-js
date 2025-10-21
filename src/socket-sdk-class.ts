@@ -23,11 +23,11 @@ import {
   DEFAULT_RETRIES,
   DEFAULT_RETRY_DELAY,
   DEFAULT_USER_AGENT,
+  httpAgentNames,
   MAX_HTTP_TIMEOUT,
   MAX_STREAM_SIZE,
   MIN_HTTP_TIMEOUT,
   SOCKET_PUBLIC_BLOB_STORE_URL,
-  httpAgentNames,
 } from './constants'
 import {
   createRequestBodyForFilepaths,
@@ -35,7 +35,6 @@ import {
   createUploadRequest,
 } from './file-upload'
 import {
-  ResponseError,
   createDeleteRequest,
   createGetRequest,
   createRequestWithJson,
@@ -44,6 +43,7 @@ import {
   getResponse,
   getResponseJson,
   isResponseOk,
+  ResponseError,
   reshapeArtifactForPublicPolicy,
 } from './http-client'
 import {
@@ -132,8 +132,14 @@ export class SocketSdk {
 
     // Validate timeout parameter.
     if (timeout !== undefined) {
-      if (typeof timeout !== 'number' || timeout < MIN_HTTP_TIMEOUT || timeout > MAX_HTTP_TIMEOUT) {
-        throw new TypeError(`"timeout" must be a number between ${MIN_HTTP_TIMEOUT} and ${MAX_HTTP_TIMEOUT} milliseconds`)
+      if (
+        typeof timeout !== 'number' ||
+        timeout < MIN_HTTP_TIMEOUT ||
+        timeout > MAX_HTTP_TIMEOUT
+      ) {
+        throw new TypeError(
+          `"timeout" must be a number between ${MIN_HTTP_TIMEOUT} and ${MAX_HTTP_TIMEOUT} milliseconds`,
+        )
       }
     }
 
@@ -486,7 +492,7 @@ export class SocketSdk {
     let res: IncomingMessage | undefined
     try {
       res = await this.#createBatchPurlRequest(componentsObj, queryParams)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'batchPackageFetch'>(e)
     }
@@ -662,7 +668,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'createDependenciesSnapshot'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'createDependenciesSnapshot'>(e)
     }
@@ -693,7 +699,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'createOrgDiffScanFromIds'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'createOrgDiffScanFromIds'>(e)
     }
@@ -730,7 +736,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'CreateOrgFullScan'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'CreateOrgFullScan'>(e)
     }
@@ -761,7 +767,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'createOrgRepo'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'createOrgRepo'>(e)
     }
@@ -793,7 +799,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'createOrgRepoLabel'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'createOrgRepoLabel'>(e)
     }
@@ -839,7 +845,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'createReport'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'createReport'>(e)
     }
@@ -868,7 +874,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'deleteOrgDiffScan'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'deleteOrgDiffScan'>(e)
     }
@@ -897,7 +903,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'deleteOrgFullScan'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'deleteOrgFullScan'>(e)
     }
@@ -926,7 +932,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'deleteOrgRepo'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'deleteOrgRepo'>(e)
     }
@@ -956,7 +962,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'deleteOrgRepoLabel'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'deleteOrgRepoLabel'>(e)
     }
@@ -984,7 +990,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'deleteReport'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'deleteReport'>(e)
     }
@@ -1013,7 +1019,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'exportCDX'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'exportCDX'>(e)
     }
@@ -1042,7 +1048,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'exportSPDX'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'exportSPDX'>(e)
     }
@@ -1083,7 +1089,7 @@ export class SocketSdk {
           cause: errorResult.cause,
           data: undefined,
           error: errorResult.error,
-          status: errorResult['status'],
+          status: errorResult.status,
           success: false,
         }
       }
@@ -1118,7 +1124,7 @@ export class SocketSdk {
           cause: errorResult.cause,
           data: undefined,
           error: errorResult.error,
-          status: errorResult['status'],
+          status: errorResult.status,
           success: false,
         }
       }
@@ -1150,7 +1156,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getAPITokens'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getAPITokens'>(e)
     }
@@ -1179,7 +1185,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getAuditLogEvents'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getAuditLogEvents'>(e)
     }
@@ -1208,7 +1214,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getDiffScanById'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getDiffScanById'>(e)
     }
@@ -1283,7 +1289,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getIssuesByNPMPackage'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getIssuesByNPMPackage'>(e)
     }
@@ -1311,7 +1317,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrgAnalytics'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgAnalytics'>(e)
     }
@@ -1338,7 +1344,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrganizations'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrganizations'>(e)
     }
@@ -1367,7 +1373,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrgFullScan'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgFullScan'>(e)
     }
@@ -1396,7 +1402,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrgFullScanList'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgFullScanList'>(e)
     }
@@ -1425,7 +1431,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrgFullScanMetadata'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgFullScanMetadata'>(e)
     }
@@ -1452,7 +1458,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrgLicensePolicy'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgLicensePolicy'>(e)
     }
@@ -1484,7 +1490,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrgRepo'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgRepo'>(e)
     }
@@ -1514,7 +1520,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrgRepoLabel'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgRepoLabel'>(e)
     }
@@ -1543,7 +1549,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrgRepoLabelList'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgRepoLabelList'>(e)
     }
@@ -1572,7 +1578,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrgRepoList'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgRepoList'>(e)
     }
@@ -1599,7 +1605,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrgSecurityPolicy'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgSecurityPolicy'>(e)
     }
@@ -1627,7 +1633,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrgTriage'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgTriage'>(e)
     }
@@ -1650,7 +1656,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getQuota'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getQuota'>(e)
     }
@@ -1679,7 +1685,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getRepoAnalytics'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getRepoAnalytics'>(e)
     }
@@ -1705,7 +1711,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getReport'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getReport'>(e)
     }
@@ -1732,7 +1738,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getReportList'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getReportList'>(e)
     }
@@ -1761,7 +1767,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getScoreByNPMPackage'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getScoreByNPMPackage'>(e)
     }
@@ -1789,7 +1795,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getReportSupportedFiles'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getReportSupportedFiles'>(e)
     }
@@ -1817,7 +1823,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'listOrgDiffScans'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'listOrgDiffScans'>(e)
     }
@@ -1848,7 +1854,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'postAPIToken'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'postAPIToken'>(e)
     }
@@ -1879,7 +1885,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'postAPITokensRevoke'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'postAPITokensRevoke'>(e)
     }
@@ -1910,7 +1916,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'postAPITokensRotate'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'postAPITokensRotate'>(e)
     }
@@ -1942,7 +1948,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'postAPITokenUpdate'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'postAPITokenUpdate'>(e)
     }
@@ -1972,7 +1978,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'postSettings'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'postSettings'>(e)
     }
@@ -2002,7 +2008,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'searchDependencies'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'searchDependencies'>(e)
     }
@@ -2064,7 +2070,7 @@ export class SocketSdk {
           cause: errorResult.cause,
           data: undefined,
           error: errorResult.error,
-          status: errorResult['status'],
+          status: errorResult.status,
           success: false,
         }
       }
@@ -2126,7 +2132,9 @@ export class SocketSdk {
           if (bytesWritten > MAX_STREAM_SIZE) {
             res.destroy()
             writeStream.destroy()
-            throw new Error(`Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`)
+            throw new Error(
+              `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
+            )
           }
         })
 
@@ -2147,7 +2155,9 @@ export class SocketSdk {
           /* c8 ignore next 3 - Stream size limit enforcement, difficult to test reliably */
           if (bytesWritten > MAX_STREAM_SIZE) {
             res.destroy()
-            throw new Error(`Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`)
+            throw new Error(
+              `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
+            )
           }
         })
 
@@ -2160,7 +2170,7 @@ export class SocketSdk {
 
       // If output is false or undefined, just return the response without streaming
       return this.#handleApiSuccess<'getOrgFullScan'>(res)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgFullScan'>(e)
     }
@@ -2254,7 +2264,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'updateOrgAlertTriage'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'updateOrgAlertTriage'>(e)
     }
@@ -2285,7 +2295,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'updateOrgLicensePolicy'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'updateOrgLicensePolicy'>(e)
     }
@@ -2317,7 +2327,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'updateOrgRepo'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'updateOrgRepo'>(e)
     }
@@ -2350,7 +2360,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'updateOrgRepoLabel'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'updateOrgRepoLabel'>(e)
     }
@@ -2380,7 +2390,7 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'updateOrgSecurityPolicy'>(data)
-    /* c8 ignore start - Standard API error handling, tested via public method error cases */
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'updateOrgSecurityPolicy'>(e)
     }

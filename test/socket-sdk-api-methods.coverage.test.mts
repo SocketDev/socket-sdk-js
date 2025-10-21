@@ -5,6 +5,7 @@
  * HTTP server that starts/stops cleanly. This works in coverage mode because we're
  * using actual HTTP, not module patching.
  */
+
 import { createServer } from 'node:http'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -25,10 +26,14 @@ describe('SocketSdk - API Methods Coverage', () => {
       const url = req.url || ''
 
       // Consume request body for POST/PUT/PATCH requests
-      if (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') {
-        let body = ''
+      if (
+        req.method === 'POST' ||
+        req.method === 'PUT' ||
+        req.method === 'PATCH'
+      ) {
+        let _body = ''
         req.on('data', chunk => {
-          body += chunk.toString()
+          _body += chunk.toString()
         })
         req.on('end', () => {
           // Body consumed, now respond
@@ -53,141 +58,157 @@ describe('SocketSdk - API Methods Coverage', () => {
 
         // Route requests to appropriate responses
         if (url.includes('/package/batch')) {
-        // Batch package fetch endpoint
-        res.end(JSON.stringify({ data: [{ name: 'lodash', version: '4.17.21', score: 95 }] }))
-      } else if (url.includes('/npm/')) {
-        // Package analysis endpoints
-        if (url.includes('/issues')) {
-          res.end(JSON.stringify({ data: { issues: [] } }))
-        } else if (url.includes('/score')) {
-          res.end(JSON.stringify({ data: { score: 95 } }))
-        } else {
-          res.end(JSON.stringify({ data: {} }))
-        }
-      } else if (url.includes('/organizations')) {
-        // Organization endpoints
-        if (url.includes('/repos')) {
-          if (req.method === 'DELETE') {
-            res.end(JSON.stringify({ success: true }))
-          } else if (req.method === 'PUT' || req.method === 'POST') {
-            res.end(JSON.stringify({ data: { id: 'repo-1', name: 'test-repo' } }))
+          // Batch package fetch endpoint
+          res.end(
+            JSON.stringify({
+              data: [{ name: 'lodash', version: '4.17.21', score: 95 }],
+            }),
+          )
+        } else if (url.includes('/npm/')) {
+          // Package analysis endpoints
+          if (url.includes('/issues')) {
+            res.end(JSON.stringify({ data: { issues: [] } }))
+          } else if (url.includes('/score')) {
+            res.end(JSON.stringify({ data: { score: 95 } }))
+          } else {
+            res.end(JSON.stringify({ data: {} }))
+          }
+        } else if (url.includes('/organizations')) {
+          // Organization endpoints
+          if (url.includes('/repos')) {
+            if (req.method === 'DELETE') {
+              res.end(JSON.stringify({ success: true }))
+            } else if (req.method === 'PUT' || req.method === 'POST') {
+              res.end(
+                JSON.stringify({ data: { id: 'repo-1', name: 'test-repo' } }),
+              )
+            } else {
+              res.end(JSON.stringify({ data: [] }))
+            }
+          } else if (url.includes('/full-scans')) {
+            if (req.method === 'DELETE') {
+              res.end(JSON.stringify({ success: true }))
+            } else if (req.method === 'POST') {
+              res.end(JSON.stringify({ data: { id: 'scan-1' } }))
+            } else if (url.includes('/metadata')) {
+              res.end(
+                JSON.stringify({ data: { id: 'scan-1', status: 'complete' } }),
+              )
+            } else {
+              res.end(JSON.stringify({ data: [] }))
+            }
+          } else if (url.includes('/diff-scans')) {
+            if (req.method === 'DELETE') {
+              res.end(JSON.stringify({ success: true }))
+            } else if (req.method === 'POST') {
+              res.end(JSON.stringify({ data: { id: 'diff-1' } }))
+            } else {
+              res.end(JSON.stringify({ data: [] }))
+            }
+          } else if (url.includes('/labels')) {
+            if (req.method === 'DELETE') {
+              res.end(JSON.stringify({ success: true }))
+            } else if (req.method === 'PUT' || req.method === 'POST') {
+              res.end(JSON.stringify({ data: { id: 'label-1', name: 'test' } }))
+            } else {
+              res.end(JSON.stringify({ data: [] }))
+            }
+          } else if (url.includes('/analytics')) {
+            res.end(JSON.stringify({ data: {} }))
+          } else if (url.includes('/security-policy')) {
+            if (req.method === 'PUT') {
+              res.end(JSON.stringify({ data: { enabled: true } }))
+            } else {
+              res.end(JSON.stringify({ data: { enabled: false } }))
+            }
+          } else if (url.includes('/license-policy')) {
+            if (req.method === 'PUT') {
+              res.end(JSON.stringify({ data: { enabled: true } }))
+            } else {
+              res.end(JSON.stringify({ data: { enabled: false } }))
+            }
+          } else if (url.includes('/triage')) {
+            res.end(JSON.stringify({ data: [] }))
           } else {
             res.end(JSON.stringify({ data: [] }))
           }
-        } else if (url.includes('/full-scans')) {
-          if (req.method === 'DELETE') {
+        } else if (url.includes('/scan')) {
+          // Scanning endpoints
+          if (req.method === 'POST') {
+            res.end(
+              JSON.stringify({ data: { id: 'scan-1', status: 'queued' } }),
+            )
+          } else {
+            res.end(
+              JSON.stringify({ data: { id: 'scan-1', status: 'complete' } }),
+            )
+          }
+        } else if (url.includes('/sbom/export')) {
+          // SBOM endpoints
+          res.end(JSON.stringify({ data: { format: 'cyclonedx' } }))
+        } else if (url.includes('/patches')) {
+          // Patches endpoint
+          res.end(JSON.stringify({ data: [] }))
+        } else if (url.includes('/quota')) {
+          // Quota endpoint
+          res.end(JSON.stringify({ data: { limit: 1000, used: 100 } }))
+        } else if (url.includes('/settings')) {
+          // Settings endpoint
+          res.end(JSON.stringify({ data: { success: true } }))
+        } else if (url.includes('/dependencies')) {
+          // Dependencies endpoints
+          if (url.includes('/search')) {
+            res.end(JSON.stringify({ data: [] }))
+          } else if (url.includes('/snapshot')) {
+            res.end(JSON.stringify({ data: { id: 'snapshot-1' } }))
+          } else {
+            res.end(JSON.stringify({ data: {} }))
+          }
+        } else if (url.includes('/api-tokens')) {
+          // API tokens
+          if (req.method === 'DELETE' || url.includes('/revoke')) {
             res.end(JSON.stringify({ success: true }))
-          } else if (req.method === 'POST') {
-            res.end(JSON.stringify({ data: { id: 'scan-1' } }))
-          } else if (url.includes('/metadata')) {
-            res.end(JSON.stringify({ data: { id: 'scan-1', status: 'complete' } }))
+          } else if (req.method === 'POST' || url.includes('/rotate')) {
+            res.end(JSON.stringify({ data: { token: 'new-token' } }))
+          } else if (req.method === 'PUT') {
+            res.end(JSON.stringify({ data: { token: 'updated-token' } }))
           } else {
             res.end(JSON.stringify({ data: [] }))
           }
-        } else if (url.includes('/diff-scans')) {
-          if (req.method === 'DELETE') {
-            res.end(JSON.stringify({ success: true }))
-          } else if (req.method === 'POST') {
-            res.end(JSON.stringify({ data: { id: 'diff-1' } }))
+        } else if (url.includes('/entitlements')) {
+          // Entitlements
+          if (url.includes('/enabled')) {
+            res.end(JSON.stringify({ data: [] }))
           } else {
             res.end(JSON.stringify({ data: [] }))
           }
-        } else if (url.includes('/labels')) {
-          if (req.method === 'DELETE') {
-            res.end(JSON.stringify({ success: true }))
-          } else if (req.method === 'PUT' || req.method === 'POST') {
-            res.end(JSON.stringify({ data: { id: 'label-1', name: 'test' } }))
-          } else {
-            res.end(JSON.stringify({ data: [] }))
-          }
-        } else if (url.includes('/analytics')) {
-          res.end(JSON.stringify({ data: {} }))
-        } else if (url.includes('/security-policy')) {
+        } else if (url.includes('/alert-triage')) {
+          // Alert triage
           if (req.method === 'PUT') {
-            res.end(JSON.stringify({ data: { enabled: true } }))
+            res.end(JSON.stringify({ data: { status: 'resolved' } }))
           } else {
-            res.end(JSON.stringify({ data: { enabled: false } }))
+            res.end(JSON.stringify({ data: {} }))
           }
-        } else if (url.includes('/license-policy')) {
-          if (req.method === 'PUT') {
-            res.end(JSON.stringify({ data: { enabled: true } }))
+        } else if (url.includes('/report')) {
+          // Reports
+          if (req.method === 'DELETE') {
+            res.end(JSON.stringify({ success: true }))
           } else {
-            res.end(JSON.stringify({ data: { enabled: false } }))
+            res.end(JSON.stringify({ data: {} }))
           }
-        } else if (url.includes('/triage')) {
+        } else if (url.includes('/audit-logs')) {
+          // Audit logs
           res.end(JSON.stringify({ data: [] }))
-        } else {
+        } else if (url.includes('/supported-files')) {
+          // Supported files
           res.end(JSON.stringify({ data: [] }))
-        }
-      } else if (url.includes('/scan')) {
-        // Scanning endpoints
-        if (req.method === 'POST') {
-          res.end(JSON.stringify({ data: { id: 'scan-1', status: 'queued' } }))
-        } else {
-          res.end(JSON.stringify({ data: { id: 'scan-1', status: 'complete' } }))
-        }
-      } else if (url.includes('/sbom/export')) {
-        // SBOM endpoints
-        res.end(JSON.stringify({ data: { format: 'cyclonedx' } }))
-      } else if (url.includes('/patches')) {
-        // Patches endpoint
-        res.end(JSON.stringify({ data: [] }))
-      } else if (url.includes('/quota')) {
-        // Quota endpoint
-        res.end(JSON.stringify({ data: { limit: 1000, used: 100 } }))
-      } else if (url.includes('/settings')) {
-        // Settings endpoint
-        res.end(JSON.stringify({ data: { success: true } }))
-      } else if (url.includes('/dependencies')) {
-        // Dependencies endpoints
-        if (url.includes('/search')) {
-          res.end(JSON.stringify({ data: [] }))
-        } else if (url.includes('/snapshot')) {
-          res.end(JSON.stringify({ data: { id: 'snapshot-1' } }))
-        } else {
-          res.end(JSON.stringify({ data: {} }))
-        }
-      } else if (url.includes('/api-tokens')) {
-        // API tokens
-        if (req.method === 'DELETE' || url.includes('/revoke')) {
-          res.end(JSON.stringify({ success: true }))
-        } else if (req.method === 'POST' || url.includes('/rotate')) {
-          res.end(JSON.stringify({ data: { token: 'new-token' } }))
-        } else if (req.method === 'PUT') {
-          res.end(JSON.stringify({ data: { token: 'updated-token' } }))
-        } else {
-          res.end(JSON.stringify({ data: [] }))
-        }
-      } else if (url.includes('/entitlements')) {
-        // Entitlements
-        if (url.includes('/enabled')) {
-          res.end(JSON.stringify({ data: [] }))
-        } else {
-          res.end(JSON.stringify({ data: [] }))
-        }
-      } else if (url.includes('/alert-triage')) {
-        // Alert triage
-        if (req.method === 'PUT') {
-          res.end(JSON.stringify({ data: { status: 'resolved' } }))
-        } else {
-          res.end(JSON.stringify({ data: {} }))
-        }
-      } else if (url.includes('/report')) {
-        // Reports
-        if (req.method === 'DELETE') {
-          res.end(JSON.stringify({ success: true }))
-        } else {
-          res.end(JSON.stringify({ data: {} }))
-        }
-      } else if (url.includes('/audit-logs')) {
-        // Audit logs
-        res.end(JSON.stringify({ data: [] }))
-      } else if (url.includes('/supported-files')) {
-        // Supported files
-        res.end(JSON.stringify({ data: [] }))
-      } else if (url.includes('/upload-manifest-files')) {
-        // Upload manifest files
-        res.end(JSON.stringify({ data: { uploadId: 'upload-123', status: 'success' } }))
+        } else if (url.includes('/upload-manifest-files')) {
+          // Upload manifest files
+          res.end(
+            JSON.stringify({
+              data: { uploadId: 'upload-123', status: 'success' },
+            }),
+          )
         } else {
           // Default response
           res.end(JSON.stringify({ data: {} }))
@@ -201,7 +222,7 @@ describe('SocketSdk - API Methods Coverage', () => {
         if (address && typeof address === 'object') {
           const { port } = address
           baseUrl = `http://127.0.0.1:${port}`
-          client = new SocketSdk('test-token', { baseUrl, timeout: 5_000 })
+          client = new SocketSdk('test-token', { baseUrl, timeout: 5000 })
           resolve()
         }
       })
@@ -468,7 +489,9 @@ describe('SocketSdk - API Methods Coverage', () => {
     })
 
     it('covers postAPIToken', async () => {
-      const result = await client.postAPIToken('test-org', { name: 'test-token' })
+      const result = await client.postAPIToken('test-org', {
+        name: 'test-token',
+      })
       expect(result.success).toBe(true)
     })
   })
@@ -677,12 +700,19 @@ describe('SocketSdk - API Methods Coverage', () => {
 
       const tempDir = mkdtempSync(join(tmpdir(), 'socket-test-'))
       const testFile = join(tempDir, 'package.json')
-      writeFileSync(testFile, JSON.stringify({ name: 'test-pkg', version: '1.0.0' }))
+      writeFileSync(
+        testFile,
+        JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
+      )
 
       try {
-        const result = await client.uploadManifestFiles('test-org', [testFile], {
-          pathsRelativeTo: tempDir,
-        })
+        const result = await client.uploadManifestFiles(
+          'test-org',
+          [testFile],
+          {
+            pathsRelativeTo: tempDir,
+          },
+        )
         expect(result.success).toBe(true)
       } finally {
         rmSync(tempDir, { recursive: true })
@@ -701,7 +731,7 @@ describe('SocketSdk - API Methods Coverage', () => {
       const cachedClient = new SocketSdk('test-token', {
         baseUrl,
         cache: true,
-        timeout: 5_000,
+        timeout: 5000,
       })
       const result1 = await cachedClient.getOrganizations()
       const result2 = await cachedClient.getOrganizations()

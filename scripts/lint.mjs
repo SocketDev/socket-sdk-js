@@ -46,7 +46,7 @@ function getBiomeExcludePatterns() {
     }
 
     const biomeConfig = JSON.parse(readFileSync(biomeConfigPath, 'utf8'))
-    const includes = biomeConfig['files']?.['includes'] ?? []
+    const includes = biomeConfig.files?.includes ?? []
 
     // Extract patterns that start with '!' (exclude patterns)
     return (

@@ -22,8 +22,11 @@ export async function testServerError(
 ): Promise<void> {
   const { args, endpoint, httpMethod = 'get', method } = config
 
-  nock('https://api.socket.dev')[httpMethod](endpoint)
-    .reply(500, { error: { message: 'Internal server error' } })
+  nock('https://api.socket.dev')
+    [httpMethod](endpoint)
+    .reply(500, {
+      error: { message: 'Internal server error' },
+    })
 
   await expect((client as any)[method](...args)).rejects.toThrow(
     'Socket API server error (500)',
@@ -40,7 +43,8 @@ export async function testNetworkError(
 ): Promise<void> {
   const { args, endpoint, httpMethod = 'get', method } = config
 
-  nock('https://api.socket.dev')[httpMethod](endpoint)
+  nock('https://api.socket.dev')
+    [httpMethod](endpoint)
     .replyWithError('Network error')
 
   await expect((client as any)[method](...args)).rejects.toThrow(
@@ -60,8 +64,9 @@ export async function test404Error(
   const { args, endpoint, httpMethod = 'get', method } = config
   const message = customMessage || 'Not found'
 
-  nock('https://api.socket.dev')[httpMethod](endpoint)
-    .reply(404, { error: { message } })
+  nock('https://api.socket.dev')[httpMethod](endpoint).reply(404, {
+    error: { message },
+  })
 
   await expect((client as any)[method](...args)).rejects.toThrow(
     'Socket API client error (404)',
@@ -78,8 +83,11 @@ export async function test403Error(
 ): Promise<void> {
   const { args, endpoint, httpMethod = 'get', method } = config
 
-  nock('https://api.socket.dev')[httpMethod](endpoint)
-    .reply(403, { error: { message: 'Forbidden' } })
+  nock('https://api.socket.dev')
+    [httpMethod](endpoint)
+    .reply(403, {
+      error: { message: 'Forbidden' },
+    })
 
   await expect((client as any)[method](...args)).rejects.toThrow(
     'Socket API client error (403)',
@@ -95,8 +103,11 @@ export async function test401Error(
 ): Promise<void> {
   const { args, endpoint, httpMethod = 'get', method } = config
 
-  nock('https://api.socket.dev')[httpMethod](endpoint)
-    .reply(401, { error: { message: 'Unauthorized' } })
+  nock('https://api.socket.dev')
+    [httpMethod](endpoint)
+    .reply(401, {
+      error: { message: 'Unauthorized' },
+    })
 
   await expect((client as any)[method](...args)).rejects.toThrow(
     'Socket API client error (401)',
@@ -114,7 +125,8 @@ export async function testUrlEncoding(
 ): Promise<void> {
   const { args, encodedEndpoint, httpMethod = 'get', method } = config
 
-  nock('https://api.socket.dev')[httpMethod](encodedEndpoint)
+  nock('https://api.socket.dev')
+    [httpMethod](encodedEndpoint)
     .reply(200, expectedResponse)
 
   await expect((client as any)[method](...args)).resolves.toMatchObject({
@@ -132,7 +144,8 @@ export async function testMalformedJson(
 ): Promise<void> {
   const { args, endpoint, httpMethod = 'get', method } = config
 
-  nock('https://api.socket.dev')[httpMethod](endpoint)
+  nock('https://api.socket.dev')
+    [httpMethod](endpoint)
     .reply(200, 'invalid json {')
 
   await expect((client as any)[method](...args)).rejects.toThrow()
@@ -144,11 +157,12 @@ export async function testMalformedJson(
 export async function testTimeout(
   client: SocketSdk,
   config: ErrorTestConfig,
-  delay: number = 10000,
+  delay: number = 10_000,
 ): Promise<void> {
   const { args, endpoint, httpMethod = 'get', method } = config
 
-  nock('https://api.socket.dev')[httpMethod](endpoint)
+  nock('https://api.socket.dev')
+    [httpMethod](endpoint)
     .delay(delay)
     .reply(200, { data: 'too late' })
 

@@ -6,8 +6,8 @@ import * as path from 'node:path'
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { setupNockEnvironment } from './utils/environment.mts'
 import { SocketSdk } from '../src/index'
+import { setupNockEnvironment } from './utils/environment.mts'
 import { FAST_TEST_CONFIG } from './utils/fast-test-config.mts'
 
 describe('SocketSdk - Upload Manifest Coverage', () => {

@@ -15,10 +15,7 @@ const distPath = path.join(rootPath, 'dist')
 
 // Build configuration for ESM output
 export const buildConfig = {
-  entryPoints: [
-    `${srcPath}/index.ts`,
-    `${srcPath}/testing.ts`
-  ],
+  entryPoints: [`${srcPath}/index.ts`, `${srcPath}/testing.ts`],
   outdir: distPath,
   bundle: true,
   format: 'esm',
@@ -43,12 +40,12 @@ export const buildConfig = {
   external: [
     // Node.js built-ins
     ...builtinModules,
-    ...builtinModules.map(m => `node:${m}`)
+    ...builtinModules.map(m => `node:${m}`),
   ],
 
   // Banner for generated code
   banner: {
-    js: '/* Socket SDK ESM - Built with esbuild */'
+    js: '/* Socket SDK ESM - Built with esbuild */',
   },
 
   // TypeScript configuration
@@ -56,8 +53,10 @@ export const buildConfig = {
 
   // Define constants for optimization
   define: {
-    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production')
-  }
+    'process.env.NODE_ENV': JSON.stringify(
+      process.env.NODE_ENV || 'production',
+    ),
+  },
 }
 
 // Watch configuration for development
@@ -77,8 +76,8 @@ export const watchConfig = {
           console.log(analysis)
         }
       }
-    }
-  }
+    },
+  },
 }
 
 /**
@@ -93,13 +92,13 @@ function analyzeMetafile(metafile) {
     totalSize += output.bytes
     return {
       name: path.relative(rootPath, file),
-      size: (output.bytes / 1024).toFixed(2) + ' KB'
+      size: `${(output.bytes / 1024).toFixed(2)} KB`,
     }
   })
 
   return {
     files,
-    totalSize: (totalSize / 1024).toFixed(2) + ' KB'
+    totalSize: `${(totalSize / 1024).toFixed(2)} KB`,
   }
 }
 
