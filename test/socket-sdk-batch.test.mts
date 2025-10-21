@@ -6,8 +6,8 @@ import * as path from 'node:path'
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { setupNockEnvironment } from './utils/environment.mts'
 import { SocketSdk } from '../src/index'
+import { setupNockEnvironment } from './utils/environment.mts'
 import { FAST_TEST_CONFIG, NO_RETRY_CONFIG } from './utils/fast-test-config.mts'
 
 import type { IncomingHttpHeaders } from 'node:http'
@@ -56,7 +56,7 @@ describe.sequential('SocketSdk - Batch Operations', () => {
 
       nock('https://api.socket.dev')
         .post('/v0/purl')
-        .reply(200, JSON.stringify(mockResponse) + '\n')
+        .reply(200, `${JSON.stringify(mockResponse)}\n`)
 
       const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.batchPackageFetch({
@@ -101,7 +101,7 @@ describe.sequential('SocketSdk - Batch Operations', () => {
 
       nock('https://api.socket.dev')
         .post('/v0/purl')
-        .reply(200, JSON.stringify(mockResponse) + '\n')
+        .reply(200, `${JSON.stringify(mockResponse)}\n`)
 
       const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
       const res = await client.batchPackageFetch({
@@ -215,7 +215,7 @@ describe.sequential('SocketSdk - Batch Operations', () => {
 
       nock('https://api.socket.dev')
         .post('/v0/purl')
-        .reply(200, JSON.stringify(errorResponse) + '\n')
+        .reply(200, `${JSON.stringify(errorResponse)}\n`)
 
       const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
 
@@ -259,7 +259,7 @@ describe.sequential('SocketSdk - Batch Operations', () => {
 
       nock('https://api.socket.dev')
         .post('/v0/purl')
-        .reply(200, responses.map(r => JSON.stringify(r)).join('\n') + '\n')
+        .reply(200, `${responses.map(r => JSON.stringify(r)).join('\n')}\n`)
 
       const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.batchPackageFetch({
@@ -287,7 +287,7 @@ describe.sequential('SocketSdk - Batch Operations', () => {
 
       nock('https://api.socket.dev')
         .post('/v0/purl?compact=true')
-        .reply(200, JSON.stringify(mockResponse) + '\n')
+        .reply(200, `${JSON.stringify(mockResponse)}\n`)
 
       const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.batchPackageFetch(

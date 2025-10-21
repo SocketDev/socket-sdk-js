@@ -61,7 +61,7 @@ async function main() {
       cwd: process.cwd(),
     })
 
-    if (outdatedResult.stdout && outdatedResult.stdout.trim()) {
+    if (outdatedResult.stdout?.trim()) {
       logger.clearLine()
       console.log('\nOutdated dependencies:')
       console.log(outdatedResult.stdout)

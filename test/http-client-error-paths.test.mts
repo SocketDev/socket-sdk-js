@@ -2,6 +2,7 @@
  * @fileoverview Tests for HTTP client error handling paths.
  * Tests error scenarios in createGetRequest, createRequestWithJson, and getResponseJson functions.
  */
+
 import { createServer } from 'node:http'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -89,7 +90,13 @@ describe('HTTP Client - Error Paths', () => {
       // Try to connect to a port that doesn't exist
       const invalidUrl = 'http://127.0.0.1:1'
       await expect(
-        createRequestWithJson('POST', invalidUrl, '/test', {}, { timeout: 100 }),
+        createRequestWithJson(
+          'POST',
+          invalidUrl,
+          '/test',
+          {},
+          { timeout: 100 },
+        ),
       ).rejects.toThrow()
     })
 
@@ -178,9 +185,15 @@ describe('HTTP Client - Error Paths', () => {
       const invalidUrl = 'http://127.0.0.1:1'
 
       try {
-        await createRequestWithJson('POST', invalidUrl, '/test', {}, {
-          timeout: 100,
-        })
+        await createRequestWithJson(
+          'POST',
+          invalidUrl,
+          '/test',
+          {},
+          {
+            timeout: 100,
+          },
+        )
         expect.fail('Should have thrown an error')
       } catch (error) {
         expect(error).toBeDefined()

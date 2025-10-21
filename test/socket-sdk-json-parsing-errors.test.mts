@@ -28,57 +28,66 @@ describe('SocketSdk - Branch Coverage Tests', () => {
       }
     })
 
-    it.skipIf(isCoverageMode)('should handle empty responseText slice branch', async () => {
-      // Create a scenario where responseText would be empty after slicing
-      nock('https://api.socket.dev')
-        .get('/v0/empty-response-test')
-        .reply(200, '')
+    it.skipIf(isCoverageMode)(
+      'should handle empty responseText slice branch',
+      async () => {
+        // Create a scenario where responseText would be empty after slicing
+        nock('https://api.socket.dev')
+          .get('/v0/empty-response-test')
+          .reply(200, '')
 
-      const result = (await getClient().getApi('empty-response-test', {
-        responseType: 'json',
-        throws: false,
-      })) as SocketSdkGenericResult<unknown>
+        const result = (await getClient().getApi('empty-response-test', {
+          responseType: 'json',
+          throws: false,
+        })) as SocketSdkGenericResult<unknown>
 
-      // Empty response should actually parse as {} and succeed
-      expect(result.success).toBe(true)
-    })
+        // Empty response should actually parse as {} and succeed
+        expect(result.success).toBe(true)
+      },
+    )
   })
 
   describe('API error handling branches', () => {
-    it.skipIf(isCoverageMode)('should handle ResponseError in getApi with throws: false', async () => {
-      // Mock a ResponseError (HTTP error response) for getApi
-      nock('https://api.socket.dev')
-        .get('/v0/getapi-error-test')
-        .reply(404, { error: 'Not Found', message: 'Resource not found' })
+    it.skipIf(isCoverageMode)(
+      'should handle ResponseError in getApi with throws: false',
+      async () => {
+        // Mock a ResponseError (HTTP error response) for getApi
+        nock('https://api.socket.dev')
+          .get('/v0/getapi-error-test')
+          .reply(404, { error: 'Not Found', message: 'Resource not found' })
 
-      const result = (await getClient().getApi('getapi-error-test', {
-        responseType: 'json',
-        throws: false,
-      })) as SocketSdkGenericResult<unknown>
+        const result = (await getClient().getApi('getapi-error-test', {
+          responseType: 'json',
+          throws: false,
+        })) as SocketSdkGenericResult<unknown>
 
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.status).toBe(404)
-      }
-    })
+        expect(result.success).toBe(false)
+        if (!result.success) {
+          expect(result.status).toBe(404)
+        }
+      },
+    )
 
-    it.skipIf(isCoverageMode)('should handle ResponseError in sendApi with throws: false', async () => {
-      // Mock a ResponseError (HTTP error response)
-      nock('https://api.socket.dev')
-        .post('/v0/response-error-test')
-        .reply(400, { error: 'Bad Request', message: 'Invalid data' })
+    it.skipIf(isCoverageMode)(
+      'should handle ResponseError in sendApi with throws: false',
+      async () => {
+        // Mock a ResponseError (HTTP error response)
+        nock('https://api.socket.dev')
+          .post('/v0/response-error-test')
+          .reply(400, { error: 'Bad Request', message: 'Invalid data' })
 
-      const result = (await getClient().sendApi('response-error-test', {
-        throws: false,
-        method: 'POST',
-        body: { test: 'data' },
-      })) as SocketSdkGenericResult<unknown>
+        const result = (await getClient().sendApi('response-error-test', {
+          throws: false,
+          method: 'POST',
+          body: { test: 'data' },
+        })) as SocketSdkGenericResult<unknown>
 
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.status).toBe(400)
-      }
-    })
+        expect(result.success).toBe(false)
+        if (!result.success) {
+          expect(result.status).toBe(400)
+        }
+      },
+    )
   })
 
   describe('Edge cases for complete branch coverage', () => {

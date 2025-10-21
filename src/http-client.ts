@@ -311,11 +311,11 @@ export function reshapeArtifactForPublicPolicy<
     const allowedActions = actions ? actions.split(',') : undefined
 
     const reshapeArtifact = (artifact: SocketArtifactWithExtras) => ({
-      name: artifact['name'],
-      version: artifact['version'],
-      size: artifact['size'],
-      author: artifact['author'],
-      type: artifact['type'],
+      name: artifact.name,
+      version: artifact.version,
+      size: artifact.size,
+      author: artifact.author,
+      type: artifact.type,
       supplyChainRisk: artifact.supplyChainRisk,
       scorecards: artifact.scorecards,
       topLevelAncestors: artifact.topLevelAncestors,
@@ -324,7 +324,7 @@ export function reshapeArtifactForPublicPolicy<
       alerts: artifact.alerts
         ?.filter((alert: SocketArtifactAlert) => {
           // Filter by severity (remove low severity alerts).
-          if (alert['severity'] === 'low') {
+          if (alert.severity === 'low') {
             return false
           }
           // Filter by actions if specified.
@@ -339,8 +339,8 @@ export function reshapeArtifactForPublicPolicy<
         })
         .map((alert: SocketArtifactAlert) => ({
           type: alert.type,
-          severity: alert['severity'],
-          key: alert['key'],
+          severity: alert.severity,
+          key: alert.key,
         })),
     })
 

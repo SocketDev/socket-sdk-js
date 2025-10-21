@@ -11,7 +11,7 @@ describe('HTTP Client - Edge Cases', () => {
     it('should handle empty message parameter', () => {
       const mockResponse = {
         statusCode: 500,
-        statusMessage: 'Internal Server Error'
+        statusMessage: 'Internal Server Error',
       } as IncomingMessage
 
       const error = new ResponseError(mockResponse)
@@ -25,7 +25,7 @@ describe('HTTP Client - Edge Cases', () => {
     it('should handle custom message', () => {
       const mockResponse = {
         statusCode: 404,
-        statusMessage: 'Not Found'
+        statusMessage: 'Not Found',
       } as IncomingMessage
 
       const error = new ResponseError(mockResponse, 'Custom message')
@@ -36,7 +36,7 @@ describe('HTTP Client - Edge Cases', () => {
 
     it('should handle missing statusCode', () => {
       const mockResponse = {
-        statusMessage: 'Error'
+        statusMessage: 'Error',
       } as IncomingMessage
 
       const error = new ResponseError(mockResponse)
@@ -46,7 +46,7 @@ describe('HTTP Client - Edge Cases', () => {
 
     it('should handle missing statusMessage', () => {
       const mockResponse = {
-        statusCode: 500
+        statusCode: 500,
       } as IncomingMessage
 
       const error = new ResponseError(mockResponse)
@@ -57,7 +57,7 @@ describe('HTTP Client - Edge Cases', () => {
     it('should have response property', () => {
       const mockResponse = {
         statusCode: 500,
-        statusMessage: 'Error'
+        statusMessage: 'Error',
       } as IncomingMessage
 
       const error = new ResponseError(mockResponse)
@@ -77,7 +77,7 @@ describe('HTTP Client - Edge Cases', () => {
     it('should have proper error stack trace', () => {
       const mockResponse = {
         statusCode: 500,
-        statusMessage: 'Error'
+        statusMessage: 'Error',
       } as IncomingMessage
 
       const error = new ResponseError(mockResponse)

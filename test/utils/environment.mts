@@ -10,7 +10,6 @@ import { SocketSdk } from '../../src/index'
 export const isCoverageMode = process.env['COVERAGE'] === 'true'
 
 export function setupTestEnvironment() {
-
   beforeEach(() => {
     nock.restore()
     nock.cleanAll()
@@ -88,15 +87,15 @@ export function setupTestClient(
   token = 'test-api-token',
   options?: ConstructorParameters<typeof SocketSdk>[1],
 ): () => SocketSdk {
-  let client: SocketSdk;
+  let client: SocketSdk
 
-  setupTestEnvironment();
+  setupTestEnvironment()
 
   beforeEach(() => {
-    client = createTestClient(token, options);
-  });
+    client = createTestClient(token, options)
+  })
 
-  return () => client;
+  return () => client
 }
 
 /**
