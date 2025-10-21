@@ -3,7 +3,7 @@
   "info": {
     "description": "Specification of the Socket API endpoints",
     "title": "API Endpoints",
-    "version": "0.1.0"
+    "version": "0"
   },
   "servers": [
     {
@@ -10451,11 +10451,30 @@
             "name": "page",
             "in": "query",
             "required": false,
-            "description": "The token specifying which page to return.",
+            "description": "The page number to return when using offset-style pagination. Ignored when cursor pagination is used.",
             "schema": {
               "type": "integer",
               "minimum": 1,
               "default": 1
+            }
+          },
+          {
+            "name": "startAfterCursor",
+            "in": "query",
+            "required": false,
+            "description": "Cursor token for pagination. Pass the returned nextPageCursor from previous responses to fetch the next set of results.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "use_cursor",
+            "in": "query",
+            "required": false,
+            "description": "Set to true on the first request to opt into cursor-based pagination.",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           },
           {
@@ -10668,6 +10687,12 @@
                       },
                       "description": ""
                     },
+                    "nextPageCursor": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
                     "nextPage": {
                       "type": "integer",
                       "description": "",
@@ -10677,6 +10702,7 @@
                   },
                   "required": [
                     "nextPage",
+                    "nextPageCursor",
                     "results"
                   ]
                 }
@@ -10827,6 +10853,16 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "name": "scan_type",
+            "in": "query",
+            "required": false,
+            "description": "The type of scan to perform. Defaults to 'socket'. Must be 32 characters or less. Used for categorizing multiple SBOM heads per repository branch.",
+            "schema": {
+              "type": "string",
+              "default": "socket"
+            }
           }
         ],
         "requestBody": {
@@ -10862,7 +10898,7 @@
             ]
           }
         ],
-        "description": "Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.\n\nTo get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getsupportedfiles) endpoint.\n\nThe maximum number of files you can upload at a time is 5000 and each file can be no bigger than 67 MB.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:create",
+        "description": "Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.\n\nTo get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getsupportedfiles) endpoint.\n\nThe maximum number of files you can upload at a time is 5000 and each file can be no bigger than 67 MB.\n\n**Query Parameters:**\n- `scan_type` (optional): The type of scan to perform. Defaults to 'socket'. Must be 32 characters or less. Used for categorizing multiple SBOM heads per repository branch.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:create",
         "responses": {
           "201": {
             "content": {
@@ -31943,6 +31979,7 @@
                 "UpdateAutopatchCurated",
                 "UpdateLabel",
                 "UpdateLabelSetting",
+                "UpdateLicenseOverlay",
                 "UpdateOrganizationSetting",
                 "UpdateWebhook",
                 "UpgradeOrganizationPlan"
@@ -33260,6 +33297,7 @@
                 "maven",
                 "npm",
                 "nuget",
+                "vscode",
                 "pypi",
                 "gem"
               ]
@@ -33541,6 +33579,7 @@
                 "maven",
                 "npm",
                 "nuget",
+                "vscode",
                 "pypi",
                 "gem"
               ]
