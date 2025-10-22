@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.0.4](https://github.com/SocketDev/socket-sdk-js/releases/tag/v2.0.4) - 2025-10-22
+
+### Added
+- Support for `Retry-After` header in rate limit responses (HTTP 429)
+  - Automatically respects server-specified retry delays
+  - Parses both delay-seconds (numeric) and HTTP-date formats
+  - Uses server delay instead of exponential backoff when available
+
 ## [2.0.3](https://github.com/SocketDev/socket-sdk-js/releases/tag/v2.0.3) - 2025-10-22
 
 ### Fixed
