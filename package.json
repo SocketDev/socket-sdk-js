@@ -15,14 +15,14 @@
   },
   "type": "module",
   "main": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.mts",
+      "types": "./dist/index.d.ts",
       "default": "./dist/index.mjs"
     },
     "./testing": {
-      "types": "./dist/testing.d.mts",
+      "types": "./dist/testing.d.ts",
       "default": "./dist/testing.mjs"
     },
     "./types/api-helpers": "./types/api-helpers.d.ts",
@@ -105,8 +105,9 @@
     "pnpm": ">=10.16.0"
   },
   "files": [
-    "dist/**",
-    "types/**",
+    "data/*.json",
+    "dist/*{.js,.d.ts}",
+    "types/*.d.ts",
     "CHANGELOG.md"
   ],
   "typeCoverage": {

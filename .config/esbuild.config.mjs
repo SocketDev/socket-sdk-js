@@ -30,9 +30,6 @@ export const buildConfig = {
   logLevel: 'info',
   outExtension: { '.js': '.mjs' },
 
-  // Enable code splitting for ESM
-  splitting: true,
-
   // Alias local packages when available (dev mode).
   alias: getLocalPackageAliases(rootPath),
 
