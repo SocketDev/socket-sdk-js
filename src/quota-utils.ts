@@ -16,7 +16,7 @@ interface Requirements {
 }
 
 /**
- * Load sdk-method-requirements.json data with caching.
+ * Load api-method-quota-and-permissions.json data with caching.
  * Internal function for lazy loading quota requirements.
  * Uses once() memoization to ensure file is only read once.
  */
@@ -25,12 +25,12 @@ const loadRequirements = once((): Requirements => {
     // Resolve path relative to this module file location.
     // When compiled, __dirname will point to dist/ directory.
     // In source, __dirname points to src/ directory.
-    // sdk-method-requirements.json is in the data directory at the project root.
+    // api-method-quota-and-permissions.json is in the data directory at the project root.
     const requirementsPath = join(
       __dirname,
       '..',
       'data',
-      'sdk-method-requirements.json',
+      'api-method-quota-and-permissions.json',
     )
 
     // Check if the requirements file exists before attempting to read.
