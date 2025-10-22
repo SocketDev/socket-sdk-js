@@ -21,15 +21,19 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.mjs"
     },
+    "./package.json": "./package.json",
     "./testing": {
       "types": "./dist/testing.d.ts",
       "default": "./dist/testing.mjs"
     },
-    "./types/api-helpers": "./types/api-helpers.d.ts",
-    "./types/api-helpers.d.ts": "./types/api-helpers.d.ts",
-    "./types/api": "./types/api.d.ts",
-    "./types/api.d.ts": "./types/api.d.ts",
-    "./package.json": "./package.json"
+    "./types/api": {
+      "types": "./types/api.d.ts",
+      "default": "./types/api.d.ts"
+    },
+    "./types/api-helpers": {
+      "types": "./types/api-helpers.d.ts",
+      "default": "./types/api-helpers.d.ts"
+    }
   },
   "scripts": {
     "build": "node scripts/build.mjs",
