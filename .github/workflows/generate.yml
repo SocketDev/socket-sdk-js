@@ -43,7 +43,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@a912e5bd8ec469d2ee13abf592a6b2e5898c006c # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@7ae88e3722a152788568bdcc84a42cc59261e46e # main
 
       - name: Fetch latest OpenAPI definition
         id: fetch
@@ -137,7 +137,7 @@ jobs:
         with:
           ref: automated/open-api
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@a912e5bd8ec469d2ee13abf592a6b2e5898c006c # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@7ae88e3722a152788568bdcc84a42cc59261e46e # main
 
       - name: Build SDK
         run: pnpm run build
