@@ -1,7 +1,10 @@
 /**
  * @fileoverview Tests for SocketSdk retry logic
+ * @vitest-environment node
  */
 
+// @vitest-environment node
+// Run these tests in isolated mode to prevent nock state bleeding
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
@@ -241,14 +244,125 @@ describe('SocketSdk - Retry Logic', () => {
       // Should not retry not found errors
       expect(attemptCount).toBe(1)
     })
+  })
 
-    it('should not retry on 429 rate limit errors', async () => {
+  describe('Rate Limit Retry with Retry-After Header', () => {
+    it('should retry 429 with Retry-After delay-seconds header', async () => {
+      let attemptCount = 0
+      const startTime = Date.now()
+
+      nock('https://api.socket.dev')
+        .get('/v0/quota')
+        .times(2)
+        .reply(() => {
+          attemptCount++
+          if (attemptCount < 2) {
+            // First attempt returns 429 with Retry-After in seconds (1 second delay)
+            return [
+              429,
+              { error: { message: 'Too Many Requests' } },
+              { 'Retry-After': '1' },
+            ]
+          }
+          return [200, { quota: 1000 }]
+        })
+
+      const client = new SocketSdk('test-token', {
+        retries: 3,
+        retryDelay: 10,
+      })
+
+      const result = await client.getQuota()
+
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.quota).toBe(1000)
+      }
+      expect(attemptCount).toBe(2)
+      // Should have waited at least 1 second (allowing some variance)
+      const elapsed = Date.now() - startTime
+      expect(elapsed).toBeGreaterThanOrEqual(900)
+    })
+
+    it('should retry 429 with Retry-After HTTP-date header', async () => {
+      let attemptCount = 0
+      const startTime = Date.now()
+
+      nock('https://api.socket.dev')
+        .get('/v0/quota')
+        .times(2)
+        .reply(() => {
+          attemptCount++
+          if (attemptCount < 2) {
+            // Set retry time to 1 second in the future
+            const retryDate = new Date(Date.now() + 1000)
+            return [
+              429,
+              { error: { message: 'Too Many Requests' } },
+              { 'Retry-After': retryDate.toUTCString() },
+            ]
+          }
+          return [200, { quota: 2000 }]
+        })
+
+      const client = new SocketSdk('test-token', {
+        retries: 3,
+        retryDelay: 10,
+      })
+
+      const result = await client.getQuota()
+
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.quota).toBe(2000)
+      }
+      expect(attemptCount).toBe(2)
+      // Should have waited roughly 1 second (allowing variance for test execution overhead)
+      const elapsed = Date.now() - startTime
+      expect(elapsed).toBeGreaterThanOrEqual(600)
+    })
+
+    it('should handle Retry-After header as array', async () => {
+      let attemptCount = 0
+
+      nock('https://api.socket.dev')
+        .get('/v0/quota')
+        .times(2)
+        .reply(() => {
+          attemptCount++
+          if (attemptCount < 2) {
+            // Return Retry-After as array (some servers might do this)
+            return [
+              429,
+              { error: { message: 'Too Many Requests' } },
+              { 'Retry-After': ['1'] },
+            ]
+          }
+          return [200, { quota: 3000 }]
+        })
+
+      const client = new SocketSdk('test-token', {
+        retries: 3,
+        retryDelay: 10,
+      })
+
+      const result = await client.getQuota()
+
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.quota).toBe(3000)
+      }
+      expect(attemptCount).toBe(2)
+    })
+
+    it('should not retry 429 without Retry-After header', async () => {
       let attemptCount = 0
 
       nock('https://api.socket.dev')
         .get('/v0/quota')
         .reply(() => {
           attemptCount++
+          // 429 without Retry-After header
           return [429, { error: { message: 'Too Many Requests' } }]
         })
 
@@ -261,8 +375,148 @@ describe('SocketSdk - Retry Logic', () => {
 
       expect(result.success).toBe(false)
       expect(result.status).toBe(429)
-      // Should not retry rate limit errors
+      // Should not retry without Retry-After header
       expect(attemptCount).toBe(1)
+    })
+
+    it('should not retry 429 with invalid Retry-After header', async () => {
+      let attemptCount = 0
+
+      nock('https://api.socket.dev')
+        .get('/v0/quota')
+        .reply(() => {
+          attemptCount++
+          // Invalid Retry-After value
+          return [
+            429,
+            { error: { message: 'Too Many Requests' } },
+            { 'Retry-After': 'invalid' },
+          ]
+        })
+
+      const client = new SocketSdk('test-token', {
+        retries: 3,
+        retryDelay: 10,
+      })
+
+      const result = await client.getQuota()
+
+      expect(result.success).toBe(false)
+      expect(result.status).toBe(429)
+      // Should not retry with invalid Retry-After
+      expect(attemptCount).toBe(1)
+    })
+
+    it('should not retry 429 with past HTTP-date', async () => {
+      let attemptCount = 0
+
+      nock('https://api.socket.dev')
+        .get('/v0/quota')
+        .reply(() => {
+          attemptCount++
+          // Date in the past
+          const pastDate = new Date(Date.now() - 1000)
+          return [
+            429,
+            { error: { message: 'Too Many Requests' } },
+            { 'Retry-After': pastDate.toUTCString() },
+          ]
+        })
+
+      const client = new SocketSdk('test-token', {
+        retries: 3,
+        retryDelay: 10,
+      })
+
+      const result = await client.getQuota()
+
+      expect(result.success).toBe(false)
+      expect(result.status).toBe(429)
+      // Should not retry with past date
+      expect(attemptCount).toBe(1)
+    })
+
+    it('should not retry 429 with negative delay-seconds', async () => {
+      let attemptCount = 0
+
+      nock('https://api.socket.dev')
+        .get('/v0/quota')
+        .reply(() => {
+          attemptCount++
+          return [
+            429,
+            { error: { message: 'Too Many Requests' } },
+            { 'Retry-After': '-1' },
+          ]
+        })
+
+      const client = new SocketSdk('test-token', {
+        retries: 3,
+        retryDelay: 10,
+      })
+
+      const result = await client.getQuota()
+
+      expect(result.success).toBe(false)
+      expect(result.status).toBe(429)
+      // Should not retry with negative delay
+      expect(attemptCount).toBe(1)
+    })
+
+    it('should handle 429 with empty Retry-After array', async () => {
+      let attemptCount = 0
+
+      nock('https://api.socket.dev')
+        .get('/v0/quota')
+        .reply(() => {
+          attemptCount++
+          return [
+            429,
+            { error: { message: 'Too Many Requests' } },
+            { 'Retry-After': [] },
+          ]
+        })
+
+      const client = new SocketSdk('test-token', {
+        retries: 3,
+        retryDelay: 10,
+      })
+
+      const result = await client.getQuota()
+
+      expect(result.success).toBe(false)
+      expect(result.status).toBe(429)
+      // Should not retry with empty array
+      expect(attemptCount).toBe(1)
+    })
+
+    it('should exhaust retries on persistent 429 with Retry-After', async () => {
+      let attemptCount = 0
+
+      nock('https://api.socket.dev')
+        .get('/v0/quota')
+        .times(4)
+        .reply(() => {
+          attemptCount++
+          return [
+            429,
+            { error: { message: 'Too Many Requests' } },
+            { 'Retry-After': '1' },
+          ]
+        })
+
+      const client = new SocketSdk('test-token', {
+        retries: 3,
+        retryDelay: 10,
+      })
+
+      const result = await client.getQuota()
+
+      // 429 is a client error (4xx), so it returns a result instead of throwing
+      expect(result.success).toBe(false)
+      expect(result.status).toBe(429)
+      // Initial attempt + 3 retries
+      expect(attemptCount).toBe(4)
     })
   })
 
