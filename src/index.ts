@@ -47,7 +47,50 @@ export {
 // Re-export the main SocketSdk class.
 export { SocketSdk } from './socket-sdk-class'
 // Re-export types from modules.
-export type * from './types'
+export type {
+  ALERT_ACTION,
+  ALERT_TYPE,
+  Agent,
+  ArtifactPatches,
+  BatchPackageFetchResultType,
+  BatchPackageStreamOptions,
+  CompactSocketArtifact,
+  CompactSocketArtifactAlert,
+  CreateDependenciesSnapshotOptions,
+  CreateOrgFullScanOptions,
+  CreateScanFromFilepathsOptions,
+  CustomResponseType,
+  Entitlement,
+  EntitlementsResponse,
+  GetOptions,
+  GotOptions,
+  HeadersRecord,
+  PatchFile,
+  PatchRecord,
+  PatchViewResponse,
+  QueryParams,
+  RequestOptions,
+  SecurityAlert,
+  SendMethod,
+  SendOptions,
+  SocketArtifact,
+  SocketArtifactAlert,
+  SocketArtifactWithExtras,
+  SocketId,
+  SocketMetricSchema,
+  SocketSdkErrorResult,
+  SocketSdkGenericResult,
+  SocketSdkOperations,
+  SocketSdkOptions,
+  SocketSdkResult,
+  SocketSdkSuccessResult,
+  StreamOrgFullScanOptions,
+  UploadManifestFilesError,
+  UploadManifestFilesOptions,
+  UploadManifestFilesResponse,
+  UploadManifestFilesReturnType,
+  Vulnerability,
+} from './types'
 // Re-export functions from modules.
 export { createUserAgentFromPkgJson } from './user-agent'
 
