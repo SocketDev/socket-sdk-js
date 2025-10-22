@@ -1,9 +1,6 @@
 # Quota Management
 
-API methods have different costs:
-- **0 units** - Free (quota checks, organization lists, entitlements)
-- **10 units** - Standard (scans, reports, policies)
-- **100 units** - Resource-intensive (batch processing, file uploads)
+API methods have different costs: 0 (free), 10 (standard), or 100 (resource-intensive) units.
 
 ## Check Quota
 
@@ -20,96 +17,48 @@ if (quota.success) {
 
 ## Utilities
 
-### `getQuotaCost(methodName)`
-
 ```typescript
-import { getQuotaCost } from '@socketsecurity/sdk'
+import {
+  getQuotaCost,
+  calculateTotalQuotaCost,
+  hasQuotaForMethods,
+  getMethodsByQuotaCost,
+  getRequiredPermissions,
+  getQuotaUsageSummary
+} from '@socketsecurity/sdk'
 
+// Get cost for a method
 getQuotaCost('batchPackageFetch')  // 100
 getQuotaCost('createOrgFullScan')  // 10
 getQuotaCost('getQuota')           // 0
-```
 
-### `calculateTotalQuotaCost(methodNames)`
-
-```typescript
-import { calculateTotalQuotaCost } from '@socketsecurity/sdk'
-
+// Calculate total cost
 const cost = calculateTotalQuotaCost([
-  'batchPackageFetch',    // 100
-  'getOrgAnalytics',      // 10
-  'getQuota'              // 0
+  'batchPackageFetch',  // 100
+  'getOrgAnalytics',    // 10
+  'getQuota'            // 0
 ])
 // Returns: 110
-```
 
-### `hasQuotaForMethods(availableQuota, methodNames)`
+// Check if enough quota
+const canProceed = hasQuotaForMethods(availableQuota, [
+  'batchPackageFetch',
+  'createOrgFullScan'
+])
 
-```typescript
-import { SocketSdk, hasQuotaForMethods } from '@socketsecurity/sdk'
-
-const client = new SocketSdk('your-api-key')
-const quota = await client.getQuota()
-
-if (quota.success) {
-  const canProceed = hasQuotaForMethods(quota.data.quota, [
-    'batchPackageFetch',
-    'createOrgFullScan'
-  ])
-
-  if (canProceed) {
-    // Proceed with operations
-  }
-}
-```
-
-### `getMethodsByQuotaCost(cost)`
-
-```typescript
-import { getMethodsByQuotaCost } from '@socketsecurity/sdk'
-
+// Get methods by cost
 getMethodsByQuotaCost(0)    // ['getQuota', 'getOrganizations', ...]
 getMethodsByQuotaCost(10)   // ['createOrgFullScan', 'getScan', ...]
 getMethodsByQuotaCost(100)  // ['batchPackageFetch', ...]
-```
 
-### `getMethodsByPermissions(permissions)`
+// Get permissions required
+getRequiredPermissions('createOrgFullScan')  // ['write:scans', 'read:repos']
 
-```typescript
-import { getMethodsByPermissions } from '@socketsecurity/sdk'
-
-getMethodsByPermissions(['read:scans'])  // Methods requiring read:scans
-getMethodsByPermissions(['admin'])       // Admin-only methods
-```
-
-### `getRequiredPermissions(methodName)`
-
-```typescript
-import { getRequiredPermissions } from '@socketsecurity/sdk'
-
-getRequiredPermissions('createOrgFullScan')        // ['write:scans', 'read:repos']
-getRequiredPermissions('updateOrgSecurityPolicy')  // ['write:policy', 'admin']
-```
-
-### `getQuotaUsageSummary()`
-
-```typescript
-import { getQuotaUsageSummary } from '@socketsecurity/sdk'
-
+// Get usage summary
 const summary = getQuotaUsageSummary()
-
 console.log(`Free: ${summary.free.length}`)
 console.log(`Standard: ${summary.standard.length}`)
 console.log(`Expensive: ${summary.expensive.length}`)
-```
-
-### `getAllMethodRequirements()`
-
-```typescript
-import { getAllMethodRequirements } from '@socketsecurity/sdk'
-
-const requirements = getAllMethodRequirements()
-// { methodName: { cost: number, permissions: string[] }, ... }
 ```
 
 ## Examples
@@ -196,7 +145,7 @@ if (quota.success && quota.data.quota >= batchCost) {
 }
 ```
 
-## Costs Reference
+## Cost Reference
 
 **Free (0 units):** `getQuota`, `getOrganizations`, `getEnabledEntitlements`, `getEntitlements`
 
@@ -207,13 +156,13 @@ if (quota.success && quota.data.quota >= batchCost) {
 ## Best Practices
 
 - Check quota before expensive operations
-- Use free methods (`getQuota`, `getOrganizations`) for health checks
+- Use free methods for health checks
 - Batch operations when possible (100 units for all packages vs 10 per package)
-- Monitor quota usage in production with quota tracker
+- Monitor quota usage with tracker
 - Configure retries for transient failures
 
 ## See Also
 
 - [API Reference](./api-reference.md) - Complete API documentation
-- [Examples](./usage-examples.md) - Usage examples and patterns
-- [Testing Utilities](./dev/testing.md) - Testing helpers and mocks
+- [Usage Examples](./usage-examples.md) - Usage patterns
+- [Testing Utilities](./dev/testing.md) - Testing helpers
