@@ -5,12 +5,14 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+import { build, context } from 'esbuild'
+import colors from 'yoctocolors-cjs'
+
 import { isQuiet } from '@socketsecurity/lib/argv/flags'
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
 import { logger } from '@socketsecurity/lib/logger'
 import { printFooter, printHeader } from '@socketsecurity/lib/stdio/header'
-import { build, context } from 'esbuild'
-import colors from 'yoctocolors-cjs'
 
 import {
   analyzeMetafile,

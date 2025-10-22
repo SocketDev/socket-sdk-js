@@ -3,14 +3,17 @@
  * Tests error scenarios in createGetRequest, createRequestWithJson, and getResponseJson functions.
  */
 
-import type { Server } from 'node:http'
 import { createServer } from 'node:http'
+
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+
 import {
   createGetRequest,
   createRequestWithJson,
   getResponseJson,
 } from '../src/http-client'
+
+import type { Server } from 'node:http'
 
 describe('HTTP Client - Error Paths', () => {
   let server: Server

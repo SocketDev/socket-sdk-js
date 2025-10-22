@@ -1,11 +1,13 @@
 /** @fileoverview Tests for generic getApi and sendApi method functionality. */
 
-import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
-import type { SocketSdkGenericResult } from '../src/index'
+
 import { SocketSdk } from '../src/index'
 import { setupTestClient } from './utils/environment.mts'
+
+import type { SocketSdkGenericResult } from '../src/index'
+import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
 
 describe('getApi and sendApi Methods', () => {
   const getClient = setupTestClient('test-api-token', { retries: 0 })

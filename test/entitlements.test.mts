@@ -1,8 +1,10 @@
 /** @fileoverview Tests for organization entitlements and enabled products. */
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
-import type { Entitlement, EntitlementsResponse } from '../src/index'
+
 import { setupTestClient } from './utils/environment.mts'
+
+import type { Entitlement, EntitlementsResponse } from '../src/index'
 
 describe('Entitlements API', () => {
   const getClient = setupTestClient('test-api-token', {

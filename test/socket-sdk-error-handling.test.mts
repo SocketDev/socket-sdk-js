@@ -5,17 +5,19 @@
  * and error response body parsing.
  */
 
-import type { IncomingMessage } from 'node:http'
 import { createServer } from 'node:http'
-import { describe, expect, it } from 'vitest'
-import { SocketSdk } from '../src/index'
 
-import type { SocketSdkGenericResult } from '../src/types'
+import { describe, expect, it } from 'vitest'
+
+import { SocketSdk } from '../src/index'
 import {
   createRouteHandler,
   jsonResponse,
   setupLocalHttpServer,
 } from './utils/local-server-helpers.mts'
+
+import type { SocketSdkGenericResult } from '../src/types'
+import type { IncomingMessage } from 'node:http'
 
 describe('SocketSdk - Error Handling', () => {
   const getBaseUrl = setupLocalHttpServer(
