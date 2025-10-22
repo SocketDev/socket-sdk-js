@@ -5399,6 +5399,8 @@ export interface operations {
         after: string
         /** @description The base full scan ID (older) */
         before: string
+        /** @description The ID of the GitHub installation. This will be used to get the GitHub installation settings. If not provided, the default GitHub installation settings will be used. */
+        github_installation_id?: string
       }
       path: {
         /** @description The slug of the organization */
@@ -5863,6 +5865,10 @@ export interface operations {
    */
   GetDiffScanGfm: {
     parameters: {
+      query?: {
+        /** @description The ID of the GitHub installation. This will be used to get the GitHub installation settings. If not provided, the default GitHub installation settings will be used. */
+        github_installation_id?: string
+      }
       path: {
         /** @description The slug of the organization */
         org_slug: string
@@ -12526,6 +12532,14 @@ export interface operations {
         'filters.alertPriority'?: string
         /** @description Alert priority ("low", "medium", "high", or "critical") */
         'filters.alertPriority.notIn'?: string
+        /** @description Alert KEV (Known Exploited Vulnerability) filter flag */
+        'filters.alertKEV'?: boolean
+        /** @description Alert KEV (Known Exploited Vulnerability) filter flag */
+        'filters.alertKEV.notIn'?: boolean
+        /** @description Alert EPSS ("low", "medium", "high", "critical") */
+        'filters.alertEPSS'?: string
+        /** @description Alert EPSS ("low", "medium", "high", "critical") */
+        'filters.alertEPSS.notIn'?: string
         /** @description Direct/transitive dependency filter flag */
         'filters.dependencyDirect'?: boolean
         /** @description Direct/transitive dependency filter flag */
@@ -12677,6 +12691,10 @@ export interface operations {
                 alertReachabilityType?: string[]
                 /** @description Alert priority ("low", "medium", "high", or "critical") */
                 alertPriority?: string[]
+                /** @description Alert KEV (Known Exploited Vulnerability) filter flag */
+                alertKEV?: boolean[]
+                /** @description Alert EPSS ("low", "medium", "high", "critical") */
+                alertEPSS?: string[]
                 /** @description Direct/transitive dependency filter flag */
                 dependencyDirect?: boolean[]
                 /** @description Development/production dependency filter flag */
@@ -12710,7 +12728,7 @@ export interface operations {
         date?: string
         /** @description The number of days of data to fetch as an offset from input date */
         range?: string
-        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,alertPriority,dependencyDirect,dependencyDev,dependencyDead) */
+        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,alertPriority,alertKEV,alertEPSS,dependencyDirect,dependencyDev,dependencyDead) */
         'aggregation.fields'?: string
         /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
         'filters.alertSeverity'?: string
@@ -12776,6 +12794,14 @@ export interface operations {
         'filters.alertPriority'?: string
         /** @description Alert priority ("low", "medium", "high", or "critical") */
         'filters.alertPriority.notIn'?: string
+        /** @description Alert KEV (Known Exploited Vulnerability) filter flag */
+        'filters.alertKEV'?: boolean
+        /** @description Alert KEV (Known Exploited Vulnerability) filter flag */
+        'filters.alertKEV.notIn'?: boolean
+        /** @description Alert EPSS ("low", "medium", "high", "critical") */
+        'filters.alertEPSS'?: string
+        /** @description Alert EPSS ("low", "medium", "high", "critical") */
+        'filters.alertEPSS.notIn'?: string
         /** @description Direct/transitive dependency filter flag */
         'filters.dependencyDirect'?: boolean
         /** @description Direct/transitive dependency filter flag */
@@ -12845,6 +12871,10 @@ export interface operations {
                 alertReachabilityType?: string[]
                 /** @description Alert priority ("low", "medium", "high", or "critical") */
                 alertPriority?: string[]
+                /** @description Alert KEV (Known Exploited Vulnerability) filter flag */
+                alertKEV?: boolean[]
+                /** @description Alert EPSS ("low", "medium", "high", "critical") */
+                alertEPSS?: string[]
                 /** @description Direct/transitive dependency filter flag */
                 dependencyDirect?: boolean[]
                 /** @description Development/production dependency filter flag */
