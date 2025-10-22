@@ -1,12 +1,15 @@
 /** @fileoverview Tests for HTTP client utility functions and module selection. */
 
-import type { IncomingMessage } from 'node:http'
 import http from 'node:http'
 import https from 'node:https'
 import { PassThrough } from 'node:stream'
+
 import { describe, expect, it } from 'vitest'
+
 import { MAX_RESPONSE_SIZE } from '../src/constants.js'
 import { getErrorResponseBody, getHttpModule } from '../src/http-client.js'
+
+import type { IncomingMessage } from 'node:http'
 
 describe('HTTP Client - Module Selection', () => {
   describe('getHttpModule', () => {

@@ -1,8 +1,10 @@
 /** @fileoverview Tests for HTTP client ResponseError edge cases. */
 
-import type { IncomingMessage } from 'node:http'
 import { describe, expect, it } from 'vitest'
+
 import { ResponseError } from '../src/http-client'
+
+import type { IncomingMessage } from 'node:http'
 
 describe('HTTP Client - Edge Cases', () => {
   describe('ResponseError constructor', () => {

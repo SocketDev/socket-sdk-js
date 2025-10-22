@@ -9,9 +9,11 @@ import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 import readline from 'node:readline'
 import { fileURLToPath } from 'node:url'
-import { parseArgs } from '@socketsecurity/lib/argv/parse'
+
 import semver from 'semver'
 import colors from 'yoctocolors-cjs'
+
+import { parseArgs } from '@socketsecurity/lib/argv/parse'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
