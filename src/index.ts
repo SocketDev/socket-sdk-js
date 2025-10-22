@@ -78,6 +78,8 @@ export type {
   SocketArtifactWithExtras,
   SocketId,
   SocketMetricSchema,
+  SocketSdkArrayElement,
+  SocketSdkData,
   SocketSdkErrorResult,
   SocketSdkGenericResult,
   SocketSdkOperations,
