@@ -4,6 +4,7 @@
     "includes": [
       "**",
       "!**/.cache",
+      "!**/.claude",
       "!**/.DS_Store",
       "!**/._.DS_Store",
       "!**/.env",
@@ -14,6 +15,7 @@
       "!**/.vscode",
       "!**/coverage",
       "!**/dist",
+      "!**/node_modules",
       "!**/package.json",
       "!**/pnpm-lock.yaml",
       "!openapi.json"
