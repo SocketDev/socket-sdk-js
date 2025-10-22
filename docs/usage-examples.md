@@ -1,4 +1,4 @@
-# Examples
+# Usage Examples
 
 ## Package Analysis
 
@@ -9,11 +9,13 @@ import { SocketSdk } from '@socketsecurity/sdk'
 
 const client = new SocketSdk('your-api-key')
 
+// Get score
 const result = await client.getScoreByNpmPackage('express', '4.18.0')
 if (result.success) {
   console.log(`Score: ${result.data.score}/100`)
 }
 
+// Get issues
 const issues = await client.getIssuesByNpmPackage('express', '4.18.0')
 if (issues.success) {
   issues.data.issues.forEach(i =>
@@ -49,7 +51,7 @@ const stream = client.batchPackageStream(
 
 for await (const result of stream) {
   if (result.success && result.data.score < 70) {
-    console.log(`⚠️ ${result.data.name}: ${result.data.score}`)
+    console.log(`⚠ ${result.data.name}: ${result.data.score}`)
   }
 }
 ```
@@ -111,13 +113,13 @@ if (repos.success) {
   )
 }
 
-// Create repository
+// Create
 const created = await client.createOrgRepo('my-org', {
   name: 'new-project',
   default_branch: 'main'
 })
 
-// Update repository
+// Update
 if (created.success) {
   await client.updateOrgRepo('my-org', 'new-project', {
     homepage: 'https://example.com'
@@ -145,10 +147,10 @@ await client.updateOrgLicensePolicy('my-org', {
 })
 ```
 
-## Analytics
+## Analytics & Tokens
 
 ```typescript
-// Organization analytics
+// Analytics
 const analytics = await client.getOrgAnalytics('30d')
 if (analytics.success) {
   analytics.data.forEach(day =>
@@ -156,39 +158,22 @@ if (analytics.success) {
   )
 }
 
-// Audit log
-const audit = await client.getAuditLogEvents('my-org', { limit: 50 })
-if (audit.success) {
-  audit.data.events.forEach(e =>
-    console.log(`${e.timestamp}: ${e.action}`)
-  )
-}
-```
-
-## Tokens
-
-```typescript
-// Create token
+// Tokens
 const token = await client.postAPIToken('my-org', {
   name: 'CI/CD',
   scopes: ['read:scans', 'write:scans']
 })
 
-// Rotate token
 if (token.success) {
   await client.postAPITokensRotate('my-org', token.data.id)
-}
-
-// List tokens
-const tokens = await client.getAPITokens('my-org')
-if (tokens.success) {
-  tokens.data.tokens.forEach(t => console.log(t.name))
 }
 ```
 
 ## SBOM Export
 
 ```typescript
+import { writeFile } from 'fs/promises'
+
 // CycloneDX
 const cdx = await client.exportCDX('my-org', 'scan_123')
 if (cdx.success) {
@@ -261,5 +246,5 @@ if (response.success) {
 ## See Also
 
 - [API Reference](./api-reference.md) - Complete API documentation
-- [Quota Management](./quota-management.md) - Quota utilities and cost management
-- [Testing Utilities](./dev/testing.md) - Testing helpers and mocks
+- [Quota Management](./quota-management.md) - Quota utilities
+- [Testing Utilities](./dev/testing.md) - Testing helpers
