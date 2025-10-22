@@ -4406,6 +4406,482 @@
               "type": {
                 "type": "string",
                 "enum": [
+                  "ghaArgToSink"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "sourceLocation": {
+                            "type": "object",
+                            "description": "",
+                            "default": null
+                          },
+                          "sinkLocations": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "description": "",
+                              "default": null
+                            },
+                            "description": ""
+                          }
+                        },
+                        "required": [
+                          "message",
+                          "sinkLocations",
+                          "sourceLocation"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "ghaEnvToSink"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "sourceLocation": {
+                            "type": "object",
+                            "description": "",
+                            "default": null
+                          },
+                          "sinkLocations": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "description": "",
+                              "default": null
+                            },
+                            "description": ""
+                          }
+                        },
+                        "required": [
+                          "message",
+                          "sinkLocations",
+                          "sourceLocation"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "ghaContextToSink"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "sourceLocation": {
+                            "type": "object",
+                            "description": "",
+                            "default": null
+                          },
+                          "sinkLocations": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "description": "",
+                              "default": null
+                            },
+                            "description": ""
+                          }
+                        },
+                        "required": [
+                          "message",
+                          "sinkLocations",
+                          "sourceLocation"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "ghaArgToOutput"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "sourceLocation": {
+                            "type": "object",
+                            "description": "",
+                            "default": null
+                          },
+                          "sinkLocations": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "description": "",
+                              "default": null
+                            },
+                            "description": ""
+                          }
+                        },
+                        "required": [
+                          "message",
+                          "sinkLocations",
+                          "sourceLocation"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "ghaArgToEnv"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "sourceLocation": {
+                            "type": "object",
+                            "description": "",
+                            "default": null
+                          },
+                          "sinkLocations": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "description": "",
+                              "default": null
+                            },
+                            "description": ""
+                          }
+                        },
+                        "required": [
+                          "message",
+                          "sinkLocations",
+                          "sourceLocation"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "ghaContextToOutput"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "sourceLocation": {
+                            "type": "object",
+                            "description": "",
+                            "default": null
+                          },
+                          "sinkLocations": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "description": "",
+                              "default": null
+                            },
+                            "description": ""
+                          }
+                        },
+                        "required": [
+                          "message",
+                          "sinkLocations",
+                          "sourceLocation"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "ghaContextToEnv"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "sourceLocation": {
+                            "type": "object",
+                            "description": "",
+                            "default": null
+                          },
+                          "sinkLocations": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "description": "",
+                              "default": null
+                            },
+                            "description": ""
+                          }
+                        },
+                        "required": [
+                          "message",
+                          "sinkLocations",
+                          "sourceLocation"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
                   "licenseSpdxDisj"
                 ]
               },
@@ -17052,6 +17528,153 @@
                             "action"
                           ]
                         },
+                        "ghaArgToSink": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaArgToSink issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "ghaEnvToSink": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaEnvToSink issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "ghaContextToSink": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaContextToSink issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "ghaArgToOutput": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaArgToOutput issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "ghaArgToEnv": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaArgToEnv issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "ghaContextToOutput": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaContextToOutput issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "ghaContextToEnv": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaContextToEnv issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "licenseSpdxDisj": {
                           "type": "object",
                           "additionalProperties": false,
@@ -19461,6 +20084,153 @@
                               "ignore"
                             ],
                             "description": "The action to take for generic issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "ghaArgToSink": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for ghaArgToSink issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "ghaEnvToSink": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for ghaEnvToSink issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "ghaContextToSink": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for ghaContextToSink issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "ghaArgToOutput": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for ghaArgToOutput issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "ghaArgToEnv": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for ghaArgToEnv issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "ghaContextToOutput": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for ghaContextToOutput issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "ghaContextToEnv": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for ghaContextToEnv issues."
                           }
                         },
                         "required": [
@@ -22195,6 +22965,153 @@
                             "action"
                           ]
                         },
+                        "ghaArgToSink": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaArgToSink issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "ghaEnvToSink": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaEnvToSink issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "ghaContextToSink": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaContextToSink issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "ghaArgToOutput": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaArgToOutput issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "ghaArgToEnv": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaArgToEnv issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "ghaContextToOutput": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaContextToOutput issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "ghaContextToEnv": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaContextToEnv issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "licenseSpdxDisj": {
                           "type": "object",
                           "additionalProperties": false,
@@ -24613,6 +25530,153 @@
                           "action"
                         ]
                       },
+                      "ghaArgToSink": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for ghaArgToSink issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "ghaEnvToSink": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for ghaEnvToSink issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "ghaContextToSink": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for ghaContextToSink issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "ghaArgToOutput": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for ghaArgToOutput issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "ghaArgToEnv": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for ghaArgToEnv issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "ghaContextToOutput": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for ghaContextToOutput issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "ghaContextToEnv": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for ghaContextToEnv issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
                       "licenseSpdxDisj": {
                         "type": "object",
                         "additionalProperties": false,
@@ -26984,6 +28048,153 @@
                             "action"
                           ]
                         },
+                        "ghaArgToSink": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaArgToSink issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "ghaEnvToSink": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaEnvToSink issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "ghaContextToSink": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaContextToSink issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "ghaArgToOutput": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaArgToOutput issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "ghaArgToEnv": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaArgToEnv issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "ghaContextToOutput": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaContextToOutput issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "ghaContextToEnv": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for ghaContextToEnv issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "licenseSpdxDisj": {
                           "type": "object",
                           "additionalProperties": false,
@@ -29185,51 +30396,440 @@
                   "type": "object",
                   "additionalProperties": false,
                   "properties": {
+                    "consoleTabularEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Enable tabular console output"
+                    },
+                    "consoleJsonEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Enable JSON console output"
+                    },
+                    "verbose": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Enable verbose logging"
+                    },
+                    "allLanguagesEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Enable all language SAST scanning"
+                    },
                     "pythonSastEnabled": {
                       "type": "boolean",
                       "default": false,
-                      "description": "Run a SAST Scan on your source code as part of the Socket Basics scan"
-                    },
-                    "golangSastEnabled": {
-                      "type": "boolean",
-                      "default": false,
-                      "description": "Run a SAST Scan on your source code as part of the Socket Basics scan"
+                      "description": "Run Python SAST scanning"
                     },
                     "javascriptSastEnabled": {
                       "type": "boolean",
                       "default": false,
-                      "description": "Run a SAST Scan on your source code as part of the Socket Basics scan"
+                      "description": "Run JavaScript SAST scanning"
+                    },
+                    "goSastEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run Go SAST scanning"
+                    },
+                    "golangSastEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run Golang SAST scanning"
+                    },
+                    "javaSastEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run Java SAST scanning"
+                    },
+                    "phpSastEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run PHP SAST scanning"
+                    },
+                    "rubySastEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run Ruby SAST scanning"
+                    },
+                    "csharpSastEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run C# SAST scanning"
+                    },
+                    "dotnetSastEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run .NET SAST scanning"
+                    },
+                    "cSastEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run C SAST scanning"
+                    },
+                    "cppSastEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run C++ SAST scanning"
+                    },
+                    "kotlinSastEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run Kotlin SAST scanning"
+                    },
+                    "scalaSastEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run Scala SAST scanning"
+                    },
+                    "swiftSastEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run Swift SAST scanning"
+                    },
+                    "rustSastEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run Rust SAST scanning"
+                    },
+                    "elixirSastEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Run Elixir SAST scanning"
+                    },
+                    "allRulesEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Enable all SAST rules"
+                    },
+                    "pythonEnabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of enabled Python SAST rules",
+                      "default": ""
+                    },
+                    "pythonDisabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of disabled Python SAST rules",
+                      "default": ""
+                    },
+                    "javascriptEnabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of enabled JavaScript SAST rules",
+                      "default": ""
+                    },
+                    "javascriptDisabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of disabled JavaScript SAST rules",
+                      "default": ""
+                    },
+                    "goEnabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of enabled Go SAST rules",
+                      "default": ""
+                    },
+                    "goDisabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of disabled Go SAST rules",
+                      "default": ""
+                    },
+                    "javaEnabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of enabled Java SAST rules",
+                      "default": ""
+                    },
+                    "javaDisabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of disabled Java SAST rules",
+                      "default": ""
+                    },
+                    "kotlinEnabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of enabled Kotlin SAST rules",
+                      "default": ""
+                    },
+                    "kotlinDisabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of disabled Kotlin SAST rules",
+                      "default": ""
+                    },
+                    "scalaEnabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of enabled Scala SAST rules",
+                      "default": ""
+                    },
+                    "scalaDisabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of disabled Scala SAST rules",
+                      "default": ""
+                    },
+                    "phpEnabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of enabled PHP SAST rules",
+                      "default": ""
+                    },
+                    "phpDisabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of disabled PHP SAST rules",
+                      "default": ""
+                    },
+                    "rubyEnabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of enabled Ruby SAST rules",
+                      "default": ""
+                    },
+                    "rubyDisabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of disabled Ruby SAST rules",
+                      "default": ""
+                    },
+                    "csharpEnabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of enabled C# SAST rules",
+                      "default": ""
+                    },
+                    "csharpDisabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of disabled C# SAST rules",
+                      "default": ""
+                    },
+                    "dotnetEnabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of enabled .NET SAST rules",
+                      "default": ""
+                    },
+                    "dotnetDisabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of disabled .NET SAST rules",
+                      "default": ""
+                    },
+                    "cEnabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of enabled C SAST rules",
+                      "default": ""
+                    },
+                    "cDisabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of disabled C SAST rules",
+                      "default": ""
+                    },
+                    "cppEnabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of enabled C++ SAST rules",
+                      "default": ""
+                    },
+                    "cppDisabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of disabled C++ SAST rules",
+                      "default": ""
+                    },
+                    "swiftEnabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of enabled Swift SAST rules",
+                      "default": ""
+                    },
+                    "swiftDisabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of disabled Swift SAST rules",
+                      "default": ""
+                    },
+                    "rustEnabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of enabled Rust SAST rules",
+                      "default": ""
+                    },
+                    "rustDisabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of disabled Rust SAST rules",
+                      "default": ""
+                    },
+                    "elixirEnabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of enabled Elixir SAST rules",
+                      "default": ""
+                    },
+                    "elixirDisabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of disabled Elixir SAST rules",
+                      "default": ""
+                    },
+                    "openGrepNotificationMethod": {
+                      "type": "string",
+                      "description": "Notification method for OpenGrep",
+                      "default": ""
+                    },
+                    "socketTier1Enabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Enable Socket Tier 1 reachability analysis"
+                    },
+                    "socketAdditionalParams": {
+                      "type": "string",
+                      "description": "Additional parameters for Socket SCA",
+                      "default": ""
                     },
                     "secretScanningEnabled": {
                       "type": "boolean",
                       "default": false,
-                      "description": "Scan for hardcoded secrets and credentials in your code as part of the Socket Basics scan"
+                      "description": "Enable secret scanning"
+                    },
+                    "trufflehogExcludeDir": {
+                      "type": "string",
+                      "description": "Directories to exclude from Trufflehog scanning",
+                      "default": ""
+                    },
+                    "trufflehogShowUnverified": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Show unverified secrets in Trufflehog results"
+                    },
+                    "trufflehogNotificationMethod": {
+                      "type": "string",
+                      "description": "Notification method for Trufflehog",
+                      "default": ""
+                    },
+                    "containerImagesToScan": {
+                      "type": "string",
+                      "description": "Comma-separated list of container images to scan",
+                      "default": ""
+                    },
+                    "dockerfiles": {
+                      "type": "string",
+                      "description": "Comma-separated list of Dockerfiles to scan",
+                      "default": ""
                     },
                     "trivyImageEnabled": {
                       "type": "boolean",
                       "default": false,
-                      "description": "Run a vulnerability scan on your Docker images as part of the Socket Basics scan"
+                      "description": "Enable Trivy image scanning"
                     },
                     "trivyDockerfileEnabled": {
                       "type": "boolean",
                       "default": false,
-                      "description": "Run a vulnerability scan on your Dockerfiles as part of the Socket Basics scan"
+                      "description": "Enable Trivy Dockerfile scanning"
+                    },
+                    "trivyNotificationMethod": {
+                      "type": "string",
+                      "description": "Notification method for Trivy",
+                      "default": ""
+                    },
+                    "trivyDisabledRules": {
+                      "type": "string",
+                      "description": "Comma-separated list of disabled Trivy rules",
+                      "default": ""
+                    },
+                    "trivyImageScanningDisabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Disable Trivy image scanning"
+                    },
+                    "slackWebhookUrl": {
+                      "type": "string",
+                      "description": "Slack webhook URL for notifications",
+                      "default": ""
+                    },
+                    "webhookUrl": {
+                      "type": "string",
+                      "description": "Generic webhook URL for notifications",
+                      "default": ""
+                    },
+                    "msSentinelWorkspaceId": {
+                      "type": "string",
+                      "description": "Microsoft Sentinel workspace ID",
+                      "default": ""
+                    },
+                    "msSentinelKey": {
+                      "type": "string",
+                      "description": "Microsoft Sentinel key",
+                      "default": ""
+                    },
+                    "sumologicEndpoint": {
+                      "type": "string",
+                      "description": "Sumo Logic endpoint URL",
+                      "default": ""
+                    },
+                    "jiraUrl": {
+                      "type": "string",
+                      "description": "Jira server URL",
+                      "default": ""
+                    },
+                    "jiraProject": {
+                      "type": "string",
+                      "description": "Jira project key",
+                      "default": ""
+                    },
+                    "jiraEmail": {
+                      "type": "string",
+                      "description": "Jira user email",
+                      "default": ""
+                    },
+                    "jiraApiToken": {
+                      "type": "string",
+                      "description": "Jira API token",
+                      "default": ""
+                    },
+                    "githubToken": {
+                      "type": "string",
+                      "description": "GitHub API token",
+                      "default": ""
+                    },
+                    "githubApiUrl": {
+                      "type": "string",
+                      "description": "GitHub API URL",
+                      "default": ""
+                    },
+                    "msteamsWebhookUrl": {
+                      "type": "string",
+                      "description": "Microsoft Teams webhook URL",
+                      "default": ""
+                    },
+                    "s3Enabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Enable S3 upload for scan results"
+                    },
+                    "s3Bucket": {
+                      "type": "string",
+                      "description": "S3 bucket name",
+                      "default": ""
+                    },
+                    "s3AccessKey": {
+                      "type": "string",
+                      "description": "S3 access key",
+                      "default": ""
+                    },
+                    "s3SecretKey": {
+                      "type": "string",
+                      "description": "S3 secret key",
+                      "default": ""
+                    },
+                    "s3Endpoint": {
+                      "type": "string",
+                      "description": "S3 endpoint URL",
+                      "default": ""
+                    },
+                    "s3Region": {
+                      "type": "string",
+                      "description": "S3 region",
+                      "default": ""
+                    },
+                    "externalCveScanningEnabled": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Enable external CVE scanning"
                     },
                     "socketScanningEnabled": {
                       "type": "boolean",
                       "default": false,
-                      "description": "Scan dependencies for security vulnerabilities and issues as part of the Socket Basics scan"
+                      "description": "Enable Socket dependency scanning (legacy)"
                     },
                     "socketScaEnabled": {
                       "type": "boolean",
                       "default": false,
-                      "description": "Enables or disable running a Socket SCA Scan as part of the Socket Basics scan. If you have Socket already enabled via the Github App this is not needed. Socket SCA provides 0 day protection of Open Source Supply Chain packages, CVE Reachability, and operational risk of packages."
+                      "description": "Enable Socket SCA scanning (legacy)"
                     },
                     "additionalParameters": {
                       "type": "string",
-                      "description": "",
-                      "default": "",
-                      "format": "Additional configuration for Socket Basics, includes support for experimental and custom tooling."
+                      "description": "Additional configuration parameters (legacy)",
+                      "default": ""
                     }
                   },
                   "description": ""
@@ -29581,7 +31181,7 @@
             "name": "filters.alertPriority",
             "in": "query",
             "required": false,
-            "description": "Alert priority (\"low\", \"medium\", or \"high\")",
+            "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")",
             "schema": {
               "type": "string"
             }
@@ -29590,7 +31190,7 @@
             "name": "filters.alertPriority.notIn",
             "in": "query",
             "required": false,
-            "description": "Alert priority (\"low\", \"medium\", or \"high\")",
+            "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")",
             "schema": {
               "type": "string"
             }
@@ -30151,7 +31751,7 @@
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Alert priority (\"low\", \"medium\", or \"high\")"
+                              "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")"
                             },
                             "dependencyDirect": {
                               "type": "array",
@@ -30541,7 +32141,7 @@
             "name": "filters.alertPriority",
             "in": "query",
             "required": false,
-            "description": "Alert priority (\"low\", \"medium\", or \"high\")",
+            "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")",
             "schema": {
               "type": "string"
             }
@@ -30550,7 +32150,7 @@
             "name": "filters.alertPriority.notIn",
             "in": "query",
             "required": false,
-            "description": "Alert priority (\"low\", \"medium\", or \"high\")",
+            "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")",
             "schema": {
               "type": "string"
             }
@@ -30842,7 +32442,7 @@
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Alert priority (\"low\", \"medium\", or \"high\")"
+                              "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")"
                             },
                             "dependencyDirect": {
                               "type": "array",
@@ -33051,9 +34651,8 @@
                   "properties": {
                     "status": {
                       "type": "string",
-                      "description": "",
-                      "default": "revoked",
-                      "format": "The status of the token"
+                      "description": "The status of the token",
+                      "default": "revoked"
                     }
                   },
                   "required": [
