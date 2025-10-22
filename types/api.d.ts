@@ -2912,6 +2912,118 @@ export interface components {
         }
       | {
           /** @enum {string} */
+          type?: 'ghaArgToSink'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              message: string
+              /** @default null */
+              sourceLocation: Record<string, never>
+              sinkLocations: Array<Record<string, never>>
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'ghaEnvToSink'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              message: string
+              /** @default null */
+              sourceLocation: Record<string, never>
+              sinkLocations: Array<Record<string, never>>
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'ghaContextToSink'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              message: string
+              /** @default null */
+              sourceLocation: Record<string, never>
+              sinkLocations: Array<Record<string, never>>
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'ghaArgToOutput'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              message: string
+              /** @default null */
+              sourceLocation: Record<string, never>
+              sinkLocations: Array<Record<string, never>>
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'ghaArgToEnv'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              message: string
+              /** @default null */
+              sourceLocation: Record<string, never>
+              sinkLocations: Array<Record<string, never>>
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'ghaContextToOutput'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              message: string
+              /** @default null */
+              sourceLocation: Record<string, never>
+              sinkLocations: Array<Record<string, never>>
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'ghaContextToEnv'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              message: string
+              /** @default null */
+              sourceLocation: Record<string, never>
+              sinkLocations: Array<Record<string, never>>
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
           type?: 'licenseSpdxDisj'
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
@@ -7377,6 +7489,55 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              ghaArgToSink?: {
+                /**
+                 * @description The action to take for ghaArgToSink issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaEnvToSink?: {
+                /**
+                 * @description The action to take for ghaEnvToSink issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaContextToSink?: {
+                /**
+                 * @description The action to take for ghaContextToSink issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaArgToOutput?: {
+                /**
+                 * @description The action to take for ghaArgToOutput issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaArgToEnv?: {
+                /**
+                 * @description The action to take for ghaArgToEnv issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaContextToOutput?: {
+                /**
+                 * @description The action to take for ghaContextToOutput issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaContextToEnv?: {
+                /**
+                 * @description The action to take for ghaContextToEnv issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               licenseSpdxDisj?: {
                 /**
                  * @description The action to take for licenseSpdxDisj issues.
@@ -8203,6 +8364,55 @@ export interface operations {
             generic?: {
               /**
                * @description The action to take for generic issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaArgToSink?: {
+              /**
+               * @description The action to take for ghaArgToSink issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaEnvToSink?: {
+              /**
+               * @description The action to take for ghaEnvToSink issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaContextToSink?: {
+              /**
+               * @description The action to take for ghaContextToSink issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaArgToOutput?: {
+              /**
+               * @description The action to take for ghaArgToOutput issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaArgToEnv?: {
+              /**
+               * @description The action to take for ghaArgToEnv issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaContextToOutput?: {
+              /**
+               * @description The action to take for ghaContextToOutput issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaContextToEnv?: {
+              /**
+               * @description The action to take for ghaContextToEnv issues.
                * @enum {string}
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -9191,6 +9401,55 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              ghaArgToSink?: {
+                /**
+                 * @description The action to take for ghaArgToSink issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaEnvToSink?: {
+                /**
+                 * @description The action to take for ghaEnvToSink issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaContextToSink?: {
+                /**
+                 * @description The action to take for ghaContextToSink issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaArgToOutput?: {
+                /**
+                 * @description The action to take for ghaArgToOutput issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaArgToEnv?: {
+                /**
+                 * @description The action to take for ghaArgToEnv issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaContextToOutput?: {
+                /**
+                 * @description The action to take for ghaContextToOutput issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaContextToEnv?: {
+                /**
+                 * @description The action to take for ghaContextToEnv issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               licenseSpdxDisj?: {
                 /**
                  * @description The action to take for licenseSpdxDisj issues.
@@ -10014,6 +10273,55 @@ export interface operations {
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
             }
+            ghaArgToSink?: {
+              /**
+               * @description The action to take for ghaArgToSink issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaEnvToSink?: {
+              /**
+               * @description The action to take for ghaEnvToSink issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaContextToSink?: {
+              /**
+               * @description The action to take for ghaContextToSink issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaArgToOutput?: {
+              /**
+               * @description The action to take for ghaArgToOutput issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaArgToEnv?: {
+              /**
+               * @description The action to take for ghaArgToEnv issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaContextToOutput?: {
+              /**
+               * @description The action to take for ghaContextToOutput issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaContextToEnv?: {
+              /**
+               * @description The action to take for ghaContextToEnv issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
             licenseSpdxDisj?: {
               /**
                * @description The action to take for licenseSpdxDisj issues.
@@ -10802,6 +11110,55 @@ export interface operations {
               generic?: {
                 /**
                  * @description The action to take for generic issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaArgToSink?: {
+                /**
+                 * @description The action to take for ghaArgToSink issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaEnvToSink?: {
+                /**
+                 * @description The action to take for ghaEnvToSink issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaContextToSink?: {
+                /**
+                 * @description The action to take for ghaContextToSink issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaArgToOutput?: {
+                /**
+                 * @description The action to take for ghaArgToOutput issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaArgToEnv?: {
+                /**
+                 * @description The action to take for ghaArgToEnv issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaContextToOutput?: {
+                /**
+                 * @description The action to take for ghaContextToOutput issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaContextToEnv?: {
+                /**
+                 * @description The action to take for ghaContextToEnv issues.
                  * @enum {string}
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -11644,47 +12001,437 @@ export interface operations {
         content: {
           'application/json': {
             /**
-             * @description Run a SAST Scan on your source code as part of the Socket Basics scan
+             * @description Enable tabular console output
+             * @default false
+             */
+            consoleTabularEnabled?: boolean
+            /**
+             * @description Enable JSON console output
+             * @default false
+             */
+            consoleJsonEnabled?: boolean
+            /**
+             * @description Enable verbose logging
+             * @default false
+             */
+            verbose?: boolean
+            /**
+             * @description Enable all language SAST scanning
+             * @default false
+             */
+            allLanguagesEnabled?: boolean
+            /**
+             * @description Run Python SAST scanning
              * @default false
              */
             pythonSastEnabled?: boolean
             /**
-             * @description Run a SAST Scan on your source code as part of the Socket Basics scan
-             * @default false
-             */
-            golangSastEnabled?: boolean
-            /**
-             * @description Run a SAST Scan on your source code as part of the Socket Basics scan
+             * @description Run JavaScript SAST scanning
              * @default false
              */
             javascriptSastEnabled?: boolean
             /**
-             * @description Scan for hardcoded secrets and credentials in your code as part of the Socket Basics scan
+             * @description Run Go SAST scanning
+             * @default false
+             */
+            goSastEnabled?: boolean
+            /**
+             * @description Run Golang SAST scanning
+             * @default false
+             */
+            golangSastEnabled?: boolean
+            /**
+             * @description Run Java SAST scanning
+             * @default false
+             */
+            javaSastEnabled?: boolean
+            /**
+             * @description Run PHP SAST scanning
+             * @default false
+             */
+            phpSastEnabled?: boolean
+            /**
+             * @description Run Ruby SAST scanning
+             * @default false
+             */
+            rubySastEnabled?: boolean
+            /**
+             * @description Run C# SAST scanning
+             * @default false
+             */
+            csharpSastEnabled?: boolean
+            /**
+             * @description Run .NET SAST scanning
+             * @default false
+             */
+            dotnetSastEnabled?: boolean
+            /**
+             * @description Run C SAST scanning
+             * @default false
+             */
+            cSastEnabled?: boolean
+            /**
+             * @description Run C++ SAST scanning
+             * @default false
+             */
+            cppSastEnabled?: boolean
+            /**
+             * @description Run Kotlin SAST scanning
+             * @default false
+             */
+            kotlinSastEnabled?: boolean
+            /**
+             * @description Run Scala SAST scanning
+             * @default false
+             */
+            scalaSastEnabled?: boolean
+            /**
+             * @description Run Swift SAST scanning
+             * @default false
+             */
+            swiftSastEnabled?: boolean
+            /**
+             * @description Run Rust SAST scanning
+             * @default false
+             */
+            rustSastEnabled?: boolean
+            /**
+             * @description Run Elixir SAST scanning
+             * @default false
+             */
+            elixirSastEnabled?: boolean
+            /**
+             * @description Enable all SAST rules
+             * @default false
+             */
+            allRulesEnabled?: boolean
+            /**
+             * @description Comma-separated list of enabled Python SAST rules
+             * @default
+             */
+            pythonEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled Python SAST rules
+             * @default
+             */
+            pythonDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled JavaScript SAST rules
+             * @default
+             */
+            javascriptEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled JavaScript SAST rules
+             * @default
+             */
+            javascriptDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled Go SAST rules
+             * @default
+             */
+            goEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled Go SAST rules
+             * @default
+             */
+            goDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled Java SAST rules
+             * @default
+             */
+            javaEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled Java SAST rules
+             * @default
+             */
+            javaDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled Kotlin SAST rules
+             * @default
+             */
+            kotlinEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled Kotlin SAST rules
+             * @default
+             */
+            kotlinDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled Scala SAST rules
+             * @default
+             */
+            scalaEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled Scala SAST rules
+             * @default
+             */
+            scalaDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled PHP SAST rules
+             * @default
+             */
+            phpEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled PHP SAST rules
+             * @default
+             */
+            phpDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled Ruby SAST rules
+             * @default
+             */
+            rubyEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled Ruby SAST rules
+             * @default
+             */
+            rubyDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled C# SAST rules
+             * @default
+             */
+            csharpEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled C# SAST rules
+             * @default
+             */
+            csharpDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled .NET SAST rules
+             * @default
+             */
+            dotnetEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled .NET SAST rules
+             * @default
+             */
+            dotnetDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled C SAST rules
+             * @default
+             */
+            cEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled C SAST rules
+             * @default
+             */
+            cDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled C++ SAST rules
+             * @default
+             */
+            cppEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled C++ SAST rules
+             * @default
+             */
+            cppDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled Swift SAST rules
+             * @default
+             */
+            swiftEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled Swift SAST rules
+             * @default
+             */
+            swiftDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled Rust SAST rules
+             * @default
+             */
+            rustEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled Rust SAST rules
+             * @default
+             */
+            rustDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled Elixir SAST rules
+             * @default
+             */
+            elixirEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled Elixir SAST rules
+             * @default
+             */
+            elixirDisabledRules?: string
+            /**
+             * @description Notification method for OpenGrep
+             * @default
+             */
+            openGrepNotificationMethod?: string
+            /**
+             * @description Enable Socket Tier 1 reachability analysis
+             * @default false
+             */
+            socketTier1Enabled?: boolean
+            /**
+             * @description Additional parameters for Socket SCA
+             * @default
+             */
+            socketAdditionalParams?: string
+            /**
+             * @description Enable secret scanning
              * @default false
              */
             secretScanningEnabled?: boolean
             /**
-             * @description Run a vulnerability scan on your Docker images as part of the Socket Basics scan
+             * @description Directories to exclude from Trufflehog scanning
+             * @default
+             */
+            trufflehogExcludeDir?: string
+            /**
+             * @description Show unverified secrets in Trufflehog results
+             * @default false
+             */
+            trufflehogShowUnverified?: boolean
+            /**
+             * @description Notification method for Trufflehog
+             * @default
+             */
+            trufflehogNotificationMethod?: string
+            /**
+             * @description Comma-separated list of container images to scan
+             * @default
+             */
+            containerImagesToScan?: string
+            /**
+             * @description Comma-separated list of Dockerfiles to scan
+             * @default
+             */
+            dockerfiles?: string
+            /**
+             * @description Enable Trivy image scanning
              * @default false
              */
             trivyImageEnabled?: boolean
             /**
-             * @description Run a vulnerability scan on your Dockerfiles as part of the Socket Basics scan
+             * @description Enable Trivy Dockerfile scanning
              * @default false
              */
             trivyDockerfileEnabled?: boolean
             /**
-             * @description Scan dependencies for security vulnerabilities and issues as part of the Socket Basics scan
+             * @description Notification method for Trivy
+             * @default
+             */
+            trivyNotificationMethod?: string
+            /**
+             * @description Comma-separated list of disabled Trivy rules
+             * @default
+             */
+            trivyDisabledRules?: string
+            /**
+             * @description Disable Trivy image scanning
+             * @default false
+             */
+            trivyImageScanningDisabled?: boolean
+            /**
+             * @description Slack webhook URL for notifications
+             * @default
+             */
+            slackWebhookUrl?: string
+            /**
+             * @description Generic webhook URL for notifications
+             * @default
+             */
+            webhookUrl?: string
+            /**
+             * @description Microsoft Sentinel workspace ID
+             * @default
+             */
+            msSentinelWorkspaceId?: string
+            /**
+             * @description Microsoft Sentinel key
+             * @default
+             */
+            msSentinelKey?: string
+            /**
+             * @description Sumo Logic endpoint URL
+             * @default
+             */
+            sumologicEndpoint?: string
+            /**
+             * @description Jira server URL
+             * @default
+             */
+            jiraUrl?: string
+            /**
+             * @description Jira project key
+             * @default
+             */
+            jiraProject?: string
+            /**
+             * @description Jira user email
+             * @default
+             */
+            jiraEmail?: string
+            /**
+             * @description Jira API token
+             * @default
+             */
+            jiraApiToken?: string
+            /**
+             * @description GitHub API token
+             * @default
+             */
+            githubToken?: string
+            /**
+             * @description GitHub API URL
+             * @default
+             */
+            githubApiUrl?: string
+            /**
+             * @description Microsoft Teams webhook URL
+             * @default
+             */
+            msteamsWebhookUrl?: string
+            /**
+             * @description Enable S3 upload for scan results
+             * @default false
+             */
+            s3Enabled?: boolean
+            /**
+             * @description S3 bucket name
+             * @default
+             */
+            s3Bucket?: string
+            /**
+             * @description S3 access key
+             * @default
+             */
+            s3AccessKey?: string
+            /**
+             * @description S3 secret key
+             * @default
+             */
+            s3SecretKey?: string
+            /**
+             * @description S3 endpoint URL
+             * @default
+             */
+            s3Endpoint?: string
+            /**
+             * @description S3 region
+             * @default
+             */
+            s3Region?: string
+            /**
+             * @description Enable external CVE scanning
+             * @default false
+             */
+            externalCveScanningEnabled?: boolean
+            /**
+             * @description Enable Socket dependency scanning (legacy)
              * @default false
              */
             socketScanningEnabled?: boolean
             /**
-             * @description Enables or disable running a Socket SCA Scan as part of the Socket Basics scan. If you have Socket already enabled via the Github App this is not needed. Socket SCA provides 0 day protection of Open Source Supply Chain packages, CVE Reachability, and operational risk of packages.
+             * @description Enable Socket SCA scanning (legacy)
              * @default false
              */
             socketScaEnabled?: boolean
             /**
-             * Format: Additional configuration for Socket Basics, includes support for experimental and custom tooling.
+             * @description Additional configuration parameters (legacy)
              * @default
              */
             additionalParameters?: string
@@ -11775,9 +12522,9 @@ export interface operations {
         'filters.alertReachabilityType'?: string
         /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
         'filters.alertReachabilityType.notIn'?: string
-        /** @description Alert priority ("low", "medium", or "high") */
+        /** @description Alert priority ("low", "medium", "high", or "critical") */
         'filters.alertPriority'?: string
-        /** @description Alert priority ("low", "medium", or "high") */
+        /** @description Alert priority ("low", "medium", "high", or "critical") */
         'filters.alertPriority.notIn'?: string
         /** @description Direct/transitive dependency filter flag */
         'filters.dependencyDirect'?: boolean
@@ -11928,7 +12675,7 @@ export interface operations {
                 alertCweName?: string[]
                 /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
                 alertReachabilityType?: string[]
-                /** @description Alert priority ("low", "medium", or "high") */
+                /** @description Alert priority ("low", "medium", "high", or "critical") */
                 alertPriority?: string[]
                 /** @description Direct/transitive dependency filter flag */
                 dependencyDirect?: boolean[]
@@ -12025,9 +12772,9 @@ export interface operations {
         'filters.alertReachabilityType'?: string
         /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
         'filters.alertReachabilityType.notIn'?: string
-        /** @description Alert priority ("low", "medium", or "high") */
+        /** @description Alert priority ("low", "medium", "high", or "critical") */
         'filters.alertPriority'?: string
-        /** @description Alert priority ("low", "medium", or "high") */
+        /** @description Alert priority ("low", "medium", "high", or "critical") */
         'filters.alertPriority.notIn'?: string
         /** @description Direct/transitive dependency filter flag */
         'filters.dependencyDirect'?: boolean
@@ -12096,7 +12843,7 @@ export interface operations {
                 alertCweName?: string[]
                 /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
                 alertReachabilityType?: string[]
-                /** @description Alert priority ("low", "medium", or "high") */
+                /** @description Alert priority ("low", "medium", "high", or "critical") */
                 alertPriority?: string[]
                 /** @description Direct/transitive dependency filter flag */
                 dependencyDirect?: boolean[]
@@ -13046,7 +13793,7 @@ export interface operations {
         content: {
           'application/json': {
             /**
-             * Format: The status of the token
+             * @description The status of the token
              * @default revoked
              */
             status: string
