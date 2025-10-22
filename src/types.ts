@@ -189,6 +189,26 @@ export type SocketSdkResult<T extends SocketSdkOperations> =
   | SocketSdkSuccessResult<T>
   | SocketSdkErrorResult<T>
 
+/**
+ * Helper type to extract the data from a successful SDK operation result.
+ * @example
+ * type RepoData = SocketSdkData<'getOrgRepoList'>
+ */
+export type SocketSdkData<T extends SocketSdkOperations> = OpReturnType<
+  operations[T]
+>
+
+/**
+ * Helper type to extract array element type from SDK operation results.
+ * Useful for typing items from paginated results.
+ * @example
+ * type RepoItem = SocketSdkArrayElement<'getOrgRepoList', 'results'>
+ */
+export type SocketSdkArrayElement<
+  T extends SocketSdkOperations,
+  K extends keyof SocketSdkData<T>,
+> = SocketSdkData<T>[K] extends (infer U)[] ? U : never
+
 // Generic result type for methods not mapped to specific operations
 export type SocketSdkGenericResult<T> =
   | {
