@@ -48,18 +48,6 @@ export {
 export { SocketSdk } from './socket-sdk-class'
 // Re-export types from modules.
 export type * from './types'
-export type {
-  ALERT_ACTION,
-  ALERT_TYPE,
-  CompactSocketArtifact,
-  CompactSocketArtifactAlert,
-  SocketArtifact,
-  SocketArtifactAlert,
-  SocketSdkErrorResult,
-  SocketSdkOperations,
-  SocketSdkResult,
-  SocketSdkSuccessResult,
-} from './types'
 // Re-export functions from modules.
 export { createUserAgentFromPkgJson } from './user-agent'
 
