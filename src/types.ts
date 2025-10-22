@@ -207,7 +207,7 @@ export type SocketSdkData<T extends SocketSdkOperations> = OpReturnType<
 export type SocketSdkArrayElement<
   T extends SocketSdkOperations,
   K extends keyof SocketSdkData<T>,
-> = SocketSdkData<T>[K] extends (infer U)[] ? U : never
+> = SocketSdkData<T>[K] extends Array<infer U> ? U : never
 
 // Generic result type for methods not mapped to specific operations
 export type SocketSdkGenericResult<T> =
