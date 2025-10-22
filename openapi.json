@@ -12352,6 +12352,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "github_installation_id",
+            "in": "query",
+            "required": false,
+            "description": "The ID of the GitHub installation. This will be used to get the GitHub installation settings. If not provided, the default GitHub installation settings will be used.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "security": [
@@ -13683,6 +13692,15 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "github_installation_id",
+            "in": "query",
+            "required": false,
+            "description": "The ID of the GitHub installation. This will be used to get the GitHub installation settings. If not provided, the default GitHub installation settings will be used.",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -31196,6 +31214,44 @@
             }
           },
           {
+            "name": "filters.alertKEV",
+            "in": "query",
+            "required": false,
+            "description": "Alert KEV (Known Exploited Vulnerability) filter flag",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "filters.alertKEV.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Alert KEV (Known Exploited Vulnerability) filter flag",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "filters.alertEPSS",
+            "in": "query",
+            "required": false,
+            "description": "Alert EPSS (\"low\", \"medium\", \"high\", \"critical\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertEPSS.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Alert EPSS (\"low\", \"medium\", \"high\", \"critical\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "filters.dependencyDirect",
             "in": "query",
             "required": false,
@@ -31753,6 +31809,24 @@
                               },
                               "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")"
                             },
+                            "alertKEV": {
+                              "type": "array",
+                              "items": {
+                                "type": "boolean",
+                                "default": false,
+                                "description": ""
+                              },
+                              "description": "Alert KEV (Known Exploited Vulnerability) filter flag"
+                            },
+                            "alertEPSS": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert EPSS (\"low\", \"medium\", \"high\", \"critical\")"
+                            },
                             "dependencyDirect": {
                               "type": "array",
                               "items": {
@@ -31861,7 +31935,7 @@
             "name": "aggregation.fields",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,alertPriority,dependencyDirect,dependencyDev,dependencyDead)",
+            "description": "Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,alertPriority,alertKEV,alertEPSS,dependencyDirect,dependencyDev,dependencyDead)",
             "schema": {
               "type": "string",
               "default": ""
@@ -32156,6 +32230,44 @@
             }
           },
           {
+            "name": "filters.alertKEV",
+            "in": "query",
+            "required": false,
+            "description": "Alert KEV (Known Exploited Vulnerability) filter flag",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "filters.alertKEV.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Alert KEV (Known Exploited Vulnerability) filter flag",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "filters.alertEPSS",
+            "in": "query",
+            "required": false,
+            "description": "Alert EPSS (\"low\", \"medium\", \"high\", \"critical\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertEPSS.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Alert EPSS (\"low\", \"medium\", \"high\", \"critical\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "filters.dependencyDirect",
             "in": "query",
             "required": false,
@@ -32443,6 +32555,24 @@
                                 "default": ""
                               },
                               "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")"
+                            },
+                            "alertKEV": {
+                              "type": "array",
+                              "items": {
+                                "type": "boolean",
+                                "default": false,
+                                "description": ""
+                              },
+                              "description": "Alert KEV (Known Exploited Vulnerability) filter flag"
+                            },
+                            "alertEPSS": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert EPSS (\"low\", \"medium\", \"high\", \"critical\")"
                             },
                             "dependencyDirect": {
                               "type": "array",
