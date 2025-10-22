@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.0.2](https://github.com/SocketDev/socket-sdk-js/releases/tag/v2.0.2) - 2025-10-22
+
+### Fixed
+- Ensured expected dist/ files are produced and refined package.json exports
+
 ## [2.0.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v2.0.1) - 2025-10-21
 
 ### Changed
