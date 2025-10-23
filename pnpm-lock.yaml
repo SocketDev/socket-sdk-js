@@ -48,7 +48,7 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(vitest@3.2.4(@types/node@24.6.2)(jiti@2.6.1)(yaml@2.8.1))
       del:
-        specifier: ^8.0.1
+        specifier: 8.0.1
         version: 8.0.1
       dev-null-cli:
         specifier: 2.0.0
