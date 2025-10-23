@@ -992,29 +992,60 @@ export class SocketSdk {
 
   /**
    * Delete a full scan from an organization.
+   *
    * Permanently removes scan data and results.
    *
+   * @param orgSlug - Organization identifier
+   * @param scanId - Full scan identifier to delete
+   * @returns Success confirmation
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.deleteFullScan('my-org', 'scan_123')
+   *
+   * if (result.success) {
+   *   console.log('Scan deleted successfully')
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/deleteorgfullscan
+   * @apiEndpoint DELETE /orgs/{org_slug}/full-scans/{full_scan_id}
+   * @quota 1 unit
+   * @scopes full-scans:delete
    * @throws {Error} When server returns 5xx status codes
    */
-  async deleteOrgFullScan(
+  async deleteFullScan(
     orgSlug: string,
-    fullScanId: string,
-  ): Promise<SocketSdkResult<'deleteOrgFullScan'>> {
+    scanId: string,
+  ): Promise<DeleteResult | StrictErrorResult> {
     try {
       const data = await this.#executeWithRetry(
         async () =>
           await getResponseJson(
             await createDeleteRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`,
               this.#reqOptions,
             ),
           ),
       )
-      return this.#handleApiSuccess<'deleteOrgFullScan'>(data)
+      return {
+        cause: undefined,
+        data: data as DeleteResult['data'],
+        error: undefined,
+        status: 200,
+        success: true,
+      }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      return await this.#handleApiError<'deleteOrgFullScan'>(e)
+      const errorResult = await this.#handleApiError<'deleteOrgFullScan'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
     }
     /* c8 ignore stop */
   }
@@ -1435,11 +1466,28 @@ export class SocketSdk {
 
   /**
    * List all organizations accessible to the current user.
-   * Returns organization details and access permissions.
    *
+   * Returns organization details and access permissions with guaranteed required fields.
+   *
+   * @returns List of organizations with metadata
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.listOrganizations()
+   *
+   * if (result.success) {
+   *   result.data.organizations.forEach(org => {
+   *     console.log(org.name, org.slug)  // Guaranteed fields
+   *   })
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/getorganizations
+   * @apiEndpoint GET /organizations
+   * @quota 1 unit
    * @throws {Error} When server returns 5xx status codes
    */
-  async getOrganizations(): Promise<SocketSdkResult<'getOrganizations'>> {
+  async listOrganizations(): Promise<OrganizationsResult | StrictErrorResult> {
     try {
       const data = await this.#getCached(
         'organizations',
@@ -1452,39 +1500,85 @@ export class SocketSdk {
             ),
           ),
       )
-      return this.#handleApiSuccess<'getOrganizations'>(data)
+      return {
+        cause: undefined,
+        data: data as OrganizationsResult['data'],
+        error: undefined,
+        status: 200,
+        success: true,
+      }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      return await this.#handleApiError<'getOrganizations'>(e)
+      const errorResult = await this.#handleApiError<'getOrganizations'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
     }
     /* c8 ignore stop */
   }
 
   /**
-   * Get complete full scan results in memory.
-   * Returns entire scan data as JSON for programmatic processing.
+   * Get complete full scan results buffered in memory.
    *
+   * Returns entire scan data as JSON for programmatic processing.
+   * For large scans, consider using streamFullScan() instead.
+   *
+   * @param orgSlug - Organization identifier
+   * @param scanId - Full scan identifier
+   * @returns Complete full scan data including all artifacts
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.getFullScan('my-org', 'scan_123')
+   *
+   * if (result.success) {
+   *   console.log('Scan status:', result.data.scan_state)
+   *   console.log('Repository:', result.data.repository_slug)
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/getorgfullscan
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
+   * @quota 1 unit
+   * @scopes full-scans:list
    * @throws {Error} When server returns 5xx status codes
    */
-  async getOrgFullScanBuffered(
+  async getFullScan(
     orgSlug: string,
-    fullScanId: string,
-  ): Promise<SocketSdkResult<'getOrgFullScan'>> {
+    scanId: string,
+  ): Promise<FullScanResult | StrictErrorResult> {
     try {
       const data = await this.#executeWithRetry(
         async () =>
           await getResponseJson(
             await createGetRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`,
               this.#reqOptions,
             ),
           ),
       )
-      return this.#handleApiSuccess<'getOrgFullScan'>(data)
+      return {
+        cause: undefined,
+        data: data as FullScanItem,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      return await this.#handleApiError<'getOrgFullScan'>(e)
+      const errorResult = await this.#handleApiError<'getOrgFullScan'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
     }
     /* c8 ignore stop */
   }
