@@ -227,6 +227,55 @@ export type SocketSdkGenericResult<T> =
     }
 
 /**
+ * Result from file validation callback.
+ * Allows consumers to customize error handling and logging.
+ *
+ * @since v3.0.0
+ */
+export interface FileValidationResult {
+  /**
+   * Whether to continue with the operation using valid files.
+   * If false, the SDK operation will fail with the provided error message.
+   */
+  shouldContinue: boolean
+
+  /**
+   * Optional custom error message if shouldContinue is false.
+   * If not provided, SDK will use default error message.
+   */
+  errorMessage?: string | undefined
+
+  /**
+   * Optional cause/reason for the error.
+   */
+  errorCause?: string | undefined
+}
+
+/**
+ * Callback invoked when file validation detects unreadable files.
+ * Gives consumers control over error messages and logging.
+ *
+ * @param validPaths - Files that passed validation (readable)
+ * @param invalidPaths - Files that failed validation (unreadable)
+ * @param context - Context about the operation (method name, orgSlug, etc.)
+ * @returns Decision on whether to continue and optional custom error messages
+ *
+ * @since v3.0.0
+ */
+export type FileValidationCallback = (
+  validPaths: string[],
+  invalidPaths: string[],
+  context: {
+    operation:
+      | 'createDependenciesSnapshot'
+      | 'createOrgFullScan'
+      | 'uploadManifestFiles'
+    orgSlug?: string | undefined
+    [key: string]: unknown
+  },
+) => FileValidationResult | Promise<FileValidationResult>
+
+/**
  * Configuration options for SocketSdk.
  */
 export interface SocketSdkOptions {
@@ -244,6 +293,21 @@ export interface SocketSdkOptions {
    * Only used when cache is enabled.
    */
   cacheTtl?: number | undefined
+  /**
+   * Callback for file validation events.
+   * Called when any file-upload method detects unreadable files:
+   * - createDependenciesSnapshot
+   * - createFullScan (formerly createOrgFullScan)
+   * - uploadManifestFiles
+   *
+   * Default behavior (if not provided):
+   * - Warns about invalid files (console.warn)
+   * - Continues with valid files if any exist
+   * - Throws error if all files are invalid
+   *
+   * @since v3.0.0
+   */
+  onFileValidation?: FileValidationCallback | undefined
   /**
    * Number of retry attempts on failure (default: 0, retries disabled).
    * Retries are opt-in following Node.js fs.rm() pattern.

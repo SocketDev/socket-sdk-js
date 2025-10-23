@@ -10,6 +10,7 @@ import { UNKNOWN_ERROR } from '@socketsecurity/lib/constants/core'
 import { getAbortSignal } from '@socketsecurity/lib/constants/process'
 import { SOCKET_PUBLIC_API_TOKEN } from '@socketsecurity/lib/constants/socket'
 import { debugLog, isDebugNs } from '@socketsecurity/lib/debug'
+import { validateFiles } from '@socketsecurity/lib/fs'
 import { jsonParse } from '@socketsecurity/lib/json'
 import { getOwn, isObjectObject } from '@socketsecurity/lib/objects'
 import { pRetry } from '@socketsecurity/lib/promises'
@@ -31,7 +32,6 @@ import {
 } from './constants'
 import {
   createRequestBodyForFilepaths,
-  createRequestBodyForJson,
   createUploadRequest,
 } from './file-upload'
 import {
@@ -61,10 +61,10 @@ import type {
   BatchPackageStreamOptions,
   CompactSocketArtifact,
   CreateDependenciesSnapshotOptions,
-  CreateScanFromFilepathsOptions,
   CustomResponseType,
   Entitlement,
   EntitlementsResponse,
+  FileValidationCallback,
   GetOptions,
   GotOptions,
   PatchViewResponse,
@@ -90,9 +90,7 @@ import type {
   FullScanItem,
   FullScanListResult,
   FullScanResult,
-  LegacyScanListResult,
   ListFullScansOptions,
-  ListLegacyScansOptions,
   ListRepositoriesOptions,
   OrganizationsResult,
   RepositoriesListResult,
@@ -114,6 +112,7 @@ export class SocketSdk {
   readonly #apiToken: string
   readonly #baseUrl: string
   readonly #cache: TtlCache | undefined
+  readonly #onFileValidation: FileValidationCallback | undefined
   readonly #reqOptions: RequestOptions
   readonly #retries: number
   readonly #retryDelay: number
@@ -143,6 +142,7 @@ export class SocketSdk {
       baseUrl = 'https://api.socket.dev/v0/',
       cache = false,
       cacheTtl = 5 * 60 * 1000,
+      onFileValidation,
       retries = DEFAULT_RETRIES,
       retryDelay = DEFAULT_RETRY_DELAY,
       timeout = DEFAULT_HTTP_TIMEOUT,
@@ -181,6 +181,7 @@ export class SocketSdk {
           ttl: cacheTtl,
         })
       : /* c8 ignore next - cache disabled by default */ undefined
+    this.#onFileValidation = onFileValidation
     this.#retries = retries
     this.#retryDelay = retryDelay
     this.#reqOptions = {
@@ -726,6 +727,49 @@ export class SocketSdk {
     } as CreateDependenciesSnapshotOptions
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
+
+    // Validate file readability before upload.
+    const { invalidPaths, validPaths } = validateFiles(absFilepaths)
+
+    // If callback provided and files were invalid, invoke it.
+    if (this.#onFileValidation && invalidPaths.length > 0) {
+      const result = await this.#onFileValidation(validPaths, invalidPaths, {
+        operation: 'createDependenciesSnapshot',
+      })
+
+      if (!result.shouldContinue) {
+        return {
+          cause: result.errorCause,
+          data: undefined,
+          error: result.errorMessage ?? 'File validation failed',
+          status: 400,
+          success: false,
+        } as SocketSdkErrorResult<'createDependenciesSnapshot'>
+      }
+    }
+
+    // Default behavior if no callback: warn and continue.
+    if (!this.#onFileValidation && invalidPaths.length > 0) {
+      console.warn(
+        `Warning: ${invalidPaths.length} files skipped (unreadable). ` +
+          'This may occur with Yarn Berry PnP or pnpm symlinks.',
+      )
+    }
+
+    // Fail if all files were invalid.
+    if (validPaths.length === 0) {
+      return {
+        cause:
+          'All files failed validation. This may occur with Yarn Berry PnP virtual filesystem. ' +
+          'Try: Run `yarn install` or use `nodeLinker: node-modules` in .yarnrc.yml',
+        data: undefined,
+        error: 'No readable manifest files found',
+        status: 400,
+        success: false,
+      } as SocketSdkErrorResult<'createDependenciesSnapshot'>
+    }
+
+    // Continue with validated files.
     try {
       const data = await this.#executeWithRetry(
         async () =>
@@ -733,7 +777,7 @@ export class SocketSdk {
             await createUploadRequest(
               this.#baseUrl,
               `dependencies/upload?${queryToSearchParams(queryParams)}`,
-              createRequestBodyForFilepaths(absFilepaths, basePath),
+              createRequestBodyForFilepaths(validPaths, basePath),
               this.#reqOptions,
             ),
           ),
@@ -824,6 +868,50 @@ export class SocketSdk {
     } as CreateFullScanOptions
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
+
+    // Validate file readability before upload.
+    const { invalidPaths, validPaths } = validateFiles(absFilepaths)
+
+    // If callback provided and files were invalid, invoke it.
+    if (this.#onFileValidation && invalidPaths.length > 0) {
+      const result = await this.#onFileValidation(validPaths, invalidPaths, {
+        operation: 'createOrgFullScan',
+        orgSlug,
+      })
+
+      if (!result.shouldContinue) {
+        return {
+          cause: result.errorCause,
+          data: undefined,
+          error: result.errorMessage ?? 'File validation failed',
+          status: 400,
+          success: false,
+        } as StrictErrorResult
+      }
+    }
+
+    // Default behavior if no callback: warn and continue.
+    if (!this.#onFileValidation && invalidPaths.length > 0) {
+      console.warn(
+        `Warning: ${invalidPaths.length} files skipped (unreadable). ` +
+          'This may occur with Yarn Berry PnP or pnpm symlinks.',
+      )
+    }
+
+    // Fail if all files were invalid.
+    if (validPaths.length === 0) {
+      return {
+        cause:
+          'All files failed validation. This may occur with Yarn Berry PnP virtual filesystem. ' +
+          'Try: Run `yarn install` or use `nodeLinker: node-modules` in .yarnrc.yml',
+        data: undefined,
+        error: 'No readable manifest files found',
+        status: 400,
+        success: false,
+      } as StrictErrorResult
+    }
+
+    // Continue with validated files.
     try {
       const data = await this.#executeWithRetry(
         async () =>
@@ -831,7 +919,7 @@ export class SocketSdk {
             await createUploadRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(queryParams as QueryParams)}`,
-              createRequestBodyForFilepaths(absFilepaths, basePath),
+              createRequestBodyForFilepaths(validPaths, basePath),
               this.#reqOptions,
             ),
           ),
@@ -982,79 +1070,6 @@ export class SocketSdk {
         status: errorResult.status,
         success: false,
       }
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Create a legacy scan by uploading project manifest files.
-   *
-   * @deprecated This endpoint is deprecated. Use {@link createFullScan} instead.
-   * The `/report/upload` endpoint is superseded by `/orgs/{org_slug}/full-scans`.
-   *
-   * Upload lockfiles to get your project analyzed by Socket. You can upload multiple
-   * lockfiles in the same request, but each filename must be unique. Filenames must be
-   * in the supported list (e.g., package.json, package-lock.json, yarn.lock).
-   *
-   * @param filepaths - Array of absolute or relative file paths to upload
-   * @param options - Upload configuration (pathsRelativeTo, issueRules)
-   * @returns Scan report with issues, packages, and security scores
-   *
-   * @example
-   * ```typescript
-   * const result = await sdk.createScan(
-   *   ['package.json', 'package-lock.json'],
-   *   { pathsRelativeTo: './myproject' }
-   * )
-   *
-   * if (result.success) {
-   *   console.log('Scan ID:', result.data.id)
-   *   console.log('Report URL:', result.data.url)
-   * }
-   * ```
-   *
-   * @see https://docs.socket.dev/reference/createreport
-   * @apiEndpoint PUT /report/upload
-   * @quota 100 units
-   * @scopes report:write
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async createScan(
-    filepaths: string[],
-    options?: CreateScanFromFilepathsOptions | undefined,
-  ): Promise<SocketSdkResult<'createReport'>> {
-    const { issueRules, pathsRelativeTo = '.' } = {
-      __proto__: null,
-      ...options,
-    } as CreateScanFromFilepathsOptions
-    const basePath = resolveBasePath(pathsRelativeTo)
-    const absFilepaths = resolveAbsPaths(filepaths, basePath)
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createUploadRequest(
-              this.#baseUrl,
-              'report/upload',
-              [
-                ...createRequestBodyForFilepaths(absFilepaths, basePath),
-                /* c8 ignore next 3 - Optional issueRules parameter edge case. */
-                ...(issueRules
-                  ? createRequestBodyForJson(issueRules, 'issueRules')
-                  : []),
-              ],
-              {
-                ...this.#reqOptions,
-                method: 'PUT',
-              },
-            ),
-            /* c8 ignore next 3 - Success path return statement requires complex file upload mocking with authentication. */
-          ),
-      )
-      return this.#handleApiSuccess<'createReport'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'createReport'>(e)
     }
     /* c8 ignore stop */
   }
@@ -1270,61 +1285,6 @@ export class SocketSdk {
 
   /**
    * Delete a legacy scan report permanently.
-   *
-   * @deprecated This endpoint is deprecated. Use {@link deleteFullScan} instead.
-   * The `/report/delete` endpoint is superseded by `/orgs/{org_slug}/full-scans/{id}`.
-   *
-   * @param scanId - Scan report identifier
-   * @returns Deletion confirmation
-   *
-   * @example
-   * ```typescript
-   * const result = await sdk.deleteScan('scan-id-123')
-   *
-   * if (result.success) {
-   *   console.log('Scan deleted successfully')
-   * }
-   * ```
-   *
-   * @see https://docs.socket.dev/reference/deletereport
-   * @apiEndpoint DELETE /report/delete/{id}
-   * @quota 10 units
-   * @scopes report:write
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async deleteScan(scanId: string): Promise<DeleteResult | StrictErrorResult> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createDeleteRequest(
-              this.#baseUrl,
-              `report/delete/${encodeURIComponent(scanId)}`,
-              this.#reqOptions,
-            ),
-          ),
-      )
-      return {
-        cause: undefined,
-        data: data as DeleteResult['data'],
-        error: undefined,
-        status: 200,
-        success: true,
-      }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      const errorResult = await this.#handleApiError<'deleteReport'>(e)
-      return {
-        cause: errorResult.cause,
-        data: undefined,
-        error: errorResult.error,
-        status: errorResult.status,
-        success: false,
-      }
-    }
-    /* c8 ignore stop */
-  }
-
   /**
    * Export scan results in CycloneDX SBOM format.
    * Returns Software Bill of Materials compliant with CycloneDX standard.
@@ -2293,116 +2253,7 @@ export class SocketSdk {
 
   /**
    * Get detailed results for a legacy scan report.
-   *
-   * @deprecated This endpoint is deprecated. Use {@link getFullScan} instead.
-   * The `/report/view` endpoint is superseded by `/orgs/{org_slug}/full-scans/{id}`.
-   *
-   * Returns complete scan analysis including issues, packages, and security scores.
-   *
-   * @param id - Scan report identifier
-   * @returns Scan report with issues, scores, and analysis details
-   *
-   * @example
-   * ```typescript
-   * const result = await sdk.getScan('scan-id-123')
-   *
-   * if (result.success) {
-   *   console.log('Scan ID:', result.data.id)
-   *   console.log('Healthy:', result.data.healthy)
-   *   console.log('Report URL:', result.data.url)
-   * }
-   * ```
-   *
-   * @see https://docs.socket.dev/reference/getreport
-   * @apiEndpoint GET /report/view/{id}
-   * @quota 10 units
-   * @scopes report:read
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getScan(id: string): Promise<SocketSdkResult<'getReport'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              `report/view/${encodeURIComponent(id)}`,
-              this.#reqOptions,
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'getReport'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'getReport'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
   /**
-   * List legacy scan reports from Socket.
-   *
-   * @deprecated This endpoint is deprecated. Use {@link listFullScans} instead.
-   * The `/report/list` endpoint is superseded by `/orgs/{org_slug}/full-scans`.
-   *
-   * @param options - Optional filters (from timestamp, repo name)
-   * @returns List of legacy scan reports
-   *
-   * @example
-   * ```typescript
-   * const result = await sdk.listScans({ repo: 'my-repo' })
-   *
-   * if (result.success) {
-   *   result.data.forEach(scan => {
-   *     console.log('Scan ID:', scan.id)
-   *     console.log('Repository:', scan.repo)
-   *     console.log('Branch:', scan.branch)
-   *   })
-   * }
-   * ```
-   *
-   * @see https://docs.socket.dev/reference/getreportlist
-   * @apiEndpoint GET /report/list
-   * @quota 10 units
-   * @scopes report:list
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async listScans(
-    options?: ListLegacyScansOptions | undefined,
-  ): Promise<LegacyScanListResult | StrictErrorResult> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              `report/list?${queryToSearchParams(options as QueryParams)}`,
-              this.#reqOptions,
-            ),
-            'GET',
-          ),
-      )
-      return {
-        cause: undefined,
-        data: data as LegacyScanListResult['data'],
-        error: undefined,
-        status: 200,
-        success: true,
-      }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      const errorResult = await this.#handleApiError<'getReportList'>(e)
-      return {
-        cause: errorResult.cause,
-        data: undefined,
-        error: errorResult.error,
-        status: errorResult.status,
-        success: false,
-      }
-    }
-    /* c8 ignore stop */
-  }
-
   /**
    * Get security score for a specific npm package and version.
    * Returns numerical security rating and scoring breakdown.
@@ -3167,6 +3018,48 @@ export class SocketSdk {
     } as UploadManifestFilesOptions
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
+
+    // Validate file readability before upload.
+    const { invalidPaths, validPaths } = validateFiles(absFilepaths)
+
+    // If callback provided and files were invalid, invoke it.
+    if (this.#onFileValidation && invalidPaths.length > 0) {
+      const result = await this.#onFileValidation(validPaths, invalidPaths, {
+        operation: 'uploadManifestFiles',
+        orgSlug,
+      })
+
+      if (!result.shouldContinue) {
+        return {
+          error: result.errorMessage ?? 'File validation failed',
+          status: 400,
+          success: false,
+          ...(result.errorCause ? { cause: result.errorCause } : {}),
+        } as UploadManifestFilesError
+      }
+    }
+
+    // Default behavior if no callback: warn and continue.
+    if (!this.#onFileValidation && invalidPaths.length > 0) {
+      console.warn(
+        `Warning: ${invalidPaths.length} files skipped (unreadable). ` +
+          'This may occur with Yarn Berry PnP or pnpm symlinks.',
+      )
+    }
+
+    // Fail if all files were invalid.
+    if (validPaths.length === 0) {
+      return {
+        cause:
+          'All files failed validation. This may occur with Yarn Berry PnP virtual filesystem. ' +
+          'Try: Run `yarn install` or use `nodeLinker: node-modules` in .yarnrc.yml',
+        error: 'No readable manifest files found',
+        status: 400,
+        success: false,
+      } as UploadManifestFilesError
+    }
+
+    // Continue with validated files.
     try {
       const data = await this.#executeWithRetry(
         async () =>
@@ -3174,7 +3067,7 @@ export class SocketSdk {
             await createUploadRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/upload-manifest-files`,
-              createRequestBodyForFilepaths(absFilepaths, basePath),
+              createRequestBodyForFilepaths(validPaths, basePath),
               this.#reqOptions,
             ),
           ),
