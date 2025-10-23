@@ -257,4 +257,59 @@ export type RepositoryResult = {
   success: true
 }
 
+/**
+ * Strict type for repository label item.
+ */
+export type RepositoryLabelItem = {
+  // Guaranteed fields (always returned by API)
+  id: string
+  name: string
+
+  // Optional fields
+  repository_ids?: string[]
+  has_security_policy?: boolean
+  has_license_policy?: boolean
+}
+
+/**
+ * Strict type for repository labels list data.
+ */
+export type RepositoryLabelsListData = {
+  results: RepositoryLabelItem[]
+  nextPage: number | null
+}
+
+/**
+ * Strict type for repository labels list result.
+ */
+export type RepositoryLabelsListResult = {
+  cause?: undefined
+  data: RepositoryLabelsListData
+  error?: undefined
+  status: number
+  success: true
+}
+
+/**
+ * Strict type for single repository label result.
+ */
+export type RepositoryLabelResult = {
+  cause?: undefined
+  data: RepositoryLabelItem
+  error?: undefined
+  status: number
+  success: true
+}
+
+/**
+ * Strict type for delete repository label result.
+ */
+export type DeleteRepositoryLabelResult = {
+  cause?: undefined
+  data: { status: string }
+  error?: undefined
+  status: number
+  success: true
+}
+
 /* c8 ignore stop */

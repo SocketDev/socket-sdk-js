@@ -96,6 +96,7 @@ export type {
 // Re-export strict types for v3 API.
 export type {
   CreateFullScanOptions,
+  DeleteRepositoryLabelResult,
   DeleteResult,
   FullScanItem,
   FullScanListData,
@@ -110,6 +111,11 @@ export type {
   RepositoriesListData,
   RepositoriesListResult,
   RepositoryItem,
+  RepositoryLabelItem,
+  RepositoryLabelResult,
+  RepositoryLabelsListData,
+  RepositoryLabelsListResult,
+  RepositoryResult,
   StreamFullScanOptions,
   StrictErrorResult,
   StrictResult,

@@ -299,34 +299,30 @@ describe('SocketSdk - API Methods Coverage', () => {
       expect(result.data).toBeDefined()
     })
 
-    it('covers createOrgRepo', async () => {
-      const result = await client.createOrgRepo('test-org', {
+    it('covers createRepository', async () => {
+      const result = await client.createRepository('test-org', {
         name: 'test-repo',
-        description: 'Test repository',
-        homepage: 'https://example.com',
       })
       expect(result.success).toBe(true)
     })
 
-    it('covers getOrgRepo', async () => {
-      const result = await client.getOrgRepo('test-org', 'test-repo')
+    it('covers getRepository', async () => {
+      const result = await client.getRepository('test-org', 'test-repo')
       expect(result.success).toBe(true)
     })
 
-    it('covers getOrgRepoList', async () => {
-      const result = await client.getOrgRepoList('test-org')
+    it('covers listRepositories', async () => {
+      const result = await client.listRepositories('test-org')
       expect(result.success).toBe(true)
     })
 
-    it('covers updateOrgRepo', async () => {
-      const result = await client.updateOrgRepo('test-org', 'test-repo', {
-        description: 'Updated',
-      })
+    it('covers updateRepository', async () => {
+      const result = await client.updateRepository('test-org', 'test-repo')
       expect(result.success).toBe(true)
     })
 
-    it('covers deleteOrgRepo', async () => {
-      const result = await client.deleteOrgRepo('test-org', 'test-repo')
+    it('covers deleteRepository', async () => {
+      const result = await client.deleteRepository('test-org', 'test-repo')
       expect(result.success).toBe(true)
     })
   })
@@ -337,8 +333,8 @@ describe('SocketSdk - API Methods Coverage', () => {
       expect(result.success).toBe(true)
     })
 
-    it('covers getOrgFullScanMetadata', async () => {
-      const result = await client.getOrgFullScanMetadata('test-org', 'scan-1')
+    it('covers getFullScanMetadata', async () => {
+      const result = await client.getFullScanMetadata('test-org', 'scan-1')
       expect(result.success).toBe(true)
     })
 
@@ -510,46 +506,32 @@ describe('SocketSdk - API Methods Coverage', () => {
   })
 
   describe('Repository Labels Methods', () => {
-    it('covers createOrgRepoLabel', async () => {
-      const result = await client.createOrgRepoLabel('test-org', 'test-repo', {
+    it('covers createRepositoryLabel', async () => {
+      const result = await client.createRepositoryLabel('test-org', {
         name: 'test-label',
-        color: '#ff0000',
       })
       expect(result.success).toBe(true)
     })
 
-    it('covers getOrgRepoLabel', async () => {
-      const result = await client.getOrgRepoLabel(
-        'test-org',
-        'test-repo',
-        'label-1',
-      )
+    it('covers getRepositoryLabel', async () => {
+      const result = await client.getRepositoryLabel('test-org', 'label-1')
       expect(result.success).toBe(true)
     })
 
-    it('covers getOrgRepoLabelList', async () => {
-      const result = await client.getOrgRepoLabelList('test-org', 'test-repo')
+    it('covers listRepositoryLabels', async () => {
+      const result = await client.listRepositoryLabels('test-org')
       expect(result.success).toBe(true)
     })
 
-    it('covers updateOrgRepoLabel', async () => {
-      const result = await client.updateOrgRepoLabel(
-        'test-org',
-        'test-repo',
-        'label-1',
-        {
-          name: 'updated-label',
-        },
-      )
+    it('covers updateRepositoryLabel', async () => {
+      const result = await client.updateRepositoryLabel('test-org', 'label-1', {
+        name: 'updated-label',
+      })
       expect(result.success).toBe(true)
     })
 
-    it('covers deleteOrgRepoLabel', async () => {
-      const result = await client.deleteOrgRepoLabel(
-        'test-org',
-        'test-repo',
-        'label-1',
-      )
+    it('covers deleteRepositoryLabel', async () => {
+      const result = await client.deleteRepositoryLabel('test-org', 'label-1')
       expect(result.success).toBe(true)
     })
   })
@@ -609,10 +591,8 @@ describe('SocketSdk - API Methods Coverage', () => {
   })
 
   describe('Streaming Methods', () => {
-    it('covers streamOrgFullScan', async () => {
-      // This method returns a Promise<SocketSdkResult>
-      // Just verify it executes without throwing
-      const result = await client.streamOrgFullScan('test-org', 'scan-1')
+    it('covers streamFullScan', async () => {
+      const result = await client.streamFullScan('test-org', 'scan-1')
       expect(result.success).toBe(true)
     })
 

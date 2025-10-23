@@ -85,6 +85,7 @@ import type {
 } from './types'
 import type {
   CreateFullScanOptions,
+  DeleteRepositoryLabelResult,
   DeleteResult,
   FullScanItem,
   FullScanListResult,
@@ -94,6 +95,9 @@ import type {
   OrganizationsResult,
   RepositoriesListResult,
   RepositoryItem,
+  RepositoryLabelItem,
+  RepositoryLabelResult,
+  RepositoryLabelsListResult,
   RepositoryResult,
   StrictErrorResult,
 } from './types-strict'
@@ -853,14 +857,36 @@ export class SocketSdk {
 
   /**
    * Create a new repository in an organization.
+   *
    * Registers a repository for monitoring and security scanning.
    *
+   * @param orgSlug - Organization identifier
+   * @param params - Repository configuration (name, description, homepage, etc.)
+   * @returns Created repository details
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.createRepository('my-org', {
+   *   name: 'my-repo',
+   *   description: 'My project repository',
+   *   homepage: 'https://example.com'
+   * })
+   *
+   * if (result.success) {
+   *   console.log('Repository created:', result.data.id)
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/createorgrepo
+   * @apiEndpoint POST /orgs/{org_slug}/repos
+   * @quota 1 unit
+   * @scopes repo:write
    * @throws {Error} When server returns 5xx status codes
    */
-  async createOrgRepo(
+  async createRepository(
     orgSlug: string,
-    queryParams?: QueryParams | undefined,
-  ): Promise<SocketSdkResult<'createOrgRepo'>> {
+    params?: QueryParams | undefined,
+  ): Promise<RepositoryResult | StrictErrorResult> {
     try {
       const data = await this.#executeWithRetry(
         async () =>
@@ -869,30 +895,61 @@ export class SocketSdk {
               'POST',
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/repos`,
-              queryParams,
+              params,
               this.#reqOptions,
             ),
           ),
       )
-      return this.#handleApiSuccess<'createOrgRepo'>(data)
+      return {
+        cause: undefined,
+        data: data as RepositoryItem,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      return await this.#handleApiError<'createOrgRepo'>(e)
+      const errorResult = await this.#handleApiError<'createOrgRepo'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
     }
     /* c8 ignore stop */
   }
 
   /**
    * Create a new repository label for an organization.
-   * Adds label for repository categorization and management.
    *
+   * Labels can be used to group and organize repositories and apply security/license policies.
+   *
+   * @param orgSlug - Organization identifier
+   * @param labelData - Label configuration (must include name property)
+   * @returns Created label with guaranteed id and name fields
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.createRepositoryLabel('my-org', { name: 'production' })
+   *
+   * if (result.success) {
+   *   console.log('Label created:', result.data.id)
+   *   console.log('Label name:', result.data.name)
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/createorgrepolabel
+   * @apiEndpoint POST /orgs/{org_slug}/repos/labels
+   * @quota 1 unit
+   * @scopes repo-label:create
    * @throws {Error} When server returns 5xx status codes
    */
-  async createOrgRepoLabel(
+  async createRepositoryLabel(
     orgSlug: string,
-    repoSlug: string,
     labelData: QueryParams,
-  ): Promise<SocketSdkResult<'createOrgRepoLabel'>> {
+  ): Promise<RepositoryLabelResult | StrictErrorResult> {
     try {
       const data = await this.#executeWithRetry(
         async () =>
@@ -900,16 +957,29 @@ export class SocketSdk {
             await createRequestWithJson(
               'POST',
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}/labels`,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels`,
               labelData,
               this.#reqOptions,
             ),
           ),
       )
-      return this.#handleApiSuccess<'createOrgRepoLabel'>(data)
+      return {
+        cause: undefined,
+        data: data as RepositoryLabelItem,
+        error: undefined,
+        status: 201,
+        success: true,
+      }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      return await this.#handleApiError<'createOrgRepoLabel'>(e)
+      const errorResult = await this.#handleApiError<'createOrgRepoLabel'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
     }
     /* c8 ignore stop */
   }
@@ -1051,14 +1121,32 @@ export class SocketSdk {
 
   /**
    * Delete a repository from an organization.
+   *
    * Removes repository monitoring and associated scan data.
    *
+   * @param orgSlug - Organization identifier
+   * @param repoSlug - Repository slug/name to delete
+   * @returns Success confirmation
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.deleteRepository('my-org', 'old-repo')
+   *
+   * if (result.success) {
+   *   console.log('Repository deleted')
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/deleteorgrepo
+   * @apiEndpoint DELETE /orgs/{org_slug}/repos/{repo_slug}
+   * @quota 1 unit
+   * @scopes repo:write
    * @throws {Error} When server returns 5xx status codes
    */
-  async deleteOrgRepo(
+  async deleteRepository(
     orgSlug: string,
     repoSlug: string,
-  ): Promise<SocketSdkResult<'deleteOrgRepo'>> {
+  ): Promise<DeleteResult | StrictErrorResult> {
     try {
       const data = await this.#executeWithRetry(
         async () =>
@@ -1070,40 +1158,83 @@ export class SocketSdk {
             ),
           ),
       )
-      return this.#handleApiSuccess<'deleteOrgRepo'>(data)
+      return {
+        cause: undefined,
+        data: data as DeleteResult['data'],
+        error: undefined,
+        status: 200,
+        success: true,
+      }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      return await this.#handleApiError<'deleteOrgRepo'>(e)
+      const errorResult = await this.#handleApiError<'deleteOrgRepo'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
     }
     /* c8 ignore stop */
   }
 
   /**
    * Delete a repository label from an organization.
-   * Removes label and associated configuration.
    *
+   * Removes label and all its associations (repositories, security policy, license policy, etc.).
+   *
+   * @param orgSlug - Organization identifier
+   * @param labelId - Label identifier
+   * @returns Deletion confirmation
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.deleteRepositoryLabel('my-org', 'label-id-123')
+   *
+   * if (result.success) {
+   *   console.log('Label deleted:', result.data.status)
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/deleteorgrepolabel
+   * @apiEndpoint DELETE /orgs/{org_slug}/repos/labels/{label_id}
+   * @quota 1 unit
+   * @scopes repo-label:delete
    * @throws {Error} When server returns 5xx status codes
    */
-  async deleteOrgRepoLabel(
+  async deleteRepositoryLabel(
     orgSlug: string,
-    repoSlug: string,
-    labelSlug: string,
-  ): Promise<SocketSdkResult<'deleteOrgRepoLabel'>> {
+    labelId: string,
+  ): Promise<DeleteRepositoryLabelResult | StrictErrorResult> {
     try {
       const data = await this.#executeWithRetry(
         async () =>
           await getResponseJson(
             await createDeleteRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}/labels/${encodeURIComponent(labelSlug)}`,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}`,
               this.#reqOptions,
             ),
           ),
       )
-      return this.#handleApiSuccess<'deleteOrgRepoLabel'>(data)
+      return {
+        cause: undefined,
+        data: data as DeleteRepositoryLabelResult['data'],
+        error: undefined,
+        status: 200,
+        success: true,
+      }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      return await this.#handleApiError<'deleteOrgRepoLabel'>(e)
+      const errorResult = await this.#handleApiError<'deleteOrgRepoLabel'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
     }
     /* c8 ignore stop */
   }
@@ -1699,7 +1830,8 @@ export class SocketSdk {
       }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      const errorResult = await this.#handleApiError<'getOrgFullScanMetadata'>(e)
+      const errorResult =
+        await this.#handleApiError<'getOrgFullScanMetadata'>(e)
       return {
         cause: errorResult.cause,
         data: undefined,
@@ -1805,59 +1937,125 @@ export class SocketSdk {
 
   /**
    * Get details for a specific repository label.
-   * Returns label configuration and metadata.
    *
+   * Returns label configuration, associated repositories, and policy settings.
+   *
+   * @param orgSlug - Organization identifier
+   * @param labelId - Label identifier
+   * @returns Label details with guaranteed id and name fields
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.getRepositoryLabel('my-org', 'label-id-123')
+   *
+   * if (result.success) {
+   *   console.log('Label name:', result.data.name)
+   *   console.log('Associated repos:', result.data.repository_ids)
+   *   console.log('Has security policy:', result.data.has_security_policy)
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/getorgrepolabel
+   * @apiEndpoint GET /orgs/{org_slug}/repos/labels/{label_id}
+   * @quota 1 unit
+   * @scopes repo-label:list
    * @throws {Error} When server returns 5xx status codes
    */
-  async getOrgRepoLabel(
+  async getRepositoryLabel(
     orgSlug: string,
-    repoSlug: string,
-    labelSlug: string,
-  ): Promise<SocketSdkResult<'getOrgRepoLabel'>> {
+    labelId: string,
+  ): Promise<RepositoryLabelResult | StrictErrorResult> {
     try {
       const data = await this.#executeWithRetry(
         async () =>
           await getResponseJson(
             await createGetRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}/labels/${encodeURIComponent(labelSlug)}`,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}`,
               this.#reqOptions,
             ),
           ),
       )
-      return this.#handleApiSuccess<'getOrgRepoLabel'>(data)
+      return {
+        cause: undefined,
+        data: data as RepositoryLabelItem,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      return await this.#handleApiError<'getOrgRepoLabel'>(e)
+      const errorResult = await this.#handleApiError<'getOrgRepoLabel'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
     }
     /* c8 ignore stop */
   }
 
   /**
-   * Get list of repository labels for an organization.
-   * Returns all labels configured for repository management.
+   * List all repository labels for an organization.
    *
+   * Returns paginated list of labels configured for repository organization and policy management.
+   *
+   * @param orgSlug - Organization identifier
+   * @param options - Pagination options
+   * @returns List of labels with guaranteed id and name fields
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.listRepositoryLabels('my-org', { per_page: 50, page: 1 })
+   *
+   * if (result.success) {
+   *   result.data.results.forEach(label => {
+   *     console.log('Label:', label.name)
+   *     console.log('Associated repos:', label.repository_ids?.length || 0)
+   *   })
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/getorgrepolabellist
+   * @apiEndpoint GET /orgs/{org_slug}/repos/labels
+   * @quota 1 unit
+   * @scopes repo-label:list
    * @throws {Error} When server returns 5xx status codes
    */
-  async getOrgRepoLabelList(
+  async listRepositoryLabels(
     orgSlug: string,
-    repoSlug: string,
-  ): Promise<SocketSdkResult<'getOrgRepoLabelList'>> {
+    options?: QueryParams | undefined,
+  ): Promise<RepositoryLabelsListResult | StrictErrorResult> {
     try {
       const data = await this.#executeWithRetry(
         async () =>
           await getResponseJson(
             await createGetRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}/labels`,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels?${queryToSearchParams(options as QueryParams)}`,
               this.#reqOptions,
             ),
           ),
       )
-      return this.#handleApiSuccess<'getOrgRepoLabelList'>(data)
+      return {
+        cause: undefined,
+        data: data as RepositoryLabelsListResult['data'],
+        error: undefined,
+        status: 200,
+        success: true,
+      }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      return await this.#handleApiError<'getOrgRepoLabelList'>(e)
+      const errorResult = await this.#handleApiError<'getOrgRepoLabelList'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
     }
     /* c8 ignore stop */
   }
@@ -2674,16 +2872,38 @@ export class SocketSdk {
   }
 
   /**
-   * Update configuration for an organization repository.
+   * Update configuration for a repository.
+   *
    * Modifies monitoring settings, branch configuration, and scan preferences.
    *
+   * @param orgSlug - Organization identifier
+   * @param repoSlug - Repository slug/name
+   * @param params - Configuration updates (description, homepage, default_branch, etc.)
+   * @returns Updated repository details
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.updateRepository('my-org', 'my-repo', {
+   *   description: 'Updated description',
+   *   default_branch: 'develop'
+   * })
+   *
+   * if (result.success) {
+   *   console.log('Repository updated:', result.data.name)
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/updateorgrepo
+   * @apiEndpoint POST /orgs/{org_slug}/repos/{repo_slug}
+   * @quota 1 unit
+   * @scopes repo:write
    * @throws {Error} When server returns 5xx status codes
    */
-  async updateOrgRepo(
+  async updateRepository(
     orgSlug: string,
     repoSlug: string,
-    queryParams?: QueryParams | undefined,
-  ): Promise<SocketSdkResult<'updateOrgRepo'>> {
+    params?: QueryParams | undefined,
+  ): Promise<RepositoryResult | StrictErrorResult> {
     try {
       const data = await this.#executeWithRetry(
         async () =>
@@ -2692,31 +2912,63 @@ export class SocketSdk {
               'POST',
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`,
-              queryParams,
+              params,
               this.#reqOptions,
             ),
           ),
       )
-      return this.#handleApiSuccess<'updateOrgRepo'>(data)
+      return {
+        cause: undefined,
+        data: data as RepositoryItem,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      return await this.#handleApiError<'updateOrgRepo'>(e)
+      const errorResult = await this.#handleApiError<'updateOrgRepo'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
     }
     /* c8 ignore stop */
   }
 
   /**
    * Update a repository label for an organization.
-   * Modifies label properties and configuration.
    *
+   * Modifies label properties like name. Label names must be non-empty and less than 1000 characters.
+   *
+   * @param orgSlug - Organization identifier
+   * @param labelId - Label identifier
+   * @param labelData - Label updates (typically name property)
+   * @returns Updated label with guaranteed id and name fields
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.updateRepositoryLabel('my-org', 'label-id-123', { name: 'staging' })
+   *
+   * if (result.success) {
+   *   console.log('Label updated:', result.data.name)
+   *   console.log('Label ID:', result.data.id)
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/updateorgrepolabel
+   * @apiEndpoint PUT /orgs/{org_slug}/repos/labels/{label_id}
+   * @quota 1 unit
+   * @scopes repo-label:update
    * @throws {Error} When server returns 5xx status codes
    */
-  async updateOrgRepoLabel(
+  async updateRepositoryLabel(
     orgSlug: string,
-    repoSlug: string,
-    labelSlug: string,
+    labelId: string,
     labelData: QueryParams,
-  ): Promise<SocketSdkResult<'updateOrgRepoLabel'>> {
+  ): Promise<RepositoryLabelResult | StrictErrorResult> {
     try {
       const data = await this.#executeWithRetry(
         async () =>
@@ -2724,16 +2976,29 @@ export class SocketSdk {
             await createRequestWithJson(
               'PUT',
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}/labels/${encodeURIComponent(labelSlug)}`,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}`,
               labelData,
               this.#reqOptions,
             ),
           ),
       )
-      return this.#handleApiSuccess<'updateOrgRepoLabel'>(data)
+      return {
+        cause: undefined,
+        data: data as RepositoryLabelItem,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      return await this.#handleApiError<'updateOrgRepoLabel'>(e)
+      const errorResult = await this.#handleApiError<'updateOrgRepoLabel'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
     }
     /* c8 ignore stop */
   }
