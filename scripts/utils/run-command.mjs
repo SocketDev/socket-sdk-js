@@ -3,7 +3,6 @@
 import { logger } from '@socketsecurity/lib/logger'
 import { spawn, spawnSync } from '@socketsecurity/lib/spawn'
 
-
 /**
  * Run a command and return a promise that resolves with the exit code.
  * @param {string} command - The command to run
