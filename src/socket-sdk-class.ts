@@ -1647,29 +1647,62 @@ export class SocketSdk {
 
   /**
    * Get metadata for a specific full scan.
-   * Returns scan configuration, status, and summary information.
    *
+   * Returns scan configuration, status, and summary information without full artifact data.
+   * Useful for checking scan status without downloading complete results.
+   *
+   * @param orgSlug - Organization identifier
+   * @param scanId - Full scan identifier
+   * @returns Scan metadata including status and configuration
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.getFullScanMetadata('my-org', 'scan_123')
+   *
+   * if (result.success) {
+   *   console.log('Scan state:', result.data.scan_state)
+   *   console.log('Branch:', result.data.branch)
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/getorgfullscanmetadata
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}/metadata
+   * @quota 1 unit
+   * @scopes full-scans:list
    * @throws {Error} When server returns 5xx status codes
    */
-  async getOrgFullScanMetadata(
+  async getFullScanMetadata(
     orgSlug: string,
-    fullScanId: string,
-  ): Promise<SocketSdkResult<'getOrgFullScanMetadata'>> {
+    scanId: string,
+  ): Promise<FullScanResult | StrictErrorResult> {
     try {
       const data = await this.#executeWithRetry(
         async () =>
           await getResponseJson(
             await createGetRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/metadata`,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}/metadata`,
               this.#reqOptions,
             ),
           ),
       )
-      return this.#handleApiSuccess<'getOrgFullScanMetadata'>(data)
+      return {
+        cause: undefined,
+        data: data as FullScanItem,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      return await this.#handleApiError<'getOrgFullScanMetadata'>(e)
+      const errorResult = await this.#handleApiError<'getOrgFullScanMetadata'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
     }
     /* c8 ignore stop */
   }
@@ -2326,13 +2359,41 @@ export class SocketSdk {
   }
 
   /**
-   * Stream a full scan's results to file or stdout.* Provides efficient streaming for large scan datasets.
+   * Stream a full scan's results to file or stdout.
    *
+   * Provides efficient streaming for large scan datasets without loading
+   * entire response into memory. Useful for processing large SBOMs.
+   *
+   * @param orgSlug - Organization identifier
+   * @param scanId - Full scan identifier
+   * @param options - Streaming options (output file path, stdout, or buffered)
+   * @returns Scan result with streaming response
+   *
+   * @example
+   * ```typescript
+   * // Stream to file
+   * await sdk.streamFullScan('my-org', 'scan_123', {
+   *   output: './scan-results.json'
+   * })
+   *
+   * // Stream to stdout
+   * await sdk.streamFullScan('my-org', 'scan_123', {
+   *   output: true
+   * })
+   *
+   * // Get buffered response
+   * const result = await sdk.streamFullScan('my-org', 'scan_123')
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/getorgfullscan
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
+   * @quota 1 unit
+   * @scopes full-scans:list
    * @throws {Error} When server returns 5xx status codes
    */
-  async streamOrgFullScan(
+  async streamFullScan(
     orgSlug: string,
-    fullScanId: string,
+    scanId: string,
     options?: StreamOrgFullScanOptions | undefined,
   ): Promise<SocketSdkResult<'getOrgFullScan'>> {
     const { output } = {
@@ -2342,7 +2403,7 @@ export class SocketSdk {
     try {
       const req = getHttpModule(this.#baseUrl)
         .request(
-          `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`,
+          `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`,
           {
             method: 'GET',
             ...this.#reqOptions,
