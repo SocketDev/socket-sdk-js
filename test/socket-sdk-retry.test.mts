@@ -662,7 +662,7 @@ describe('SocketSdk - Retry Logic', () => {
         retryDelay: 10,
       })
 
-      const result = await client.deleteReport('test-id')
+      const result = await client.deleteScan('test-id')
 
       expect(result.success).toBe(true)
       expect(attemptCount).toBe(2)

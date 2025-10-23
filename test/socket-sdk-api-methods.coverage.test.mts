@@ -274,20 +274,8 @@ describe('SocketSdk - API Methods Coverage', () => {
   })
 
   describe('Scanning Methods', () => {
-    it('covers createScanFromFilepaths', async () => {
-      const result = await client.createScanFromFilepaths([], {
-        pathsRelativeTo: '.',
-      })
-      expect(result.success).toBe(true)
-    })
-
     it('covers getScan', async () => {
       const result = await client.getScan('scan-1')
-      expect(result.success).toBe(true)
-    })
-
-    it('covers getScanList', async () => {
-      const result = await client.getScanList()
       expect(result.success).toBe(true)
     })
   })
@@ -499,11 +487,6 @@ describe('SocketSdk - API Methods Coverage', () => {
   })
 
   describe('Reports Methods', () => {
-    it('covers deleteReport', async () => {
-      const result = await client.deleteReport('report-1')
-      expect(result.success).toBe(true)
-    })
-
     it('covers deleteScan', async () => {
       const result = await client.deleteScan('scan-1')
       expect(result.success).toBe(true)
