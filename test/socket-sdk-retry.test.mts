@@ -642,6 +642,5 @@ describe('SocketSdk - Retry Logic', () => {
       expect(result.success).toBe(true)
       expect(attemptCount).toBe(2)
     })
-
   })
 })

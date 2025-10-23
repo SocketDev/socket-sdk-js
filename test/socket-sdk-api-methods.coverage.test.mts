@@ -273,7 +273,6 @@ describe('SocketSdk - API Methods Coverage', () => {
     })
   })
 
-
   describe('Organization Methods', () => {
     it('covers listOrganizations', async () => {
       const result = await client.listOrganizations()
@@ -479,7 +478,6 @@ describe('SocketSdk - API Methods Coverage', () => {
       expect(result.success).toBe(true)
     })
   })
-
 
   describe('Repository Labels Methods', () => {
     it('covers createRepositoryLabel', async () => {
