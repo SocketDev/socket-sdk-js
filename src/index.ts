@@ -93,6 +93,27 @@ export type {
   UploadManifestFilesReturnType,
   Vulnerability,
 } from './types'
+// Re-export strict types for v3 API.
+export type {
+  CreateFullScanOptions,
+  DeleteResult,
+  FullScanItem,
+  FullScanListData,
+  FullScanListResult,
+  FullScanResult,
+  LegacyScanItem,
+  LegacyScanListResult,
+  ListFullScansOptions,
+  ListRepositoriesOptions,
+  OrganizationItem,
+  OrganizationsResult,
+  RepositoriesListData,
+  RepositoriesListResult,
+  RepositoryItem,
+  StreamFullScanOptions,
+  StrictErrorResult,
+  StrictResult,
+} from './types-strict'
 // Re-export functions from modules.
 export { createUserAgentFromPkgJson } from './user-agent'
 

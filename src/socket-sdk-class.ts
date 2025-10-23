@@ -84,6 +84,20 @@ import type {
   UploadManifestFilesOptions,
   UploadManifestFilesReturnType,
 } from './types'
+import type {
+  CreateFullScanOptions,
+  DeleteResult,
+  FullScanItem,
+  FullScanListResult,
+  FullScanResult,
+  LegacyScanListResult,
+  ListFullScansOptions,
+  ListRepositoriesOptions,
+  OrganizationsResult,
+  RepositoriesListResult,
+  StrictErrorResult,
+  StreamFullScanOptions as StrictStreamFullScanOptions,
+} from './types-strict'
 import type { TtlCache } from '@socketsecurity/lib/cache-with-ttl'
 import type { IncomingMessage } from 'node:http'
 
@@ -759,20 +773,50 @@ export class SocketSdk {
   }
 
   /**
-   * Create a comprehensive security scan for an organization.
-   * Uploads project files and initiates full security analysis.
+   * Create a full security scan for an organization.
    *
+   * Uploads project manifest files and initiates full security analysis.
+   * Returns scan metadata with guaranteed required fields.
+   *
+   * @param orgSlug - Organization identifier
+   * @param filepaths - Array of file paths to upload (package.json, package-lock.json, etc.)
+   * @param options - Scan configuration including repository, branch, and commit details
+   * @returns Full scan metadata including ID and URLs
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.createFullScan('my-org',
+   *   ['package.json', 'package-lock.json'],
+   *   {
+   *     repo: 'my-repo',
+   *     branch: 'main',
+   *     commit_message: 'Update dependencies',
+   *     commit_hash: 'abc123',
+   *     pathsRelativeTo: './my-project'
+   *   }
+   * )
+   *
+   * if (result.success) {
+   *   console.log('Scan ID:', result.data.id)
+   *   console.log('Report URL:', result.data.html_report_url)
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/createorgfullscan
+   * @apiEndpoint POST /orgs/{org_slug}/full-scans
+   * @quota 1 unit
+   * @scopes full-scans:create
    * @throws {Error} When server returns 5xx status codes
    */
-  async createOrgFullScan(
+  async createFullScan(
     orgSlug: string,
     filepaths: string[],
-    options?: CreateOrgFullScanOptions | undefined,
-  ): Promise<SocketSdkResult<'CreateOrgFullScan'>> {
-    const { pathsRelativeTo = '.', queryParams } = {
+    options: CreateFullScanOptions,
+  ): Promise<FullScanResult | StrictErrorResult> {
+    const { pathsRelativeTo = '.', ...queryParams } = {
       __proto__: null,
       ...options,
-    } as CreateOrgFullScanOptions
+    } as CreateFullScanOptions
     const basePath = resolveBasePath(pathsRelativeTo)
     const absFilepaths = resolveAbsPaths(filepaths, basePath)
     try {
@@ -781,16 +825,29 @@ export class SocketSdk {
           await getResponseJson(
             await createUploadRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(queryParams)}`,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(queryParams as QueryParams)}`,
               createRequestBodyForFilepaths(absFilepaths, basePath),
               this.#reqOptions,
             ),
           ),
       )
-      return this.#handleApiSuccess<'CreateOrgFullScan'>(data)
+      return {
+        cause: undefined,
+        data: data as FullScanItem,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      return await this.#handleApiError<'CreateOrgFullScan'>(e)
+      const errorResult = await this.#handleApiError<'CreateOrgFullScan'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
     }
     /* c8 ignore stop */
   }
@@ -1434,29 +1491,67 @@ export class SocketSdk {
 
   /**
    * List all full scans for an organization.
-   * Returns paginated list of scan metadata and status.
    *
+   * Returns paginated list of full scan metadata with guaranteed required fields
+   * for improved TypeScript autocomplete.
+   *
+   * @param orgSlug - Organization identifier
+   * @param options - Filtering and pagination options
+   * @returns List of full scans with metadata
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.listFullScans('my-org', {
+   *   branch: 'main',
+   *   per_page: 50,
+   *   use_cursor: true
+   * })
+   *
+   * if (result.success) {
+   *   result.data.results.forEach(scan => {
+   *     console.log(scan.id, scan.created_at)  // Guaranteed fields
+   *   })
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/getorgfullscanlist
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans
+   * @quota 1 unit
+   * @scopes full-scans:list
    * @throws {Error} When server returns 5xx status codes
    */
-  async getOrgFullScanList(
+  async listFullScans(
     orgSlug: string,
-    queryParams?: QueryParams | undefined,
-  ): Promise<SocketSdkResult<'getOrgFullScanList'>> {
+    options?: ListFullScansOptions | undefined,
+  ): Promise<FullScanListResult | StrictErrorResult> {
     try {
       const data = await this.#executeWithRetry(
         async () =>
           await getResponseJson(
             await createGetRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(queryParams)}`,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(options as QueryParams)}`,
               this.#reqOptions,
             ),
           ),
       )
-      return this.#handleApiSuccess<'getOrgFullScanList'>(data)
+      return {
+        cause: undefined,
+        data: data as FullScanListResult['data'],
+        error: undefined,
+        status: 200,
+        success: true,
+      }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      return await this.#handleApiError<'getOrgFullScanList'>(e)
+      const errorResult = await this.#handleApiError<'getOrgFullScanList'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
     }
     /* c8 ignore stop */
   }
