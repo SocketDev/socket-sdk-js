@@ -317,7 +317,7 @@ describe('SocketSdk - API Methods Coverage', () => {
     })
 
     it('covers updateRepository', async () => {
-      const result = await client.updateRepository('test-org', 'test-repo')
+      const result = await client.updateRepository('test-org', 'test-repo', {})
       expect(result.success).toBe(true)
     })
 
@@ -501,6 +501,21 @@ describe('SocketSdk - API Methods Coverage', () => {
   describe('Reports Methods', () => {
     it('covers deleteReport', async () => {
       const result = await client.deleteReport('report-1')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers deleteScan', async () => {
+      const result = await client.deleteScan('scan-1')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers createScan', async () => {
+      const result = await client.createScan(['package.json'])
+      expect(result.success).toBe(true)
+    })
+
+    it('covers listScans', async () => {
+      const result = await client.listScans()
       expect(result.success).toBe(true)
     })
   })
