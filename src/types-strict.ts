@@ -70,41 +70,6 @@ export type FullScanResult = {
 }
 
 /**
- * Strict type for legacy scan list item.
- * Used by deprecated /report/list endpoint.
- */
-export type LegacyScanItem = {
-  id: string
-  url: string
-  repo: string
-  branch: string
-  commit: string
-  owner: string
-  created_at: string
-  pull_requests: Record<string, never>
-}
-
-/**
- * Strict type for legacy scan list result.
- */
-export type LegacyScanListResult = {
-  cause?: undefined
-  data: LegacyScanItem[]
-  error?: undefined
-  status: number
-  success: true
-}
-
-/**
- * Options for listing legacy scans.
- * Used by deprecated /report/list endpoint.
- */
-export type ListLegacyScansOptions = {
-  from?: string
-  repo?: string
-}
-
-/**
  * Options for listing full scans.
  */
 export type ListFullScansOptions = {

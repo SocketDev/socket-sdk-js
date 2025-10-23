@@ -4,11 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [3.0.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.0) - 2025-10-22
+## [3.0.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.0) - 2025-10-23
 
 ### ⚠️ BREAKING CHANGES
 
-This is a major release focused on improving TypeScript developer experience with better type safety, clearer method names, and comprehensive documentation.
+#### Removed Deprecated Methods
+
+The following methods mapped to deprecated `/report/*` backend endpoints and have been removed:
+
+- **`createScan()`** - Use `createFullScan()` instead
+- **`deleteScan()`** - Use `deleteFullScan()` instead
+- **`getScan()`** - Use `getFullScan()` instead
+- **`listScans()`** - Use `listFullScans()` instead
 
 #### Method Renames (Following REST Conventions)
 
@@ -30,103 +37,19 @@ This is a major release focused on improving TypeScript developer experience wit
 - `updateOrgRepo()` → `updateRepository()`
 - `deleteOrgRepo()` → `deleteRepository()`
 
-**Legacy Scans (Deprecated API Endpoints):**
-- `getScanList()` → `listScans()`
-- `deleteReport()` → `deleteScan()`
-- `createScanFromFilepathsOptions()` → `createScan()`
-
 #### Type System Improvements
 
-**New Strict Types** with guaranteed required fields for better IntelliSense:
-- `FullScanListResult` - replaces `SocketSdkResult<'getOrgFullScanList'>`
-- `FullScanResult` - replaces `SocketSdkResult<'CreateOrgFullScan'>`
-- `FullScanItem` - strict type for full scan metadata
-- `OrganizationsResult` - replaces `SocketSdkResult<'getOrganizations'>`
-- `OrganizationItem` - strict type for organization data
-- `RepositoriesListResult` - replaces `SocketSdkResult<'getOrgRepoList'>`
-- `RepositoryItem` - strict type for repository data
-- `DeleteResult` - standard delete operation result
-- `StrictErrorResult` - strict error type for all operations
-- `LegacyScanListResult` - for legacy scan methods
-- `LegacyScanItem` - for legacy scan data
-
-**What Changed:**
-- Required fields are now typed as `field: type` instead of `field?: type`
-- Only truly optional/nullable fields use `?` or `| null`
-- Dramatically improved VSCode IntelliSense autocomplete
-- Type-safe access to guaranteed API response fields
-
-#### Options Type Changes
-
-Options are now flattened (no more nested `queryParams`):
-
-**Before (v2.x):**
-```typescript
-await sdk.createOrgFullScan('my-org', files, {
-  pathsRelativeTo: './src',
-  queryParams: {
-    repo: 'my-repo',
-    branch: 'main'
-  }
-})
-```
-
-**After (v3.0):**
-```typescript
-await sdk.createFullScan('my-org', files, {
-  pathsRelativeTo: './src',
-  repo: 'my-repo',
-  branch: 'main'
-})
-```
+Strict types now mark guaranteed API fields as required instead of optional, improving IntelliSense autocomplete.
 
 ### Added
 
-- **Comprehensive Documentation:**
-  - Added `docs/MIGRATION_V3.md` - complete migration guide from v2.x to v3.0
-  - Added `docs/WHEN_TO_USE_WHAT.md` - decision guide for choosing right methods
-  - All methods now have detailed JSDoc with examples
-  - API endpoint URLs, quota costs, and required scopes documented
-
-- **Strict Type System:**
-  - New `src/types-strict.ts` with non-optional fields for better DX
-  - All strict types exported from main index
-  - Type helpers for extracting data and array elements
+- **File Validation Callback:** New `onFileValidation` option in `SocketSdkOptions` allows customizing error handling when unreadable files are detected. File-upload methods (`uploadManifestFiles()`, `createFullScan()`, `createDependenciesSnapshot()`) now automatically validate file readability, preventing ENOENT errors from Yarn Berry PnP virtual filesystems and pnpm symlink issues.
 
 ### Changed
 
-- Method names follow REST conventions (`list*`, `get*`, `create*`, `update*`, `delete*`)
-- Return types use strict types instead of generic `SocketSdkResult<T>`
-- Options interfaces flattened for cleaner API
-- Legacy scan methods clearly marked as deprecated API mapping
+- File-upload methods automatically skip unreadable files with warnings instead of failing
 
-### Migration Guide
-
-See [docs/MIGRATION_V3.md](./docs/MIGRATION_V3.md) for:
-- Complete method rename mappings
-- Type migration examples
-- Before/after code comparisons
-- Automated search and replace patterns
-
-See [docs/WHEN_TO_USE_WHAT.md](./docs/WHEN_TO_USE_WHAT.md) for:
-- Decision tree for choosing methods
-- Modern vs legacy API comparison
-- Common patterns and best practices
-
-### Why v3.0?
-
-This release addresses developer feedback about:
-1. ❌ TypeScript showing all fields as optional (poor IntelliSense)
-2. ❌ Confusing deprecated naming (methods map to deprecated endpoints)
-3. ❌ Inconsistent method names (mixing "Org", "Repo", "List", "Get")
-4. ✅ Need for clearer "when to use what" guidance
-
-### Benefits
-
-- **Better IntelliSense:** Required fields show without `?`, autocomplete works perfectly
-- **Clearer naming:** Method names match REST conventions and resources
-- **Modern vs Legacy:** Clear distinction between current and deprecated APIs
-- **Better docs:** Every method has examples, endpoint URLs, quota costs
+See [docs/migration-v3.md](./docs/migration-v3.md) and [docs/when-to-use-what.md](./docs/when-to-use-what.md) for migration guidance.
 
 ## [2.0.7](https://github.com/SocketDev/socket-sdk-js/releases/tag/v2.0.7) - 2025-10-22
 
