@@ -4,6 +4,53 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.0.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.0) - 2025-10-23
+
+### ⚠️ BREAKING CHANGES
+
+#### Removed Deprecated Methods
+
+The following methods mapped to deprecated `/report/*` backend endpoints and have been removed:
+
+- **`createScan()`** - Use `createFullScan()` instead
+- **`deleteScan()`** - Use `deleteFullScan()` instead
+- **`getScan()`** - Use `getFullScan()` instead
+- **`listScans()`** - Use `listFullScans()` instead
+
+#### Method Renames (Following REST Conventions)
+
+**Full Scans (Modern API):**
+- `getOrgFullScanList()` → `listFullScans()` with `ListFullScansOptions`
+- `createOrgFullScan()` → `createFullScan()` with `CreateFullScanOptions`
+- `getOrgFullScanBuffered()` → `getFullScan()`
+- `deleteOrgFullScan()` → `deleteFullScan()`
+- `streamOrgFullScan()` → `streamFullScan()` with `StreamFullScanOptions`
+- `getOrgFullScanMetadata()` → `getFullScanMetadata()`
+
+**Organizations:**
+- `getOrganizations()` → `listOrganizations()`
+
+**Repositories:**
+- `getOrgRepoList()` → `listRepositories()` with `ListRepositoriesOptions`
+- `getOrgRepo()` → `getRepository()`
+- `createOrgRepo()` → `createRepository()`
+- `updateOrgRepo()` → `updateRepository()`
+- `deleteOrgRepo()` → `deleteRepository()`
+
+#### Type System Improvements
+
+Strict types now mark guaranteed API fields as required instead of optional, improving IntelliSense autocomplete.
+
+### Added
+
+- **File Validation Callback:** New `onFileValidation` option in `SocketSdkOptions` allows customizing error handling when unreadable files are detected. File-upload methods (`uploadManifestFiles()`, `createFullScan()`, `createDependenciesSnapshot()`) now automatically validate file readability, preventing ENOENT errors from Yarn Berry PnP virtual filesystems and pnpm symlink issues.
+
+### Changed
+
+- File-upload methods automatically skip unreadable files with warnings instead of failing
+
+See [docs/migration-v3.md](./docs/migration-v3.md) and [docs/when-to-use-what.md](./docs/when-to-use-what.md) for migration guidance.
+
 ## [2.0.7](https://github.com/SocketDev/socket-sdk-js/releases/tag/v2.0.7) - 2025-10-22
 
 ### Changed
