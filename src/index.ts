@@ -62,6 +62,8 @@ export type {
   CustomResponseType,
   Entitlement,
   EntitlementsResponse,
+  FileValidationCallback,
+  FileValidationResult,
   GetOptions,
   GotOptions,
   HeadersRecord,
