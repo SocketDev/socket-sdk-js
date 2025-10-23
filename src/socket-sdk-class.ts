@@ -1060,52 +1060,6 @@ export class SocketSdk {
   }
 
   /**
-   * Create a security scan by uploading project files.
-   *
-   * @deprecated Use {@link createScan} instead for v3 naming convention.
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async createScanFromFilepaths(
-    filepaths: string[],
-    options?: CreateScanFromFilepathsOptions | undefined,
-  ): Promise<SocketSdkResult<'createReport'>> {
-    const { issueRules, pathsRelativeTo = '.' } = {
-      __proto__: null,
-      ...options,
-    } as CreateScanFromFilepathsOptions
-    const basePath = resolveBasePath(pathsRelativeTo)
-    const absFilepaths = resolveAbsPaths(filepaths, basePath)
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createUploadRequest(
-              this.#baseUrl,
-              'report/upload',
-              [
-                ...createRequestBodyForFilepaths(absFilepaths, basePath),
-                /* c8 ignore next 3 - Optional issueRules parameter edge case. */
-                ...(issueRules
-                  ? createRequestBodyForJson(issueRules, 'issueRules')
-                  : []),
-              ],
-              {
-                ...this.#reqOptions,
-                method: 'PUT',
-              },
-            ),
-            /* c8 ignore next 3 - Success path return statement requires complex file upload mocking with authentication. */
-          ),
-      )
-      return this.#handleApiSuccess<'createReport'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'createReport'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
    * Delete a diff scan from an organization.
    * Permanently removes diff scan data and results.
    *
@@ -1367,34 +1321,6 @@ export class SocketSdk {
         status: errorResult.status,
         success: false,
       }
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Delete a scan report permanently.
-   *
-   * @deprecated Use {@link deleteScan} instead for v3 naming convention.
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async deleteReport(
-    reportId: string,
-  ): Promise<SocketSdkResult<'deleteReport'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createDeleteRequest(
-              this.#baseUrl,
-              `report/delete/${encodeURIComponent(reportId)}`,
-              this.#reqOptions,
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'deleteReport'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'deleteReport'>(e)
     }
     /* c8 ignore stop */
   }
@@ -2473,33 +2399,6 @@ export class SocketSdk {
         status: errorResult.status,
         success: false,
       }
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * List all scans accessible to the current user.
-   *
-   * @deprecated Use {@link listScans} instead for v3 naming convention.
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getScanList(): Promise<SocketSdkResult<'getReportList'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              'report/list',
-              this.#reqOptions,
-            ),
-            'GET',
-          ),
-      )
-      return this.#handleApiSuccess<'getReportList'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'getReportList'>(e)
     }
     /* c8 ignore stop */
   }
