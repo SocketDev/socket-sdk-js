@@ -61,7 +61,10 @@ describe('Strict Types - v3.0', () => {
         nextPage: null,
       }
 
-      nock(baseUrl).get('/orgs/test-org/full-scans').reply(200, mockResponse)
+      nock(baseUrl)
+        .get('/orgs/test-org/full-scans')
+        .query(true)
+        .reply(200, mockResponse)
 
       const client = new SocketSdk('test-token', { baseUrl, retries: 0 })
       const result = await client.listFullScans('test-org')
@@ -153,7 +156,10 @@ describe('Strict Types - v3.0', () => {
         scan_state: 'pending',
       }
 
-      nock(baseUrl).post('/orgs/test-org/full-scans').reply(200, mockResponse)
+      nock(baseUrl)
+        .post('/orgs/test-org/full-scans')
+        .query({ repo: 'test-repo' })
+        .reply(200, mockResponse)
 
       const client = new SocketSdk('test-token', { baseUrl, retries: 0 })
       const result = await client.createFullScan('test-org', [], {
@@ -201,6 +207,7 @@ describe('Strict Types - v3.0', () => {
 
       nock(baseUrl)
         .get('/orgs/test-org/full-scans/scan-get')
+        .query(true)
         .reply(200, mockResponse)
 
       const client = new SocketSdk('test-token', { baseUrl, retries: 0 })
@@ -243,7 +250,7 @@ describe('Strict Types - v3.0', () => {
         ],
       }
 
-      nock(baseUrl).get('/organizations').reply(200, mockResponse)
+      nock(baseUrl).get('/organizations').query(true).reply(200, mockResponse)
 
       const client = new SocketSdk('test-token', { baseUrl, retries: 0 })
       const result = await client.listOrganizations()
@@ -280,7 +287,7 @@ describe('Strict Types - v3.0', () => {
 
   describe('Error Responses', () => {
     it('should return StrictErrorResult on failure', async () => {
-      nock(baseUrl).get('/orgs/test-org/full-scans').reply(404, {
+      nock(baseUrl).get('/orgs/test-org/full-scans').query(true).reply(404, {
         error: 'Not Found',
         message: 'Organization not found',
       })
