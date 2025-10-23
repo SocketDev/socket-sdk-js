@@ -96,6 +96,15 @@ export type LegacyScanListResult = {
 }
 
 /**
+ * Options for listing legacy scans.
+ * Used by deprecated /report/list endpoint.
+ */
+export type ListLegacyScansOptions = {
+  from?: string
+  repo?: string
+}
+
+/**
  * Options for listing full scans.
  */
 export type ListFullScansOptions = {

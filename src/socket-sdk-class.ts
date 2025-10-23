@@ -90,7 +90,9 @@ import type {
   FullScanItem,
   FullScanListResult,
   FullScanResult,
+  LegacyScanListResult,
   ListFullScansOptions,
+  ListLegacyScansOptions,
   ListRepositoriesOptions,
   OrganizationsResult,
   RepositoriesListResult,
@@ -985,9 +987,82 @@ export class SocketSdk {
   }
 
   /**
-   * Create a security scan by uploading project files.
-   * Analyzes uploaded files for security vulnerabilities and policy violations.
+   * Create a legacy scan by uploading project manifest files.
    *
+   * @deprecated This endpoint is deprecated. Use {@link createFullScan} instead.
+   * The `/report/upload` endpoint is superseded by `/orgs/{org_slug}/full-scans`.
+   *
+   * Upload lockfiles to get your project analyzed by Socket. You can upload multiple
+   * lockfiles in the same request, but each filename must be unique. Filenames must be
+   * in the supported list (e.g., package.json, package-lock.json, yarn.lock).
+   *
+   * @param filepaths - Array of absolute or relative file paths to upload
+   * @param options - Upload configuration (pathsRelativeTo, issueRules)
+   * @returns Scan report with issues, packages, and security scores
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.createScan(
+   *   ['package.json', 'package-lock.json'],
+   *   { pathsRelativeTo: './myproject' }
+   * )
+   *
+   * if (result.success) {
+   *   console.log('Scan ID:', result.data.id)
+   *   console.log('Report URL:', result.data.url)
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/createreport
+   * @apiEndpoint PUT /report/upload
+   * @quota 100 units
+   * @scopes report:write
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async createScan(
+    filepaths: string[],
+    options?: CreateScanFromFilepathsOptions | undefined,
+  ): Promise<SocketSdkResult<'createReport'>> {
+    const { issueRules, pathsRelativeTo = '.' } = {
+      __proto__: null,
+      ...options,
+    } as CreateScanFromFilepathsOptions
+    const basePath = resolveBasePath(pathsRelativeTo)
+    const absFilepaths = resolveAbsPaths(filepaths, basePath)
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createUploadRequest(
+              this.#baseUrl,
+              'report/upload',
+              [
+                ...createRequestBodyForFilepaths(absFilepaths, basePath),
+                /* c8 ignore next 3 - Optional issueRules parameter edge case. */
+                ...(issueRules
+                  ? createRequestBodyForJson(issueRules, 'issueRules')
+                  : []),
+              ],
+              {
+                ...this.#reqOptions,
+                method: 'PUT',
+              },
+            ),
+            /* c8 ignore next 3 - Success path return statement requires complex file upload mocking with authentication. */
+          ),
+      )
+      return this.#handleApiSuccess<'createReport'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'createReport'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Create a security scan by uploading project files.
+   *
+   * @deprecated Use {@link createScan} instead for v3 naming convention.
    * @throws {Error} When server returns 5xx status codes
    */
   async createScanFromFilepaths(
@@ -1240,9 +1315,66 @@ export class SocketSdk {
   }
 
   /**
-   * Delete a scan report permanently.
-   * Removes scan data and analysis results from the system.
+   * Delete a legacy scan report permanently.
    *
+   * @deprecated This endpoint is deprecated. Use {@link deleteFullScan} instead.
+   * The `/report/delete` endpoint is superseded by `/orgs/{org_slug}/full-scans/{id}`.
+   *
+   * @param scanId - Scan report identifier
+   * @returns Deletion confirmation
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.deleteScan('scan-id-123')
+   *
+   * if (result.success) {
+   *   console.log('Scan deleted successfully')
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/deletereport
+   * @apiEndpoint DELETE /report/delete/{id}
+   * @quota 10 units
+   * @scopes report:write
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async deleteScan(scanId: string): Promise<DeleteResult | StrictErrorResult> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createDeleteRequest(
+              this.#baseUrl,
+              `report/delete/${encodeURIComponent(scanId)}`,
+              this.#reqOptions,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as DeleteResult['data'],
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'deleteReport'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Delete a scan report permanently.
+   *
+   * @deprecated Use {@link deleteScan} instead for v3 naming convention.
    * @throws {Error} When server returns 5xx status codes
    */
   async deleteReport(
@@ -2234,9 +2366,31 @@ export class SocketSdk {
   }
 
   /**
-   * Get detailed results for a specific scan.
-   * Returns complete scan analysis including vulnerabilities and alerts.
+   * Get detailed results for a legacy scan report.
    *
+   * @deprecated This endpoint is deprecated. Use {@link getFullScan} instead.
+   * The `/report/view` endpoint is superseded by `/orgs/{org_slug}/full-scans/{id}`.
+   *
+   * Returns complete scan analysis including issues, packages, and security scores.
+   *
+   * @param id - Scan report identifier
+   * @returns Scan report with issues, scores, and analysis details
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.getScan('scan-id-123')
+   *
+   * if (result.success) {
+   *   console.log('Scan ID:', result.data.id)
+   *   console.log('Healthy:', result.data.healthy)
+   *   console.log('Report URL:', result.data.url)
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/getreport
+   * @apiEndpoint GET /report/view/{id}
+   * @quota 10 units
+   * @scopes report:read
    * @throws {Error} When server returns 5xx status codes
    */
   async getScan(id: string): Promise<SocketSdkResult<'getReport'>> {
@@ -2260,9 +2414,73 @@ export class SocketSdk {
   }
 
   /**
-   * List all scans accessible to the current user.
-   * Returns paginated list of scan metadata and status.
+   * List legacy scan reports from Socket.
    *
+   * @deprecated This endpoint is deprecated. Use {@link listFullScans} instead.
+   * The `/report/list` endpoint is superseded by `/orgs/{org_slug}/full-scans`.
+   *
+   * @param options - Optional filters (from timestamp, repo name)
+   * @returns List of legacy scan reports
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.listScans({ repo: 'my-repo' })
+   *
+   * if (result.success) {
+   *   result.data.forEach(scan => {
+   *     console.log('Scan ID:', scan.id)
+   *     console.log('Repository:', scan.repo)
+   *     console.log('Branch:', scan.branch)
+   *   })
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/getreportlist
+   * @apiEndpoint GET /report/list
+   * @quota 10 units
+   * @scopes report:list
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async listScans(
+    options?: ListLegacyScansOptions | undefined,
+  ): Promise<LegacyScanListResult | StrictErrorResult> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `report/list?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptions,
+            ),
+            'GET',
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as LegacyScanListResult['data'],
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'getReportList'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * List all scans accessible to the current user.
+   *
+   * @deprecated Use {@link listScans} instead for v3 naming convention.
    * @throws {Error} When server returns 5xx status codes
    */
   async getScanList(): Promise<SocketSdkResult<'getReportList'>> {

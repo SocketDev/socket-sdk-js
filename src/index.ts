@@ -105,6 +105,7 @@ export type {
   LegacyScanItem,
   LegacyScanListResult,
   ListFullScansOptions,
+  ListLegacyScansOptions,
   ListRepositoriesOptions,
   OrganizationItem,
   OrganizationsResult,
