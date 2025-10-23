@@ -439,7 +439,7 @@ describe.sequential('SocketSdk - Batch Operations', () => {
       expect(contentType).toContain('boundary=')
     })
 
-    it('should upload files with createOrgFullScan', async () => {
+    it('should upload files with createFullScan', async () => {
       let capturedHeaders: IncomingHttpHeaders = {}
 
       nock('https://api.socket.dev')
@@ -458,10 +458,10 @@ describe.sequential('SocketSdk - Batch Operations', () => {
         })
 
       const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
-      const res = await client.createOrgFullScan(
+      const res = await client.createFullScan(
         'test-org',
         [packageJsonPath, packageLockPath],
-        { pathsRelativeTo: tempDir },
+        { pathsRelativeTo: tempDir, repo: 'test-repo' },
       )
 
       expect(res.success).toBe(true)

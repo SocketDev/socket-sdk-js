@@ -293,8 +293,8 @@ describe('SocketSdk - API Methods Coverage', () => {
   })
 
   describe('Organization Methods', () => {
-    it('covers getOrganizations', async () => {
-      const result = await client.getOrganizations()
+    it('covers listOrganizations', async () => {
+      const result = await client.listOrganizations()
       expect(result.success).toBe(true)
       expect(result.data).toBeDefined()
     })
@@ -332,8 +332,8 @@ describe('SocketSdk - API Methods Coverage', () => {
   })
 
   describe('Full Scan Methods', () => {
-    it('covers getOrgFullScanList', async () => {
-      const result = await client.getOrgFullScanList('test-org')
+    it('covers listFullScans', async () => {
+      const result = await client.listFullScans('test-org')
       expect(result.success).toBe(true)
     })
 
@@ -342,19 +342,18 @@ describe('SocketSdk - API Methods Coverage', () => {
       expect(result.success).toBe(true)
     })
 
-    it('covers createOrgFullScan', async () => {
-      const result = await client.createOrgFullScan('test-org', [], {
-        queryParams: {
-          branch: 'main',
-          commit_message: 'test',
-          make_default_branch: false,
-        },
+    it('covers createFullScan', async () => {
+      const result = await client.createFullScan('test-org', [], {
+        repo: 'test-repo',
+        branch: 'main',
+        commit_message: 'test',
+        make_default_branch: false,
       })
       expect(result.success).toBe(true)
     })
 
-    it('covers deleteOrgFullScan', async () => {
-      const result = await client.deleteOrgFullScan('test-org', 'scan-1')
+    it('covers deleteFullScan', async () => {
+      const result = await client.deleteFullScan('test-org', 'scan-1')
       expect(result.success).toBe(true)
     })
   })
@@ -672,8 +671,8 @@ describe('SocketSdk - API Methods Coverage', () => {
       expect(result2.success).toBe(true)
     })
 
-    it('covers getOrgFullScanBuffered', async () => {
-      const result = await client.getOrgFullScanBuffered('test-org', 'scan-1')
+    it('covers getFullScan', async () => {
+      const result = await client.getFullScan('test-org', 'scan-1')
       expect(result.success).toBe(true)
       expect(result.data).toBeDefined()
     })
@@ -723,7 +722,7 @@ describe('SocketSdk - API Methods Coverage', () => {
   describe('Error Handling Paths', () => {
     it('covers retry logic through timeout', async () => {
       // This will succeed but exercise retry preparation code
-      const result = await client.getOrganizations()
+      const result = await client.listOrganizations()
       expect(result.success).toBe(true)
     })
 
@@ -733,16 +732,16 @@ describe('SocketSdk - API Methods Coverage', () => {
         cache: true,
         timeout: 5000,
       })
-      const result1 = await cachedClient.getOrganizations()
-      const result2 = await cachedClient.getOrganizations()
+      const result1 = await cachedClient.listOrganizations()
+      const result2 = await cachedClient.listOrganizations()
       expect(result1.success).toBe(true)
       expect(result2.success).toBe(true)
     })
 
     it('covers methods with query parameters', async () => {
-      const result = await client.getOrgFullScanList('test-org', {
-        limit: 10,
-        offset: 0,
+      const result = await client.listFullScans('test-org', {
+        per_page: 10,
+        page: 0,
       })
       expect(result.success).toBe(true)
     })
