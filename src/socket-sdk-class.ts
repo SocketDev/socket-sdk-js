@@ -90,7 +90,11 @@ import type {
   FullScanListResult,
   FullScanResult,
   ListFullScansOptions,
+  ListRepositoriesOptions,
   OrganizationsResult,
+  RepositoriesListResult,
+  RepositoryItem,
+  RepositoryResult,
   StrictErrorResult,
 } from './types-strict'
 import type { TtlCache } from '@socketsecurity/lib/cache-with-ttl'
@@ -1735,15 +1739,35 @@ export class SocketSdk {
   }
 
   /**
-   * Get details for a specific organization repository.
+   * Get details for a specific repository.
+   *
    * Returns repository configuration, monitoring status, and metadata.
    *
+   * @param orgSlug - Organization identifier
+   * @param repoSlug - Repository slug/name
+   * @returns Repository details with configuration
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.getRepository('my-org', 'my-repo')
+   *
+   * if (result.success) {
+   *   console.log('Repository:', result.data.name)
+   *   console.log('Visibility:', result.data.visibility)
+   *   console.log('Default branch:', result.data.default_branch)
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/getorgrepo
+   * @apiEndpoint GET /orgs/{org_slug}/repos/{repo_slug}
+   * @quota 1 unit
+   * @scopes repo:read
    * @throws {Error} When server returns 5xx status codes
    */
-  async getOrgRepo(
+  async getRepository(
     orgSlug: string,
     repoSlug: string,
-  ): Promise<SocketSdkResult<'getOrgRepo'>> {
+  ): Promise<RepositoryResult | StrictErrorResult> {
     const orgSlugParam = encodeURIComponent(orgSlug)
     const repoSlugParam = encodeURIComponent(repoSlug)
 
@@ -1758,10 +1782,23 @@ export class SocketSdk {
             ),
           ),
       )
-      return this.#handleApiSuccess<'getOrgRepo'>(data)
+      return {
+        cause: undefined,
+        data: data as RepositoryItem,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      return await this.#handleApiError<'getOrgRepo'>(e)
+      const errorResult = await this.#handleApiError<'getOrgRepo'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
     }
     /* c8 ignore stop */
   }
@@ -1827,29 +1864,66 @@ export class SocketSdk {
 
   /**
    * List all repositories in an organization.
-   * Returns paginated list of repository metadata and status.
    *
+   * Returns paginated list of repository metadata with guaranteed required fields.
+   *
+   * @param orgSlug - Organization identifier
+   * @param options - Pagination and filtering options
+   * @returns List of repositories with metadata
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.listRepositories('my-org', {
+   *   per_page: 50,
+   *   sort: 'name',
+   *   direction: 'asc'
+   * })
+   *
+   * if (result.success) {
+   *   result.data.results.forEach(repo => {
+   *     console.log(repo.name, repo.visibility)
+   *   })
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/getorgrepolist
+   * @apiEndpoint GET /orgs/{org_slug}/repos
+   * @quota 1 unit
+   * @scopes repo:list
    * @throws {Error} When server returns 5xx status codes
    */
-  async getOrgRepoList(
+  async listRepositories(
     orgSlug: string,
-    queryParams?: QueryParams | undefined,
-  ): Promise<SocketSdkResult<'getOrgRepoList'>> {
+    options?: ListRepositoriesOptions | undefined,
+  ): Promise<RepositoriesListResult | StrictErrorResult> {
     try {
       const data = await this.#executeWithRetry(
         async () =>
           await getResponseJson(
             await createGetRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/repos?${queryToSearchParams(queryParams)}`,
+              `orgs/${encodeURIComponent(orgSlug)}/repos?${queryToSearchParams(options as QueryParams)}`,
               this.#reqOptions,
             ),
           ),
       )
-      return this.#handleApiSuccess<'getOrgRepoList'>(data)
+      return {
+        cause: undefined,
+        data: data as RepositoriesListResult['data'],
+        error: undefined,
+        status: 200,
+        success: true,
+      }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      return await this.#handleApiError<'getOrgRepoList'>(e)
+      const errorResult = await this.#handleApiError<'getOrgRepoList'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
     }
     /* c8 ignore stop */
   }

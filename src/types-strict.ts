@@ -246,4 +246,15 @@ export type DeleteResult = {
   success: true
 }
 
+/**
+ * Strict type for single repository result.
+ */
+export type RepositoryResult = {
+  cause?: undefined
+  data: RepositoryItem
+  error?: undefined
+  status: number
+  success: true
+}
+
 /* c8 ignore stop */
