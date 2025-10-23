@@ -1,8 +1,8 @@
 /** @fileoverview Utility for running shell commands with proper error handling. */
 
-import { spawn, spawnSync } from 'node:child_process'
-
 import { logger } from '@socketsecurity/lib/logger'
+import { spawn, spawnSync } from '@socketsecurity/lib/spawn'
+
 
 /**
  * Run a command and return a promise that resolves with the exit code.
@@ -11,22 +11,12 @@ import { logger } from '@socketsecurity/lib/logger'
  * @param {object} options - Spawn options
  * @returns {Promise<number>} Exit code
  */
-export function runCommand(command, args = [], options = {}) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(command, args, {
-      stdio: 'inherit',
-      ...(process.platform === 'win32' && { shell: true }),
-      ...options,
-    })
-
-    child.on('exit', code => {
-      resolve(code || 0)
-    })
-
-    child.on('error', error => {
-      reject(error)
-    })
+export async function runCommand(command, args = [], options = {}) {
+  const result = await spawn(command, args, {
+    stdio: 'inherit',
+    ...options,
   })
+  return result.code
 }
 
 /**
@@ -39,10 +29,8 @@ export function runCommand(command, args = [], options = {}) {
 export function runCommandSync(command, args = [], options = {}) {
   const result = spawnSync(command, args, {
     stdio: 'inherit',
-    ...(process.platform === 'win32' && { shell: true }),
     ...options,
   })
-
   return result.status || 0
 }
 
@@ -85,43 +73,24 @@ export async function runParallel(commands) {
 }
 
 /**
- * Run a command and suppress output.
+ * Run a command and capture output.
  * @param {string} command - The command to run
  * @param {string[]} args - Arguments to pass to the command
  * @param {object} options - Spawn options
  * @returns {Promise<{exitCode: number, stdout: string, stderr: string}>}
  */
-export function runCommandQuiet(command, args = [], options = {}) {
-  return new Promise((resolve, reject) => {
-    let stdout = ''
-    let stderr = ''
-
-    const child = spawn(command, args, {
-      ...options,
-      ...(process.platform === 'win32' && { shell: true }),
-      stdio: ['inherit', 'pipe', 'pipe'],
-    })
-
-    child.stdout?.on('data', data => {
-      stdout += data.toString()
-    })
-
-    child.stderr?.on('data', data => {
-      stderr += data.toString()
-    })
-
-    child.on('exit', code => {
-      resolve({
-        exitCode: code || 0,
-        stderr,
-        stdout,
-      })
-    })
-
-    child.on('error', error => {
-      reject(error)
-    })
+export async function runCommandQuiet(command, args = [], options = {}) {
+  const result = await spawn(command, args, {
+    ...options,
+    stdio: ['inherit', 'pipe', 'pipe'],
+    stdioString: true,
   })
+
+  return {
+    exitCode: result.code,
+    stderr: result.stderr,
+    stdout: result.stdout,
+  }
 }
 
 /**
