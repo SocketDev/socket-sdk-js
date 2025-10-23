@@ -100,6 +100,9 @@ async function buildTypes(options = {}) {
   commands.push({
     args: ['exec', 'tsgo', '--project', '.config/tsconfig.dts.json'],
     command: 'pnpm',
+    options: {
+      ...(process.platform === 'win32' && { shell: true }),
+    },
   })
 
   const exitCode = await runSequence(commands)
