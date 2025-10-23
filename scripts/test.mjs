@@ -280,24 +280,75 @@ async function runTests(options, positionals = []) {
     },
   )
 
-  // Print output
-  if (result.stdout) {
-    process.stdout.write(result.stdout)
-  }
-  if (result.stderr) {
-    process.stderr.write(result.stderr)
-  }
-
   // Check if we have worker termination error but no test failures
-  const hasWorkerTerminationError =
-    (result.stdout + result.stderr).includes('Terminating worker thread') ||
-    (result.stdout + result.stderr).includes('ThreadTermination')
-
   const output = result.stdout + result.stderr
+  const hasWorkerTerminationError =
+    output.includes('Terminating worker thread') ||
+    output.includes('ThreadTermination')
+
   const hasTestFailures =
     output.includes('FAIL') ||
     (output.includes('Test Files') && output.match(/(\d+) failed/) !== null) ||
     (output.includes('Tests') && output.match(/Tests\s+\d+ failed/) !== null)
+
+  // Filter out worker termination errors from output if no real test failures
+  const shouldFilterWorkerErrors = hasWorkerTerminationError && !hasTestFailures
+
+  const filterWorkerErrors = text => {
+    if (!shouldFilterWorkerErrors || !text) {
+      return text
+    }
+
+    const lines = text.split('\n')
+    const filtered = []
+    let skipUntilBlankLine = false
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+
+      // Start skipping when we hit the unhandled rejection header
+      if (line.includes('⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯')) {
+        skipUntilBlankLine = true
+        continue
+      }
+
+      // Stop skipping after blank line following error block
+      if (skipUntilBlankLine && line.trim() === '') {
+        skipUntilBlankLine = false
+        continue
+      }
+
+      // Skip lines that are part of worker termination error
+      if (
+        skipUntilBlankLine ||
+        line.includes('Terminating worker thread') ||
+        line.includes('ThreadTermination') ||
+        line.includes('tinypool/dist/index.js')
+      ) {
+        continue
+      }
+
+      // Skip the "Command failed" line if it's only due to worker termination
+      if (
+        line.includes('Command failed with exit code 1') &&
+        shouldFilterWorkerErrors
+      ) {
+        continue
+      }
+
+      filtered.push(line)
+    }
+
+    return filtered.join('\n')
+  }
+
+  // Print filtered output
+  if (result.stdout) {
+    process.stdout.write(filterWorkerErrors(result.stdout))
+  }
+  if (result.stderr) {
+    process.stderr.write(filterWorkerErrors(result.stderr))
+  }
 
   // Override exit code if we only have worker termination errors
   if (result.code !== 0 && hasWorkerTerminationError && !hasTestFailures) {
