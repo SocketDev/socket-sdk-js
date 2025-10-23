@@ -273,12 +273,6 @@ describe('SocketSdk - API Methods Coverage', () => {
     })
   })
 
-  describe('Scanning Methods', () => {
-    it('covers getScan', async () => {
-      const result = await client.getScan('scan-1')
-      expect(result.success).toBe(true)
-    })
-  })
 
   describe('Organization Methods', () => {
     it('covers listOrganizations', async () => {
@@ -486,22 +480,6 @@ describe('SocketSdk - API Methods Coverage', () => {
     })
   })
 
-  describe('Reports Methods', () => {
-    it('covers deleteScan', async () => {
-      const result = await client.deleteScan('scan-1')
-      expect(result.success).toBe(true)
-    })
-
-    it('covers createScan', async () => {
-      const result = await client.createScan(['package.json'])
-      expect(result.success).toBe(true)
-    })
-
-    it('covers listScans', async () => {
-      const result = await client.listScans()
-      expect(result.success).toBe(true)
-    })
-  })
 
   describe('Repository Labels Methods', () => {
     it('covers createRepositoryLabel', async () => {

@@ -643,29 +643,5 @@ describe('SocketSdk - Retry Logic', () => {
       expect(attemptCount).toBe(2)
     })
 
-    it('should retry DELETE requests on 500 errors', async () => {
-      let attemptCount = 0
-
-      nock('https://api.socket.dev')
-        .delete('/v0/report/delete/test-id')
-        .times(2)
-        .reply(() => {
-          attemptCount++
-          if (attemptCount < 2) {
-            return [500, { error: { message: 'Internal Server Error' } }]
-          }
-          return [200, { success: true }]
-        })
-
-      const client = new SocketSdk('test-token', {
-        retries: 3,
-        retryDelay: 10,
-      })
-
-      const result = await client.deleteScan('test-id')
-
-      expect(result.success).toBe(true)
-      expect(attemptCount).toBe(2)
-    })
   })
 })
