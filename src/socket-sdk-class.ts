@@ -61,7 +61,6 @@ import type {
   BatchPackageStreamOptions,
   CompactSocketArtifact,
   CreateDependenciesSnapshotOptions,
-  CreateOrgFullScanOptions,
   CreateScanFromFilepathsOptions,
   CustomResponseType,
   Entitlement,
@@ -90,13 +89,9 @@ import type {
   FullScanItem,
   FullScanListResult,
   FullScanResult,
-  LegacyScanListResult,
   ListFullScansOptions,
-  ListRepositoriesOptions,
   OrganizationsResult,
-  RepositoriesListResult,
   StrictErrorResult,
-  StreamFullScanOptions as StrictStreamFullScanOptions,
 } from './types-strict'
 import type { TtlCache } from '@socketsecurity/lib/cache-with-ttl'
 import type { IncomingMessage } from 'node:http'

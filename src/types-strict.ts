@@ -142,7 +142,7 @@ export type StreamFullScanOptions = {
  * Error result type for all SDK operations.
  */
 export type StrictErrorResult = {
-  cause?: string
+  cause?: string | undefined
   data?: undefined
   error: string
   status: number
@@ -153,7 +153,13 @@ export type StrictErrorResult = {
  * Generic strict result type combining success and error.
  */
 export type StrictResult<T> =
-  | { cause?: undefined; data: T; error?: undefined; status: number; success: true }
+  | {
+      cause?: undefined
+      data: T
+      error?: undefined
+      status: number
+      success: true
+    }
   | StrictErrorResult
 
 /**

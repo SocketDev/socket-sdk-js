@@ -75,7 +75,11 @@ describe('Strict Types - v3.0', () => {
         // Verify required fields are present and correctly typed
         expect(typedResult.data.results).toHaveLength(1)
 
-        const scan: FullScanItem = typedResult.data.results[0]
+        const scan = typedResult.data.results[0]
+        expect(scan).toBeDefined()
+        if (!scan) {
+          return
+        }
 
         // Required string fields
         expect(typeof scan.id).toBe('string')
@@ -149,9 +153,7 @@ describe('Strict Types - v3.0', () => {
         scan_state: 'pending',
       }
 
-      nock(baseUrl)
-        .post('/orgs/test-org/full-scans')
-        .reply(200, mockResponse)
+      nock(baseUrl).post('/orgs/test-org/full-scans').reply(200, mockResponse)
 
       const client = new SocketSdk('test-token', { baseUrl, retries: 0 })
       const result = await client.createFullScan('test-org', [], {
@@ -264,8 +266,14 @@ describe('Strict Types - v3.0', () => {
         })
 
         // Specific value checks
-        expect(typedResult.data.organizations[0].name).toBe('Test Org')
-        expect(typedResult.data.organizations[1].slug).toBe('another-org')
+        const firstOrg = typedResult.data.organizations[0]
+        const secondOrg = typedResult.data.organizations[1]
+        expect(firstOrg).toBeDefined()
+        expect(secondOrg).toBeDefined()
+        if (firstOrg && secondOrg) {
+          expect(firstOrg.name).toBe('Test Org')
+          expect(secondOrg.slug).toBe('another-org')
+        }
       }
     })
   })
