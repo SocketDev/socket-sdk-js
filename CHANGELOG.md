@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.0.3](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.3) - 2025-10-24
+
+### Fixed
+
+- Updated `@socketsecurity/lib` to v1.3.2 to fix broken v1.3.1 release
+
 ## [3.0.2](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.2) - 2025-10-24
 
 ### Fixed
