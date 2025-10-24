@@ -110,7 +110,7 @@
   },
   "files": [
     "data/*.json",
-    "dist/*{.js,.d.ts}",
+    "dist/*{.js,.mjs,.d.ts}",
     "types/*.d.ts",
     "CHANGELOG.md"
   ],
