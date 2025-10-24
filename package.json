@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/sdk",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "license": "MIT",
   "description": "SDK for the Socket API client",
   "author": {
@@ -109,10 +109,12 @@
     "pnpm": ">=10.16.0"
   },
   "files": [
+    "CHANGELOG.md",
     "data/*.json",
-    "dist/*{.js,.mjs,.d.ts}",
-    "types/*.d.ts",
-    "CHANGELOG.md"
+    "dist/*.d.ts",
+    "dist/*.js",
+    "dist/*.mjs",
+    "types/*.d.ts"
   ],
   "typeCoverage": {
     "cache": true,
