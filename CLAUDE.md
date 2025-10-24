@@ -2,13 +2,26 @@
 
 🚨 **MANDATORY**: Act as principal-level engineer with deep expertise in TypeScript, Node.js, and SDK development.
 
+## 👤 USER CONTEXT
+
+- **Identify users by git credentials**: Extract name from git commit author, GitHub account, or context
+- 🚨 **When identity is verified**: ALWAYS use their actual name - NEVER use "the user" or "user"
+- **Direct communication**: Use "you/your" when speaking directly to the verified user
+- **Discussing their work**: Use their actual name when referencing their commits/contributions
+- **Example**: If git shows "John-David Dalton <jdalton@example.com>", refer to them as "John-David"
+- **Other contributors**: Use their actual names from commit history/context
+
 ## 📚 SHARED STANDARDS
 
 **See canonical reference:** `../socket-registry/CLAUDE.md`
 
 For all shared Socket standards (git workflow, testing, code style, imports, sorting, error handling, cross-platform, CI, etc.), refer to socket-registry/CLAUDE.md.
 
-**Git Workflow Reminder**: When user says "commit changes" → create actual commits, use small atomic commits, follow all CLAUDE.md rules (NO AI attribution).
+**Git Workflow Reminder**: When user says "commit changes" → create actual commits, use small atomic commits, follow all CLAUDE.md rules:
+- Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) style: `<type>(<scope>): <description>`
+- NO AI attribution in commit messages
+
+**Package.json Scripts**: Prefer `pnpm run foo --<flag>` over multiple `foo:bar` scripts (see socket-registry/CLAUDE.md)
 
 ---
 
