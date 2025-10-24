@@ -13,6 +13,35 @@ const rootPath = path.join(__dirname, '..')
 const srcPath = path.join(rootPath, 'src')
 const distPath = path.join(rootPath, 'dist')
 
+/**
+ * Plugin to handle local package aliases.
+ * Provides consistent alias resolution across all Socket repos.
+ */
+function createAliasPlugin() {
+  const aliases = getLocalPackageAliases(rootPath)
+
+  // Only create plugin if we have local aliases
+  if (Object.keys(aliases).length === 0) {
+    return null
+  }
+
+  return {
+    name: 'local-package-aliases',
+    setup(build) {
+      // Intercept imports for aliased packages
+      for (const [packageName, aliasPath] of Object.entries(aliases)) {
+        // Match both exact package name and subpath imports
+        build.onResolve({ filter: new RegExp(`^${packageName}(/|$)`) }, args => {
+          // Handle subpath imports like '@socketsecurity/lib/spinner'
+          const subpath = args.path.slice(packageName.length + 1)
+          const resolvedPath = subpath ? path.join(aliasPath, subpath) : aliasPath
+          return { path: resolvedPath, external: true }
+        })
+      }
+    },
+  }
+}
+
 // Build configuration for ESM output
 export const buildConfig = {
   entryPoints: [`${srcPath}/index.ts`, `${srcPath}/testing.ts`],
@@ -30,8 +59,8 @@ export const buildConfig = {
   logLevel: 'info',
   outExtension: { '.js': '.mjs' },
 
-  // Alias local packages when available (dev mode).
-  alias: getLocalPackageAliases(rootPath),
+  // Use plugin for local package aliases (consistent across all Socket repos)
+  plugins: [createAliasPlugin()].filter(Boolean),
 
   // External dependencies
   external: [
