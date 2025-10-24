@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/sdk",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "license": "MIT",
   "description": "SDK for the Socket API client",
   "author": {
@@ -109,10 +109,24 @@
     "pnpm": ">=10.16.0"
   },
   "files": [
-    "data/*.json",
-    "dist/*{.js,.mjs,.d.ts}",
-    "types/*.d.ts",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "data/api-method-quota-and-permissions.json",
+    "dist/constants.d.ts",
+    "dist/file-upload.d.ts",
+    "dist/http-client.d.ts",
+    "dist/index.d.ts",
+    "dist/index.mjs",
+    "dist/promise-queue.d.ts",
+    "dist/quota-utils.d.ts",
+    "dist/socket-sdk-class.d.ts",
+    "dist/testing.d.ts",
+    "dist/testing.mjs",
+    "dist/types-strict.d.ts",
+    "dist/types.d.ts",
+    "dist/user-agent.d.ts",
+    "dist/utils.d.ts",
+    "types/api-helpers.d.ts",
+    "types/api.d.ts"
   ],
   "typeCoverage": {
     "cache": true,
