@@ -2,7 +2,6 @@
  * @fileoverview esbuild configuration for fast builds with smaller bundles
  */
 
-import { builtinModules } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -53,8 +52,9 @@ export const buildConfig = {
   outdir: distPath,
   bundle: true,
   format: 'esm',
+  // Target Node.js environment (not browser).
   platform: 'node',
-  // Minimum Node version from package.json
+  // Target Node.js 18+ features.
   target: 'node18',
   sourcemap: false,
   minify: true,
@@ -67,12 +67,12 @@ export const buildConfig = {
   // Use plugin for local package aliases (consistent across all Socket repos)
   plugins: [createAliasPlugin()].filter(Boolean),
 
-  // External dependencies
+  // External dependencies.
+  // With platform: 'node', esbuild automatically externalizes all Node.js
+  // built-ins. The explicit external array with builtinModules is redundant
+  // (but doesn't hurt as extra safety).
   external: [
-    // Node.js built-ins
-    ...builtinModules,
-    ...builtinModules.map(m => `node:${m}`),
-    // External dependencies that shouldn't be bundled
+    // External dependencies that shouldn't be bundled.
     '@socketsecurity/lib',
   ],
 
