@@ -41,6 +41,7 @@ jobs:
 
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
         with:
+          autocrlf: false
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@d8ff3b0581d799466cfbf150f715c1a4bf9f84a5 # main
@@ -135,6 +136,7 @@ jobs:
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
         with:
+          autocrlf: false
           ref: automated/open-api
 
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@d8ff3b0581d799466cfbf150f715c1a4bf9f84a5 # main
