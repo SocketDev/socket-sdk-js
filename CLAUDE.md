@@ -107,6 +107,11 @@ All `logger.error()` and `logger.log()` calls include empty string:
 - **Type safety**: ❌ FORBIDDEN `any`; use `unknown` or specific
 - **Type imports**: Always `import type`
 
+#### Working Directory
+- **🚨 NEVER use `process.chdir()`** - use `{ cwd }` options and absolute paths instead
+  - Breaks tests, worker threads, and causes race conditions
+  - Always pass `{ cwd: absolutePath }` to spawn/exec/fs operations
+
 #### API Method Organization
 Documentation organized alphabetically within functional categories
 
