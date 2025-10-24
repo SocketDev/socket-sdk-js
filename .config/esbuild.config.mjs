@@ -72,6 +72,8 @@ export const buildConfig = {
     // Node.js built-ins
     ...builtinModules,
     ...builtinModules.map(m => `node:${m}`),
+    // External dependencies that shouldn't be bundled
+    '@socketsecurity/lib',
   ],
 
   // Banner for generated code
