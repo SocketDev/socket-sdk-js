@@ -31,12 +31,17 @@ function createAliasPlugin() {
       // Intercept imports for aliased packages
       for (const [packageName, aliasPath] of Object.entries(aliases)) {
         // Match both exact package name and subpath imports
-        build.onResolve({ filter: new RegExp(`^${packageName}(/|$)`) }, args => {
-          // Handle subpath imports like '@socketsecurity/lib/spinner'
-          const subpath = args.path.slice(packageName.length + 1)
-          const resolvedPath = subpath ? path.join(aliasPath, subpath) : aliasPath
-          return { path: resolvedPath, external: true }
-        })
+        build.onResolve(
+          { filter: new RegExp(`^${packageName}(/|$)`) },
+          args => {
+            // Handle subpath imports like '@socketsecurity/lib/spinner'
+            const subpath = args.path.slice(packageName.length + 1)
+            const resolvedPath = subpath
+              ? path.join(aliasPath, subpath)
+              : aliasPath
+            return { path: resolvedPath, external: true }
+          },
+        )
       }
     },
   }
