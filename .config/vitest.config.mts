@@ -38,7 +38,6 @@ export default defineConfig({
       'test/quota-utils-error-handling.test.mts',
       'test/json-parsing-edge-cases.test.mts',
       'test/socket-sdk-retry.test.mts',
-      'test/http-client-retry.test.mts',
       'test/getapi-sendapi-methods.test.mts',
       'test/entitlements.test.mts',
       'test/socket-sdk-upload-simple.test.mts',
