@@ -354,7 +354,9 @@ async function main() {
       // Log completion messages
       if (!quiet) {
         if (srcResult.exitCode === 0) {
-          console.log(colors.green(`✓ Source Bundle (${srcResult.buildTime}ms)`))
+          console.log(
+            colors.green(`✓ Source Bundle (${srcResult.buildTime}ms)`),
+          )
 
           if (values.analyze && srcResult.result?.metafile) {
             const analysis = analyzeMetafile(srcResult.result.metafile)
