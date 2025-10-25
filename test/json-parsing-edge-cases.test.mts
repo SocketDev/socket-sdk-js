@@ -5,13 +5,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { IncomingMessage } from 'node:http'
 
 // Mock the registry module to control JSON parsing behavior.
-vi.mock('@socketsecurity/registry/lib/json', () => ({
+vi.mock('@socketsecurity/lib/json', () => ({
   jsonParse: vi.fn(),
 }))
 
 // Use dynamic imports to ensure mocks are applied.
 const { getResponseJson } = await import('../src/http-client.js')
-const { jsonParse } = await import('@socketsecurity/registry/lib/json')
+const { jsonParse } = await import('@socketsecurity/lib/json')
 const mockJsonParse = vi.mocked(jsonParse)
 
 describe('JSON Parsing Edge Cases', () => {

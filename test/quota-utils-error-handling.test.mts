@@ -27,8 +27,8 @@ describe('Quota Utils - Error Handling', () => {
         }),
       }))
 
-      // Also mock the registry memoization to prevent caching issues
-      vi.doMock('@socketsecurity/registry/lib/memoization', () => ({
+      // Also mock lib/memoization to prevent caching issues
+      vi.doMock('@socketsecurity/lib/memoization', () => ({
         memoize: (fn: unknown) => fn,
         once: (fn: unknown) => fn,
       }))
@@ -47,8 +47,8 @@ describe('Quota Utils - Error Handling', () => {
         readFileSync: vi.fn(() => 'invalid json content {'),
       }))
 
-      // Also mock the registry memoization to prevent caching issues
-      vi.doMock('@socketsecurity/registry/lib/memoization', () => ({
+      // Also mock lib/memoization to prevent caching issues
+      vi.doMock('@socketsecurity/lib/memoization', () => ({
         memoize: (fn: unknown) => fn,
         once: (fn: unknown) => fn,
       }))
@@ -67,8 +67,8 @@ describe('Quota Utils - Error Handling', () => {
         readFileSync: vi.fn(),
       }))
 
-      // Also mock the registry memoization to prevent caching issues
-      vi.doMock('@socketsecurity/registry/lib/memoization', () => ({
+      // Also mock lib/memoization to prevent caching issues
+      vi.doMock('@socketsecurity/lib/memoization', () => ({
         memoize: (fn: unknown) => fn,
         once: (fn: unknown) => fn,
       }))
