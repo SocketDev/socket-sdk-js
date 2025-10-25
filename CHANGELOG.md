@@ -4,7 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [3.0.5](https://github.com/SocketDev/socket-lib/releases/tag/v3.0.5) - 2025-10-24
+## [3.0.6](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.6) - 2025-10-24
+
+### Fixed
+
+- Externalized `@socketsecurity/lib` dependency to prevent dynamic require errors in bundled applications
+
+### Changed
+
+- Updated `@socketsecurity/lib` to v1.3.3
+
+## [3.0.5](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.5) - 2025-10-24
 
 ### Fixed
 
