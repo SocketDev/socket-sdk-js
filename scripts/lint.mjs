@@ -6,6 +6,8 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
+import colors from 'yoctocolors-cjs'
+
 import { isQuiet } from '@socketsecurity/lib/argv/flags'
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
 import { getChangedFiles, getStagedFiles } from '@socketsecurity/lib/git'
@@ -201,10 +203,10 @@ async function runLintOnFiles(files, options = {}) {
           logger.error('Linting failed')
         }
         if (result.stderr) {
-          console.error(result.stderr)
+          logger.error(result.stderr)
         }
         if (result.stdout && !fix) {
-          console.log(result.stdout)
+          logger.log(result.stdout)
         }
         return result.exitCode
       }
@@ -212,7 +214,7 @@ async function runLintOnFiles(files, options = {}) {
   }
 
   if (!quiet) {
-    logger.clearLine().done('Linting passed')
+    logger.log(`${colors.green('✓')} Linting passed`)
     // Add newline after message (use error to write to same stream)
     logger.error('')
   }
@@ -265,10 +267,10 @@ async function runLintOnAll(options = {}) {
           logger.error('Linting failed')
         }
         if (result.stderr) {
-          console.error(result.stderr)
+          logger.error(result.stderr)
         }
         if (result.stdout && !fix) {
-          console.log(result.stdout)
+          logger.log(result.stdout)
         }
         return result.exitCode
       }
@@ -276,7 +278,7 @@ async function runLintOnAll(options = {}) {
   }
 
   if (!quiet) {
-    logger.clearLine().done('Linting passed')
+    logger.log(`${colors.green('✓')} Linting passed`)
     // Add newline after message (use error to write to same stream)
     logger.error('')
   }
@@ -376,23 +378,23 @@ async function main() {
 
     // Show help if requested
     if (values.help) {
-      console.log('Lint Runner')
-      console.log('\nUsage: pnpm lint [options] [files...]')
-      console.log('\nOptions:')
-      console.log('  --help         Show this help message')
-      console.log('  --fix          Automatically fix problems')
-      console.log('  --all          Lint all files')
-      console.log('  --changed      Lint changed files (default behavior)')
-      console.log('  --staged       Lint staged files')
-      console.log('  --quiet, --silent  Suppress progress messages')
-      console.log('\nExamples:')
-      console.log(
+      logger.log('Lint Runner')
+      logger.log('\nUsage: pnpm lint [options] [files...]')
+      logger.log('\nOptions:')
+      logger.log('  --help         Show this help message')
+      logger.log('  --fix          Automatically fix problems')
+      logger.log('  --all          Lint all files')
+      logger.log('  --changed      Lint changed files (default behavior)')
+      logger.log('  --staged       Lint staged files')
+      logger.log('  --quiet, --silent  Suppress progress messages')
+      logger.log('\nExamples:')
+      logger.log(
         '  pnpm lint                   # Lint changed files (default)',
       )
-      console.log('  pnpm lint --fix             # Fix issues in changed files')
-      console.log('  pnpm lint --all             # Lint all files')
-      console.log('  pnpm lint --staged --fix    # Fix issues in staged files')
-      console.log('  pnpm lint src/index.ts      # Lint specific file(s)')
+      logger.log('  pnpm lint --fix             # Fix issues in changed files')
+      logger.log('  pnpm lint --all             # Lint all files')
+      logger.log('  pnpm lint --staged --fix    # Fix issues in staged files')
+      logger.log('  pnpm lint src/index.ts      # Lint specific file(s)')
       process.exitCode = 0
       return
     }
@@ -401,7 +403,7 @@ async function main() {
 
     if (!quiet) {
       printHeader('Lint Runner')
-      console.log('')
+      logger.log('')
     }
 
     let exitCode = 0
@@ -449,13 +451,13 @@ async function main() {
     if (exitCode !== 0) {
       if (!quiet) {
         logger.error('')
-        console.log('Lint failed')
+        logger.log('Lint failed')
       }
       process.exitCode = exitCode
     } else {
       if (!quiet) {
-        console.log('')
-        logger.success('All lint checks passed!')
+        logger.log('')
+        logger.log(`${colors.green('✓')} All lint checks passed!`)
       }
     }
   } catch (error) {
