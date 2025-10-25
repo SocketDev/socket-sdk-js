@@ -33,10 +33,6 @@ const rootPath = path.resolve(
 async function buildSource(options = {}) {
   const { quiet = false, skipClean = false, verbose = false } = options
 
-  if (!quiet) {
-    logger.substep('Building source code')
-  }
-
   // Clean dist directory if needed
   if (!skipClean) {
     const exitCode = await runSequence([
@@ -83,10 +79,6 @@ async function buildTypes(options = {}) {
     skipClean = false,
     verbose: _verbose = false,
   } = options
-
-  if (!quiet) {
-    logger.substep('Building TypeScript declarations')
-  }
 
   const commands = []
 
@@ -280,30 +272,29 @@ async function main() {
       return
     }
 
-    if (!quiet) {
-      printHeader('Build Runner')
-    }
-
     let exitCode = 0
 
     // Handle watch mode
     if (values.watch) {
+      if (!quiet) {
+        printHeader('Build Runner (Watch Mode)')
+      }
       exitCode = await watchBuild({ quiet, verbose })
     }
     // Build types only
     else if (values.types && !values.src) {
       if (!quiet) {
-        logger.step('Building TypeScript declarations only')
+        printHeader('Building TypeScript Declarations')
       }
       exitCode = await buildTypes({ quiet, verbose })
       if (exitCode === 0 && !quiet) {
-        logger.substep('Type declarations built')
+        console.log(colors.green('✓ Type Declarations'))
       }
     }
     // Build source only
     else if (values.src && !values.types) {
       if (!quiet) {
-        logger.step('Building source only')
+        printHeader('Building Source')
       }
       const {
         buildTime,
@@ -312,7 +303,7 @@ async function main() {
       } = await buildSource({ quiet, verbose, analyze: values.analyze })
       exitCode = srcExitCode
       if (exitCode === 0 && !quiet) {
-        logger.substep(`Source build complete in ${buildTime}ms`)
+        console.log(colors.green(`✓ Source Bundle (${buildTime}ms)`))
 
         if (values.analyze && result?.metafile) {
           const analysis = analyzeMetafile(result.metafile)
@@ -327,13 +318,10 @@ async function main() {
     // Build everything (default)
     else {
       if (!quiet) {
-        logger.step('Building package (source + types)')
+        printHeader('Building Package')
       }
 
       // Clean all directories first (once)
-      if (!quiet) {
-        logger.substep('Cleaning build directories')
-      }
       exitCode = await runSequence([
         {
           args: ['scripts/load.cjs', 'clean', '--dist', '--types', '--quiet'],
@@ -348,6 +336,10 @@ async function main() {
         return
       }
 
+      if (!quiet) {
+        console.log(colors.green('✓ Build Cleaned'))
+      }
+
       // Run source and types builds in parallel
       const [srcResult, typesExitCode] = await Promise.all([
         buildSource({
@@ -359,10 +351,10 @@ async function main() {
         buildTypes({ quiet, verbose, skipClean: true }),
       ])
 
-      // Log completion messages in order
+      // Log completion messages
       if (!quiet) {
         if (srcResult.exitCode === 0) {
-          logger.substep(`Source build complete in ${srcResult.buildTime}ms`)
+          console.log(colors.green(`✓ Source Bundle (${srcResult.buildTime}ms)`))
 
           if (values.analyze && srcResult.result?.metafile) {
             const analysis = analyzeMetafile(srcResult.result.metafile)
@@ -375,7 +367,7 @@ async function main() {
         }
 
         if (typesExitCode === 0) {
-          logger.substep('Type declarations built')
+          console.log(colors.green('✓ Type Declarations'))
         }
       }
 
