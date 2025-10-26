@@ -145,13 +145,13 @@ jobs:
         run: pnpm run build
 
       - name: Type check
-        run: pnpm run type-ci
+        run: pnpm run type
 
       - name: Lint
-        run: pnpm run lint-ci
+        run: pnpm run lint --all
 
       - name: Test
-        run: pnpm run test-ci
+        run: pnpm run test --all
 
       - name: Check for API breaking changes
         run: |
