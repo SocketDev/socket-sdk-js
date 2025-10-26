@@ -148,10 +148,10 @@ jobs:
         run: pnpm run check
 
       - name: Lint
-        run: pnpm run lint
+        run: pnpm run lint --all
 
       - name: Test
-        run: pnpm run test
+        run: pnpm run test --all
 
       - name: Check for API breaking changes
         run: |

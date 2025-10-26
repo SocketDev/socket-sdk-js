@@ -20,10 +20,10 @@ jobs:
     uses: SocketDev/socket-registry/.github/workflows/ci.yml@d8ff3b0581d799466cfbf150f715c1a4bf9f84a5 # 2025-10-23
     with:
       fail-fast: false
-      lint-script: 'pnpm run lint'
+      lint-script: 'pnpm run lint --all'
       node-versions: '[20, 22, 24]'
       os-versions: '["ubuntu-latest", "windows-latest"]'
-      test-script: 'pnpm run test'
+      test-script: 'pnpm run test --all'
       test-setup-script: 'pnpm run build'
       type-check-script: 'pnpm run check'
       type-check-setup-script: 'pnpm run build'
