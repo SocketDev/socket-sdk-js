@@ -197,6 +197,16 @@ async function runLintOnFiles(files, options = {}) {
     const result = await runCommandQuiet('pnpm', args)
 
     if (result.exitCode !== 0) {
+      // Check if Biome simply had no files to process (not an error)
+      const isBiomeNoFilesError =
+        result.stderr &&
+        result.stderr.includes('No files were processed in the specified paths')
+
+      if (isBiomeNoFilesError) {
+        // Biome had nothing to do - this is fine, continue to next linter
+        continue
+      }
+
       // When fixing, non-zero exit codes are normal if fixes were applied.
       if (!fix || (result.stderr && result.stderr.trim().length > 0)) {
         if (!quiet) {
@@ -261,6 +271,16 @@ async function runLintOnAll(options = {}) {
     const result = await runCommandQuiet('pnpm', args)
 
     if (result.exitCode !== 0) {
+      // Check if Biome simply had no files to process (not an error)
+      const isBiomeNoFilesError =
+        result.stderr &&
+        result.stderr.includes('No files were processed in the specified paths')
+
+      if (isBiomeNoFilesError) {
+        // Biome had nothing to do - this is fine, continue to next linter
+        continue
+      }
+
       // When fixing, non-zero exit codes are normal if fixes were applied.
       if (!fix || (result.stderr && result.stderr.trim().length > 0)) {
         if (!quiet) {
