@@ -70,7 +70,7 @@
     "@eslint/js": "9.35.0",
     "@types/node": "24.6.2",
     "@typescript/native-preview": "7.0.0-dev.20250926.1",
-    "@vitest/coverage-v8": "3.2.4",
+    "@vitest/coverage-v8": "4.0.3",
     "del": "8.0.1",
     "dev-null-cli": "2.0.0",
     "esbuild": "0.25.10",
@@ -93,7 +93,7 @@
     "taze": "19.6.0",
     "type-coverage": "2.29.7",
     "typescript-eslint": "8.44.1",
-    "vitest": "3.2.4",
+    "vitest": "4.0.3",
     "yoctocolors-cjs": "2.1.3"
   },
   "pnpm": {
@@ -102,7 +102,7 @@
       "unrs-resolver"
     ],
     "overrides": {
-      "vite": "7.1.11"
+      "vite": "7.1.12"
     }
   },
   "engines": {
