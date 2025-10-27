@@ -2,6 +2,10 @@
  * @fileoverview Tests for v3.0 strict type system.
  * Validates that new strict types properly reflect API responses.
  */
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
@@ -156,26 +160,40 @@ describe('Strict Types - v3.0', () => {
         scan_state: 'pending',
       }
 
+      // Create temporary directory and test file
+      const tempDir = mkdtempSync(join(tmpdir(), 'socket-sdk-test-'))
+      const testFile = join(tempDir, 'package.json')
+      writeFileSync(
+        testFile,
+        JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
+      )
+
       nock(baseUrl)
         .post('/orgs/test-org/full-scans')
         .query({ repo: 'test-repo' })
         .reply(200, mockResponse)
 
-      const client = new SocketSdk('test-token', { baseUrl, retries: 0 })
-      const result = await client.createFullScan('test-org', [], {
-        repo: 'test-repo',
-      })
+      try {
+        const client = new SocketSdk('test-token', { baseUrl, retries: 0 })
+        const result = await client.createFullScan('test-org', [testFile], {
+          pathsRelativeTo: tempDir,
+          repo: 'test-repo',
+        })
 
-      expect(result.success).toBe(true)
+        expect(result.success).toBe(true)
 
-      if (result.success) {
-        const typedResult: FullScanResult = result
+        if (result.success) {
+          const typedResult: FullScanResult = result
 
-        // Verify all required fields exist
-        expect(typedResult.data.id).toBe('scan-new')
-        expect(typedResult.data.created_at).toBeTruthy()
-        expect(typedResult.data.organization_id).toBeTruthy()
-        expect(typedResult.data.repository_slug).toBeTruthy()
+          // Verify all required fields exist
+          expect(typedResult.data.id).toBe('scan-new')
+          expect(typedResult.data.created_at).toBeTruthy()
+          expect(typedResult.data.organization_id).toBeTruthy()
+          expect(typedResult.data.repository_slug).toBeTruthy()
+        }
+      } finally {
+        // Clean up temporary directory
+        rmSync(tempDir, { recursive: true })
       }
     })
 
