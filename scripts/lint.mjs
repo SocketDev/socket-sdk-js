@@ -198,9 +198,9 @@ async function runLintOnFiles(files, options = {}) {
 
     if (result.exitCode !== 0) {
       // Check if Biome simply had no files to process (not an error)
-      const isBiomeNoFilesError =
-        result.stderr &&
-        result.stderr.includes('No files were processed in the specified paths')
+      const isBiomeNoFilesError = result.stderr?.includes(
+        'No files were processed in the specified paths',
+      )
 
       if (isBiomeNoFilesError) {
         // Biome had nothing to do - this is fine, continue to next linter
@@ -272,9 +272,9 @@ async function runLintOnAll(options = {}) {
 
     if (result.exitCode !== 0) {
       // Check if Biome simply had no files to process (not an error)
-      const isBiomeNoFilesError =
-        result.stderr &&
-        result.stderr.includes('No files were processed in the specified paths')
+      const isBiomeNoFilesError = result.stderr?.includes(
+        'No files were processed in the specified paths',
+      )
 
       if (isBiomeNoFilesError) {
         // Biome had nothing to do - this is fine, continue to next linter
