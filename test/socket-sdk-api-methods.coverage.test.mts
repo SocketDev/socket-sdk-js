@@ -320,13 +320,30 @@ describe('SocketSdk - API Methods Coverage', () => {
     })
 
     it('covers createFullScan', async () => {
-      const result = await client.createFullScan('test-org', [], {
-        repo: 'test-repo',
-        branch: 'main',
-        commit_message: 'test',
-        make_default_branch: false,
-      })
-      expect(result.success).toBe(true)
+      // Create a temporary test file
+      const { mkdtempSync, rmSync, writeFileSync } = await import('node:fs')
+      const { tmpdir } = await import('node:os')
+      const { join } = await import('node:path')
+
+      const tempDir = mkdtempSync(join(tmpdir(), 'socket-test-'))
+      const testFile = join(tempDir, 'package.json')
+      writeFileSync(
+        testFile,
+        JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
+      )
+
+      try {
+        const result = await client.createFullScan('test-org', [testFile], {
+          branch: 'main',
+          commit_message: 'test',
+          make_default_branch: false,
+          pathsRelativeTo: tempDir,
+          repo: 'test-repo',
+        })
+        expect(result.success).toBe(true)
+      } finally {
+        rmSync(tempDir, { recursive: true })
+      }
     })
 
     it('covers deleteFullScan', async () => {
@@ -409,14 +426,31 @@ describe('SocketSdk - API Methods Coverage', () => {
     })
 
     it('covers createDependenciesSnapshot', async () => {
-      const result = await client.createDependenciesSnapshot([], {
-        queryParams: {
-          orgSlug: 'test-org',
-          repoName: 'test-repo',
-          branch: 'main',
-        },
-      })
-      expect(result.success).toBe(true)
+      // Create a temporary test file
+      const { mkdtempSync, rmSync, writeFileSync } = await import('node:fs')
+      const { tmpdir } = await import('node:os')
+      const { join } = await import('node:path')
+
+      const tempDir = mkdtempSync(join(tmpdir(), 'socket-test-'))
+      const testFile = join(tempDir, 'package.json')
+      writeFileSync(
+        testFile,
+        JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
+      )
+
+      try {
+        const result = await client.createDependenciesSnapshot([testFile], {
+          pathsRelativeTo: tempDir,
+          queryParams: {
+            branch: 'main',
+            orgSlug: 'test-org',
+            repoName: 'test-repo',
+          },
+        })
+        expect(result.success).toBe(true)
+      } finally {
+        rmSync(tempDir, { recursive: true })
+      }
     })
   })
 
