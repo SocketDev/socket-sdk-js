@@ -444,6 +444,7 @@ describe.sequential('SocketSdk - Batch Operations', () => {
 
       nock('https://api.socket.dev')
         .post('/v0/orgs/test-org/full-scans')
+        .query({ repo: 'test-repo' })
         .reply(function () {
           capturedHeaders = this.req.headers
           return [
@@ -495,14 +496,18 @@ describe.sequential('SocketSdk - Batch Operations', () => {
     it('should handle non-existent file paths', async () => {
       const nonExistentPath = path.join(tempDir, 'non-existent.json')
 
-      // The SDK will attempt to read the file and fail with ENOENT
+      // The SDK validates files and returns an error result for unreadable files
       const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
 
-      await expect(
-        client.createDependenciesSnapshot([nonExistentPath], {
-          pathsRelativeTo: tempDir,
-        }),
-      ).rejects.toThrow()
+      const res = await client.createDependenciesSnapshot([nonExistentPath], {
+        pathsRelativeTo: tempDir,
+      })
+
+      expect(res.success).toBe(false)
+      if (!res.success) {
+        expect(res.error).toBe('No readable manifest files found')
+        expect(res.status).toBe(400)
+      }
     })
   })
 })
