@@ -64,8 +64,8 @@ importers:
         specifier: 4.16.1
         version: 4.16.1(@typescript-eslint/utils@8.44.1(eslint@9.35.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.35.0(jiti@2.6.1))
       eslint-plugin-jsdoc:
-        specifier: 57.0.8
-        version: 57.0.8(eslint@9.35.0(jiti@2.6.1))
+        specifier: 61.1.4
+        version: 61.1.4(eslint@9.35.0(jiti@2.6.1))
       eslint-plugin-n:
         specifier: 17.23.1
         version: 17.23.1(eslint@9.35.0(jiti@2.6.1))(typescript@5.9.3)
@@ -242,8 +242,8 @@ packages:
   '@emnapi/wasi-threads@1.1.0':
     resolution: {integrity: sha512-WI0DdZ8xFSbgMjR1sFsKABJ/C5OnRrjT06JXbZKexJGrDuPTzZdDYfFlsgcCXCyf+suG5QU2e/y1Wo2V/OapLQ==}
 
-  '@es-joy/jsdoccomment@0.58.0':
-    resolution: {integrity: sha512-smMc5pDht/UVsCD3hhw/a/e/p8m0RdRYiluXToVfd+d4yaQQh7nn9bACjkk6nXJvat7EWPAxuFkMEFfrxeGa3Q==}
+  '@es-joy/jsdoccomment@0.76.0':
+    resolution: {integrity: sha512-g+RihtzFgGTx2WYCuTHbdOXJeAlGnROws0TeALx9ow/ZmOROOZkVg5wp/B44n0WJgI4SQFP1eWM2iRPlU2Y14w==}
     engines: {node: '>=20.11.0'}
 
   '@esbuild/aix-ppc64@0.25.10':
@@ -643,6 +643,10 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@sindresorhus/base62@0.1.0':
+    resolution: {integrity: sha512-BNjiImatCV+CUdvzSbFWzZIZqOddg6qn0Ag6/8Ty5G09oOtvxidZ5tkPQW2XHpzGVkB3eHfdYGwrWNy2nUFOwQ==}
+    engines: {node: '>=18'}
+
   '@sindresorhus/merge-streams@2.3.0':
     resolution: {integrity: sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==}
     engines: {node: '>=18'}
@@ -727,6 +731,10 @@ packages:
 
   '@typescript-eslint/types@8.46.1':
     resolution: {integrity: sha512-C+soprGBHwWBdkDpbaRC4paGBrkIXxVlNohadL5o0kfhsXqOC6GYH2S/Obmig+I0HTDl8wMaRySwrfrXVP8/pQ==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@typescript-eslint/types@8.46.2':
+    resolution: {integrity: sha512-lNCWCbq7rpg7qDsQrd3D6NyWYu+gkTENkG5IKYhUIcxSb59SQC/hEQ+MrG4sTgBVghTonNWq42bA/d4yYumldQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@typescript-eslint/typescript-estree@8.44.1':
@@ -1171,8 +1179,8 @@ packages:
       eslint-import-resolver-node:
         optional: true
 
-  eslint-plugin-jsdoc@57.0.8:
-    resolution: {integrity: sha512-L3kb1fz1VsWMDxcNOPqomC8gWROxCJomynYZkhQJInZu4m3Ugjod75pWAICRrKW1WedHkX8BotknBtGCLUFpAg==}
+  eslint-plugin-jsdoc@61.1.4:
+    resolution: {integrity: sha512-DmpKw8kHgNQlMS8m+XYtlGcsw4IzrHtupEObPZAww0OrXb7IekbKR7vjYu8jv5aOiFRhGdnIfEZRuoAf4ELe5w==}
     engines: {node: '>=20.11.0'}
     peerDependencies:
       eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
@@ -1374,6 +1382,9 @@ packages:
     resolution: {integrity: sha512-kyCuEOWjJqZuDbRHzL8V93NzQhwIB71oFWSyzVo+KPZI+pnQPPxucdkrOZvkLRnrf5URsQM+IJ09Dw29cRALIA==}
     engines: {node: '>=10'}
 
+  html-entities@2.6.0:
+    resolution: {integrity: sha512-kig+rMn/QOVRvr7c86gQ8lWXq+Hkv6CbAH1hLu+RG338StTpE8Z0b44SDVaqVu7HGKf27frdmUYEs9hTUX/cLQ==}
+
   html-escaper@2.0.2:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
 
@@ -1496,9 +1507,9 @@ packages:
     resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
     hasBin: true
 
-  jsdoc-type-pratt-parser@5.4.0:
-    resolution: {integrity: sha512-F9GQ+F1ZU6qvSrZV8fNFpjDNf614YzR2eF6S0+XbDjAcUI28FSoXnYZFjQmb1kFx3rrJb5PnxUH3/Yti6fcM+g==}
-    engines: {node: '>=12.0.0'}
+  jsdoc-type-pratt-parser@6.10.0:
+    resolution: {integrity: sha512-+LexoTRyYui5iOhJGn13N9ZazL23nAHGkXsa1p/C8yeq79WRfLBag6ZZ0FQG2aRoc9yfo59JT9EYCQonOkHKkQ==}
+    engines: {node: '>=20.0.0'}
 
   jsesc@0.5.0:
     resolution: {integrity: sha512-uZz5UnB7u4T9LvwmFqXii7pZSouaRPorGs5who1Ip7VO0wxanFvBL7GkM6dTHlgX+jhBApRetaWpnDabOeTcnA==}
@@ -1857,6 +1868,10 @@ packages:
     resolution: {integrity: sha512-qx+xQGZVsy55CH0a1hiVwHmqjLryfh7wQyF5HO07XJ9f7dQMY/gPQHhlyDkIzJKC+x2fUCpCcUODUUUFrm7SHA==}
     hasBin: true
 
+  reserved-identifiers@1.2.0:
+    resolution: {integrity: sha512-yE7KUfFvaBFzGPs5H3Ops1RevfUEsDc5Iz65rOwWg4lE8HJSYtle77uul3+573457oHvBKuHYDl/xqUkKpEEdw==}
+    engines: {node: '>=18'}
+
   resolve-alpn@1.2.1:
     resolution: {integrity: sha512-0a1F4l73/ZFZOakJnQ3FvkJ2+gSTQWz/r2KE5OdDY0TxPm5h4GkqkWWfM47T7HsbnOtcJVEF4epCVy6u7Q3K+g==}
 
@@ -1894,6 +1909,11 @@ packages:
 
   semver@7.7.2:
     resolution: {integrity: sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==}
+    engines: {node: '>=10'}
+    hasBin: true
+
+  semver@7.7.3:
+    resolution: {integrity: sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -2011,6 +2031,10 @@ packages:
   to-regex-range@5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
+
+  to-valid-identifier@0.1.1:
+    resolution: {integrity: sha512-/m+BsP+oLrdYptSVuWdRanXBD0N1qiyx2GtAunpPz+TRPENw7IpEndqyPTwxe67wLiu16ZinauXESdOL1eDYBQ==}
+    engines: {node: '>=18'}
 
   trim-newlines@4.1.1:
     resolution: {integrity: sha512-jRKj0n0jXWo6kh62nA5TEh3+4igKDXLvzBJcPpiizP7oOolUrYIxmVBG9TOtHYFHoddUk6YvAkGeGoSVTXfQXQ==}
@@ -2366,13 +2390,13 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
-  '@es-joy/jsdoccomment@0.58.0':
+  '@es-joy/jsdoccomment@0.76.0':
     dependencies:
       '@types/estree': 1.0.8
-      '@typescript-eslint/types': 8.46.1
+      '@typescript-eslint/types': 8.46.2
       comment-parser: 1.4.1
       esquery: 1.6.0
-      jsdoc-type-pratt-parser: 5.4.0
+      jsdoc-type-pratt-parser: 6.10.0
 
   '@esbuild/aix-ppc64@0.25.10':
     optional: true
@@ -2648,6 +2672,8 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.52.4':
     optional: true
 
+  '@sindresorhus/base62@0.1.0': {}
+
   '@sindresorhus/merge-streams@2.3.0': {}
 
   '@socketsecurity/lib@1.3.5(typescript@5.9.3)':
@@ -2711,7 +2737,7 @@ snapshots:
   '@typescript-eslint/project-service@8.44.1(typescript@5.9.3)':
     dependencies:
       '@typescript-eslint/tsconfig-utils': 8.44.1(typescript@5.9.3)
-      '@typescript-eslint/types': 8.44.1
+      '@typescript-eslint/types': 8.46.2
       debug: 4.4.3
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -2741,6 +2767,8 @@ snapshots:
   '@typescript-eslint/types@8.44.1': {}
 
   '@typescript-eslint/types@8.46.1': {}
+
+  '@typescript-eslint/types@8.46.2': {}
 
   '@typescript-eslint/typescript-estree@8.44.1(typescript@5.9.3)':
     dependencies:
@@ -3174,9 +3202,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-jsdoc@57.0.8(eslint@9.35.0(jiti@2.6.1)):
+  eslint-plugin-jsdoc@61.1.4(eslint@9.35.0(jiti@2.6.1)):
     dependencies:
-      '@es-joy/jsdoccomment': 0.58.0
+      '@es-joy/jsdoccomment': 0.76.0
       are-docs-informative: 0.0.2
       comment-parser: 1.4.1
       debug: 4.4.3
@@ -3184,10 +3212,12 @@ snapshots:
       eslint: 9.35.0(jiti@2.6.1)
       espree: 10.4.0
       esquery: 1.6.0
+      html-entities: 2.6.0
       object-deep-merge: 1.0.5
       parse-imports-exports: 0.2.4
-      semver: 7.7.2
+      semver: 7.7.3
       spdx-expression-parse: 4.0.0
+      to-valid-identifier: 0.1.1
     transitivePeerDependencies:
       - supports-color
 
@@ -3425,6 +3455,8 @@ snapshots:
     dependencies:
       lru-cache: 6.0.0
 
+  html-entities@2.6.0: {}
+
   html-escaper@2.0.2: {}
 
   http2-wrapper@2.2.1:
@@ -3518,7 +3550,7 @@ snapshots:
     dependencies:
       argparse: 2.0.1
 
-  jsdoc-type-pratt-parser@5.4.0: {}
+  jsdoc-type-pratt-parser@6.10.0: {}
 
   jsesc@0.5.0: {}
 
@@ -3857,6 +3889,8 @@ snapshots:
     dependencies:
       jsesc: 0.5.0
 
+  reserved-identifiers@1.2.0: {}
+
   resolve-alpn@1.2.1: {}
 
   resolve-from@4.0.0: {}
@@ -3911,6 +3945,8 @@ snapshots:
   semver@5.7.2: {}
 
   semver@7.7.2: {}
+
+  semver@7.7.3: {}
 
   shebang-command@2.0.0:
     dependencies:
@@ -4008,6 +4044,11 @@ snapshots:
   to-regex-range@5.0.1:
     dependencies:
       is-number: 7.0.0
+
+  to-valid-identifier@0.1.1:
+    dependencies:
+      '@sindresorhus/base62': 0.1.0
+      reserved-identifiers: 1.2.0
 
   trim-newlines@4.1.1: {}
 
