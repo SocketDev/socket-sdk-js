@@ -37,21 +37,21 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "bump": "bash scripts/node-with-loader.sh scripts/bump.mjs",
-    "check": "bash scripts/node-with-loader.sh scripts/check.mjs",
+    "bump": "node scripts/bump.mjs",
+    "check": "node scripts/check.mjs",
     "clean": "node scripts/clean.mjs",
-    "cover": "bash scripts/node-with-loader.sh scripts/cover.mjs",
+    "cover": "node scripts/cover.mjs",
     "fix": "node scripts/lint.mjs --fix",
-    "generate-sdk": "bash scripts/node-with-loader.sh scripts/generate-sdk.mjs",
+    "generate-sdk": "node scripts/generate-sdk.mjs",
     "lint": "node scripts/lint.mjs",
     "precommit": "pnpm run check --lint --staged",
     "prepare": "husky",
     "prepublishOnly": "echo 'ERROR: Use GitHub Actions workflow for publishing' && exit 1",
-    "publish": "bash scripts/node-with-loader.sh scripts/publish.mjs",
-    "claude": "bash scripts/node-with-loader.sh scripts/claude.mjs",
+    "publish": "node scripts/publish.mjs",
+    "claude": "node scripts/claude.mjs",
     "test": "node scripts/test.mjs",
     "type": "tsgo --noEmit -p .config/tsconfig.check.json",
-    "update": "bash scripts/node-with-loader.sh scripts/update.mjs"
+    "update": "node scripts/update.mjs"
   },
   "dependencies": {
     "@socketsecurity/lib": "2.0.0"
