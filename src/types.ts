@@ -289,7 +289,7 @@ export interface SocketSdkOptions {
    */
   cache?: boolean | undefined
   /**
-   * Cache TTL in milliseconds (default: 300000 = 5 minutes).
+   * Cache TTL in milliseconds (default: 300_000 = 5 minutes).
    * Only used when cache is enabled.
    */
   cacheTtl?: number | undefined
