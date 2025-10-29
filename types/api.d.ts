@@ -4906,6 +4906,8 @@ export interface operations {
         use_cursor?: boolean
         /** @description A Unix timestamp in seconds that filters full-scans prior to the date. */
         from?: string
+        /** @description A repository workspace to filter full-scans by. */
+        workspace?: string
         /** @description A repository slug to filter full-scans by. */
         repo?: string
         /** @description A branch name to filter full-scans by. */
@@ -4953,6 +4955,8 @@ export interface operations {
               html_url?: string | null
               /** @default */
               api_url?: string | null
+              /** @default */
+              workspace?: string
               /** @default */
               repo?: string
               /** @default */
@@ -5009,6 +5013,8 @@ export interface operations {
       query: {
         /** @description The slug of the repository to associate the full-scan with. */
         repo: string
+        /** @description The workspace of the repository to associate the full-scan with. */
+        workspace?: string
         /** @description The branch name to associate the full-scan with. Branch names must follow Git branch name rules: be 1–255 characters long; cannot be exactly @;  cannot begin or end with /, ., or .lock; cannot contain "//", "..", or "@{"; and cannot include control characters, spaces, or any of ~^:?*[. */
         branch?: string
         /** @description The commit message to associate the full-scan with. */
@@ -5076,6 +5082,8 @@ export interface operations {
             html_url?: string | null
             /** @default */
             api_url?: string | null
+            /** @default */
+            workspace?: string
             /** @default */
             repo?: string
             /** @default */
@@ -5235,6 +5243,8 @@ export interface operations {
             html_url?: string | null
             /** @default */
             api_url?: string | null
+            /** @default */
+            workspace?: string
             /** @default */
             repo?: string
             /** @default */
@@ -6015,6 +6025,8 @@ export interface operations {
         integration_org_slug?: string
         /** @description Set to true when running a diff between a merged commit and its parent commit in the same branch. Set to false when running diffs in an open PR between unmerged commits. */
         merge?: boolean
+        /** @description The workspace of the repository. */
+        workspace?: string
       }
       path: {
         /** @description The slug of the organization */
@@ -6486,6 +6498,11 @@ export interface operations {
                * @default main
                */
               default_branch?: string | null
+              /**
+               * @description The workspace of the repository
+               * @default
+               */
+              workspace?: string
             }>
             /** @default 0 */
             nextPage: number | null
@@ -6551,6 +6568,11 @@ export interface operations {
            * @default main
            */
           default_branch?: string | null
+          /**
+           * @description The workspace of the repository
+           * @default
+           */
+          workspace?: string
         }
       }
     }
@@ -6641,6 +6663,11 @@ export interface operations {
              * @default main
              */
             default_branch?: string | null
+            /**
+             * @description The workspace of the repository
+             * @default
+             */
+            workspace?: string
           }
         }
       }
@@ -6662,6 +6689,10 @@ export interface operations {
    */
   getOrgRepo: {
     parameters: {
+      query?: {
+        /** @description The workspace of the repository */
+        workspace?: string
+      }
       path: {
         /** @description The slug of the organization */
         org_slug: string
@@ -6757,6 +6788,11 @@ export interface operations {
              */
             default_branch: string | null
             /**
+             * @description The workspace of the repository
+             * @default
+             */
+            workspace: string
+            /**
              * @description The slug of the repository. This typo is intentionally preserved for backwards compatibility reasons.
              * @default
              */
@@ -6782,6 +6818,10 @@ export interface operations {
    */
   updateOrgRepo: {
     parameters: {
+      query?: {
+        /** @description The workspace of the repository */
+        workspace?: string
+      }
       path: {
         /** @description The slug of the organization */
         org_slug: string
@@ -6823,6 +6863,11 @@ export interface operations {
            * @default main
            */
           default_branch?: string | null
+          /**
+           * @description The workspace of the repository
+           * @default
+           */
+          workspace?: string
         }
       }
     }
@@ -6913,6 +6958,11 @@ export interface operations {
              * @default main
              */
             default_branch?: string | null
+            /**
+             * @description The workspace of the repository
+             * @default
+             */
+            workspace?: string
           }
         }
       }
@@ -6934,6 +6984,10 @@ export interface operations {
    */
   deleteOrgRepo: {
     parameters: {
+      query?: {
+        /** @description The workspace of the repository */
+        workspace?: string
+      }
       path: {
         /** @description The slug of the organization */
         org_slug: string
@@ -14824,6 +14878,12 @@ export interface operations {
    * - report:write
    */
   createReport: {
+    parameters: {
+      query?: {
+        /** @description The workspace of the repository to associate the full-scan with. */
+        workspace?: string
+      }
+    }
     requestBody?: {
       content: {
         'multipart/form-data': {
@@ -14925,6 +14985,8 @@ export interface operations {
               github_full_name: string
               /** @default */
               organization_id: string | null
+              /** @default */
+              workspace: string
               latest_project_report?: {
                 /** @default */
                 id: string

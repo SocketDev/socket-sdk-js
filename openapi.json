@@ -10963,6 +10963,15 @@
             }
           },
           {
+            "name": "workspace",
+            "in": "query",
+            "required": false,
+            "description": "A repository workspace to filter full-scans by.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "repo",
             "in": "query",
             "required": false,
@@ -11107,6 +11116,11 @@
                             "default": "",
                             "nullable": true
                           },
+                          "workspace": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
                           "repo": {
                             "type": "string",
                             "description": "",
@@ -11225,6 +11239,15 @@
             "in": "query",
             "required": true,
             "description": "The slug of the repository to associate the full-scan with.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace",
+            "in": "query",
+            "required": false,
+            "description": "The workspace of the repository to associate the full-scan with.",
             "schema": {
               "type": "string"
             }
@@ -11462,6 +11485,11 @@
                       "description": "",
                       "default": "",
                       "nullable": true
+                    },
+                    "workspace": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
                     },
                     "repo": {
                       "type": "string",
@@ -11861,6 +11889,11 @@
                       "description": "",
                       "default": "",
                       "nullable": true
+                    },
+                    "workspace": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
                     },
                     "repo": {
                       "type": "string",
@@ -14181,6 +14214,15 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "name": "workspace",
+            "in": "query",
+            "required": false,
+            "description": "The workspace of the repository.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -15445,6 +15487,11 @@
                             "description": "The default branch of the repository",
                             "default": "main",
                             "nullable": true
+                          },
+                          "workspace": {
+                            "type": "string",
+                            "description": "The workspace of the repository",
+                            "default": ""
                           }
                         },
                         "description": ""
@@ -15545,6 +15592,11 @@
                     "description": "The default branch of the repository",
                     "default": "main",
                     "nullable": true
+                  },
+                  "workspace": {
+                    "type": "string",
+                    "description": "The workspace of the repository",
+                    "default": ""
                   }
                 },
                 "description": ""
@@ -15688,6 +15740,11 @@
                       "description": "The default branch of the repository",
                       "default": "main",
                       "nullable": true
+                    },
+                    "workspace": {
+                      "type": "string",
+                      "description": "The workspace of the repository",
+                      "default": ""
                     }
                   },
                   "description": ""
@@ -15737,6 +15794,15 @@
             "in": "path",
             "required": true,
             "description": "The slug of the repository",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace",
+            "in": "query",
+            "required": false,
+            "description": "The workspace of the repository",
             "schema": {
               "type": "string"
             }
@@ -15879,6 +15945,11 @@
                       "default": "main",
                       "nullable": true
                     },
+                    "workspace": {
+                      "type": "string",
+                      "description": "The workspace of the repository",
+                      "default": ""
+                    },
                     "slig": {
                       "type": "string",
                       "description": "The slug of the repository. This typo is intentionally preserved for backwards compatibility reasons.",
@@ -15898,7 +15969,8 @@
                     "slig",
                     "slug",
                     "updated_at",
-                    "visibility"
+                    "visibility",
+                    "workspace"
                   ]
                 }
               }
@@ -15947,6 +16019,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "workspace",
+            "in": "query",
+            "required": false,
+            "description": "The workspace of the repository",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -15992,6 +16073,11 @@
                     "description": "The default branch of the repository",
                     "default": "main",
                     "nullable": true
+                  },
+                  "workspace": {
+                    "type": "string",
+                    "description": "The workspace of the repository",
+                    "default": ""
                   }
                 },
                 "description": ""
@@ -16135,6 +16221,11 @@
                       "description": "The default branch of the repository",
                       "default": "main",
                       "nullable": true
+                    },
+                    "workspace": {
+                      "type": "string",
+                      "description": "The workspace of the repository",
+                      "default": ""
                     }
                   },
                   "description": ""
@@ -16182,6 +16273,15 @@
             "in": "path",
             "required": true,
             "description": "The slug of the repository",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace",
+            "in": "query",
+            "required": false,
+            "description": "The workspace of the repository",
             "schema": {
               "type": "string"
             }
@@ -36469,6 +36569,17 @@
         "summary": "Create a report",
         "deprecated": true,
         "operationId": "createReport",
+        "parameters": [
+          {
+            "name": "workspace",
+            "in": "query",
+            "required": false,
+            "description": "The workspace of the repository to associate the full-scan with.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -36713,6 +36824,11 @@
                             "default": "",
                             "nullable": true
                           },
+                          "workspace": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
                           "latest_project_report": {
                             "type": "object",
                             "additionalProperties": false,
@@ -36743,7 +36859,8 @@
                           "id",
                           "name",
                           "organization_id",
-                          "updated_at"
+                          "updated_at",
+                          "workspace"
                         ]
                       },
                       "description": ""
