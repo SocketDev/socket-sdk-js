@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/sdk",
-  "version": "3.0.13",
+  "version": "3.0.14",
   "license": "MIT",
   "description": "SDK for the Socket API client",
   "author": {
@@ -54,7 +54,7 @@
     "update": "node scripts/update.mjs"
   },
   "dependencies": {
-    "@socketsecurity/lib": "2.6.0"
+    "@socketsecurity/lib": "2.7.0"
   },
   "devDependencies": {
     "@babel/parser": "7.26.3",
