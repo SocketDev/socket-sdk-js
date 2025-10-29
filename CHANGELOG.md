@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.0.16](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.16) - 2025-10-29
+
+### Changed
+
+- Updated OpenAPI types with new alert filtering capabilities:
+  - Added `github_installation_id` query parameter to diff scan endpoints for GitHub installation-specific settings
+  - Added KEV (Known Exploited Vulnerability) filter support (`filters.alertKEV`)
+  - Added EPSS (Exploit Prediction Scoring System) severity filter support (`filters.alertEPSS`)
+  - Updated aggregation fields to include `alertKEV` and `alertEPSS` options
+
 ## [3.0.15](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.15) - 2025-10-29
 
 ### Changed
