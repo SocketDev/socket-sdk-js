@@ -12,6 +12,7 @@ Thumbs.db
 /npm-debug.log
 **/.cache
 **/dist
+**/html
 **/node_modules
 **/*.tmp
 **/*.tsbuildinfo
