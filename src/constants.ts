@@ -34,6 +34,12 @@ export const MAX_STREAM_SIZE = 100 * 1024 * 1024
 // Public blob store URL for patch downloads
 export const SOCKET_PUBLIC_BLOB_STORE_URL = 'https://socketusercontent.com'
 
+// Socket.dev site URLs for user guidance
+export const SOCKET_CONTACT_URL = 'https://socket.dev/contact'
+export const SOCKET_DASHBOARD_URL = 'https://socket.dev/dashboard'
+export const SOCKET_API_TOKENS_URL =
+  'https://socket.dev/dashboard/settings/api-tokens'
+
 // https://github.com/sindresorhus/got/blob/v14.4.6/documentation/2-options.md#agent
 // Valid HTTP agent names for Got-style agent configuration compatibility.
 export const httpAgentNames = new Set(['http', 'https', 'http2'])
