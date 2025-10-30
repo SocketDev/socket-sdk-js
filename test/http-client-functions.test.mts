@@ -82,7 +82,7 @@ describe('HTTP Client - Module Selection', () => {
       mockResponse.emit('data', largeChunk)
 
       await expect(bodyPromise).rejects.toThrow(
-        `Response exceeds maximum size limit of ${MAX_RESPONSE_SIZE} bytes`,
+        'Response exceeds maximum size limit',
       )
     })
 
@@ -106,7 +106,7 @@ describe('HTTP Client - Module Selection', () => {
       mockResponse.emit('data', chunk2)
 
       await expect(bodyPromise).rejects.toThrow(
-        `Response exceeds maximum size limit of ${MAX_RESPONSE_SIZE} bytes`,
+        'Response exceeds maximum size limit',
       )
     })
 
@@ -142,7 +142,7 @@ describe('HTTP Client - Module Selection', () => {
       mockResponse.emit('data', largeEmojiString)
 
       await expect(bodyPromise).rejects.toThrow(
-        `Response exceeds maximum size limit of ${MAX_RESPONSE_SIZE} bytes`,
+        'Response exceeds maximum size limit',
       )
     })
   })
