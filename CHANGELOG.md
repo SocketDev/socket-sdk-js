@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.0.21](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.21) - 2025-10-30
+
+### Changed
+
+- Consolidated Socket.dev URL constants (`SOCKET_CONTACT_URL`, `SOCKET_DASHBOARD_URL`, `SOCKET_API_TOKENS_URL`) to use standardized exports from `@socketsecurity/lib` instead of duplicating them locally
+
 ## [3.0.20](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.20) - 2025-10-30
 
 ### Changed
