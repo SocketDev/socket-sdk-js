@@ -8,6 +8,13 @@ import { createUserAgentFromPkgJson } from './user-agent'
 
 import type { ALERT_ACTION, ALERT_TYPE } from './types'
 
+// Re-export Socket.dev URL constants from @socketsecurity/lib
+export {
+  SOCKET_API_TOKENS_URL,
+  SOCKET_CONTACT_URL,
+  SOCKET_DASHBOARD_URL,
+} from '@socketsecurity/lib/constants/socket'
+
 export const DEFAULT_USER_AGENT = createUserAgentFromPkgJson(rootPkgJson)
 
 // Default timeout for HTTP requests (30 seconds)
@@ -33,12 +40,6 @@ export const MAX_STREAM_SIZE = 100 * 1024 * 1024
 
 // Public blob store URL for patch downloads
 export const SOCKET_PUBLIC_BLOB_STORE_URL = 'https://socketusercontent.com'
-
-// Socket.dev site URLs for user guidance
-export const SOCKET_CONTACT_URL = 'https://socket.dev/contact'
-export const SOCKET_DASHBOARD_URL = 'https://socket.dev/dashboard'
-export const SOCKET_API_TOKENS_URL =
-  'https://socket.dev/dashboard/settings/api-tokens'
 
 // https://github.com/sindresorhus/got/blob/v14.4.6/documentation/2-options.md#agent
 // Valid HTTP agent names for Got-style agent configuration compatibility.
