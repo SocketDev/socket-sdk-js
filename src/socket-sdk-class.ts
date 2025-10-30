@@ -28,6 +28,9 @@ import {
   MAX_HTTP_TIMEOUT,
   MAX_STREAM_SIZE,
   MIN_HTTP_TIMEOUT,
+  SOCKET_API_TOKENS_URL,
+  SOCKET_CONTACT_URL,
+  SOCKET_DASHBOARD_URL,
   SOCKET_PUBLIC_BLOB_STORE_URL,
 } from './constants'
 import {
@@ -501,8 +504,60 @@ export class SocketSdk {
         errorMessage = `${errorMessage}: ${trimmedBody}`
       }
     }
+
+    // Add actionable guidance based on status code.
+    let actionableGuidance: string | undefined
+    if (statusCode === 401) {
+      actionableGuidance = [
+        '→ Authentication failed. API token is invalid or expired.',
+        '→ Check: Your API token is correct and active.',
+        `→ Generate a new token at: ${SOCKET_API_TOKENS_URL}`,
+      ].join('\n')
+    } else if (statusCode === 403) {
+      actionableGuidance = [
+        '→ Authorization failed. Insufficient permissions.',
+        '→ Check: Your API token has required permissions for this operation.',
+        '→ Check: You have access to the specified organization/repository.',
+        `→ Verify: Organization settings at ${SOCKET_DASHBOARD_URL}`,
+      ].join('\n')
+    } else if (statusCode === 404) {
+      actionableGuidance = [
+        '→ Resource not found.',
+        '→ Verify: Package name, version, or resource ID is correct.',
+        '→ Check: Organization or repository exists and is accessible.',
+      ].join('\n')
+    } else if (statusCode === 429) {
+      const retryAfter = error.response.headers['retry-after']
+      const retryMsg = retryAfter
+        ? `Retry after ${retryAfter} seconds.`
+        : 'Wait before retrying.'
+      actionableGuidance = [
+        '→ Rate limit exceeded. Too many requests.',
+        `→ ${retryMsg}`,
+        '→ Try: Implement exponential backoff or enable SDK retry option.',
+        `→ Contact support to increase rate limits: ${SOCKET_CONTACT_URL}`,
+      ].join('\n')
+    } else if (statusCode === 400) {
+      actionableGuidance = [
+        '→ Bad request. Invalid parameters or request body.',
+        '→ Check: All required parameters are provided and correctly formatted.',
+        '→ Verify: Package URLs (PURLs) follow correct format.',
+      ].join('\n')
+    } else if (statusCode === 413) {
+      actionableGuidance = [
+        '→ Payload too large. Request exceeds size limits.',
+        '→ Try: Reduce the number of files or packages in a single request.',
+        '→ Try: Use batch operations with smaller chunks.',
+      ].join('\n')
+    }
+
+    // Append actionable guidance to cause if available.
+    const causeWithGuidance = actionableGuidance
+      ? [trimmedBody, '', actionableGuidance].filter(Boolean).join('\n')
+      : body
+
     return {
-      cause: body,
+      cause: causeWithGuidance,
       data: undefined,
       error: errorMessage,
       /* c8 ignore next - fallback for missing status code in edge cases. */
@@ -750,18 +805,42 @@ export class SocketSdk {
 
     // Default behavior if no callback: warn and continue.
     if (!this.#onFileValidation && invalidPaths.length > 0) {
+      const samplePaths = invalidPaths.slice(0, 3).join('\n  - ')
+      const remaining =
+        invalidPaths.length > 3
+          ? `\n  ... and ${invalidPaths.length - 3} more`
+          : ''
       console.warn(
-        `Warning: ${invalidPaths.length} files skipped (unreadable). ` +
-          'This may occur with Yarn Berry PnP or pnpm symlinks.',
+        `Warning: ${invalidPaths.length} files skipped (unreadable):\n  - ${samplePaths}${remaining}\n` +
+          '→ This may occur with Yarn Berry PnP or pnpm symlinks.\n' +
+          '→ Try: Run installation command to ensure files are accessible.',
       )
     }
 
     // Fail if all files were invalid.
     if (validPaths.length === 0) {
+      const samplePaths = invalidPaths.slice(0, 5).join('\n  - ')
+      const remaining =
+        invalidPaths.length > 5
+          ? `\n  ... and ${invalidPaths.length - 5} more`
+          : ''
       return {
-        cause:
-          'All files failed validation. This may occur with Yarn Berry PnP virtual filesystem. ' +
-          'Try: Run `yarn install` or use `nodeLinker: node-modules` in .yarnrc.yml',
+        cause: [
+          `All ${invalidPaths.length} files failed validation:`,
+          `  - ${samplePaths}${remaining}`,
+          '',
+          '→ Common causes:',
+          '  • Yarn Berry PnP virtual filesystem (files are not on disk)',
+          '  • pnpm symlinks pointing to inaccessible locations',
+          '  • Incorrect file permissions',
+          '  • Files were deleted after discovery',
+          '',
+          '→ Solutions:',
+          '  • Yarn Berry: Use `nodeLinker: node-modules` in .yarnrc.yml',
+          '  • pnpm: Use `node-linker=hoisted` in .npmrc',
+          '  • Check file permissions with: ls -la <file>',
+          '  • Run package manager install command',
+        ].join('\n'),
         data: undefined,
         error: 'No readable manifest files found',
         status: 400,
@@ -892,18 +971,42 @@ export class SocketSdk {
 
     // Default behavior if no callback: warn and continue.
     if (!this.#onFileValidation && invalidPaths.length > 0) {
+      const samplePaths = invalidPaths.slice(0, 3).join('\n  - ')
+      const remaining =
+        invalidPaths.length > 3
+          ? `\n  ... and ${invalidPaths.length - 3} more`
+          : ''
       console.warn(
-        `Warning: ${invalidPaths.length} files skipped (unreadable). ` +
-          'This may occur with Yarn Berry PnP or pnpm symlinks.',
+        `Warning: ${invalidPaths.length} files skipped (unreadable):\n  - ${samplePaths}${remaining}\n` +
+          '→ This may occur with Yarn Berry PnP or pnpm symlinks.\n' +
+          '→ Try: Run installation command to ensure files are accessible.',
       )
     }
 
     // Fail if all files were invalid.
     if (validPaths.length === 0) {
+      const samplePaths = invalidPaths.slice(0, 5).join('\n  - ')
+      const remaining =
+        invalidPaths.length > 5
+          ? `\n  ... and ${invalidPaths.length - 5} more`
+          : ''
       return {
-        cause:
-          'All files failed validation. This may occur with Yarn Berry PnP virtual filesystem. ' +
-          'Try: Run `yarn install` or use `nodeLinker: node-modules` in .yarnrc.yml',
+        cause: [
+          `All ${invalidPaths.length} files failed validation:`,
+          `  - ${samplePaths}${remaining}`,
+          '',
+          '→ Common causes:',
+          '  • Yarn Berry PnP virtual filesystem (files are not on disk)',
+          '  • pnpm symlinks pointing to inaccessible locations',
+          '  • Incorrect file permissions',
+          '  • Files were deleted after discovery',
+          '',
+          '→ Solutions:',
+          '  • Yarn Berry: Use `nodeLinker: node-modules` in .yarnrc.yml',
+          '  • pnpm: Use `node-linker=hoisted` in .npmrc',
+          '  • Check file permissions with: ls -la <file>',
+          '  • Run package manager install command',
+        ].join('\n'),
         data: undefined,
         error: 'No readable manifest files found',
         status: 400,
@@ -3041,18 +3144,42 @@ export class SocketSdk {
 
     // Default behavior if no callback: warn and continue.
     if (!this.#onFileValidation && invalidPaths.length > 0) {
+      const samplePaths = invalidPaths.slice(0, 3).join('\n  - ')
+      const remaining =
+        invalidPaths.length > 3
+          ? `\n  ... and ${invalidPaths.length - 3} more`
+          : ''
       console.warn(
-        `Warning: ${invalidPaths.length} files skipped (unreadable). ` +
-          'This may occur with Yarn Berry PnP or pnpm symlinks.',
+        `Warning: ${invalidPaths.length} files skipped (unreadable):\n  - ${samplePaths}${remaining}\n` +
+          '→ This may occur with Yarn Berry PnP or pnpm symlinks.\n' +
+          '→ Try: Run installation command to ensure files are accessible.',
       )
     }
 
     // Fail if all files were invalid.
     if (validPaths.length === 0) {
+      const samplePaths = invalidPaths.slice(0, 5).join('\n  - ')
+      const remaining =
+        invalidPaths.length > 5
+          ? `\n  ... and ${invalidPaths.length - 5} more`
+          : ''
       return {
-        cause:
-          'All files failed validation. This may occur with Yarn Berry PnP virtual filesystem. ' +
-          'Try: Run `yarn install` or use `nodeLinker: node-modules` in .yarnrc.yml',
+        cause: [
+          `All ${invalidPaths.length} files failed validation:`,
+          `  - ${samplePaths}${remaining}`,
+          '',
+          '→ Common causes:',
+          '  • Yarn Berry PnP virtual filesystem (files are not on disk)',
+          '  • pnpm symlinks pointing to inaccessible locations',
+          '  • Incorrect file permissions',
+          '  • Files were deleted after discovery',
+          '',
+          '→ Solutions:',
+          '  • Yarn Berry: Use `nodeLinker: node-modules` in .yarnrc.yml',
+          '  • pnpm: Use `node-linker=hoisted` in .npmrc',
+          '  • Check file permissions with: ls -la <file>',
+          '  • Run package manager install command',
+        ].join('\n'),
         error: 'No readable manifest files found',
         status: 400,
         success: false,
@@ -3140,15 +3267,27 @@ export class SocketSdk {
       client
         .get(url, res => {
           if (res.statusCode === 404) {
-            reject(new Error(`Blob not found: ${hash}`))
+            const message = [
+              `Blob not found: ${hash}`,
+              `→ URL: ${url}`,
+              '→ The patch file may have expired or the hash is incorrect.',
+              '→ Verify: The blob hash is correct.',
+              '→ Note: Blob URLs may expire after a certain time period.',
+            ].join('\n')
+            reject(new Error(message))
             return
           }
           if (res.statusCode !== 200) {
-            reject(
-              new Error(
-                `Failed to download blob: ${res.statusCode} ${res.statusMessage}`,
-              ),
-            )
+            const message = [
+              `Failed to download blob: ${res.statusCode} ${res.statusMessage}`,
+              `→ Hash: ${hash}`,
+              `→ URL: ${url}`,
+              '→ The blob storage service may be temporarily unavailable.',
+              res.statusCode && res.statusCode >= 500
+                ? '→ Try: Retry the download after a short delay.'
+                : '→ Verify: The blob hash and URL are correct.',
+            ].join('\n')
+            reject(new Error(message))
             return
           }
 
@@ -3165,7 +3304,34 @@ export class SocketSdk {
           })
         })
         .on('error', err => {
-          reject(new Error(`Error downloading blob ${hash}: ${err.message}`))
+          const nodeErr = err as NodeJS.ErrnoException
+          const message = [
+            `Error downloading blob: ${hash}`,
+            `→ URL: ${url}`,
+            `→ Network error: ${nodeErr.message}`,
+          ]
+
+          // Add specific guidance based on error code.
+          if (nodeErr.code === 'ENOTFOUND') {
+            message.push(
+              '→ DNS lookup failed. Cannot resolve blob storage hostname.',
+              '→ Check: Internet connection and DNS settings.',
+            )
+          } else if (nodeErr.code === 'ECONNREFUSED') {
+            message.push(
+              '→ Connection refused. Blob storage service is unreachable.',
+              '→ Check: Network connectivity and firewall settings.',
+            )
+          } else if (nodeErr.code === 'ETIMEDOUT') {
+            message.push(
+              '→ Connection timed out.',
+              '→ Try: Check network connectivity and retry.',
+            )
+          } else if (nodeErr.code) {
+            message.push(`→ Error code: ${nodeErr.code}`)
+          }
+
+          reject(new Error(message.join('\n'), { cause: err }))
         })
     })
   }
