@@ -16,6 +16,8 @@ import type { RequestOptions as HttpsRequestOptions } from 'node:https'
 /**
  * Create multipart form-data body parts for file uploads.
  * Converts file paths to readable streams with proper multipart headers.
+ *
+ * @throws {Error} When file cannot be read (ENOENT, EACCES, EISDIR, etc.)
  */
 export function createRequestBodyForFilepaths(
   filepaths: string[],
@@ -25,10 +27,27 @@ export function createRequestBodyForFilepaths(
   for (const absPath of filepaths) {
     const relPath = normalizePath(path.relative(basePath, absPath))
     const filename = path.basename(absPath)
+    let stream: ReadStream
+    try {
+      stream = createReadStream(absPath, { highWaterMark: 1024 * 1024 })
+    } catch (error) {
+      const err = error as NodeJS.ErrnoException
+      let message = `Failed to read file: ${absPath}`
+      if (err.code === 'ENOENT') {
+        message += '\n→ File does not exist. Check the file path and try again.'
+      } else if (err.code === 'EACCES') {
+        message += `\n→ Permission denied. Run: chmod +r "${absPath}"`
+      } else if (err.code === 'EISDIR') {
+        message += '\n→ Expected a file but found a directory.'
+      } else if (err.code) {
+        message += `\n→ Error code: ${err.code}`
+      }
+      throw new Error(message, { cause: error })
+    }
     requestBody.push([
       `Content-Disposition: form-data; name="${relPath}"; filename="${filename}"\r\n`,
       'Content-Type: application/octet-stream\r\n\r\n',
-      createReadStream(absPath, { highWaterMark: 1024 * 1024 }),
+      stream,
     ])
   }
   return requestBody
@@ -131,16 +150,31 @@ export async function createUploadRequest(
         } else if (typeof part?.pipe === 'function') {
           // Stream data chunk-by-chunk with backpressure support.
           const stream = part as Readable
-          // eslint-disable-next-line no-await-in-loop
-          for await (const chunk of stream) {
-            /* c8 ignore next 3 - aborted state during streaming is difficult to test reliably */
-            if (aborted) {
-              break
+          try {
+            // eslint-disable-next-line no-await-in-loop
+            for await (const chunk of stream) {
+              /* c8 ignore next 3 - aborted state during streaming is difficult to test reliably */
+              if (aborted) {
+                break
+              }
+              /* c8 ignore next 3 - backpressure handling requires specific stream conditions */
+              if (!req.write(chunk)) {
+                await events.once(req, 'drain')
+              }
             }
-            /* c8 ignore next 3 - backpressure handling requires specific stream conditions */
-            if (!req.write(chunk)) {
-              await events.once(req, 'drain')
+          } catch (streamError) {
+            const err = streamError as NodeJS.ErrnoException
+            let message = 'Failed to read file during upload'
+            if (err.code === 'ENOENT') {
+              message +=
+                '\n→ File was deleted during upload. Ensure files remain accessible during the upload process.'
+            } else if (err.code === 'EACCES') {
+              message +=
+                '\n→ Permission denied while reading file. Check file permissions.'
+            } else if (err.code) {
+              message += `\n→ Error code: ${err.code}`
             }
+            throw new Error(message, { cause: streamError })
           }
           // Ensure trailing CRLF after file part.
           /* c8 ignore next 4 - trailing CRLF backpressure handling is edge case */
