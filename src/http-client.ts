@@ -160,11 +160,16 @@ export async function getErrorResponseBody(
       if (totalBytes > MAX_RESPONSE_SIZE) {
         // Destroy the response stream to stop receiving data
         response.destroy()
-        reject(
-          new Error(
-            `Response exceeds maximum size limit of ${MAX_RESPONSE_SIZE} bytes`,
-          ),
-        )
+        const sizeMB = (totalBytes / (1024 * 1024)).toFixed(2)
+        const maxMB = (MAX_RESPONSE_SIZE / (1024 * 1024)).toFixed(2)
+        const message = [
+          `Response exceeds maximum size limit (${sizeMB}MB > ${maxMB}MB)`,
+          '→ The API response is too large to process safely.',
+          '→ Try: Use pagination parameters (limit, offset) to reduce response size.',
+          '→ Try: Request specific fields instead of full objects.',
+          '→ Contact support if you need to process larger responses.',
+        ].join('\n')
+        reject(new Error(message))
         return
       }
 
@@ -205,11 +210,76 @@ export async function getResponse(
     req.on('timeout', () => {
       timedOut = true
       req.destroy()
-      reject(new Error('Request timed out'))
+      // Extract request details for better error context.
+      const method = (req as any).method || 'REQUEST'
+      const path = (req as any).path || 'unknown'
+      const timeout = (req as any).timeout || 'configured timeout'
+      const message = [
+        `${method} request timed out after ${timeout}ms: ${path}`,
+        '→ The Socket API did not respond in time.',
+        '→ Try: Increase timeout option or check network connectivity.',
+        '→ If problem persists, Socket API may be experiencing issues.',
+      ].join('\n')
+      reject(new Error(message))
     })
     req.on('error', e => {
       if (!timedOut) {
-        reject(e)
+        const err = e as NodeJS.ErrnoException
+        const method = (req as any).method || 'REQUEST'
+        const path = (req as any).path || 'unknown'
+        let message = `${method} request failed: ${path}`
+
+        // Provide specific guidance based on error code.
+        if (err.code === 'ECONNREFUSED') {
+          message += [
+            '',
+            '→ Connection refused. Socket API server is unreachable.',
+            '→ Check: Network connectivity and firewall settings.',
+            '→ Verify: Base URL is correct (default: https://api.socket.dev)',
+          ].join('\n')
+        } else if (err.code === 'ENOTFOUND') {
+          message += [
+            '',
+            '→ DNS lookup failed. Cannot resolve hostname.',
+            '→ Check: Internet connection and DNS settings.',
+            '→ Verify: Base URL hostname is correct.',
+          ].join('\n')
+        } else if (err.code === 'ETIMEDOUT') {
+          message += [
+            '',
+            '→ Connection timed out. Network or server issue.',
+            '→ Try: Check network connectivity and retry.',
+            '→ If using proxy, verify proxy configuration.',
+          ].join('\n')
+        } else if (err.code === 'ECONNRESET') {
+          message += [
+            '',
+            '→ Connection reset by server. Possible network interruption.',
+            '→ Try: Retry the request. Enable retries option if not set.',
+          ].join('\n')
+        } else if (err.code === 'EPIPE') {
+          message += [
+            '',
+            '→ Broken pipe. Server closed connection unexpectedly.',
+            '→ Possible: Authentication issue or server error.',
+            '→ Check: API token is valid and has required permissions.',
+          ].join('\n')
+        } else if (
+          err.code === 'CERT_HAS_EXPIRED' ||
+          err.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE'
+        ) {
+          message += [
+            '',
+            '→ SSL/TLS certificate error.',
+            '→ Check: System time and date are correct.',
+            '→ Try: Update CA certificates on your system.',
+          ].join('\n')
+        } else if (err.code) {
+          message += `\n→ Error code: ${err.code}`
+        }
+
+        const enhancedError = new Error(message, { cause: e })
+        reject(enhancedError)
       }
     })
   })
@@ -253,10 +323,43 @@ export async function getResponseJson(
       stopTimer({ error: true })
       if (e instanceof SyntaxError) {
         // Attach the original response text for better error reporting.
-        const enhancedError = new Error(
-          `Socket API - Invalid JSON response:\n${responseBody}\n→ ${e.message}`,
-          { cause: e },
-        ) as SyntaxError & {
+        const contentType = response.headers['content-type']
+        const preview =
+          responseBody.length > 200
+            ? `${responseBody.slice(0, 200)}...`
+            : responseBody
+        const messageParts = [
+          'Socket API returned invalid JSON response',
+          `→ Response preview: ${preview}`,
+          `→ Parse error: ${e.message}`,
+        ]
+
+        // Add helpful hints based on response characteristics.
+        if (contentType && !contentType.includes('application/json')) {
+          messageParts.push(
+            `→ Unexpected Content-Type: ${contentType} (expected application/json)`,
+            '→ The API may have returned an error page instead of JSON.',
+          )
+        } else if (responseBody.startsWith('<')) {
+          messageParts.push(
+            '→ Response appears to be HTML, not JSON.',
+            '→ This may indicate an API endpoint error or network interception.',
+          )
+        } else if (responseBody.length === 0) {
+          messageParts.push('→ Response body is empty when JSON was expected.')
+        } else if (
+          responseBody.includes('502 Bad Gateway') ||
+          responseBody.includes('503 Service')
+        ) {
+          messageParts.push(
+            '→ Response indicates a server error.',
+            '→ The Socket API may be temporarily unavailable.',
+          )
+        }
+
+        const enhancedError = new Error(messageParts.join('\n'), {
+          cause: e,
+        }) as SyntaxError & {
           originalResponse?: string | undefined
         }
         enhancedError.name = 'SyntaxError'
