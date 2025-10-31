@@ -69,7 +69,7 @@
     "@vitest/coverage-v8": "4.0.3",
     "del": "8.0.1",
     "dev-null-cli": "2.0.0",
-    "esbuild": "0.25.10",
+    "esbuild": "0.25.11",
     "eslint": "9.35.0",
     "eslint-import-resolver-typescript": "4.4.4",
     "eslint-plugin-import-x": "4.16.1",
