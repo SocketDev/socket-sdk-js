@@ -10,7 +10,10 @@ Thumbs.db
 /.type-coverage
 /.vscode
 /coverage
-/npm-debug.log
+*.log
+*.pid
+*.seed
+*.pid.lock
 
 # Editor files
 *.swp
@@ -19,7 +22,6 @@ Thumbs.db
 .#*
 **/.cache
 **/dist
-**/html
 **/node_modules
 **/*.tmp
 **/*.tsbuildinfo
