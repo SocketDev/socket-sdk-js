@@ -125,6 +125,10 @@ Documentation organized alphabetically within functional categories
 
 ### Testing
 
+**Vitest Configuration**: This repo uses the shared vitest configuration patterns documented in `../socket-registry/CLAUDE.md` (see "Vitest Configuration Variants" section). Two configs available:
+- `.config/vitest.config.mts` - Main config (default)
+- `.config/vitest.config.isolated.mts` - Full process isolation for vi.doMock()
+
 #### Test Structure
 - **Directories**: `test/` - Test files, `test/utils/` - Shared utilities
 - **Naming**: Descriptive names
