@@ -31062,6 +31062,24 @@
             }
           },
           {
+            "name": "filters.repoFullName",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo full names that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoFullName.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo full names that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "filters.repoLabels",
             "in": "query",
             "required": false,
@@ -31296,6 +31314,24 @@
             }
           },
           {
+            "name": "filters.alertReachabilityAnalysisType",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertReachabilityAnalysisType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "filters.alertPriority",
             "in": "query",
             "required": false,
@@ -31447,6 +31483,11 @@
                         "additionalProperties": false,
                         "description": "",
                         "properties": {
+                          "repoFullName": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
                           "repoId": {
                             "type": "string",
                             "description": "",
@@ -31722,6 +31763,7 @@
                           "defaultBranch",
                           "dependency",
                           "fullScanId",
+                          "repoFullName",
                           "repoId",
                           "repoLabelIds",
                           "repoLabels",
@@ -31782,6 +31824,15 @@
                                 "default": ""
                               },
                               "description": "Comma-separated list of repo slugs that should be excluded"
+                            },
+                            "repoFullName": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo full names that should be excluded"
                             },
                             "repoLabels": {
                               "type": "array",
@@ -31899,6 +31950,15 @@
                                 "default": ""
                               },
                               "description": "Comma-separated list of alert CVE reachability types (\"direct_dependency\", \"error\", \"maybe_reachable\", \"missing_support\", \"pending\", \"reachable\", \"undeterminable_reachability\", \"unknown\", or \"unreachable\") that should be excluded"
+                            },
+                            "alertReachabilityAnalysisType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be excluded"
                             },
                             "alertPriority": {
                               "type": "array",
@@ -32035,7 +32095,7 @@
             "name": "aggregation.fields",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,alertPriority,alertKEV,alertEPSS,dependencyDirect,dependencyDev,dependencyDead)",
+            "description": "Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoFullName,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,alertReachabilityAnalysisType,alertPriority,alertKEV,alertEPSS,dependencyDirect,dependencyDev,dependencyDead)",
             "schema": {
               "type": "string",
               "default": ""
@@ -32073,6 +32133,24 @@
             "in": "query",
             "required": false,
             "description": "Comma-separated list of repo slugs that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoFullName",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo full names that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoFullName.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo full names that should be excluded",
             "schema": {
               "type": "string"
             }
@@ -32312,6 +32390,24 @@
             }
           },
           {
+            "name": "filters.alertReachabilityAnalysisType",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertReachabilityAnalysisType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "filters.alertPriority",
             "in": "query",
             "required": false,
@@ -32530,6 +32626,15 @@
                               },
                               "description": "Comma-separated list of repo slugs that should be excluded"
                             },
+                            "repoFullName": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo full names that should be excluded"
+                            },
                             "repoLabels": {
                               "type": "array",
                               "items": {
@@ -32646,6 +32751,15 @@
                                 "default": ""
                               },
                               "description": "Comma-separated list of alert CVE reachability types (\"direct_dependency\", \"error\", \"maybe_reachable\", \"missing_support\", \"pending\", \"reachable\", \"undeterminable_reachability\", \"unknown\", or \"unreachable\") that should be excluded"
+                            },
+                            "alertReachabilityAnalysisType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be excluded"
                             },
                             "alertPriority": {
                               "type": "array",
@@ -32839,6 +32953,15 @@
             }
           },
           {
+            "name": "repoFullName",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo full names that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "repoSlug",
             "in": "query",
             "required": false,
@@ -32980,6 +33103,15 @@
                           "type": "object",
                           "additionalProperties": false,
                           "properties": {
+                            "repoFullName": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo full names that should be included"
+                            },
                             "repoSlug": {
                               "type": "array",
                               "items": {

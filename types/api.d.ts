@@ -12530,6 +12530,10 @@ export interface operations {
         'filters.repoSlug'?: string
         /** @description Comma-separated list of repo slugs that should be excluded */
         'filters.repoSlug.notIn'?: string
+        /** @description Comma-separated list of repo full names that should be included */
+        'filters.repoFullName'?: string
+        /** @description Comma-separated list of repo full names that should be excluded */
+        'filters.repoFullName.notIn'?: string
         /** @description Comma-separated list of repo labels that should be included. Use "" to filter for repositories with no labels. */
         'filters.repoLabels'?: string
         /** @description Comma-separated list of repo labels that should be excluded. Use "" to filter for repositories with no labels. */
@@ -12582,6 +12586,10 @@ export interface operations {
         'filters.alertReachabilityType'?: string
         /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
         'filters.alertReachabilityType.notIn'?: string
+        /** @description Comma-separated list of alert CVE reachability analysis types ("full-scan" or "precomputed") that should be included */
+        'filters.alertReachabilityAnalysisType'?: string
+        /** @description Comma-separated list of alert CVE reachability analysis types ("full-scan" or "precomputed") that should be excluded */
+        'filters.alertReachabilityAnalysisType.notIn'?: string
         /** @description Alert priority ("low", "medium", "high", or "critical") */
         'filters.alertPriority'?: string
         /** @description Alert priority ("low", "medium", "high", or "critical") */
@@ -12620,6 +12628,8 @@ export interface operations {
             /** @default */
             endCursor: string | null
             items: Array<{
+              /** @default */
+              repoFullName: string
               /** @default */
               repoId: string | null
               /** @default */
@@ -12717,6 +12727,8 @@ export interface operations {
                 alertSeverity?: string[]
                 /** @description Comma-separated list of repo slugs that should be excluded */
                 repoSlug?: string[]
+                /** @description Comma-separated list of repo full names that should be excluded */
+                repoFullName?: string[]
                 /** @description Comma-separated list of repo labels that should be excluded. Use "" to filter for repositories with no labels. */
                 repoLabels?: string[]
                 /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be excluded */
@@ -12743,6 +12755,8 @@ export interface operations {
                 alertCweName?: string[]
                 /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
                 alertReachabilityType?: string[]
+                /** @description Comma-separated list of alert CVE reachability analysis types ("full-scan" or "precomputed") that should be excluded */
+                alertReachabilityAnalysisType?: string[]
                 /** @description Alert priority ("low", "medium", "high", or "critical") */
                 alertPriority?: string[]
                 /** @description Alert KEV (Known Exploited Vulnerability) filter flag */
@@ -12782,7 +12796,7 @@ export interface operations {
         date?: string
         /** @description The number of days of data to fetch as an offset from input date */
         range?: string
-        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,alertPriority,alertKEV,alertEPSS,dependencyDirect,dependencyDev,dependencyDead) */
+        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoFullName,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,alertReachabilityAnalysisType,alertPriority,alertKEV,alertEPSS,dependencyDirect,dependencyDev,dependencyDead) */
         'aggregation.fields'?: string
         /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
         'filters.alertSeverity'?: string
@@ -12792,6 +12806,10 @@ export interface operations {
         'filters.repoSlug'?: string
         /** @description Comma-separated list of repo slugs that should be excluded */
         'filters.repoSlug.notIn'?: string
+        /** @description Comma-separated list of repo full names that should be included */
+        'filters.repoFullName'?: string
+        /** @description Comma-separated list of repo full names that should be excluded */
+        'filters.repoFullName.notIn'?: string
         /** @description Comma-separated list of repo labels that should be included. Use "" to filter for repositories with no labels. */
         'filters.repoLabels'?: string
         /** @description Comma-separated list of repo labels that should be excluded. Use "" to filter for repositories with no labels. */
@@ -12844,6 +12862,10 @@ export interface operations {
         'filters.alertReachabilityType'?: string
         /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
         'filters.alertReachabilityType.notIn'?: string
+        /** @description Comma-separated list of alert CVE reachability analysis types ("full-scan" or "precomputed") that should be included */
+        'filters.alertReachabilityAnalysisType'?: string
+        /** @description Comma-separated list of alert CVE reachability analysis types ("full-scan" or "precomputed") that should be excluded */
+        'filters.alertReachabilityAnalysisType.notIn'?: string
         /** @description Alert priority ("low", "medium", "high", or "critical") */
         'filters.alertPriority'?: string
         /** @description Alert priority ("low", "medium", "high", or "critical") */
@@ -12897,6 +12919,8 @@ export interface operations {
                 alertSeverity?: string[]
                 /** @description Comma-separated list of repo slugs that should be excluded */
                 repoSlug?: string[]
+                /** @description Comma-separated list of repo full names that should be excluded */
+                repoFullName?: string[]
                 /** @description Comma-separated list of repo labels that should be excluded. Use "" to filter for repositories with no labels. */
                 repoLabels?: string[]
                 /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be excluded */
@@ -12923,6 +12947,8 @@ export interface operations {
                 alertCweName?: string[]
                 /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
                 alertReachabilityType?: string[]
+                /** @description Comma-separated list of alert CVE reachability analysis types ("full-scan" or "precomputed") that should be excluded */
+                alertReachabilityAnalysisType?: string[]
                 /** @description Alert priority ("low", "medium", "high", or "critical") */
                 alertPriority?: string[]
                 /** @description Alert KEV (Known Exploited Vulnerability) filter flag */
@@ -12975,6 +13001,8 @@ export interface operations {
         date?: string
         /** @description The number of days of data to fetch as an offset from input date */
         range?: string
+        /** @description Comma-separated list of repo full names that should be included */
+        repoFullName?: string
         /** @description Comma-separated list of repo slugs that should be included */
         repoSlug?: string
         /** @description Comma-separated list of repo labels that should be included */
@@ -13012,6 +13040,8 @@ export interface operations {
                 groups: string[][]
               }
               filters: {
+                /** @description Comma-separated list of repo full names that should be included */
+                repoFullName?: string[]
                 /** @description Comma-separated list of repo slugs that should be included */
                 repoSlug?: string[]
                 /** @description Comma-separated list of repo labels that should be included */
