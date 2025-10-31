@@ -445,6 +445,7 @@ async function main() {
     const withCoverage = values.cover || values.coverage
 
     let exitCode = 0
+    const startTime = performance.now()
 
     // Run checks unless skipped
     if (!skipChecks) {
@@ -468,16 +469,23 @@ async function main() {
     }
 
     // Run tests
+    const testStartTime = performance.now()
     exitCode = await runTests(
       { ...values, coverage: withCoverage },
       positionals,
     )
+    const testEndTime = performance.now()
+    const testDuration = ((testEndTime - testStartTime) / 1000).toFixed(2)
 
     if (exitCode !== 0) {
       logger.error('Tests failed')
       process.exitCode = exitCode
     } else {
       logger.success('All tests passed!')
+      const totalDuration = ((performance.now() - startTime) / 1000).toFixed(2)
+      logger.progress(
+        `Test execution: ${testDuration}s | Total: ${totalDuration}s`,
+      )
     }
   } catch (error) {
     // Ensure spinner is stopped

@@ -8,6 +8,10 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitest/config'
 
 import { getLocalPackageAliases } from '../scripts/utils/get-local-package-aliases.mjs'
+import {
+  baseCoverageConfig,
+  isolatedCoverageThresholds,
+} from './vitest.coverage.config.mts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -42,37 +46,8 @@ export default defineConfig({
     hookTimeout: 10_000,
     // Share coverage settings with main config
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html', 'lcov', 'clover'],
-      exclude: [
-        '**/*.config.*',
-        '**/node_modules/**',
-        '**/[.]**',
-        '**/*.d.ts',
-        '**/virtual:*',
-        'coverage/**',
-        'dist/**',
-        'scripts/**',
-        'types/**',
-        'test/**',
-        '**/*.mjs',
-        '**/*.cjs',
-        'src/types.ts',
-        'perf/**',
-        '/scripts/**',
-        '/test/**',
-      ],
-      include: ['src/**/*.{ts,mts,cts}'],
-      all: true,
-      clean: true,
-      skipFull: false,
-      ignoreClassMethods: ['constructor'],
-      thresholds: {
-        lines: 35,
-        functions: 35,
-        branches: 85,
-        statements: 35,
-      },
+      ...baseCoverageConfig,
+      thresholds: isolatedCoverageThresholds,
     },
   },
 })

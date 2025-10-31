@@ -24,7 +24,7 @@ const require = createRequire(import.meta.url)
 const getMaintainedNodeVersions = () => ['18', '20', '22', '24']
 
 const rootPath = path.dirname(__dirname)
-const rootTsConfigPath = path.join(__dirname, 'tsconfig.json')
+const rootTsConfigPath = path.join(__dirname, 'tsconfig.check.json')
 
 const nodeGlobalsConfig = Object.fromEntries(
   Object.entries(globals.node).map(([k]) => [k, 'readonly']),
