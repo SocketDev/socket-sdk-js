@@ -37,17 +37,27 @@ const { values } = parseArgs({
 printHeader('Test Coverage')
 console.log('')
 
-// Run vitest with coverage enabled via test runner, capturing output
+// Run vitest with coverage enabled, capturing output
 // Filter out custom flags that vitest doesn't understand
 const customFlags = ['--code-only', '--type-only', '--summary']
-const vitestArgs = [
+
+// Build vitest commands for both main and isolated test suites
+const mainVitestArgs = [
   'exec',
-  'bash',
-  'scripts/node-with-loader.sh',
-  'scripts/test.mjs',
-  '--skip-checks',
-  '--cover',
-  '--all',
+  'vitest',
+  'run',
+  '--config',
+  '.config/vitest.config.mts',
+  '--coverage',
+  ...process.argv.slice(2).filter(arg => !customFlags.includes(arg)),
+]
+const isolatedVitestArgs = [
+  'exec',
+  'vitest',
+  'run',
+  '--config',
+  '.config/vitest.config.isolated.mts',
+  '--coverage',
   ...process.argv.slice(2).filter(arg => !customFlags.includes(arg)),
 ]
 const typeCoverageArgs = ['exec', 'type-coverage']
@@ -83,10 +93,43 @@ try {
   }
   // Handle --code-only flag
   else if (values['code-only']) {
-    codeCoverageResult = await runCommandQuiet('pnpm', vitestArgs, {
-      cwd: rootPath,
-    })
-    exitCode = codeCoverageResult.exitCode
+    // Run main test suite (allow failures for coverage reporting)
+    let mainResult
+    try {
+      mainResult = await runCommandQuiet('pnpm', mainVitestArgs, {
+        cwd: rootPath,
+      })
+    } catch (error) {
+      // Command may throw on non-zero exit, but we still want coverage
+      mainResult = {
+        exitCode: 1,
+        stdout: error.stdout || '',
+        stderr: error.stderr || error.message || '',
+      }
+    }
+
+    // Run isolated test suite (allow failures for coverage reporting)
+    let isolatedResult
+    try {
+      isolatedResult = await runCommandQuiet('pnpm', isolatedVitestArgs, {
+        cwd: rootPath,
+      })
+    } catch (error) {
+      // Command may throw on non-zero exit, but we still want coverage
+      isolatedResult = {
+        exitCode: 1,
+        stdout: error.stdout || '',
+        stderr: error.stderr || error.message || '',
+      }
+    }
+
+    // Combine results - fail if either failed
+    exitCode = mainResult.exitCode !== 0 ? mainResult.exitCode : isolatedResult.exitCode
+    codeCoverageResult = {
+      stdout: mainResult.stdout + isolatedResult.stdout,
+      stderr: mainResult.stderr + isolatedResult.stderr,
+      exitCode,
+    }
 
     // Process code coverage output only
     const ansiRegex = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g')
@@ -134,10 +177,43 @@ try {
   }
   // Default: run both code and type coverage
   else {
-    codeCoverageResult = await runCommandQuiet('pnpm', vitestArgs, {
-      cwd: rootPath,
-    })
-    exitCode = codeCoverageResult.exitCode
+    // Run main test suite (allow failures for coverage reporting)
+    let mainResult
+    try {
+      mainResult = await runCommandQuiet('pnpm', mainVitestArgs, {
+        cwd: rootPath,
+      })
+    } catch (error) {
+      // Command may throw on non-zero exit, but we still want coverage
+      mainResult = {
+        exitCode: 1,
+        stdout: error.stdout || '',
+        stderr: error.stderr || error.message || '',
+      }
+    }
+
+    // Run isolated test suite (allow failures for coverage reporting)
+    let isolatedResult
+    try {
+      isolatedResult = await runCommandQuiet('pnpm', isolatedVitestArgs, {
+        cwd: rootPath,
+      })
+    } catch (error) {
+      // Command may throw on non-zero exit, but we still want coverage
+      isolatedResult = {
+        exitCode: 1,
+        stdout: error.stdout || '',
+        stderr: error.stderr || error.message || '',
+      }
+    }
+
+    // Combine results - fail if either failed
+    exitCode = mainResult.exitCode !== 0 ? mainResult.exitCode : isolatedResult.exitCode
+    codeCoverageResult = {
+      stdout: mainResult.stdout + isolatedResult.stdout,
+      stderr: mainResult.stderr + isolatedResult.stderr,
+      exitCode,
+    }
 
     // Run type coverage
     typeCoverageResult = await runCommandQuiet('pnpm', typeCoverageArgs, {
