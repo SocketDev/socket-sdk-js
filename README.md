@@ -8,6 +8,27 @@
 
 JavaScript SDK for [Socket.dev](https://socket.dev/) API - Security analysis, vulnerability scanning, and compliance monitoring for software supply chains.
 
+## Table of Contents
+
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [API Methods](#api-methods) - [Full API Reference](./docs/api-reference.md)
+- [Documentation](#documentation)
+- [Examples](#examples)
+
+## At a Glance
+
+| Feature | Description |
+|---------|-------------|
+| **Package Analysis** | Quick security checks for npm packages |
+| **Full Scans** | Deep analysis with SBOM support |
+| **Batch Operations** | Analyze multiple packages efficiently |
+| **Policy Management** | Configure security & license rules |
+| **Quota Utilities** | Cost calculation & planning helpers |
+| **TypeScript** | Full type safety with auto-generated types |
+
+**Requirements:** Node.js 18+ • ESM only (v2.0+)
+
 ## Installation
 
 ```bash
@@ -142,19 +163,33 @@ Raw API access: `getApi()` • `sendApi()`
 
 [→ Documentation](./docs/api-reference.md#advanced-query-methods)
 
-**[→ API Reference](./docs/api-reference.md)**
+## Documentation
 
-**[→ Examples](./docs/usage-examples.md)**
+| Guide | Description |
+|-------|-------------|
+| **[API Reference](./docs/api-reference.md)** | Complete API method documentation |
+| **[Usage Examples](./docs/usage-examples.md)** | Real-world patterns and code samples |
+| **[Getting Started](./docs/getting-started.md)** | Development setup and workflow |
+| **[Quota Management](./docs/quota-management.md)** | Cost tiers (0/10/100) and utilities |
+| **[Testing Guide](./docs/dev/testing.md)** | Test helpers, fixtures, and patterns |
+| **[Method Reference](./docs/when-to-use-what.md)** | Quick method selection guide |
 
-**[→ Quota Management](./docs/quota-management.md)** - Cost tiers: 0 (free), 10 (standard), 100 (batch/uploads)
+## Examples
 
-**[→ Testing Utilities](./docs/dev/testing.md)** - Mock factories, fixtures, type guards
+See **[usage-examples.md](./docs/usage-examples.md)** for complete examples including:
+- Package security analysis
+- Batch operations
+- Full scans with SBOM
+- Policy management
+- Quota planning
 
-## See Also
+## Related Projects
 
-- [Socket.dev API Reference](https://docs.socket.dev/reference) - Official API documentation
-- [Socket CLI](https://github.com/SocketDev/socket-cli) - Command-line interface
-- [Socket GitHub App](https://github.com/apps/socket-security) - GitHub integration
+| Project | Description |
+|---------|-------------|
+| [Socket.dev API](https://docs.socket.dev/reference) | Official REST API documentation |
+| [Socket CLI](https://github.com/SocketDev/socket-cli) | Command-line interface |
+| [Socket GitHub App](https://github.com/apps/socket-security) | Automated GitHub integration |
 
 ## License
 

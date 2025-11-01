@@ -26,20 +26,32 @@ You're ready to develop!
 
 ## Prerequisites
 
-**Required:**
-- **Node.js** 18.0.0 or higher (20, 22, 24 recommended)
-- **pnpm** 10.16.0 or higher
-- **Socket API Key** (for integration testing)
+### Required
 
-**Recommended:**
-- **Git** 2.0 or higher
-- **VSCode** with recommended extensions
+| Tool | Version | Purpose |
+|------|---------|---------|
+| **Node.js** | 18.0.0+ (20, 22, 24 recommended) | Runtime environment |
+| **pnpm** | 10.16.0+ | Package manager |
+| **Socket API Key** | - | Integration testing ([Get yours](https://socket.dev/dashboard)) |
 
-**Install pnpm:**
+### Recommended
+
+| Tool | Version | Purpose |
+|------|---------|---------|
+| **Git** | 2.0+ | Version control |
+| **VSCode** | Latest | IDE with extension support |
+
+### Installation
+
 ```bash
+# Install pnpm
 npm install -g pnpm
-# or
+
+# Or via Homebrew (macOS)
 brew install pnpm
+
+# Verify installation
+pnpm --version
 ```
 
 ## Repository Structure
@@ -135,6 +147,26 @@ pnpm run fix
 # Type check only
 pnpm run type
 ```
+
+## Command Reference
+
+Quick reference for common development commands:
+
+| Command | Purpose | Notes |
+|---------|---------|-------|
+| `pnpm install` | Install dependencies | Run after cloning or `package.json` changes |
+| `pnpm run build` | Build SDK | Outputs to `dist/` |
+| `pnpm run build --watch` | Watch mode | 68% faster incremental builds (9ms vs 27ms) |
+| `pnpm test` | Run all tests | Must maintain ≥99% coverage |
+| `pnpm run test:run <file>` | Run specific test | Supports glob patterns |
+| `pnpm run cover` | Test with coverage | Shows detailed coverage report |
+| `pnpm run coverage:percent` | Coverage percentage | Quick coverage check |
+| `pnpm run check` | Lint + type check | Run before commits |
+| `pnpm run fix` | Auto-fix lint issues | Uses Biome formatter |
+| `pnpm run type` | Type check only | Uses TypeScript compiler |
+| `pnpm run generate-sdk` | Update API types | Fetches latest OpenAPI spec |
+| `pnpm run check-ci` | CI lint checks | Full CI validation |
+| `pnpm run test-ci` | CI test run | All test files |
 
 ## Common Development Tasks
 

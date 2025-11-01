@@ -92,6 +92,35 @@ Socket SDK for JavaScript/TypeScript - Programmatic access to Socket.dev securit
 
 **Development tip:** Use `pnpm build --watch` for 68% faster rebuilds (9ms vs 27ms). See `docs/INCREMENTAL_BUILDS.md` for details.
 
+### Configuration Files
+
+All configuration files are organized in `.config/` directory for cleanliness:
+
+| File | Purpose | When to Modify |
+|------|---------|----------------|
+| **tsconfig.json** | Main TS config (extends tsconfig.base.json) | Rarely - only for project-wide TS changes |
+| **.config/tsconfig.base.json** | Base TS settings (strict mode, targets) | Rarely - shared TS configuration |
+| **.config/tsconfig.check.json** | Type checking for ESLint resolver | Never - auto-used by ESLint |
+| **.config/tsconfig.dts.json** | Declaration file generation settings | Rarely - only for type output changes |
+| **.config/esbuild.config.mjs** | Build orchestration (ESM output, node18+ target) | When adding new entry points or build steps |
+| **.config/eslint.config.mjs** | Linting rules (flat config format) | When adding new lint rules |
+| **.config/vitest.config.mts** | Main test config (default runner) | When changing test setup or plugins |
+| **.config/vitest.config.isolated.mts** | Isolated test config (for vi.doMock() tests) | Never - only for isolated test mode |
+| **.config/vitest.coverage.config.mts** | Shared coverage thresholds (≥99%) | When adjusting coverage requirements |
+| **.config/isolated-tests.json** | List of tests requiring isolation | When adding tests that use vi.doMock() |
+| **.config/taze.config.mts** | Dependency update tool settings | When changing update policies |
+| **biome.json** | Code formatting + linting (replaces Prettier/ESLint) | When adding format/lint rules |
+
+**Why multiple TypeScript configs?**
+- `tsconfig.json` - Main config for building the SDK
+- `tsconfig.check.json` - ESLint needs separate config for type checking imports
+- `tsconfig.dts.json` - Declaration file generation has different output requirements
+
+**Why multiple Vitest configs?**
+- `vitest.config.mts` - Standard test mode (default, fastest)
+- `vitest.config.isolated.mts` - Process isolation for tests using `vi.doMock()` (slower)
+- `vitest.coverage.config.mts` - Shared coverage settings to avoid duplication
+
 ### SDK-Specific Patterns
 
 #### Logger Standardization
