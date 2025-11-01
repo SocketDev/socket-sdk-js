@@ -144,7 +144,7 @@ describe('Entitlements API', () => {
         .replyWithError('Network error')
 
       await expect(getClient().getEntitlements('error-org')).rejects.toThrow(
-        'Network error',
+        'GET request failed',
       )
     })
 
@@ -155,7 +155,7 @@ describe('Entitlements API', () => {
 
       await expect(
         getClient().getEnabledEntitlements('error-org'),
-      ).rejects.toThrow('Connection refused')
+      ).rejects.toThrow('GET request failed')
     })
 
     it('should handle 401 unauthorized errors', async () => {

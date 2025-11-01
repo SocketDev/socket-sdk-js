@@ -26,6 +26,9 @@ describe('JSON Parsing Edge Cases', () => {
         statusCode: 200,
         setEncoding: vi.fn(),
         on: vi.fn(),
+        headers: {
+          'content-type': 'application/json',
+        },
       } as unknown as IncomingMessage
 
       // Mock response.on to simulate receiving data.
@@ -65,6 +68,9 @@ describe('JSON Parsing Edge Cases', () => {
         statusCode: 200,
         setEncoding: vi.fn(),
         on: vi.fn(),
+        headers: {
+          'content-type': 'application/json',
+        },
       } as unknown as IncomingMessage
 
       const responseBody = '{"test": "data"}'
@@ -95,6 +101,9 @@ describe('JSON Parsing Edge Cases', () => {
         statusCode: 200,
         setEncoding: vi.fn(),
         on: vi.fn(),
+        headers: {
+          'content-type': 'application/json',
+        },
       } as unknown as IncomingMessage
 
       const responseBody = 'invalid json {'
@@ -119,7 +128,7 @@ describe('JSON Parsing Edge Cases', () => {
         expect.objectContaining({
           name: 'SyntaxError',
           message: expect.stringContaining(
-            'Socket API - Invalid JSON response:',
+            'Socket API returned invalid JSON response',
           ),
           originalResponse: responseBody,
         }),
