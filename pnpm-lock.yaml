@@ -11,6 +11,9 @@ importers:
 
   .:
     dependencies:
+      '@socketregistry/packageurl-js':
+        specifier: 1.3.2
+        version: 1.3.2
       '@socketsecurity/lib':
         specifier: 3.0.3
         version: 3.0.3(typescript@5.9.3)
@@ -646,6 +649,10 @@ packages:
   '@sindresorhus/merge-streams@2.3.0':
     resolution: {integrity: sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==}
     engines: {node: '>=18'}
+
+  '@socketregistry/packageurl-js@1.3.2':
+    resolution: {integrity: sha512-CWXk2YXS0BItymgrbavnilsX6NMeyn0LGUpyKJQn1RtIgGRJ07dVt5bUEr4203+TcNELRhRQqIa4O5ZA+zD+zw==}
+    engines: {node: '>=18', pnpm: '>=10.16.0'}
 
   '@socketsecurity/lib@3.0.3':
     resolution: {integrity: sha512-TPwQQO9slv2qWEfoY8E+/o2SHEfVNwz5VDMHOC9XSA/jJq3lwfay8dXhllkA+QhzL/13DBOg+Wnw31IeZZ+1eA==}
@@ -2649,6 +2656,8 @@ snapshots:
     optional: true
 
   '@sindresorhus/merge-streams@2.3.0': {}
+
+  '@socketregistry/packageurl-js@1.3.2': {}
 
   '@socketsecurity/lib@3.0.3(typescript@5.9.3)':
     optionalDependencies:

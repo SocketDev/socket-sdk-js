@@ -54,6 +54,7 @@
     "update": "node scripts/update.mjs"
   },
   "dependencies": {
+    "@socketregistry/packageurl-js": "1.3.2",
     "@socketsecurity/lib": "3.0.3"
   },
   "devDependencies": {
