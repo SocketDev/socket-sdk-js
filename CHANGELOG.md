@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.0.29](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.29) - 2025-11-01
+
+### Changed
+
+- Moved `@socketsecurity/lib` and `@socketregistry/packageurl-js` to devDependencies (bundled SDK has no runtime dependencies)
+
 ## [3.0.28](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.28) - 2025-11-01
 
 ### Changed
