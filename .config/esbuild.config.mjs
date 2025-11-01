@@ -57,7 +57,7 @@ export const buildConfig = {
   // Target Node.js 18+ features.
   target: 'node18',
   sourcemap: false,
-  minify: true,
+  minify: false,
   treeShaking: true,
   // For bundle analysis
   metafile: true,
