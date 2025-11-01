@@ -74,7 +74,7 @@ describe('PromiseQueue', () => {
     })
   })
 
-  describe('Max Queue Length', () => {
+  describe.sequential('Max Queue Length', () => {
     it('should drop oldest tasks when queue is full', async () => {
       const limitedQueue = new PromiseQueue(1, 2)
       const completed: number[] = []
@@ -136,7 +136,7 @@ describe('PromiseQueue', () => {
     })
   })
 
-  describe('Complex Scenarios', () => {
+  describe.sequential('Complex Scenarios', () => {
     it('should handle multiple concurrent queues', async () => {
       const queue1 = new PromiseQueue(2)
       const queue2 = new PromiseQueue(2)

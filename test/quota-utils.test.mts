@@ -15,22 +15,18 @@ import {
 
 describe('Quota Utils', () => {
   describe('getQuotaCost', () => {
-    it('should return correct quota cost for high-cost methods', () => {
-      expect(getQuotaCost('batchPackageFetch')).toBe(100)
-      expect(getQuotaCost('searchDependencies')).toBe(100)
-      expect(getQuotaCost('uploadManifestFiles')).toBe(100)
-    })
-
-    it('should return correct quota cost for medium-cost methods', () => {
-      expect(getQuotaCost('getOrgAnalytics')).toBe(10)
-      expect(getQuotaCost('getAPITokens')).toBe(10)
-      expect(getQuotaCost('getScoreByNpmPackage')).toBe(10)
-    })
-
-    it('should return correct quota cost for free methods', () => {
-      expect(getQuotaCost('getQuota')).toBe(0)
-      expect(getQuotaCost('getOrganizations')).toBe(0)
-      expect(getQuotaCost('getScan')).toBe(0)
+    it.each([
+      ['batchPackageFetch', 100],
+      ['searchDependencies', 100],
+      ['uploadManifestFiles', 100],
+      ['getOrgAnalytics', 10],
+      ['getAPITokens', 10],
+      ['getScoreByNpmPackage', 10],
+      ['getQuota', 0],
+      ['getOrganizations', 0],
+      ['getScan', 0],
+    ])('should return %i quota cost for %s', (method, expectedCost) => {
+      expect(getQuotaCost(method)).toBe(expectedCost)
     })
 
     it('should throw error for unknown method', () => {

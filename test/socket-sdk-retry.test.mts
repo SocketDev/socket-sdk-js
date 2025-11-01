@@ -247,7 +247,7 @@ describe('SocketSdk - Retry Logic', () => {
   })
 
   describe('Rate Limit Retry with Retry-After Header', () => {
-    it('should retry 429 with Retry-After delay-seconds header', async () => {
+    it.sequential('should retry 429 with Retry-After delay-seconds header', async () => {
       let attemptCount = 0
       const startTime = Date.now()
 
@@ -284,7 +284,7 @@ describe('SocketSdk - Retry Logic', () => {
       expect(elapsed).toBeGreaterThanOrEqual(900)
     })
 
-    it('should retry 429 with Retry-After HTTP-date header', async () => {
+    it.sequential('should retry 429 with Retry-After HTTP-date header', async () => {
       let attemptCount = 0
       const startTime = Date.now()
 
@@ -322,7 +322,7 @@ describe('SocketSdk - Retry Logic', () => {
       expect(elapsed).toBeGreaterThanOrEqual(600)
     })
 
-    it('should handle Retry-After header as array', async () => {
+    it.sequential('should handle Retry-After header as array', async () => {
       let attemptCount = 0
 
       nock('https://api.socket.dev')
@@ -490,7 +490,7 @@ describe('SocketSdk - Retry Logic', () => {
       expect(attemptCount).toBe(1)
     })
 
-    it('should exhaust retries on persistent 429 with Retry-After', async () => {
+    it.sequential('should exhaust retries on persistent 429 with Retry-After', async () => {
       let attemptCount = 0
 
       nock('https://api.socket.dev')
@@ -575,7 +575,7 @@ describe('SocketSdk - Retry Logic', () => {
   })
 
   describe('Retry Configuration', () => {
-    it('should respect custom retry count', async () => {
+    it.sequential('should respect custom retry count', async () => {
       let attemptCount = 0
 
       nock('https://api.socket.dev')
