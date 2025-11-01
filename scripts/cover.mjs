@@ -124,7 +124,8 @@ try {
     }
 
     // Combine results - fail if either failed
-    exitCode = mainResult.exitCode !== 0 ? mainResult.exitCode : isolatedResult.exitCode
+    exitCode =
+      mainResult.exitCode !== 0 ? mainResult.exitCode : isolatedResult.exitCode
     codeCoverageResult = {
       stdout: mainResult.stdout + isolatedResult.stdout,
       stderr: mainResult.stderr + isolatedResult.stderr,
@@ -208,7 +209,8 @@ try {
     }
 
     // Combine results - fail if either failed
-    exitCode = mainResult.exitCode !== 0 ? mainResult.exitCode : isolatedResult.exitCode
+    exitCode =
+      mainResult.exitCode !== 0 ? mainResult.exitCode : isolatedResult.exitCode
     codeCoverageResult = {
       stdout: mainResult.stdout + isolatedResult.stdout,
       stderr: mainResult.stderr + isolatedResult.stderr,

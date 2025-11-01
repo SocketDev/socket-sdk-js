@@ -109,5 +109,39 @@ describe('SocketSdk - Branch Coverage Tests', () => {
 
       expect(result.success).toBe(false)
     })
+
+    it('should detect 502 Bad Gateway in response body', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/502-test')
+        .reply(200, '502 Bad Gateway')
+
+      const result = (await getClient().getApi('502-test', {
+        responseType: 'json',
+        throws: false,
+      })) as SocketSdkGenericResult<unknown>
+
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toContain('invalid JSON')
+        expect(result.cause).toContain('502 Bad Gateway')
+      }
+    })
+
+    it('should detect 503 Service in response body', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/503-test')
+        .reply(200, '503 Service Unavailable')
+
+      const result = (await getClient().getApi('503-test', {
+        responseType: 'json',
+        throws: false,
+      })) as SocketSdkGenericResult<unknown>
+
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toContain('invalid JSON')
+        expect(result.cause).toContain('503 Service')
+      }
+    })
   })
 })
