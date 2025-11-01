@@ -641,19 +641,14 @@ describe('SocketSdk - API Methods Coverage', () => {
       // Create client with cache enabled to test cache code path
       const clientWithCache = new SocketSdk('test-token', {
         baseUrl,
+        cache: true,
         cacheTtl: 5000,
         retries: 0,
       })
 
       // Make two identical requests - second should use cache
-      const result1 = await clientWithCache.getIssuesByNpmPackage(
-        'lodash',
-        '4.17.21',
-      )
-      const result2 = await clientWithCache.getIssuesByNpmPackage(
-        'lodash',
-        '4.17.21',
-      )
+      const result1 = await clientWithCache.listOrganizations()
+      const result2 = await clientWithCache.listOrganizations()
 
       expect(result1.success).toBe(true)
       expect(result2.success).toBe(true)
