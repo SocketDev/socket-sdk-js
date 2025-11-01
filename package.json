@@ -54,7 +54,7 @@
     "update": "node scripts/update.mjs"
   },
   "dependencies": {
-    "@socketsecurity/lib": "3.0.2"
+    "@socketsecurity/lib": "3.0.3"
   },
   "devDependencies": {
     "@babel/parser": "7.26.3",
