@@ -1,8 +1,8 @@
-# incremental builds
+# Incremental Builds
 
 Guide to optimizing build performance during development.
 
-## quick start
+## Quick Start
 
 ```bash
 # Development mode with incremental builds (68% faster)
@@ -12,7 +12,7 @@ pnpm build --watch
 pnpm build
 ```
 
-## performance comparison
+## Performance Comparison
 
 | Build Type | Time | Use Case |
 |------------|------|----------|
@@ -20,7 +20,7 @@ pnpm build
 | Incremental | ~9ms | Development, hot reload |
 | **Improvement** | **68% faster** | Watch mode only |
 
-## how it works
+## How It Works
 
 The build system uses esbuild's incremental mode when `--watch` is enabled:
 
@@ -29,7 +29,7 @@ The build system uses esbuild's incremental mode when `--watch` is enabled:
 3. **Smart caching**: Build metadata reused across rebuilds
 4. **Type checking**: Runs in parallel with bundling
 
-## watch mode features
+## Watch Mode Features
 
 ```bash
 pnpm build --watch
@@ -46,7 +46,7 @@ pnpm build --watch
 - Cache not persisted across process restarts
 - Memory footprint slightly higher (build context in memory)
 
-## development workflow
+## Development Workflow
 
 **Recommended setup:**
 
@@ -61,14 +61,14 @@ pnpm test --fast
 pnpm tsc --watch
 ```
 
-## configuration
+## Configuration
 
 Build configuration lives in:
 - `scripts/build.mjs` - Main build orchestration
 - `.config/esbuild.config.mjs` - esbuild settings
 - `.config/tsconfig.dts.json` - Type declaration generation
 
-## optimization tips
+## Optimization Tips
 
 1. **Use watch mode for development**
    - 68% faster rebuilds
@@ -91,7 +91,7 @@ Build configuration lives in:
    pnpm build         # Fresh build
    ```
 
-## troubleshooting
+## Troubleshooting
 
 **Issue: Build seems slow**
 - Solution: Ensure you're using `--watch` flag
@@ -105,7 +105,7 @@ Build configuration lives in:
 - Solution: Run `pnpm tsc` separately
 - Context: Watch mode prioritizes speed over type checking
 
-## implementation details
+## Implementation Details
 
 **esbuild configuration:**
 ```javascript
@@ -124,7 +124,7 @@ Build configuration lives in:
 const isWatch = process.argv.includes('--watch')
 ```
 
-## performance metrics
+## Performance Metrics
 
 **Measured on M1 Mac:**
 - Full TypeScript build: ~27ms
@@ -135,7 +135,7 @@ const isWatch = process.argv.includes('--watch')
 - Edit → Save → Rebuild: < 50ms
 - Edit → Save → Rebuild → Test: < 2s (with `--fast`)
 
-## see also
+## See Also
 
 - `docs/getting-started.md` - Initial setup
 - `docs/dev/scripts.md` - All available scripts

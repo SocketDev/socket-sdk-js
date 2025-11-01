@@ -59,14 +59,14 @@ pnpm --version
 ```
 socket-sdk-js/
 ├── docs/                   # Documentation
-│   ├── api-reference.md    # Complete API reference (27KB)
+│   ├── api-reference.md    # Complete API reference
 │   ├── usage-examples.md   # Usage examples
 │   ├── quota-management.md # Quota costs and utilities
 │   ├── when-to-use-what.md # Method selection guide
 │   └── dev/                # Developer documentation
-│       ├── testing.md      # Testing utilities guide
-│       ├── test-style-guide.md
-│       └── ci-testing.md
+│       ├── testing.md      # Testing guide & utilities
+│       ├── ci-testing.md   # CI/CD testing setup
+│       └── scripts.md      # Script organization
 ├── src/                    # TypeScript source code
 │   ├── socket-sdk-class.ts # Main SDK class (40+ methods)
 │   ├── http-client.ts      # HTTP request/response handling
