@@ -15,6 +15,7 @@ import { spinner } from '@socketsecurity/lib/spinner'
 import { printHeader } from '@socketsecurity/lib/stdio/header'
 
 import { getTestsToRun } from './utils/changed-test-mapper.mjs'
+import { getLocalPackageAliases } from './utils/get-local-package-aliases.mjs'
 
 const WIN32 = process.platform === 'win32'
 
@@ -36,6 +37,13 @@ process.on('unhandledRejection', (reason, _promise) => {
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.resolve(__dirname, '..')
 const nodeModulesBinPath = path.join(rootPath, 'node_modules', '.bin')
+
+// Determine which TypeScript config to use based on local package detection
+const localPackageAliases = getLocalPackageAliases(rootPath)
+const hasLocalPackages = Object.keys(localPackageAliases).length > 0
+const tsConfigPath = hasLocalPackages
+  ? '.config/tsconfig.check.local.json'
+  : '.config/tsconfig.check.json'
 
 // Track running processes for cleanup
 const runningProcesses = new Set()
@@ -170,7 +178,7 @@ async function runCheck() {
   spinner.start('Checking TypeScript...')
   exitCode = await runCommand(
     'tsgo',
-    ['--noEmit', '-p', '.config/tsconfig.check.json'],
+    ['--noEmit', '-p', tsConfigPath],
     {
       stdio: 'pipe',
     },
@@ -179,7 +187,7 @@ async function runCheck() {
     spinner.stop()
     logger.error('TypeScript check failed')
     // Re-run with output to show errors
-    await runCommand('tsgo', ['--noEmit', '-p', '.config/tsconfig.check.json'])
+    await runCommand('tsgo', ['--noEmit', '-p', tsConfigPath])
     return exitCode
   }
   spinner.stop()

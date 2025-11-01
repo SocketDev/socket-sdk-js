@@ -16,6 +16,8 @@ import unicornPlugin from 'eslint-plugin-unicorn'
 import globals from 'globals'
 import tsEslint from 'typescript-eslint'
 
+import { getLocalPackageAliases } from '../scripts/utils/get-local-package-aliases.mjs'
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const require = createRequire(import.meta.url)
@@ -24,7 +26,14 @@ const require = createRequire(import.meta.url)
 const getMaintainedNodeVersions = () => ['18', '20', '22', '24']
 
 const rootPath = path.dirname(__dirname)
-const rootTsConfigPath = path.join(__dirname, 'tsconfig.check.json')
+
+// Use local config if local Socket packages are detected
+const localPackageAliases = getLocalPackageAliases(rootPath)
+const hasLocalPackages = Object.keys(localPackageAliases).length > 0
+const rootTsConfigPath = path.join(
+  __dirname,
+  hasLocalPackages ? 'tsconfig.check.local.json' : 'tsconfig.check.json',
+)
 
 const nodeGlobalsConfig = Object.fromEntries(
   Object.entries(globals.node).map(([k]) => [k, 'readonly']),

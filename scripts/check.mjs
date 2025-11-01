@@ -12,7 +12,15 @@
 import { logger } from '@socketsecurity/lib/logger'
 import { printFooter, printHeader } from '@socketsecurity/lib/stdio/header'
 
+import { getLocalPackageAliases } from './utils/get-local-package-aliases.mjs'
 import { runParallel } from './utils/run-command.mjs'
+
+// Determine which TypeScript config to use based on local package detection
+const localPackageAliases = getLocalPackageAliases(process.cwd())
+const hasLocalPackages = Object.keys(localPackageAliases).length > 0
+const tsConfigPath = hasLocalPackages
+  ? '.config/tsconfig.check.local.json'
+  : '.config/tsconfig.check.json'
 
 async function main() {
   try {
@@ -20,7 +28,7 @@ async function main() {
 
     const checks = [
       {
-        args: ['exec', 'tsgo', '--noEmit', '-p', '.config/tsconfig.check.json'],
+        args: ['exec', 'tsgo', '--noEmit', '-p', tsConfigPath],
         command: 'pnpm',
       },
       {
