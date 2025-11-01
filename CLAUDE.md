@@ -90,7 +90,7 @@ Socket SDK for JavaScript/TypeScript - Programmatic access to Socket.dev securit
 - **Check all**: `pnpm check`
 - **Coverage**: `pnpm run test:unit:coverage`, `pnpm run coverage:percent`
 
-**Development tip:** Use `pnpm build --watch` for 68% faster rebuilds (9ms vs 27ms). See `docs/INCREMENTAL_BUILDS.md` for details.
+**Development tip:** Use `pnpm build --watch` for 68% faster rebuilds (9ms vs 27ms). See `docs/incremental-builds.md` for details.
 
 ### Configuration Files
 
