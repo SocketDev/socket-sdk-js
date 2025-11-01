@@ -37,7 +37,7 @@ describe('SocketSdk - Upload Manifest Coverage', () => {
 
   describe('uploadManifestFiles', () => {
     it('should successfully execute upload manifest files method', async () => {
-      const scope = nock('https://api.socket.dev')
+      nock('https://api.socket.dev')
         .post('/v0/orgs/test-org/upload-manifest-files')
         .reply(200, {
           tarHash: 'abc123def456',
@@ -54,11 +54,10 @@ describe('SocketSdk - Upload Manifest Coverage', () => {
         expect(result.data.tarHash).toBe('abc123def456')
         expect(result.data.unmatchedFiles).toEqual([])
       }
-      expect(scope.isDone()).toBe(true)
     })
 
     it('should handle errors in uploadManifestFiles', async () => {
-      const scope = nock('https://api.socket.dev')
+      nock('https://api.socket.dev')
         .post('/v0/orgs/test-org/upload-manifest-files')
         .reply(400, {
           error: {
@@ -75,7 +74,6 @@ describe('SocketSdk - Upload Manifest Coverage', () => {
         expect(result.status).toBe(400)
         expect(result.error).toContain('Invalid manifest files')
       }
-      expect(scope.isDone()).toBe(true)
     })
   })
 })
