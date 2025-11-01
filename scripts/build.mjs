@@ -11,7 +11,7 @@ import colors from 'yoctocolors-cjs'
 
 import { isQuiet } from '@socketsecurity/lib/argv/flags'
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
-import { logger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { printFooter, printHeader } from '@socketsecurity/lib/stdio/header'
 
 import {
@@ -25,6 +25,9 @@ const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '..',
 )
+
+// Initialize logger
+const logger = getDefaultLogger()
 
 /**
  * Build source code with esbuild.

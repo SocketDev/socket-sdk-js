@@ -11,13 +11,16 @@ import fastGlob from 'fast-glob'
 
 import { isQuiet } from '@socketsecurity/lib/argv/flags'
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
-import { logger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { createSectionHeader } from '@socketsecurity/lib/stdio/header'
 
 const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '..',
 )
+
+// Initialize logger
+const logger = getDefaultLogger()
 
 /**
  * Clean specific directories.

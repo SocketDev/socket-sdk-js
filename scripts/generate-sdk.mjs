@@ -19,13 +19,16 @@ import traverse from '@babel/traverse'
 import * as t from '@babel/types'
 import MagicString from 'magic-string'
 
-import { logger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 import { getRootPath } from './utils/path-helpers.mjs'
 import { runCommand } from './utils/run-command.mjs'
 
 const rootPath = getRootPath(import.meta.url)
 const typesPath = resolve(rootPath, 'types/api.d.ts')
+
+// Initialize logger
+const logger = getDefaultLogger()
 
 async function generateTypes() {
   return new Promise((resolve, reject) => {

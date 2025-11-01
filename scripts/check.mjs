@@ -9,11 +9,14 @@
  *   node scripts/check.mjs
  */
 
-import { logger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { printFooter, printHeader } from '@socketsecurity/lib/stdio/header'
 
 import { getLocalPackageAliases } from './utils/get-local-package-aliases.mjs'
 import { runParallel } from './utils/run-command.mjs'
+
+// Initialize logger
+const logger = getDefaultLogger()
 
 // Determine which TypeScript config to use based on local package detection
 const localPackageAliases = getLocalPackageAliases(process.cwd())

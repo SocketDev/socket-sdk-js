@@ -9,9 +9,9 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
-import { logger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { onExit } from '@socketsecurity/lib/signal-exit'
-import { spinner } from '@socketsecurity/lib/spinner'
+import { getDefaultSpinner } from '@socketsecurity/lib/spinner'
 import { printHeader } from '@socketsecurity/lib/stdio/header'
 
 import { getTestsToRun } from './utils/changed-test-mapper.mjs'
@@ -37,6 +37,10 @@ process.on('unhandledRejection', (reason, _promise) => {
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.resolve(__dirname, '..')
 const nodeModulesBinPath = path.join(rootPath, 'node_modules', '.bin')
+
+// Initialize logger and spinner
+const logger = getDefaultLogger()
+const spinner = getDefaultSpinner()
 
 // Determine which TypeScript config to use based on local package detection
 const localPackageAliases = getLocalPackageAliases(rootPath)
@@ -176,13 +180,9 @@ async function runCheck() {
 
   // Run TypeScript check
   spinner.start('Checking TypeScript...')
-  exitCode = await runCommand(
-    'tsgo',
-    ['--noEmit', '-p', tsConfigPath],
-    {
-      stdio: 'pipe',
-    },
-  )
+  exitCode = await runCommand('tsgo', ['--noEmit', '-p', tsConfigPath], {
+    stdio: 'pipe',
+  })
   if (exitCode !== 0) {
     spinner.stop()
     logger.error('TypeScript check failed')

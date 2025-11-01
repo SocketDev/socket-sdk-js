@@ -192,7 +192,7 @@ describe('SocketSdk - Batch Operations', () => {
 
         vi.useRealTimers()
       },
-      10000,
+      10_000,
     )
 
     it('should handle partial response data', async () => {
