@@ -143,8 +143,8 @@ async function checkBundledDependencies(content: string): Promise<{
 }
 
 describe('Bundle validation', () => {
-  it('should not contain absolute paths in dist/index.mjs', async () => {
-    const indexPath = path.join(distPath, 'index.mjs')
+  it('should not contain absolute paths in dist/index.js', async () => {
+    const indexPath = path.join(distPath, 'index.js')
     const content = await fs.readFile(indexPath, 'utf8')
 
     const result = hasAbsolutePaths(content)
@@ -162,7 +162,7 @@ describe('Bundle validation', () => {
   })
 
   it('should not bundle dependencies inline (validate against package.json dependencies)', async () => {
-    const indexPath = path.join(distPath, 'index.mjs')
+    const indexPath = path.join(distPath, 'index.js')
     const content = await fs.readFile(indexPath, 'utf8')
 
     const result = await checkBundledDependencies(content)
