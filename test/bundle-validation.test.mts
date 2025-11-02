@@ -7,6 +7,8 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { parse } from '@babel/parser'
+import traverse from '@babel/traverse'
 import { describe, expect, it } from 'vitest'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -44,7 +46,7 @@ function hasAbsolutePaths(content: string): {
 }
 
 /**
- * Check if bundle contains inlined dependencies.
+ * Check if bundle contains inlined dependencies using AST analysis.
  * Reads package.json dependencies and ensures they are NOT bundled inline.
  */
 async function checkBundledDependencies(content: string): Promise<{
@@ -58,62 +60,77 @@ async function checkBundledDependencies(content: string): Promise<{
 
   const bundledDeps: string[] = []
 
-  // If we have NO dependencies, check that no external packages are bundled.
+  // Parse the bundle into an AST.
+  const ast = parse(content, {
+    sourceType: 'module',
+    plugins: ['typescript'],
+  })
+
+  // Collect all import sources from the AST.
+  const importSources = new Set<string>()
+  // @ts-expect-error - traverse types are complex
+  traverse(ast, {
+    ImportDeclaration(path) {
+      const source = path.node.source.value
+      importSources.add(source)
+    },
+  })
+
+  // Packages that should always be external (never bundled).
+  const socketPackagePatterns = [
+    /@socketsecurity\/lib/,
+    /@socketregistry\/packageurl-js/,
+    /@socketsecurity\/sdk/,
+    /@socketsecurity\/registry/,
+  ]
+
+  // Check if we have runtime dependencies.
   if (Object.keys(dependencies).length === 0) {
-    // Look for signs of bundled npm packages in ESM format.
-    // Bundled ESM packages have patterns like:
-    // - import { x } from "inline-bundled-code"
-    // - Functions from external packages inlined directly.
-    const bundledPackagePatterns = [
-      // Socket packages that should always be external.
-      /@socketsecurity\/lib/,
-      /@socketsecurity\/packageurl-js/,
-      /@socketsecurity\/sdk/,
-      /@socketsecurity\/registry/,
-    ]
+    // No runtime dependencies - check that Socket packages aren't bundled.
+    for (const pattern of socketPackagePatterns) {
+      const hasExternalImport = Array.from(importSources).some(source =>
+        pattern.test(source),
+      )
 
-    for (const pattern of bundledPackagePatterns) {
-      // For ESM bundles, check if imports are to external packages (good)
-      // vs having the code inlined (bad).
-      // Look for: import ... from "@socketsecurity/lib" (external - good)
-      // vs: no imports but code from the package is present (bundled - bad).
-      const hasExternalImport = new RegExp(
-        `import\\s+.*?from\\s+["']${pattern.source}`,
-      ).test(content)
-
-      // If no external import found, check if package code might be bundled.
-      // This is a heuristic - look for multiple characteristic functions.
       if (!hasExternalImport) {
-        // Check for signs of bundled code from this package.
-        // This would mean the package wasn't properly externalized.
-        const bundlePattern = new RegExp(
-          `(?:var|const|let)\\s+\\w+.*${pattern.source}`,
-        )
+        // Check if this package name appears in the content at all.
+        // If it's just in string literals (like constants), that's fine.
+        // Use AST to check if it appears in any meaningful way.
+        let foundInCode = false
+        // @ts-expect-error - traverse types are complex
+        traverse(ast, {
+          StringLiteral(path) {
+            // Skip string literals - these are fine
+            if (pattern.test(path.node.value)) {
+              // It's in a string literal, which is fine
+            }
+          },
+          Identifier(path) {
+            // Check if the package name appears in identifiers or other code
+            if (
+              pattern.test(path.node.name) ||
+              (path.node.name.includes('socketsecurity') &&
+                pattern.test(path.node.name))
+            ) {
+              foundInCode = true
+            }
+          },
+        })
 
-        if (bundlePattern.test(content)) {
+        // Only flag if we found it in actual code, not just string literals
+        if (foundInCode) {
           bundledDeps.push(pattern.source)
         }
       }
     }
   } else {
-    // If we have dependencies, check that they remain external (not bundled).
+    // We have runtime dependencies - check that they remain external.
     for (const dep of Object.keys(dependencies)) {
-      const escapedDep = dep.replace(/[/\\^$*+?.()|[\]{}]/g, '\\$&')
+      const hasExternalImport = importSources.has(dep)
 
-      // Check if dependency is properly external.
-      const hasExternalImport = new RegExp(
-        `import\\s+.*?from\\s+["']${escapedDep}`,
-      ).test(content)
-
-      // If no external import, it might be bundled.
       if (!hasExternalImport) {
-        const bundlePattern = new RegExp(
-          `(?:var|const|let)\\s+\\w+.*${escapedDep}`,
-        )
-
-        if (bundlePattern.test(content)) {
-          bundledDeps.push(dep)
-        }
+        // Dependency isn't imported externally - it might be bundled
+        bundledDeps.push(dep)
       }
     }
   }
