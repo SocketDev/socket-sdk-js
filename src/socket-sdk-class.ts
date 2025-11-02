@@ -954,7 +954,7 @@ export class SocketSdk {
     // If callback provided and files were invalid, invoke it.
     if (this.#onFileValidation && invalidPaths.length > 0) {
       const result = await this.#onFileValidation(validPaths, invalidPaths, {
-        operation: 'createOrgFullScan',
+        operation: 'createFullScan',
         orgSlug,
       })
 

@@ -268,7 +268,7 @@ export type FileValidationCallback = (
   context: {
     operation:
       | 'createDependenciesSnapshot'
-      | 'createOrgFullScan'
+      | 'createFullScan'
       | 'uploadManifestFiles'
     orgSlug?: string | undefined
     [key: string]: unknown
