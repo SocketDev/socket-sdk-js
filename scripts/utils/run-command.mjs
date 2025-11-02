@@ -82,7 +82,7 @@ export async function runParallel(commands) {
     runCommand(command, args, options),
   )
   const results = await Promise.allSettled(promises)
-  return results.map(r => r.status === 'fulfilled' ? r.value : 1)
+  return results.map(r => (r.status === 'fulfilled' ? r.value : 1))
 }
 
 /**

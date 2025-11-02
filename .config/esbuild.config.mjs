@@ -171,11 +171,19 @@ function createAliasPlugin() {
     return null
   }
 
+  // Packages that should always be bundled (even when using local aliases)
+  const ALWAYS_BUNDLED = new Set(['@socketsecurity/lib'])
+
   return {
     name: 'local-package-aliases',
     setup(build) {
       // Intercept imports for aliased packages and mark as external.
       for (const [packageName, _aliasPath] of Object.entries(aliases)) {
+        // Skip packages that should always be bundled - let esbuild bundle them naturally
+        if (ALWAYS_BUNDLED.has(packageName)) {
+          continue
+        }
+
         // Match both exact package name and subpath imports.
         build.onResolve(
           { filter: new RegExp(`^${packageName}(/|$)`) },
@@ -188,6 +196,19 @@ function createAliasPlugin() {
       }
     },
   }
+}
+
+// Get local package aliases for bundled packages
+function getBundledPackageAliases() {
+  const aliases = getLocalPackageAliases(rootPath)
+  const bundledAliases = {}
+
+  // @socketsecurity/lib should always be bundled (not external)
+  if (aliases['@socketsecurity/lib']) {
+    bundledAliases['@socketsecurity/lib'] = aliases['@socketsecurity/lib']
+  }
+
+  return bundledAliases
 }
 
 // Build configuration for ESM output
@@ -207,6 +228,9 @@ export const buildConfig = {
   // For bundle analysis
   metafile: true,
   logLevel: 'info',
+
+  // Alias local packages that should be bundled (not external)
+  alias: getBundledPackageAliases(),
 
   // Use plugin for local package aliases (consistent across all Socket repos).
   plugins: [createPathShorteningPlugin(), createAliasPlugin()].filter(Boolean),

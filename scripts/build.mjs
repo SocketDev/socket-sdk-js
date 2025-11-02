@@ -353,8 +353,10 @@ async function main() {
         }),
         buildTypes({ quiet, verbose, skipClean: true }),
       ])
-      const srcResult = results[0].status === 'fulfilled' ? results[0].value : undefined
-      const typesExitCode = results[1].status === 'fulfilled' ? results[1].value : 1
+      const srcResult =
+        results[0].status === 'fulfilled' ? results[0].value : undefined
+      const typesExitCode =
+        results[1].status === 'fulfilled' ? results[1].value : 1
 
       // Log completion messages
       if (!quiet) {
