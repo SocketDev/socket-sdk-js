@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - Validation guard against `link:` dependencies in package.json
+- Pre-commit and pre-push hooks for development workflow
 
 ### Fixed
 
@@ -16,7 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- Updated `@socketsecurity/lib` to v3.0.5
+- Updated `@socketsecurity/lib` to v3.0.6
 - Updated `@socketregistry/packageurl-js` to v1.3.3
 
 ## [3.0.29](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.29) - 2025-11-01
