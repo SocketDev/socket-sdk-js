@@ -27,18 +27,15 @@ function createAliasPlugin() {
   return {
     name: 'local-package-aliases',
     setup(build) {
-      // Intercept imports for aliased packages
-      for (const [packageName, aliasPath] of Object.entries(aliases)) {
-        // Match both exact package name and subpath imports
+      // Intercept imports for aliased packages.
+      for (const [packageName, _aliasPath] of Object.entries(aliases)) {
+        // Match both exact package name and subpath imports.
         build.onResolve(
           { filter: new RegExp(`^${packageName}(/|$)`) },
           args => {
-            // Handle subpath imports like '@socketsecurity/lib/spinner'
-            const subpath = args.path.slice(packageName.length + 1)
-            const resolvedPath = subpath
-              ? path.join(aliasPath, subpath)
-              : aliasPath
-            return { path: resolvedPath, external: true }
+            // Mark as external using the original package name to avoid absolute paths in output.
+            // This ensures require('@socketsecurity/lib') instead of require('/absolute/path/to/socket-lib/dist').
+            return { path: args.path, external: true }
           },
         )
       }
