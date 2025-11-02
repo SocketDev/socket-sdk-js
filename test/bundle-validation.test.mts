@@ -61,16 +61,16 @@ async function checkBundledDependencies(content: string): Promise<{
   const bundledDeps: string[] = []
 
   // Parse the bundle into an AST.
-  const ast = parse(content, {
+  const file = parse(content, {
     sourceType: 'module',
     plugins: ['typescript'],
   })
 
   // Collect all import sources from the AST.
   const importSources = new Set<string>()
-  // @ts-expect-error - traverse types are complex
-  traverse(ast, {
-    ImportDeclaration(path) {
+
+  traverse(file as any, {
+    ImportDeclaration(path: any) {
       const source = path.node.source.value
       importSources.add(source)
     },
@@ -97,15 +97,16 @@ async function checkBundledDependencies(content: string): Promise<{
         // If it's just in string literals (like constants), that's fine.
         // Use AST to check if it appears in any meaningful way.
         let foundInCode = false
-        // @ts-expect-error - traverse types are complex
-        traverse(ast, {
-          StringLiteral(path) {
+
+        traverse(file as any, {
+          StringLiteral(path: any) {
             // Skip string literals - these are fine
             if (pattern.test(path.node.value)) {
               // It's in a string literal, which is fine
             }
           },
-          Identifier(path) {
+
+          Identifier(path: any) {
             // Check if the package name appears in identifiers or other code
             if (
               pattern.test(path.node.name) ||
