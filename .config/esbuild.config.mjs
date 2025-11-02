@@ -2,8 +2,12 @@
  * @fileoverview esbuild configuration for fast builds with smaller bundles
  */
 
+import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+import { parse } from '@babel/parser'
+import MagicString from 'magic-string'
 
 import { getLocalPackageAliases } from '../scripts/utils/get-local-package-aliases.mjs'
 
@@ -22,11 +26,6 @@ function createPathShorteningPlugin() {
     setup(build) {
       build.onEnd(async result => {
         if (!result.outputFiles && result.metafile) {
-          // Dynamic imports to avoid adding to production dependencies
-          const fs = await import('node:fs/promises')
-          const { parse } = await import('@babel/parser')
-          const MagicString = (await import('magic-string')).default
-
           const outputs = Object.keys(result.metafile.outputs).filter(
             f => f.endsWith('.js') || f.endsWith('.mjs'),
           )
@@ -163,7 +162,6 @@ function createPathShorteningPlugin() {
 /**
  * Plugin to handle local package aliases.
  * Provides consistent alias resolution across all Socket repos.
- * Note: Does not externalize @socketsecurity/lib - that should be bundled.
  */
 function createAliasPlugin() {
   const aliases = getLocalPackageAliases(rootPath)
@@ -176,13 +174,8 @@ function createAliasPlugin() {
   return {
     name: 'local-package-aliases',
     setup(build) {
-      // Intercept imports for aliased packages (except @socketsecurity/lib which should be bundled)
+      // Intercept imports for aliased packages and mark as external.
       for (const [packageName, _aliasPath] of Object.entries(aliases)) {
-        // Skip @socketsecurity/lib - it should be bundled, not externalized
-        if (packageName === '@socketsecurity/lib') {
-          continue
-        }
-
         // Match both exact package name and subpath imports.
         build.onResolve(
           { filter: new RegExp(`^${packageName}(/|$)`) },
@@ -203,7 +196,7 @@ export const buildConfig = {
   outdir: distPath,
   outbase: srcPath,
   bundle: true,
-  format: 'esm',
+  format: 'cjs',
   // Target Node.js environment (not browser).
   platform: 'node',
   // Target Node.js 18+ features.
@@ -216,19 +209,17 @@ export const buildConfig = {
   logLevel: 'info',
   outExtension: { '.js': '.mjs' },
 
-  // Use plugin for local package aliases (consistent across all Socket repos)
+  // Use plugin for local package aliases (consistent across all Socket repos).
   plugins: [createPathShorteningPlugin(), createAliasPlugin()].filter(Boolean),
 
   // External dependencies.
-  // With platform: 'node', esbuild automatically externalizes all Node.js
-  // built-ins. The explicit external array with builtinModules is redundant
-  // (but doesn't hurt as extra safety).
-  // Note: @socketsecurity/lib is bundled (not external) to reduce consumer dependencies
+  // Note: @socketsecurity/lib is bundled (not external) to reduce consumer dependencies.
+  // With format: 'cjs', bundling CJS code works fine (no __require wrapper issues).
   external: [],
 
   // Banner for generated code
   banner: {
-    js: '/* Socket SDK ESM - Built with esbuild */',
+    js: '/* Socket SDK CJS - Built with esbuild */',
   },
 
   // TypeScript configuration
