@@ -61,6 +61,18 @@ async function main() {
         args: ['scripts/validate-no-cdn-refs.mjs'],
         command: 'node',
       },
+      {
+        args: ['scripts/validate-markdown-filenames.mjs'],
+        command: 'node',
+      },
+      {
+        args: ['scripts/validate-file-size.mjs'],
+        command: 'node',
+      },
+      {
+        args: ['scripts/validate-file-count.mjs'],
+        command: 'node',
+      },
     ]
 
     const exitCodes = await runParallel(checks)
