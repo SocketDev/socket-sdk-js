@@ -344,7 +344,7 @@ async function main() {
       }
 
       // Run source and types builds in parallel
-      const [srcResult, typesExitCode] = await Promise.all([
+      const results = await Promise.allSettled([
         buildSource({
           quiet,
           verbose,
@@ -353,6 +353,8 @@ async function main() {
         }),
         buildTypes({ quiet, verbose, skipClean: true }),
       ])
+      const srcResult = results[0].status === 'fulfilled' ? results[0].value : undefined
+      const typesExitCode = results[1].status === 'fulfilled' ? results[1].value : 1
 
       // Log completion messages
       if (!quiet) {

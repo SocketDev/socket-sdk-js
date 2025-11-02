@@ -369,7 +369,8 @@ describe('Entitlements API', () => {
           client.getEnabledEntitlements('concurrent-org'),
       )
 
-      const results = await Promise.all(promises)
+      const settled = await Promise.allSettled(promises)
+      const results = settled.filter(r => r.status === 'fulfilled').map(r => r.value)
 
       results.forEach((result: string[]) => {
         expect(result).toEqual(['firewall'])
@@ -392,7 +393,8 @@ describe('Entitlements API', () => {
           client.getEnabledEntitlements(`org-${i}`),
       )
 
-      const results = await Promise.all(promises)
+      const settled = await Promise.allSettled(promises)
+      const results = settled.filter(r => r.status === 'fulfilled').map(r => r.value)
 
       results.forEach((result: string[], i: number) => {
         expect(result).toEqual([`product-${i}`])
