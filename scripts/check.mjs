@@ -53,6 +53,10 @@ async function main() {
         args: ['scripts/validate-bundle-deps.mjs'],
         command: 'node',
       },
+      {
+        args: ['scripts/validate-esbuild-minify.mjs'],
+        command: 'node',
+      },
     ]
 
     const exitCodes = await runParallel(checks)
