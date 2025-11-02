@@ -256,37 +256,26 @@ async function runTests(options, positionals = []) {
       ...process.env,
       NODE_OPTIONS:
         `${process.env.NODE_OPTIONS || ''} --max-old-space-size=${process.env.CI ? 8192 : 4096} --unhandled-rejections=warn`.trim(),
+      VITEST: '1',
     },
     stdio: 'inherit',
   }
 
-  // Use dotenvx to load test environment
-  const dotenvxCmd = WIN32 ? 'dotenvx.cmd' : 'dotenvx'
-  const dotenvxPath = path.join(nodeModulesBinPath, dotenvxCmd)
-
   // Use interactive runner for interactive Ctrl+O experience when appropriate
   if (process.stdout.isTTY) {
     const { runTests } = await import('./utils/interactive-runner.mjs')
-    return runTests(
-      dotenvxPath,
-      ['-q', 'run', '-f', '.env.test', '--', vitestPath, ...vitestArgs],
-      {
-        env: spawnOptions.env,
-        cwd: spawnOptions.cwd,
-        verbose: false,
-      },
-    )
+    return runTests(vitestPath, vitestArgs, {
+      env: spawnOptions.env,
+      cwd: spawnOptions.cwd,
+      verbose: false,
+    })
   }
 
   // Fallback to execution with output capture to handle worker termination errors
-  const result = await runCommandWithOutput(
-    dotenvxPath,
-    ['-q', 'run', '-f', '.env.test', '--', vitestPath, ...vitestArgs],
-    {
-      ...spawnOptions,
-      stdio: ['inherit', 'pipe', 'pipe'],
-    },
-  )
+  const result = await runCommandWithOutput(vitestPath, vitestArgs, {
+    ...spawnOptions,
+    stdio: ['inherit', 'pipe', 'pipe'],
+  })
 
   // Check if we have worker termination error but no test failures
   const output = result.stdout + result.stderr
