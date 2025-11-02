@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.1.2](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.1.2) - 2025-11-02
+
+### Fixed
+
+- Add type aliases in `operations` interface to map SDK v3 method names to OpenAPI operation names for TypeScript compatibility
+- Update `FileValidationCallback` to use `createFullScan` instead of `createOrgFullScan`
+
 ## [3.1.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.1.1) - 2025-11-02
 
 ### Fixed
