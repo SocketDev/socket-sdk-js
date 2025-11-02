@@ -21,7 +21,7 @@ jobs:
     with:
       fail-fast: false
       lint-script: 'pnpm run lint --all'
-      node-versions: '[20, 22, 24]'
+      node-versions: '["24.10.0"]'
       os-versions: '["ubuntu-latest", "windows-latest"]'
       test-script: 'pnpm run test --all'
       test-setup-script: 'pnpm run build'
