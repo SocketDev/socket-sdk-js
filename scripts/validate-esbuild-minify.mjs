@@ -68,12 +68,14 @@ async function main() {
   for (const violation of violations) {
     console.error(`  ${violation.message}`)
     console.error(`  Found: minify: ${violation.value}`)
-    console.error(`  Expected: minify: false`)
+    console.error('  Expected: minify: false')
     console.error(`  Location: ${violation.location}`)
     console.error('')
   }
 
-  console.error('Minification breaks ESM/CJS interop and makes debugging harder.')
+  console.error(
+    'Minification breaks ESM/CJS interop and makes debugging harder.',
+  )
   console.error('')
 
   process.exitCode = 1

@@ -127,7 +127,7 @@ async function findFiles(dir, files = []) {
         }
       }
     }
-  } catch (error) {
+  } catch {
     // Skip directories we can't read
   }
 
@@ -148,7 +148,7 @@ async function checkFile(filePath) {
       return []
     }
 
-    for (const { pattern, name } of CDN_PATTERNS) {
+    for (const { name, pattern } of CDN_PATTERNS) {
       // Reset regex state
       pattern.lastIndex = 0
 
@@ -173,7 +173,7 @@ async function checkFile(filePath) {
     }
 
     return violations
-  } catch (error) {
+  } catch {
     // Skip files we can't read
     return []
   }
