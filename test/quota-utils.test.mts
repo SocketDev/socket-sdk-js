@@ -1,5 +1,5 @@
 /** @fileoverview Tests for quota utility functions. */
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   calculateTotalQuotaCost,
@@ -246,6 +246,79 @@ describe('Quota Utils', () => {
     it('should throw for unknown method in getRequiredPermissions', () => {
       expect(() => getRequiredPermissions('yetAnotherUnknownMethod')).toThrow(
         'Unknown SDK method',
+      )
+    })
+  })
+
+  describe('File system error handling', () => {
+    beforeEach(() => {
+      vi.resetModules()
+    })
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+      vi.resetModules()
+    })
+
+    it('should throw error when requirements.json file cannot be read', async () => {
+      vi.doMock('node:fs', () => ({
+        existsSync: vi.fn(() => true),
+        readFileSync: vi.fn(() => {
+          throw new Error('ENOENT: no such file or directory')
+        }),
+      }))
+
+      vi.doMock('@socketsecurity/lib/memoization', () => ({
+        memoize: (fn: unknown) => fn,
+        once: (fn: unknown) => fn,
+      }))
+
+      const { getQuotaCost: getQuotaCostMocked } = await import(
+        '../src/quota-utils'
+      )
+
+      expect(() => getQuotaCostMocked('someMethod')).toThrow(
+        'Failed to load SDK method requirements',
+      )
+    })
+
+    it('should throw error when requirements.json contains invalid JSON', async () => {
+      vi.doMock('node:fs', () => ({
+        existsSync: vi.fn(() => true),
+        readFileSync: vi.fn(() => 'invalid json content {'),
+      }))
+
+      vi.doMock('@socketsecurity/lib/memoization', () => ({
+        memoize: (fn: unknown) => fn,
+        once: (fn: unknown) => fn,
+      }))
+
+      const { getQuotaCost: getQuotaCostMocked } = await import(
+        '../src/quota-utils'
+      )
+
+      expect(() => getQuotaCostMocked('someMethod')).toThrow(
+        'Failed to load SDK method requirements',
+      )
+    })
+
+    it('should throw error when requirements.json file does not exist', async () => {
+      vi.doMock('node:fs', () => ({
+        existsSync: vi.fn(() => false),
+        readFileSync: vi.fn(),
+      }))
+
+      vi.doMock('@socketsecurity/lib/memoization', () => ({
+        memoize: (fn: unknown) => fn,
+        once: (fn: unknown) => fn,
+      }))
+
+      const { getQuotaCost: getQuotaCostMocked } = await import(
+        '../src/quota-utils'
+      )
+
+      expect(() => getQuotaCostMocked('someMethod')).toThrow(
+        'Failed to load SDK method requirements',
       )
     })
   })
