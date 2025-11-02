@@ -49,6 +49,10 @@ async function main() {
         args: ['scripts/validate-no-link-deps.mjs'],
         command: 'node',
       },
+      {
+        args: ['scripts/validate-bundle-deps.mjs'],
+        command: 'node',
+      },
     ]
 
     const exitCodes = await runParallel(checks)
