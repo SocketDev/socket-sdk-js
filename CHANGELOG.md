@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.1.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.1.0) - 2025-11-02
+
+### Fixed
+
+- Changed SDK output format from ESM to CJS to resolve Node.js built-in module bundling issues when bundling CJS dependencies into ESM output
+- SDK now correctly handles `@socketsecurity/lib` bundling without creating broken `__require()` wrappers that caused "Dynamic require of 'async_hooks' is not supported" errors in isolated environments
+
 ## [3.0.31](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.31) - 2025-11-02
 
 ### Added
