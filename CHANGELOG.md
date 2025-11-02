@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.0.30](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.30) - 2025-11-01
+
+### Added
+
+- Validation guard against `link:` dependencies in package.json
+
+### Fixed
+
+- Build output now uses relative paths instead of absolute paths for better portability
+
+### Changed
+
+- Updated `@socketsecurity/lib` to v3.0.5
+- Updated `@socketregistry/packageurl-js` to v1.3.3
+
 ## [3.0.29](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.29) - 2025-11-01
 
 ### Changed
