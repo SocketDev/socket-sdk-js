@@ -45,6 +45,10 @@ async function main() {
         ],
         command: 'pnpm',
       },
+      {
+        args: ['scripts/validate-no-link-deps.mjs'],
+        command: 'node',
+      },
     ]
 
     const exitCodes = await runParallel(checks)
