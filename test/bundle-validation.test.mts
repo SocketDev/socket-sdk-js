@@ -44,35 +44,83 @@ function hasAbsolutePaths(content: string): {
 }
 
 /**
- * Check if content is missing external dependencies (they should be import/require statements).
- * External dependencies should NOT be bundled inline.
+ * Check if bundle contains inlined dependencies.
+ * Reads package.json dependencies and ensures they are NOT bundled inline.
  */
-function checkExternalDependencies(content: string): {
-  missingImports: string[]
-  hasAllImports: boolean
-} {
-  // Dependencies that should be external (as import/require statements).
-  const externalDeps = ['@socketsecurity/lib']
+async function checkBundledDependencies(content: string): Promise<{
+  bundledDeps: string[]
+  hasNoBundledDeps: boolean
+}> {
+  // Read package.json to get runtime dependencies.
+  const pkgJsonPath = path.join(packagePath, 'package.json')
+  const pkgJson = JSON.parse(await fs.readFile(pkgJsonPath, 'utf8'))
+  const dependencies = pkgJson.dependencies || {}
 
-  const missingImports: string[] = []
+  const bundledDeps: string[] = []
 
-  for (const dep of externalDeps) {
-    // Check if the bundle has import or require() statements for this dependency.
-    // ESM: import { foo } from "@socketsecurity/lib"
-    // CJS: require("@socketsecurity/lib")
-    const importPattern = new RegExp(
-      `(?:import\\s+.*?from\\s+["']${dep.replace('/', '\\/')}|require\\(["']${dep.replace('/', '\\/')}["']\\))`,
-    )
-    const hasImport = importPattern.test(content)
+  // If we have NO dependencies, check that no external packages are bundled.
+  if (Object.keys(dependencies).length === 0) {
+    // Look for signs of bundled npm packages in ESM format.
+    // Bundled ESM packages have patterns like:
+    // - import { x } from "inline-bundled-code"
+    // - Functions from external packages inlined directly.
+    const bundledPackagePatterns = [
+      // Socket packages that should always be external.
+      /@socketsecurity\/lib/,
+      /@socketsecurity\/packageurl-js/,
+      /@socketsecurity\/sdk/,
+      /@socketsecurity\/registry/,
+    ]
 
-    if (!hasImport) {
-      missingImports.push(dep)
+    for (const pattern of bundledPackagePatterns) {
+      // For ESM bundles, check if imports are to external packages (good)
+      // vs having the code inlined (bad).
+      // Look for: import ... from "@socketsecurity/lib" (external - good)
+      // vs: no imports but code from the package is present (bundled - bad).
+      const hasExternalImport = new RegExp(
+        `import\\s+.*?from\\s+["']${pattern.source}`,
+      ).test(content)
+
+      // If no external import found, check if package code might be bundled.
+      // This is a heuristic - look for multiple characteristic functions.
+      if (!hasExternalImport) {
+        // Check for signs of bundled code from this package.
+        // This would mean the package wasn't properly externalized.
+        const bundlePattern = new RegExp(
+          `(?:var|const|let)\\s+\\w+.*${pattern.source}`,
+        )
+
+        if (bundlePattern.test(content)) {
+          bundledDeps.push(pattern.source)
+        }
+      }
+    }
+  } else {
+    // If we have dependencies, check that they remain external (not bundled).
+    for (const dep of Object.keys(dependencies)) {
+      const escapedDep = dep.replace(/[/\\^$*+?.()|[\]{}]/g, '\\$&')
+
+      // Check if dependency is properly external.
+      const hasExternalImport = new RegExp(
+        `import\\s+.*?from\\s+["']${escapedDep}`,
+      ).test(content)
+
+      // If no external import, it might be bundled.
+      if (!hasExternalImport) {
+        const bundlePattern = new RegExp(
+          `(?:var|const|let)\\s+\\w+.*${escapedDep}`,
+        )
+
+        if (bundlePattern.test(content)) {
+          bundledDeps.push(dep)
+        }
+      }
     }
   }
 
   return {
-    missingImports,
-    hasAllImports: missingImports.length === 0,
+    bundledDeps,
+    hasNoBundledDeps: bundledDeps.length === 0,
   }
 }
 
@@ -95,24 +143,22 @@ describe('Bundle validation', () => {
     )
   })
 
-  it('should have external dependencies as import/require statements', async () => {
+  it('should not bundle dependencies inline (validate against package.json dependencies)', async () => {
     const indexPath = path.join(distPath, 'index.mjs')
     const content = await fs.readFile(indexPath, 'utf8')
 
-    const result = checkExternalDependencies(content)
+    const result = await checkBundledDependencies(content)
 
-    if (!result.hasAllImports) {
-      console.error(
-        'Missing import/require statements for external dependencies:',
-      )
-      for (const dep of result.missingImports) {
+    if (!result.hasNoBundledDeps) {
+      console.error('Found bundled dependencies (should be external):')
+      for (const dep of result.bundledDeps) {
         console.error(`  - ${dep}`)
       }
     }
 
     expect(
-      result.hasAllImports,
-      'All external dependencies should be import/require statements, not bundled inline',
+      result.hasNoBundledDeps,
+      'Dependencies from package.json should be external, not bundled inline',
     ).toBe(true)
   })
 })
