@@ -675,7 +675,8 @@ export interface paths {
   '/orgs/{org_slug}/settings/license-policy/view': {
     /**
      * Get License Policy (Beta)
-     * @description Returns an organization's license policy
+     * @description Returns an organization's license policy including allow, warn, monitor, and deny categories.
+     * The deny category contains all licenses that are not explicitly categorized as allow, warn, or monitor.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -1746,6 +1747,7 @@ export interface components {
       allow: string[] | null
       warn: string[] | null
       monitor: string[] | null
+      deny: string[] | null
       options: string[] | null
     }
     Capabilities: {
@@ -12006,7 +12008,8 @@ export interface operations {
   }
   /**
    * Get License Policy (Beta)
-   * @description Returns an organization's license policy
+   * @description Returns an organization's license policy including allow, warn, monitor, and deny categories.
+   * The deny category contains all licenses that are not explicitly categorized as allow, warn, or monitor.
    *
    * This endpoint consumes 1 unit of your quota.
    *

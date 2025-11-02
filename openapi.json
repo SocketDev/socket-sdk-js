@@ -1250,6 +1250,16 @@
             "description": "",
             "nullable": true
           },
+          "deny": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            },
+            "description": "",
+            "nullable": true
+          },
           "options": {
             "type": "array",
             "items": {
@@ -1263,6 +1273,7 @@
         },
         "required": [
           "allow",
+          "deny",
           "monitor",
           "options",
           "warn"
@@ -30441,7 +30452,7 @@
             ]
           }
         ],
-        "description": "Returns an organization's license policy\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- license-policy:read",
+        "description": "Returns an organization's license policy including allow, warn, monitor, and deny categories.\nThe deny category contains all licenses that are not explicitly categorized as allow, warn, or monitor.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- license-policy:read",
         "responses": {
           "200": {
             "content": {
