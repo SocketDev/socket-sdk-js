@@ -3,7 +3,7 @@
  * Provides default values, HTTP agents, and public policy configurations for API interactions.
  */
 
-import rootPkgJson from '../package.json'
+import rootPkgJson from '../package.json' with { type: 'json' }
 import { createUserAgentFromPkgJson } from './user-agent'
 
 import type { ALERT_ACTION, ALERT_TYPE } from './types'
