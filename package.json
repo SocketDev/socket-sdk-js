@@ -13,18 +13,17 @@
     "type": "git",
     "url": "git://github.com/SocketDev/socket-sdk-js.git"
   },
-  "type": "module",
-  "main": "./dist/index.mjs",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.mjs"
+      "default": "./dist/index.js"
     },
     "./package.json": "./package.json",
     "./testing": {
       "types": "./dist/testing.d.ts",
-      "default": "./dist/testing.mjs"
+      "default": "./dist/testing.js"
     },
     "./types/api": {
       "types": "./types/api.d.ts",
@@ -111,7 +110,6 @@
     "data/*.json",
     "dist/*.d.ts",
     "dist/*.js",
-    "dist/*.mjs",
     "types/*.d.ts"
   ],
   "typeCoverage": {

@@ -207,7 +207,6 @@ export const buildConfig = {
   // For bundle analysis
   metafile: true,
   logLevel: 'info',
-  outExtension: { '.js': '.mjs' },
 
   // Use plugin for local package aliases (consistent across all Socket repos).
   plugins: [createPathShorteningPlugin(), createAliasPlugin()].filter(Boolean),
