@@ -57,6 +57,10 @@ async function main() {
         args: ['scripts/validate-esbuild-minify.mjs'],
         command: 'node',
       },
+      {
+        args: ['scripts/validate-no-cdn-refs.mjs'],
+        command: 'node',
+      },
     ]
 
     const exitCodes = await runParallel(checks)
