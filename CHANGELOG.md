@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.1.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.1.1) - 2025-11-02
+
+### Fixed
+
+- Use standard `.js` extension for CommonJS output instead of `.mjs`
+- Remove `"type": "module"` from package.json to properly indicate CommonJS format
+
 ## [3.1.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.1.0) - 2025-11-02
 
 ### Fixed
