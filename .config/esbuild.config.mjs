@@ -27,8 +27,8 @@ function createPathShorteningPlugin() {
           const { parse } = await import('@babel/parser')
           const MagicString = (await import('magic-string')).default
 
-          const outputs = Object.keys(result.metafile.outputs).filter(f =>
-            f.endsWith('.js') || f.endsWith('.mjs'),
+          const outputs = Object.keys(result.metafile.outputs).filter(
+            f => f.endsWith('.js') || f.endsWith('.mjs'),
           )
 
           for (const outputPath of outputs) {
