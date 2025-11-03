@@ -1,4 +1,4 @@
-name: 📦 Publish to npm registry
+name: ⚡ Publish
 
 on:
   workflow_dispatch:
