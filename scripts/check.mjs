@@ -84,7 +84,7 @@ async function main() {
       process.exitCode = 1
     } else {
       logger.log('')
-      logger.success('All checks passed!')
+      logger.success('All checks passed')
       printFooter()
     }
   } catch (error) {
