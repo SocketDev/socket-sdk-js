@@ -44,7 +44,7 @@ jobs:
           autocrlf: false
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@5d91b07baf94ad7372cd0b9476750b6b33ae5a61 # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@1a96ced97aaa85d61543351b90d6f463b983c46c # main
 
       - name: Fetch latest OpenAPI definition
         id: fetch
@@ -139,7 +139,7 @@ jobs:
           autocrlf: false
           ref: automated/open-api
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@5d91b07baf94ad7372cd0b9476750b6b33ae5a61 # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@1a96ced97aaa85d61543351b90d6f463b983c46c # main
 
       - name: Build SDK
         run: pnpm run build
