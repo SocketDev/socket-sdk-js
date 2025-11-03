@@ -36,8 +36,8 @@ importers:
         specifier: 1.3.5
         version: 1.3.5
       '@socketsecurity/lib':
-        specifier: 3.1.3
-        version: 3.1.3(typescript@5.9.3)
+        specifier: 3.2.1
+        version: 3.2.1(typescript@5.9.3)
       '@types/babel__traverse':
         specifier: 7.28.0
         version: 7.28.0
@@ -644,8 +644,8 @@ packages:
     resolution: {integrity: sha512-Fl4GNUJ/z3IBJBGj4IsJfuRGUBCRMgX0df0mb5x5buaCPDKC+NhMhAFuxpc3viLSHV12CO2rGaNCf4fBYWI0FA==}
     engines: {node: '>=18', pnpm: '>=10.16.0'}
 
-  '@socketsecurity/lib@3.1.3':
-    resolution: {integrity: sha512-k7vnV9opOQScbLHJytnKCSW2Hdgo5KeJTzN0GfAqRq+Zaqd4RZXI/YSyEaA89MYxP+w2jAVkGenCac2HC102Kg==}
+  '@socketsecurity/lib@3.2.1':
+    resolution: {integrity: sha512-xM2cWW+UQi8MsGTQvjoZnNJ2fYPhqmV+y3ZBm18gqNJ1KWy8OWA2H3QiSG2lEyksHftGlvDmmtU14rPFSYI6Tg==}
     engines: {node: '>=22'}
     peerDependencies:
       typescript: '>=5.0.0'
@@ -2537,7 +2537,7 @@ snapshots:
 
   '@socketregistry/packageurl-js@1.3.5': {}
 
-  '@socketsecurity/lib@3.1.3(typescript@5.9.3)':
+  '@socketsecurity/lib@3.2.1(typescript@5.9.3)':
     optionalDependencies:
       typescript: 5.9.3
 
