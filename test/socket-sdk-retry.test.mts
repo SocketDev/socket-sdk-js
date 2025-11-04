@@ -3,7 +3,6 @@
  * @vitest-environment node
  */
 
-// @vitest-environment node
 // Run these tests in isolated mode to prevent nock state bleeding
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
