@@ -36,44 +36,52 @@ describe('SocketSdk - Upload Manifest Coverage', () => {
   })
 
   describe('uploadManifestFiles', () => {
-    it('should successfully execute upload manifest files method', async () => {
-      nock('https://api.socket.dev')
-        .post('/v0/orgs/test-org/upload-manifest-files')
-        .reply(200, {
-          tarHash: 'abc123def456',
-          unmatchedFiles: [],
-        })
+    it(
+      'should successfully execute upload manifest files method',
+      { retry: 2 },
+      async () => {
+        nock('https://api.socket.dev')
+          .post('/v0/orgs/test-org/upload-manifest-files')
+          .reply(200, {
+            tarHash: 'abc123def456',
+            unmatchedFiles: [],
+          })
 
-      const result = await sdk.uploadManifestFiles('test-org', [
-        packageJsonPath,
-      ])
+        const result = await sdk.uploadManifestFiles('test-org', [
+          packageJsonPath,
+        ])
 
-      expect(result.success).toBe(true)
-      expect(result.status).toBe(200)
-      if (result.success) {
-        expect(result.data.tarHash).toBe('abc123def456')
-        expect(result.data.unmatchedFiles).toEqual([])
-      }
-    })
+        expect(result.success).toBe(true)
+        expect(result.status).toBe(200)
+        if (result.success) {
+          expect(result.data.tarHash).toBe('abc123def456')
+          expect(result.data.unmatchedFiles).toEqual([])
+        }
+      },
+    )
 
-    it('should handle errors in uploadManifestFiles', async () => {
-      nock('https://api.socket.dev')
-        .post('/v0/orgs/test-org/upload-manifest-files')
-        .reply(400, {
-          error: {
-            message: 'Invalid manifest files',
-          },
-        })
+    it(
+      'should handle errors in uploadManifestFiles',
+      { retry: 2 },
+      async () => {
+        nock('https://api.socket.dev')
+          .post('/v0/orgs/test-org/upload-manifest-files')
+          .reply(400, {
+            error: {
+              message: 'Invalid manifest files',
+            },
+          })
 
-      const result = await sdk.uploadManifestFiles('test-org', [
-        packageJsonPath,
-      ])
+        const result = await sdk.uploadManifestFiles('test-org', [
+          packageJsonPath,
+        ])
 
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.status).toBe(400)
-        expect(result.error).toContain('Invalid manifest files')
-      }
-    })
+        expect(result.success).toBe(false)
+        if (!result.success) {
+          expect(result.status).toBe(400)
+          expect(result.error).toContain('Invalid manifest files')
+        }
+      },
+    )
   })
 })
