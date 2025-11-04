@@ -15277,5 +15277,18 @@ export interface operations {
       404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
-  }
+  } // SDK v3 method name aliases for TypeScript compatibility.
+  // These map the new SDK method names to their underlying OpenAPI operation names.
+  listOrganizations: operations['getOrganizations']
+  listRepositories: operations['getOrgRepoList']
+  createRepository: operations['createOrgRepo']
+  deleteRepository: operations['deleteOrgRepo']
+  updateRepository: operations['updateOrgRepo']
+  getRepository: operations['getOrgRepo']
+  listFullScans: operations['getOrgFullScanList']
+  createFullScan: operations['CreateOrgFullScan']
+  getFullScan: operations['getOrgFullScan']
+  streamFullScan: operations['getOrgFullScan']
+  deleteFullScan: operations['deleteOrgFullScan']
+  getFullScanMetadata: operations['getOrgFullScanMetadata']
 }
