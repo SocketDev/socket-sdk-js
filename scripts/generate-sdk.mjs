@@ -53,6 +53,8 @@ async function generateTypes() {
         writeFileSync(typesPath, output, 'utf8')
         // Fix array syntax after writing to disk
         fixArraySyntax(typesPath)
+        // Add SDK v3 method name aliases
+        addSdkMethodAliases(typesPath)
         resolve()
       } catch (error) {
         reject(error)
@@ -61,6 +63,46 @@ async function generateTypes() {
 
     child.on('error', reject)
   })
+}
+
+/**
+ * Adds SDK v3 method name aliases to the operations interface.
+ * These aliases map the new SDK method names to their underlying OpenAPI operation names.
+ * @param {string} filePath - The path to the TypeScript file to update
+ */
+function addSdkMethodAliases(filePath) {
+  const content = readFileSync(filePath, 'utf8')
+
+  // Find the closing brace of the operations interface
+  const operationsInterfaceEnd = content.lastIndexOf('\n}')
+
+  if (operationsInterfaceEnd === -1) {
+    logger.error('    Could not find operations interface closing brace')
+    return
+  }
+
+  const aliases = `  // SDK v3 method name aliases for TypeScript compatibility.
+  // These map the new SDK method names to their underlying OpenAPI operation names.
+  listOrganizations: operations['getOrganizations']
+  listRepositories: operations['getOrgRepoList']
+  createRepository: operations['createOrgRepo']
+  deleteRepository: operations['deleteOrgRepo']
+  updateRepository: operations['updateOrgRepo']
+  getRepository: operations['getOrgRepo']
+  listFullScans: operations['getOrgFullScanList']
+  createFullScan: operations['CreateOrgFullScan']
+  getFullScan: operations['getOrgFullScan']
+  streamFullScan: operations['getOrgFullScan']
+  deleteFullScan: operations['deleteOrgFullScan']
+  getFullScanMetadata: operations['getOrgFullScanMetadata']
+`
+
+  const updated =
+    content.slice(0, operationsInterfaceEnd) +
+    aliases +
+    content.slice(operationsInterfaceEnd)
+  writeFileSync(filePath, updated, 'utf8')
+  logger.log('    Added SDK v3 method name aliases')
 }
 
 /**
