@@ -27,7 +27,7 @@ JavaScript SDK for [Socket.dev](https://socket.dev/) API - Security analysis, vu
 | **Quota Utilities** | Cost calculation & planning helpers |
 | **TypeScript** | Full type safety with auto-generated types |
 
-**Requirements:** Node.js 18+ • ESM only (v2.0+)
+**Requirements:** Node.js 18+ ·ESM only (v2.0+)
 
 ## Installation
 
@@ -75,91 +75,91 @@ const batchResult = await client.batchPackageFetch({
 
 ### Package Analysis
 
-Quick security checks: `batchPackageFetch()` • `batchPackageStream()` • `getIssuesByNpmPackage()` • `getScoreByNpmPackage()`
+Quick security checks: `batchPackageFetch()` ·`batchPackageStream()` ·`getIssuesByNpmPackage()` ·`getScoreByNpmPackage()`
 
 [→ Documentation](./docs/api-reference.md#package-analysis)
 
 ### Scanning & Analysis
 
-Project scanning: `createDependenciesSnapshot()` • `createOrgFullScan()` • `createScanFromFilepaths()` • `getScan()` • `getScanList()` • `getSupportedScanFiles()`
+Project scanning: `createDependenciesSnapshot()` ·`createOrgFullScan()` ·`createScanFromFilepaths()` ·`getScan()` ·`getScanList()` ·`getSupportedScanFiles()`
 
 [→ Documentation](./docs/api-reference.md#scanning--analysis)
 
 ### Organization Management
 
-Organizations and repositories: `getOrganizations()` • `createOrgRepo()` • `getOrgRepo()` • `getOrgRepoList()` • `updateOrgRepo()` • `deleteOrgRepo()`
+Organizations and repositories: `getOrganizations()` ·`createOrgRepo()` ·`getOrgRepo()` ·`getOrgRepoList()` ·`updateOrgRepo()` ·`deleteOrgRepo()`
 
 [→ Documentation](./docs/api-reference.md#organization-management)
 
 ### Policy & Settings
 
-Security configuration: `getOrgSecurityPolicy()` • `updateOrgSecurityPolicy()` • `getOrgLicensePolicy()` • `updateOrgLicensePolicy()` • `postSettings()`
+Security configuration: `getOrgSecurityPolicy()` ·`updateOrgSecurityPolicy()` ·`getOrgLicensePolicy()` ·`updateOrgLicensePolicy()` ·`postSettings()`
 
 [→ Documentation](./docs/api-reference.md#policy--settings)
 
 ### Full Scan Management
 
-Deep analysis: `getOrgFullScanList()` • `getOrgFullScanMetadata()` • `getOrgFullScanBuffered()` • `streamOrgFullScan()` • `deleteOrgFullScan()`
+Deep analysis: `getOrgFullScanList()` ·`getOrgFullScanMetadata()` ·`getOrgFullScanBuffered()` ·`streamOrgFullScan()` ·`deleteOrgFullScan()`
 
 [→ Documentation](./docs/api-reference.md#full-scan-management)
 
 ### Diff Scans
 
-Scan comparison: `createOrgDiffScanFromIds()` • `getDiffScanById()` • `listOrgDiffScans()` • `deleteOrgDiffScan()`
+Scan comparison: `createOrgDiffScanFromIds()` ·`getDiffScanById()` ·`listOrgDiffScans()` ·`deleteOrgDiffScan()`
 
 [→ Documentation](./docs/api-reference.md#diff-scans)
 
 ### Patches & Vulnerabilities
 
-Security fixes: `streamPatchesFromScan()` • `viewPatch()`
+Security fixes: `streamPatchesFromScan()` ·`viewPatch()`
 
 [→ Documentation](./docs/api-reference.md#patches--vulnerabilities)
 
 ### Alert & Triage
 
-Alert management: `getOrgTriage()` • `updateOrgAlertTriage()`
+Alert management: `getOrgTriage()` ·`updateOrgAlertTriage()`
 
 [→ Documentation](./docs/api-reference.md#alert--triage)
 
 ### Export & Integration
 
-SBOM export: `exportCDX()` • `exportSPDX()` • `searchDependencies()` • `uploadManifestFiles()`
+SBOM export: `exportCDX()` ·`exportSPDX()` ·`searchDependencies()` ·`uploadManifestFiles()`
 
 [→ Documentation](./docs/api-reference.md#export--integration)
 
 ### Repository Labels
 
-Categorization: `createOrgRepoLabel()` • `getOrgRepoLabel()` • `getOrgRepoLabelList()` • `updateOrgRepoLabel()` • `deleteOrgRepoLabel()`
+Categorization: `createOrgRepoLabel()` ·`getOrgRepoLabel()` ·`getOrgRepoLabelList()` ·`updateOrgRepoLabel()` ·`deleteOrgRepoLabel()`
 
 [→ Documentation](./docs/api-reference.md#repository-labels)
 
 ### Analytics & Monitoring
 
-Usage metrics: `getQuota()` • `getOrgAnalytics()` • `getRepoAnalytics()` • `getAuditLogEvents()`
+Usage metrics: `getQuota()` ·`getOrgAnalytics()` ·`getRepoAnalytics()` ·`getAuditLogEvents()`
 
 [→ Documentation](./docs/api-reference.md#analytics--monitoring)
 
 ### Authentication & Access
 
-API tokens: `getAPITokens()` • `postAPIToken()` • `postAPITokensRotate()` • `postAPITokensRevoke()` • `postAPITokenUpdate()`
+API tokens: `getAPITokens()` ·`postAPIToken()` ·`postAPITokensRotate()` ·`postAPITokensRevoke()` ·`postAPITokenUpdate()`
 
 [→ Documentation](./docs/api-reference.md#authentication--access)
 
 ### Entitlements
 
-Feature access: `getEnabledEntitlements()` • `getEntitlements()`
+Feature access: `getEnabledEntitlements()` ·`getEntitlements()`
 
 [→ Documentation](./docs/api-reference.md#entitlements)
 
 ### Quota Utilities
 
-Cost helpers: `getQuotaCost()` • `getRequiredPermissions()` • `calculateTotalQuotaCost()` • `hasQuotaForMethods()` • `getMethodsByQuotaCost()` • `getMethodsByPermissions()` • `getQuotaUsageSummary()` • `getAllMethodRequirements()`
+Cost helpers: `getQuotaCost()` ·`getRequiredPermissions()` ·`calculateTotalQuotaCost()` ·`hasQuotaForMethods()` ·`getMethodsByQuotaCost()` ·`getMethodsByPermissions()` ·`getQuotaUsageSummary()` ·`getAllMethodRequirements()`
 
 [→ Documentation](./docs/quota-management.md)
 
 ### Advanced Query Methods
 
-Raw API access: `getApi()` • `sendApi()`
+Raw API access: `getApi()` ·`sendApi()`
 
 [→ Documentation](./docs/api-reference.md#advanced-query-methods)
 
