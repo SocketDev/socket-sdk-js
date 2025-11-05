@@ -12,8 +12,8 @@
  */
 
 import { isQuiet, isVerbose } from '@socketsecurity/lib/argv/flags'
-import loggerPkg from '@socketsecurity/lib/logger'
 import platformPkg from '@socketsecurity/lib/constants/platform'
+import loggerPkg from '@socketsecurity/lib/logger'
 import spawnPkg from '@socketsecurity/lib/spawn'
 
 const { getDefaultLogger } = loggerPkg

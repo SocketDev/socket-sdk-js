@@ -169,9 +169,9 @@ Raw API access: `getApi()` ·`sendApi()`
 
 | Guide | Description |
 |-------|-------------|
+| **[Getting Started](./docs/getting-started.md)** | Quick start for contributors (5 min setup) |
 | **[API Reference](./docs/api-reference.md)** | Complete API method documentation |
 | **[Usage Examples](./docs/usage-examples.md)** | Real-world patterns and code samples |
-| **[Getting Started](./docs/getting-started.md)** | Development setup and workflow |
 | **[Quota Management](./docs/quota-management.md)** | Cost tiers (0/10/100) and utilities |
 | **[Testing Guide](./docs/dev/testing.md)** | Test helpers, fixtures, and patterns |
 | **[Method Reference](./docs/when-to-use-what.md)** | Quick method selection guide |
