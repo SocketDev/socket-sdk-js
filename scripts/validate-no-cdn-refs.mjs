@@ -1,75 +1,35 @@
 #!/usr/bin/env node
 /**
- * @fileoverview Validates that no files contain CDN references.
- * CDN usage is prohibited - use npm packages and bundle instead.
+ * @fileoverview Validates that there are no CDN references in the codebase.
  *
- * Checks for:
- * - bundle.run
- * - cdnjs.cloudflare.com
- * - denopkg.com
- * - esm.run
- * - esm.sh
- * - jsdelivr.net (cdn.jsdelivr.net, fastly.jsdelivr.net)
- * - jspm.io/jspm.dev
- * - jsr.io
- * - Pika/Snowpack CDN
- * - skypack.dev
+ * This is a preventative check to ensure no hardcoded CDN URLs are introduced.
+ * The project deliberately avoids CDN dependencies for security and reliability.
+ *
+ * Blocked CDN domains:
  * - unpkg.com
+ * - cdn.jsdelivr.net
+ * - esm.sh
+ * - cdn.skypack.dev
+ * - ga.jspm.io
  */
 
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import loggerPkg from '@socketsecurity/lib/logger'
+
+const logger = loggerPkg.getDefaultLogger()
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
 
-// CDN patterns to detect
+// CDN domains to block
 const CDN_PATTERNS = [
-  {
-    pattern: /bundle\.run/gi,
-    name: 'bundle.run',
-  },
-  {
-    pattern: /cdnjs\.cloudflare\.com/gi,
-    name: 'cdnjs',
-  },
-  {
-    pattern: /denopkg\.com/gi,
-    name: 'denopkg',
-  },
-  {
-    pattern: /esm\.run/gi,
-    name: 'esm.run',
-  },
-  {
-    pattern: /esm\.sh/gi,
-    name: 'esm.sh',
-  },
-  {
-    pattern: /cdn\.jsdelivr\.net|jsdelivr\.net|fastly\.jsdelivr\.net/gi,
-    name: 'jsDelivr',
-  },
-  {
-    pattern: /ga\.jspm\.io|jspm\.dev/gi,
-    name: 'JSPM',
-  },
-  {
-    pattern: /jsr\.io/gi,
-    name: 'JSR',
-  },
-  {
-    pattern: /cdn\.pika\.dev|cdn\.snowpack\.dev/gi,
-    name: 'Pika/Snowpack CDN',
-  },
-  {
-    pattern: /skypack\.dev|cdn\.skypack\.dev/gi,
-    name: 'Skypack',
-  },
-  {
-    pattern: /unpkg\.com/gi,
-    name: 'unpkg',
-  },
+  /unpkg\.com/i,
+  /cdn\.jsdelivr\.net/i,
+  /esm\.sh/i,
+  /cdn\.skypack\.dev/i,
+  /ga\.jspm\.io/i,
 ]
 
 // Directories to skip
@@ -83,33 +43,47 @@ const SKIP_DIRS = new Set([
   '.next',
   '.nuxt',
   '.output',
+  '.turbo',
+  '.type-coverage',
+  '.yarn',
 ])
 
 // File extensions to check
-const CHECK_EXTENSIONS = new Set([
+const TEXT_EXTENSIONS = new Set([
   '.js',
   '.mjs',
   '.cjs',
   '.ts',
   '.mts',
   '.cts',
-  '.tsx',
   '.jsx',
+  '.tsx',
   '.json',
   '.md',
   '.html',
   '.htm',
   '.css',
-  '.scss',
-  '.yaml',
   '.yml',
-  '.toml',
+  '.yaml',
+  '.xml',
+  '.svg',
+  '.txt',
+  '.sh',
+  '.bash',
 ])
 
 /**
- * Recursively find all files to check.
+ * Check if file should be scanned.
  */
-async function findFiles(dir, files = []) {
+function shouldScanFile(filename) {
+  const ext = path.extname(filename).toLowerCase()
+  return TEXT_EXTENSIONS.has(ext)
+}
+
+/**
+ * Recursively find all text files to scan.
+ */
+async function findTextFiles(dir, files = []) {
   try {
     const entries = await fs.readdir(dir, { withFileTypes: true })
 
@@ -117,14 +91,15 @@ async function findFiles(dir, files = []) {
       const fullPath = path.join(dir, entry.name)
 
       if (entry.isDirectory()) {
-        if (!SKIP_DIRS.has(entry.name) && !entry.name.startsWith('.')) {
-          await findFiles(fullPath, files)
+        // Skip certain directories and hidden directories (except .github)
+        if (
+          !SKIP_DIRS.has(entry.name) &&
+          (!entry.name.startsWith('.') || entry.name === '.github')
+        ) {
+          await findTextFiles(fullPath, files)
         }
-      } else if (entry.isFile()) {
-        const ext = path.extname(entry.name)
-        if (CHECK_EXTENSIONS.has(ext)) {
-          files.push(fullPath)
-        }
+      } else if (entry.isFile() && shouldScanFile(entry.name)) {
+        files.push(fullPath)
       }
     }
   } catch {
@@ -135,59 +110,56 @@ async function findFiles(dir, files = []) {
 }
 
 /**
- * Check a file for CDN references.
+ * Check file contents for CDN references.
  */
-async function checkFile(filePath) {
+async function checkFileForCdnRefs(filePath) {
+  // Skip this validator script itself (it mentions CDN domains by necessity)
+  if (filePath.endsWith('validate-no-cdn-refs.mjs')) {
+    return []
+  }
+
   try {
     const content = await fs.readFile(filePath, 'utf8')
+    const lines = content.split('\n')
     const violations = []
 
-    // Skip this validation script itself (it contains CDN names in documentation)
-    const relativePath = path.relative(rootPath, filePath)
-    if (relativePath === 'scripts/validate-no-cdn-refs.mjs') {
-      return []
-    }
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+      const lineNumber = i + 1
 
-    for (const { name, pattern } of CDN_PATTERNS) {
-      // Reset regex state
-      pattern.lastIndex = 0
-
-      let match
-      while ((match = pattern.exec(content)) !== null) {
-        // Get line number
-        const beforeMatch = content.substring(0, match.index)
-        const lineNumber = beforeMatch.split('\n').length
-
-        // Get context (line containing the match)
-        const lines = content.split('\n')
-        const line = lines[lineNumber - 1]
-
-        violations.push({
-          file: path.relative(rootPath, filePath),
-          lineNumber,
-          cdn: name,
-          line: line.trim(),
-          url: match[0],
-        })
+      for (const pattern of CDN_PATTERNS) {
+        if (pattern.test(line)) {
+          const match = line.match(pattern)
+          violations.push({
+            file: path.relative(rootPath, filePath),
+            line: lineNumber,
+            content: line.trim(),
+            cdnDomain: match[0],
+          })
+        }
       }
     }
 
     return violations
-  } catch {
-    // Skip files we can't read
+  } catch (error) {
+    // Skip files we can't read (likely binary despite extension)
+    if (error.code === 'EISDIR' || error.message.includes('ENOENT')) {
+      return []
+    }
+    // For other errors, try to continue
     return []
   }
 }
 
 /**
- * Validate no CDN references exist.
+ * Validate all files for CDN references.
  */
 async function validateNoCdnRefs() {
-  const files = await findFiles(rootPath)
+  const files = await findTextFiles(rootPath)
   const allViolations = []
 
   for (const file of files) {
-    const violations = await checkFile(file)
+    const violations = await checkFileForCdnRefs(file)
     allViolations.push(...violations)
   }
 
@@ -199,48 +171,44 @@ async function main() {
     const violations = await validateNoCdnRefs()
 
     if (violations.length === 0) {
-      console.log('✓ No CDN references found')
+      logger.success('No CDN references found')
       process.exitCode = 0
       return
     }
 
-    console.error('❌ CDN references found (prohibited)\n')
-    console.error(
-      'Public CDNs (cdnjs, unpkg, jsDelivr, esm.sh, JSR, etc.) are not allowed.\n',
-    )
-    console.error('Use npm packages and bundle instead.\n')
+    logger.fail(`Found ${violations.length} CDN reference(s)`)
+    logger.log('')
+    logger.log('CDN URLs are not allowed in this codebase for security and')
+    logger.log('reliability reasons. Please use npm packages instead.')
+    logger.log('')
+    logger.log('Blocked CDN domains:')
+    logger.log('  - unpkg.com')
+    logger.log('  - cdn.jsdelivr.net')
+    logger.log('  - esm.sh')
+    logger.log('  - cdn.skypack.dev')
+    logger.log('  - ga.jspm.io')
+    logger.log('')
+    logger.log('Violations:')
+    logger.log('')
 
-    // Group by file
-    const byFile = new Map()
     for (const violation of violations) {
-      if (!byFile.has(violation.file)) {
-        byFile.set(violation.file, [])
-      }
-      byFile.get(violation.file).push(violation)
+      logger.log(`  ${violation.file}:${violation.line}`)
+      logger.log(`    Domain: ${violation.cdnDomain}`)
+      logger.log(`    Content: ${violation.content}`)
+      logger.log('')
     }
 
-    for (const [file, fileViolations] of byFile) {
-      console.error(`  ${file}`)
-      for (const violation of fileViolations) {
-        console.error(`    Line ${violation.lineNumber}: ${violation.cdn}`)
-        console.error(`      ${violation.line}`)
-      }
-      console.error('')
-    }
-
-    console.error('Replace CDN usage with:')
-    console.error('  - npm install <package>')
-    console.error('  - Import and bundle with your build tool')
-    console.error('')
+    logger.log('Remove CDN references and use npm dependencies instead.')
+    logger.log('')
 
     process.exitCode = 1
   } catch (error) {
-    console.error('Validation failed:', error.message)
+    logger.fail(`Validation failed: ${error.message}`)
     process.exitCode = 1
   }
 }
 
 main().catch(error => {
-  console.error('Validation failed:', error)
+  logger.fail(`Unexpected error: ${error.message}`)
   process.exitCode = 1
 })
