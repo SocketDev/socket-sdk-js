@@ -16,6 +16,7 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+
 import loggerPkg from '@socketsecurity/lib/logger'
 
 const logger = loggerPkg.getDefaultLogger()

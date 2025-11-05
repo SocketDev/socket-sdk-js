@@ -160,7 +160,7 @@ async function runLintOnFiles(files, options = {}) {
   }
 
   if (!quiet) {
-    logger.progress(`Linting ${files.length} file(s)`)
+    logger.stdout.progress(`Linting ${files.length} file(s)`)
   }
 
   // Build the linter configurations.
@@ -227,6 +227,7 @@ async function runLintOnFiles(files, options = {}) {
   }
 
   if (!quiet) {
+    logger.stdout.clearLine()
     logger.log(`${colors.green('✓')} Linting passed`)
     // Add newline after message (use error to write to same stream)
     logger.error('')
@@ -242,7 +243,7 @@ async function runLintOnAll(options = {}) {
   const { fix = false, quiet = false } = options
 
   if (!quiet) {
-    logger.progress('Linting all files')
+    logger.stdout.progress('Linting all files')
   }
 
   const linters = [
@@ -301,6 +302,7 @@ async function runLintOnAll(options = {}) {
   }
 
   if (!quiet) {
+    logger.stdout.clearLine()
     logger.log(`${colors.green('✓')} Linting passed`)
     // Add newline after message (use error to write to same stream)
     logger.error('')
