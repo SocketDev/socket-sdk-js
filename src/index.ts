@@ -52,6 +52,23 @@ export type ALERT_TYPE = keyof NonNullable<
 
 export type Agent = HttpsAgent | HttpAgent | ClientHttp2Session
 
+export interface RequestInfo {
+  method: string
+  url: string
+  headers?: Record<string, string> | undefined
+  timeout?: number | undefined
+}
+
+export interface ResponseInfo {
+  method: string
+  url: string
+  duration: number
+  status?: number | undefined
+  statusText?: string | undefined
+  headers?: Record<string, string> | undefined
+  error?: Error | undefined
+}
+
 export type BatchPackageFetchResultType = SocketSdkResult<'batchPackageFetch'>
 
 export type BatchPackageStreamOptions = {
@@ -139,6 +156,13 @@ export interface SocketSdkOptions {
   baseUrl?: string | undefined
   timeout?: number | undefined
   userAgent?: string | undefined
+  /** Request/response logging hooks */
+  hooks?:
+    | {
+        onRequest?: (info: RequestInfo) => void
+        onResponse?: (info: ResponseInfo) => void
+      }
+    | undefined
 }
 
 export type UploadManifestFilesResponse = {
@@ -270,6 +294,49 @@ const publicPolicy = new Map<ALERT_TYPE, ALERT_ACTION>([
   ['zeroWidth', 'ignore']
 ])
 
+/**
+ * Array of sensitive header names that should be redacted in logs
+ */
+const SENSITIVE_HEADERS = [
+  'authorization',
+  'cookie',
+  'set-cookie',
+  'proxy-authorization',
+  'www-authenticate',
+  'proxy-authenticate',
+]
+
+/**
+ * Sanitize headers for logging by redacting sensitive values.
+ */
+function sanitizeHeaders(
+  headers: Record<string, unknown> | readonly string[] | undefined,
+): Record<string, string> | undefined {
+  if (!headers) {
+    return undefined
+  }
+
+  // Handle readonly string[] case - this shouldn't normally happen for headers
+  if (Array.isArray(headers)) {
+    return { headers: headers.join(', ') }
+  }
+
+  const sanitized: Record<string, string> = {}
+
+  // Plain object iteration works for both HeadersRecord and IncomingHttpHeaders
+  for (const [key, value] of Object.entries(headers)) {
+    const keyLower = key.toLowerCase()
+    if (SENSITIVE_HEADERS.includes(keyLower)) {
+      sanitized[key] = '[REDACTED]'
+    } else {
+      // Handle both string and string[] values
+      sanitized[key] = Array.isArray(value) ? value.join(', ') : String(value)
+    }
+  }
+
+  return sanitized
+}
+
 class ResponseError extends Error {
   response: IncomingMessage
   constructor(response: IncomingMessage, message: string = '') {
@@ -287,44 +354,155 @@ class ResponseError extends Error {
 async function createDeleteRequest(
   baseUrl: string,
   urlPath: string,
-  options: RequestOptions
+  options: RequestOptions,
+  hooks?: SocketSdkOptions['hooks']
 ): Promise<IncomingMessage> {
-  const req = getHttpModule(baseUrl)
-    .request(`${baseUrl}${urlPath}`, {
-      method: 'DELETE',
-      ...options
+  const startTime = Date.now()
+  const url = `${baseUrl}${urlPath}`
+  const method = 'DELETE'
+
+  hooks?.onRequest?.({
+    method,
+    url,
+    headers: sanitizeHeaders((options as HttpsRequestOptions).headers),
+    timeout: options.timeout,
+  })
+
+  try {
+    const req = getHttpModule(baseUrl)
+      .request(url, {
+        method,
+        ...options
+      })
+      .end()
+    const response = await getResponse(req)
+
+    hooks?.onResponse?.({
+      method,
+      url,
+      duration: Date.now() - startTime,
+      status: response.statusCode,
+      statusText: response.statusMessage,
+      headers: sanitizeHeaders(response.headers),
     })
-    .end()
-  return await getResponse(req)
+
+    return response
+  } catch (error) {
+    hooks?.onResponse?.({
+      method,
+      url,
+      duration: Date.now() - startTime,
+      error: error as Error,
+    })
+
+    throw error
+  }
 }
 
 async function createGetRequest(
   baseUrl: string,
   urlPath: string,
-  options: RequestOptions
+  options: RequestOptions,
+  hooks?: SocketSdkOptions['hooks']
 ): Promise<IncomingMessage> {
-  const req = getHttpModule(baseUrl)
-    .request(`${baseUrl}${urlPath}`, {
-      method: 'GET',
-      ...options
+  const startTime = Date.now()
+  const url = `${baseUrl}${urlPath}`
+  const method = 'GET'
+
+  hooks?.onRequest?.({
+    method,
+    url,
+    headers: sanitizeHeaders((options as HttpsRequestOptions).headers),
+    timeout: options.timeout,
+  })
+
+  try {
+    const req = getHttpModule(baseUrl)
+      .request(url, {
+        method,
+        ...options
+      })
+      .end()
+    const response = await getResponse(req)
+
+    hooks?.onResponse?.({
+      method,
+      url,
+      duration: Date.now() - startTime,
+      status: response.statusCode,
+      statusText: response.statusMessage,
+      headers: sanitizeHeaders(response.headers),
     })
-    .end()
-  return await getResponse(req)
+
+    return response
+  } catch (error) {
+    hooks?.onResponse?.({
+      method,
+      url,
+      duration: Date.now() - startTime,
+      error: error as Error,
+    })
+
+    throw error
+  }
 }
 
 async function createPostRequest(
   baseUrl: string,
   urlPath: string,
   postJson: any,
-  options: RequestOptions
+  options: RequestOptions,
+  hooks?: SocketSdkOptions['hooks']
 ): Promise<IncomingMessage> {
-  const req = getHttpModule(baseUrl)
-    .request(`${baseUrl}${urlPath}`, {
-      method: 'POST',
-      ...options
+  const startTime = Date.now()
+  const url = `${baseUrl}${urlPath}`
+  const method = 'POST'
+  const body = JSON.stringify(postJson)
+  const headers = {
+    ...(options as HttpsRequestOptions)?.headers,
+    'Content-Length': Buffer.byteLength(body, 'utf8'),
+    'Content-Type': 'application/json',
+  }
+
+  hooks?.onRequest?.({
+    method,
+    url,
+    headers: sanitizeHeaders(headers),
+    timeout: options.timeout,
+  })
+
+  try {
+    const req = getHttpModule(baseUrl).request(url, {
+      method,
+      ...options,
+      headers,
     })
-    .end(JSON.stringify(postJson))
-  return await getResponse(req)
+
+    req.write(body)
+    req.end()
+
+    const response = await getResponse(req)
+
+    hooks?.onResponse?.({
+      method,
+      url,
+      duration: Date.now() - startTime,
+      status: response.statusCode,
+      statusText: response.statusMessage,
+      headers: sanitizeHeaders(response.headers),
+    })
+
+    return response
+  } catch (error) {
+    hooks?.onResponse?.({
+      method,
+      url,
+      duration: Date.now() - startTime,
+      error: error as Error,
+    })
+
+    throw error
+  }
 }
 
 function createRequestBodyForFilepaths(
@@ -362,7 +540,8 @@ async function createUploadRequest(
   baseUrl: string,
   urlPath: string,
   requestBodyNoBoundaries: Array<string | Readable | Array<string | Readable>>,
-  options: RequestOptions
+  options: RequestOptions,
+  hooks?: SocketSdkOptions['hooks']
 ): Promise<IncomingMessage> {
   // This function constructs and sends a multipart/form-data HTTP POST request
   // where each part is streamed to the server. It supports string payloads
@@ -395,20 +574,50 @@ async function createUploadRequest(
     ]
 
     const url = new URL(urlPath, baseUrl)
+    const method = 'POST'
+    const headers = {
+      ...(options as HttpsRequestOptions)?.headers,
+      'Content-Type': `multipart/form-data; boundary=${boundary}`,
+    }
+    const startTime = Date.now()
     const req: ClientRequest = getHttpModule(baseUrl).request(url, {
-      method: 'POST',
+      method,
       ...options,
-      headers: {
-        ...(options as HttpsRequestOptions)?.headers,
-        'Content-Type': `multipart/form-data; boundary=${boundary}`
-      }
+      headers,
+    })
+    hooks?.onRequest?.({
+      method,
+      url: url.toString(),
+      headers: sanitizeHeaders(headers),
+      timeout: options.timeout,
     })
 
     // Send headers early to prompt server validation (auth, URL, quota, etc.).
     req.flushHeaders()
 
     // Concurrently wait for response while we stream body.
-    getResponse(req).then(pass, fail)
+    getResponse(req).then(
+      response => {
+        hooks?.onResponse?.({
+          method,
+          url: url.toString(),
+          duration: Date.now() - startTime,
+          status: response.statusCode,
+          statusText: response.statusMessage,
+          headers: sanitizeHeaders(response.headers),
+        })
+        pass(response)
+      },
+      error => {
+        hooks?.onResponse?.({
+          method,
+          url: url.toString(),
+          duration: Date.now() - startTime,
+          error: error as Error,
+        })
+        fail(error)
+      },
+    )
 
     let aborted = false
     req.on('error', () => (aborted = true))
@@ -687,12 +896,14 @@ const agentNames = new Set(['http', 'https', 'http2'])
 export class SocketSdk {
   readonly #apiToken: string
   readonly #baseUrl: string
+  readonly #hooks: SocketSdkOptions['hooks']
   readonly #reqOptions: RequestOptions
 
   constructor(apiToken: string, options?: SocketSdkOptions | undefined) {
     const {
       agent: agentOrObj,
       baseUrl = 'https://api.socket.dev/v0/',
+      hooks,
       timeout,
       userAgent
     } = { __proto__: null, ...options } as SocketSdkOptions
@@ -707,6 +918,7 @@ export class SocketSdk {
     ) as Agent | undefined
     this.#apiToken = apiToken
     this.#baseUrl = baseUrl
+    this.#hooks = hooks
     this.#reqOptions = {
       ...(agent ? { agent } : {}),
       headers: {
@@ -1004,7 +1216,8 @@ export class SocketSdk {
           this.#baseUrl,
           `dependencies/upload?${queryToSearchParams(queryParams)}`,
           createRequestBodyForFilepaths(absFilepaths, basePath),
-          this.#reqOptions
+          this.#reqOptions,
+          this.#hooks,
         )
       )
       return this.#handleApiSuccess<'createDependenciesSnapshot'>(data)
@@ -1036,7 +1249,8 @@ export class SocketSdk {
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(queryParams)}`,
           createRequestBodyForFilepaths(absFilepaths, basePath),
-          this.#reqOptions
+          this.#reqOptions,
+          this.#hooks,
         )
       )
       return this.#handleApiSuccess<'CreateOrgFullScan'>(data)
@@ -1055,7 +1269,8 @@ export class SocketSdk {
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/repos`,
           queryParams,
-          this.#reqOptions
+          this.#reqOptions,
+          this.#hooks,
         )
       )
       return this.#handleApiSuccess<'createOrgRepo'>(data)
@@ -1084,7 +1299,8 @@ export class SocketSdk {
         {
           ...this.#reqOptions,
           method: 'PUT'
-        }
+        },
+        this.#hooks,
       )
       return this.#handleApiSuccess<'createReport'>(data)
     } catch (e) {
@@ -1331,7 +1547,12 @@ export class SocketSdk {
   async getQuota(): Promise<SocketSdkResult<'getQuota'>> {
     try {
       const data = await getResponseJson(
-        await createGetRequest(this.#baseUrl, 'quota', this.#reqOptions)
+        await createGetRequest(
+          this.#baseUrl,
+          'quota',
+          this.#reqOptions,
+          this.#hooks,
+        )
       )
       return this.#handleApiSuccess<'getQuota'>(data)
     } catch (e) {
@@ -1487,7 +1708,8 @@ export class SocketSdk {
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/upload-manifest-files`,
           createRequestBodyForFilepaths(absFilepaths, basePath),
-          this.#reqOptions
+          this.#reqOptions,
+          this.#hooks,
         )
       )
       return this.#handleApiSuccess<any>(
