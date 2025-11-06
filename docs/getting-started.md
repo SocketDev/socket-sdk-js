@@ -201,19 +201,7 @@ it('fetches package metadata', async () => {
 - [Usage Examples](./usage-examples.md) - Common patterns
 - [When to Use What](./when-to-use-what.md) - Method selection guide
 - [Quota Management](./quota-management.md) - Rate limiting
-- [Testing Guide](./dev/testing.md) - Testing best practices
-- [CLAUDE.md](../CLAUDE.md) - Development standards
 
----
+## License
 
-## ✅ Checklist
-
-- [ ] Installed dependencies (`pnpm install`)
-- [ ] Set up API key (for integration tests)
-- [ ] Tests passing (`pnpm test`)
-- [ ] Read [API Reference](./api-reference.md)
-- [ ] Understand rate limiting
-- [ ] Know commit format (conventional commits)
-- [ ] Ready to contribute!
-
-**Welcome!** 🎉
+MIT
