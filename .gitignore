@@ -10,8 +10,9 @@ desktop.ini
 /.env
 /.env.local
 /.env.*.local
-/.pnpmfile.cjs
+/.node-version
 /.nvm
+/.pnpmfile.cjs
 
 # Build artifacts
 /.type-coverage
