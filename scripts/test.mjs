@@ -15,7 +15,6 @@ import { getDefaultSpinner } from '@socketsecurity/lib/spinner'
 import { printHeader } from '@socketsecurity/lib/stdio/header'
 
 import { getTestsToRun } from './utils/changed-test-mapper.mjs'
-import { getLocalPackageAliases } from './utils/get-local-package-aliases.mjs'
 
 const WIN32 = process.platform === 'win32'
 
@@ -42,12 +41,7 @@ const nodeModulesBinPath = path.join(rootPath, 'node_modules', '.bin')
 const logger = getDefaultLogger()
 const spinner = getDefaultSpinner()
 
-// Determine which TypeScript config to use based on local package detection
-const localPackageAliases = getLocalPackageAliases(rootPath)
-const hasLocalPackages = Object.keys(localPackageAliases).length > 0
-const tsConfigPath = hasLocalPackages
-  ? '.config/tsconfig.check.local.json'
-  : '.config/tsconfig.check.json'
+const tsConfigPath = '.config/tsconfig.check.json'
 
 // Track running processes for cleanup
 const runningProcesses = new Set()

@@ -12,18 +12,12 @@
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { printFooter, printHeader } from '@socketsecurity/lib/stdio/header'
 
-import { getLocalPackageAliases } from './utils/get-local-package-aliases.mjs'
 import { runParallel } from './utils/run-command.mjs'
 
 // Initialize logger
 const logger = getDefaultLogger()
 
-// Determine which TypeScript config to use based on local package detection
-const localPackageAliases = getLocalPackageAliases(process.cwd())
-const hasLocalPackages = Object.keys(localPackageAliases).length > 0
-const tsConfigPath = hasLocalPackages
-  ? '.config/tsconfig.check.local.json'
-  : '.config/tsconfig.check.json'
+const tsConfigPath = '.config/tsconfig.check.json'
 
 async function main() {
   try {

@@ -8,7 +8,6 @@ import { fileURLToPath } from 'node:url'
 
 import { defineConfig } from 'vitest/config'
 
-import { getLocalPackageAliases } from '../scripts/utils/get-local-package-aliases.mjs'
 import {
   baseCoverageConfig,
   isolatedCoverageThresholds,
@@ -29,9 +28,6 @@ const isCoverageEnabled =
 
 export default defineConfig({
   cacheDir: './.cache/vitest',
-  resolve: {
-    alias: getLocalPackageAliases(path.join(__dirname, '..')),
-  },
   test: {
     globals: false,
     environment: 'node',

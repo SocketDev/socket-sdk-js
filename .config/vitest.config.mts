@@ -2,18 +2,12 @@
  * @fileoverview Vitest configuration for Socket SDK test suite.
  * Configures test environment, coverage, and module resolution.
  */
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-
 import { defineConfig } from 'vitest/config'
 
-import { getLocalPackageAliases } from '../scripts/utils/get-local-package-aliases.mjs'
 import {
   baseCoverageConfig,
   mainCoverageThresholds,
 } from './vitest.coverage.config.mts'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // Check if coverage is enabled via CLI flags or environment.
 const isCoverageEnabled =
@@ -28,9 +22,6 @@ if (isCoverageEnabled) {
 
 export default defineConfig({
   cacheDir: './.cache/vitest',
-  resolve: {
-    alias: getLocalPackageAliases(path.join(__dirname, '..')),
-  },
   test: {
     globals: false,
     environment: 'node',
