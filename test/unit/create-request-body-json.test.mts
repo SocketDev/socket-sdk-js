@@ -1,7 +1,7 @@
 /** @fileoverview Tests for JSON request body creation utilities. */
 import { describe, expect, it } from 'vitest'
 
-import { createRequestBodyForJson } from '../src/index'
+import { createRequestBodyForJson } from '../../src/index'
 
 describe('JSON Request Body Creation', () => {
   describe('createRequestBodyForJson', () => {

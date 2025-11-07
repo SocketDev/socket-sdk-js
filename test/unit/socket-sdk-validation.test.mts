@@ -1,7 +1,7 @@
 /** @fileoverview Tests for SocketSdk parameter validation and error handling (no HTTP mocking). */
 import { describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../src/index'
+import { SocketSdk } from '../../src/index'
 import { setupTestClient } from '../utils/environment.mts'
 
 describe('SocketSdk Validation & Error Handling', () => {

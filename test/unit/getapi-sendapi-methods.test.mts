@@ -3,10 +3,10 @@
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../src/index'
+import { SocketSdk } from '../../src/index'
 import { setupTestClient } from '../utils/environment.mts'
 
-import type { SocketSdkGenericResult } from '../src/index'
+import type { SocketSdkGenericResult } from '../../src/index'
 import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
 
 describe('getApi and sendApi Methods', () => {

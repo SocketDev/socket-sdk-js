@@ -11,7 +11,7 @@ import {
   getQuotaUsageSummary,
   getRequiredPermissions,
   hasQuotaForMethods,
-} from '../src/quota-utils'
+} from '../../src/quota-utils'
 
 describe('Quota Utils', () => {
   describe('getQuotaCost', () => {

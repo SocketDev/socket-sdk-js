@@ -10,7 +10,7 @@ import { createServer } from 'node:http'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../src/index'
+import { SocketSdk } from '../../src/index'
 
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'
 

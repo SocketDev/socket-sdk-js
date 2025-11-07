@@ -1,7 +1,7 @@
 /** @fileoverview Tests for promiseWithResolvers utility function coverage. */
 import { describe, expect, it } from 'vitest'
 
-import { promiseWithResolvers } from '../src/index'
+import { promiseWithResolvers } from '../../src/index'
 
 describe('Utility Functions - Promise Resolvers', () => {
   describe('promiseWithResolvers', () => {

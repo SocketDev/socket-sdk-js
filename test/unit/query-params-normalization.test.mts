@@ -1,7 +1,7 @@
 /** @fileoverview Tests for query parameter normalization and URL encoding. */
 import { describe, expect, it } from 'vitest'
 
-import { queryToSearchParams } from '../src/index'
+import { queryToSearchParams } from '../../src/index'
 
 describe('Query Parameter Normalization', () => {
   describe('queryToSearchParams', () => {

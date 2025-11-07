@@ -7,7 +7,7 @@
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../src/index'
+import { SocketSdk } from '../../src/index'
 import { setupTestEnvironment } from '../utils/environment.mts'
 
 describe('SocketSdk - Retry Logic', () => {
