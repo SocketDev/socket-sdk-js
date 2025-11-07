@@ -1,6 +1,6 @@
 # Quota Management
 
-API methods have different costs: 0 (free), 10 (standard), or 100 (resource-intensive) units.
+API methods cost: 0 (free), 10 (standard), or 100 (resource-intensive)) units.
 
 ## Check Quota
 
@@ -22,43 +22,31 @@ import {
   getQuotaCost,
   calculateTotalQuotaCost,
   hasQuotaForMethods,
-  getMethodsByQuotaCost,
-  getRequiredPermissions,
-  getQuotaUsageSummary
+  getMethodsByQuotaCost
 } from '@socketsecurity/sdk'
 
-// Get cost for a method
+// Get method cost
 getQuotaCost('batchPackageFetch')  // 100
 getQuotaCost('createOrgFullScan')  // 10
 getQuotaCost('getQuota')           // 0
 
-// Calculate total cost
+// Calculate total
 const cost = calculateTotalQuotaCost([
   'batchPackageFetch',  // 100
   'getOrgAnalytics',    // 10
   'getQuota'            // 0
-])
-// Returns: 110
+])  // Returns: 110
 
-// Check if enough quota
+// Check quota
 const canProceed = hasQuotaForMethods(availableQuota, [
   'batchPackageFetch',
   'createOrgFullScan'
 ])
 
-// Get methods by cost
-getMethodsByQuotaCost(0)    // ['getQuota', 'getOrganizations', ...]
-getMethodsByQuotaCost(10)   // ['createOrgFullScan', 'getScan', ...]
-getMethodsByQuotaCost(100)  // ['batchPackageFetch', ...]
-
-// Get permissions required
-getRequiredPermissions('createOrgFullScan')  // ['write:scans', 'read:repos']
-
-// Get usage summary
-const summary = getQuotaUsageSummary()
-console.log(`Free: ${summary.free.length}`)
-console.log(`Standard: ${summary.standard.length}`)
-console.log(`Expensive: ${summary.expensive.length}`)
+// Methods by cost
+getMethodsByQuotaCost(0)    // Free methods
+getMethodsByQuotaCost(10)   // Standard methods
+getMethodsByQuotaCost(100)  // Expensive methods
 ```
 
 ## Examples
@@ -66,10 +54,6 @@ console.log(`Expensive: ${summary.expensive.length}`)
 ### Pre-flight Check
 
 ```typescript
-import { SocketSdk, calculateTotalQuotaCost, hasQuotaForMethods } from '@socketsecurity/sdk'
-
-const client = new SocketSdk('your-api-key')
-
 const operations = ['batchPackageFetch', 'uploadManifestFiles']
 const required = calculateTotalQuotaCost(operations)
 
@@ -77,35 +61,11 @@ const quota = await client.getQuota()
 if (!quota.success || !hasQuotaForMethods(quota.data.quota, operations)) {
   throw new Error(`Need ${required} units, have ${quota.data.quota}`)
 }
-
-// Proceed with operations
-```
-
-### Optimize Usage
-
-```typescript
-import { SocketSdk, getMethodsByQuotaCost } from '@socketsecurity/sdk'
-
-const client = new SocketSdk('your-api-key')
-const quota = await client.getQuota()
-
-if (quota.success) {
-  if (quota.data.quota < 100) {
-    // Use free methods only
-    const freeMethods = getMethodsByQuotaCost(0)
-  } else if (quota.data.quota < 500) {
-    // Use standard methods (10 units)
-  } else {
-    // Can use expensive operations (100 units)
-  }
-}
 ```
 
 ### Monitor Usage
 
 ```typescript
-import { SocketSdk, getQuotaCost } from '@socketsecurity/sdk'
-
 class QuotaTracker {
   private used = 0
 
@@ -117,25 +77,15 @@ class QuotaTracker {
     return result
   }
 }
-
-const tracker = new QuotaTracker()
-await tracker.track('batchPackageFetch', () =>
-  client.batchPackageFetch({ components })
-)
 ```
 
 ### Fallback Strategy
 
 ```typescript
-import { SocketSdk, getQuotaCost } from '@socketsecurity/sdk'
-
-const client = new SocketSdk('your-api-key')
-
 const quota = await client.getQuota()
 const batchCost = getQuotaCost('batchPackageFetch')
 
 if (quota.success && quota.data.quota >= batchCost) {
-  // Use efficient batch method
   await client.batchPackageFetch({ components })
 } else {
   // Fall back to individual queries
@@ -147,22 +97,13 @@ if (quota.success && quota.data.quota >= batchCost) {
 
 ## Cost Reference
 
-**Free (0 units):** `getQuota`, `getOrganizations`, `getEnabledEntitlements`, `getEntitlements`
-
-**Standard (10 units):** `createOrgFullScan`, `getScan`, `getScanList`, `getOrgAnalytics`, `getRepoAnalytics`, `getOrgSecurityPolicy`, `updateOrgSecurityPolicy`, `getOrgLicensePolicy`, `updateOrgLicensePolicy`, `getAuditLogEvents`
-
-**Expensive (100 units):** `batchPackageFetch`, `batchPackageStream`, `uploadManifestFiles`, `createDependenciesSnapshot`
+- **Free (0):** `getQuota`, `getOrganizations`, `getEnabledEntitlements`, `getEntitlements`
+- **Standard (10):** `createOrgFullScan`, `getScan`, `getScanList`, `getOrgAnalytics`, `getOrgSecurityPolicy`, `updateOrgSecurityPolicy`
+- **Expensive (100):** `batchPackageFetch`, `batchPackageStream`, `uploadManifestFiles`, `createDependenciesSnapshot`
 
 ## Best Practices
 
 - Check quota before expensive operations
-- Use free methods for health checks
-- Batch operations when possible (100 units for all packages vs 10 per package)
-- Monitor quota usage with tracker
-- Configure retries for transient failures
-
-## See Also
-
-- [API Reference](./api-reference.md) - Complete API documentation
-- [Usage Examples](./usage-examples.md) - Usage patterns
-- [Testing Utilities](./dev/testing.md) - Testing helpers
+- Use batching (100 units for all vs 10 per package)
+- Monitor usage with tracker
+- Implement fallback strategies
