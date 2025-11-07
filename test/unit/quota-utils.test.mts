@@ -274,7 +274,7 @@ describe('Quota Utils', () => {
       }))
 
       const { getQuotaCost: getQuotaCostMocked } = await import(
-        '../src/quota-utils'
+        '../../src/quota-utils'
       )
 
       expect(() => getQuotaCostMocked('someMethod')).toThrow(
@@ -294,7 +294,7 @@ describe('Quota Utils', () => {
       }))
 
       const { getQuotaCost: getQuotaCostMocked } = await import(
-        '../src/quota-utils'
+        '../../src/quota-utils'
       )
 
       expect(() => getQuotaCostMocked('someMethod')).toThrow(
@@ -314,7 +314,7 @@ describe('Quota Utils', () => {
       }))
 
       const { getQuotaCost: getQuotaCostMocked } = await import(
-        '../src/quota-utils'
+        '../../src/quota-utils'
       )
 
       expect(() => getQuotaCostMocked('someMethod')).toThrow(

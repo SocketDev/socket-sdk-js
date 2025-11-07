@@ -12,7 +12,7 @@ import traverse from '@babel/traverse'
 import { describe, expect, it } from 'vitest'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const packagePath = path.resolve(__dirname, '..')
+const packagePath = path.resolve(__dirname, '../..')
 const distPath = path.join(packagePath, 'dist')
 
 /**
