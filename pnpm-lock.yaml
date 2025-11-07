@@ -10,6 +10,10 @@ overrides:
 importers:
 
   .:
+    dependencies:
+      '@socketsecurity/lib':
+        specifier: 3.2.4
+        version: 3.2.4(typescript@5.9.3)
     devDependencies:
       '@babel/generator':
         specifier: 7.28.5
@@ -35,9 +39,6 @@ importers:
       '@socketregistry/packageurl-js':
         specifier: 1.3.5
         version: 1.3.5
-      '@socketsecurity/lib':
-        specifier: 3.2.4
-        version: 3.2.4(typescript@5.9.3)
       '@types/babel__traverse':
         specifier: 7.28.0
         version: 7.28.0
