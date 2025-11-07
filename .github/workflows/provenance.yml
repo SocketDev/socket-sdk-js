@@ -3,6 +3,11 @@ name: 📦 Publish
 on:
   workflow_dispatch:
     inputs:
+      dist-tag:
+        description: 'npm dist-tag (latest, next, beta, canary, etc.)'
+        required: false
+        default: 'latest'
+        type: string
       debug:
         description: 'Enable debug output'
         required: false
@@ -18,9 +23,11 @@ permissions:
 
 jobs:
   publish:
-    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@1a96ced97aaa85d61543351b90d6f463b983c46c # main
+    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@c722588dc8547ea3f1094f7930ce3ca3b725ffd8 # main
     with:
       debug: ${{ inputs.debug }}
+      dist-tag: ${{ inputs.dist-tag }}
       package-name: '@socketsecurity/sdk'
+      publish-script: 'publish:ci'
       setup-script: 'pnpm run build'
       use-trusted-publishing: true
