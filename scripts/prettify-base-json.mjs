@@ -5,7 +5,11 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
+
 import { getRootPath } from './utils/path-helpers.mjs'
+
+const logger = getDefaultLogger()
 
 const rootPath = getRootPath(import.meta.url)
 const openApiJsonPath = path.join(rootPath, 'openapi.json')
@@ -19,11 +23,11 @@ async function main() {
     )
   } catch (e) {
     process.exitCode = 1
-    console.error('Failed with error:', e.message)
+    logger.error('Failed with error:', e.message)
   }
 }
 
 main().catch(e => {
-  console.error(e)
+  logger.error(e)
   process.exitCode = 1
 })

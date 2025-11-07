@@ -155,9 +155,8 @@ function createPathShorteningPlugin() {
               // eslint-disable-next-line no-await-in-loop
               await fs.writeFile(outputPath, magicString.toString(), 'utf8')
             } catch (error) {
-              console.error(
-                `Failed to shorten paths in ${outputPath}:`,
-                error.message,
+              logger.error(
+                `Failed to shorten paths in ${outputPath}: ${error.message}`,
               )
             }
           }
@@ -247,12 +246,12 @@ export const watchConfig = {
   watch: {
     onRebuild(error, result) {
       if (error) {
-        console.error('Watch build failed:', error)
+        logger.error(`Watch build failed: ${error}`)
       } else {
-        console.log('Watch build succeeded')
+        logger.log('Watch build succeeded')
         if (result.metafile) {
           const analysis = analyzeMetafile(result.metafile)
-          console.log(analysis)
+          logger.log(analysis)
         }
       }
     },

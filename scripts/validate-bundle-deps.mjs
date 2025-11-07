@@ -295,7 +295,7 @@ async function validateBundleDeps() {
   const distFiles = await findDistFiles(distPath)
 
   if (distFiles.length === 0) {
-    console.log('ℹ No dist files found - run build first')
+    logger.log('ℹ No dist files found - run build first')
     return { violations: [], warnings: [] }
   }
 
@@ -371,28 +371,28 @@ async function main() {
     }
 
     if (violations.length > 0) {
-      console.error('❌ Bundle dependencies validation failed\n')
+      logger.error('❌ Bundle dependencies validation failed\n')
 
       for (const violation of violations) {
-        console.error(`  ${violation.message}`)
-        console.error(`  ${violation.fix}`)
-        console.error('')
+        logger.error(`  ${violation.message}`)
+        logger.error(`  ${violation.fix}`)
+        logger.error('')
       }
     }
 
     if (warnings.length > 0) {
-      console.log('⚠ Warnings:\n')
+      logger.log('⚠ Warnings:\n')
 
       for (const warning of warnings) {
-        console.log(`  ${warning.message}`)
-        console.log(`  ${warning.fix}\n`)
+        logger.log(`  ${warning.message}`)
+        logger.log(`  ${warning.fix}\n`)
       }
     }
 
     // Only fail on violations, not warnings
     process.exitCode = violations.length > 0 ? 1 : 0
   } catch (error) {
-    console.error('Validation failed:', error.message)
+    logger.error('Validation failed:', error.message)
     process.exitCode = 1
   }
 }

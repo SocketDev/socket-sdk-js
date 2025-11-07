@@ -11,6 +11,9 @@ import { fileURLToPath } from 'node:url'
 import colors from 'yoctocolors-cjs'
 
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
+
+const logger = getDefaultLogger()
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
@@ -19,33 +22,33 @@ const CI = !!process.env.CI
 
 // Simple inline logger.
 const log = {
-  info: msg => console.log(msg),
-  error: msg => console.error(`${colors.red('✗')} ${msg}`),
-  success: msg => console.log(`${colors.green('✓')} ${msg}`),
-  step: msg => console.log(`\n${msg}`),
-  substep: msg => console.log(`  ${msg}`),
+  info: msg => logger.log(msg),
+  error: msg => logger.error(`${colors.red('✗')} ${msg}`),
+  success: msg => logger.log(`${colors.green('✓')} ${msg}`),
+  step: msg => logger.log(`\n${msg}`),
+  substep: msg => logger.log(`  ${msg}`),
   progress: msg => process.stdout.write(`  ∴ ${msg}`),
   done: msg => {
     process.stdout.write('\r\x1b[K')
-    console.log(`  ${colors.green('✓')} ${msg}`)
+    logger.log(`  ${colors.green('✓')} ${msg}`)
   },
   failed: msg => {
     process.stdout.write('\r\x1b[K')
-    console.log(`  ${colors.red('✗')} ${msg}`)
+    logger.log(`  ${colors.red('✗')} ${msg}`)
   },
-  warn: msg => console.log(`${colors.yellow('⚠')} ${msg}`),
+  warn: msg => logger.log(`${colors.yellow('⚠')} ${msg}`),
 }
 
 function printHeader(title) {
-  console.log(`\n${'─'.repeat(60)}`)
-  console.log(`  ${title}`)
-  console.log(`${'─'.repeat(60)}`)
+  logger.log(`\n${'─'.repeat(60)}`)
+  logger.log(`  ${title}`)
+  logger.log(`${'─'.repeat(60)}`)
 }
 
 function printFooter(message) {
-  console.log(`\n${'─'.repeat(60)}`)
+  logger.log(`\n${'─'.repeat(60)}`)
   if (message) {
-    console.log(`  ${colors.green('✓')} ${message}`)
+    logger.log(`  ${colors.green('✓')} ${message}`)
   }
 }
 
@@ -118,7 +121,7 @@ async function checkGitStatus() {
   if (result.stdout.trim()) {
     log.error('Working directory is not clean')
     log.info('Uncommitted changes:')
-    console.log(result.stdout)
+    logger.log(result.stdout)
     return false
   }
   return true
@@ -455,24 +458,24 @@ async function main() {
 
     // Show help if requested.
     if (values.help) {
-      console.log('\nUsage: pnpm publish [options]')
-      console.log('\nOptions:')
-      console.log('  --help         Show this help message')
-      console.log('  --dry-run      Perform a dry-run without publishing')
-      console.log('  --force        Force publish even with warnings')
-      console.log('  --skip-checks  Skip pre-publish checks')
-      console.log('  --skip-build   Skip build step (not allowed in CI)')
-      console.log('  --skip-git     Skip git status checks')
-      console.log('  --skip-tag     Skip git tag push')
-      console.log('  --complex      Use complex multi-package flow')
-      console.log('  --tag <tag>    npm dist-tag (default: latest)')
-      console.log('  --access <access>  Package access level (default: public)')
-      console.log('  --otp <otp>    npm one-time password')
-      console.log('\nExamples:')
-      console.log('  pnpm publish              # Standard publish flow')
-      console.log('  pnpm publish --dry-run    # Dry-run to test')
-      console.log('  pnpm publish --complex    # Multi-package publish')
-      console.log('  pnpm publish --otp 123456 # Publish with OTP')
+      logger.log('\nUsage: pnpm publish [options]')
+      logger.log('\nOptions:')
+      logger.log('  --help         Show this help message')
+      logger.log('  --dry-run      Perform a dry-run without publishing')
+      logger.log('  --force        Force publish even with warnings')
+      logger.log('  --skip-checks  Skip pre-publish checks')
+      logger.log('  --skip-build   Skip build step (not allowed in CI)')
+      logger.log('  --skip-git     Skip git status checks')
+      logger.log('  --skip-tag     Skip git tag push')
+      logger.log('  --complex      Use complex multi-package flow')
+      logger.log('  --tag <tag>    npm dist-tag (default: latest)')
+      logger.log('  --access <access>  Package access level (default: public)')
+      logger.log('  --otp <otp>    npm one-time password')
+      logger.log('\nExamples:')
+      logger.log('  pnpm publish              # Standard publish flow')
+      logger.log('  pnpm publish --dry-run    # Dry-run to test')
+      logger.log('  pnpm publish --complex    # Multi-package publish')
+      logger.log('  pnpm publish --otp 123456 # Publish with OTP')
       process.exitCode = 0
       return
     }
@@ -557,6 +560,6 @@ async function main() {
 }
 
 main().catch(e => {
-  console.error(e)
+  logger.error(e)
   process.exitCode = 1
 })

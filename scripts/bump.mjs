@@ -14,6 +14,9 @@ import semver from 'semver'
 import colors from 'yoctocolors-cjs'
 
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
+
+const logger = getDefaultLogger()
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
@@ -61,33 +64,33 @@ if (hasInteractivePrompts) {
 
 // Simple inline logger.
 const log = {
-  info: msg => console.log(msg),
-  error: msg => console.error(`${colors.red('✗')} ${msg}`),
-  success: msg => console.log(`${colors.green('✓')} ${msg}`),
-  step: msg => console.log(`\n${msg}`),
-  substep: msg => console.log(`  ${msg}`),
+  info: msg => logger.log(msg),
+  error: msg => logger.error(`${colors.red('✗')} ${msg}`),
+  success: msg => logger.log(`${colors.green('✓')} ${msg}`),
+  step: msg => logger.log(`\n${msg}`),
+  substep: msg => logger.log(`  ${msg}`),
   progress: msg => process.stdout.write(`  ∴ ${msg}`),
   done: msg => {
     process.stdout.write('\r\x1b[K')
-    console.log(`  ${colors.green('✓')} ${msg}`)
+    logger.log(`  ${colors.green('✓')} ${msg}`)
   },
   failed: msg => {
     process.stdout.write('\r\x1b[K')
-    console.log(`  ${colors.red('✗')} ${msg}`)
+    logger.log(`  ${colors.red('✗')} ${msg}`)
   },
-  warn: msg => console.log(`${colors.yellow('⚠')} ${msg}`),
+  warn: msg => logger.log(`${colors.yellow('⚠')} ${msg}`),
 }
 
 function printHeader(title) {
-  console.log(`\n${'─'.repeat(60)}`)
-  console.log(`  ${title}`)
-  console.log(`${'─'.repeat(60)}`)
+  logger.log(`\n${'─'.repeat(60)}`)
+  logger.log(`  ${title}`)
+  logger.log(`${'─'.repeat(60)}`)
 }
 
 function printFooter(message) {
-  console.log(`\n${'─'.repeat(60)}`)
+  logger.log(`\n${'─'.repeat(60)}`)
   if (message) {
-    console.log(`  ${colors.green('✓')} ${message}`)
+    logger.log(`  ${colors.green('✓')} ${message}`)
   }
 }
 
@@ -258,7 +261,7 @@ async function checkGitStatus() {
   if (result.stdout.trim()) {
     log.error('Working directory is not clean')
     log.info('Uncommitted changes:')
-    console.log(result.stdout)
+    logger.log(result.stdout)
     return false
   }
   return true
@@ -421,11 +424,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
  * Uses interactive prompts if available, falls back to basic readline prompts.
  */
 async function reviewChangelog(claudeCmd, changelogEntry, interactive = false) {
-  console.log(`\n${colors.blue('━'.repeat(60))}`)
-  console.log(colors.blue('Proposed Changelog Entry:'))
-  console.log(colors.blue('━'.repeat(60)))
-  console.log(changelogEntry)
-  console.log(`${colors.blue('━'.repeat(60))}\n`)
+  logger.log(`\n${colors.blue('━'.repeat(60))}`)
+  logger.log(colors.blue('Proposed Changelog Entry:'))
+  logger.log(colors.blue('━'.repeat(60)))
+  logger.log(changelogEntry)
+  logger.log(`${colors.blue('━'.repeat(60))}\n`)
 
   // Use interactive prompts if available and requested.
   if (interactive && prompts) {
@@ -470,11 +473,11 @@ Provide the refined changelog entry in the same format.`
         changelogEntry = refineResult.stdout.trim()
         log.done('Changelog refined')
 
-        console.log(`\n${colors.blue('━'.repeat(60))}`)
-        console.log(colors.blue('Refined Changelog Entry:'))
-        console.log(colors.blue('━'.repeat(60)))
-        console.log(changelogEntry)
-        console.log(`${colors.blue('━'.repeat(60))}\n`)
+        logger.log(`\n${colors.blue('━'.repeat(60))}`)
+        logger.log(colors.blue('Refined Changelog Entry:'))
+        logger.log(colors.blue('━'.repeat(60)))
+        logger.log(changelogEntry)
+        logger.log(`${colors.blue('━'.repeat(60))}\n`)
       } else {
         log.failed('Failed to refine changelog')
       }
@@ -501,10 +504,10 @@ async function interactiveReviewChangelog(claudeCmd, changelogEntry) {
 
   while (true) {
     // Show the current changelog.
-    console.log(`\n${colors.cyan('Current Changelog Entry:')}`)
-    console.log(colors.dim('─'.repeat(60)))
-    console.log(currentEntry)
-    console.log(`${colors.dim('─'.repeat(60))}\n`)
+    logger.log(`\n${colors.cyan('Current Changelog Entry:')}`)
+    logger.log(colors.dim('─'.repeat(60)))
+    logger.log(currentEntry)
+    logger.log(`${colors.dim('─'.repeat(60))}\n`)
 
     // Offer action choices.
     const action = await prompts.select({
@@ -540,7 +543,7 @@ async function interactiveReviewChangelog(claudeCmd, changelogEntry) {
     }
 
     if (action === 'manual') {
-      console.log(
+      logger.log(
         '\nEnter the changelog manually (paste and press Enter twice when done):',
       )
       const rl = createReadline()
@@ -692,41 +695,41 @@ async function main() {
 
     // Show help if requested.
     if (values.help) {
-      console.log('\nUsage: pnpm bump [options]')
-      console.log('\nOptions:')
-      console.log('  --help           Show this help message')
-      console.log('  --bump <type>    Version bump type (default: patch)')
-      console.log(
+      logger.log('\nUsage: pnpm bump [options]')
+      logger.log('\nOptions:')
+      logger.log('  --help           Show this help message')
+      logger.log('  --bump <type>    Version bump type (default: patch)')
+      logger.log(
         '                   Can be: major, minor, patch, premajor, preminor,',
       )
-      console.log(
+      logger.log(
         '                   prepatch, prerelease, or a specific version',
       )
-      console.log('  --interactive    Force interactive changelog review')
-      console.log('  --no-interactive Disable interactive mode')
-      console.log('  --skip-changelog Skip changelog generation with Claude')
-      console.log('  --skip-checks    Skip git status/branch checks')
-      console.log('  --no-push        Do not push changes to remote')
-      console.log('  --force          Force bump even with warnings')
-      console.log('\nExamples:')
-      console.log(
+      logger.log('  --interactive    Force interactive changelog review')
+      logger.log('  --no-interactive Disable interactive mode')
+      logger.log('  --skip-changelog Skip changelog generation with Claude')
+      logger.log('  --skip-checks    Skip git status/branch checks')
+      logger.log('  --no-push        Do not push changes to remote')
+      logger.log('  --force          Force bump even with warnings')
+      logger.log('\nExamples:')
+      logger.log(
         '  pnpm bump                    # Bump patch (interactive by default)',
       )
-      console.log('  pnpm bump --bump=minor       # Bump minor version')
-      console.log('  pnpm bump --no-interactive   # Use basic prompts')
-      console.log('  pnpm bump --bump=2.0.0       # Set specific version')
-      console.log(
+      logger.log('  pnpm bump --bump=minor       # Bump minor version')
+      logger.log('  pnpm bump --no-interactive   # Use basic prompts')
+      logger.log('  pnpm bump --bump=2.0.0       # Set specific version')
+      logger.log(
         '  pnpm bump --skip-changelog   # Skip AI changelog generation',
       )
-      console.log('\nRequires:')
-      console.log('  - claude-console (or claude) CLI tool installed')
-      console.log('  - Clean git working directory')
-      console.log('  - Main/master branch (unless --force)')
+      logger.log('\nRequires:')
+      logger.log('  - claude-console (or claude) CLI tool installed')
+      logger.log('  - Clean git working directory')
+      logger.log('  - Main/master branch (unless --force)')
       if (hasInteractivePrompts) {
-        console.log('\nInteractive mode: Available ✓ (default)')
+        logger.log('\nInteractive mode: Available ✓ (default)')
       } else {
-        console.log('\nInteractive mode: Not available')
-        console.log('  (install @socketsecurity/lib or build local registry)')
+        logger.log('\nInteractive mode: Not available')
+        logger.log('  (install @socketsecurity/lib or build local registry)')
       }
       process.exitCode = 0
       return
@@ -902,6 +905,6 @@ async function main() {
 }
 
 main().catch(e => {
-  console.error(e)
+  logger.error(e)
   process.exitCode = 1
 })
