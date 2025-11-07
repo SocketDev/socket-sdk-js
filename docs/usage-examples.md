@@ -76,9 +76,7 @@ if (scan.success) {
   }
 
   const data = await client.getOrgFullScanBuffered('my-org', scan.data.id)
-  if (data.success) {
-    console.log(`Found ${data.data.packages.length} packages`)
-  }
+  console.log(`Found ${data.data.packages.length} packages`)
 }
 ```
 
@@ -90,13 +88,11 @@ const diffScan = await client.createOrgDiffScanFromIds('my-org', {
   to: 'scan_current'
 })
 
-if (diffScan.success) {
-  const diff = await client.getDiffScanById('my-org', diffScan.data.id)
-  if (diff.success) {
-    console.log(`Added: ${diff.data.added.length}`)
-    console.log(`Removed: ${diff.data.removed.length}`)
-    console.log(`Changed: ${diff.data.changed.length}`)
-  }
+const diff = await client.getDiffScanById('my-org', diffScan.data.id)
+if (diff.success) {
+  console.log(`Added: ${diff.data.added.length}`)
+  console.log(`Removed: ${diff.data.removed.length}`)
+  console.log(`Changed: ${diff.data.changed.length}`)
 }
 ```
 
@@ -106,12 +102,9 @@ if (diffScan.success) {
 
 ```typescript
 const repos = await client.getOrgRepoList('my-org', { limit: 100 })
-
-if (repos.success) {
-  repos.data.repositories.forEach(repo =>
-    console.log(`${repo.name}: ${repo.default_branch}`)
-  )
-}
+repos.data.repositories.forEach(repo =>
+  console.log(`${repo.name}: ${repo.default_branch}`)
+)
 
 // Create
 const created = await client.createOrgRepo('my-org', {
@@ -120,19 +113,15 @@ const created = await client.createOrgRepo('my-org', {
 })
 
 // Update
-if (created.success) {
-  await client.updateOrgRepo('my-org', 'new-project', {
-    homepage: 'https://example.com'
-  })
-}
+await client.updateOrgRepo('my-org', 'new-project', {
+  homepage: 'https://example.com'
+})
 ```
 
 ## Policy
 
-### Security & License
-
 ```typescript
-// Update security policy
+// Security policy
 await client.updateOrgSecurityPolicy('my-org', {
   securityPolicyRules: {
     malware: { action: 'error' },
@@ -140,7 +129,7 @@ await client.updateOrgSecurityPolicy('my-org', {
   }
 })
 
-// Update license policy
+// License policy
 await client.updateOrgLicensePolicy('my-org', {
   allowed: ['MIT', 'Apache-2.0'],
   restricted: ['GPL-3.0']
@@ -152,21 +141,18 @@ await client.updateOrgLicensePolicy('my-org', {
 ```typescript
 // Analytics
 const analytics = await client.getOrgAnalytics('30d')
-if (analytics.success) {
-  analytics.data.forEach(day =>
-    console.log(`${day.date}: ${day.scans} scans`)
-  )
-}
+analytics.data.forEach(day =>
+  console.log(`${day.date}: ${day.scans} scans`)
+)
 
-// Tokens
+// Create token
 const token = await client.postAPIToken('my-org', {
   name: 'CI/CD',
   scopes: ['read:scans', 'write:scans']
 })
 
-if (token.success) {
-  await client.postAPITokensRotate('my-org', token.data.id)
-}
+// Rotate token
+await client.postAPITokensRotate('my-org', token.data.id)
 ```
 
 ## SBOM Export
@@ -174,17 +160,11 @@ if (token.success) {
 ```typescript
 import { writeFile } from 'fs/promises'
 
-// CycloneDX
 const cdx = await client.exportCDX('my-org', 'scan_123')
-if (cdx.success) {
-  await writeFile('sbom.json', JSON.stringify(cdx.data, null, 2))
-}
+await writeFile('sbom.json', JSON.stringify(cdx.data, null, 2))
 
-// SPDX
 const spdx = await client.exportSPDX('my-org', 'scan_123')
-if (spdx.success) {
-  await writeFile('spdx.json', JSON.stringify(spdx.data, null, 2))
-}
+await writeFile('spdx.json', JSON.stringify(spdx.data, null, 2))
 ```
 
 ## Error Handling
@@ -236,15 +216,7 @@ const response = await client.getApi('/endpoint', {
   responseType: 'response'
 })
 
-if (response.success) {
-  for await (const chunk of response.data) {
-    // Process chunk
-  }
+for await (const chunk of response.data) {
+  // Process chunk
 }
 ```
-
-## See Also
-
-- [API Reference](./api-reference.md) - Complete API documentation
-- [Quota Management](./quota-management.md) - Quota utilities
-- [Testing Utilities](./dev/testing.md) - Testing helpers
