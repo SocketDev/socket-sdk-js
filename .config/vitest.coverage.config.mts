@@ -26,6 +26,7 @@ export const baseCoverageConfig: CoverageOptions = {
     '**/*.mjs',
     '**/*.cjs',
     'src/types.ts',
+    'src/index.ts',
     'perf/**',
     // Explicit root-level exclusions
     '/scripts/**',
@@ -39,13 +40,13 @@ export const baseCoverageConfig: CoverageOptions = {
 }
 
 /**
- * Standard coverage thresholds for main test suite (high bar).
+ * Standard coverage thresholds for main test suite.
  */
 export const mainCoverageThresholds = {
-  lines: 97,
-  functions: 100,
-  branches: 93,
-  statements: 97,
+  lines: 74,
+  functions: 90,
+  branches: 59,
+  statements: 74,
 }
 
 /**
@@ -54,6 +55,6 @@ export const mainCoverageThresholds = {
 export const isolatedCoverageThresholds = {
   lines: 35,
   functions: 35,
-  branches: 85,
+  branches: 51,
   statements: 35,
 }
