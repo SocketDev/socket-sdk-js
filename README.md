@@ -8,38 +8,15 @@
 [![Follow @SocketSecurity](https://img.shields.io/twitter/follow/SocketSecurity?style=social)](https://twitter.com/SocketSecurity)
 [![Follow @socket.dev on Bluesky](https://img.shields.io/badge/Follow-@socket.dev-1DA1F2?style=social&logo=bluesky)](https://bsky.app/profile/socket.dev)
 
-JavaScript SDK for [Socket.dev](https://socket.dev/) API - Security analysis, vulnerability scanning, and compliance monitoring for software supply chains.
+JavaScript SDK for [Socket.dev](https://socket.dev/) API.
 
-## Table of Contents
-
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [API Methods](#api-methods) - [Full API Reference](./docs/api-reference.md)
-- [Documentation](#documentation)
-- [Examples](#examples)
-
-## At a Glance
-
-| Feature | Description |
-|---------|-------------|
-| **Package Analysis** | Quick security checks for npm packages |
-| **Full Scans** | Deep analysis with SBOM support |
-| **Batch Operations** | Analyze multiple packages efficiently |
-| **Policy Management** | Configure security & license rules |
-| **Quota Utilities** | Cost calculation & planning helpers |
-| **TypeScript** | Full type safety with auto-generated types |
-
-**Requirements:** Node.js 18+ ·ESM only (v2.0+)
-
-## Installation
+## Install
 
 ```bash
 pnpm add @socketsecurity/sdk
 ```
 
-**Note:** Version 2.0+ is ESM-only. For CommonJS support, use version 1.x.
-
-## Quick Start
+## Usage
 
 ```typescript
 import { SocketSdk } from '@socketsecurity/sdk'
@@ -71,100 +48,6 @@ const batchResult = await client.batchPackageFetch({
 })
 ```
 
-**[→ Configuration](./docs/api-reference.md#configuration)**
-
-## API Methods
-
-### Package Analysis
-
-Quick security checks: `batchPackageFetch()` ·`batchPackageStream()` ·`getIssuesByNpmPackage()` ·`getScoreByNpmPackage()`
-
-[→ Documentation](./docs/api-reference.md#package-analysis)
-
-### Scanning & Analysis
-
-Project scanning: `createDependenciesSnapshot()` ·`createOrgFullScan()` ·`createScanFromFilepaths()` ·`getScan()` ·`getScanList()` ·`getSupportedScanFiles()`
-
-[→ Documentation](./docs/api-reference.md#scanning--analysis)
-
-### Organization Management
-
-Organizations and repositories: `getOrganizations()` ·`createOrgRepo()` ·`getOrgRepo()` ·`getOrgRepoList()` ·`updateOrgRepo()` ·`deleteOrgRepo()`
-
-[→ Documentation](./docs/api-reference.md#organization-management)
-
-### Policy & Settings
-
-Security configuration: `getOrgSecurityPolicy()` ·`updateOrgSecurityPolicy()` ·`getOrgLicensePolicy()` ·`updateOrgLicensePolicy()` ·`postSettings()`
-
-[→ Documentation](./docs/api-reference.md#policy--settings)
-
-### Full Scan Management
-
-Deep analysis: `getOrgFullScanList()` ·`getOrgFullScanMetadata()` ·`getOrgFullScanBuffered()` ·`streamOrgFullScan()` ·`deleteOrgFullScan()`
-
-[→ Documentation](./docs/api-reference.md#full-scan-management)
-
-### Diff Scans
-
-Scan comparison: `createOrgDiffScanFromIds()` ·`getDiffScanById()` ·`listOrgDiffScans()` ·`deleteOrgDiffScan()`
-
-[→ Documentation](./docs/api-reference.md#diff-scans)
-
-### Patches & Vulnerabilities
-
-Security fixes: `streamPatchesFromScan()` ·`viewPatch()`
-
-[→ Documentation](./docs/api-reference.md#patches--vulnerabilities)
-
-### Alert & Triage
-
-Alert management: `getOrgTriage()` ·`updateOrgAlertTriage()`
-
-[→ Documentation](./docs/api-reference.md#alert--triage)
-
-### Export & Integration
-
-SBOM export: `exportCDX()` ·`exportSPDX()` ·`searchDependencies()` ·`uploadManifestFiles()`
-
-[→ Documentation](./docs/api-reference.md#export--integration)
-
-### Repository Labels
-
-Categorization: `createOrgRepoLabel()` ·`getOrgRepoLabel()` ·`getOrgRepoLabelList()` ·`updateOrgRepoLabel()` ·`deleteOrgRepoLabel()`
-
-[→ Documentation](./docs/api-reference.md#repository-labels)
-
-### Analytics & Monitoring
-
-Usage metrics: `getQuota()` ·`getOrgAnalytics()` ·`getRepoAnalytics()` ·`getAuditLogEvents()`
-
-[→ Documentation](./docs/api-reference.md#analytics--monitoring)
-
-### Authentication & Access
-
-API tokens: `getAPITokens()` ·`postAPIToken()` ·`postAPITokensRotate()` ·`postAPITokensRevoke()` ·`postAPITokenUpdate()`
-
-[→ Documentation](./docs/api-reference.md#authentication--access)
-
-### Entitlements
-
-Feature access: `getEnabledEntitlements()` ·`getEntitlements()`
-
-[→ Documentation](./docs/api-reference.md#entitlements)
-
-### Quota Utilities
-
-Cost helpers: `getQuotaCost()` ·`getRequiredPermissions()` ·`calculateTotalQuotaCost()` ·`hasQuotaForMethods()` ·`getMethodsByQuotaCost()` ·`getMethodsByPermissions()` ·`getQuotaUsageSummary()` ·`getAllMethodRequirements()`
-
-[→ Documentation](./docs/quota-management.md)
-
-### Advanced Query Methods
-
-Raw API access: `getApi()` ·`sendApi()`
-
-[→ Documentation](./docs/api-reference.md#advanced-query-methods)
-
 ## Documentation
 
 | Guide | Description |
@@ -184,14 +67,6 @@ See **[usage-examples.md](./docs/usage-examples.md)** for complete examples incl
 - Full scans with SBOM
 - Policy management
 - Quota planning
-
-## Related Projects
-
-| Project | Description |
-|---------|-------------|
-| [Socket.dev API](https://docs.socket.dev/reference) | Official REST API documentation |
-| [Socket CLI](https://github.com/SocketDev/socket-cli) | Command-line interface |
-| [Socket GitHub App](https://github.com/apps/socket-security) | Automated GitHub integration |
 
 ## License
 
