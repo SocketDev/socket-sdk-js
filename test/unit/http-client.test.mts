@@ -12,12 +12,18 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { MAX_RESPONSE_SIZE } from '../../src/constants.js'
 import {
   ResponseError,
+  createDeleteRequest,
   createGetRequest,
   createRequestWithJson,
   getErrorResponseBody,
   getHttpModule,
   getResponseJson,
+  isResponseOk,
 } from '../../src/http-client.js'
+import {
+  createRouteHandler,
+  setupLocalHttpServer,
+} from '../utils/local-server-helpers.mts'
 
 import type { IncomingMessage, Server } from 'node:http'
 
@@ -456,5 +462,67 @@ describe('HTTP Client - ResponseError Edge Cases', () => {
       expect(error.stack).toBeDefined()
       expect(error.stack).toContain('ResponseError')
     })
+  })
+})
+
+describe('HTTP Client - isResponseOk', () => {
+  it('should return true for 2xx status codes', () => {
+    const response200 = { statusCode: 200 } as IncomingMessage
+    const response201 = { statusCode: 201 } as IncomingMessage
+    const response204 = { statusCode: 204 } as IncomingMessage
+    const response299 = { statusCode: 299 } as IncomingMessage
+
+    expect(isResponseOk(response200)).toBe(true)
+    expect(isResponseOk(response201)).toBe(true)
+    expect(isResponseOk(response204)).toBe(true)
+    expect(isResponseOk(response299)).toBe(true)
+  })
+
+  it('should return false for non-2xx status codes', () => {
+    const response199 = { statusCode: 199 } as IncomingMessage
+    const response300 = { statusCode: 300 } as IncomingMessage
+    const response400 = { statusCode: 400 } as IncomingMessage
+    const response404 = { statusCode: 404 } as IncomingMessage
+    const response500 = { statusCode: 500 } as IncomingMessage
+
+    expect(isResponseOk(response199)).toBe(false)
+    expect(isResponseOk(response300)).toBe(false)
+    expect(isResponseOk(response400)).toBe(false)
+    expect(isResponseOk(response404)).toBe(false)
+    expect(isResponseOk(response500)).toBe(false)
+  })
+
+  it('should return false for undefined statusCode', () => {
+    const responseNoStatus = {} as IncomingMessage
+    expect(isResponseOk(responseNoStatus)).toBe(false)
+  })
+})
+
+describe('HTTP Client - createDeleteRequest', () => {
+  const getBaseUrl = setupLocalHttpServer(
+    createRouteHandler({
+      '/test-delete': (_req: IncomingMessage, res) => {
+        res.writeHead(204, { 'Content-Type': 'application/json' })
+        res.end()
+      },
+    }),
+  )
+
+  it('should make successful DELETE request', async () => {
+    const response = await createDeleteRequest(
+      getBaseUrl(),
+      '/test-delete',
+      {},
+    )
+
+    expect(response.statusCode).toBe(204)
+  })
+
+  it('should handle DELETE request errors', async () => {
+    await expect(
+      createDeleteRequest('http://localhost:1', '/test-delete', {
+        timeout: 100,
+      }),
+    ).rejects.toThrow()
   })
 })
