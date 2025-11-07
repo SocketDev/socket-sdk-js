@@ -10,7 +10,7 @@ vi.mock('@socketsecurity/lib/json', () => ({
 }))
 
 // Use dynamic imports to ensure mocks are applied.
-const { getResponseJson } = await import('../src/http-client.js')
+const { getResponseJson } = await import('../../src/http-client.js')
 const { jsonParse } = await import('@socketsecurity/lib/json')
 const mockJsonParse = vi.mocked(jsonParse)
 
