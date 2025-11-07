@@ -3,6 +3,7 @@
  * Provides the SocketSdk class and utility functions for Socket security analysis API interactions.
  */
 
+/* c8 ignore start - Re-export module, no testable logic */
 // Import from our modules.
 import { DEFAULT_USER_AGENT, httpAgentNames, publicPolicy } from './constants'
 import {
@@ -134,3 +135,4 @@ export {
 
 // Re-export constants.
 export { DEFAULT_USER_AGENT, httpAgentNames, publicPolicy }
+/* c8 ignore stop */
