@@ -509,11 +509,7 @@ describe('HTTP Client - createDeleteRequest', () => {
   )
 
   it('should make successful DELETE request', async () => {
-    const response = await createDeleteRequest(
-      getBaseUrl(),
-      '/test-delete',
-      {},
-    )
+    const response = await createDeleteRequest(getBaseUrl(), '/test-delete', {})
 
     expect(response.statusCode).toBe(204)
   })

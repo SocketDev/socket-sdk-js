@@ -14,7 +14,7 @@ describe('SocketSdk - Edge Cases and Error Branches', () => {
     it('should handle SDK with all options', () => {
       const sdk = new SocketSdk('test-token', {
         baseUrl: 'https://custom.api.dev',
-        timeout: 60000,
+        timeout: 60_000,
         retries: 5,
         retryDelay: 2000,
       })
