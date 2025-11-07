@@ -3,11 +3,6 @@ name: 📦 Publish
 on:
   workflow_dispatch:
     inputs:
-      ref:
-        description: 'Branch, tag, or commit to publish from'
-        required: false
-        default: ''
-        type: string
       debug:
         description: 'Enable debug output'
         required: false
@@ -25,7 +20,6 @@ jobs:
   publish:
     uses: SocketDev/socket-registry/.github/workflows/provenance.yml@1a96ced97aaa85d61543351b90d6f463b983c46c # main
     with:
-      ref: ${{ inputs.ref }}
       debug: ${{ inputs.debug }}
       package-name: '@socketsecurity/sdk'
       setup-script: 'pnpm run build'
