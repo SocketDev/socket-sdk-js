@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       dist-tag:
-        description: 'npm dist-tag (latest, next, beta, canary, etc.)'
+        description: 'npm dist-tag (latest, next, beta, canary, backport, etc.)'
         required: false
         default: 'latest'
         type: string
@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   publish:
-    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@c722588dc8547ea3f1094f7930ce3ca3b725ffd8 # main
+    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@0a1fbfe9c2ca651794ad11784d4c8295c67bcf19 # main
     with:
       debug: ${{ inputs.debug }}
       dist-tag: ${{ inputs.dist-tag }}
