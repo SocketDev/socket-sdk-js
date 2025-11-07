@@ -7,10 +7,9 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
 import nock from 'nock'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../src/socket-sdk-class'
-import { setupTestEnvironment } from './utils/environment.mts'
+import { setupTestClient } from './utils/environment.mts'
 
 import type {
   FullScanItem,
@@ -19,18 +18,8 @@ import type {
   OrganizationsResult,
 } from '../src/types-strict'
 
-describe('Strict Types - v3.0', () => {
-  const baseUrl = 'https://api.socket.dev/v0'
-
-  setupTestEnvironment()
-
-  beforeEach(() => {
-    nock.cleanAll()
-  })
-
-  afterEach(() => {
-    nock.cleanAll()
-  })
+describe.sequential('Strict Types - v3.0', () => {
+  const getClient = setupTestClient('test-token', { retries: 0 })
 
   describe('FullScanListResult', () => {
     it('should have guaranteed required fields', async () => {
@@ -65,13 +54,12 @@ describe('Strict Types - v3.0', () => {
         nextPage: null,
       }
 
-      nock(baseUrl)
-        .get('/orgs/test-org/full-scans')
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/full-scans')
         .query(true)
         .reply(200, mockResponse)
 
-      const client = new SocketSdk('test-token', { baseUrl, retries: 0 })
-      const result = await client.listFullScans('test-org')
+      const result = await getClient().listFullScans('test-org')
 
       expect(result.success).toBe(true)
 
@@ -168,17 +156,20 @@ describe('Strict Types - v3.0', () => {
         JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
       )
 
-      nock(baseUrl)
-        .post('/orgs/test-org/full-scans')
+      nock('https://api.socket.dev')
+        .post('/v0/orgs/test-org/full-scans')
         .query({ repo: 'test-repo' })
         .reply(200, mockResponse)
 
       try {
-        const client = new SocketSdk('test-token', { baseUrl, retries: 0 })
-        const result = await client.createFullScan('test-org', [testFile], {
-          pathsRelativeTo: tempDir,
-          repo: 'test-repo',
-        })
+        const result = await getClient().createFullScan(
+          'test-org',
+          [testFile],
+          {
+            pathsRelativeTo: tempDir,
+            repo: 'test-repo',
+          },
+        )
 
         expect(result.success).toBe(true)
 
@@ -223,13 +214,12 @@ describe('Strict Types - v3.0', () => {
         scan_state: 'scan',
       }
 
-      nock(baseUrl)
-        .get('/orgs/test-org/full-scans/scan-get')
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/full-scans/scan-get')
         .query(true)
         .reply(200, mockResponse)
 
-      const client = new SocketSdk('test-token', { baseUrl, retries: 0 })
-      const result = await client.getFullScan('test-org', 'scan-get')
+      const result = await getClient().getFullScan('test-org', 'scan-get')
 
       expect(result.success).toBe(true)
 
@@ -268,10 +258,12 @@ describe('Strict Types - v3.0', () => {
         ],
       }
 
-      nock(baseUrl).get('/organizations').query(true).reply(200, mockResponse)
+      nock('https://api.socket.dev')
+        .get('/v0/organizations')
+        .query(true)
+        .reply(200, mockResponse)
 
-      const client = new SocketSdk('test-token', { baseUrl, retries: 0 })
-      const result = await client.listOrganizations()
+      const result = await getClient().listOrganizations()
 
       expect(result.success).toBe(true)
 
@@ -305,13 +297,15 @@ describe('Strict Types - v3.0', () => {
 
   describe('Error Responses', () => {
     it('should return StrictErrorResult on failure', async () => {
-      nock(baseUrl).get('/orgs/test-org/full-scans').query(true).reply(404, {
-        error: 'Not Found',
-        message: 'Organization not found',
-      })
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/full-scans')
+        .query(true)
+        .reply(404, {
+          error: 'Not Found',
+          message: 'Organization not found',
+        })
 
-      const client = new SocketSdk('test-token', { baseUrl, retries: 0 })
-      const result = await client.listFullScans('test-org')
+      const result = await getClient().listFullScans('test-org')
 
       expect(result.success).toBe(false)
 

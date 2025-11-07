@@ -5,6 +5,8 @@
     "test/getapi-sendapi-methods.test.mts",
     "test/socket-sdk-retry.test.mts",
     "test/entitlements.test.mts",
-    "test/socket-sdk-batch.test.mts"
+    "test/socket-sdk-batch.test.mts",
+    "test/socket-sdk-json-parsing-errors.test.mts",
+    "test/socket-sdk-strict-types.test.mts"
   ]
 }
