@@ -74,6 +74,17 @@ async function checkBundledDependencies(content: string): Promise<{
       const source = path.node.source.value
       importSources.add(source)
     },
+    CallExpression(path: any) {
+      // Handle require() calls
+      if (
+        path.node.callee.name === 'require' &&
+        path.node.arguments.length > 0 &&
+        path.node.arguments[0].type === 'StringLiteral'
+      ) {
+        const source = path.node.arguments[0].value
+        importSources.add(source)
+      }
+    },
   })
 
   // Packages that should always be external (never bundled).
@@ -127,7 +138,10 @@ async function checkBundledDependencies(content: string): Promise<{
   } else {
     // We have runtime dependencies - check that they remain external.
     for (const dep of Object.keys(dependencies)) {
-      const hasExternalImport = importSources.has(dep)
+      // Check for exact match or subpath imports (e.g., '@socketsecurity/lib/path')
+      const hasExternalImport = Array.from(importSources).some(
+        source => source === dep || source.startsWith(`${dep}/`),
+      )
 
       if (!hasExternalImport) {
         // Dependency isn't imported externally - it might be bundled
