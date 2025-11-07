@@ -8,8 +8,8 @@ import {
   setupLocalHttpServer,
 } from '../utils/local-server-helpers.mts'
 
-import type { IncomingMessage } from 'node:http'
 import type { SocketSdkGenericResult } from '../../src/types'
+import type { IncomingMessage } from 'node:http'
 
 describe('SocketSdk - Retry-After Header Parsing', () => {
   describe('Retry-After with seconds (delay-seconds format)', () => {
@@ -46,7 +46,7 @@ describe('SocketSdk - Retry-After Header Parsing', () => {
       createRouteHandler({
         '/retry-date': (_req: IncomingMessage, res) => {
           // Create a date 30 seconds in the future
-          const futureDate = new Date(Date.now() + 30000)
+          const futureDate = new Date(Date.now() + 30_000)
           res.writeHead(429, {
             'Content-Type': 'application/json',
             'Retry-After': futureDate.toUTCString(),
@@ -104,7 +104,7 @@ describe('SocketSdk - Retry-After Header Parsing', () => {
       createRouteHandler({
         '/retry-past': (_req: IncomingMessage, res) => {
           // Date in the past should not be used
-          const pastDate = new Date(Date.now() - 30000)
+          const pastDate = new Date(Date.now() - 30_000)
           res.writeHead(429, {
             'Content-Type': 'application/json',
             'Retry-After': pastDate.toUTCString(),
