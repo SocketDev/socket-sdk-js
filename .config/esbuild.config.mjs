@@ -11,6 +11,7 @@ import { parse } from '@babel/parser'
 import MagicString from 'magic-string'
 
 import { NODE_MODULES } from '@socketsecurity/lib/constants/paths'
+import { envAsBoolean } from '@socketsecurity/lib/env/helpers'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -210,7 +211,8 @@ export const buildConfig = {
   platform: 'node',
   // Target Node.js 18+ features.
   target: 'node18',
-  sourcemap: false,
+  // Enable source maps for coverage (set COVERAGE=true env var)
+  sourcemap: envAsBoolean(process.env.COVERAGE),
   minify: false,
   treeShaking: true,
   // For bundle analysis
