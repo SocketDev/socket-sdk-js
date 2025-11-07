@@ -86,28 +86,28 @@ describe('SocketSdk - Error Branch Coverage', () => {
       new SocketSdk('test-token', { baseUrl: getBaseUrl(), retries: 0 })
 
     it('should handle sendApi with POST method', async () => {
-      const result = await getClient().sendApi('/test-endpoint', {
+      const result = (await getClient().sendApi('/test-endpoint', {
         body: { test: 'data' },
         method: 'POST',
-      })
+      })) as SocketSdkGenericResult<unknown>
 
       expect(result.success).toBe(true)
     })
 
     it('should handle sendApi with PUT method', async () => {
-      const result = await getClient().sendApi('/test-endpoint', {
+      const result = (await getClient().sendApi('/test-endpoint', {
         body: { test: 'data' },
         method: 'PUT',
-      })
+      })) as SocketSdkGenericResult<unknown>
 
       expect(result.success).toBe(true)
     })
 
     it('should handle sendApi with empty body', async () => {
-      const result = await getClient().sendApi('/test-endpoint', {
+      const result = (await getClient().sendApi('/test-endpoint', {
         body: {},
         method: 'POST',
-      })
+      })) as SocketSdkGenericResult<unknown>
 
       expect(result.success).toBe(true)
     })

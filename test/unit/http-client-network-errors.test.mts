@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createGetRequest, getResponse } from '../../src/http-client'
 
-import type { ClientRequest, IncomingMessage } from 'node:http'
+import type { ClientRequest } from 'node:http'
 
 describe('HTTP Client - Network Error Handling', () => {
   beforeEach(() => {
@@ -56,7 +56,9 @@ describe('HTTP Client - Network Error Handling', () => {
       Object.assign(error, { code: 'ECONNRESET' })
       mockRequest.emit('error', error)
 
-      await expect(responsePromise).rejects.toThrow('Connection reset by server')
+      await expect(responsePromise).rejects.toThrow(
+        'Connection reset by server',
+      )
       await expect(responsePromise).rejects.toThrow(
         'Possible network interruption',
       )
