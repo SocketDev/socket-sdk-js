@@ -23,13 +23,11 @@ API reference for `@socketsecurity/sdk`. All methods return a result object:
 
 #### `batchPackageFetch(componentsObj, queryParams?)`
 
-Analyze multiple packages in a single batch request. Returns all results after processing completes.
+Analyze multiple packages in a single request.
 
-**Parameters:**
-- `componentsObj` - Object containing array of package components with PURLs
-- `queryParams?` - Optional query parameters for filtering/configuration
-
-**Returns:** Promise resolving to array of package analysis results
+- `componentsObj` - Package components with PURLs
+- `queryParams?` - Optional query parameters
+- **Returns:** Package analysis array
 
 <details>
 <summary>Show example</summary>
@@ -55,13 +53,11 @@ if (result.success) {
 
 #### `batchPackageStream(componentsObj, options?)`
 
-Stream package analysis with concurrency control via async generator.
+Stream package analysis with concurrency control.
 
-**Parameters:**
-- `componentsObj` - Object containing array of package components
-- `options?` - Streaming options with concurrency control
-
-**Returns:** AsyncGenerator yielding package results
+- `componentsObj` - Package components
+- `options?` - Streaming options (concurrency)
+- **Returns:** AsyncGenerator yielding results
 
 <details>
 <summary>Show example</summary>
@@ -87,13 +83,11 @@ for await (const result of stream) {
 
 #### `getIssuesByNpmPackage(packageName, version)`
 
-Get security issues for an npm package version.
+Get security issues for a package.
 
-**Parameters:**
-- `packageName` - Package name (e.g., 'express')
-- `version` - Specific version (e.g., '4.18.0')
-
-**Returns:** Promise with vulnerability and security alert information
+- `packageName` - Package name
+- `version` - Package version
+- **Returns:** Vulnerabilities and security alerts
 
 <details>
 <summary>Show example</summary>
@@ -117,11 +111,9 @@ if (result.success) {
 
 Get security score for a package.
 
-**Parameters:**
 - `packageName` - Package name
 - `version` - Package version
-
-**Returns:** Promise with numerical security rating
+- **Returns:** Security score and rating
 
 <details>
 <summary>Show example</summary>
@@ -141,14 +133,12 @@ if (result.success) {
 
 #### `createDependenciesSnapshot(filepaths, pathsRelativeTo?, queryParams?)`
 
-Create dependency snapshot from project files.
+Create dependency snapshot from files.
 
-**Parameters:**
-- `filepaths` - Array of file paths to analyze
-- `pathsRelativeTo?` - Base directory for relative paths (default: '.')
-- `queryParams?` - Additional query parameters
-
-**Returns:** Promise with snapshot creation result
+- `filepaths` - Files to analyze
+- `pathsRelativeTo?` - Base directory (default: '.')
+- `queryParams?` - Query parameters
+- **Returns:** Snapshot creation result
 
 <details>
 <summary>Show example</summary>
@@ -170,15 +160,13 @@ if (result.success) {
 
 #### `createOrgFullScan(orgSlug, filepaths, pathsRelativeTo?, queryParams?)`
 
-Create full security scan for organization.
+Create full security scan.
 
-**Parameters:**
-- `orgSlug` - Organization identifier
-- `filepaths` - Array of project files to scan
+- `orgSlug` - Organization ID
+- `filepaths` - Files to scan
 - `pathsRelativeTo?` - Base directory (default: '.')
-- `queryParams?` - Scan configuration options
-
-**Returns:** Promise with scan creation result
+- `queryParams?` - Scan configuration
+- **Returns:** Scan creation result
 
 <details>
 <summary>Show example</summary>
@@ -202,12 +190,10 @@ if (result.success) {
 
 #### `getScan(id)`
 
-Retrieve complete scan results by scan ID.
+Get scan results.
 
-**Parameters:**
-- `id` - Scan identifier
-
-**Returns:** Promise with complete scan analysis
+- `id` - Scan ID
+- **Returns:** Complete scan data
 
 <details>
 <summary>Show example</summary>
@@ -227,9 +213,9 @@ if (result.success) {
 
 #### `getScanList()`
 
-List all accessible scans with pagination support.
+List all scans.
 
-**Returns:** Promise with paginated list of scan metadata
+- **Returns:** Paginated scan list
 
 <details>
 <summary>Show example</summary>
@@ -250,9 +236,9 @@ if (result.success) {
 
 #### `getSupportedScanFiles()`
 
-Get list of supported manifest files and formats.
+Get supported file types.
 
-**Returns:** Promise with supported file types
+- **Returns:** Supported manifest files
 
 <details>
 <summary>Show example</summary>
@@ -271,9 +257,9 @@ if (result.success) {
 
 #### `getOrganizations()`
 
-List all accessible organizations with permissions.
+List organizations.
 
-**Returns:** Promise with organization list
+- **Returns:** Organization list
 
 <details>
 <summary>Show example</summary>
@@ -294,13 +280,11 @@ if (result.success) {
 
 #### `createOrgRepo(orgSlug, queryParams?)`
 
-Create a new repository for monitoring.
+Create repository.
 
-**Parameters:**
-- `orgSlug` - Organization identifier
+- `orgSlug` - Organization ID
 - `queryParams?` - Repository configuration
-
-**Returns:** Promise with created repository details
+- **Returns:** Created repository
 
 <details>
 <summary>Show example</summary>
@@ -323,13 +307,11 @@ if (result.success) {
 
 #### `getOrgRepo(orgSlug, repoSlug)`
 
-Get repository details and configuration.
+Get repository details.
 
-**Parameters:**
-- `orgSlug` - Organization identifier
-- `repoSlug` - Repository identifier
-
-**Returns:** Promise with repository details
+- `orgSlug` - Organization ID
+- `repoSlug` - Repository ID
+- **Returns:** Repository details
 
 <details>
 <summary>Show example</summary>
@@ -349,13 +331,11 @@ if (result.success) {
 
 #### `getOrgRepoList(orgSlug, queryParams?)`
 
-List all repositories in an organization.
+List repositories.
 
-**Parameters:**
-- `orgSlug` - Organization identifier
-- `queryParams?` - Filtering and pagination options
-
-**Returns:** Promise with repository list
+- `orgSlug` - Organization ID
+- `queryParams?` - Filters and pagination
+- **Returns:** Repository list
 
 <details>
 <summary>Show example</summary>
@@ -377,14 +357,12 @@ if (result.success) {
 
 #### `updateOrgRepo(orgSlug, repoSlug, queryParams?)`
 
-Update repository configuration and settings.
+Update repository.
 
-**Parameters:**
-- `orgSlug` - Organization identifier
-- `repoSlug` - Repository identifier
+- `orgSlug` - Organization ID
+- `repoSlug` - Repository ID
 - `queryParams?` - Updated configuration
-
-**Returns:** Promise with updated repository details
+- **Returns:** Updated repository
 
 <details>
 <summary>Show example</summary>
@@ -406,13 +384,11 @@ if (result.success) {
 
 #### `deleteOrgRepo(orgSlug, repoSlug)`
 
-Delete a repository and its associated data.
+Delete repository.
 
-**Parameters:**
-- `orgSlug` - Organization identifier
-- `repoSlug` - Repository identifier
-
-**Returns:** Promise with deletion confirmation
+- `orgSlug` - Organization ID
+- `repoSlug` - Repository ID
+- **Returns:** Deletion confirmation
 
 <details>
 <summary>Show example</summary>
@@ -431,13 +407,11 @@ if (result.success) {
 
 #### `getOrgFullScanList(orgSlug, queryParams?)`
 
-List all full scans for an organization.
+List full scans.
 
-**Parameters:**
-- `orgSlug` - Organization identifier
-- `queryParams?` - Filtering options
-
-**Returns:** Promise with scan list
+- `orgSlug` - Organization ID
+- `queryParams?` - Filters
+- **Returns:** Scan list
 
 <details>
 <summary>Show example</summary>
@@ -461,13 +435,11 @@ if (result.success) {
 
 #### `getOrgFullScanMetadata(orgSlug, fullScanId)`
 
-Get metadata for a specific full scan.
+Get scan metadata.
 
-**Parameters:**
-- `orgSlug` - Organization identifier
-- `fullScanId` - Full scan identifier
-
-**Returns:** Promise with scan metadata
+- `orgSlug` - Organization ID
+- `fullScanId` - Scan ID
+- **Returns:** Scan metadata
 
 <details>
 <summary>Show example</summary>
@@ -487,13 +459,11 @@ if (result.success) {
 
 #### `getOrgFullScanBuffered(orgSlug, fullScanId)`
 
-Get complete scan results loaded into memory.
+Get complete scan (buffered).
 
-**Parameters:**
-- `orgSlug` - Organization identifier
-- `fullScanId` - Full scan identifier
-
-**Returns:** Promise with complete scan data
+- `orgSlug` - Organization ID
+- `fullScanId` - Scan ID
+- **Returns:** Complete scan data
 
 <details>
 <summary>Show example</summary>
@@ -513,14 +483,12 @@ if (result.success) {
 
 #### `streamOrgFullScan(orgSlug, fullScanId, output?)`
 
-Stream large scan results efficiently.
+Stream large scan results.
 
-**Parameters:**
-- `orgSlug` - Organization identifier
-- `fullScanId` - Full scan identifier
-- `output?` - Output destination (file path or writable stream)
-
-**Returns:** Promise with streaming result
+- `orgSlug` - Organization ID
+- `fullScanId` - Scan ID
+- `output?` - File path or stream
+- **Returns:** Streaming result
 
 <details>
 <summary>Show example</summary>
@@ -547,13 +515,11 @@ if (result.success) {
 
 #### `deleteOrgFullScan(orgSlug, fullScanId)`
 
-Delete a full scan and its data.
+Delete full scan.
 
-**Parameters:**
-- `orgSlug` - Organization identifier
-- `fullScanId` - Full scan identifier
-
-**Returns:** Promise with deletion confirmation
+- `orgSlug` - Organization ID
+- `fullScanId` - Scan ID
+- **Returns:** Deletion confirmation
 
 <details>
 <summary>Show example</summary>
@@ -572,12 +538,10 @@ if (result.success) {
 
 #### `getOrgSecurityPolicy(orgSlug)`
 
-Get organization security policy configuration.
+Get security policy.
 
-**Parameters:**
-- `orgSlug` - Organization identifier
-
-**Returns:** Promise with security policy
+- `orgSlug` - Organization ID
+- **Returns:** Security policy
 
 <details>
 <summary>Show example</summary>
@@ -596,13 +560,11 @@ if (result.success) {
 
 #### `updateOrgSecurityPolicy(orgSlug, policyData)`
 
-Update security policy rules and settings.
+Update security policy.
 
-**Parameters:**
-- `orgSlug` - Organization identifier
-- `policyData` - Updated policy configuration
-
-**Returns:** Promise with update confirmation
+- `orgSlug` - Organization ID
+- `policyData` - Policy configuration
+- **Returns:** Update confirmation
 
 <details>
 <summary>Show example</summary>
@@ -626,12 +588,10 @@ if (result.success) {
 
 #### `getOrgLicensePolicy(orgSlug)`
 
-Get license policy configuration.
+Get license policy.
 
-**Parameters:**
-- `orgSlug` - Organization identifier
-
-**Returns:** Promise with license policy
+- `orgSlug` - Organization ID
+- **Returns:** License policy
 
 <details>
 <summary>Show example</summary>
@@ -651,14 +611,12 @@ if (result.success) {
 
 #### `updateOrgLicensePolicy(orgSlug, policyData, queryParams?)`
 
-Update license policy settings.
+Update license policy.
 
-**Parameters:**
-- `orgSlug` - Organization identifier
-- `policyData` - Updated license policy
-- `queryParams?` - Additional options
-
-**Returns:** Promise with update confirmation
+- `orgSlug` - Organization ID
+- `policyData` - License policy
+- `queryParams?` - Options
+- **Returns:** Update confirmation
 
 <details>
 <summary>Show example</summary>
@@ -680,9 +638,9 @@ if (result.success) {
 
 #### `getQuota()`
 
-Get current API quota usage and limits.
+Get API quota.
 
-**Returns:** Promise with quota information
+- **Returns:** Quota usage and limits
 
 <details>
 <summary>Show example</summary>
@@ -702,12 +660,10 @@ if (result.success) {
 
 #### `getOrgAnalytics(time)`
 
-Get organization analytics for a time period.
+Get organization analytics.
 
-**Parameters:**
 - `time` - Time period ('7d', '30d', '90d')
-
-**Returns:** Promise with analytics data
+- **Returns:** Analytics data
 
 <details>
 <summary>Show example</summary>
@@ -728,13 +684,11 @@ if (result.success) {
 
 #### `getRepoAnalytics(repo, time)`
 
-Get repository-specific analytics.
+Get repository analytics.
 
-**Parameters:**
-- `repo` - Repository identifier
+- `repo` - Repository ID
 - `time` - Time period
-
-**Returns:** Promise with repository analytics
+- **Returns:** Repository analytics
 
 <details>
 <summary>Show example</summary>
@@ -754,13 +708,11 @@ if (result.success) {
 
 #### `getAuditLogEvents(orgSlug, queryParams?)`
 
-Get audit log events for an organization.
+Get audit log events.
 
-**Parameters:**
-- `orgSlug` - Organization identifier
-- `queryParams?` - Filtering options
-
-**Returns:** Promise with audit log entries
+- `orgSlug` - Organization ID
+- `queryParams?` - Filters
+- **Returns:** Audit log entries
 
 <details>
 <summary>Show example</summary>
