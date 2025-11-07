@@ -16,7 +16,7 @@ import type {
   FullScanListResult,
   FullScanResult,
   OrganizationsResult,
-} from '../src/types-strict'
+} from '../../src/types-strict'
 
 describe.sequential('Strict Types - v3.0', () => {
   const getClient = setupTestClient('test-token', { retries: 0 })

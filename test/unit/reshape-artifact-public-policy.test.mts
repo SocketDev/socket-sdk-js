@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { reshapeArtifactForPublicPolicy } from '../src/http-client.js'
+import { reshapeArtifactForPublicPolicy } from '../../src/http-client.js'
 
 describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
   describe('when user is authenticated', () => {

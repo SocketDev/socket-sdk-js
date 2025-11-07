@@ -240,6 +240,7 @@ export default [
             '.config/*.config.isolated.mts',
             '*.config.mts',
             'test/*.mts',
+            'test/unit/*.mts',
             'test/utils/*.mts',
             'src/*.mts',
           ],

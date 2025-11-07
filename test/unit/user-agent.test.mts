@@ -1,7 +1,7 @@
 /** @fileoverview Tests for User-Agent string generation utilities. */
 import { describe, expect, it } from 'vitest'
 
-import { createUserAgentFromPkgJson } from '../src/user-agent'
+import { createUserAgentFromPkgJson } from '../../src/user-agent'
 
 describe('createUserAgentFromPkgJson', () => {
   it('should generate User-Agent without homepage', () => {
