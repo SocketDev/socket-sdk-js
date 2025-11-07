@@ -3,6 +3,11 @@ name: Publish Package to npm
 on:
   workflow_dispatch:
     inputs:
+      dist-tag:
+        description: 'npm dist-tag (latest, next, beta, canary, backport, etc.)'
+        required: false
+        default: 'latest'
+        type: string
       debug:
         description: 'Enable debug output'
         required: false
@@ -30,7 +35,7 @@ jobs:
           scope: '@socketregistry'
       - run: npm install -g npm@latest
       - run: npm ci
-      - run: npm publish --provenance --access public
+      - run: npm publish --provenance --access public --tag ${{ inputs.dist-tag }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           SOCKET_CLI_DEBUG: ${{ inputs.debug }}
