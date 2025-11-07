@@ -3,18 +3,23 @@
  */
 
 import { promises as fs } from 'node:fs'
+import Module from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { parse } from '@babel/parser'
 import MagicString from 'magic-string'
 
-import { getLocalPackageAliases } from '../scripts/utils/get-local-package-aliases.mjs'
+import { NODE_MODULES } from '@socketsecurity/lib/constants/paths'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
 const rootPath = path.join(__dirname, '..')
 const srcPath = path.join(rootPath, 'src')
 const distPath = path.join(rootPath, 'dist')
+
+const logger = getDefaultLogger()
 
 /**
  * Plugin to shorten module paths in bundled output with conflict detection.
@@ -31,6 +36,7 @@ function createPathShorteningPlugin() {
           )
 
           for (const outputPath of outputs) {
+            // eslint-disable-next-line no-await-in-loop
             const content = await fs.readFile(outputPath, 'utf8')
             const magicString = new MagicString(content)
 
@@ -38,7 +44,8 @@ function createPathShorteningPlugin() {
             const pathMap = new Map()
             const conflictDetector = new Map()
 
-            function shortenPath(longPath) {
+            // eslint-disable-next-line unicorn/consistent-function-scoping
+            const shortenPath = longPath => {
               if (pathMap.has(longPath)) {
                 return pathMap.get(longPath)
               }
@@ -67,8 +74,8 @@ function createPathShorteningPlugin() {
               if (conflictDetector.has(shortPath)) {
                 const existingPath = conflictDetector.get(shortPath)
                 if (existingPath !== longPath) {
-                  console.warn(
-                    `⚠ Path conflict detected:\n  "${shortPath}"\n  Maps to: "${existingPath}"\n  Also from: "${longPath}"\n  Keeping original paths to avoid conflict.`,
+                  logger.warn(
+                    `Path conflict detected:\n  "${shortPath}"\n  Maps to: "${existingPath}"\n  Also from: "${longPath}"\n  Keeping original paths to avoid conflict.`,
                   )
                   shortPath = longPath
                 }
@@ -91,7 +98,7 @@ function createPathShorteningPlugin() {
               for (const comment of ast.comments || []) {
                 if (
                   comment.type === 'CommentLine' &&
-                  comment.value.includes('node_modules')
+                  comment.value.includes(NODE_MODULES)
                 ) {
                   const originalPath = comment.value.trim()
                   const shortPath = shortenPath(originalPath)
@@ -115,7 +122,7 @@ function createPathShorteningPlugin() {
                 if (
                   node.type === 'StringLiteral' &&
                   node.value &&
-                  node.value.includes('node_modules')
+                  node.value.includes(NODE_MODULES)
                 ) {
                   const originalPath = node.value
                   const shortPath = shortenPath(originalPath)
@@ -145,6 +152,7 @@ function createPathShorteningPlugin() {
               }
 
               walk(ast.program)
+              // eslint-disable-next-line no-await-in-loop
               await fs.writeFile(outputPath, magicString.toString(), 'utf8')
             } catch (error) {
               console.error(
@@ -160,55 +168,36 @@ function createPathShorteningPlugin() {
 }
 
 /**
- * Plugin to handle local package aliases.
- * Provides consistent alias resolution across all Socket repos.
+ * Plugin to ensure all Node.js builtins use the node: protocol.
+ * Intercepts imports of Node.js built-in modules and rewrites them to use the node: prefix.
  */
-function createAliasPlugin() {
-  const aliases = getLocalPackageAliases(rootPath)
-
-  // Only create plugin if we have local aliases
-  if (Object.keys(aliases).length === 0) {
-    return null
-  }
-
-  // Packages that should always be bundled (even when using local aliases)
-  const ALWAYS_BUNDLED = new Set(['@socketsecurity/lib'])
-
+function createNodeProtocolPlugin() {
+  // Get list of Node.js built-in modules dynamically
   return {
-    name: 'local-package-aliases',
+    name: 'node-protocol',
     setup(build) {
-      // Intercept imports for aliased packages and mark as external.
-      for (const [packageName, _aliasPath] of Object.entries(aliases)) {
-        // Skip packages that should always be bundled - let esbuild bundle them naturally
-        if (ALWAYS_BUNDLED.has(packageName)) {
+      for (const builtin of Module.builtinModules) {
+        // Skip builtins that already have node: prefix
+        if (builtin.startsWith('node:')) {
           continue
         }
 
-        // Match both exact package name and subpath imports.
+        // Match imports that don't already have the node: prefix
+        // Escape special regex characters in module name
+        const escapedBuiltin = builtin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
         build.onResolve(
-          { filter: new RegExp(`^${packageName}(/|$)`) },
-          args => {
-            // Mark as external using the original package name to avoid absolute paths in output.
-            // This ensures require('@socketsecurity/lib') instead of require('/absolute/path/to/socket-lib/dist').
-            return { path: args.path, external: true }
+          { filter: new RegExp(`^${escapedBuiltin}$`) },
+          _args => {
+            // Return with node: prefix and mark as external
+            return {
+              path: `node:${builtin}`,
+              external: true,
+            }
           },
         )
       }
     },
   }
-}
-
-// Get local package aliases for bundled packages
-function getBundledPackageAliases() {
-  const aliases = getLocalPackageAliases(rootPath)
-  const bundledAliases = {}
-
-  // @socketsecurity/lib should always be bundled (not external)
-  if (aliases['@socketsecurity/lib']) {
-    bundledAliases['@socketsecurity/lib'] = aliases['@socketsecurity/lib']
-  }
-
-  return bundledAliases
 }
 
 // Build configuration for ESM output
@@ -229,21 +218,14 @@ export const buildConfig = {
   metafile: true,
   logLevel: 'info',
 
-  // Alias local packages that should be bundled (not external)
-  alias: getBundledPackageAliases(),
-
-  // Use plugin for local package aliases (consistent across all Socket repos).
-  plugins: [createPathShorteningPlugin(), createAliasPlugin()].filter(Boolean),
+  // Use plugins for module resolution and path handling.
+  plugins: [createNodeProtocolPlugin(), createPathShorteningPlugin()].filter(
+    Boolean,
+  ),
 
   // External dependencies.
-  // Note: @socketsecurity/lib is bundled (not external) to reduce consumer dependencies.
-  // With format: 'cjs', bundling CJS code works fine (no __require wrapper issues).
-  external: [],
-
-  // Banner for generated code
-  banner: {
-    js: '/* Socket SDK CJS - Built with esbuild */',
-  },
+  // @socketsecurity/lib is external (not bundled) - consumers must install it.
+  external: ['@socketsecurity/lib'],
 
   // TypeScript configuration
   tsconfig: path.join(rootPath, 'tsconfig.json'),
