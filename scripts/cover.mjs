@@ -14,6 +14,7 @@ import { fileURLToPath } from 'node:url'
 
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { spawn } from '@socketsecurity/lib/spawn'
 import { printHeader } from '@socketsecurity/lib/stdio/header'
 
 import { runCommandQuiet } from './utils/run-command.mjs'
@@ -35,6 +36,23 @@ const { values } = parseArgs({
 })
 
 printHeader('Test Coverage')
+logger.log('')
+
+// Rebuild with source maps enabled for coverage
+logger.info('Building with source maps for coverage...')
+const buildResult = await spawn('node', ['scripts/build.mjs'], {
+  cwd: rootPath,
+  stdio: 'inherit',
+  env: {
+    ...process.env,
+    COVERAGE: 'true',
+  },
+})
+if (buildResult.code !== 0) {
+  logger.error('Build with source maps failed')
+  process.exitCode = 1
+  process.exit(1)
+}
 logger.log('')
 
 // Run vitest with coverage enabled, capturing output

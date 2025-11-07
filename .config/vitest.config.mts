@@ -30,12 +30,12 @@ export default defineConfig({
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
-      'test/quota-utils-error-handling.test.mts',
-      'test/json-parsing-edge-cases.test.mts',
-      'test/getapi-sendapi-methods.test.mts',
-      'test/socket-sdk-retry.test.mts',
-      'test/entitlements.test.mts',
-      'test/socket-sdk-batch.test.mts',
+      'test/unit/quota-utils-error-handling.test.mts',
+      'test/unit/json-parsing-edge-cases.test.mts',
+      'test/unit/getapi-sendapi-methods.test.mts',
+      'test/unit/socket-sdk-retry.test.mts',
+      'test/unit/entitlements.test.mts',
+      'test/unit/socket-sdk-batch.test.mts',
     ],
     reporters:
       process.env.TEST_REPORTER === 'json' ? ['json', 'default'] : ['default'],
