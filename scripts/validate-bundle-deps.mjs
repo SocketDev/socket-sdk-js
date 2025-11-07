@@ -14,6 +14,10 @@ import { builtinModules } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
+
+const logger = getDefaultLogger()
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
 
@@ -361,7 +365,7 @@ async function main() {
     const { violations, warnings } = await validateBundleDeps()
 
     if (violations.length === 0 && warnings.length === 0) {
-      console.log('✓ Bundle dependencies validation passed')
+      logger.success('Bundle dependencies validation passed')
       process.exitCode = 0
       return
     }

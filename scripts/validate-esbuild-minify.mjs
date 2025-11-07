@@ -7,6 +7,10 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
+
+const logger = getDefaultLogger()
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
 
@@ -58,7 +62,7 @@ async function main() {
   const violations = await validateEsbuildMinify()
 
   if (violations.length === 0) {
-    console.log('✓ esbuild minify validation passed')
+    logger.success('esbuild minify validation passed')
     process.exitCode = 0
     return
   }
