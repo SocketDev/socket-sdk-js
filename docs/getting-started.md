@@ -1,40 +1,28 @@
 # Getting Started
 
-**Quick start guide** — Start contributing to the Socket.dev SDK in 5 minutes.
+Start using the Socket.dev SDK.
 
----
+## Prerequisites
 
-## 📋 Prerequisites
+- Node.js 20+
+- pnpm 9+
+- Git
+- Socket.dev API key (for integration tests)
 
-```
-Required:
- ✓ Node.js 20+ (LTS recommended)
- ✓ pnpm 9+
- ✓ Git
- ✓ Socket.dev API key (for integration tests)
-```
+## Quick Start
 
----
-
-## 🚀 Quick Start
-
-### 1. Clone & Setup
+### Clone & Setup
 
 ```bash
-# Clone
 git clone https://github.com/SocketDev/socket-sdk-js.git
 cd socket-sdk-js
-
-# Install & verify
 pnpm install
 pnpm test
 ```
 
-**Expected:** ✓ 95% test coverage, ✓ 100% type coverage
+Expected: ✓ 95% test coverage, ✓ 100% type coverage
 
----
-
-### 2. Project Structure
+### Project Structure
 
 ```
 socket-sdk-js/
@@ -58,18 +46,15 @@ socket-sdk-js/
         └── testing.md
 ```
 
----
-
-### 3. Essential Commands
+### Essential Commands
 
 ```bash
 # Development
 pnpm run dev         # Watch mode
-pnpm build           # Build for production
+pnpm build           # Production build
 
 # Testing
-pnpm test            # Unit tests
-pnpm test:integration # Integration tests (requires API key)
+pnpm test            # Run tests
 pnpm run cover       # With coverage
 
 # Quality
@@ -77,43 +62,29 @@ pnpm run check       # Type check + lint
 pnpm run fix         # Auto-fix issues
 ```
 
----
+## API Key Setup
 
-## 🔑 API Key Setup
-
-For integration tests, set your Socket.dev API key:
+For integration tests:
 
 ```bash
-# .env file
-SOCKET_API_KEY=your-api-key-here
-
-# Or export directly
 export SOCKET_API_KEY=your-api-key-here
 ```
 
 Get your API key at [socket.dev/settings/api-keys](https://socket.dev/settings/api-keys)
 
----
+## Development Workflow
 
-## 💡 Development Workflow
+1. Branch: `git checkout -b feature/my-change`
+2. Implement changes in `src/`
+3. Test: `pnpm test`
+4. Verify: `pnpm run fix && pnpm test`
+5. Update docs if needed
+6. Commit with conventional commits
+7. Submit pull request
 
-```
-1. Branch     → git checkout -b feature/my-change
-2. Implement  → Edit src/ files
-3. Test       → pnpm test (unit + integration)
-4. Verify     → pnpm run fix && pnpm test
-5. Docs       → Update API docs if needed
-6. Commit     → Conventional commits
-7. PR         → Submit pull request
-```
+## Key Concepts
 
----
-
-## 📚 Key Concepts
-
-### 1. API Versioning
-
-The SDK wraps the Socket.dev REST API v0:
+### API Versioning
 
 ```typescript
 import { SocketSdk } from '@socketsecurity/sdk'
@@ -121,17 +92,13 @@ import { SocketSdk } from '@socketsecurity/sdk'
 const sdk = new SocketSdk('your-api-key')
 ```
 
-### 2. Rate Limiting
+### Rate Limiting
 
-Be mindful of API quotas:
-- Check rate limits before large operations
-- Use quota management utilities
+Check API quotas before large operations. See [quota-management.md](./quota-management.md)
 
-See [docs/quota-management.md](./quota-management.md)
+### Type Safety
 
-### 3. Type Safety
-
-Full TypeScript support for all API responses:
+Full TypeScript support:
 
 ```typescript
 import type { PackageMetadata } from '@socketsecurity/sdk'
@@ -139,30 +106,23 @@ import type { PackageMetadata } from '@socketsecurity/sdk'
 const metadata: PackageMetadata = await sdk.getPackage('npm', 'lodash')
 ```
 
-### 4. Error Handling
-
-All API errors are properly typed:
+### Error Handling
 
 ```typescript
-try {
-  await sdk.getPackage('npm', 'nonexistent')
-} catch (error) {
-  if (error.statusCode === 404) {
+const result = await sdk.getPackage('npm', 'nonexistent')
+
+if (!result.success) {
+  if (result.status === 404) {
     // Handle not found
   }
 }
 ```
 
----
+## Testing
 
-## 🧪 Testing
-
-### Unit Tests
-
-Test business logic without API calls:
+Unit tests:
 
 ```typescript
-// test/unit/utils/parse-purl.test.ts
 import { describe, it, expect } from 'vitest'
 import { parsePurl } from '../../../src/utils/parse-purl'
 
@@ -177,12 +137,9 @@ describe('parsePurl', () => {
 })
 ```
 
-### Integration Tests
-
-Test actual API calls (requires API key):
+Integration tests (requires API key):
 
 ```typescript
-// test/integration/package.test.ts
 import { SocketSdk } from '../../src'
 
 const sdk = new SocketSdk(process.env.SOCKET_API_KEY!)
@@ -193,14 +150,12 @@ it('fetches package metadata', async () => {
 })
 ```
 
----
+## Additional Resources
 
-## 📖 Additional Resources
-
-- [API Reference](./api-reference.md) - Complete method docs
-- [Usage Examples](./usage-examples.md) - Common patterns
-- [When to Use What](./when-to-use-what.md) - Method selection guide
-- [Quota Management](./quota-management.md) - Rate limiting
+- [API Reference](./api-reference.md)
+- [Usage Examples](./usage-examples.md)
+- [When to Use What](./when-to-use-what.md)
+- [Quota Management](./quota-management.md)
 
 ## License
 
