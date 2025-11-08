@@ -75,7 +75,7 @@
     "precommit": "lint-staged",
     "prepare": "dotenvx -q run -f .env.local -- husky",
     "prepublishOnly": "run-s build",
-    "publish:ci": "node scripts/publish.mjs --skip-checks --skip-build",
+    "publish:ci": "node scripts/publish.mjs --skip-checks",
     "test": "node scripts/test.mjs",
     "test:prepare": "dotenvx -q run -f .env.test -- npm run build",
     "test:unit": "dotenvx -q run -f .env.test -- vitest --run",
