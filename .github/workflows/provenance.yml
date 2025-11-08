@@ -1,4 +1,4 @@
-name: Publish Package to npm
+name: 📦 Publish
 
 on:
   workflow_dispatch:
@@ -17,25 +17,17 @@ on:
           - '0'
           - '1'
 
+permissions:
+  contents: write
+  id-token: write
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
-        with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
-          cache: npm
-          scope: '@socketregistry'
-      - run: npm install -g npm@latest
-      - run: npm ci
-      - run: npm publish --provenance --access public --tag ${{ inputs.dist-tag }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          SOCKET_CLI_DEBUG: ${{ inputs.debug }}
+  publish:
+    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@0a1fbfe9c2ca651794ad11784d4c8295c67bcf19 # main
+    with:
+      debug: ${{ inputs.debug }}
+      dist-tag: ${{ inputs.dist-tag }}
+      package-name: '@socketsecurity/sdk'
+      publish-script: 'publish:ci'
+      setup-script: 'pnpm run build'
+      use-trusted-publishing: true

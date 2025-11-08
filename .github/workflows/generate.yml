@@ -1,13 +1,24 @@
-name: Sync SDK
+name: 🔄 Generate SDK
 
 on:
   push:
     branches:
       - main
+    paths:
+      - '.github/workflows/generate.yml'
+      - 'openapi.json'
+      - 'scripts/generate-types.mjs'
+      - 'scripts/prettify-base-json.mjs'
   schedule:
-    # At 06:37 on every day-of-week from Monday through Friday.
-    - cron: '37 6 * * 1-5'
+    # At 07:23 on every day-of-week from Monday through Friday.
+    - cron: '23 7 * * 1-5'
   workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force regeneration even if no changes detected'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -16,13 +27,135 @@ permissions:
 jobs:
   fetch_and_update:
     name: Sync OpenAPI definition
-    uses: SocketDev/workflows/.github/workflows/reusable-sync.yml@master
-    secrets: inherit
-    with:
-      url: 'https://api.socket.dev/v0/openapi'
-      path: 'openapi.json'
-      branch-name: 'automated/open-api'
-      commit-message: 'fix(openapi): sync with openapi definition'
-      pr-title: 'Sync with OpenAPI definition'
-      pr-body: 'The OpenAPI definition in the API has been updated. This PR downloads the latest one and regenerates the SDK.'
-      npm-post-sync-script: 'generate-sdk'
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.check.outputs.has_changes }}
+    steps:
+      - name: Random delay
+        if: github.event_name == 'schedule'
+        run: |
+          # Add random delay between 0-10 minutes for scheduled runs
+          delay=$((RANDOM % 600))
+          echo "Sleeping for $delay seconds..."
+          sleep $delay
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          autocrlf: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@1a96ced97aaa85d61543351b90d6f463b983c46c # main
+
+      - name: Fetch latest OpenAPI definition
+        id: fetch
+        run: |
+          echo "Fetching latest OpenAPI definition..."
+          curl -sSL https://api.socket.dev/v0/openapi -o openapi-new.json
+
+          # Check if file changed
+          if [ -f openapi.json ]; then
+            if diff -q openapi.json openapi-new.json > /dev/null; then
+              echo "No changes detected"
+              echo "changed=false" >> $GITHUB_OUTPUT
+            else
+              echo "Changes detected"
+              echo "changed=true" >> $GITHUB_OUTPUT
+              mv openapi-new.json openapi.json
+            fi
+          else
+            echo "OpenAPI file doesn't exist, creating new one"
+            echo "changed=true" >> $GITHUB_OUTPUT
+            mv openapi-new.json openapi.json
+          fi
+
+      - name: Run post-sync script
+        if: steps.fetch.outputs.changed == 'true' || github.event.inputs.force == 'true'
+        run: pnpm run generate-sdk
+
+      - name: Configure git
+        if: steps.fetch.outputs.changed == 'true' || github.event.inputs.force == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Check for changes
+        id: check
+        if: steps.fetch.outputs.changed == 'true' || github.event.inputs.force == 'true'
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push changes
+        if: steps.check.outputs.has_changes == 'true'
+        run: |
+          git checkout -b automated/open-api
+          git add .
+          git commit -m "fix(openapi): sync with openapi definition"
+          git push origin automated/open-api -fu --no-verify
+
+      - name: Create Pull Request
+        if: steps.check.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if PR already exists
+          existing_pr=$(gh pr list --head automated/open-api --json number --jq '.[0].number' || echo "")
+
+          if [ -z "$existing_pr" ]; then
+            gh pr create \
+              --head automated/open-api \
+              --base main \
+              --title "Sync with OpenAPI definition" \
+              --body "## 🔄 OpenAPI Sync
+
+          The OpenAPI definition in the API has been updated. This PR automatically:
+          - Downloads the latest OpenAPI specification
+          - Regenerates TypeScript types
+          - Updates SDK method signatures if needed
+
+          ### What's Changed
+          See the file changes below for specific updates to the API types and methods.
+
+          ⚠️ **Please review carefully for any breaking changes in the API.**" \
+              --label "dependencies" \
+              --label "automated"
+          else
+            echo "PR #$existing_pr already exists, skipping creation"
+          fi
+
+  validate:
+    name: Validate generated SDK
+    needs: fetch_and_update
+    if: needs.fetch_and_update.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.check.outputs.has_changes }}
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          autocrlf: false
+          ref: automated/open-api
+
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@1a96ced97aaa85d61543351b90d6f463b983c46c # main
+
+      - name: Build SDK
+        run: pnpm run build
+
+      - name: Type check
+        run: pnpm run check
+
+      - name: Lint
+        run: pnpm run lint --all
+
+      - name: Test
+        run: pnpm run test --all
+
+      - name: Check for API breaking changes
+        run: |
+          if git diff origin/main...HEAD --name-only | grep -q 'types/api.d.ts'; then
+            echo "⚠️ API types have changed. Please review for breaking changes."
+            git diff origin/main...HEAD types/api.d.ts | head -100
+          fi
