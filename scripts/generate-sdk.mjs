@@ -10,7 +10,6 @@
  *   node scripts/generate-sdk.mjs
  */
 
-import { spawn } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
@@ -18,6 +17,7 @@ import * as parser from '@babel/parser'
 import traverse from '@babel/traverse'
 import * as t from '@babel/types'
 import MagicString from 'magic-string'
+import openapiTS from 'openapi-typescript'
 
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
@@ -25,44 +25,40 @@ import { getRootPath } from './utils/path-helpers.mjs'
 import { runCommand } from './utils/run-command.mjs'
 
 const rootPath = getRootPath(import.meta.url)
+const openApiJsonPath = resolve(rootPath, 'openapi.json')
 const typesPath = resolve(rootPath, 'types/api.d.ts')
 
 // Initialize logger
 const logger = getDefaultLogger()
 
+/**
+ * Prettifies the OpenAPI JSON file.
+ */
+async function prettifyOpenApiJson() {
+  const openApiData = readFileSync(openApiJsonPath, 'utf8')
+  writeFileSync(
+    openApiJsonPath,
+    JSON.stringify(JSON.parse(openApiData), null, 2),
+  )
+}
+
+/**
+ * Generates TypeScript types from OpenAPI schema.
+ */
 async function generateTypes() {
-  return new Promise((resolve, reject) => {
-    const child = spawn('node', ['scripts/generate-types.mjs'], {
-      cwd: rootPath,
-      stdio: ['inherit', 'pipe', 'inherit'],
-    })
-
-    let output = ''
-
-    child.stdout.on('data', data => {
-      output += data.toString()
-    })
-
-    child.on('exit', code => {
-      if (code !== 0) {
-        reject(new Error(`Type generation failed with exit code ${code}`))
-        return
+  const output = await openapiTS(openApiJsonPath, {
+    transform(schemaObject) {
+      if ('format' in schemaObject && schemaObject.format === 'binary') {
+        return 'never'
       }
-
-      try {
-        writeFileSync(typesPath, output, 'utf8')
-        // Fix array syntax after writing to disk
-        fixArraySyntax(typesPath)
-        // Add SDK v3 method name aliases
-        addSdkMethodAliases(typesPath)
-        resolve()
-      } catch (error) {
-        reject(error)
-      }
-    })
-
-    child.on('error', reject)
+    },
   })
+
+  writeFileSync(typesPath, output, 'utf8')
+  // Fix array syntax after writing to disk
+  fixArraySyntax(typesPath)
+  // Add SDK v3 method name aliases
+  addSdkMethodAliases(typesPath)
 }
 
 /**
@@ -213,11 +209,7 @@ async function main() {
 
     // Step 1: Prettify OpenAPI JSON
     logger.log('  1. Prettifying OpenAPI JSON...')
-    let exitCode = await runCommand('node', ['scripts/prettify-base-json.mjs'])
-    if (exitCode !== 0) {
-      process.exitCode = exitCode
-      return
-    }
+    await prettifyOpenApiJson()
 
     // Step 2: Generate types
     logger.log('  2. Generating TypeScript types...')
@@ -225,7 +217,7 @@ async function main() {
 
     // Step 3: Format generated files
     logger.log('  3. Formatting generated files...')
-    exitCode = await runCommand('pnpm', [
+    let exitCode = await runCommand('pnpm', [
       'exec',
       'biome',
       'format',
