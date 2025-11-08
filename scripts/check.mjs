@@ -40,31 +40,31 @@ async function main() {
         command: 'pnpm',
       },
       {
-        args: ['scripts/validate-no-link-deps.mjs'],
+        args: ['scripts/validation/no-link-deps.mjs'],
         command: 'node',
       },
       {
-        args: ['scripts/validate-bundle-deps.mjs'],
+        args: ['scripts/validation/bundle-deps.mjs'],
         command: 'node',
       },
       {
-        args: ['scripts/validate-esbuild-minify.mjs'],
+        args: ['scripts/validation/esbuild-minify.mjs'],
         command: 'node',
       },
       {
-        args: ['scripts/validate-no-cdn-refs.mjs'],
+        args: ['scripts/validation/no-cdn-refs.mjs'],
         command: 'node',
       },
       {
-        args: ['scripts/validate-markdown-filenames.mjs'],
+        args: ['scripts/validation/markdown-filenames.mjs'],
         command: 'node',
       },
       {
-        args: ['scripts/validate-file-size.mjs'],
+        args: ['scripts/validation/file-size.mjs'],
         command: 'node',
       },
       {
-        args: ['scripts/validate-file-count.mjs'],
+        args: ['scripts/validation/file-count.mjs'],
         command: 'node',
       },
     ]

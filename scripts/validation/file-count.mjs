@@ -19,7 +19,7 @@ const logger = getDefaultLogger()
 const execAsync = promisify(exec)
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.join(__dirname, '..')
+const rootPath = path.join(__dirname, '..', '..')
 
 // Maximum number of files in a single commit
 const MAX_FILES_PER_COMMIT = 50

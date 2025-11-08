@@ -22,7 +22,7 @@ import loggerPkg from '@socketsecurity/lib/logger'
 const logger = loggerPkg.getDefaultLogger()
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.join(__dirname, '..')
+const rootPath = path.join(__dirname, '..', '..')
 
 // CDN domains to block
 const CDN_PATTERNS = [
@@ -115,7 +115,7 @@ async function findTextFiles(dir, files = []) {
  */
 async function checkFileForCdnRefs(filePath) {
   // Skip this validator script itself (it mentions CDN domains by necessity)
-  if (filePath.endsWith('validate-no-cdn-refs.mjs')) {
+  if (filePath.endsWith('validation/no-cdn-refs.mjs')) {
     return []
   }
 
