@@ -21,13 +21,15 @@ on:
         type: boolean
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   fetch_and_update:
     name: Sync OpenAPI definition
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     outputs:
       has_changes: ${{ steps.check.outputs.has_changes }}
     steps:
@@ -42,7 +44,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           autocrlf: false
-          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
 
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@e145a6b355d614054e4df3d49ba5218812f42b3e # main
 
@@ -90,11 +92,16 @@ jobs:
 
       - name: Commit and push changes
         if: steps.check.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git checkout -b automated/open-api
           git add .
-          git commit -m "fix(openapi): sync with openapi definition"
-          git push origin automated/open-api -fu --no-verify
+          git commit -m "fix(openapi): sync with openapi definition" --no-verify
+
+          # Use gh to push (works with GITHUB_TOKEN in env)
+          gh repo set-default ${{ github.repository }}
+          git push https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git automated/open-api -f
 
       - name: Create Pull Request
         if: steps.check.outputs.has_changes == 'true'
@@ -131,12 +138,15 @@ jobs:
     needs: fetch_and_update
     if: needs.fetch_and_update.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       has_changes: ${{ steps.check.outputs.has_changes }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           autocrlf: false
+          persist-credentials: false
           ref: automated/open-api
 
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@e145a6b355d614054e4df3d49ba5218812f42b3e # main
