@@ -345,6 +345,7 @@ export async function getResponseJson(
             '→ Response appears to be HTML, not JSON.',
             '→ This may indicate an API endpoint error or network interception.',
           )
+          /* c8 ignore next 3 - Empty responses are handled before JSON parsing (line 311), making this branch unreachable */
         } else if (responseBody.length === 0) {
           messageParts.push('→ Response body is empty when JSON was expected.')
         } else if (

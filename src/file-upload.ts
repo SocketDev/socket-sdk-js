@@ -30,6 +30,7 @@ export function createRequestBodyForFilepaths(
     let stream: ReadStream
     try {
       stream = createReadStream(absPath, { highWaterMark: 1024 * 1024 })
+      /* c8 ignore next 14 - File system errors during stream creation require specific file states */
     } catch (error) {
       const err = error as NodeJS.ErrnoException
       let message = `Failed to read file: ${absPath}`

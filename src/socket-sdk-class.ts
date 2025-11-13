@@ -446,6 +446,15 @@ export class SocketSdk {
   async #handleApiError<T extends SocketSdkOperations>(
     error: unknown,
   ): Promise<SocketSdkErrorResult<T>> {
+    // Handle JSON parsing errors (SyntaxError from invalid API responses)
+    if (error instanceof SyntaxError) {
+      return {
+        success: false as const,
+        error: error.message,
+        // Response was HTTP 200 but body was not valid JSON
+        status: 200,
+      }
+    }
     if (!(error instanceof ResponseError)) {
       throw new Error('Unexpected Socket API error', {
         cause: error,
