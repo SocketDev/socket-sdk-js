@@ -84,8 +84,9 @@ export default defineConfig({
       },
     },
     // Reduce timeouts for faster failures
-    testTimeout: 10_000,
-    hookTimeout: 10_000,
+    // Increase timeout in coverage mode due to instrumentation overhead
+    testTimeout: process.env.COVERAGE ? 30_000 : 10_000,
+    hookTimeout: process.env.COVERAGE ? 30_000 : 10_000,
     // Speed optimizations
     // Note: cache is now configured via Vite's cacheDir
     sequence: {

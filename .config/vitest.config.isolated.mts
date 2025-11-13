@@ -50,6 +50,7 @@ export default defineConfig({
     // Share coverage settings with main config
     coverage: {
       ...baseCoverageConfig,
+      reportsDirectory: './coverage-isolated',
       thresholds: isolatedCoverageThresholds,
     },
   },
