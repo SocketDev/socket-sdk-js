@@ -14,10 +14,117 @@ import { describe, expect, it } from 'vitest'
 
 import {
   createRequestBodyForJson,
+  normalizeBaseUrl,
   promiseWithResolvers,
   queryToSearchParams,
+  resolveAbsPaths,
+  resolveBasePath,
 } from '../../src/index'
 import { createUserAgentFromPkgJson } from '../../src/user-agent'
+
+// =============================================================================
+// URL Normalization
+// =============================================================================
+
+describe('URL Normalization', () => {
+  describe('normalizeBaseUrl', () => {
+    it('should add trailing slash if missing', () => {
+      const result = normalizeBaseUrl('https://api.socket.dev')
+      expect(result).toBe('https://api.socket.dev/')
+    })
+
+    it('should not modify URL that already has trailing slash', () => {
+      const result = normalizeBaseUrl('https://api.socket.dev/')
+      expect(result).toBe('https://api.socket.dev/')
+    })
+
+    it('should handle local URLs', () => {
+      const result = normalizeBaseUrl('http://localhost:3000')
+      expect(result).toBe('http://localhost:3000/')
+    })
+
+    it('should memoize results for performance', () => {
+      const url = 'https://test.example.com'
+      const result1 = normalizeBaseUrl(url)
+      const result2 = normalizeBaseUrl(url)
+      // Both calls should return the same reference (memoized)
+      expect(result1).toBe(result2)
+      expect(result1).toBe('https://test.example.com/')
+    })
+  })
+})
+
+// =============================================================================
+// Path Resolution
+// =============================================================================
+
+describe('Path Resolution', () => {
+  describe('resolveBasePath', () => {
+    it('should resolve relative path to absolute', () => {
+      const result = resolveBasePath('.')
+      expect(result).toContain('socket-sdk-js')
+      expect(result.startsWith('/')).toBe(true)
+    })
+
+    it('should resolve nested relative path', () => {
+      const result = resolveBasePath('./test')
+      expect(result).toContain('socket-sdk-js')
+      expect(result.endsWith('/test')).toBe(true)
+    })
+
+    it('should return absolute path unchanged', () => {
+      const absolutePath = '/tmp/test'
+      const result = resolveBasePath(absolutePath)
+      expect(result).toBe('/tmp/test')
+    })
+
+    it('should default to cwd when no argument provided', () => {
+      const result = resolveBasePath()
+      expect(result).toContain('socket-sdk-js')
+    })
+  })
+
+  describe('resolveAbsPaths', () => {
+    it('should resolve array of relative paths to absolute', () => {
+      const paths = ['./package.json', './src/index.ts']
+      const result = resolveAbsPaths(paths)
+
+      expect(result).toHaveLength(2)
+      expect(result[0]).toContain('socket-sdk-js/package.json')
+      expect(result[1]).toContain('socket-sdk-js/src/index.ts')
+      result.forEach(p => expect(p.startsWith('/')).toBe(true))
+    })
+
+    it('should handle absolute paths in array', () => {
+      const paths = ['/tmp/test.txt', '/var/log/app.log']
+      const result = resolveAbsPaths(paths)
+
+      expect(result).toEqual(['/tmp/test.txt', '/var/log/app.log'])
+    })
+
+    it('should resolve relative to specified base path', () => {
+      const paths = ['file1.txt', 'file2.txt']
+      const result = resolveAbsPaths(paths, '/custom/base')
+
+      expect(result).toHaveLength(2)
+      expect(result[0]).toBe('/custom/base/file1.txt')
+      expect(result[1]).toBe('/custom/base/file2.txt')
+    })
+
+    it('should handle empty array', () => {
+      const result = resolveAbsPaths([])
+      expect(result).toEqual([])
+    })
+
+    it('should handle mixed absolute and relative paths', () => {
+      const paths = ['./relative.txt', '/absolute.txt']
+      const result = resolveAbsPaths(paths, '/base')
+
+      expect(result[0]).toBe('/base/relative.txt')
+      expect(result[1]).toBe('/absolute.txt')
+    })
+  })
+})
 
 // =============================================================================
 // Promise Utilities
