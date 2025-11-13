@@ -10,10 +10,6 @@ overrides:
 importers:
 
   .:
-    dependencies:
-      '@socketsecurity/lib':
-        specifier: 3.2.4
-        version: 3.2.4(typescript@5.9.3)
     devDependencies:
       '@babel/generator':
         specifier: 7.28.5
@@ -42,6 +38,9 @@ importers:
       '@socketregistry/packageurl-js':
         specifier: 1.3.5
         version: 1.3.5
+      '@socketsecurity/lib':
+        specifier: 3.3.2
+        version: 3.3.2(typescript@5.9.3)
       '@types/babel__traverse':
         specifier: 7.28.0
         version: 7.28.0
@@ -670,9 +669,9 @@ packages:
     resolution: {integrity: sha512-Fl4GNUJ/z3IBJBGj4IsJfuRGUBCRMgX0df0mb5x5buaCPDKC+NhMhAFuxpc3viLSHV12CO2rGaNCf4fBYWI0FA==}
     engines: {node: '>=18', pnpm: '>=10.16.0'}
 
-  '@socketsecurity/lib@3.2.4':
-    resolution: {integrity: sha512-zB/yzF+X9TlJDAANTRppioNf6ZfnD7Iysr2FnynWMGcSfO3v9SarxtOduC4XmnpegEZpo24A+w1lk7+F2A6B6g==}
-    engines: {node: '>=22'}
+  '@socketsecurity/lib@3.3.2':
+    resolution: {integrity: sha512-jlsgqlZVa5NLTnHA6LaShhmcN/FWYemeYDj2KjyzGQ4NgH+DezPo7+j79LR+Dq+Nd/x2TVov24NGK/qqqiU5YA==}
+    engines: {node: '>=22', pnpm: '>=10.21.0'}
     peerDependencies:
       typescript: '>=5.0.0'
     peerDependenciesMeta:
@@ -2650,7 +2649,7 @@ snapshots:
 
   '@socketregistry/packageurl-js@1.3.5': {}
 
-  '@socketsecurity/lib@3.2.4(typescript@5.9.3)':
+  '@socketsecurity/lib@3.3.2(typescript@5.9.3)':
     optionalDependencies:
       typescript: 5.9.3
 
