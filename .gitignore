@@ -17,6 +17,7 @@ desktop.ini
 # Build artifacts
 /.type-coverage
 /coverage
+/coverage-isolated
 **/dist
 **/*.tsbuildinfo
 *.d.ts

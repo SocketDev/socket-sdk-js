@@ -47,6 +47,28 @@ describe('index.ts exports', () => {
     expect(sdk.publicPolicy).toBeInstanceOf(Map)
   })
 
+  describe('Constants validation', () => {
+    it('should have valid publicPolicy map with known threat categories', () => {
+      expect(sdk.publicPolicy.size).toBeGreaterThan(0)
+      // Verify known threat categories exist with correct actions
+      expect(sdk.publicPolicy.get('malware')).toBe('error')
+      expect(sdk.publicPolicy.get('criticalCVE')).toBe('warn')
+      expect(sdk.publicPolicy.get('deprecated')).toBe('monitor')
+      expect(sdk.publicPolicy.get('cve')).toBe('ignore')
+    })
+
+    it('should have valid httpAgentNames set', () => {
+      expect(sdk.httpAgentNames.size).toBeGreaterThan(0)
+      expect(sdk.httpAgentNames.has('http')).toBe(true)
+      expect(sdk.httpAgentNames.has('https')).toBe(true)
+    })
+
+    it('should have non-empty DEFAULT_USER_AGENT', () => {
+      expect(sdk.DEFAULT_USER_AGENT.length).toBeGreaterThan(0)
+      expect(sdk.DEFAULT_USER_AGENT).toContain('socketsecurity-sdk')
+    })
+  })
+
   it('should have a comprehensive export list', () => {
     const expectedExports = [
       // HTTP client functions
