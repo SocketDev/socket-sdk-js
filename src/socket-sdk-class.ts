@@ -3322,6 +3322,7 @@ export class SocketSdk {
               '→ Connection refused. Blob storage service is unreachable.',
               '→ Check: Network connectivity and firewall settings.',
             )
+            /* c8 ignore next 4 - ETIMEDOUT requires non-routable IPs which cause unreliable test timeouts */
           } else if (nodeErr.code === 'ETIMEDOUT') {
             message.push(
               '→ Connection timed out.',

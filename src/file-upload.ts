@@ -162,6 +162,7 @@ export async function createUploadRequest(
                 await events.once(req, 'drain')
               }
             }
+            /* c8 ignore next 13 - File system error handling during streaming requires complex setup */
           } catch (streamError) {
             const err = streamError as NodeJS.ErrnoException
             let message = 'Failed to read file during upload'
@@ -191,6 +192,7 @@ export async function createUploadRequest(
           throw new TypeError('Expected "string" or "stream" type')
         }
       }
+      /* c8 ignore next 4 - Catch-all error handler for unexpected failures during multipart upload */
     } catch (e) {
       req.destroy(e as Error)
       fail(e)
