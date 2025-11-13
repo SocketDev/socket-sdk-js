@@ -68,13 +68,10 @@ export function queryToSearchParams(
     let key: string = entry[0]
     const value: string = entry[1]
     if (key === 'defaultBranch') {
-      /* c8 ignore next - query parameter normalization for API compatibility */
       key = 'default_branch'
     } else if (key === 'perPage') {
-      /* c8 ignore next 2 - query parameter normalization for API compatibility */
       key = 'per_page'
     }
-    /* c8 ignore next - skip empty string values in params */
     if (value) {
       normalized[key] = value
     }
