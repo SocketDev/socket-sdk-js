@@ -203,106 +203,6 @@ export class SocketSdk {
   }
 
   /**
-   * Parse Retry-After header value and return delay in milliseconds.
-   * Supports both delay-seconds (integer) and HTTP-date formats.
-   */
-  #parseRetryAfter(
-    retryAfterValue: string | string[] | undefined,
-  ): number | undefined {
-    if (!retryAfterValue) {
-      return undefined
-    }
-
-    // Handle array of values (take first).
-    const value = Array.isArray(retryAfterValue)
-      ? retryAfterValue[0]
-      : retryAfterValue
-
-    // Return if value is empty after extracting from array.
-    if (!value) {
-      return undefined
-    }
-
-    // Try parsing as seconds (integer).
-    const seconds = Number.parseInt(value, 10)
-    if (!Number.isNaN(seconds) && seconds >= 0) {
-      return seconds * 1000
-    }
-
-    // Try parsing as HTTP date.
-    const date = new Date(value)
-    if (!Number.isNaN(date.getTime())) {
-      const delayMs = date.getTime() - Date.now()
-      // Only use if date is in the future.
-      if (delayMs > 0) {
-        return delayMs
-      }
-    }
-
-    return undefined
-  }
-
-  /**
-   * Execute an HTTP request with retry logic.
-   * Internal method for wrapping HTTP operations with exponential backoff.
-   */
-  async #executeWithRetry<T>(operation: () => Promise<T>): Promise<T> {
-    const result = await pRetry(operation, {
-      baseDelayMs: this.#retryDelay,
-      onRetry: (
-        _attempt: number,
-        error: unknown,
-        _delay: number,
-      ): boolean | number | undefined => {
-        /* c8 ignore next 3 - Early return for non-ResponseError types in retry logic */
-        if (!(error instanceof ResponseError)) {
-          return undefined
-        }
-        const { statusCode } = error.response
-        // Don't retry authentication/authorization errors - they won't succeed.
-        if (statusCode === 401 || statusCode === 403) {
-          throw error
-        }
-        // Rate limiting (429) will be retried with custom delay if Retry-After header is present.
-        if (statusCode === 429) {
-          const retryAfter = this.#parseRetryAfter(
-            error.response.headers['retry-after'],
-          )
-          if (retryAfter !== undefined) {
-            // Return custom delay in milliseconds.
-            // Note: Requires @socketsecurity/lib >= 1.0.5 with updated pRetry types.
-            return retryAfter
-          }
-        }
-        return undefined
-      },
-      onRetryRethrow: true,
-      retries: this.#retries,
-    })
-    /* c8 ignore next 3 - Defensive check for undefined result from pRetry abort */
-    if (result === undefined) {
-      throw new Error('Request aborted')
-    }
-    return result
-  }
-
-  /**
-   * Execute a GET request with optional caching.
-   * Internal method for handling cached GET requests with retry logic.
-   */
-  async #getCached<T>(cacheKey: string, fetcher: () => Promise<T>): Promise<T> {
-    // If caching is disabled, just execute the request.
-    if (!this.#cache) {
-      return await this.#executeWithRetry(fetcher)
-    }
-
-    // Use cache with retry logic.
-    return await this.#cache.getOrFetch(cacheKey, async () => {
-      return await this.#executeWithRetry(fetcher)
-    })
-  }
-
-  /**
    * Create async generator for streaming batch package URL processing.
    * Internal method for handling chunked PURL responses with error handling.
    */
@@ -419,6 +319,66 @@ export class SocketSdk {
       success: false,
     }
     /* c8 ignore stop */
+  }
+
+  /**
+   * Execute an HTTP request with retry logic.
+   * Internal method for wrapping HTTP operations with exponential backoff.
+   */
+  async #executeWithRetry<T>(operation: () => Promise<T>): Promise<T> {
+    const result = await pRetry(operation, {
+      baseDelayMs: this.#retryDelay,
+      onRetry: (
+        _attempt: number,
+        error: unknown,
+        _delay: number,
+      ): boolean | number | undefined => {
+        /* c8 ignore next 3 - Early return for non-ResponseError types in retry logic */
+        if (!(error instanceof ResponseError)) {
+          return undefined
+        }
+        const { statusCode } = error.response
+        // Don't retry authentication/authorization errors - they won't succeed.
+        if (statusCode === 401 || statusCode === 403) {
+          throw error
+        }
+        // Rate limiting (429) will be retried with custom delay if Retry-After header is present.
+        if (statusCode === 429) {
+          const retryAfter = this.#parseRetryAfter(
+            error.response.headers['retry-after'],
+          )
+          if (retryAfter !== undefined) {
+            // Return custom delay in milliseconds.
+            // Note: Requires @socketsecurity/lib >= 1.0.5 with updated pRetry types.
+            return retryAfter
+          }
+        }
+        return undefined
+      },
+      onRetryRethrow: true,
+      retries: this.#retries,
+    })
+    /* c8 ignore next 3 - Defensive check for undefined result from pRetry abort */
+    if (result === undefined) {
+      throw new Error('Request aborted')
+    }
+    return result
+  }
+
+  /**
+   * Execute a GET request with optional caching.
+   * Internal method for handling cached GET requests with retry logic.
+   */
+  async #getCached<T>(cacheKey: string, fetcher: () => Promise<T>): Promise<T> {
+    // If caching is disabled, just execute the request.
+    if (!this.#cache) {
+      return await this.#executeWithRetry(fetcher)
+    }
+
+    // Use cache with retry logic.
+    return await this.#cache.getOrFetch(cacheKey, async () => {
+      return await this.#executeWithRetry(fetcher)
+    })
   }
 
   /**
@@ -616,6 +576,46 @@ export class SocketSdk {
     }
 
     return response as T
+  }
+
+  /**
+   * Parse Retry-After header value and return delay in milliseconds.
+   * Supports both delay-seconds (integer) and HTTP-date formats.
+   */
+  #parseRetryAfter(
+    retryAfterValue: string | string[] | undefined,
+  ): number | undefined {
+    if (!retryAfterValue) {
+      return undefined
+    }
+
+    // Handle array of values (take first).
+    const value = Array.isArray(retryAfterValue)
+      ? retryAfterValue[0]
+      : retryAfterValue
+
+    // Return if value is empty after extracting from array.
+    if (!value) {
+      return undefined
+    }
+
+    // Try parsing as seconds (integer).
+    const seconds = Number.parseInt(value, 10)
+    if (!Number.isNaN(seconds) && seconds >= 0) {
+      return seconds * 1000
+    }
+
+    // Try parsing as HTTP date.
+    const date = new Date(value)
+    if (!Number.isNaN(date.getTime())) {
+      const delayMs = date.getTime() - Date.now()
+      // Only use if date is in the future.
+      if (delayMs > 0) {
+        return delayMs
+      }
+    }
+
+    return undefined
   }
 
   /**
