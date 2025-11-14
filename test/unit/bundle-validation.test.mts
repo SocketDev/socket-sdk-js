@@ -8,7 +8,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { parse } from '@babel/parser'
-import traverse from '@babel/traverse'
+import { default as traverse } from '@babel/traverse'
 import { describe, expect, it } from 'vitest'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
