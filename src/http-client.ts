@@ -17,8 +17,52 @@ import type {
   SendMethod,
   SocketArtifactAlert,
   SocketArtifactWithExtras,
+  SocketSdkOptions,
 } from './types'
 import type { ClientRequest, IncomingMessage } from 'node:http'
+
+/**
+ * Array of sensitive header names that should be redacted in logs
+ */
+const SENSITIVE_HEADERS = [
+  'authorization',
+  'cookie',
+  'set-cookie',
+  'proxy-authorization',
+  'www-authenticate',
+  'proxy-authenticate',
+]
+
+/**
+ * Sanitize headers for logging by redacting sensitive values.
+ */
+function sanitizeHeaders(
+  headers: Record<string, unknown> | readonly string[] | undefined,
+): Record<string, string> | undefined {
+  if (!headers) {
+    return undefined
+  }
+
+  // Handle readonly string[] case - this shouldn't normally happen for headers
+  if (Array.isArray(headers)) {
+    return { headers: headers.join(', ') }
+  }
+
+  const sanitized: Record<string, string> = {}
+
+  // Plain object iteration works for both HeadersRecord and IncomingHttpHeaders
+  for (const [key, value] of Object.entries(headers)) {
+    const keyLower = key.toLowerCase()
+    if (SENSITIVE_HEADERS.includes(keyLower)) {
+      sanitized[key] = '[REDACTED]'
+    } else {
+      // Handle both string and string[] values
+      sanitized[key] = Array.isArray(value) ? value.join(', ') : String(value)
+    }
+  }
+
+  return sanitized
+}
 
 /**
  * HTTP response error for Socket API requests.
@@ -55,14 +99,48 @@ export async function createDeleteRequest(
   baseUrl: string,
   urlPath: string,
   options: RequestOptions,
+  hooks?: SocketSdkOptions['hooks'],
 ): Promise<IncomingMessage> {
-  const req = getHttpModule(baseUrl)
-    .request(`${baseUrl}${urlPath}`, {
-      method: 'DELETE',
-      ...options,
+  const startTime = Date.now()
+  const url = `${baseUrl}${urlPath}`
+  const method = 'DELETE'
+
+  hooks?.onRequest?.({
+    method,
+    url,
+    headers: sanitizeHeaders(options.headers),
+    timeout: options.timeout,
+  })
+
+  try {
+    const req = getHttpModule(baseUrl)
+      .request(url, {
+        method,
+        ...options,
+      })
+      .end()
+    const response = await getResponse(req)
+
+    hooks?.onResponse?.({
+      method,
+      url,
+      duration: Date.now() - startTime,
+      status: response.statusCode,
+      statusText: response.statusMessage,
+      headers: sanitizeHeaders(response.headers),
     })
-    .end()
-  return await getResponse(req)
+
+    return response
+  } catch (error) {
+    hooks?.onResponse?.({
+      method,
+      url,
+      duration: Date.now() - startTime,
+      error: error as Error,
+    })
+
+    throw error
+  }
 }
 
 /**
@@ -76,20 +154,50 @@ export async function createGetRequest(
   baseUrl: string,
   urlPath: string,
   options: RequestOptions,
+  hooks?: SocketSdkOptions['hooks'],
 ): Promise<IncomingMessage> {
+  const startTime = Date.now()
+  const url = `${baseUrl}${urlPath}`
+  const method = 'GET'
   const stopTimer = perfTimer('http:get', { urlPath })
+
+  hooks?.onRequest?.({
+    method,
+    url,
+    headers: sanitizeHeaders(options.headers),
+    timeout: options.timeout,
+  })
+
   try {
     const req = getHttpModule(baseUrl)
-      .request(`${baseUrl}${urlPath}`, {
-        method: 'GET',
+      .request(url, {
+        method,
         ...options,
       })
       .end()
     const response = await getResponse(req)
     stopTimer({ statusCode: response.statusCode })
+
+    hooks?.onResponse?.({
+      method,
+      url,
+      duration: Date.now() - startTime,
+      status: response.statusCode,
+      statusText: response.statusMessage,
+      headers: sanitizeHeaders(response.headers),
+    })
+
     return response
   } catch (error) {
     stopTimer({ error: true })
+
+    hooks?.onResponse?.({
+      method,
+      url,
+      duration: Date.now() - startTime,
+      error: error as Error,
+    })
+
     throw error
   }
 }
@@ -107,20 +215,32 @@ export async function createRequestWithJson(
   urlPath: string,
   json: unknown,
   options: RequestOptions,
+  hooks?: SocketSdkOptions['hooks'],
 ): Promise<IncomingMessage> {
+  const startTime = Date.now()
+  const url = `${baseUrl}${urlPath}`
   const stopTimer = perfTimer(`http:${method.toLowerCase()}`, {
     urlPath,
   })
+  const body = JSON.stringify(json)
+  const headers = {
+    ...options.headers,
+    'Content-Length': Buffer.byteLength(body, 'utf8'),
+    'Content-Type': 'application/json',
+  }
+
+  hooks?.onRequest?.({
+    method,
+    url,
+    headers: sanitizeHeaders(headers),
+    timeout: options.timeout,
+  })
+
   try {
-    const body = JSON.stringify(json)
-    const req = getHttpModule(baseUrl).request(`${baseUrl}${urlPath}`, {
+    const req = getHttpModule(baseUrl).request(url, {
       method,
       ...options,
-      headers: {
-        ...options.headers,
-        'Content-Length': Buffer.byteLength(body, 'utf8'),
-        'Content-Type': 'application/json',
-      },
+      headers,
     })
 
     req.write(body)
@@ -128,9 +248,27 @@ export async function createRequestWithJson(
 
     const response = await getResponse(req)
     stopTimer({ statusCode: response.statusCode })
+
+    hooks?.onResponse?.({
+      method,
+      url,
+      duration: Date.now() - startTime,
+      status: response.statusCode,
+      statusText: response.statusMessage,
+      headers: sanitizeHeaders(response.headers),
+    })
+
     return response
   } catch (error) {
     stopTimer({ error: true })
+
+    hooks?.onResponse?.({
+      method,
+      url,
+      duration: Date.now() - startTime,
+      error: error as Error,
+    })
+
     throw error
   }
 }
@@ -549,9 +687,10 @@ export async function createGetRequestWithRetry(
   options: RequestOptions,
   retries = 0,
   retryDelay = 100,
+  hooks?: SocketSdkOptions['hooks'],
 ): Promise<IncomingMessage> {
   return await withRetry(
-    () => createGetRequest(baseUrl, urlPath, options),
+    () => createGetRequest(baseUrl, urlPath, options, hooks),
     retries,
     retryDelay,
   )
@@ -572,9 +711,10 @@ export async function createDeleteRequestWithRetry(
   options: RequestOptions,
   retries = 0,
   retryDelay = 100,
+  hooks?: SocketSdkOptions['hooks'],
 ): Promise<IncomingMessage> {
   return await withRetry(
-    () => createDeleteRequest(baseUrl, urlPath, options),
+    () => createDeleteRequest(baseUrl, urlPath, options, hooks),
     retries,
     retryDelay,
   )
@@ -597,9 +737,10 @@ export async function createRequestWithJsonAndRetry(
   options: RequestOptions,
   retries = 0,
   retryDelay = 100,
+  hooks?: SocketSdkOptions['hooks'],
 ): Promise<IncomingMessage> {
   return await withRetry(
-    () => createRequestWithJson(method, baseUrl, urlPath, json, options),
+    () => createRequestWithJson(method, baseUrl, urlPath, json, options, hooks),
     retries,
     retryDelay,
   )

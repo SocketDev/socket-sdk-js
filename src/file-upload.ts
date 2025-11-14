@@ -8,10 +8,53 @@ import { normalizePath } from '@socketsecurity/lib/path'
 
 import { getHttpModule, getResponse } from './http-client'
 
-import type { RequestOptions } from './types'
+import type { RequestOptions, SocketSdkOptions } from './types'
 import type { ReadStream } from 'node:fs'
 import type { ClientRequest, IncomingMessage } from 'node:http'
 import type { RequestOptions as HttpsRequestOptions } from 'node:https'
+
+/**
+ * Array of sensitive header names that should be redacted in logs
+ */
+const SENSITIVE_HEADERS = [
+  'authorization',
+  'cookie',
+  'set-cookie',
+  'proxy-authorization',
+  'www-authenticate',
+  'proxy-authenticate',
+]
+
+/**
+ * Sanitize headers for logging by redacting sensitive values.
+ */
+function sanitizeHeaders(
+  headers: Record<string, unknown> | readonly string[] | undefined,
+): Record<string, string> | undefined {
+  if (!headers) {
+    return undefined
+  }
+
+  // Handle readonly string[] case - this shouldn't normally happen for headers
+  if (Array.isArray(headers)) {
+    return { headers: headers.join(', ') }
+  }
+
+  const sanitized: Record<string, string> = {}
+
+  // Plain object iteration works for both HeadersRecord and IncomingHttpHeaders
+  for (const [key, value] of Object.entries(headers)) {
+    const keyLower = key.toLowerCase()
+    if (SENSITIVE_HEADERS.includes(keyLower)) {
+      sanitized[key] = '[REDACTED]'
+    } else {
+      // Handle both string and string[] values
+      sanitized[key] = Array.isArray(value) ? value.join(', ') : String(value)
+    }
+  }
+
+  return sanitized
+}
 
 /**
  * Create multipart form-data body parts for file uploads.
@@ -83,6 +126,7 @@ export async function createUploadRequest(
   urlPath: string,
   requestBodyNoBoundaries: Array<string | Readable | Array<string | Readable>>,
   options: RequestOptions,
+  hooks?: SocketSdkOptions['hooks'],
 ): Promise<IncomingMessage> {
   // This function constructs and sends a multipart/form-data HTTP POST request
   // where each part is streamed to the server. It supports string payloads
@@ -116,20 +160,52 @@ export async function createUploadRequest(
     ]
 
     const url = new URL(urlPath, baseUrl)
+    const method = 'POST'
+    const headers = {
+      ...(options as HttpsRequestOptions)?.headers,
+      'Content-Type': `multipart/form-data; boundary=${boundary}`,
+    }
+    const startTime = Date.now()
+
     const req: ClientRequest = getHttpModule(baseUrl).request(url, {
-      method: 'POST',
+      method,
       ...options,
-      headers: {
-        ...(options as HttpsRequestOptions)?.headers,
-        'Content-Type': `multipart/form-data; boundary=${boundary}`,
-      },
+      headers,
+    })
+
+    hooks?.onRequest?.({
+      method,
+      url: url.toString(),
+      headers: sanitizeHeaders(headers),
+      timeout: options.timeout,
     })
 
     // Send headers early to prompt server validation (auth, URL, quota, etc.).
     req.flushHeaders()
 
     // Concurrently wait for response while we stream body.
-    getResponse(req).then(pass, fail)
+    getResponse(req).then(
+      response => {
+        hooks?.onResponse?.({
+          method,
+          url: url.toString(),
+          duration: Date.now() - startTime,
+          status: response.statusCode,
+          statusText: response.statusMessage,
+          headers: sanitizeHeaders(response.headers),
+        })
+        pass(response)
+      },
+      error => {
+        hooks?.onResponse?.({
+          method,
+          url: url.toString(),
+          duration: Date.now() - startTime,
+          error: error as Error,
+        })
+        fail(error)
+      },
+    )
 
     let aborted = false
     req.on('error', () => (aborted = true))

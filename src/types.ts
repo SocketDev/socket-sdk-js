@@ -81,6 +81,23 @@ export type ArtifactPatches = {
 
 export type Agent = HttpsAgent | HttpAgent | ClientHttp2Session
 
+export interface RequestInfo {
+  method: string
+  url: string
+  headers?: Record<string, string> | undefined
+  timeout?: number | undefined
+}
+
+export interface ResponseInfo {
+  method: string
+  url: string
+  duration: number
+  status?: number | undefined
+  statusText?: string | undefined
+  headers?: Record<string, string> | undefined
+  error?: Error | undefined
+}
+
 export type CompactSocketArtifactAlert = Remap<
   Omit<
     SocketArtifactAlert,
@@ -308,6 +325,13 @@ export interface SocketSdkOptions {
    * @since v3.0.0
    */
   onFileValidation?: FileValidationCallback | undefined
+  /** Request/response logging hooks */
+  hooks?:
+    | {
+        onRequest?: (info: RequestInfo) => void
+        onResponse?: (info: ResponseInfo) => void
+      }
+    | undefined
   /**
    * Number of retry attempts on failure (default: 0, retries disabled).
    * Retries are opt-in following Node.js fs.rm() pattern.

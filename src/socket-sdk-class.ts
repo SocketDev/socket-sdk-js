@@ -115,6 +115,7 @@ export class SocketSdk {
   readonly #apiToken: string
   readonly #baseUrl: string
   readonly #cache: TtlCache | undefined
+  readonly #hooks: SocketSdkOptions['hooks']
   readonly #onFileValidation: FileValidationCallback | undefined
   readonly #reqOptions: RequestOptions
   readonly #retries: number
@@ -145,6 +146,7 @@ export class SocketSdk {
       baseUrl = 'https://api.socket.dev/v0/',
       cache = false,
       cacheTtl = 5 * 60 * 1000,
+      hooks,
       onFileValidation,
       retries = DEFAULT_RETRIES,
       retryDelay = DEFAULT_RETRY_DELAY,
@@ -184,6 +186,7 @@ export class SocketSdk {
           ttl: cacheTtl,
         })
       : /* c8 ignore next - cache disabled by default */ undefined
+    this.#hooks = hooks
     this.#onFileValidation = onFileValidation
     this.#retries = retries
     this.#retryDelay = retryDelay
@@ -867,6 +870,7 @@ export class SocketSdk {
               `dependencies/upload?${queryToSearchParams(queryParams)}`,
               createRequestBodyForFilepaths(validPaths, basePath),
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -898,6 +902,7 @@ export class SocketSdk {
               `orgs/${encodeURIComponent(orgSlug)}/diff-scans?${queryToSearchParams(queryParams)}`,
               {},
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1033,6 +1038,7 @@ export class SocketSdk {
               `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(queryParams as QueryParams)}`,
               createRequestBodyForFilepaths(validPaths, basePath),
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1099,6 +1105,7 @@ export class SocketSdk {
               `orgs/${encodeURIComponent(orgSlug)}/repos`,
               params,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1162,6 +1169,7 @@ export class SocketSdk {
               `orgs/${encodeURIComponent(orgSlug)}/repos/labels`,
               labelData,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1204,6 +1212,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/diff-scans/${encodeURIComponent(diffScanId)}`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1251,6 +1260,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1311,6 +1321,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1371,6 +1382,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1415,6 +1427,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/sbom/export/cdx`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1444,6 +1457,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/sbom/export/spdx`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1476,6 +1490,7 @@ export class SocketSdk {
         this.#baseUrl,
         urlPath,
         this.#reqOptions,
+        this.#hooks,
       )
       // Check for HTTP error status codes first.
       if (!isResponseOk(response)) {
@@ -1552,6 +1567,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/tokens`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1581,6 +1597,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/audit-log?${queryToSearchParams(queryParams)}`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1610,6 +1627,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/diff-scans/${encodeURIComponent(diffScanId)}`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1635,6 +1653,7 @@ export class SocketSdk {
             this.#baseUrl,
             `orgs/${encodeURIComponent(orgSlug)}/entitlements`,
             this.#reqOptions,
+            this.#hooks,
           ),
         ),
     )
@@ -1660,6 +1679,7 @@ export class SocketSdk {
             this.#baseUrl,
             `orgs/${encodeURIComponent(orgSlug)}/entitlements`,
             this.#reqOptions,
+            this.#hooks,
           ),
         ),
     )
@@ -1685,6 +1705,7 @@ export class SocketSdk {
               this.#baseUrl,
               `npm/${encodeURIComponent(pkgName)}/${encodeURIComponent(version)}/issues`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1713,6 +1734,7 @@ export class SocketSdk {
               this.#baseUrl,
               `analytics/org/${encodeURIComponent(time)}`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1757,6 +1779,7 @@ export class SocketSdk {
               this.#baseUrl,
               'organizations',
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1819,6 +1842,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1886,6 +1910,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(options as QueryParams)}`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1948,6 +1973,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}/metadata`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -1989,6 +2015,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/settings/license-policy`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2041,6 +2068,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${orgSlugParam}/repos/${repoSlugParam}`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2103,6 +2131,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2166,6 +2195,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/repos/labels?${queryToSearchParams(options as QueryParams)}`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2232,6 +2262,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/repos?${queryToSearchParams(options as QueryParams)}`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2272,6 +2303,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/settings/security-policy`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2300,6 +2332,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/triage`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2323,7 +2356,12 @@ export class SocketSdk {
         'quota',
         async () =>
           await getResponseJson(
-            await createGetRequest(this.#baseUrl, 'quota', this.#reqOptions),
+            await createGetRequest(
+              this.#baseUrl,
+              'quota',
+              this.#reqOptions,
+              this.#hooks,
+            ),
           ),
       )
       return this.#handleApiSuccess<'getQuota'>(data)
@@ -2352,6 +2390,7 @@ export class SocketSdk {
               this.#baseUrl,
               `analytics/repo/${encodeURIComponent(repo)}/${encodeURIComponent(time)}`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2384,6 +2423,7 @@ export class SocketSdk {
               this.#baseUrl,
               `npm/${encodeURIComponent(pkgName)}/${encodeURIComponent(version)}/score`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2412,6 +2452,7 @@ export class SocketSdk {
               this.#baseUrl,
               'report/supported',
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2440,6 +2481,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/diff-scans`,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2471,6 +2513,7 @@ export class SocketSdk {
               `orgs/${encodeURIComponent(orgSlug)}/tokens`,
               tokenData,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2502,6 +2545,7 @@ export class SocketSdk {
               `orgs/${encodeURIComponent(orgSlug)}/tokens/${encodeURIComponent(tokenId)}/revoke`,
               {},
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2533,6 +2577,7 @@ export class SocketSdk {
               `orgs/${encodeURIComponent(orgSlug)}/tokens/${encodeURIComponent(tokenId)}/rotate`,
               {},
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2565,6 +2610,7 @@ export class SocketSdk {
               `orgs/${encodeURIComponent(orgSlug)}/tokens/${encodeURIComponent(tokenId)}/update`,
               updateData,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2595,6 +2641,7 @@ export class SocketSdk {
               'settings',
               { json: selectors },
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2625,6 +2672,7 @@ export class SocketSdk {
               'dependencies/search',
               queryParams,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2662,6 +2710,7 @@ export class SocketSdk {
         urlPath,
         body,
         this.#reqOptions,
+        this.#hooks,
       )
 
       const data = (await getResponseJson(response)) as T
@@ -2844,6 +2893,7 @@ export class SocketSdk {
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/patches/scan?scan_id=${encodeURIComponent(scanId)}`,
           this.#reqOptions,
+          this.#hooks,
         ),
     )
 
@@ -2909,6 +2959,7 @@ export class SocketSdk {
               `orgs/${encodeURIComponent(orgSlug)}/triage/${encodeURIComponent(alertId)}`,
               triageData,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2940,6 +2991,7 @@ export class SocketSdk {
               `orgs/${encodeURIComponent(orgSlug)}/settings/license-policy?${queryToSearchParams(queryParams)}`,
               policyData,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -2994,6 +3046,7 @@ export class SocketSdk {
               `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`,
               params,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -3059,6 +3112,7 @@ export class SocketSdk {
               `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}`,
               labelData,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -3102,6 +3156,7 @@ export class SocketSdk {
               `orgs/${encodeURIComponent(orgSlug)}/settings/security-policy`,
               policyData,
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -3205,6 +3260,7 @@ export class SocketSdk {
               `orgs/${encodeURIComponent(orgSlug)}/upload-manifest-files`,
               createRequestBodyForFilepaths(validPaths, basePath),
               this.#reqOptions,
+              this.#hooks,
             ),
           ),
       )
@@ -3232,6 +3288,7 @@ export class SocketSdk {
         this.#baseUrl,
         `orgs/${encodeURIComponent(orgSlug)}/patches/view/${encodeURIComponent(uuid)}`,
         this.#reqOptions,
+        this.#hooks,
       ),
     )
 
