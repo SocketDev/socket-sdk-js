@@ -20,14 +20,13 @@ on:
         default: false
         type: boolean
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   fetch_and_update:
     name: Sync OpenAPI definition
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     outputs:
       has_changes: ${{ steps.check.outputs.has_changes }}
     steps:
@@ -42,6 +41,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           autocrlf: false
+          persist-credentials: false
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@63ad52562c1f2d007a1833b2b22cffc3001e1cc2 # main
@@ -135,12 +135,15 @@ jobs:
     needs: fetch_and_update
     if: needs.fetch_and_update.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       has_changes: ${{ steps.check.outputs.has_changes }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           autocrlf: false
+          persist-credentials: false
           ref: automated/open-api
 
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@63ad52562c1f2d007a1833b2b22cffc3001e1cc2 # main
