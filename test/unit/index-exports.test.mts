@@ -34,11 +34,14 @@ describe('index.ts exports', () => {
   })
 
   it('should export all expected utility functions', () => {
+    expect(typeof sdk.calculateWordSetSimilarity).toBe('function')
+    expect(typeof sdk.filterRedundantCause).toBe('function')
     expect(typeof sdk.normalizeBaseUrl).toBe('function')
     expect(typeof sdk.promiseWithResolvers).toBe('function')
     expect(typeof sdk.queryToSearchParams).toBe('function')
     expect(typeof sdk.resolveAbsPaths).toBe('function')
     expect(typeof sdk.resolveBasePath).toBe('function')
+    expect(typeof sdk.shouldOmitReason).toBe('function')
   })
 
   it('should export all expected constants', () => {
@@ -106,11 +109,14 @@ describe('index.ts exports', () => {
       'createUserAgentFromPkgJson',
 
       // Utility functions
+      'calculateWordSetSimilarity',
+      'filterRedundantCause',
       'normalizeBaseUrl',
       'promiseWithResolvers',
       'queryToSearchParams',
       'resolveAbsPaths',
       'resolveBasePath',
+      'shouldOmitReason',
 
       // Constants
       'DEFAULT_USER_AGENT',
@@ -150,11 +156,14 @@ describe('index.ts exports', () => {
       'getRequiredPermissions',
       'hasQuotaForMethods',
       'createUserAgentFromPkgJson',
+      'calculateWordSetSimilarity',
+      'filterRedundantCause',
       'normalizeBaseUrl',
       'promiseWithResolvers',
       'queryToSearchParams',
       'resolveAbsPaths',
       'resolveBasePath',
+      'shouldOmitReason',
       'DEFAULT_USER_AGENT',
       'httpAgentNames',
       'publicPolicy',
@@ -165,5 +174,11 @@ describe('index.ts exports', () => {
       key => !expectedKeys.has(key) && key !== 'default',
     )
     expect(unexpectedExports).toEqual([])
+  })
+
+  it('should export word set similarity functions', () => {
+    expect(typeof sdk.calculateWordSetSimilarity).toBe('function')
+    expect(typeof sdk.filterRedundantCause).toBe('function')
+    expect(typeof sdk.shouldOmitReason).toBe('function')
   })
 })
