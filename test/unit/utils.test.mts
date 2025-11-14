@@ -10,7 +10,11 @@
  * - create-request-body-json.test.mts
  */
 
+import path from 'node:path'
+
 import { describe, expect, it } from 'vitest'
+
+import { normalizePath } from '@socketsecurity/lib/path'
 
 import {
   createRequestBodyForJson,
@@ -63,7 +67,7 @@ describe('Path Resolution', () => {
     it('should resolve relative path to absolute', () => {
       const result = resolveBasePath('.')
       expect(result).toContain('socket-sdk-js')
-      expect(result.startsWith('/')).toBe(true)
+      expect(path.isAbsolute(result)).toBe(true)
     })
 
     it('should resolve nested relative path', () => {
@@ -73,9 +77,10 @@ describe('Path Resolution', () => {
     })
 
     it('should return absolute path unchanged', () => {
-      const absolutePath = '/tmp/test'
+      // Use a truly absolute path for cross-platform testing
+      const absolutePath = normalizePath(path.resolve('/tmp/test'))
       const result = resolveBasePath(absolutePath)
-      expect(result).toBe('/tmp/test')
+      expect(result).toBe(absolutePath)
     })
 
     it('should default to cwd when no argument provided', () => {
@@ -92,23 +97,27 @@ describe('Path Resolution', () => {
       expect(result).toHaveLength(2)
       expect(result[0]).toContain('socket-sdk-js/package.json')
       expect(result[1]).toContain('socket-sdk-js/src/index.ts')
-      result.forEach(p => expect(p.startsWith('/')).toBe(true))
+      result.forEach(p => expect(path.isAbsolute(p)).toBe(true))
     })
 
     it('should handle absolute paths in array', () => {
-      const paths = ['/tmp/test.txt', '/var/log/app.log']
+      // Use truly absolute paths for cross-platform testing
+      const path1 = normalizePath(path.resolve('/tmp/test.txt'))
+      const path2 = normalizePath(path.resolve('/var/log/app.log'))
+      const paths = [path1, path2]
       const result = resolveAbsPaths(paths)
 
-      expect(result).toEqual(['/tmp/test.txt', '/var/log/app.log'])
+      expect(result).toEqual([path1, path2])
     })
 
     it('should resolve relative to specified base path', () => {
       const paths = ['file1.txt', 'file2.txt']
-      const result = resolveAbsPaths(paths, '/custom/base')
+      const basePath = normalizePath(path.resolve('/custom/base'))
+      const result = resolveAbsPaths(paths, basePath)
 
       expect(result).toHaveLength(2)
-      expect(result[0]).toBe('/custom/base/file1.txt')
-      expect(result[1]).toBe('/custom/base/file2.txt')
+      expect(result[0]).toBe(normalizePath(path.join(basePath, 'file1.txt')))
+      expect(result[1]).toBe(normalizePath(path.join(basePath, 'file2.txt')))
     })
 
     it('should handle empty array', () => {
@@ -117,11 +126,13 @@ describe('Path Resolution', () => {
     })
 
     it('should handle mixed absolute and relative paths', () => {
-      const paths = ['./relative.txt', '/absolute.txt']
-      const result = resolveAbsPaths(paths, '/base')
+      const basePath = normalizePath(path.resolve('/base'))
+      const absolutePath = normalizePath(path.resolve('/absolute.txt'))
+      const paths = ['./relative.txt', absolutePath]
+      const result = resolveAbsPaths(paths, basePath)
 
-      expect(result[0]).toBe('/base/relative.txt')
-      expect(result[1]).toBe('/absolute.txt')
+      expect(result[0]).toBe(normalizePath(path.join(basePath, 'relative.txt')))
+      expect(result[1]).toBe(absolutePath)
     })
   })
 })
