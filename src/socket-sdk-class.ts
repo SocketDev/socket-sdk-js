@@ -50,6 +50,7 @@ import {
   reshapeArtifactForPublicPolicy,
 } from './http-client'
 import {
+  filterRedundantCause,
   normalizeBaseUrl,
   promiseWithResolvers,
   queryToSearchParams,
@@ -528,8 +529,12 @@ export class SocketSdk {
       ? [trimmedBody, '', actionableGuidance].filter(Boolean).join('\n')
       : body
 
+    // Omit cause if it's too similar to the error message (redundant).
+    // This prevents repeating essentially the same information twice.
+    const finalCause = filterRedundantCause(errorMessage, causeWithGuidance)
+
     return {
-      cause: causeWithGuidance,
+      cause: finalCause,
       data: undefined,
       error: errorMessage,
       /* c8 ignore next - fallback for missing status code in edge cases. */
@@ -805,10 +810,11 @@ export class SocketSdk {
       })
 
       if (!result.shouldContinue) {
+        const errorMsg = result.errorMessage ?? 'File validation failed'
         return {
-          cause: result.errorCause,
+          cause: filterRedundantCause(errorMsg, result.errorCause),
           data: undefined,
-          error: result.errorMessage ?? 'File validation failed',
+          error: errorMsg,
           status: 400,
           success: false,
         } as SocketSdkErrorResult<'createDependenciesSnapshot'>
@@ -973,10 +979,11 @@ export class SocketSdk {
       })
 
       if (!result.shouldContinue) {
+        const errorMsg = result.errorMessage ?? 'File validation failed'
         return {
-          cause: result.errorCause,
+          cause: filterRedundantCause(errorMsg, result.errorCause),
           data: undefined,
-          error: result.errorMessage ?? 'File validation failed',
+          error: errorMsg,
           status: 400,
           success: false,
         } as StrictErrorResult
@@ -3197,11 +3204,13 @@ export class SocketSdk {
       })
 
       if (!result.shouldContinue) {
+        const errorMsg = result.errorMessage ?? 'File validation failed'
+        const finalCause = filterRedundantCause(errorMsg, result.errorCause)
         return {
-          error: result.errorMessage ?? 'File validation failed',
+          error: errorMsg,
           status: 400,
           success: false,
-          ...(result.errorCause ? { cause: result.errorCause } : {}),
+          ...(finalCause ? { cause: finalCause } : {}),
         } as UploadManifestFilesError
       }
     }

@@ -7,11 +7,14 @@
 // Import from our modules.
 import { DEFAULT_USER_AGENT, httpAgentNames, publicPolicy } from './constants'
 import {
+  calculateWordSetSimilarity,
+  filterRedundantCause,
   normalizeBaseUrl,
   promiseWithResolvers,
   queryToSearchParams,
   resolveAbsPaths,
   resolveBasePath,
+  shouldOmitReason,
 } from './utils'
 
 // Re-export file upload functions.
@@ -128,11 +131,14 @@ export { createUserAgentFromPkgJson } from './user-agent'
 
 // Re-export utility functions.
 export {
+  calculateWordSetSimilarity,
+  filterRedundantCause,
   normalizeBaseUrl,
   promiseWithResolvers,
   queryToSearchParams,
   resolveAbsPaths,
   resolveBasePath,
+  shouldOmitReason,
 }
 
 // Re-export constants.
