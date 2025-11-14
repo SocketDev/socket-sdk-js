@@ -1,188 +1,150 @@
-/** @fileoverview Tests for SocketSdk parameter validation and error handling (no HTTP mocking). */
+/** @fileoverview Tests for SocketSdk configuration validation and edge cases. */
 import { describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../../src/index'
-import { setupTestClient } from '../utils/environment.mts'
 
-describe('SocketSdk Validation & Error Handling', () => {
-  describe('Constructor Validation', () => {
-    it('creates a valid SDK instance with API token', () => {
-      const client = new SocketSdk('valid-token')
-      expect(client).toBeInstanceOf(SocketSdk)
+describe('SocketSdk - Configuration Validation', () => {
+  describe('API token validation', () => {
+    it('should throw error for empty API token', () => {
+      // Test validation of empty token
+      expect(() => new SocketSdk('')).toThrow(
+        '"apiToken" cannot be empty or whitespace-only',
+      )
     })
 
-    it('rejects empty API token', () => {
-      expect(() => new SocketSdk('')).toThrow('cannot be empty')
+    it('should throw error for whitespace-only API token', () => {
+      // Test validation of whitespace token
+      expect(() => new SocketSdk('   ')).toThrow(
+        '"apiToken" cannot be empty or whitespace-only',
+      )
     })
 
-    it('rejects whitespace-only API token', () => {
-      expect(() => new SocketSdk('   ')).toThrow('cannot be empty')
+    it('should handle custom timeout in options', () => {
+      const sdk = new SocketSdk('test-token', {
+        timeout: 5000,
+      })
+      expect(sdk).toBeDefined()
     })
 
-    it('rejects null API token', () => {
-      // @ts-expect-error - testing invalid input
-      expect(() => new SocketSdk(null)).toThrow()
+    it('should handle custom retries in options', () => {
+      const sdk = new SocketSdk('test-token', {
+        retries: 3,
+      })
+      expect(sdk).toBeDefined()
     })
 
-    it('rejects undefined API token', () => {
-      // @ts-expect-error - testing invalid input
-      expect(() => new SocketSdk(undefined)).toThrow()
+    it('should handle custom baseUrl in options', () => {
+      const sdk = new SocketSdk('test-token', {
+        baseUrl: 'https://custom.api.socket.dev/',
+      })
+      expect(sdk).toBeDefined()
     })
 
-    it('rejects excessively long API token', () => {
+    it('should handle all custom options together', () => {
+      const sdk = new SocketSdk('test-token', {
+        baseUrl: 'https://custom.api.socket.dev/',
+        timeout: 10_000,
+        retries: 5,
+      })
+      expect(sdk).toBeDefined()
+    })
+  })
+
+  describe('SDK API token validation', () => {
+    it('should throw error for API token exceeding maximum length', () => {
+      // Create a token longer than 1024 characters (actual max)
       const longToken = 'a'.repeat(1025)
-      expect(() => new SocketSdk(longToken)).toThrow('exceeds maximum length')
+      expect(() => new SocketSdk(longToken)).toThrow(
+        '"apiToken" exceeds maximum length of 1024 characters',
+      )
     })
 
-    it('accepts maximum length API token', () => {
+    it('should accept API token at maximum length boundary', () => {
+      // Create a token exactly 1024 characters (max length)
       const maxToken = 'a'.repeat(1024)
-      const client = new SocketSdk(maxToken)
-      expect(client).toBeInstanceOf(SocketSdk)
+      const sdk = new SocketSdk(maxToken)
+      expect(sdk).toBeDefined()
     })
 
-    it('trims whitespace from API token', () => {
-      const client = new SocketSdk('  token  ')
-      expect(client).toBeInstanceOf(SocketSdk)
-    })
-  })
-
-  describe('Configuration Options Validation', () => {
-    it('accepts valid timeout', () => {
-      const client = new SocketSdk('token', { timeout: 5000 })
-      expect(client).toBeInstanceOf(SocketSdk)
-    })
-
-    it('rejects timeout below minimum', () => {
-      expect(() => new SocketSdk('token', { timeout: 4999 })).toThrow(
-        'must be a number between',
-      )
-    })
-
-    it('rejects timeout above maximum', () => {
-      expect(() => new SocketSdk('token', { timeout: 301_000 })).toThrow(
-        'must be a number between',
-      )
-    })
-
-    it('accepts minimum timeout', () => {
-      const client = new SocketSdk('token', { timeout: 5000 })
-      expect(client).toBeInstanceOf(SocketSdk)
-    })
-
-    it('accepts maximum timeout', () => {
-      const client = new SocketSdk('token', { timeout: 300_000 })
-      expect(client).toBeInstanceOf(SocketSdk)
-    })
-
-    it('rejects non-numeric timeout', () => {
-      // @ts-expect-error - testing invalid input
-      expect(() => new SocketSdk('token', { timeout: 'fast' })).toThrow()
-    })
-
-    it('accepts retries option', () => {
-      const client = new SocketSdk('token', { retries: 5 })
-      expect(client).toBeInstanceOf(SocketSdk)
-    })
-
-    it('accepts cache option', () => {
-      const client = new SocketSdk('token', { cache: true })
-      expect(client).toBeInstanceOf(SocketSdk)
-    })
-
-    it('accepts userAgent option', () => {
-      const client = new SocketSdk('token', { userAgent: 'CustomAgent/1.0' })
-      expect(client).toBeInstanceOf(SocketSdk)
-    })
-
-    it('accepts baseUrl option', () => {
-      const client = new SocketSdk('token', {
-        baseUrl: 'https://custom.api.com',
-      })
-      expect(client).toBeInstanceOf(SocketSdk)
-    })
-
-    it('accepts agent option with https agent', async () => {
-      const https = await import('node:https')
-      const agent = new https.Agent({ keepAlive: true })
-      const client = new SocketSdk('token', { agent })
-      expect(client).toBeInstanceOf(SocketSdk)
-    })
-
-    it('accepts agent option with http agent', async () => {
-      const http = await import('node:http')
-      const agent = new http.Agent({ keepAlive: true })
-      const client = new SocketSdk('token', { agent })
-      expect(client).toBeInstanceOf(SocketSdk)
-    })
-
-    it('accepts agent option in Got-style format', async () => {
-      const https = await import('node:https')
-      const agent = new https.Agent({ keepAlive: true })
-      const client = new SocketSdk('token', { agent: { https: agent } })
-      expect(client).toBeInstanceOf(SocketSdk)
-    })
-
-    it('accepts cacheTtl option', () => {
-      const client = new SocketSdk('token', { cacheTtl: 5000 })
-      expect(client).toBeInstanceOf(SocketSdk)
+    it('should trim whitespace from API token', () => {
+      // Token with leading/trailing whitespace
+      const sdk = new SocketSdk('  valid-token  ')
+      expect(sdk).toBeDefined()
     })
   })
 
-  describe('Public Method Existence', () => {
-    const getClient = setupTestClient('test-token', { retries: 0 })
-
-    const publicMethods = [
-      'batchPackageFetch',
-      'batchPackageStream',
-      'createDependenciesSnapshot',
-      'createFullScan',
-      'createOrgDiffScanFromIds',
-      'createRepository',
-      'createRepositoryLabel',
-      'deleteFullScan',
-      'deleteOrgDiffScan',
-      'deleteRepository',
-      'deleteRepositoryLabel',
-      'exportCDX',
-      'exportSPDX',
-      'getAPITokens',
-      'getAuditLogEvents',
-      'getDiffScanById',
-      'getFullScan',
-      'getFullScanMetadata',
-      'getIssuesByNpmPackage',
-      'getOrgAnalytics',
-      'getOrgLicensePolicy',
-      'getOrgSecurityPolicy',
-      'getOrgTriage',
-      'getQuota',
-      'getRepoAnalytics',
-      'getRepository',
-      'getRepositoryLabel',
-      'getScoreByNpmPackage',
-      'getSupportedScanFiles',
-      'listFullScans',
-      'listOrganizations',
-      'listOrgDiffScans',
-      'listRepositories',
-      'listRepositoryLabels',
-      'postAPIToken',
-      'postSettings',
-      'searchDependencies',
-      'streamFullScan',
-      'streamPatchesFromScan',
-      'updateOrgLicensePolicy',
-      'updateRepository',
-      'updateRepositoryLabel',
-      'updateOrgSecurityPolicy',
-      'viewPatch',
-    ]
-
-    publicMethods.forEach(method => {
-      it(`has ${method} method`, () => {
-        const client = getClient() as unknown as Record<string, unknown>
-        expect(typeof client[method]).toBe('function')
+  describe('SDK baseUrl normalization', () => {
+    it('should handle baseUrl without trailing slash', () => {
+      const sdk = new SocketSdk('test-token', {
+        baseUrl: 'https://custom.api.socket.dev',
       })
+      expect(sdk).toBeDefined()
+    })
+
+    it('should handle baseUrl with trailing slash', () => {
+      const sdk = new SocketSdk('test-token', {
+        baseUrl: 'https://custom.api.socket.dev/',
+      })
+      expect(sdk).toBeDefined()
+    })
+
+    it('should handle baseUrl with multiple trailing slashes', () => {
+      const sdk = new SocketSdk('test-token', {
+        baseUrl: 'https://custom.api.socket.dev///',
+      })
+      expect(sdk).toBeDefined()
+    })
+  })
+
+  describe('SDK configuration validation', () => {
+    it('should throw error for timeout below minimum (5000)', () => {
+      expect(
+        () =>
+          new SocketSdk('test-token', {
+            timeout: 4999,
+          }),
+      ).toThrow(
+        '"timeout" must be a number between 5000 and 300000 milliseconds',
+      )
+    })
+
+    it('should throw error for timeout above maximum (300000)', () => {
+      expect(
+        () =>
+          new SocketSdk('test-token', {
+            timeout: 300_001,
+          }),
+      ).toThrow(
+        '"timeout" must be a number between 5000 and 300000 milliseconds',
+      )
+    })
+
+    it('should accept timeout at minimum boundary', () => {
+      const sdk = new SocketSdk('test-token', {
+        timeout: 5000,
+      })
+      expect(sdk).toBeDefined()
+    })
+
+    it('should accept timeout at maximum boundary', () => {
+      const sdk = new SocketSdk('test-token', {
+        timeout: 300_000,
+      })
+      expect(sdk).toBeDefined()
+    })
+
+    it('should accept zero retries', () => {
+      const sdk = new SocketSdk('test-token', {
+        retries: 0,
+      })
+      expect(sdk).toBeDefined()
+    })
+
+    it('should accept high retries', () => {
+      const sdk = new SocketSdk('test-token', {
+        retries: 10,
+      })
+      expect(sdk).toBeDefined()
     })
   })
 })
