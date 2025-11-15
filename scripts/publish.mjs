@@ -27,7 +27,7 @@ const log = {
   success: msg => logger.log(`${colors.green('✓')} ${msg}`),
   step: msg => logger.log(`\n${msg}`),
   substep: msg => logger.log(`  ${msg}`),
-  progress: msg => process.stdout.write(`  ∴ ${msg}`),
+  progress: msg => logger.progress(msg),
   done: msg => {
     process.stdout.write('\r\x1b[K')
     logger.log(`  ${colors.green('✓')} ${msg}`)
