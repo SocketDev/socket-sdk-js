@@ -7,8 +7,8 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../src/index'
-import { setupLocalHttpServer } from './utils/local-server-helpers.mts'
+import { SocketSdk } from '../../src/index'
+import { setupLocalHttpServer } from '../utils/local-server-helpers.mts'
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
 

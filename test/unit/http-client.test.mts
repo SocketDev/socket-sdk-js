@@ -9,7 +9,7 @@ import { PassThrough } from 'node:stream'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { MAX_RESPONSE_SIZE } from '../src/constants.js'
+import { MAX_RESPONSE_SIZE } from '../../src/constants.js'
 import {
   ResponseError,
   createGetRequest,
@@ -17,7 +17,7 @@ import {
   getErrorResponseBody,
   getHttpModule,
   getResponseJson,
-} from '../src/http-client.js'
+} from '../../src/http-client.js'
 
 import type { IncomingMessage, Server } from 'node:http'
 

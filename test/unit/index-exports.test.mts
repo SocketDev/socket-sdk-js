@@ -1,7 +1,7 @@
 /** @fileoverview Tests for main module exports and public API surface. */
 import { describe, expect, it } from 'vitest'
 
-import * as sdk from '../src/index'
+import * as sdk from '../../src/index'
 
 describe('index.ts exports', () => {
   it('should export all expected functions from http-client', () => {
@@ -34,17 +34,42 @@ describe('index.ts exports', () => {
   })
 
   it('should export all expected utility functions', () => {
+    expect(typeof sdk.calculateWordSetSimilarity).toBe('function')
+    expect(typeof sdk.filterRedundantCause).toBe('function')
     expect(typeof sdk.normalizeBaseUrl).toBe('function')
     expect(typeof sdk.promiseWithResolvers).toBe('function')
     expect(typeof sdk.queryToSearchParams).toBe('function')
     expect(typeof sdk.resolveAbsPaths).toBe('function')
     expect(typeof sdk.resolveBasePath).toBe('function')
+    expect(typeof sdk.shouldOmitReason).toBe('function')
   })
 
   it('should export all expected constants', () => {
     expect(typeof sdk.DEFAULT_USER_AGENT).toBe('string')
     expect(sdk.httpAgentNames).toBeInstanceOf(Set)
     expect(sdk.publicPolicy).toBeInstanceOf(Map)
+  })
+
+  describe('Constants validation', () => {
+    it('should have valid publicPolicy map with known threat categories', () => {
+      expect(sdk.publicPolicy.size).toBeGreaterThan(0)
+      // Verify known threat categories exist with correct actions
+      expect(sdk.publicPolicy.get('malware')).toBe('error')
+      expect(sdk.publicPolicy.get('criticalCVE')).toBe('warn')
+      expect(sdk.publicPolicy.get('deprecated')).toBe('monitor')
+      expect(sdk.publicPolicy.get('cve')).toBe('ignore')
+    })
+
+    it('should have valid httpAgentNames set', () => {
+      expect(sdk.httpAgentNames.size).toBeGreaterThan(0)
+      expect(sdk.httpAgentNames.has('http')).toBe(true)
+      expect(sdk.httpAgentNames.has('https')).toBe(true)
+    })
+
+    it('should have non-empty DEFAULT_USER_AGENT', () => {
+      expect(sdk.DEFAULT_USER_AGENT.length).toBeGreaterThan(0)
+      expect(sdk.DEFAULT_USER_AGENT).toContain('socketsecurity-sdk')
+    })
   })
 
   it('should have a comprehensive export list', () => {
@@ -84,11 +109,14 @@ describe('index.ts exports', () => {
       'createUserAgentFromPkgJson',
 
       // Utility functions
+      'calculateWordSetSimilarity',
+      'filterRedundantCause',
       'normalizeBaseUrl',
       'promiseWithResolvers',
       'queryToSearchParams',
       'resolveAbsPaths',
       'resolveBasePath',
+      'shouldOmitReason',
 
       // Constants
       'DEFAULT_USER_AGENT',
@@ -128,11 +156,14 @@ describe('index.ts exports', () => {
       'getRequiredPermissions',
       'hasQuotaForMethods',
       'createUserAgentFromPkgJson',
+      'calculateWordSetSimilarity',
+      'filterRedundantCause',
       'normalizeBaseUrl',
       'promiseWithResolvers',
       'queryToSearchParams',
       'resolveAbsPaths',
       'resolveBasePath',
+      'shouldOmitReason',
       'DEFAULT_USER_AGENT',
       'httpAgentNames',
       'publicPolicy',
@@ -143,5 +174,11 @@ describe('index.ts exports', () => {
       key => !expectedKeys.has(key) && key !== 'default',
     )
     expect(unexpectedExports).toEqual([])
+  })
+
+  it('should export word set similarity functions', () => {
+    expect(typeof sdk.calculateWordSetSimilarity).toBe('function')
+    expect(typeof sdk.filterRedundantCause).toBe('function')
+    expect(typeof sdk.shouldOmitReason).toBe('function')
   })
 })

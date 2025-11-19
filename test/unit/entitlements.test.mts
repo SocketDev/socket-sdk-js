@@ -2,9 +2,9 @@
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
-import { setupTestClient } from './utils/environment.mts'
+import { setupTestClient } from '../utils/environment.mts'
 
-import type { Entitlement, EntitlementsResponse } from '../src/index'
+import type { Entitlement, EntitlementsResponse } from '../../src/index'
 
 describe('Entitlements API', () => {
   const getClient = setupTestClient('test-api-token', {
