@@ -8,6 +8,10 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
+
+const logger = getDefaultLogger()
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
 
@@ -119,34 +123,34 @@ async function main() {
   }
 
   if (allViolations.length > 0) {
-    console.error('❌ Found link: dependencies (prohibited)')
-    console.error('')
-    console.error(
+    logger.error('❌ Found link: dependencies (prohibited)')
+    logger.error('')
+    logger.error(
       'Use workspace: protocol for monorepo packages or catalog: for centralized versions.',
     )
-    console.error('')
+    logger.error('')
 
     for (const violation of allViolations) {
       const relativePath = path.relative(rootPath, violation.file)
-      console.error(`  ${relativePath}`)
-      console.error(
+      logger.error(`  ${relativePath}`)
+      logger.error(
         `    ${violation.field}.${violation.package}: "${violation.value}"`,
       )
     }
 
-    console.error('')
-    console.error('Replace link: with:')
-    console.error('  - workspace: for monorepo packages')
-    console.error('  - catalog: for centralized version management')
-    console.error('')
+    logger.error('')
+    logger.error('Replace link: with:')
+    logger.error('  - workspace: for monorepo packages')
+    logger.error('  - catalog: for centralized version management')
+    logger.error('')
 
     process.exitCode = 1
   } else {
-    console.log('✓ No link: dependencies found')
+    logger.success('No link: dependencies found')
   }
 }
 
 main().catch(error => {
-  console.error('Validation failed:', error)
+  logger.error('Validation failed:', error)
   process.exitCode = 1
 })

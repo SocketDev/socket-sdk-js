@@ -14,8 +14,8 @@ import { spawn } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
-import * as parser from '@babel/parser'
-import traverse from '@babel/traverse'
+import { parse } from '@babel/parser'
+import { default as traverse } from '@babel/traverse'
 import * as t from '@babel/types'
 import MagicString from 'magic-string'
 
@@ -116,7 +116,7 @@ function fixArraySyntax(filePath) {
   const magicString = new MagicString(content)
 
   // Parse the TypeScript file
-  const ast = parser.parse(content, {
+  const ast = parse(content, {
     sourceType: 'module',
     plugins: ['typescript'],
   })
