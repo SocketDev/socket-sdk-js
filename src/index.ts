@@ -3,14 +3,18 @@
  * Provides the SocketSdk class and utility functions for Socket security analysis API interactions.
  */
 
+/* c8 ignore start - Re-export module, no testable logic */
 // Import from our modules.
 import { DEFAULT_USER_AGENT, httpAgentNames, publicPolicy } from './constants'
 import {
+  calculateWordSetSimilarity,
+  filterRedundantCause,
   normalizeBaseUrl,
   promiseWithResolvers,
   queryToSearchParams,
   resolveAbsPaths,
   resolveBasePath,
+  shouldOmitReason,
 } from './utils'
 
 // Re-export file upload functions.
@@ -71,7 +75,9 @@ export type {
   PatchRecord,
   PatchViewResponse,
   QueryParams,
+  RequestInfo,
   RequestOptions,
+  ResponseInfo,
   SecurityAlert,
   SendMethod,
   SendOptions,
@@ -125,12 +131,16 @@ export { createUserAgentFromPkgJson } from './user-agent'
 
 // Re-export utility functions.
 export {
+  calculateWordSetSimilarity,
+  filterRedundantCause,
   normalizeBaseUrl,
   promiseWithResolvers,
   queryToSearchParams,
   resolveAbsPaths,
   resolveBasePath,
+  shouldOmitReason,
 }
 
 // Re-export constants.
 export { DEFAULT_USER_AGENT, httpAgentNames, publicPolicy }
+/* c8 ignore stop */
