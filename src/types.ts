@@ -423,6 +423,20 @@ export type StreamOrgFullScanOptions = {
   output?: boolean | string | undefined
 }
 
+export type PostOrgTelemetryPayload = Record<string, unknown>
+
+export type PostOrgTelemetryResponse = Record<string, never>
+
+/**
+ * Configuration for telemetry collection.
+ * Controls whether telemetry is enabled and how events are collected.
+ */
+export interface TelemetryConfig {
+  telemetry: {
+    enabled: boolean
+  }
+}
+
 export type UploadManifestFilesOptions = {
   pathsRelativeTo?: string | undefined
 }

@@ -73,6 +73,8 @@ import type {
   GetOptions,
   GotOptions,
   PatchViewResponse,
+  PostOrgTelemetryPayload,
+  PostOrgTelemetryResponse,
   QueryParams,
   RequestOptions,
   SendOptions,
@@ -3480,6 +3482,113 @@ export class SocketSdk {
           reject(new Error(message.join('\n'), { cause: err }))
         })
     })
+  }
+
+  /**
+   * Update organization's telemetry configuration.
+   * Enables or disables telemetry for the organization.
+   *
+   * @param orgSlug - Organization identifier
+   * @param telemetryData - Telemetry configuration with enabled flag
+   * @returns Updated telemetry configuration
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async updateOrgTelemetryConfig(
+    orgSlug: string,
+    telemetryData: { enabled?: boolean | undefined },
+  ): Promise<SocketSdkResult<'updateOrgTelemetryConfig'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'PUT',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/telemetry/config`,
+              telemetryData,
+              this.#reqOptions,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'updateOrgTelemetryConfig'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgTelemetryConfig'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Get organization's telemetry configuration.
+   * Returns whether telemetry is enabled for the organization.
+   *
+   * @param orgSlug - Organization identifier
+   * @returns Telemetry configuration with enabled status
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getTelemetryConfig(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'getOrgTelemetryConfig'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/telemetry/config`,
+              this.#reqOptions,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgTelemetryConfig'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'getOrgTelemetryConfig'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Post telemetry data for an organization.
+   * Sends telemetry events and analytics data for monitoring and analysis.
+   *
+   * @param orgSlug - Organization identifier
+   * @param telemetryData - Telemetry payload containing events and metrics
+   * @returns Empty object on successful submission
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async postOrgTelemetry(
+    orgSlug: string,
+    telemetryData: PostOrgTelemetryPayload,
+  ): Promise<SocketSdkGenericResult<PostOrgTelemetryResponse>> {
+    try {
+      const data = (await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/telemetry`,
+              telemetryData,
+              this.#reqOptions,
+            ),
+          ),
+      )) as PostOrgTelemetryResponse
+      return {
+        cause: undefined,
+        data,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return this.#createQueryErrorResult<PostOrgTelemetryResponse>(e)
+    }
+    /* c8 ignore stop */
   }
 }
 

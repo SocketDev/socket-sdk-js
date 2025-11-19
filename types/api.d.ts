@@ -943,6 +943,27 @@ export interface paths {
      */
     get: operations['fetch-fixes']
   }
+  '/orgs/{org_slug}/telemetry/config': {
+    /**
+     * Get Organization Telemetry Config
+     * @description Retrieve the telemetry config of an organization.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     */
+    get: operations['getOrgTelemetryConfig']
+    /**
+     * Update Telemetry Config
+     * @description Update the telemetry config of an organization.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - telemetry-policy:update
+     */
+    put: operations['updateOrgTelemetryConfig']
+  }
   '/orgs/{org_slug}/webhooks': {
     /**
      * List all webhooks
@@ -13823,6 +13844,8 @@ export interface operations {
                 | 'security-policy:read'
                 | 'socket-basics'
                 | 'socket-basics:read'
+                | 'telemetry-policy'
+                | 'telemetry-policy:update'
                 | 'threat-feed'
                 | 'threat-feed:list'
                 | 'triage'
@@ -13941,6 +13964,8 @@ export interface operations {
             | 'security-policy:read'
             | 'socket-basics'
             | 'socket-basics:read'
+            | 'telemetry-policy'
+            | 'telemetry-policy:update'
             | 'threat-feed'
             | 'threat-feed:list'
             | 'triage'
@@ -14079,6 +14104,8 @@ export interface operations {
             | 'security-policy:read'
             | 'socket-basics'
             | 'socket-basics:read'
+            | 'telemetry-policy'
+            | 'telemetry-policy:update'
             | 'threat-feed'
             | 'threat-feed:list'
             | 'triage'
@@ -14895,6 +14922,94 @@ export interface operations {
                       } | null
                     }
                   }
+            }
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Get Organization Telemetry Config
+   * @description Retrieve the telemetry config of an organization.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   */
+  getOrgTelemetryConfig: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    responses: {
+      /** @description Retrieved telemetry config details */
+      200: {
+        content: {
+          'application/json': {
+            /** @description Telemetry configuration */
+            telemetry: {
+              /**
+               * @description Telemetry enabled
+               * @default false
+               */
+              enabled: boolean
+            }
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Update Telemetry Config
+   * @description Update the telemetry config of an organization.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - telemetry-policy:update
+   */
+  updateOrgTelemetryConfig: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    requestBody?: {
+      content: {
+        'application/json': {
+          /**
+           * @description Telemetry enabled
+           * @default false
+           */
+          enabled?: boolean
+        }
+      }
+    }
+    responses: {
+      /** @description Updated telemetry config details */
+      200: {
+        content: {
+          'application/json': {
+            /** @description Telemetry configuration */
+            telemetry: {
+              /**
+               * @description Telemetry enabled
+               * @default false
+               */
+              enabled: boolean
             }
           }
         }

@@ -67,6 +67,9 @@
     },
     {
       "name": "Deprecated"
+    },
+    {
+      "name": "Telemetry"
     }
   ],
   "components": {
@@ -34752,6 +34755,8 @@
                         "security-policy:read",
                         "socket-basics",
                         "socket-basics:read",
+                        "telemetry-policy",
+                        "telemetry-policy:update",
                         "threat-feed",
                         "threat-feed:list",
                         "triage",
@@ -35106,6 +35111,8 @@
                                 "security-policy:read",
                                 "socket-basics",
                                 "socket-basics:read",
+                                "telemetry-policy",
+                                "telemetry-policy:update",
                                 "threat-feed",
                                 "threat-feed:list",
                                 "triage",
@@ -35277,6 +35284,8 @@
                         "security-policy:read",
                         "socket-basics",
                         "socket-basics:read",
+                        "telemetry-policy",
+                        "telemetry-policy:update",
                         "threat-feed",
                         "threat-feed:list",
                         "triage",
@@ -37318,6 +37327,185 @@
               }
             },
             "description": "Fix details for requested vulnerabilities"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/telemetry/config": {
+      "get": {
+        "tags": [
+          "Telemetry"
+        ],
+        "summary": "Get Organization Telemetry Config",
+        "operationId": "getOrgTelemetryConfig",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "description": "Retrieve the telemetry config of an organization.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "telemetry": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "Telemetry configuration",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean",
+                          "default": false,
+                          "description": "Telemetry enabled"
+                        }
+                      },
+                      "required": [
+                        "enabled"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "telemetry"
+                  ]
+                }
+              }
+            },
+            "description": "Retrieved telemetry config details"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      },
+      "put": {
+        "tags": [
+          "Telemetry"
+        ],
+        "summary": "Update Telemetry Config",
+        "operationId": "updateOrgTelemetryConfig",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "enabled": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Telemetry enabled"
+                  }
+                },
+                "description": ""
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "telemetry-policy:update"
+            ]
+          },
+          {
+            "basicAuth": [
+              "telemetry-policy:update"
+            ]
+          }
+        ],
+        "description": "Update the telemetry config of an organization.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- telemetry-policy:update",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "telemetry": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "Telemetry configuration",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean",
+                          "default": false,
+                          "description": "Telemetry enabled"
+                        }
+                      },
+                      "required": [
+                        "enabled"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "telemetry"
+                  ]
+                }
+              }
+            },
+            "description": "Updated telemetry config details"
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
