@@ -60,6 +60,9 @@
       "name": "API Tokens"
     },
     {
+      "name": "Webhooks"
+    },
+    {
       "name": "Metadata"
     },
     {
@@ -370,6 +373,25 @@
               },
               "value": {
                 "$ref": "#/components/schemas/PurlErrorSchema"
+              }
+            },
+            "required": [
+              "_type",
+              "value"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "_type": {
+                "type": "string",
+                "enum": [
+                  "summary"
+                ]
+              },
+              "value": {
+                "$ref": "#/components/schemas/PurlSummarySchema"
               }
             },
             "required": [
@@ -1588,6 +1610,49 @@
         "required": [
           "error",
           "inputPurl"
+        ]
+      },
+      "PurlSummarySchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "",
+        "properties": {
+          "purl_input": {
+            "type": "integer",
+            "description": "",
+            "default": 0
+          },
+          "resolved": {
+            "type": "integer",
+            "description": "",
+            "default": 0
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "",
+            "properties": {
+              "purl_malformed": {
+                "type": "integer",
+                "description": "",
+                "default": 0
+              },
+              "package_not_found": {
+                "type": "integer",
+                "description": "",
+                "default": 0
+              }
+            },
+            "required": [
+              "package_not_found",
+              "purl_malformed"
+            ]
+          }
+        },
+        "required": [
+          "errors",
+          "purl_input",
+          "resolved"
         ]
       },
       "SocketBatchPURLRequest": {
@@ -10526,6 +10591,16 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "name": "summary",
+            "in": "query",
+            "required": false,
+            "description": "Include a summary object at the end of the stream with counts of malformed, resolved, and not found PURLs.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "requestBody": {
@@ -11319,7 +11394,7 @@
             "name": "committers",
             "in": "query",
             "required": false,
-            "description": "The committers to associate the full-scan with. Set query more than once to set multiple.",
+            "description": "The committers to associate with the full-scan. Set query more than once to set multiple.",
             "schema": {
               "type": "string"
             }
@@ -12694,6 +12769,432 @@
               }
             },
             "description": "Metadata about the full scans and the dependency overview and dependency alert comment. Can be used in a pull request context."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/full-scans/{full_scan_id}/files/tar": {
+      "get": {
+        "tags": [
+          "Full Scans"
+        ],
+        "summary": "Download full scan files as tarball",
+        "operationId": "downloadOrgFullScanFilesAsTar",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "full_scan_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the full scan",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [
+              "full-scans:list"
+            ]
+          },
+          {
+            "basicAuth": [
+              "full-scans:list"
+            ]
+          }
+        ],
+        "description": "Download all files associated with a full scan in tar format.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/x-tar": {}
+            },
+            "description": "Tar archive of full scan files"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/full-scans/archive": {
+      "post": {
+        "tags": [
+          "Full Scans"
+        ],
+        "summary": "Create full scan from archive",
+        "operationId": "CreateOrgFullScanArchive",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repo",
+            "in": "query",
+            "required": true,
+            "description": "The slug of the repository to associate the full-scan with.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace",
+            "in": "query",
+            "required": false,
+            "description": "The workspace of the repository to associate the full-scan with.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "branch",
+            "in": "query",
+            "required": false,
+            "description": "The branch name to associate the full-scan with. Branch names must follow Git branch name rules: be 1–255 characters long; cannot be exactly @;  cannot begin or end with /, ., or .lock; cannot contain \"//\", \"..\", or \"@{\"; and cannot include control characters, spaces, or any of ~^:?*[.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "commit_message",
+            "in": "query",
+            "required": false,
+            "description": "The commit message to associate the full-scan with.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "commit_hash",
+            "in": "query",
+            "required": false,
+            "description": "The commit hash to associate the full-scan with.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pull_request",
+            "in": "query",
+            "required": false,
+            "description": "The pull request number to associate the full-scan with.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "committers",
+            "in": "query",
+            "required": false,
+            "description": "The committers to associate with the full-scan. Set query more than once to set multiple.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "integration_type",
+            "in": "query",
+            "required": false,
+            "description": "The integration type to associate the full-scan with. Defaults to \"Api\" if omitted.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "api",
+                "github",
+                "gitlab",
+                "bitbucket",
+                "azure"
+              ]
+            }
+          },
+          {
+            "name": "integration_org_slug",
+            "in": "query",
+            "required": false,
+            "description": "The integration org slug to associate the full-scan with. If omitted, the Socket org name will be used. This is used to generate links and badges.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "make_default_branch",
+            "in": "query",
+            "required": false,
+            "description": "Set the default branch of the repository to the branch of this full-scan. A branch name is required with this option.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "set_as_pending_head",
+            "in": "query",
+            "required": false,
+            "description": "Designate this full-scan as the latest scan of a given branch. Default branch head scans are included in org alerts. This is only supported on the default branch. A branch name is required with this option.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "tmp",
+            "in": "query",
+            "required": false,
+            "description": "Create a temporary full-scan that is not listed in the reports dashboard. Cannot be used when set_as_pending_head=true.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "scan_type",
+            "in": "query",
+            "required": false,
+            "description": "The type of scan to perform. Defaults to 'socket'. Must be 32 characters or less. Used for categorizing multiple SBOM heads per repository branch.",
+            "schema": {
+              "type": "string",
+              "default": "socket"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string",
+                  "default": {
+                    "type": "Buffer",
+                    "data": []
+                  },
+                  "format": "binary",
+                  "description": ""
+                },
+                "properties": {},
+                "description": ""
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "full-scans:create"
+            ]
+          },
+          {
+            "basicAuth": [
+              "full-scans:create"
+            ]
+          }
+        ],
+        "description": "Create a full scan by uploading one or more archives. Supported archive formats include **.tar**, **.tar.gz/.tgz**, and **.zip**.\n\nEach uploaded archive is extracted server-side and any supported manifest files (like package.json, package-lock.json, pnpm-lock.yaml, etc.) are ingested for the scan. If you upload multiple archives in a single request, the manifests from every archive are merged into one full scan. The response includes any files that were ignored.\n\nThe maximum combined number of files extracted from your upload is 5000 and each extracted file can be no bigger than 67 MB.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:create",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "organization_id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "organization_slug": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "repository_id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "repository_slug": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "branch": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "commit_message": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "commit_hash": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "pull_request": {
+                      "type": "integer",
+                      "description": "",
+                      "default": 0,
+                      "nullable": true
+                    },
+                    "committers": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "description": ""
+                    },
+                    "html_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "api_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "workspace": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "repo": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "html_report_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "integration_type": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "integration_repo_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "integration_branch_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "integration_commit_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "integration_pull_request_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "scan_state": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "precrawl",
+                        "resolve",
+                        "scan"
+                      ],
+                      "description": "The current processing status of the SBOM",
+                      "default": "pending",
+                      "nullable": true
+                    },
+                    "unmatchedFiles": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "description": ""
+                    }
+                  },
+                  "description": ""
+                }
+              }
+            },
+            "description": "The details of the created full scan."
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -34252,7 +34753,12 @@
                         "threat-feed:list",
                         "triage",
                         "triage:alerts-list",
-                        "triage:alerts-update"
+                        "triage:alerts-update",
+                        "webhooks",
+                        "webhooks:create",
+                        "webhooks:list",
+                        "webhooks:update",
+                        "webhooks:delete"
                       ],
                       "description": "",
                       "default": "repo:list"
@@ -34601,7 +35107,12 @@
                                 "threat-feed:list",
                                 "triage",
                                 "triage:alerts-list",
-                                "triage:alerts-update"
+                                "triage:alerts-update",
+                                "webhooks",
+                                "webhooks:create",
+                                "webhooks:list",
+                                "webhooks:update",
+                                "webhooks:delete"
                               ],
                               "description": "",
                               "default": "repo:list"
@@ -34767,7 +35278,12 @@
                         "threat-feed:list",
                         "triage",
                         "triage:alerts-list",
-                        "triage:alerts-update"
+                        "triage:alerts-update",
+                        "webhooks",
+                        "webhooks:create",
+                        "webhooks:list",
+                        "webhooks:update",
+                        "webhooks:delete"
                       ],
                       "description": "",
                       "default": "repo:list"
@@ -35781,6 +36297,16 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "name": "include_responsible_direct_dependencies",
+            "in": "query",
+            "required": false,
+            "description": "Set to include the direct dependencies responsible for introducing the dependency or dependencies with the vulnerability in the response",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "security": [
@@ -35846,17 +36372,7 @@
                                   "fixDetails": {
                                     "type": "object",
                                     "additionalProperties": false,
-                                    "description": "",
                                     "properties": {
-                                      "responsibleDirectDependencyPurls": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "string",
-                                          "description": "",
-                                          "default": "The PURL (unique package identifier) of the direct dependency(ies) responsible for introducing the vulnerability"
-                                        },
-                                        "description": ""
-                                      },
                                       "fixes": {
                                         "type": "array",
                                         "items": {
@@ -35903,11 +36419,88 @@
                                           ]
                                         },
                                         "description": ""
+                                      },
+                                      "responsibleDirectDependencies": {
+                                        "type": "object",
+                                        "additionalProperties": {
+                                          "type": "object",
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "currentVersion": {
+                                              "type": "string",
+                                              "description": "",
+                                              "default": "",
+                                              "format": "The current version of the package"
+                                            },
+                                            "nextAvailableVersion": {
+                                              "type": "object",
+                                              "additionalProperties": false,
+                                              "description": "",
+                                              "properties": {
+                                                "version": {
+                                                  "type": "string",
+                                                  "description": "",
+                                                  "default": "",
+                                                  "format": "The next available version of the package"
+                                                },
+                                                "updateType": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "patch",
+                                                    "minor",
+                                                    "major",
+                                                    "unknown"
+                                                  ],
+                                                  "description": "The type of version update (patch, minor, major, or unknown if it cannot be determined)",
+                                                  "default": "unknown"
+                                                }
+                                              },
+                                              "required": [
+                                                "updateType",
+                                                "version"
+                                              ],
+                                              "nullable": true
+                                            },
+                                            "fixByUpgradingTo": {
+                                              "type": "object",
+                                              "additionalProperties": false,
+                                              "description": "The version and update type of the package that is necessary to fix the vulnerability. If the value is null, it means the package does not have to be upgraded to fix the vulnerability",
+                                              "properties": {
+                                                "version": {
+                                                  "type": "string",
+                                                  "description": "",
+                                                  "default": ""
+                                                },
+                                                "updateType": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "patch",
+                                                    "minor",
+                                                    "major",
+                                                    "unknown"
+                                                  ],
+                                                  "description": "The type of version update (patch, minor, major, or unknown if it cannot be determined)",
+                                                  "default": "unknown"
+                                                }
+                                              },
+                                              "required": [
+                                                "updateType",
+                                                "version"
+                                              ],
+                                              "nullable": true
+                                            }
+                                          },
+                                          "required": [
+                                            "currentVersion"
+                                          ]
+                                        },
+                                        "properties": {},
+                                        "description": "The keys are the PURL (unique package identifier) of the direct dependency(ies) responsible for introducing the vulnerability.",
+                                        "nullable": true
                                       }
                                     },
                                     "required": [
-                                      "fixes",
-                                      "responsibleDirectDependencyPurls"
+                                      "fixes"
                                     ]
                                   },
                                   "advisoryDetails": {
@@ -36046,17 +36639,7 @@
                                   "fixDetails": {
                                     "type": "object",
                                     "additionalProperties": false,
-                                    "description": "",
                                     "properties": {
-                                      "responsibleDirectDependencyPurls": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "string",
-                                          "description": "",
-                                          "default": "The PURL (unique package identifier) of the direct dependency(ies) responsible for introducing the vulnerability"
-                                        },
-                                        "description": ""
-                                      },
                                       "fixes": {
                                         "type": "array",
                                         "items": {
@@ -36132,11 +36715,88 @@
                                           ]
                                         },
                                         "description": ""
+                                      },
+                                      "responsibleDirectDependencies": {
+                                        "type": "object",
+                                        "additionalProperties": {
+                                          "type": "object",
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "currentVersion": {
+                                              "type": "string",
+                                              "description": "",
+                                              "default": "",
+                                              "format": "The current version of the package"
+                                            },
+                                            "nextAvailableVersion": {
+                                              "type": "object",
+                                              "additionalProperties": false,
+                                              "description": "",
+                                              "properties": {
+                                                "version": {
+                                                  "type": "string",
+                                                  "description": "",
+                                                  "default": "",
+                                                  "format": "The next available version of the package"
+                                                },
+                                                "updateType": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "patch",
+                                                    "minor",
+                                                    "major",
+                                                    "unknown"
+                                                  ],
+                                                  "description": "The type of version update (patch, minor, major, or unknown if it cannot be determined)",
+                                                  "default": "unknown"
+                                                }
+                                              },
+                                              "required": [
+                                                "updateType",
+                                                "version"
+                                              ],
+                                              "nullable": true
+                                            },
+                                            "fixByUpgradingTo": {
+                                              "type": "object",
+                                              "additionalProperties": false,
+                                              "description": "The version and update type of the package that is necessary to fix the vulnerability. If the value is null, it means the package does not have to be upgraded to fix the vulnerability",
+                                              "properties": {
+                                                "version": {
+                                                  "type": "string",
+                                                  "description": "",
+                                                  "default": ""
+                                                },
+                                                "updateType": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "patch",
+                                                    "minor",
+                                                    "major",
+                                                    "unknown"
+                                                  ],
+                                                  "description": "The type of version update (patch, minor, major, or unknown if it cannot be determined)",
+                                                  "default": "unknown"
+                                                }
+                                              },
+                                              "required": [
+                                                "updateType",
+                                                "version"
+                                              ],
+                                              "nullable": true
+                                            }
+                                          },
+                                          "required": [
+                                            "currentVersion"
+                                          ]
+                                        },
+                                        "properties": {},
+                                        "description": "The keys are the PURL (unique package identifier) of the direct dependency(ies) responsible for introducing the vulnerability.",
+                                        "nullable": true
                                       }
                                     },
                                     "required": [
                                       "fixes",
-                                      "responsibleDirectDependencyPurls",
                                       "unfixablePurls"
                                     ]
                                   },
@@ -36655,6 +37315,932 @@
               }
             },
             "description": "Fix details for requested vulnerabilities"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/webhooks": {
+      "get": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "List all webhooks",
+        "externalDocs": {
+          "description": "Webhooks documentation",
+          "url": "https://docs.socket.dev/docs/webhooks"
+        },
+        "operationId": "getOrgWebhooksList",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": "created_at"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": "desc"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 30
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [
+              "webhooks:list"
+            ]
+          },
+          {
+            "basicAuth": [
+              "webhooks:list"
+            ]
+          }
+        ],
+        "description": "List all webhooks in the specified organization.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- webhooks:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "The ID of the webhook",
+                            "default": ""
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "description": "The creation date of the webhook",
+                            "default": ""
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "description": "The last update date of the webhook",
+                            "default": ""
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "The name of the webhook",
+                            "default": ""
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "The description of the webhook",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "url": {
+                            "type": "string",
+                            "description": "The URL where webhook events will be sent",
+                            "default": ""
+                          },
+                          "secret": {
+                            "type": "string",
+                            "description": "The signing key used to sign webhook payloads",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "events": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "description": "The event types to subscribe to",
+                              "default": ""
+                            },
+                            "description": "Array of event names"
+                          },
+                          "headers": {
+                            "type": "object",
+                            "description": "Custom headers to include in webhook requests",
+                            "default": null,
+                            "nullable": true
+                          },
+                          "filters": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "description": "",
+                            "properties": {
+                              "repositoryIds": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "description": "Repository IDs to filter events",
+                                  "default": ""
+                                },
+                                "description": "Array of repository IDs",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "repositoryIds"
+                            ],
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "created_at",
+                          "description",
+                          "events",
+                          "filters",
+                          "headers",
+                          "id",
+                          "name",
+                          "secret",
+                          "updated_at",
+                          "url"
+                        ]
+                      },
+                      "description": ""
+                    },
+                    "nextPage": {
+                      "type": "integer",
+                      "description": "",
+                      "default": 0,
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "nextPage",
+                    "results"
+                  ]
+                }
+              }
+            },
+            "description": "List of webhooks"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      },
+      "post": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Create a webhook",
+        "externalDocs": {
+          "description": "Webhooks documentation",
+          "url": "https://docs.socket.dev/docs/webhooks"
+        },
+        "operationId": "createOrgWebhook",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the webhook",
+                    "default": ""
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "The URL where webhook events will be sent",
+                    "default": ""
+                  },
+                  "secret": {
+                    "type": "string",
+                    "description": "The signing key used to sign webhook payloads",
+                    "default": ""
+                  },
+                  "events": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "The event types to subscribe to",
+                      "default": ""
+                    },
+                    "description": "Array of event names"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "The description of the webhook",
+                    "default": "",
+                    "nullable": true
+                  },
+                  "headers": {
+                    "type": "object",
+                    "description": "Custom headers to include in webhook requests",
+                    "default": null,
+                    "nullable": true
+                  },
+                  "filters": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "repositoryIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "description": "Repository IDs to filter events",
+                          "default": ""
+                        },
+                        "description": "Array of repository IDs",
+                        "nullable": true
+                      }
+                    },
+                    "required": [
+                      "repositoryIds"
+                    ],
+                    "nullable": true
+                  }
+                },
+                "required": [
+                  "events",
+                  "name",
+                  "secret",
+                  "url"
+                ]
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "webhooks:create"
+            ]
+          },
+          {
+            "basicAuth": [
+              "webhooks:create"
+            ]
+          }
+        ],
+        "description": "Create a new webhook. Returns the created webhook details.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- webhooks:create",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The ID of the webhook",
+                      "default": ""
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "description": "The creation date of the webhook",
+                      "default": ""
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "description": "The last update date of the webhook",
+                      "default": ""
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the webhook",
+                      "default": ""
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "The description of the webhook",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "url": {
+                      "type": "string",
+                      "description": "The URL where webhook events will be sent",
+                      "default": ""
+                    },
+                    "secret": {
+                      "type": "string",
+                      "description": "The signing key used to sign webhook payloads",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "The event types to subscribe to",
+                        "default": ""
+                      },
+                      "description": "Array of event names"
+                    },
+                    "headers": {
+                      "type": "object",
+                      "description": "Custom headers to include in webhook requests",
+                      "default": null,
+                      "nullable": true
+                    },
+                    "filters": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "repositoryIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "description": "Repository IDs to filter events",
+                            "default": ""
+                          },
+                          "description": "Array of repository IDs",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "repositoryIds"
+                      ],
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "created_at",
+                    "description",
+                    "events",
+                    "filters",
+                    "headers",
+                    "id",
+                    "name",
+                    "secret",
+                    "updated_at",
+                    "url"
+                  ]
+                }
+              }
+            },
+            "description": "The created webhook"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/webhooks/{webhook_id}": {
+      "get": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Get webhook",
+        "externalDocs": {
+          "description": "Webhooks documentation",
+          "url": "https://docs.socket.dev/docs/webhooks"
+        },
+        "operationId": "getOrgWebhook",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the webhook",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [
+              "webhooks:list"
+            ]
+          },
+          {
+            "basicAuth": [
+              "webhooks:list"
+            ]
+          }
+        ],
+        "description": "Get a webhook for the specified organization.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- webhooks:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The ID of the webhook",
+                      "default": ""
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "description": "The creation date of the webhook",
+                      "default": ""
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "description": "The last update date of the webhook",
+                      "default": ""
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the webhook",
+                      "default": ""
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "The description of the webhook",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "url": {
+                      "type": "string",
+                      "description": "The URL where webhook events will be sent",
+                      "default": ""
+                    },
+                    "secret": {
+                      "type": "string",
+                      "description": "The signing key used to sign webhook payloads",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "The event types to subscribe to",
+                        "default": ""
+                      },
+                      "description": "Array of event names"
+                    },
+                    "headers": {
+                      "type": "object",
+                      "description": "Custom headers to include in webhook requests",
+                      "default": null,
+                      "nullable": true
+                    },
+                    "filters": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "repositoryIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "description": "Repository IDs to filter events",
+                            "default": ""
+                          },
+                          "description": "Array of repository IDs",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "repositoryIds"
+                      ],
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "created_at",
+                    "description",
+                    "events",
+                    "filters",
+                    "headers",
+                    "id",
+                    "name",
+                    "secret",
+                    "updated_at",
+                    "url"
+                  ]
+                }
+              }
+            },
+            "description": "Webhook details"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      },
+      "put": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Update webhook",
+        "externalDocs": {
+          "description": "Webhooks documentation",
+          "url": "https://docs.socket.dev/docs/webhooks"
+        },
+        "operationId": "updateOrgWebhook",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the webhook",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the webhook",
+                    "default": ""
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "The description of the webhook",
+                    "default": "",
+                    "nullable": true
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "The URL where webhook events will be sent",
+                    "default": ""
+                  },
+                  "secret": {
+                    "type": "string",
+                    "description": "The signing key used to sign webhook payloads",
+                    "default": "",
+                    "nullable": true
+                  },
+                  "events": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "The event types to subscribe to",
+                      "default": ""
+                    },
+                    "description": "Array of event names"
+                  },
+                  "headers": {
+                    "type": "object",
+                    "description": "Custom headers to include in webhook requests",
+                    "default": null,
+                    "nullable": true
+                  },
+                  "filters": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "",
+                    "properties": {
+                      "repositoryIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "description": "Repository IDs to filter events",
+                          "default": ""
+                        },
+                        "description": "Array of repository IDs",
+                        "nullable": true
+                      }
+                    },
+                    "required": [
+                      "repositoryIds"
+                    ],
+                    "nullable": true
+                  }
+                },
+                "description": ""
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "webhooks:update"
+            ]
+          },
+          {
+            "basicAuth": [
+              "webhooks:update"
+            ]
+          }
+        ],
+        "description": "Update details of an existing webhook.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- webhooks:update",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The ID of the webhook",
+                      "default": ""
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "description": "The creation date of the webhook",
+                      "default": ""
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "description": "The last update date of the webhook",
+                      "default": ""
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the webhook",
+                      "default": ""
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "The description of the webhook",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "url": {
+                      "type": "string",
+                      "description": "The URL where webhook events will be sent",
+                      "default": ""
+                    },
+                    "secret": {
+                      "type": "string",
+                      "description": "The signing key used to sign webhook payloads",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "The event types to subscribe to",
+                        "default": ""
+                      },
+                      "description": "Array of event names"
+                    },
+                    "headers": {
+                      "type": "object",
+                      "description": "Custom headers to include in webhook requests",
+                      "default": null,
+                      "nullable": true
+                    },
+                    "filters": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "repositoryIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "description": "Repository IDs to filter events",
+                            "default": ""
+                          },
+                          "description": "Array of repository IDs",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "repositoryIds"
+                      ],
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "created_at",
+                    "description",
+                    "events",
+                    "filters",
+                    "headers",
+                    "id",
+                    "name",
+                    "secret",
+                    "updated_at",
+                    "url"
+                  ]
+                }
+              }
+            },
+            "description": "Updated webhook details"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      },
+      "delete": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Delete webhook",
+        "externalDocs": {
+          "description": "Webhooks documentation",
+          "url": "https://docs.socket.dev/docs/webhooks"
+        },
+        "operationId": "deleteOrgWebhook",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the webhook",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [
+              "webhooks:delete"
+            ]
+          },
+          {
+            "basicAuth": [
+              "webhooks:delete"
+            ]
+          }
+        ],
+        "description": "Delete a webhook. This will stop all future webhook deliveries to the webhook URL.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- webhooks:delete",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "",
+                      "default": "ok"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            },
+            "description": "Success"
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"

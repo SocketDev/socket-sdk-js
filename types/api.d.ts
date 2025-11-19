@@ -212,6 +212,34 @@ export interface paths {
      */
     get: operations['GetOrgFullScanDiffGfm']
   }
+  '/orgs/{org_slug}/full-scans/{full_scan_id}/files/tar': {
+    /**
+     * Download full scan files as tarball
+     * @description Download all files associated with a full scan in tar format.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - full-scans:list
+     */
+    get: operations['downloadOrgFullScanFilesAsTar']
+  }
+  '/orgs/{org_slug}/full-scans/archive': {
+    /**
+     * Create full scan from archive
+     * @description Create a full scan by uploading one or more archives. Supported archive formats include **.tar**, **.tar.gz/.tgz**, and **.zip**.
+     *
+     * Each uploaded archive is extracted server-side and any supported manifest files (like package.json, package-lock.json, pnpm-lock.yaml, etc.) are ingested for the scan. If you upload multiple archives in a single request, the manifests from every archive are merged into one full scan. The response includes any files that were ignored.
+     *
+     * The maximum combined number of files extracted from your upload is 5000 and each extracted file can be no bigger than 67 MB.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - full-scans:create
+     */
+    post: operations['CreateOrgFullScanArchive']
+  }
   '/orgs/{org_slug}/export/cdx/{id}': {
     /**
      * Export CycloneDX SBOM (Beta)
@@ -915,6 +943,60 @@ export interface paths {
      */
     get: operations['fetch-fixes']
   }
+  '/orgs/{org_slug}/webhooks': {
+    /**
+     * List all webhooks
+     * @description List all webhooks in the specified organization.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - webhooks:list
+     */
+    get: operations['getOrgWebhooksList']
+    /**
+     * Create a webhook
+     * @description Create a new webhook. Returns the created webhook details.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - webhooks:create
+     */
+    post: operations['createOrgWebhook']
+  }
+  '/orgs/{org_slug}/webhooks/{webhook_id}': {
+    /**
+     * Get webhook
+     * @description Get a webhook for the specified organization.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - webhooks:list
+     */
+    get: operations['getOrgWebhook']
+    /**
+     * Update webhook
+     * @description Update details of an existing webhook.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - webhooks:update
+     */
+    put: operations['updateOrgWebhook']
+    /**
+     * Delete webhook
+     * @description Delete a webhook. This will stop all future webhook deliveries to the webhook URL.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - webhooks:delete
+     */
+    delete: operations['deleteOrgWebhook']
+  }
   '/license-policy': {
     /**
      * License Policy (Beta)
@@ -1516,6 +1598,11 @@ export interface components {
           _type: 'purlError'
           value: components['schemas']['PurlErrorSchema']
         }
+      | {
+          /** @enum {string} */
+          _type: 'summary'
+          value: components['schemas']['PurlSummarySchema']
+        }
     SocketBatchPURLFetch: {
       components: Array<components['schemas']['SocketBatchPURLRequest']>
     }
@@ -1897,6 +1984,18 @@ export interface components {
       error: string
       /** @default */
       inputPurl: string
+    }
+    PurlSummarySchema: {
+      /** @default 0 */
+      purl_input: number
+      /** @default 0 */
+      resolved: number
+      errors: {
+        /** @default 0 */
+        purl_malformed: number
+        /** @default 0 */
+        package_not_found: number
+      }
     }
     SocketBatchPURLRequest: {
       /** @default */
@@ -4764,6 +4863,8 @@ export interface operations {
         purlErrors?: boolean
         /** @description Return only cached results, do not attempt to scan new artifacts or rescan stale results. */
         cachedResultsOnly?: boolean
+        /** @description Include a summary object at the end of the stream with counts of malformed, resolved, and not found PURLs. */
+        summary?: boolean
       }
     }
     requestBody?: {
@@ -5043,7 +5144,7 @@ export interface operations {
         commit_hash?: string
         /** @description The pull request number to associate the full-scan with. */
         pull_request?: number
-        /** @description The committers to associate the full-scan with. Set query more than once to set multiple. */
+        /** @description The committers to associate with the full-scan. Set query more than once to set multiple. */
         committers?: string
         /** @description The integration type to associate the full-scan with. Defaults to "Api" if omitted. */
         integration_type?: 'api' | 'github' | 'gitlab' | 'bitbucket' | 'azure'
@@ -5510,6 +5611,158 @@ export interface operations {
             directDependenciesChanged: boolean
             /** @default */
             diff_report_url: string | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Download full scan files as tarball
+   * @description Download all files associated with a full scan in tar format.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:list
+   */
+  downloadOrgFullScanFilesAsTar: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The ID of the full scan */
+        full_scan_id: string
+      }
+    }
+    responses: {
+      /** @description Tar archive of full scan files */
+      200: {
+        content: {
+          'application/x-tar': unknown
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Create full scan from archive
+   * @description Create a full scan by uploading one or more archives. Supported archive formats include **.tar**, **.tar.gz/.tgz**, and **.zip**.
+   *
+   * Each uploaded archive is extracted server-side and any supported manifest files (like package.json, package-lock.json, pnpm-lock.yaml, etc.) are ingested for the scan. If you upload multiple archives in a single request, the manifests from every archive are merged into one full scan. The response includes any files that were ignored.
+   *
+   * The maximum combined number of files extracted from your upload is 5000 and each extracted file can be no bigger than 67 MB.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:create
+   */
+  CreateOrgFullScanArchive: {
+    parameters: {
+      query: {
+        /** @description The slug of the repository to associate the full-scan with. */
+        repo: string
+        /** @description The workspace of the repository to associate the full-scan with. */
+        workspace?: string
+        /** @description The branch name to associate the full-scan with. Branch names must follow Git branch name rules: be 1–255 characters long; cannot be exactly @;  cannot begin or end with /, ., or .lock; cannot contain "//", "..", or "@{"; and cannot include control characters, spaces, or any of ~^:?*[. */
+        branch?: string
+        /** @description The commit message to associate the full-scan with. */
+        commit_message?: string
+        /** @description The commit hash to associate the full-scan with. */
+        commit_hash?: string
+        /** @description The pull request number to associate the full-scan with. */
+        pull_request?: number
+        /** @description The committers to associate with the full-scan. Set query more than once to set multiple. */
+        committers?: string
+        /** @description The integration type to associate the full-scan with. Defaults to "Api" if omitted. */
+        integration_type?: 'api' | 'github' | 'gitlab' | 'bitbucket' | 'azure'
+        /** @description The integration org slug to associate the full-scan with. If omitted, the Socket org name will be used. This is used to generate links and badges. */
+        integration_org_slug?: string
+        /** @description Set the default branch of the repository to the branch of this full-scan. A branch name is required with this option. */
+        make_default_branch?: boolean
+        /** @description Designate this full-scan as the latest scan of a given branch. Default branch head scans are included in org alerts. This is only supported on the default branch. A branch name is required with this option. */
+        set_as_pending_head?: boolean
+        /** @description Create a temporary full-scan that is not listed in the reports dashboard. Cannot be used when set_as_pending_head=true. */
+        tmp?: boolean
+        /** @description The type of scan to perform. Defaults to 'socket'. Must be 32 characters or less. Used for categorizing multiple SBOM heads per repository branch. */
+        scan_type?: string
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    requestBody?: {
+      content: {
+        'multipart/form-data': {
+          [key: string]: never
+        }
+      }
+    }
+    responses: {
+      /** @description The details of the created full scan. */
+      201: {
+        content: {
+          'application/json': {
+            /** @default */
+            id?: string
+            /** @default */
+            created_at?: string
+            /** @default */
+            updated_at?: string
+            /** @default */
+            organization_id?: string
+            /** @default */
+            organization_slug?: string
+            /** @default */
+            repository_id?: string
+            /** @default */
+            repository_slug?: string
+            /** @default */
+            branch?: string | null
+            /** @default */
+            commit_message?: string | null
+            /** @default */
+            commit_hash?: string | null
+            /** @default 0 */
+            pull_request?: number | null
+            committers?: string[]
+            /** @default */
+            html_url?: string | null
+            /** @default */
+            api_url?: string | null
+            /** @default */
+            workspace?: string
+            /** @default */
+            repo?: string
+            /** @default */
+            html_report_url?: string
+            /** @default */
+            integration_type?: string | null
+            /** @default */
+            integration_repo_url?: string
+            /** @default */
+            integration_branch_url?: string | null
+            /** @default */
+            integration_commit_url?: string | null
+            /** @default */
+            integration_pull_request_url?: string | null
+            /**
+             * @description The current processing status of the SBOM
+             * @default pending
+             * @enum {string|null}
+             */
+            scan_state?: 'pending' | 'precrawl' | 'resolve' | 'scan' | null
+            unmatchedFiles?: string[]
           }
         }
       }
@@ -13572,6 +13825,11 @@ export interface operations {
                 | 'triage'
                 | 'triage:alerts-list'
                 | 'triage:alerts-update'
+                | 'webhooks'
+                | 'webhooks:create'
+                | 'webhooks:list'
+                | 'webhooks:update'
+                | 'webhooks:delete'
               )[]
               /**
                * @description The obfuscated token of the API Token
@@ -13685,6 +13943,11 @@ export interface operations {
             | 'triage'
             | 'triage:alerts-list'
             | 'triage:alerts-update'
+            | 'webhooks'
+            | 'webhooks:create'
+            | 'webhooks:list'
+            | 'webhooks:update'
+            | 'webhooks:delete'
           >
           /**
            * @description The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.
@@ -13818,6 +14081,11 @@ export interface operations {
             | 'triage'
             | 'triage:alerts-list'
             | 'triage:alerts-update'
+            | 'webhooks'
+            | 'webhooks:create'
+            | 'webhooks:list'
+            | 'webhooks:update'
+            | 'webhooks:delete'
           >
           /** @default */
           token: string
@@ -14233,6 +14501,8 @@ export interface operations {
         minimum_release_age?: string
         /** @description Whether to include advisory details in the response */
         include_details?: boolean
+        /** @description Set to include the direct dependencies responsible for introducing the dependency or dependencies with the vulnerability in the response */
+        include_responsible_direct_dependencies?: boolean
       }
       path: {
         /** @description The slug of the organization */
@@ -14260,7 +14530,6 @@ export interface operations {
                       /** @default */
                       cve: string | null
                       fixDetails: {
-                        responsibleDirectDependencyPurls: string[]
                         fixes: Array<{
                           /** @default The PURL (unique package identifier) of the package to upgrade */
                           purl: string
@@ -14274,6 +14543,48 @@ export interface operations {
                            */
                           updateType: 'patch' | 'minor' | 'major' | 'unknown'
                         }>
+                        /** @description The keys are the PURL (unique package identifier) of the direct dependency(ies) responsible for introducing the vulnerability. */
+                        responsibleDirectDependencies?: {
+                          [key: string]: {
+                            /**
+                             * Format: The current version of the package
+                             * @default
+                             */
+                            currentVersion: string
+                            nextAvailableVersion?: {
+                              /**
+                               * Format: The next available version of the package
+                               * @default
+                               */
+                              version: string
+                              /**
+                               * @description The type of version update (patch, minor, major, or unknown if it cannot be determined)
+                               * @default unknown
+                               * @enum {string}
+                               */
+                              updateType:
+                                | 'patch'
+                                | 'minor'
+                                | 'major'
+                                | 'unknown'
+                            } | null
+                            /** @description The version and update type of the package that is necessary to fix the vulnerability. If the value is null, it means the package does not have to be upgraded to fix the vulnerability */
+                            fixByUpgradingTo?: {
+                              /** @default */
+                              version: string
+                              /**
+                               * @description The type of version update (patch, minor, major, or unknown if it cannot be determined)
+                               * @default unknown
+                               * @enum {string}
+                               */
+                              updateType:
+                                | 'patch'
+                                | 'minor'
+                                | 'major'
+                                | 'unknown'
+                            } | null
+                          }
+                        } | null
                       }
                       advisoryDetails: {
                         /** @default */
@@ -14327,7 +14638,6 @@ export interface operations {
                       /** @default */
                       cve: string | null
                       fixDetails: {
-                        responsibleDirectDependencyPurls: string[]
                         fixes: Array<{
                           /** @default The PURL (unique package identifier) of the package to upgrade */
                           purl: string
@@ -14346,6 +14656,48 @@ export interface operations {
                           purl: string
                           manifestFiles: string[]
                         }>
+                        /** @description The keys are the PURL (unique package identifier) of the direct dependency(ies) responsible for introducing the vulnerability. */
+                        responsibleDirectDependencies?: {
+                          [key: string]: {
+                            /**
+                             * Format: The current version of the package
+                             * @default
+                             */
+                            currentVersion: string
+                            nextAvailableVersion?: {
+                              /**
+                               * Format: The next available version of the package
+                               * @default
+                               */
+                              version: string
+                              /**
+                               * @description The type of version update (patch, minor, major, or unknown if it cannot be determined)
+                               * @default unknown
+                               * @enum {string}
+                               */
+                              updateType:
+                                | 'patch'
+                                | 'minor'
+                                | 'major'
+                                | 'unknown'
+                            } | null
+                            /** @description The version and update type of the package that is necessary to fix the vulnerability. If the value is null, it means the package does not have to be upgraded to fix the vulnerability */
+                            fixByUpgradingTo?: {
+                              /** @default */
+                              version: string
+                              /**
+                               * @description The type of version update (patch, minor, major, or unknown if it cannot be determined)
+                               * @default unknown
+                               * @enum {string}
+                               */
+                              updateType:
+                                | 'patch'
+                                | 'minor'
+                                | 'major'
+                                | 'unknown'
+                            } | null
+                          }
+                        } | null
                       }
                       advisoryDetails: {
                         /** @default */
@@ -14541,6 +14893,437 @@ export interface operations {
                     }
                   }
             }
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * List all webhooks
+   * @description List all webhooks in the specified organization.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - webhooks:list
+   */
+  getOrgWebhooksList: {
+    parameters: {
+      query?: {
+        sort?: string
+        direction?: string
+        per_page?: number
+        page?: number
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    responses: {
+      /** @description List of webhooks */
+      200: {
+        content: {
+          'application/json': {
+            results: Array<{
+              /**
+               * @description The ID of the webhook
+               * @default
+               */
+              id: string
+              /**
+               * @description The creation date of the webhook
+               * @default
+               */
+              created_at: string
+              /**
+               * @description The last update date of the webhook
+               * @default
+               */
+              updated_at: string
+              /**
+               * @description The name of the webhook
+               * @default
+               */
+              name: string
+              /**
+               * @description The description of the webhook
+               * @default
+               */
+              description: string | null
+              /**
+               * @description The URL where webhook events will be sent
+               * @default
+               */
+              url: string
+              /**
+               * @description The signing key used to sign webhook payloads
+               * @default
+               */
+              secret: string | null
+              /** @description Array of event names */
+              events: string[]
+              /**
+               * @description Custom headers to include in webhook requests
+               * @default null
+               */
+              headers: Record<string, unknown> | null
+              filters: {
+                /** @description Array of repository IDs */
+                repositoryIds: string[] | null
+              } | null
+            }>
+            /** @default 0 */
+            nextPage: number | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Create a webhook
+   * @description Create a new webhook. Returns the created webhook details.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - webhooks:create
+   */
+  createOrgWebhook: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    requestBody?: {
+      content: {
+        'application/json': {
+          /**
+           * @description The name of the webhook
+           * @default
+           */
+          name: string
+          /**
+           * @description The URL where webhook events will be sent
+           * @default
+           */
+          url: string
+          /**
+           * @description The signing key used to sign webhook payloads
+           * @default
+           */
+          secret: string
+          /** @description Array of event names */
+          events: string[]
+          /**
+           * @description The description of the webhook
+           * @default
+           */
+          description?: string | null
+          /**
+           * @description Custom headers to include in webhook requests
+           * @default null
+           */
+          headers?: Record<string, unknown> | null
+          filters?: {
+            /** @description Array of repository IDs */
+            repositoryIds: string[] | null
+          } | null
+        }
+      }
+    }
+    responses: {
+      /** @description The created webhook */
+      201: {
+        content: {
+          'application/json': {
+            /**
+             * @description The ID of the webhook
+             * @default
+             */
+            id: string
+            /**
+             * @description The creation date of the webhook
+             * @default
+             */
+            created_at: string
+            /**
+             * @description The last update date of the webhook
+             * @default
+             */
+            updated_at: string
+            /**
+             * @description The name of the webhook
+             * @default
+             */
+            name: string
+            /**
+             * @description The description of the webhook
+             * @default
+             */
+            description: string | null
+            /**
+             * @description The URL where webhook events will be sent
+             * @default
+             */
+            url: string
+            /**
+             * @description The signing key used to sign webhook payloads
+             * @default
+             */
+            secret: string | null
+            /** @description Array of event names */
+            events: string[]
+            /**
+             * @description Custom headers to include in webhook requests
+             * @default null
+             */
+            headers: Record<string, unknown> | null
+            filters: {
+              /** @description Array of repository IDs */
+              repositoryIds: string[] | null
+            } | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Get webhook
+   * @description Get a webhook for the specified organization.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - webhooks:list
+   */
+  getOrgWebhook: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The ID of the webhook */
+        webhook_id: string
+      }
+    }
+    responses: {
+      /** @description Webhook details */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * @description The ID of the webhook
+             * @default
+             */
+            id: string
+            /**
+             * @description The creation date of the webhook
+             * @default
+             */
+            created_at: string
+            /**
+             * @description The last update date of the webhook
+             * @default
+             */
+            updated_at: string
+            /**
+             * @description The name of the webhook
+             * @default
+             */
+            name: string
+            /**
+             * @description The description of the webhook
+             * @default
+             */
+            description: string | null
+            /**
+             * @description The URL where webhook events will be sent
+             * @default
+             */
+            url: string
+            /**
+             * @description The signing key used to sign webhook payloads
+             * @default
+             */
+            secret: string | null
+            /** @description Array of event names */
+            events: string[]
+            /**
+             * @description Custom headers to include in webhook requests
+             * @default null
+             */
+            headers: Record<string, unknown> | null
+            filters: {
+              /** @description Array of repository IDs */
+              repositoryIds: string[] | null
+            } | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Update webhook
+   * @description Update details of an existing webhook.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - webhooks:update
+   */
+  updateOrgWebhook: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The ID of the webhook */
+        webhook_id: string
+      }
+    }
+    requestBody?: {
+      content: {
+        'application/json': {
+          /**
+           * @description The name of the webhook
+           * @default
+           */
+          name?: string
+          /**
+           * @description The description of the webhook
+           * @default
+           */
+          description?: string | null
+          /**
+           * @description The URL where webhook events will be sent
+           * @default
+           */
+          url?: string
+          /**
+           * @description The signing key used to sign webhook payloads
+           * @default
+           */
+          secret?: string | null
+          /** @description Array of event names */
+          events?: string[]
+          /**
+           * @description Custom headers to include in webhook requests
+           * @default null
+           */
+          headers?: Record<string, unknown> | null
+          filters?: {
+            /** @description Array of repository IDs */
+            repositoryIds: string[] | null
+          } | null
+        }
+      }
+    }
+    responses: {
+      /** @description Updated webhook details */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * @description The ID of the webhook
+             * @default
+             */
+            id: string
+            /**
+             * @description The creation date of the webhook
+             * @default
+             */
+            created_at: string
+            /**
+             * @description The last update date of the webhook
+             * @default
+             */
+            updated_at: string
+            /**
+             * @description The name of the webhook
+             * @default
+             */
+            name: string
+            /**
+             * @description The description of the webhook
+             * @default
+             */
+            description: string | null
+            /**
+             * @description The URL where webhook events will be sent
+             * @default
+             */
+            url: string
+            /**
+             * @description The signing key used to sign webhook payloads
+             * @default
+             */
+            secret: string | null
+            /** @description Array of event names */
+            events: string[]
+            /**
+             * @description Custom headers to include in webhook requests
+             * @default null
+             */
+            headers: Record<string, unknown> | null
+            filters: {
+              /** @description Array of repository IDs */
+              repositoryIds: string[] | null
+            } | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Delete webhook
+   * @description Delete a webhook. This will stop all future webhook deliveries to the webhook URL.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - webhooks:delete
+   */
+  deleteOrgWebhook: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The ID of the webhook */
+        webhook_id: string
+      }
+    }
+    responses: {
+      /** @description Success */
+      200: {
+        content: {
+          'application/json': {
+            /** @default ok */
+            status: string
           }
         }
       }
