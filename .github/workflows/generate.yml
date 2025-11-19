@@ -20,14 +20,13 @@ on:
         default: false
         type: boolean
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   fetch_and_update:
     name: Sync OpenAPI definition
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     outputs:
       has_changes: ${{ steps.check.outputs.has_changes }}
     steps:
@@ -42,9 +41,10 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           autocrlf: false
+          persist-credentials: false
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@1a96ced97aaa85d61543351b90d6f463b983c46c # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@63ad52562c1f2d007a1833b2b22cffc3001e1cc2 # main
 
       - name: Fetch latest OpenAPI definition
         id: fetch
@@ -74,9 +74,13 @@ jobs:
 
       - name: Configure git
         if: steps.fetch.outputs.changed == 'true' || github.event.inputs.force == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          # Configure git to use the GitHub token for authentication
+          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
 
       - name: Check for changes
         id: check
@@ -131,15 +135,18 @@ jobs:
     needs: fetch_and_update
     if: needs.fetch_and_update.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       has_changes: ${{ steps.check.outputs.has_changes }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           autocrlf: false
+          persist-credentials: false
           ref: automated/open-api
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@1a96ced97aaa85d61543351b90d6f463b983c46c # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@63ad52562c1f2d007a1833b2b22cffc3001e1cc2 # main
 
       - name: Build SDK
         run: pnpm run build
