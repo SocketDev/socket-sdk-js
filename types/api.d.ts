@@ -13725,21 +13725,33 @@ export interface operations {
         content: {
           'application/json': {
             tokens: Array<{
+              /** @description List of committers associated with this API Token */
               committers: {
-                /** @default */
+                /**
+                 * @description Email address of the committer
+                 * @default
+                 */
                 email?: string
                 /**
+                 * @description The source control provider for the committer
                  * @default api
                  * @enum {string}
                  */
                 provider?: 'api' | 'azure' | 'bitbucket' | 'github' | 'gitlab'
-                /** @default */
+                /**
+                 * @description Login name on the provider platform
+                 * @default
+                 */
                 providerLoginName?: string
-                /** @default */
+                /**
+                 * @description User ID on the provider platform
+                 * @default
+                 */
                 providerUserId?: string
               }[]
               /**
                * Format: date
+               * @description Timestamp when the API Token was created
                * @default
                */
               created_at: string
@@ -13750,16 +13762,21 @@ export interface operations {
               id: string
               /**
                * Format: date
+               * @description Timestamp when the API Token was last used
                * @default
                */
               last_used_at: string
-              /** @default 1000 */
+              /**
+               * @description Maximum number of API calls allowed per month
+               * @default 1000
+               */
               max_quota: number
               /**
                * @description Name for the API Token
                * @default api token
                */
               name: string | null
+              /** @description List of scopes granted to the API Token */
               scopes: (
                 | 'alerts'
                 | 'alerts:list'
@@ -13876,8 +13893,12 @@ export interface operations {
     requestBody?: {
       content: {
         'application/json': {
-          /** @default 1000 */
+          /**
+           * @description Maximum number of API calls allowed per month
+           * @default 1000
+           */
           max_quota: number
+          /** @description List of scopes granted to the API Token */
           scopes: Array<
             | 'alerts'
             | 'alerts:list'
@@ -13958,17 +13979,28 @@ export interface operations {
            * @enum {string}
            */
           visibility: 'admin' | 'organization'
+          /** @description Committer information to associate with the API Token */
           committer: {
-            /** @default */
+            /**
+             * @description Email address of the committer
+             * @default
+             */
             email?: string
             /**
+             * @description The source control provider for the committer
              * @default api
              * @enum {string}
              */
             provider?: 'api' | 'azure' | 'bitbucket' | 'github' | 'gitlab'
-            /** @default */
+            /**
+             * @description Login name on the provider platform
+             * @default
+             */
             providerLoginName?: string
-            /** @default */
+            /**
+             * @description User ID on the provider platform
+             * @default
+             */
             providerUserId?: string
           }
           /**
@@ -13976,6 +14008,24 @@ export interface operations {
            * @default api token
            */
           name?: string
+          /** @description List of resources this API Token can access. Tokens with resource grants can only access a subset of routes that support this feature. */
+          resources?: Array<{
+            /**
+             * @description Slug of the organization to grant access to
+             * @default
+             */
+            organizationSlug: string
+            /**
+             * @description Slug of the repository to grant access to
+             * @default
+             */
+            repositorySlug: string
+            /**
+             * @description Workspace slug containing the specified repo
+             * @default
+             */
+            workspace?: string
+          }>
         }
       }
     }
@@ -14014,8 +14064,12 @@ export interface operations {
     requestBody?: {
       content: {
         'application/json': {
-          /** @default 1000 */
+          /**
+           * @description Maximum number of API calls allowed per hour
+           * @default 1000
+           */
           max_quota: number
+          /** @description List of scopes granted to the API Token */
           scopes: Array<
             | 'alerts'
             | 'alerts:list'
@@ -14090,7 +14144,10 @@ export interface operations {
             | 'webhooks:update'
             | 'webhooks:delete'
           >
-          /** @default */
+          /**
+           * @description The API token to update
+           * @default
+           */
           token: string
           /**
            * @description The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.
@@ -14098,17 +14155,28 @@ export interface operations {
            * @enum {string}
            */
           visibility: 'admin' | 'organization'
+          /** @description Committer information to associate with the API Token */
           committer: {
-            /** @default */
+            /**
+             * @description Email address of the committer
+             * @default
+             */
             email?: string
             /**
+             * @description The source control provider for the committer
              * @default api
              * @enum {string}
              */
             provider?: 'api' | 'azure' | 'bitbucket' | 'github' | 'gitlab'
-            /** @default */
+            /**
+             * @description Login name on the provider platform
+             * @default
+             */
             providerLoginName?: string
-            /** @default */
+            /**
+             * @description User ID on the provider platform
+             * @default
+             */
             providerUserId?: string
           }
           /**
@@ -14517,12 +14585,13 @@ export interface operations {
       200: {
         content: {
           'application/json': {
+            /** @description Map of vulnerability IDs (GHSA or CVE) to their fix details. Each entry contains information about available fixes, partial fixes, or reasons why fixes are not available. */
             fixDetails: {
               [key: string]:
                 | {
                     /** @enum {string} */
-                    type?: 'fixFound'
-                    value?: {
+                    type: 'fixFound'
+                    value: {
                       /**
                        * @default fixFound
                        * @enum {string}
@@ -14629,8 +14698,8 @@ export interface operations {
                   }
                 | {
                     /** @enum {string} */
-                    type?: 'partialFixFound'
-                    value?: {
+                    type: 'partialFixFound'
+                    value: {
                       /**
                        * @default partialFixFound
                        * @enum {string}
@@ -14742,8 +14811,8 @@ export interface operations {
                   }
                 | {
                     /** @enum {string} */
-                    type?: 'errorComputingFix'
-                    value?: {
+                    type: 'errorComputingFix'
+                    value: {
                       /**
                        * @default errorComputingFix
                        * @enum {string}
@@ -14795,8 +14864,8 @@ export interface operations {
                   }
                 | {
                     /** @enum {string} */
-                    type?: 'noFixAvailable'
-                    value?: {
+                    type: 'noFixAvailable'
+                    value: {
                       /**
                        * @default noFixAvailable
                        * @enum {string}
@@ -14846,8 +14915,8 @@ export interface operations {
                   }
                 | {
                     /** @enum {string} */
-                    type?: 'fixNotApplicable'
-                    value?: {
+                    type: 'fixNotApplicable'
+                    value: {
                       /**
                        * @default fixNotApplicable
                        * @enum {string}
