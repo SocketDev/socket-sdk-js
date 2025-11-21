@@ -34682,7 +34682,7 @@
                 "properties": {
                   "max_quota": {
                     "type": "integer",
-                    "description": "",
+                    "description": "Maximum number of API calls allowed per month",
                     "default": 1000
                   },
                   "scopes": {
@@ -34763,10 +34763,10 @@
                         "webhooks:update",
                         "webhooks:delete"
                       ],
-                      "description": "",
+                      "description": "The scope of permissions for this API Token",
                       "default": "repo:list"
                     },
-                    "description": ""
+                    "description": "List of scopes granted to the API Token"
                   },
                   "visibility": {
                     "type": "string",
@@ -34783,7 +34783,7 @@
                     "properties": {
                       "email": {
                         "type": "string",
-                        "description": "",
+                        "description": "Email address of the committer",
                         "default": ""
                       },
                       "provider": {
@@ -34795,26 +34795,55 @@
                           "github",
                           "gitlab"
                         ],
-                        "description": "",
+                        "description": "The source control provider for the committer",
                         "default": "api"
                       },
                       "providerLoginName": {
                         "type": "string",
-                        "description": "",
+                        "description": "Login name on the provider platform",
                         "default": ""
                       },
                       "providerUserId": {
                         "type": "string",
-                        "description": "",
+                        "description": "User ID on the provider platform",
                         "default": ""
                       }
                     },
-                    "description": ""
+                    "description": "Committer information to associate with the API Token"
                   },
                   "name": {
                     "type": "string",
                     "description": "Name for the API Token",
                     "default": "api token"
+                  },
+                  "resources": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "organizationSlug": {
+                          "type": "string",
+                          "description": "Slug of the organization to grant access to",
+                          "default": ""
+                        },
+                        "repositorySlug": {
+                          "type": "string",
+                          "description": "Slug of the repository to grant access to",
+                          "default": ""
+                        },
+                        "workspace": {
+                          "type": "string",
+                          "description": "Workspace slug containing the specified repo",
+                          "default": ""
+                        }
+                      },
+                      "required": [
+                        "organizationSlug",
+                        "repositorySlug"
+                      ]
+                    },
+                    "description": "List of resources this API Token can access. Tokens with resource grants can only access a subset of routes that support this feature."
                   }
                 },
                 "required": [
@@ -34971,7 +35000,7 @@
                       "items": {
                         "type": "object",
                         "additionalProperties": false,
-                        "description": "",
+                        "description": "API Token response schema",
                         "properties": {
                           "committers": {
                             "type": "array",
@@ -34981,7 +35010,7 @@
                               "properties": {
                                 "email": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "Email address of the committer",
                                   "default": ""
                                 },
                                 "provider": {
@@ -34993,27 +35022,27 @@
                                     "github",
                                     "gitlab"
                                   ],
-                                  "description": "",
+                                  "description": "The source control provider for the committer",
                                   "default": "api"
                                 },
                                 "providerLoginName": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "Login name on the provider platform",
                                   "default": ""
                                 },
                                 "providerUserId": {
                                   "type": "string",
-                                  "description": "",
+                                  "description": "User ID on the provider platform",
                                   "default": ""
                                 }
                               },
-                              "description": ""
+                              "description": "Committer information associated with the API Token"
                             },
-                            "description": ""
+                            "description": "List of committers associated with this API Token"
                           },
                           "created_at": {
                             "type": "string",
-                            "description": "",
+                            "description": "Timestamp when the API Token was created",
                             "default": "",
                             "format": "date"
                           },
@@ -35024,13 +35053,13 @@
                           },
                           "last_used_at": {
                             "type": "string",
-                            "description": "",
+                            "description": "Timestamp when the API Token was last used",
                             "default": "",
                             "format": "date"
                           },
                           "max_quota": {
                             "type": "integer",
-                            "description": "",
+                            "description": "Maximum number of API calls allowed per month",
                             "default": 1000
                           },
                           "name": {
@@ -35117,10 +35146,10 @@
                                 "webhooks:update",
                                 "webhooks:delete"
                               ],
-                              "description": "",
+                              "description": "The scope of permissions for this API Token",
                               "default": "repo:list"
                             },
-                            "description": ""
+                            "description": "List of scopes granted to the API Token"
                           },
                           "token": {
                             "type": "string",
@@ -35207,7 +35236,7 @@
                 "properties": {
                   "max_quota": {
                     "type": "integer",
-                    "description": "",
+                    "description": "Maximum number of API calls allowed per hour",
                     "default": 1000
                   },
                   "scopes": {
@@ -35288,14 +35317,14 @@
                         "webhooks:update",
                         "webhooks:delete"
                       ],
-                      "description": "",
+                      "description": "The scope of permissions for this API Token",
                       "default": "repo:list"
                     },
-                    "description": ""
+                    "description": "List of scopes granted to the API Token"
                   },
                   "token": {
                     "type": "string",
-                    "description": "",
+                    "description": "The API token to update",
                     "default": ""
                   },
                   "visibility": {
@@ -35313,7 +35342,7 @@
                     "properties": {
                       "email": {
                         "type": "string",
-                        "description": "",
+                        "description": "Email address of the committer",
                         "default": ""
                       },
                       "provider": {
@@ -35325,21 +35354,21 @@
                           "github",
                           "gitlab"
                         ],
-                        "description": "",
+                        "description": "The source control provider for the committer",
                         "default": "api"
                       },
                       "providerLoginName": {
                         "type": "string",
-                        "description": "",
+                        "description": "Login name on the provider platform",
                         "default": ""
                       },
                       "providerUserId": {
                         "type": "string",
-                        "description": "",
+                        "description": "User ID on the provider platform",
                         "default": ""
                       }
                     },
-                    "description": ""
+                    "description": "Committer information to associate with the API Token"
                   },
                   "name": {
                     "type": "string",
@@ -36332,15 +36361,19 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
-                  "description": "",
+                  "description": "Response containing fix details for each requested vulnerability ID",
                   "properties": {
                     "fixDetails": {
                       "type": "object",
+                      "description": "Map of vulnerability IDs (GHSA or CVE) to their fix details. Each entry contains information about available fixes, partial fixes, or reasons why fixes are not available.",
                       "additionalProperties": {
-                        "anyOf": [
+                        "oneOf": [
                           {
                             "type": "object",
-                            "additionalProperties": false,
+                            "required": [
+                              "type",
+                              "value"
+                            ],
                             "properties": {
                               "type": {
                                 "type": "string",
@@ -36607,7 +36640,10 @@
                           },
                           {
                             "type": "object",
-                            "additionalProperties": false,
+                            "required": [
+                              "type",
+                              "value"
+                            ],
                             "properties": {
                               "type": {
                                 "type": "string",
@@ -36904,7 +36940,10 @@
                           },
                           {
                             "type": "object",
-                            "additionalProperties": false,
+                            "required": [
+                              "type",
+                              "value"
+                            ],
                             "properties": {
                               "type": {
                                 "type": "string",
@@ -37043,7 +37082,10 @@
                           },
                           {
                             "type": "object",
-                            "additionalProperties": false,
+                            "required": [
+                              "type",
+                              "value"
+                            ],
                             "properties": {
                               "type": {
                                 "type": "string",
@@ -37175,7 +37217,10 @@
                           },
                           {
                             "type": "object",
-                            "additionalProperties": false,
+                            "required": [
+                              "type",
+                              "value"
+                            ],
                             "properties": {
                               "type": {
                                 "type": "string",
@@ -37305,10 +37350,12 @@
                               }
                             }
                           }
-                        ]
+                        ],
+                        "discriminator": {
+                          "propertyName": "type"
+                        }
                       },
-                      "properties": {},
-                      "description": ""
+                      "properties": {}
                     }
                   },
                   "required": [
