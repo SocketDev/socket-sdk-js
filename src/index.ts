@@ -297,20 +297,20 @@ const publicPolicy = new Map<ALERT_TYPE, ALERT_ACTION>([
 /**
  * Array of sensitive header names that should be redacted in logs
  */
-const SENSITIVE_HEADERS = [
+const SENSITIVE_HEADERS = new Set([
   'authorization',
   'cookie',
   'set-cookie',
   'proxy-authorization',
   'www-authenticate',
-  'proxy-authenticate',
-]
+  'proxy-authenticate'
+])
 
 /**
  * Sanitize headers for logging by redacting sensitive values.
  */
 function sanitizeHeaders(
-  headers: Record<string, unknown> | readonly string[] | undefined,
+  headers: Record<string, unknown> | readonly string[] | undefined
 ): Record<string, string> | undefined {
   if (!headers) {
     return undefined
@@ -326,7 +326,7 @@ function sanitizeHeaders(
   // Plain object iteration works for both HeadersRecord and IncomingHttpHeaders
   for (const [key, value] of Object.entries(headers)) {
     const keyLower = key.toLowerCase()
-    if (SENSITIVE_HEADERS.includes(keyLower)) {
+    if (SENSITIVE_HEADERS.has(keyLower)) {
       sanitized[key] = '[REDACTED]'
     } else {
       // Handle both string and string[] values
@@ -365,7 +365,7 @@ async function createDeleteRequest(
     method,
     url,
     headers: sanitizeHeaders((options as HttpsRequestOptions).headers),
-    timeout: options.timeout,
+    timeout: options.timeout
   })
 
   try {
@@ -383,7 +383,7 @@ async function createDeleteRequest(
       duration: Date.now() - startTime,
       status: response.statusCode,
       statusText: response.statusMessage,
-      headers: sanitizeHeaders(response.headers),
+      headers: sanitizeHeaders(response.headers)
     })
 
     return response
@@ -392,7 +392,7 @@ async function createDeleteRequest(
       method,
       url,
       duration: Date.now() - startTime,
-      error: error as Error,
+      error: error as Error
     })
 
     throw error
@@ -413,7 +413,7 @@ async function createGetRequest(
     method,
     url,
     headers: sanitizeHeaders((options as HttpsRequestOptions).headers),
-    timeout: options.timeout,
+    timeout: options.timeout
   })
 
   try {
@@ -431,7 +431,7 @@ async function createGetRequest(
       duration: Date.now() - startTime,
       status: response.statusCode,
       statusText: response.statusMessage,
-      headers: sanitizeHeaders(response.headers),
+      headers: sanitizeHeaders(response.headers)
     })
 
     return response
@@ -440,7 +440,7 @@ async function createGetRequest(
       method,
       url,
       duration: Date.now() - startTime,
-      error: error as Error,
+      error: error as Error
     })
 
     throw error
@@ -461,21 +461,21 @@ async function createPostRequest(
   const headers = {
     ...(options as HttpsRequestOptions)?.headers,
     'Content-Length': Buffer.byteLength(body, 'utf8'),
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json'
   }
 
   hooks?.onRequest?.({
     method,
     url,
     headers: sanitizeHeaders(headers),
-    timeout: options.timeout,
+    timeout: options.timeout
   })
 
   try {
     const req = getHttpModule(baseUrl).request(url, {
       method,
       ...options,
-      headers,
+      headers
     })
 
     req.write(body)
@@ -489,7 +489,7 @@ async function createPostRequest(
       duration: Date.now() - startTime,
       status: response.statusCode,
       statusText: response.statusMessage,
-      headers: sanitizeHeaders(response.headers),
+      headers: sanitizeHeaders(response.headers)
     })
 
     return response
@@ -498,7 +498,65 @@ async function createPostRequest(
       method,
       url,
       duration: Date.now() - startTime,
-      error: error as Error,
+      error: error as Error
+    })
+
+    throw error
+  }
+}
+
+async function createPutRequest(
+  baseUrl: string,
+  urlPath: string,
+  putJson: any,
+  options: RequestOptions,
+  hooks?: SocketSdkOptions['hooks']
+): Promise<IncomingMessage> {
+  const startTime = Date.now()
+  const url = `${baseUrl}${urlPath}`
+  const method = 'PUT'
+  const body = JSON.stringify(putJson)
+  const headers = {
+    ...(options as HttpsRequestOptions)?.headers,
+    'Content-Length': Buffer.byteLength(body, 'utf8'),
+    'Content-Type': 'application/json'
+  }
+
+  hooks?.onRequest?.({
+    method,
+    url,
+    headers: sanitizeHeaders(headers),
+    timeout: options.timeout
+  })
+
+  try {
+    const req = getHttpModule(baseUrl).request(url, {
+      method,
+      ...options,
+      headers
+    })
+
+    req.write(body)
+    req.end()
+
+    const response = await getResponse(req)
+
+    hooks?.onResponse?.({
+      method,
+      url,
+      duration: Date.now() - startTime,
+      status: response.statusCode,
+      statusText: response.statusMessage,
+      headers: sanitizeHeaders(response.headers)
+    })
+
+    return response
+  } catch (error) {
+    hooks?.onResponse?.({
+      method,
+      url,
+      duration: Date.now() - startTime,
+      error: error as Error
     })
 
     throw error
@@ -577,19 +635,19 @@ async function createUploadRequest(
     const method = 'POST'
     const headers = {
       ...(options as HttpsRequestOptions)?.headers,
-      'Content-Type': `multipart/form-data; boundary=${boundary}`,
+      'Content-Type': `multipart/form-data; boundary=${boundary}`
     }
     const startTime = Date.now()
     const req: ClientRequest = getHttpModule(baseUrl).request(url, {
       method,
       ...options,
-      headers,
+      headers
     })
     hooks?.onRequest?.({
       method,
       url: url.toString(),
       headers: sanitizeHeaders(headers),
-      timeout: options.timeout,
+      timeout: options.timeout
     })
 
     // Send headers early to prompt server validation (auth, URL, quota, etc.).
@@ -604,7 +662,7 @@ async function createUploadRequest(
           duration: Date.now() - startTime,
           status: response.statusCode,
           statusText: response.statusMessage,
-          headers: sanitizeHeaders(response.headers),
+          headers: sanitizeHeaders(response.headers)
         })
         pass(response)
       },
@@ -613,10 +671,10 @@ async function createUploadRequest(
           method,
           url: url.toString(),
           duration: Date.now() - startTime,
-          error: error as Error,
+          error: error as Error
         })
         fail(error)
-      },
+      }
     )
 
     let aborted = false
@@ -1217,7 +1275,7 @@ export class SocketSdk {
           `dependencies/upload?${queryToSearchParams(queryParams)}`,
           createRequestBodyForFilepaths(absFilepaths, basePath),
           this.#reqOptions,
-          this.#hooks,
+          this.#hooks
         )
       )
       return this.#handleApiSuccess<'createDependenciesSnapshot'>(data)
@@ -1250,7 +1308,7 @@ export class SocketSdk {
           `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(queryParams)}`,
           createRequestBodyForFilepaths(absFilepaths, basePath),
           this.#reqOptions,
-          this.#hooks,
+          this.#hooks
         )
       )
       return this.#handleApiSuccess<'CreateOrgFullScan'>(data)
@@ -1270,7 +1328,7 @@ export class SocketSdk {
           `orgs/${encodeURIComponent(orgSlug)}/repos`,
           queryParams,
           this.#reqOptions,
-          this.#hooks,
+          this.#hooks
         )
       )
       return this.#handleApiSuccess<'createOrgRepo'>(data)
@@ -1300,7 +1358,7 @@ export class SocketSdk {
           ...this.#reqOptions,
           method: 'PUT'
         },
-        this.#hooks,
+        this.#hooks
       )
       return this.#handleApiSuccess<'createReport'>(data)
     } catch (e) {
@@ -1551,7 +1609,7 @@ export class SocketSdk {
           this.#baseUrl,
           'quota',
           this.#reqOptions,
-          this.#hooks,
+          this.#hooks
         )
       )
       return this.#handleApiSuccess<'getQuota'>(data)
@@ -1709,7 +1767,7 @@ export class SocketSdk {
           `orgs/${encodeURIComponent(orgSlug)}/upload-manifest-files`,
           createRequestBodyForFilepaths(absFilepaths, basePath),
           this.#reqOptions,
-          this.#hooks,
+          this.#hooks
         )
       )
       return this.#handleApiSuccess<any>(
@@ -1719,6 +1777,101 @@ export class SocketSdk {
       return (await this.#handleApiError<any>(
         e
       )) as unknown as UploadManifestFilesError
+    }
+  }
+
+  async updateOrgTelemetryConfig(
+    orgSlug: string,
+    telemetryData: { enabled?: boolean | undefined }
+  ): Promise<SocketSdkResult<'updateOrgTelemetryConfig'>> {
+    try {
+      const data = await getResponseJson(
+        await createPutRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/telemetry/config`,
+          telemetryData,
+          this.#reqOptions,
+          this.#hooks
+        )
+      )
+      return this.#handleApiSuccess<'updateOrgTelemetryConfig'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgTelemetryConfig'>(e)
+    }
+  }
+
+  async getTelemetryConfig(
+    orgSlug: string
+  ): Promise<SocketSdkResult<'getOrgTelemetryConfig'>> {
+    try {
+      const data = await getResponseJson(
+        await createGetRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/telemetry/config`,
+          this.#reqOptions,
+          this.#hooks
+        )
+      )
+      return this.#handleApiSuccess<'getOrgTelemetryConfig'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgTelemetryConfig'>(e)
+    }
+  }
+
+  async postOrgTelemetry(
+    orgSlug: string,
+    telemetryData: Record<string, unknown>
+  ): Promise<
+    | { success: true; status: 200; data: Record<string, never> }
+    | { success: false; status: number; error: string; cause?: string }
+  > {
+    try {
+      const data = await getResponseJson(
+        await createPostRequest(
+          this.#baseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/telemetry`,
+          telemetryData,
+          this.#reqOptions,
+          this.#hooks
+        )
+      )
+      return {
+        success: true,
+        status: 200,
+        data: data as Record<string, never>
+      }
+    } catch (e) {
+      if (!(e instanceof ResponseError)) {
+        throw new Error('Unexpected Socket API error', { cause: e })
+      }
+      const { statusCode } = e.response
+      if (statusCode && statusCode >= 500) {
+        throw new Error(`Socket API server error (${statusCode})`, { cause: e })
+      }
+      const bodyStr = await getErrorResponseBody(e.response)
+      let body: string | undefined
+      try {
+        const parsed = JSON.parse(bodyStr)
+        if (typeof parsed?.error?.message === 'string') {
+          body = parsed.error.message
+        }
+      } catch {
+        body = bodyStr
+      }
+      const result: {
+        success: false
+        status: number
+        error: string
+        cause?: string
+      } = {
+        success: false,
+        status: statusCode ?? 0,
+        error: e.message ?? 'Unknown error'
+      }
+      if (body) {
+        result.cause = body
+      }
+      return result
     }
   }
 }

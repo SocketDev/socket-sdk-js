@@ -13,7 +13,7 @@ describe('SocketSdk - Logging Hooks', () => {
     const onResponse = vi.fn()
 
     const client = new SocketSdk('test-token', {
-      hooks: { onRequest, onResponse },
+      hooks: { onRequest, onResponse }
     })
 
     // Mock successful quota API call
@@ -28,7 +28,7 @@ describe('SocketSdk - Logging Hooks', () => {
     const requestInfo: RequestInfo = onRequest.mock.calls[0]?.[0]!
     expect(requestInfo).toMatchObject({
       method: 'GET',
-      url: 'https://api.socket.dev/v0/quota',
+      url: 'https://api.socket.dev/v0/quota'
     })
     expect(requestInfo.headers).toBeDefined()
 
@@ -38,7 +38,7 @@ describe('SocketSdk - Logging Hooks', () => {
     expect(responseInfo).toMatchObject({
       method: 'GET',
       url: 'https://api.socket.dev/v0/quota',
-      status: 200,
+      status: 200
     })
     expect(responseInfo.duration).toBeGreaterThanOrEqual(0)
     expect(responseInfo.headers).toBeDefined()
@@ -49,7 +49,7 @@ describe('SocketSdk - Logging Hooks', () => {
     const onResponse = vi.fn()
 
     const client = new SocketSdk('test-token', {
-      hooks: { onRequest, onResponse },
+      hooks: { onRequest, onResponse }
     })
 
     // Mock network error
@@ -67,7 +67,7 @@ describe('SocketSdk - Logging Hooks', () => {
     const responseInfo: ResponseInfo = onResponse.mock.calls[0]?.[0]!
     expect(responseInfo).toMatchObject({
       method: 'GET',
-      url: 'https://api.socket.dev/v0/quota',
+      url: 'https://api.socket.dev/v0/quota'
     })
     expect(responseInfo.error).toBeInstanceOf(Error)
     expect(responseInfo.duration).toBeGreaterThanOrEqual(0)
@@ -78,16 +78,20 @@ describe('SocketSdk - Logging Hooks', () => {
     const onResponse = vi.fn()
 
     const client = new SocketSdk('test-token', {
-      hooks: { onRequest, onResponse },
+      hooks: { onRequest, onResponse }
     })
 
     // Mock successful API call
     nock('https://api.socket.dev')
       .get('/v0/quota')
-      .reply(200, { quota: { remaining: 100 } }, {
-        'set-cookie': 'session=secret123',
-        'content-type': 'application/json',
-      })
+      .reply(
+        200,
+        { quota: { remaining: 100 } },
+        {
+          'set-cookie': 'session=secret123',
+          'content-type': 'application/json'
+        }
+      )
 
     await client.getQuota()
 

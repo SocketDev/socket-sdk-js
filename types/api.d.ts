@@ -135,6 +135,9 @@ export interface paths {
      *
      * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 67 MB.
      *
+     * **Query Parameters:**
+     * - `scan_type` (optional): The type of scan to perform. Defaults to 'socket'. Must be 32 characters or less. Used for categorizing multiple SBOM heads per repository branch.
+     *
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
@@ -208,6 +211,34 @@ export interface paths {
      * - full-scans:list
      */
     get: operations['GetOrgFullScanDiffGfm']
+  }
+  '/orgs/{org_slug}/full-scans/{full_scan_id}/files/tar': {
+    /**
+     * Download full scan files as tarball
+     * @description Download all files associated with a full scan in tar format.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - full-scans:list
+     */
+    get: operations['downloadOrgFullScanFilesAsTar']
+  }
+  '/orgs/{org_slug}/full-scans/archive': {
+    /**
+     * Create full scan from archive
+     * @description Create a full scan by uploading one or more archives. Supported archive formats include **.tar**, **.tar.gz/.tgz**, and **.zip**.
+     *
+     * Each uploaded archive is extracted server-side and any supported manifest files (like package.json, package-lock.json, pnpm-lock.yaml, etc.) are ingested for the scan. If you upload multiple archives in a single request, the manifests from every archive are merged into one full scan. The response includes any files that were ignored.
+     *
+     * The maximum combined number of files extracted from your upload is 5000 and each extracted file can be no bigger than 67 MB.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - full-scans:create
+     */
+    post: operations['CreateOrgFullScanArchive']
   }
   '/orgs/{org_slug}/export/cdx/{id}': {
     /**
@@ -672,7 +703,8 @@ export interface paths {
   '/orgs/{org_slug}/settings/license-policy/view': {
     /**
      * Get License Policy (Beta)
-     * @description Returns an organization's license policy
+     * @description Returns an organization's license policy including allow, warn, monitor, and deny categories.
+     * The deny category contains all licenses that are not explicitly categorized as allow, warn, or monitor.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -896,6 +928,95 @@ export interface paths {
      * - threat-feed:list
      */
     get: operations['getOrgThreatFeedItems']
+  }
+  '/orgs/{org_slug}/fixes': {
+    /**
+     * Fetch fixes for vulnerabilities in a repository or scan
+     * @description Fetches available fixes for vulnerabilities in a repository or scan.
+     * Requires either repo_slug or full_scan_id as well as vulnerability_ids to be provided.
+     * vulnerability_ids can be a comma-separated list of GHSA or CVE IDs, or "*" for all vulnerabilities.
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - fixes:list
+     */
+    get: operations['fetch-fixes']
+  }
+  '/orgs/{org_slug}/telemetry/config': {
+    /**
+     * Get Organization Telemetry Config
+     * @description Retrieve the telemetry config of an organization.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     */
+    get: operations['getOrgTelemetryConfig']
+    /**
+     * Update Telemetry Config
+     * @description Update the telemetry config of an organization.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - telemetry-policy:update
+     */
+    put: operations['updateOrgTelemetryConfig']
+  }
+  '/orgs/{org_slug}/webhooks': {
+    /**
+     * List all webhooks
+     * @description List all webhooks in the specified organization.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - webhooks:list
+     */
+    get: operations['getOrgWebhooksList']
+    /**
+     * Create a webhook
+     * @description Create a new webhook. Returns the created webhook details.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - webhooks:create
+     */
+    post: operations['createOrgWebhook']
+  }
+  '/orgs/{org_slug}/webhooks/{webhook_id}': {
+    /**
+     * Get webhook
+     * @description Get a webhook for the specified organization.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - webhooks:list
+     */
+    get: operations['getOrgWebhook']
+    /**
+     * Update webhook
+     * @description Update details of an existing webhook.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - webhooks:update
+     */
+    put: operations['updateOrgWebhook']
+    /**
+     * Delete webhook
+     * @description Delete a webhook. This will stop all future webhook deliveries to the webhook URL.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - webhooks:delete
+     */
+    delete: operations['deleteOrgWebhook']
   }
   '/license-policy': {
     /**
@@ -1236,6 +1357,17 @@ export interface paths {
      */
     get: operations['getOpenAPI']
   }
+  '/openapi.json': {
+    /**
+     * Returns the OpenAPI definition
+     * @description Retrieve the API specification in an Openapi JSON format.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     */
+    get: operations['getOpenAPIJSON']
+  }
   '/quota': {
     /**
      * Get quota
@@ -1487,6 +1619,11 @@ export interface components {
           _type: 'purlError'
           value: components['schemas']['PurlErrorSchema']
         }
+      | {
+          /** @enum {string} */
+          _type: 'summary'
+          value: components['schemas']['PurlSummarySchema']
+        }
     SocketBatchPURLFetch: {
       components: Array<components['schemas']['SocketBatchPURLRequest']>
     }
@@ -1507,6 +1644,7 @@ export interface components {
         repositoryType?: string
         alerts?: Array<components['schemas']['SocketAlert']>
         score?: components['schemas']['SocketScore']
+        patch?: components['schemas']['SocketArtifactPatch']
         /**
          * @description Original unmodified PURL input string before normalization
          * @default
@@ -1731,6 +1869,7 @@ export interface components {
       allow: string[] | null
       warn: string[] | null
       monitor: string[] | null
+      deny: string[] | null
       options: string[] | null
     }
     Capabilities: {
@@ -1867,6 +2006,18 @@ export interface components {
       /** @default */
       inputPurl: string
     }
+    PurlSummarySchema: {
+      /** @default 0 */
+      purl_input: number
+      /** @default 0 */
+      resolved: number
+      errors: {
+        /** @default 0 */
+        purl_malformed: number
+        /** @default 0 */
+        package_not_found: number
+      }
+    }
     SocketBatchPURLRequest: {
       /** @default */
       purl: string
@@ -1982,11 +2133,41 @@ export interface components {
          * @default
          */
         description: string
+        /** @description Patches available to fix this specific alert */
+        patch?: Array<{
+          /**
+           * @description Unique identifier for this patch
+           * @default
+           */
+          uuid: string
+          /**
+           * @description Access tier required for this patch (free or paid)
+           * @default free
+           * @enum {string}
+           */
+          tier: 'free' | 'paid'
+          /**
+           * @description Indicates if this patch is deprecated and should not be used
+           * @default false
+           */
+          deprecated?: boolean
+        }>
       }
+      patch?: components['schemas']['SocketPatch']
       reachability?: {
         head?: components['schemas']['ReachabilityResult']
         base?: components['schemas']['ReachabilityResult']
       }
+      /**
+       * @description Generic alert sub-type
+       * @default
+       */
+      subType?: string
+    }
+    SocketArtifactPatch: {
+      appliedPatch?: components['schemas']['SocketPatch']
+      /** @description List of available patches that can be applied to fix vulnerabilities */
+      availablePatches?: Array<components['schemas']['SocketPatch']>
     }
     LicenseDetails: Array<{
       /**
@@ -2861,6 +3042,118 @@ export interface components {
               title: string
               /** @default */
               description: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'ghaArgToSink'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              message: string
+              /** @default null */
+              sourceLocation: Record<string, never>
+              sinkLocations: Array<Record<string, never>>
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'ghaEnvToSink'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              message: string
+              /** @default null */
+              sourceLocation: Record<string, never>
+              sinkLocations: Array<Record<string, never>>
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'ghaContextToSink'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              message: string
+              /** @default null */
+              sourceLocation: Record<string, never>
+              sinkLocations: Array<Record<string, never>>
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'ghaArgToOutput'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              message: string
+              /** @default null */
+              sourceLocation: Record<string, never>
+              sinkLocations: Array<Record<string, never>>
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'ghaArgToEnv'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              message: string
+              /** @default null */
+              sourceLocation: Record<string, never>
+              sinkLocations: Array<Record<string, never>>
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'ghaContextToOutput'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              message: string
+              /** @default null */
+              sourceLocation: Record<string, never>
+              sinkLocations: Array<Record<string, never>>
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'ghaContextToEnv'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              message: string
+              /** @default null */
+              sourceLocation: Record<string, never>
+              sinkLocations: Array<Record<string, never>>
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -3942,6 +4235,117 @@ export interface components {
             usage?: components['schemas']['SocketUsageRef']
           }
         }
+      | {
+          /** @enum {string} */
+          type?: 'vsxProposedApiUsage'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              proposals: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'vsxActivationWildcard'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              event: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'vsxWorkspaceContainsActivation'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              pattern: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'vsxUntrustedWorkspaceSupported'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              supported: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'vsxVirtualWorkspaceSupported'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              supported: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'vsxWebviewContribution'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: Record<string, never>
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'vsxDebuggerContribution'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: Record<string, never>
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'vsxExtensionDependency'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              extension: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'vsxExtensionPack'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              count: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
     SocketMetricSchema: {
       /** @default 0 */
       score: number
@@ -3959,6 +4363,7 @@ export interface components {
      * @enum {string}
      */
     SocketPURL_Type:
+      | 'alpm'
       | 'apk'
       | 'bitbucket'
       | 'cocoapods'
@@ -3988,6 +4393,7 @@ export interface components {
       | 'rpm'
       | 'swid'
       | 'swift'
+      | 'vscode'
       | 'unknown'
     /**
      * @default low
@@ -4005,6 +4411,24 @@ export interface components {
       | 'vulnerability'
       | 'license'
       | 'other'
+    SocketPatch: {
+      /**
+       * @description Unique identifier for this patch
+       * @default
+       */
+      uuid: string
+      /**
+       * @description Access tier required for this patch (free or paid)
+       * @default free
+       * @enum {string}
+       */
+      tier: 'free' | 'paid'
+      /**
+       * @description Indicates if this patch is deprecated and should not be used
+       * @default false
+       */
+      deprecated?: boolean
+    }
     ReachabilityResult: {
       /**
        * @description Type of reachability analysis performed
@@ -4458,6 +4882,10 @@ export interface operations {
         licensedetails?: boolean
         /** @description Return errors found with handling PURLs as error objects in the stream. */
         purlErrors?: boolean
+        /** @description Return only cached results, do not attempt to scan new artifacts or rescan stale results. */
+        cachedResultsOnly?: boolean
+        /** @description Include a summary object at the end of the stream with counts of malformed, resolved, and not found PURLs. */
+        summary?: boolean
       }
     }
     requestBody?: {
@@ -4612,10 +5040,16 @@ export interface operations {
         direction?: 'asc' | 'desc'
         /** @description Specify the maximum number of results to return per page. */
         per_page?: number
-        /** @description The token specifying which page to return. */
+        /** @description The page number to return when using offset-style pagination. Ignored when cursor pagination is used. */
         page?: number
+        /** @description Cursor token for pagination. Pass the returned nextPageCursor from previous responses to fetch the next set of results. */
+        startAfterCursor?: string
+        /** @description Set to true on the first request to opt into cursor-based pagination. */
+        use_cursor?: boolean
         /** @description A Unix timestamp in seconds that filters full-scans prior to the date. */
         from?: string
+        /** @description A repository workspace to filter full-scans by. */
+        workspace?: string
         /** @description A repository slug to filter full-scans by. */
         repo?: string
         /** @description A branch name to filter full-scans by. */
@@ -4664,6 +5098,8 @@ export interface operations {
               /** @default */
               api_url?: string | null
               /** @default */
+              workspace?: string
+              /** @default */
               repo?: string
               /** @default */
               html_report_url?: string
@@ -4684,6 +5120,8 @@ export interface operations {
                */
               scan_state?: 'pending' | 'precrawl' | 'resolve' | 'scan' | null
             }>
+            /** @default */
+            nextPageCursor: string | null
             /** @default 0 */
             nextPage: number | null
           }
@@ -4704,6 +5142,9 @@ export interface operations {
    *
    * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 67 MB.
    *
+   * **Query Parameters:**
+   * - `scan_type` (optional): The type of scan to perform. Defaults to 'socket'. Must be 32 characters or less. Used for categorizing multiple SBOM heads per repository branch.
+   *
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
@@ -4714,6 +5155,8 @@ export interface operations {
       query: {
         /** @description The slug of the repository to associate the full-scan with. */
         repo: string
+        /** @description The workspace of the repository to associate the full-scan with. */
+        workspace?: string
         /** @description The branch name to associate the full-scan with. Branch names must follow Git branch name rules: be 1–255 characters long; cannot be exactly @;  cannot begin or end with /, ., or .lock; cannot contain "//", "..", or "@{"; and cannot include control characters, spaces, or any of ~^:?*[. */
         branch?: string
         /** @description The commit message to associate the full-scan with. */
@@ -4722,7 +5165,7 @@ export interface operations {
         commit_hash?: string
         /** @description The pull request number to associate the full-scan with. */
         pull_request?: number
-        /** @description The committers to associate the full-scan with. Set query more than once to set multiple. */
+        /** @description The committers to associate with the full-scan. Set query more than once to set multiple. */
         committers?: string
         /** @description The integration type to associate the full-scan with. Defaults to "Api" if omitted. */
         integration_type?: 'api' | 'github' | 'gitlab' | 'bitbucket' | 'azure'
@@ -4734,6 +5177,8 @@ export interface operations {
         set_as_pending_head?: boolean
         /** @description Create a temporary full-scan that is not listed in the reports dashboard. Cannot be used when set_as_pending_head=true. */
         tmp?: boolean
+        /** @description The type of scan to perform. Defaults to 'socket'. Must be 32 characters or less. Used for categorizing multiple SBOM heads per repository branch. */
+        scan_type?: string
       }
       path: {
         /** @description The slug of the organization */
@@ -4779,6 +5224,8 @@ export interface operations {
             html_url?: string | null
             /** @default */
             api_url?: string | null
+            /** @default */
+            workspace?: string
             /** @default */
             repo?: string
             /** @default */
@@ -4938,6 +5385,8 @@ export interface operations {
             html_url?: string | null
             /** @default */
             api_url?: string | null
+            /** @default */
+            workspace?: string
             /** @default */
             repo?: string
             /** @default */
@@ -5102,6 +5551,8 @@ export interface operations {
         after: string
         /** @description The base full scan ID (older) */
         before: string
+        /** @description The ID of the GitHub installation. This will be used to get the GitHub installation settings. If not provided, the default GitHub installation settings will be used. */
+        github_installation_id?: string
       }
       path: {
         /** @description The slug of the organization */
@@ -5181,6 +5632,158 @@ export interface operations {
             directDependenciesChanged: boolean
             /** @default */
             diff_report_url: string | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Download full scan files as tarball
+   * @description Download all files associated with a full scan in tar format.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:list
+   */
+  downloadOrgFullScanFilesAsTar: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The ID of the full scan */
+        full_scan_id: string
+      }
+    }
+    responses: {
+      /** @description Tar archive of full scan files */
+      200: {
+        content: {
+          'application/x-tar': unknown
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Create full scan from archive
+   * @description Create a full scan by uploading one or more archives. Supported archive formats include **.tar**, **.tar.gz/.tgz**, and **.zip**.
+   *
+   * Each uploaded archive is extracted server-side and any supported manifest files (like package.json, package-lock.json, pnpm-lock.yaml, etc.) are ingested for the scan. If you upload multiple archives in a single request, the manifests from every archive are merged into one full scan. The response includes any files that were ignored.
+   *
+   * The maximum combined number of files extracted from your upload is 5000 and each extracted file can be no bigger than 67 MB.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:create
+   */
+  CreateOrgFullScanArchive: {
+    parameters: {
+      query: {
+        /** @description The slug of the repository to associate the full-scan with. */
+        repo: string
+        /** @description The workspace of the repository to associate the full-scan with. */
+        workspace?: string
+        /** @description The branch name to associate the full-scan with. Branch names must follow Git branch name rules: be 1–255 characters long; cannot be exactly @;  cannot begin or end with /, ., or .lock; cannot contain "//", "..", or "@{"; and cannot include control characters, spaces, or any of ~^:?*[. */
+        branch?: string
+        /** @description The commit message to associate the full-scan with. */
+        commit_message?: string
+        /** @description The commit hash to associate the full-scan with. */
+        commit_hash?: string
+        /** @description The pull request number to associate the full-scan with. */
+        pull_request?: number
+        /** @description The committers to associate with the full-scan. Set query more than once to set multiple. */
+        committers?: string
+        /** @description The integration type to associate the full-scan with. Defaults to "Api" if omitted. */
+        integration_type?: 'api' | 'github' | 'gitlab' | 'bitbucket' | 'azure'
+        /** @description The integration org slug to associate the full-scan with. If omitted, the Socket org name will be used. This is used to generate links and badges. */
+        integration_org_slug?: string
+        /** @description Set the default branch of the repository to the branch of this full-scan. A branch name is required with this option. */
+        make_default_branch?: boolean
+        /** @description Designate this full-scan as the latest scan of a given branch. Default branch head scans are included in org alerts. This is only supported on the default branch. A branch name is required with this option. */
+        set_as_pending_head?: boolean
+        /** @description Create a temporary full-scan that is not listed in the reports dashboard. Cannot be used when set_as_pending_head=true. */
+        tmp?: boolean
+        /** @description The type of scan to perform. Defaults to 'socket'. Must be 32 characters or less. Used for categorizing multiple SBOM heads per repository branch. */
+        scan_type?: string
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    requestBody?: {
+      content: {
+        'multipart/form-data': {
+          [key: string]: never
+        }
+      }
+    }
+    responses: {
+      /** @description The details of the created full scan. */
+      201: {
+        content: {
+          'application/json': {
+            /** @default */
+            id?: string
+            /** @default */
+            created_at?: string
+            /** @default */
+            updated_at?: string
+            /** @default */
+            organization_id?: string
+            /** @default */
+            organization_slug?: string
+            /** @default */
+            repository_id?: string
+            /** @default */
+            repository_slug?: string
+            /** @default */
+            branch?: string | null
+            /** @default */
+            commit_message?: string | null
+            /** @default */
+            commit_hash?: string | null
+            /** @default 0 */
+            pull_request?: number | null
+            committers?: string[]
+            /** @default */
+            html_url?: string | null
+            /** @default */
+            api_url?: string | null
+            /** @default */
+            workspace?: string
+            /** @default */
+            repo?: string
+            /** @default */
+            html_report_url?: string
+            /** @default */
+            integration_type?: string | null
+            /** @default */
+            integration_repo_url?: string
+            /** @default */
+            integration_branch_url?: string | null
+            /** @default */
+            integration_commit_url?: string | null
+            /** @default */
+            integration_pull_request_url?: string | null
+            /**
+             * @description The current processing status of the SBOM
+             * @default pending
+             * @enum {string|null}
+             */
+            scan_state?: 'pending' | 'precrawl' | 'resolve' | 'scan' | null
+            unmatchedFiles?: string[]
           }
         }
       }
@@ -5566,6 +6169,10 @@ export interface operations {
    */
   GetDiffScanGfm: {
     parameters: {
+      query?: {
+        /** @description The ID of the GitHub installation. This will be used to get the GitHub installation settings. If not provided, the default GitHub installation settings will be used. */
+        github_installation_id?: string
+      }
       path: {
         /** @description The slug of the organization */
         org_slug: string
@@ -5712,6 +6319,8 @@ export interface operations {
         integration_org_slug?: string
         /** @description Set to true when running a diff between a merged commit and its parent commit in the same branch. Set to false when running diffs in an open PR between unmerged commits. */
         merge?: boolean
+        /** @description The workspace of the repository. */
+        workspace?: string
       }
       path: {
         /** @description The slug of the organization */
@@ -6126,6 +6735,32 @@ export interface operations {
                * @default
                */
               head_full_scan_id?: string | null
+              integration_meta?: {
+                /** @enum {string} */
+                type?: 'github'
+                value?: {
+                  /**
+                   * @description The GitHub installation_id of the active associated Socket GitHub App
+                   * @default
+                   */
+                  installation_id: string
+                  /**
+                   * @description The GitHub login name that the active Socket GitHub App installation is installed to
+                   * @default
+                   */
+                  installation_login: string
+                  /**
+                   * @description The name of the associated GitHub repo.
+                   * @default
+                   */
+                  repo_name: string | null
+                  /**
+                   * @description The id of the associated GitHub repo.
+                   * @default
+                   */
+                  repo_id: string | null
+                }
+              } | null
               /**
                * @description The name of the repository
                * @default
@@ -6157,6 +6792,11 @@ export interface operations {
                * @default main
                */
               default_branch?: string | null
+              /**
+               * @description The workspace of the repository
+               * @default
+               */
+              workspace?: string
             }>
             /** @default 0 */
             nextPage: number | null
@@ -6222,6 +6862,11 @@ export interface operations {
            * @default main
            */
           default_branch?: string | null
+          /**
+           * @description The workspace of the repository
+           * @default
+           */
+          workspace?: string
         }
       }
     }
@@ -6255,6 +6900,32 @@ export interface operations {
              * @default
              */
             head_full_scan_id?: string | null
+            integration_meta?: {
+              /** @enum {string} */
+              type?: 'github'
+              value?: {
+                /**
+                 * @description The GitHub installation_id of the active associated Socket GitHub App
+                 * @default
+                 */
+                installation_id: string
+                /**
+                 * @description The GitHub login name that the active Socket GitHub App installation is installed to
+                 * @default
+                 */
+                installation_login: string
+                /**
+                 * @description The name of the associated GitHub repo.
+                 * @default
+                 */
+                repo_name: string | null
+                /**
+                 * @description The id of the associated GitHub repo.
+                 * @default
+                 */
+                repo_id: string | null
+              }
+            } | null
             /**
              * @description The name of the repository
              * @default
@@ -6286,6 +6957,11 @@ export interface operations {
              * @default main
              */
             default_branch?: string | null
+            /**
+             * @description The workspace of the repository
+             * @default
+             */
+            workspace?: string
           }
         }
       }
@@ -6307,6 +6983,10 @@ export interface operations {
    */
   getOrgRepo: {
     parameters: {
+      query?: {
+        /** @description The workspace of the repository */
+        workspace?: string
+      }
       path: {
         /** @description The slug of the organization */
         org_slug: string
@@ -6344,6 +7024,32 @@ export interface operations {
              * @default
              */
             head_full_scan_id: string | null
+            integration_meta: {
+              /** @enum {string} */
+              type?: 'github'
+              value?: {
+                /**
+                 * @description The GitHub installation_id of the active associated Socket GitHub App
+                 * @default
+                 */
+                installation_id: string
+                /**
+                 * @description The GitHub login name that the active Socket GitHub App installation is installed to
+                 * @default
+                 */
+                installation_login: string
+                /**
+                 * @description The name of the associated GitHub repo.
+                 * @default
+                 */
+                repo_name: string | null
+                /**
+                 * @description The id of the associated GitHub repo.
+                 * @default
+                 */
+                repo_id: string | null
+              }
+            } | null
             /**
              * @description The name of the repository
              * @default
@@ -6376,6 +7082,11 @@ export interface operations {
              */
             default_branch: string | null
             /**
+             * @description The workspace of the repository
+             * @default
+             */
+            workspace: string
+            /**
              * @description The slug of the repository. This typo is intentionally preserved for backwards compatibility reasons.
              * @default
              */
@@ -6401,6 +7112,10 @@ export interface operations {
    */
   updateOrgRepo: {
     parameters: {
+      query?: {
+        /** @description The workspace of the repository */
+        workspace?: string
+      }
       path: {
         /** @description The slug of the organization */
         org_slug: string
@@ -6442,6 +7157,11 @@ export interface operations {
            * @default main
            */
           default_branch?: string | null
+          /**
+           * @description The workspace of the repository
+           * @default
+           */
+          workspace?: string
         }
       }
     }
@@ -6475,6 +7195,32 @@ export interface operations {
              * @default
              */
             head_full_scan_id?: string | null
+            integration_meta?: {
+              /** @enum {string} */
+              type?: 'github'
+              value?: {
+                /**
+                 * @description The GitHub installation_id of the active associated Socket GitHub App
+                 * @default
+                 */
+                installation_id: string
+                /**
+                 * @description The GitHub login name that the active Socket GitHub App installation is installed to
+                 * @default
+                 */
+                installation_login: string
+                /**
+                 * @description The name of the associated GitHub repo.
+                 * @default
+                 */
+                repo_name: string | null
+                /**
+                 * @description The id of the associated GitHub repo.
+                 * @default
+                 */
+                repo_id: string | null
+              }
+            } | null
             /**
              * @description The name of the repository
              * @default
@@ -6506,6 +7252,11 @@ export interface operations {
              * @default main
              */
             default_branch?: string | null
+            /**
+             * @description The workspace of the repository
+             * @default
+             */
+            workspace?: string
           }
         }
       }
@@ -6527,6 +7278,10 @@ export interface operations {
    */
   deleteOrgRepo: {
     parameters: {
+      query?: {
+        /** @description The workspace of the repository */
+        workspace?: string
+      }
       path: {
         /** @description The slug of the organization */
         org_slug: string
@@ -7088,6 +7843,55 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              ghaArgToSink?: {
+                /**
+                 * @description The action to take for ghaArgToSink issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaEnvToSink?: {
+                /**
+                 * @description The action to take for ghaEnvToSink issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaContextToSink?: {
+                /**
+                 * @description The action to take for ghaContextToSink issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaArgToOutput?: {
+                /**
+                 * @description The action to take for ghaArgToOutput issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaArgToEnv?: {
+                /**
+                 * @description The action to take for ghaArgToEnv issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaContextToOutput?: {
+                /**
+                 * @description The action to take for ghaContextToOutput issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaContextToEnv?: {
+                /**
+                 * @description The action to take for ghaContextToEnv issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               licenseSpdxDisj?: {
                 /**
                  * @description The action to take for licenseSpdxDisj issues.
@@ -7662,6 +8466,69 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              vsxProposedApiUsage?: {
+                /**
+                 * @description The action to take for vsxProposedApiUsage issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxActivationWildcard?: {
+                /**
+                 * @description The action to take for vsxActivationWildcard issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxWorkspaceContainsActivation?: {
+                /**
+                 * @description The action to take for vsxWorkspaceContainsActivation issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxUntrustedWorkspaceSupported?: {
+                /**
+                 * @description The action to take for vsxUntrustedWorkspaceSupported issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxVirtualWorkspaceSupported?: {
+                /**
+                 * @description The action to take for vsxVirtualWorkspaceSupported issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxWebviewContribution?: {
+                /**
+                 * @description The action to take for vsxWebviewContribution issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxDebuggerContribution?: {
+                /**
+                 * @description The action to take for vsxDebuggerContribution issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxExtensionDependency?: {
+                /**
+                 * @description The action to take for vsxExtensionDependency issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxExtensionPack?: {
+                /**
+                 * @description The action to take for vsxExtensionPack issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
             } | null
             /**
              * @description The default security policy for the repository label
@@ -7851,6 +8718,55 @@ export interface operations {
             generic?: {
               /**
                * @description The action to take for generic issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaArgToSink?: {
+              /**
+               * @description The action to take for ghaArgToSink issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaEnvToSink?: {
+              /**
+               * @description The action to take for ghaEnvToSink issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaContextToSink?: {
+              /**
+               * @description The action to take for ghaContextToSink issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaArgToOutput?: {
+              /**
+               * @description The action to take for ghaArgToOutput issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaArgToEnv?: {
+              /**
+               * @description The action to take for ghaArgToEnv issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaContextToOutput?: {
+              /**
+               * @description The action to take for ghaContextToOutput issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaContextToEnv?: {
+              /**
+               * @description The action to take for ghaContextToEnv issues.
                * @enum {string}
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -8425,6 +9341,69 @@ export interface operations {
             potentialVulnerability?: {
               /**
                * @description The action to take for potentialVulnerability issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxProposedApiUsage?: {
+              /**
+               * @description The action to take for vsxProposedApiUsage issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxActivationWildcard?: {
+              /**
+               * @description The action to take for vsxActivationWildcard issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxWorkspaceContainsActivation?: {
+              /**
+               * @description The action to take for vsxWorkspaceContainsActivation issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxUntrustedWorkspaceSupported?: {
+              /**
+               * @description The action to take for vsxUntrustedWorkspaceSupported issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxVirtualWorkspaceSupported?: {
+              /**
+               * @description The action to take for vsxVirtualWorkspaceSupported issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxWebviewContribution?: {
+              /**
+               * @description The action to take for vsxWebviewContribution issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxDebuggerContribution?: {
+              /**
+               * @description The action to take for vsxDebuggerContribution issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxExtensionDependency?: {
+              /**
+               * @description The action to take for vsxExtensionDependency issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxExtensionPack?: {
+              /**
+               * @description The action to take for vsxExtensionPack issues.
                * @enum {string}
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -8776,6 +9755,55 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              ghaArgToSink?: {
+                /**
+                 * @description The action to take for ghaArgToSink issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaEnvToSink?: {
+                /**
+                 * @description The action to take for ghaEnvToSink issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaContextToSink?: {
+                /**
+                 * @description The action to take for ghaContextToSink issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaArgToOutput?: {
+                /**
+                 * @description The action to take for ghaArgToOutput issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaArgToEnv?: {
+                /**
+                 * @description The action to take for ghaArgToEnv issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaContextToOutput?: {
+                /**
+                 * @description The action to take for ghaContextToOutput issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaContextToEnv?: {
+                /**
+                 * @description The action to take for ghaContextToEnv issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               licenseSpdxDisj?: {
                 /**
                  * @description The action to take for licenseSpdxDisj issues.
@@ -9350,6 +10378,69 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              vsxProposedApiUsage?: {
+                /**
+                 * @description The action to take for vsxProposedApiUsage issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxActivationWildcard?: {
+                /**
+                 * @description The action to take for vsxActivationWildcard issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxWorkspaceContainsActivation?: {
+                /**
+                 * @description The action to take for vsxWorkspaceContainsActivation issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxUntrustedWorkspaceSupported?: {
+                /**
+                 * @description The action to take for vsxUntrustedWorkspaceSupported issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxVirtualWorkspaceSupported?: {
+                /**
+                 * @description The action to take for vsxVirtualWorkspaceSupported issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxWebviewContribution?: {
+                /**
+                 * @description The action to take for vsxWebviewContribution issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxDebuggerContribution?: {
+                /**
+                 * @description The action to take for vsxDebuggerContribution issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxExtensionDependency?: {
+                /**
+                 * @description The action to take for vsxExtensionDependency issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxExtensionPack?: {
+                /**
+                 * @description The action to take for vsxExtensionPack issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
             }
             /**
              * @description The default security policy for the organization
@@ -9532,6 +10623,55 @@ export interface operations {
             generic?: {
               /**
                * @description The action to take for generic issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaArgToSink?: {
+              /**
+               * @description The action to take for ghaArgToSink issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaEnvToSink?: {
+              /**
+               * @description The action to take for ghaEnvToSink issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaContextToSink?: {
+              /**
+               * @description The action to take for ghaContextToSink issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaArgToOutput?: {
+              /**
+               * @description The action to take for ghaArgToOutput issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaArgToEnv?: {
+              /**
+               * @description The action to take for ghaArgToEnv issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaContextToOutput?: {
+              /**
+               * @description The action to take for ghaContextToOutput issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            ghaContextToEnv?: {
+              /**
+               * @description The action to take for ghaContextToEnv issues.
                * @enum {string}
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -10110,6 +11250,69 @@ export interface operations {
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
             }
+            vsxProposedApiUsage?: {
+              /**
+               * @description The action to take for vsxProposedApiUsage issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxActivationWildcard?: {
+              /**
+               * @description The action to take for vsxActivationWildcard issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxWorkspaceContainsActivation?: {
+              /**
+               * @description The action to take for vsxWorkspaceContainsActivation issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxUntrustedWorkspaceSupported?: {
+              /**
+               * @description The action to take for vsxUntrustedWorkspaceSupported issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxVirtualWorkspaceSupported?: {
+              /**
+               * @description The action to take for vsxVirtualWorkspaceSupported issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxWebviewContribution?: {
+              /**
+               * @description The action to take for vsxWebviewContribution issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxDebuggerContribution?: {
+              /**
+               * @description The action to take for vsxDebuggerContribution issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxExtensionDependency?: {
+              /**
+               * @description The action to take for vsxExtensionDependency issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            vsxExtensionPack?: {
+              /**
+               * @description The action to take for vsxExtensionPack issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
           }
           /**
            * @description Reset the policy rules to the default. When set to true, do not include any policyRules updates.
@@ -10261,6 +11464,55 @@ export interface operations {
               generic?: {
                 /**
                  * @description The action to take for generic issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaArgToSink?: {
+                /**
+                 * @description The action to take for ghaArgToSink issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaEnvToSink?: {
+                /**
+                 * @description The action to take for ghaEnvToSink issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaContextToSink?: {
+                /**
+                 * @description The action to take for ghaContextToSink issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaArgToOutput?: {
+                /**
+                 * @description The action to take for ghaArgToOutput issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaArgToEnv?: {
+                /**
+                 * @description The action to take for ghaArgToEnv issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaContextToOutput?: {
+                /**
+                 * @description The action to take for ghaContextToOutput issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              ghaContextToEnv?: {
+                /**
+                 * @description The action to take for ghaContextToEnv issues.
                  * @enum {string}
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -10839,6 +12091,69 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              vsxProposedApiUsage?: {
+                /**
+                 * @description The action to take for vsxProposedApiUsage issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxActivationWildcard?: {
+                /**
+                 * @description The action to take for vsxActivationWildcard issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxWorkspaceContainsActivation?: {
+                /**
+                 * @description The action to take for vsxWorkspaceContainsActivation issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxUntrustedWorkspaceSupported?: {
+                /**
+                 * @description The action to take for vsxUntrustedWorkspaceSupported issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxVirtualWorkspaceSupported?: {
+                /**
+                 * @description The action to take for vsxVirtualWorkspaceSupported issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxWebviewContribution?: {
+                /**
+                 * @description The action to take for vsxWebviewContribution issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxDebuggerContribution?: {
+                /**
+                 * @description The action to take for vsxDebuggerContribution issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxExtensionDependency?: {
+                /**
+                 * @description The action to take for vsxExtensionDependency issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              vsxExtensionPack?: {
+                /**
+                 * @description The action to take for vsxExtensionPack issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
             }
             /**
              * @description The default security policy for the organization
@@ -10985,7 +12300,8 @@ export interface operations {
   }
   /**
    * Get License Policy (Beta)
-   * @description Returns an organization's license policy
+   * @description Returns an organization's license policy including allow, warn, monitor, and deny categories.
+   * The deny category contains all licenses that are not explicitly categorized as allow, warn, or monitor.
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -11040,47 +12356,437 @@ export interface operations {
         content: {
           'application/json': {
             /**
-             * @description Run a SAST Scan on your source code as part of the Socket Basics scan
+             * @description Enable tabular console output
+             * @default false
+             */
+            consoleTabularEnabled?: boolean
+            /**
+             * @description Enable JSON console output
+             * @default false
+             */
+            consoleJsonEnabled?: boolean
+            /**
+             * @description Enable verbose logging
+             * @default false
+             */
+            verbose?: boolean
+            /**
+             * @description Enable all language SAST scanning
+             * @default false
+             */
+            allLanguagesEnabled?: boolean
+            /**
+             * @description Run Python SAST scanning
              * @default false
              */
             pythonSastEnabled?: boolean
             /**
-             * @description Run a SAST Scan on your source code as part of the Socket Basics scan
-             * @default false
-             */
-            golangSastEnabled?: boolean
-            /**
-             * @description Run a SAST Scan on your source code as part of the Socket Basics scan
+             * @description Run JavaScript SAST scanning
              * @default false
              */
             javascriptSastEnabled?: boolean
             /**
-             * @description Scan for hardcoded secrets and credentials in your code as part of the Socket Basics scan
+             * @description Run Go SAST scanning
+             * @default false
+             */
+            goSastEnabled?: boolean
+            /**
+             * @description Run Golang SAST scanning
+             * @default false
+             */
+            golangSastEnabled?: boolean
+            /**
+             * @description Run Java SAST scanning
+             * @default false
+             */
+            javaSastEnabled?: boolean
+            /**
+             * @description Run PHP SAST scanning
+             * @default false
+             */
+            phpSastEnabled?: boolean
+            /**
+             * @description Run Ruby SAST scanning
+             * @default false
+             */
+            rubySastEnabled?: boolean
+            /**
+             * @description Run C# SAST scanning
+             * @default false
+             */
+            csharpSastEnabled?: boolean
+            /**
+             * @description Run .NET SAST scanning
+             * @default false
+             */
+            dotnetSastEnabled?: boolean
+            /**
+             * @description Run C SAST scanning
+             * @default false
+             */
+            cSastEnabled?: boolean
+            /**
+             * @description Run C++ SAST scanning
+             * @default false
+             */
+            cppSastEnabled?: boolean
+            /**
+             * @description Run Kotlin SAST scanning
+             * @default false
+             */
+            kotlinSastEnabled?: boolean
+            /**
+             * @description Run Scala SAST scanning
+             * @default false
+             */
+            scalaSastEnabled?: boolean
+            /**
+             * @description Run Swift SAST scanning
+             * @default false
+             */
+            swiftSastEnabled?: boolean
+            /**
+             * @description Run Rust SAST scanning
+             * @default false
+             */
+            rustSastEnabled?: boolean
+            /**
+             * @description Run Elixir SAST scanning
+             * @default false
+             */
+            elixirSastEnabled?: boolean
+            /**
+             * @description Enable all SAST rules
+             * @default false
+             */
+            allRulesEnabled?: boolean
+            /**
+             * @description Comma-separated list of enabled Python SAST rules
+             * @default
+             */
+            pythonEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled Python SAST rules
+             * @default
+             */
+            pythonDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled JavaScript SAST rules
+             * @default
+             */
+            javascriptEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled JavaScript SAST rules
+             * @default
+             */
+            javascriptDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled Go SAST rules
+             * @default
+             */
+            goEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled Go SAST rules
+             * @default
+             */
+            goDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled Java SAST rules
+             * @default
+             */
+            javaEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled Java SAST rules
+             * @default
+             */
+            javaDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled Kotlin SAST rules
+             * @default
+             */
+            kotlinEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled Kotlin SAST rules
+             * @default
+             */
+            kotlinDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled Scala SAST rules
+             * @default
+             */
+            scalaEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled Scala SAST rules
+             * @default
+             */
+            scalaDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled PHP SAST rules
+             * @default
+             */
+            phpEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled PHP SAST rules
+             * @default
+             */
+            phpDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled Ruby SAST rules
+             * @default
+             */
+            rubyEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled Ruby SAST rules
+             * @default
+             */
+            rubyDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled C# SAST rules
+             * @default
+             */
+            csharpEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled C# SAST rules
+             * @default
+             */
+            csharpDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled .NET SAST rules
+             * @default
+             */
+            dotnetEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled .NET SAST rules
+             * @default
+             */
+            dotnetDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled C SAST rules
+             * @default
+             */
+            cEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled C SAST rules
+             * @default
+             */
+            cDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled C++ SAST rules
+             * @default
+             */
+            cppEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled C++ SAST rules
+             * @default
+             */
+            cppDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled Swift SAST rules
+             * @default
+             */
+            swiftEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled Swift SAST rules
+             * @default
+             */
+            swiftDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled Rust SAST rules
+             * @default
+             */
+            rustEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled Rust SAST rules
+             * @default
+             */
+            rustDisabledRules?: string
+            /**
+             * @description Comma-separated list of enabled Elixir SAST rules
+             * @default
+             */
+            elixirEnabledRules?: string
+            /**
+             * @description Comma-separated list of disabled Elixir SAST rules
+             * @default
+             */
+            elixirDisabledRules?: string
+            /**
+             * @description Notification method for OpenGrep
+             * @default
+             */
+            openGrepNotificationMethod?: string
+            /**
+             * @description Enable Socket Tier 1 reachability analysis
+             * @default false
+             */
+            socketTier1Enabled?: boolean
+            /**
+             * @description Additional parameters for Socket SCA
+             * @default
+             */
+            socketAdditionalParams?: string
+            /**
+             * @description Enable secret scanning
              * @default false
              */
             secretScanningEnabled?: boolean
             /**
-             * @description Run a vulnerability scan on your Docker images as part of the Socket Basics scan
+             * @description Directories to exclude from Trufflehog scanning
+             * @default
+             */
+            trufflehogExcludeDir?: string
+            /**
+             * @description Show unverified secrets in Trufflehog results
+             * @default false
+             */
+            trufflehogShowUnverified?: boolean
+            /**
+             * @description Notification method for Trufflehog
+             * @default
+             */
+            trufflehogNotificationMethod?: string
+            /**
+             * @description Comma-separated list of container images to scan
+             * @default
+             */
+            containerImagesToScan?: string
+            /**
+             * @description Comma-separated list of Dockerfiles to scan
+             * @default
+             */
+            dockerfiles?: string
+            /**
+             * @description Enable Trivy image scanning
              * @default false
              */
             trivyImageEnabled?: boolean
             /**
-             * @description Run a vulnerability scan on your Dockerfiles as part of the Socket Basics scan
+             * @description Enable Trivy Dockerfile scanning
              * @default false
              */
             trivyDockerfileEnabled?: boolean
             /**
-             * @description Scan dependencies for security vulnerabilities and issues as part of the Socket Basics scan
+             * @description Notification method for Trivy
+             * @default
+             */
+            trivyNotificationMethod?: string
+            /**
+             * @description Comma-separated list of disabled Trivy rules
+             * @default
+             */
+            trivyDisabledRules?: string
+            /**
+             * @description Disable Trivy image scanning
+             * @default false
+             */
+            trivyImageScanningDisabled?: boolean
+            /**
+             * @description Slack webhook URL for notifications
+             * @default
+             */
+            slackWebhookUrl?: string
+            /**
+             * @description Generic webhook URL for notifications
+             * @default
+             */
+            webhookUrl?: string
+            /**
+             * @description Microsoft Sentinel workspace ID
+             * @default
+             */
+            msSentinelWorkspaceId?: string
+            /**
+             * @description Microsoft Sentinel key
+             * @default
+             */
+            msSentinelKey?: string
+            /**
+             * @description Sumo Logic endpoint URL
+             * @default
+             */
+            sumologicEndpoint?: string
+            /**
+             * @description Jira server URL
+             * @default
+             */
+            jiraUrl?: string
+            /**
+             * @description Jira project key
+             * @default
+             */
+            jiraProject?: string
+            /**
+             * @description Jira user email
+             * @default
+             */
+            jiraEmail?: string
+            /**
+             * @description Jira API token
+             * @default
+             */
+            jiraApiToken?: string
+            /**
+             * @description GitHub API token
+             * @default
+             */
+            githubToken?: string
+            /**
+             * @description GitHub API URL
+             * @default
+             */
+            githubApiUrl?: string
+            /**
+             * @description Microsoft Teams webhook URL
+             * @default
+             */
+            msteamsWebhookUrl?: string
+            /**
+             * @description Enable S3 upload for scan results
+             * @default false
+             */
+            s3Enabled?: boolean
+            /**
+             * @description S3 bucket name
+             * @default
+             */
+            s3Bucket?: string
+            /**
+             * @description S3 access key
+             * @default
+             */
+            s3AccessKey?: string
+            /**
+             * @description S3 secret key
+             * @default
+             */
+            s3SecretKey?: string
+            /**
+             * @description S3 endpoint URL
+             * @default
+             */
+            s3Endpoint?: string
+            /**
+             * @description S3 region
+             * @default
+             */
+            s3Region?: string
+            /**
+             * @description Enable external CVE scanning
+             * @default false
+             */
+            externalCveScanningEnabled?: boolean
+            /**
+             * @description Enable Socket dependency scanning (legacy)
              * @default false
              */
             socketScanningEnabled?: boolean
             /**
-             * @description Enables or disable running a Socket SCA Scan as part of the Socket Basics scan. If you have Socket already enabled via the Github App this is not needed. Socket SCA provides 0 day protection of Open Source Supply Chain packages, CVE Reachability, and operational risk of packages.
+             * @description Enable Socket SCA scanning (legacy)
              * @default false
              */
             socketScaEnabled?: boolean
             /**
-             * Format: Additional configuration for Socket Basics, includes support for experimental and custom tooling.
+             * @description Additional configuration parameters (legacy)
              * @default
              */
             additionalParameters?: string
@@ -11119,9 +12825,13 @@ export interface operations {
         'filters.repoSlug'?: string
         /** @description Comma-separated list of repo slugs that should be excluded */
         'filters.repoSlug.notIn'?: string
-        /** @description Comma-separated list of repo labels that should be included */
+        /** @description Comma-separated list of repo full names that should be included */
+        'filters.repoFullName'?: string
+        /** @description Comma-separated list of repo full names that should be excluded */
+        'filters.repoFullName.notIn'?: string
+        /** @description Comma-separated list of repo labels that should be included. Use "" to filter for repositories with no labels. */
         'filters.repoLabels'?: string
-        /** @description Comma-separated list of repo labels that should be excluded */
+        /** @description Comma-separated list of repo labels that should be excluded. Use "" to filter for repositories with no labels. */
         'filters.repoLabels.notIn'?: string
         /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
         'filters.alertType'?: string
@@ -11139,9 +12849,9 @@ export interface operations {
         'filters.alertAction'?: string
         /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
         'filters.alertAction.notIn'?: string
-        /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be included */
+        /** @description Comma-separated list of alert action source types ("fallback", "injected-alert", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be included */
         'filters.alertActionSourceType'?: string
-        /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
+        /** @description Comma-separated list of alert action source types ("fallback", "injected-alert", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
         'filters.alertActionSourceType.notIn'?: string
         /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
         'filters.alertFixType'?: string
@@ -11171,10 +12881,22 @@ export interface operations {
         'filters.alertReachabilityType'?: string
         /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
         'filters.alertReachabilityType.notIn'?: string
-        /** @description Alert priority ("low", "medium", or "high") */
+        /** @description Comma-separated list of alert CVE reachability analysis types ("full-scan" or "precomputed") that should be included */
+        'filters.alertReachabilityAnalysisType'?: string
+        /** @description Comma-separated list of alert CVE reachability analysis types ("full-scan" or "precomputed") that should be excluded */
+        'filters.alertReachabilityAnalysisType.notIn'?: string
+        /** @description Alert priority ("low", "medium", "high", or "critical") */
         'filters.alertPriority'?: string
-        /** @description Alert priority ("low", "medium", or "high") */
+        /** @description Alert priority ("low", "medium", "high", or "critical") */
         'filters.alertPriority.notIn'?: string
+        /** @description Alert KEV (Known Exploited Vulnerability) filter flag */
+        'filters.alertKEV'?: boolean
+        /** @description Alert KEV (Known Exploited Vulnerability) filter flag */
+        'filters.alertKEV.notIn'?: boolean
+        /** @description Alert EPSS ("low", "medium", "high", "critical") */
+        'filters.alertEPSS'?: string
+        /** @description Alert EPSS ("low", "medium", "high", "critical") */
+        'filters.alertEPSS.notIn'?: string
         /** @description Direct/transitive dependency filter flag */
         'filters.dependencyDirect'?: boolean
         /** @description Direct/transitive dependency filter flag */
@@ -11201,6 +12923,8 @@ export interface operations {
             /** @default */
             endCursor: string | null
             items: Array<{
+              /** @default */
+              repoFullName: string
               /** @default */
               repoId: string | null
               /** @default */
@@ -11300,7 +13024,9 @@ export interface operations {
                 alertSeverity?: string[]
                 /** @description Comma-separated list of repo slugs that should be excluded */
                 repoSlug?: string[]
-                /** @description Comma-separated list of repo labels that should be excluded */
+                /** @description Comma-separated list of repo full names that should be excluded */
+                repoFullName?: string[]
+                /** @description Comma-separated list of repo labels that should be excluded. Use "" to filter for repositories with no labels. */
                 repoLabels?: string[]
                 /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be excluded */
                 alertType?: string[]
@@ -11310,7 +13036,7 @@ export interface operations {
                 artifactType?: string[]
                 /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
                 alertAction?: string[]
-                /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
+                /** @description Comma-separated list of alert action source types ("fallback", "injected-alert", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
                 alertActionSourceType?: string[]
                 /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be excluded */
                 alertFixType?: string[]
@@ -11326,8 +13052,14 @@ export interface operations {
                 alertCweName?: string[]
                 /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
                 alertReachabilityType?: string[]
-                /** @description Alert priority ("low", "medium", or "high") */
+                /** @description Comma-separated list of alert CVE reachability analysis types ("full-scan" or "precomputed") that should be excluded */
+                alertReachabilityAnalysisType?: string[]
+                /** @description Alert priority ("low", "medium", "high", or "critical") */
                 alertPriority?: string[]
+                /** @description Alert KEV (Known Exploited Vulnerability) filter flag */
+                alertKEV?: boolean[]
+                /** @description Alert EPSS ("low", "medium", "high", "critical") */
+                alertEPSS?: string[]
                 /** @description Direct/transitive dependency filter flag */
                 dependencyDirect?: boolean[]
                 /** @description Development/production dependency filter flag */
@@ -11361,7 +13093,7 @@ export interface operations {
         date?: string
         /** @description The number of days of data to fetch as an offset from input date */
         range?: string
-        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,alertPriority,dependencyDirect,dependencyDev,dependencyDead) */
+        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoFullName,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,alertReachabilityAnalysisType,alertPriority,alertKEV,alertEPSS,dependencyDirect,dependencyDev,dependencyDead) */
         'aggregation.fields'?: string
         /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
         'filters.alertSeverity'?: string
@@ -11371,9 +13103,13 @@ export interface operations {
         'filters.repoSlug'?: string
         /** @description Comma-separated list of repo slugs that should be excluded */
         'filters.repoSlug.notIn'?: string
-        /** @description Comma-separated list of repo labels that should be included */
+        /** @description Comma-separated list of repo full names that should be included */
+        'filters.repoFullName'?: string
+        /** @description Comma-separated list of repo full names that should be excluded */
+        'filters.repoFullName.notIn'?: string
+        /** @description Comma-separated list of repo labels that should be included. Use "" to filter for repositories with no labels. */
         'filters.repoLabels'?: string
-        /** @description Comma-separated list of repo labels that should be excluded */
+        /** @description Comma-separated list of repo labels that should be excluded. Use "" to filter for repositories with no labels. */
         'filters.repoLabels.notIn'?: string
         /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
         'filters.alertType'?: string
@@ -11391,9 +13127,9 @@ export interface operations {
         'filters.alertAction'?: string
         /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
         'filters.alertAction.notIn'?: string
-        /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be included */
+        /** @description Comma-separated list of alert action source types ("fallback", "injected-alert", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be included */
         'filters.alertActionSourceType'?: string
-        /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
+        /** @description Comma-separated list of alert action source types ("fallback", "injected-alert", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
         'filters.alertActionSourceType.notIn'?: string
         /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
         'filters.alertFixType'?: string
@@ -11423,10 +13159,22 @@ export interface operations {
         'filters.alertReachabilityType'?: string
         /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
         'filters.alertReachabilityType.notIn'?: string
-        /** @description Alert priority ("low", "medium", or "high") */
+        /** @description Comma-separated list of alert CVE reachability analysis types ("full-scan" or "precomputed") that should be included */
+        'filters.alertReachabilityAnalysisType'?: string
+        /** @description Comma-separated list of alert CVE reachability analysis types ("full-scan" or "precomputed") that should be excluded */
+        'filters.alertReachabilityAnalysisType.notIn'?: string
+        /** @description Alert priority ("low", "medium", "high", or "critical") */
         'filters.alertPriority'?: string
-        /** @description Alert priority ("low", "medium", or "high") */
+        /** @description Alert priority ("low", "medium", "high", or "critical") */
         'filters.alertPriority.notIn'?: string
+        /** @description Alert KEV (Known Exploited Vulnerability) filter flag */
+        'filters.alertKEV'?: boolean
+        /** @description Alert KEV (Known Exploited Vulnerability) filter flag */
+        'filters.alertKEV.notIn'?: boolean
+        /** @description Alert EPSS ("low", "medium", "high", "critical") */
+        'filters.alertEPSS'?: string
+        /** @description Alert EPSS ("low", "medium", "high", "critical") */
+        'filters.alertEPSS.notIn'?: string
         /** @description Direct/transitive dependency filter flag */
         'filters.dependencyDirect'?: boolean
         /** @description Direct/transitive dependency filter flag */
@@ -11468,7 +13216,9 @@ export interface operations {
                 alertSeverity?: string[]
                 /** @description Comma-separated list of repo slugs that should be excluded */
                 repoSlug?: string[]
-                /** @description Comma-separated list of repo labels that should be excluded */
+                /** @description Comma-separated list of repo full names that should be excluded */
+                repoFullName?: string[]
+                /** @description Comma-separated list of repo labels that should be excluded. Use "" to filter for repositories with no labels. */
                 repoLabels?: string[]
                 /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be excluded */
                 alertType?: string[]
@@ -11478,7 +13228,7 @@ export interface operations {
                 artifactType?: string[]
                 /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
                 alertAction?: string[]
-                /** @description Comma-separated list of alert action source types ("fallback", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
+                /** @description Comma-separated list of alert action source types ("fallback", "injected-alert", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
                 alertActionSourceType?: string[]
                 /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be excluded */
                 alertFixType?: string[]
@@ -11494,8 +13244,14 @@ export interface operations {
                 alertCweName?: string[]
                 /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
                 alertReachabilityType?: string[]
-                /** @description Alert priority ("low", "medium", or "high") */
+                /** @description Comma-separated list of alert CVE reachability analysis types ("full-scan" or "precomputed") that should be excluded */
+                alertReachabilityAnalysisType?: string[]
+                /** @description Alert priority ("low", "medium", "high", or "critical") */
                 alertPriority?: string[]
+                /** @description Alert KEV (Known Exploited Vulnerability) filter flag */
+                alertKEV?: boolean[]
+                /** @description Alert EPSS ("low", "medium", "high", "critical") */
+                alertEPSS?: string[]
                 /** @description Direct/transitive dependency filter flag */
                 dependencyDirect?: boolean[]
                 /** @description Development/production dependency filter flag */
@@ -11542,6 +13298,8 @@ export interface operations {
         date?: string
         /** @description The number of days of data to fetch as an offset from input date */
         range?: string
+        /** @description Comma-separated list of repo full names that should be included */
+        repoFullName?: string
         /** @description Comma-separated list of repo slugs that should be included */
         repoSlug?: string
         /** @description Comma-separated list of repo labels that should be included */
@@ -11579,6 +13337,8 @@ export interface operations {
                 groups: string[][]
               }
               filters: {
+                /** @description Comma-separated list of repo full names that should be included */
+                repoFullName?: string[]
                 /** @description Comma-separated list of repo slugs that should be included */
                 repoSlug?: string[]
                 /** @description Comma-separated list of repo labels that should be included */
@@ -11861,12 +13621,19 @@ export interface operations {
           | 'ChangePlanSubscriptionSeats'
           | 'CreateApiToken'
           | 'CreateLabel'
+          | 'CreateWebhook'
+          | 'DeleteFullScan'
           | 'DeleteLabel'
           | 'DeleteLabelSetting'
           | 'DeleteReport'
           | 'DeleteRepository'
+          | 'DeleteWebhook'
           | 'DisassociateLabel'
+          | 'DowngradeOrganizationPlan'
           | 'JoinOrganization'
+          | 'MemberAdded'
+          | 'MemberRemoved'
+          | 'MemberRoleChanged'
           | 'RemoveLicenseOverlay'
           | 'RemoveMember'
           | 'ResetInvitationLink'
@@ -11886,7 +13653,9 @@ export interface operations {
           | 'UpdateAutopatchCurated'
           | 'UpdateLabel'
           | 'UpdateLabelSetting'
+          | 'UpdateLicenseOverlay'
           | 'UpdateOrganizationSetting'
+          | 'UpdateWebhook'
           | 'UpgradeOrganizationPlan'
         /** @description Number of events per page */
         per_page?: number
@@ -11979,21 +13748,33 @@ export interface operations {
         content: {
           'application/json': {
             tokens: Array<{
+              /** @description List of committers associated with this API Token */
               committers: Array<{
-                /** @default */
+                /**
+                 * @description Email address of the committer
+                 * @default
+                 */
                 email?: string
                 /**
+                 * @description The source control provider for the committer
                  * @default api
                  * @enum {string}
                  */
                 provider?: 'api' | 'azure' | 'bitbucket' | 'github' | 'gitlab'
-                /** @default */
+                /**
+                 * @description Login name on the provider platform
+                 * @default
+                 */
                 providerLoginName?: string
-                /** @default */
+                /**
+                 * @description User ID on the provider platform
+                 * @default
+                 */
                 providerUserId?: string
               }>
               /**
                * Format: date
+               * @description Timestamp when the API Token was created
                * @default
                */
               created_at: string
@@ -12004,16 +13785,21 @@ export interface operations {
               id: string
               /**
                * Format: date
+               * @description Timestamp when the API Token was last used
                * @default
                */
               last_used_at: string
-              /** @default 1000 */
+              /**
+               * @description Maximum number of API calls allowed per month
+               * @default 1000
+               */
               max_quota: number
               /**
                * @description Name for the API Token
                * @default api token
                */
               name: string | null
+              /** @description List of scopes granted to the API Token */
               scopes: Array<
                 | 'alerts'
                 | 'alerts:list'
@@ -12029,6 +13815,8 @@ export interface operations {
                 | 'dependencies'
                 | 'dependencies:list'
                 | 'dependencies:trend'
+                | 'fixes'
+                | 'fixes:list'
                 | 'full-scans'
                 | 'full-scans:list'
                 | 'full-scans:create'
@@ -12075,11 +13863,18 @@ export interface operations {
                 | 'security-policy:read'
                 | 'socket-basics'
                 | 'socket-basics:read'
+                | 'telemetry-policy'
+                | 'telemetry-policy:update'
                 | 'threat-feed'
                 | 'threat-feed:list'
                 | 'triage'
                 | 'triage:alerts-list'
                 | 'triage:alerts-update'
+                | 'webhooks'
+                | 'webhooks:create'
+                | 'webhooks:list'
+                | 'webhooks:update'
+                | 'webhooks:delete'
               >
               /**
                * @description The obfuscated token of the API Token
@@ -12123,8 +13918,12 @@ export interface operations {
     requestBody?: {
       content: {
         'application/json': {
-          /** @default 1000 */
+          /**
+           * @description Maximum number of API calls allowed per month
+           * @default 1000
+           */
           max_quota: number
+          /** @description List of scopes granted to the API Token */
           scopes: Array<
             | 'alerts'
             | 'alerts:list'
@@ -12140,6 +13939,8 @@ export interface operations {
             | 'dependencies'
             | 'dependencies:list'
             | 'dependencies:trend'
+            | 'fixes'
+            | 'fixes:list'
             | 'full-scans'
             | 'full-scans:list'
             | 'full-scans:create'
@@ -12186,11 +13987,18 @@ export interface operations {
             | 'security-policy:read'
             | 'socket-basics'
             | 'socket-basics:read'
+            | 'telemetry-policy'
+            | 'telemetry-policy:update'
             | 'threat-feed'
             | 'threat-feed:list'
             | 'triage'
             | 'triage:alerts-list'
             | 'triage:alerts-update'
+            | 'webhooks'
+            | 'webhooks:create'
+            | 'webhooks:list'
+            | 'webhooks:update'
+            | 'webhooks:delete'
           >
           /**
            * @description The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.
@@ -12198,17 +14006,28 @@ export interface operations {
            * @enum {string}
            */
           visibility: 'admin' | 'organization'
+          /** @description Committer information to associate with the API Token */
           committer: {
-            /** @default */
+            /**
+             * @description Email address of the committer
+             * @default
+             */
             email?: string
             /**
+             * @description The source control provider for the committer
              * @default api
              * @enum {string}
              */
             provider?: 'api' | 'azure' | 'bitbucket' | 'github' | 'gitlab'
-            /** @default */
+            /**
+             * @description Login name on the provider platform
+             * @default
+             */
             providerLoginName?: string
-            /** @default */
+            /**
+             * @description User ID on the provider platform
+             * @default
+             */
             providerUserId?: string
           }
           /**
@@ -12216,6 +14035,24 @@ export interface operations {
            * @default api token
            */
           name?: string
+          /** @description List of resources this API Token can access. Tokens with resource grants can only access a subset of routes that support this feature. */
+          resources?: Array<{
+            /**
+             * @description Slug of the organization to grant access to
+             * @default
+             */
+            organizationSlug: string
+            /**
+             * @description Slug of the repository to grant access to
+             * @default
+             */
+            repositorySlug: string
+            /**
+             * @description Workspace slug containing the specified repo
+             * @default
+             */
+            workspace?: string
+          }>
         }
       }
     }
@@ -12254,8 +14091,12 @@ export interface operations {
     requestBody?: {
       content: {
         'application/json': {
-          /** @default 1000 */
+          /**
+           * @description Maximum number of API calls allowed per hour
+           * @default 1000
+           */
           max_quota: number
+          /** @description List of scopes granted to the API Token */
           scopes: Array<
             | 'alerts'
             | 'alerts:list'
@@ -12271,6 +14112,8 @@ export interface operations {
             | 'dependencies'
             | 'dependencies:list'
             | 'dependencies:trend'
+            | 'fixes'
+            | 'fixes:list'
             | 'full-scans'
             | 'full-scans:list'
             | 'full-scans:create'
@@ -12317,13 +14160,23 @@ export interface operations {
             | 'security-policy:read'
             | 'socket-basics'
             | 'socket-basics:read'
+            | 'telemetry-policy'
+            | 'telemetry-policy:update'
             | 'threat-feed'
             | 'threat-feed:list'
             | 'triage'
             | 'triage:alerts-list'
             | 'triage:alerts-update'
+            | 'webhooks'
+            | 'webhooks:create'
+            | 'webhooks:list'
+            | 'webhooks:update'
+            | 'webhooks:delete'
           >
-          /** @default */
+          /**
+           * @description The API token to update
+           * @default
+           */
           token: string
           /**
            * @description The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.
@@ -12331,17 +14184,28 @@ export interface operations {
            * @enum {string}
            */
           visibility: 'admin' | 'organization'
+          /** @description Committer information to associate with the API Token */
           committer: {
-            /** @default */
+            /**
+             * @description Email address of the committer
+             * @default
+             */
             email?: string
             /**
+             * @description The source control provider for the committer
              * @default api
              * @enum {string}
              */
             provider?: 'api' | 'azure' | 'bitbucket' | 'github' | 'gitlab'
-            /** @default */
+            /**
+             * @description Login name on the provider platform
+             * @default
+             */
             providerLoginName?: string
-            /** @default */
+            /**
+             * @description User ID on the provider platform
+             * @default
+             */
             providerUserId?: string
           }
           /**
@@ -12438,7 +14302,7 @@ export interface operations {
         content: {
           'application/json': {
             /**
-             * Format: The status of the token
+             * @description The status of the token
              * @default revoked
              */
             status: string
@@ -12529,6 +14393,7 @@ export interface operations {
           | 'typo'
           | 'secret'
           | 'obf'
+          | 'dual'
         /** @description Filter threats by package name */
         name?: string
         /** @description Filter threats by package version */
@@ -12545,6 +14410,7 @@ export interface operations {
           | 'maven'
           | 'npm'
           | 'nuget'
+          | 'vscode'
           | 'pypi'
           | 'gem'
       }
@@ -12578,6 +14444,11 @@ export interface operations {
                * @default false
                */
               needsHumanReview?: boolean
+              /**
+               * @description Unique threat instance identifier across artifacts
+               * @default 0
+               */
+              threatInstanceId?: number
             }>
             /** @default */
             nextPage: string | null
@@ -12631,6 +14502,7 @@ export interface operations {
           | 'typo'
           | 'secret'
           | 'obf'
+          | 'dual'
         /** @description Filter threats by package name */
         name?: string
         /** @description Filter threats by package version. */
@@ -12647,6 +14519,7 @@ export interface operations {
           | 'maven'
           | 'npm'
           | 'nuget'
+          | 'vscode'
           | 'pypi'
           | 'gem'
       }
@@ -12684,9 +14557,962 @@ export interface operations {
                * @default false
                */
               needsHumanReview?: boolean
+              /**
+               * @description Unique threat instance identifier across artifacts
+               * @default 0
+               */
+              threatInstanceId?: number
             }>
             /** @default */
             nextPageCursor: string | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Fetch fixes for vulnerabilities in a repository or scan
+   * @description Fetches available fixes for vulnerabilities in a repository or scan.
+   * Requires either repo_slug or full_scan_id as well as vulnerability_ids to be provided.
+   * vulnerability_ids can be a comma-separated list of GHSA or CVE IDs, or "*" for all vulnerabilities.
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - fixes:list
+   */
+  'fetch-fixes': {
+    parameters: {
+      query: {
+        /** @description The slug of the repository to fetch fixes for. Computes fixes based on the latest scan on the default branch */
+        repo_slug?: string
+        /** @description The ID of the scan to fetch fixes for */
+        full_scan_id?: string
+        /** @description Comma-separated list of GHSA or CVE IDs, or "*" for all vulnerabilities */
+        vulnerability_ids: string
+        /** @description Whether to allow major version updates in fixes */
+        allow_major_updates: boolean
+        /** @description Minimum release age for fixes packages (e.g., "1h", "2d", "1w"). Higher values reduces risk of installing recently released untested package versions. */
+        minimum_release_age?: string
+        /** @description Whether to include advisory details in the response */
+        include_details?: boolean
+        /** @description Set to include the direct dependencies responsible for introducing the dependency or dependencies with the vulnerability in the response */
+        include_responsible_direct_dependencies?: boolean
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    responses: {
+      /** @description Fix details for requested vulnerabilities */
+      200: {
+        content: {
+          'application/json': {
+            /** @description Map of vulnerability IDs (GHSA or CVE) to their fix details. Each entry contains information about available fixes, partial fixes, or reasons why fixes are not available. */
+            fixDetails: {
+              [key: string]:
+                | {
+                    /** @enum {string} */
+                    type: 'fixFound'
+                    value: {
+                      /**
+                       * @default fixFound
+                       * @enum {string}
+                       */
+                      type: 'fixFound'
+                      /** @default */
+                      ghsa: string
+                      /** @default */
+                      cve: string | null
+                      fixDetails: {
+                        fixes: Array<{
+                          /** @default The PURL (unique package identifier) of the package to upgrade */
+                          purl: string
+                          /** @default The version of the package to upgrade to */
+                          fixedVersion: string
+                          manifestFiles: string[]
+                          /**
+                           * @description The type of version update (patch, minor, major, or unknown if it cannot be determined)
+                           * @default unknown
+                           * @enum {string}
+                           */
+                          updateType: 'patch' | 'minor' | 'major' | 'unknown'
+                        }>
+                        /** @description The keys are the PURL (unique package identifier) of the direct dependency(ies) responsible for introducing the vulnerability. */
+                        responsibleDirectDependencies?: {
+                          [key: string]: {
+                            /**
+                             * Format: The current version of the package
+                             * @default
+                             */
+                            currentVersion: string
+                            nextAvailableVersion?: {
+                              /**
+                               * Format: The next available version of the package
+                               * @default
+                               */
+                              version: string
+                              /**
+                               * @description The type of version update (patch, minor, major, or unknown if it cannot be determined)
+                               * @default unknown
+                               * @enum {string}
+                               */
+                              updateType:
+                                | 'patch'
+                                | 'minor'
+                                | 'major'
+                                | 'unknown'
+                            } | null
+                            /** @description The version and update type of the package that is necessary to fix the vulnerability. If the value is null, it means the package does not have to be upgraded to fix the vulnerability */
+                            fixByUpgradingTo?: {
+                              /** @default */
+                              version: string
+                              /**
+                               * @description The type of version update (patch, minor, major, or unknown if it cannot be determined)
+                               * @default unknown
+                               * @enum {string}
+                               */
+                              updateType:
+                                | 'patch'
+                                | 'minor'
+                                | 'major'
+                                | 'unknown'
+                            } | null
+                          }
+                        } | null
+                      }
+                      advisoryDetails: {
+                        /** @default */
+                        title?: string | null
+                        /** @default */
+                        description?: string | null
+                        cwes?: string[]
+                        /**
+                         * @description Severity level of the vulnerability
+                         * @default LOW
+                         * @enum {string}
+                         */
+                        severity?: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL'
+                        /** @default */
+                        cvssVector?: string | null
+                        /** @default */
+                        publishedAt?: string
+                        /**
+                         * @description Whether the vulnerability is a Known Exploited Vulnerability
+                         * @default false
+                         */
+                        kev?: boolean
+                        /**
+                         * @description Exploit Prediction Scoring System score
+                         * @default 0
+                         */
+                        epss?: number | null
+                        affectedPurls?: Array<{
+                          /**
+                           * Format: The PURL (unique package identifier) of the affected package
+                           * @default
+                           */
+                          purl: string
+                          /** @default The range of vulnerable versions */
+                          affectedRange: string
+                        }>
+                      } | null
+                    }
+                  }
+                | {
+                    /** @enum {string} */
+                    type: 'partialFixFound'
+                    value: {
+                      /**
+                       * @default partialFixFound
+                       * @enum {string}
+                       */
+                      type: 'partialFixFound'
+                      /** @default */
+                      ghsa: string
+                      /** @default */
+                      cve: string | null
+                      fixDetails: {
+                        fixes: Array<{
+                          /** @default The PURL (unique package identifier) of the package to upgrade */
+                          purl: string
+                          /** @default The version of the package to upgrade to */
+                          fixedVersion: string
+                          manifestFiles: string[]
+                          /**
+                           * @description The type of version update (patch, minor, major, or unknown if it cannot be determined)
+                           * @default unknown
+                           * @enum {string}
+                           */
+                          updateType: 'patch' | 'minor' | 'major' | 'unknown'
+                        }>
+                        unfixablePurls: Array<{
+                          /** @default The PURL (unique package identifier) of the package that cannot be upgraded */
+                          purl: string
+                          manifestFiles: string[]
+                        }>
+                        /** @description The keys are the PURL (unique package identifier) of the direct dependency(ies) responsible for introducing the vulnerability. */
+                        responsibleDirectDependencies?: {
+                          [key: string]: {
+                            /**
+                             * Format: The current version of the package
+                             * @default
+                             */
+                            currentVersion: string
+                            nextAvailableVersion?: {
+                              /**
+                               * Format: The next available version of the package
+                               * @default
+                               */
+                              version: string
+                              /**
+                               * @description The type of version update (patch, minor, major, or unknown if it cannot be determined)
+                               * @default unknown
+                               * @enum {string}
+                               */
+                              updateType:
+                                | 'patch'
+                                | 'minor'
+                                | 'major'
+                                | 'unknown'
+                            } | null
+                            /** @description The version and update type of the package that is necessary to fix the vulnerability. If the value is null, it means the package does not have to be upgraded to fix the vulnerability */
+                            fixByUpgradingTo?: {
+                              /** @default */
+                              version: string
+                              /**
+                               * @description The type of version update (patch, minor, major, or unknown if it cannot be determined)
+                               * @default unknown
+                               * @enum {string}
+                               */
+                              updateType:
+                                | 'patch'
+                                | 'minor'
+                                | 'major'
+                                | 'unknown'
+                            } | null
+                          }
+                        } | null
+                      }
+                      advisoryDetails: {
+                        /** @default */
+                        title?: string | null
+                        /** @default */
+                        description?: string | null
+                        cwes?: string[]
+                        /**
+                         * @description Severity level of the vulnerability
+                         * @default LOW
+                         * @enum {string}
+                         */
+                        severity?: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL'
+                        /** @default */
+                        cvssVector?: string | null
+                        /** @default */
+                        publishedAt?: string
+                        /**
+                         * @description Whether the vulnerability is a Known Exploited Vulnerability
+                         * @default false
+                         */
+                        kev?: boolean
+                        /**
+                         * @description Exploit Prediction Scoring System score
+                         * @default 0
+                         */
+                        epss?: number | null
+                        affectedPurls?: Array<{
+                          /**
+                           * Format: The PURL (unique package identifier) of the affected package
+                           * @default
+                           */
+                          purl: string
+                          /** @default The range of vulnerable versions */
+                          affectedRange: string
+                        }>
+                      } | null
+                    }
+                  }
+                | {
+                    /** @enum {string} */
+                    type: 'errorComputingFix'
+                    value: {
+                      /**
+                       * @default errorComputingFix
+                       * @enum {string}
+                       */
+                      type: 'errorComputingFix'
+                      /** @default */
+                      ghsa: string | null
+                      /** @default */
+                      cve: string | null
+                      /** @default */
+                      message: string
+                      advisoryDetails: {
+                        /** @default */
+                        title?: string | null
+                        /** @default */
+                        description?: string | null
+                        cwes?: string[]
+                        /**
+                         * @description Severity level of the vulnerability
+                         * @default LOW
+                         * @enum {string}
+                         */
+                        severity?: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL'
+                        /** @default */
+                        cvssVector?: string | null
+                        /** @default */
+                        publishedAt?: string
+                        /**
+                         * @description Whether the vulnerability is a Known Exploited Vulnerability
+                         * @default false
+                         */
+                        kev?: boolean
+                        /**
+                         * @description Exploit Prediction Scoring System score
+                         * @default 0
+                         */
+                        epss?: number | null
+                        affectedPurls?: Array<{
+                          /**
+                           * Format: The PURL (unique package identifier) of the affected package
+                           * @default
+                           */
+                          purl: string
+                          /** @default The range of vulnerable versions */
+                          affectedRange: string
+                        }>
+                      } | null
+                    }
+                  }
+                | {
+                    /** @enum {string} */
+                    type: 'noFixAvailable'
+                    value: {
+                      /**
+                       * @default noFixAvailable
+                       * @enum {string}
+                       */
+                      type: 'noFixAvailable'
+                      /** @default */
+                      ghsa: string
+                      /** @default */
+                      cve: string | null
+                      advisoryDetails: {
+                        /** @default */
+                        title?: string | null
+                        /** @default */
+                        description?: string | null
+                        cwes?: string[]
+                        /**
+                         * @description Severity level of the vulnerability
+                         * @default LOW
+                         * @enum {string}
+                         */
+                        severity?: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL'
+                        /** @default */
+                        cvssVector?: string | null
+                        /** @default */
+                        publishedAt?: string
+                        /**
+                         * @description Whether the vulnerability is a Known Exploited Vulnerability
+                         * @default false
+                         */
+                        kev?: boolean
+                        /**
+                         * @description Exploit Prediction Scoring System score
+                         * @default 0
+                         */
+                        epss?: number | null
+                        affectedPurls?: Array<{
+                          /**
+                           * Format: The PURL (unique package identifier) of the affected package
+                           * @default
+                           */
+                          purl: string
+                          /** @default The range of vulnerable versions */
+                          affectedRange: string
+                        }>
+                      } | null
+                    }
+                  }
+                | {
+                    /** @enum {string} */
+                    type: 'fixNotApplicable'
+                    value: {
+                      /**
+                       * @default fixNotApplicable
+                       * @enum {string}
+                       */
+                      type: 'fixNotApplicable'
+                      /** @default */
+                      ghsa: string
+                      /** @default */
+                      cve: string | null
+                      advisoryDetails: {
+                        /** @default */
+                        title?: string | null
+                        /** @default */
+                        description?: string | null
+                        cwes?: string[]
+                        /**
+                         * @description Severity level of the vulnerability
+                         * @default LOW
+                         * @enum {string}
+                         */
+                        severity?: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL'
+                        /** @default */
+                        cvssVector?: string | null
+                        /** @default */
+                        publishedAt?: string
+                        /**
+                         * @description Whether the vulnerability is a Known Exploited Vulnerability
+                         * @default false
+                         */
+                        kev?: boolean
+                        /**
+                         * @description Exploit Prediction Scoring System score
+                         * @default 0
+                         */
+                        epss?: number | null
+                        affectedPurls?: Array<{
+                          /**
+                           * Format: The PURL (unique package identifier) of the affected package
+                           * @default
+                           */
+                          purl: string
+                          /** @default The range of vulnerable versions */
+                          affectedRange: string
+                        }>
+                      } | null
+                    }
+                  }
+            }
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Get Organization Telemetry Config
+   * @description Retrieve the telemetry config of an organization.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   */
+  getOrgTelemetryConfig: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    responses: {
+      /** @description Retrieved telemetry config details */
+      200: {
+        content: {
+          'application/json': {
+            /** @description Telemetry configuration */
+            telemetry: {
+              /**
+               * @description Telemetry enabled
+               * @default false
+               */
+              enabled: boolean
+            }
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Update Telemetry Config
+   * @description Update the telemetry config of an organization.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - telemetry-policy:update
+   */
+  updateOrgTelemetryConfig: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    requestBody?: {
+      content: {
+        'application/json': {
+          /**
+           * @description Telemetry enabled
+           * @default false
+           */
+          enabled?: boolean
+        }
+      }
+    }
+    responses: {
+      /** @description Updated telemetry config details */
+      200: {
+        content: {
+          'application/json': {
+            /** @description Telemetry configuration */
+            telemetry: {
+              /**
+               * @description Telemetry enabled
+               * @default false
+               */
+              enabled: boolean
+            }
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * List all webhooks
+   * @description List all webhooks in the specified organization.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - webhooks:list
+   */
+  getOrgWebhooksList: {
+    parameters: {
+      query?: {
+        sort?: string
+        direction?: string
+        per_page?: number
+        page?: number
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    responses: {
+      /** @description List of webhooks */
+      200: {
+        content: {
+          'application/json': {
+            results: Array<{
+              /**
+               * @description The ID of the webhook
+               * @default
+               */
+              id: string
+              /**
+               * @description The creation date of the webhook
+               * @default
+               */
+              created_at: string
+              /**
+               * @description The last update date of the webhook
+               * @default
+               */
+              updated_at: string
+              /**
+               * @description The name of the webhook
+               * @default
+               */
+              name: string
+              /**
+               * @description The description of the webhook
+               * @default
+               */
+              description: string | null
+              /**
+               * @description The URL where webhook events will be sent
+               * @default
+               */
+              url: string
+              /**
+               * @description The signing key used to sign webhook payloads
+               * @default
+               */
+              secret: string | null
+              /** @description Array of event names */
+              events: string[]
+              /**
+               * @description Custom headers to include in webhook requests
+               * @default null
+               */
+              headers: Record<string, unknown> | null
+              filters: {
+                /** @description Array of repository IDs */
+                repositoryIds: string[] | null
+              } | null
+            }>
+            /** @default 0 */
+            nextPage: number | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Create a webhook
+   * @description Create a new webhook. Returns the created webhook details.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - webhooks:create
+   */
+  createOrgWebhook: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    requestBody?: {
+      content: {
+        'application/json': {
+          /**
+           * @description The name of the webhook
+           * @default
+           */
+          name: string
+          /**
+           * @description The URL where webhook events will be sent
+           * @default
+           */
+          url: string
+          /**
+           * @description The signing key used to sign webhook payloads
+           * @default
+           */
+          secret: string
+          /** @description Array of event names */
+          events: string[]
+          /**
+           * @description The description of the webhook
+           * @default
+           */
+          description?: string | null
+          /**
+           * @description Custom headers to include in webhook requests
+           * @default null
+           */
+          headers?: Record<string, unknown> | null
+          filters?: {
+            /** @description Array of repository IDs */
+            repositoryIds: string[] | null
+          } | null
+        }
+      }
+    }
+    responses: {
+      /** @description The created webhook */
+      201: {
+        content: {
+          'application/json': {
+            /**
+             * @description The ID of the webhook
+             * @default
+             */
+            id: string
+            /**
+             * @description The creation date of the webhook
+             * @default
+             */
+            created_at: string
+            /**
+             * @description The last update date of the webhook
+             * @default
+             */
+            updated_at: string
+            /**
+             * @description The name of the webhook
+             * @default
+             */
+            name: string
+            /**
+             * @description The description of the webhook
+             * @default
+             */
+            description: string | null
+            /**
+             * @description The URL where webhook events will be sent
+             * @default
+             */
+            url: string
+            /**
+             * @description The signing key used to sign webhook payloads
+             * @default
+             */
+            secret: string | null
+            /** @description Array of event names */
+            events: string[]
+            /**
+             * @description Custom headers to include in webhook requests
+             * @default null
+             */
+            headers: Record<string, unknown> | null
+            filters: {
+              /** @description Array of repository IDs */
+              repositoryIds: string[] | null
+            } | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Get webhook
+   * @description Get a webhook for the specified organization.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - webhooks:list
+   */
+  getOrgWebhook: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The ID of the webhook */
+        webhook_id: string
+      }
+    }
+    responses: {
+      /** @description Webhook details */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * @description The ID of the webhook
+             * @default
+             */
+            id: string
+            /**
+             * @description The creation date of the webhook
+             * @default
+             */
+            created_at: string
+            /**
+             * @description The last update date of the webhook
+             * @default
+             */
+            updated_at: string
+            /**
+             * @description The name of the webhook
+             * @default
+             */
+            name: string
+            /**
+             * @description The description of the webhook
+             * @default
+             */
+            description: string | null
+            /**
+             * @description The URL where webhook events will be sent
+             * @default
+             */
+            url: string
+            /**
+             * @description The signing key used to sign webhook payloads
+             * @default
+             */
+            secret: string | null
+            /** @description Array of event names */
+            events: string[]
+            /**
+             * @description Custom headers to include in webhook requests
+             * @default null
+             */
+            headers: Record<string, unknown> | null
+            filters: {
+              /** @description Array of repository IDs */
+              repositoryIds: string[] | null
+            } | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Update webhook
+   * @description Update details of an existing webhook.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - webhooks:update
+   */
+  updateOrgWebhook: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The ID of the webhook */
+        webhook_id: string
+      }
+    }
+    requestBody?: {
+      content: {
+        'application/json': {
+          /**
+           * @description The name of the webhook
+           * @default
+           */
+          name?: string
+          /**
+           * @description The description of the webhook
+           * @default
+           */
+          description?: string | null
+          /**
+           * @description The URL where webhook events will be sent
+           * @default
+           */
+          url?: string
+          /**
+           * @description The signing key used to sign webhook payloads
+           * @default
+           */
+          secret?: string | null
+          /** @description Array of event names */
+          events?: string[]
+          /**
+           * @description Custom headers to include in webhook requests
+           * @default null
+           */
+          headers?: Record<string, unknown> | null
+          filters?: {
+            /** @description Array of repository IDs */
+            repositoryIds: string[] | null
+          } | null
+        }
+      }
+    }
+    responses: {
+      /** @description Updated webhook details */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * @description The ID of the webhook
+             * @default
+             */
+            id: string
+            /**
+             * @description The creation date of the webhook
+             * @default
+             */
+            created_at: string
+            /**
+             * @description The last update date of the webhook
+             * @default
+             */
+            updated_at: string
+            /**
+             * @description The name of the webhook
+             * @default
+             */
+            name: string
+            /**
+             * @description The description of the webhook
+             * @default
+             */
+            description: string | null
+            /**
+             * @description The URL where webhook events will be sent
+             * @default
+             */
+            url: string
+            /**
+             * @description The signing key used to sign webhook payloads
+             * @default
+             */
+            secret: string | null
+            /** @description Array of event names */
+            events: string[]
+            /**
+             * @description Custom headers to include in webhook requests
+             * @default null
+             */
+            headers: Record<string, unknown> | null
+            filters: {
+              /** @description Array of repository IDs */
+              repositoryIds: string[] | null
+            } | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Delete webhook
+   * @description Delete a webhook. This will stop all future webhook deliveries to the webhook URL.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - webhooks:delete
+   */
+  deleteOrgWebhook: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The ID of the webhook */
+        webhook_id: string
+      }
+    }
+    responses: {
+      /** @description Success */
+      200: {
+        content: {
+          'application/json': {
+            /** @default ok */
+            status: string
           }
         }
       }
@@ -13156,6 +15982,25 @@ export interface operations {
     }
   }
   /**
+   * Returns the OpenAPI definition
+   * @description Retrieve the API specification in an Openapi JSON format.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   */
+  getOpenAPIJSON: {
+    responses: {
+      /** @description OpenAPI specification */
+      200: {
+        content: {
+          'application/json': unknown
+        }
+      }
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
    * Get quota
    * @description Get your current API quota. You can use this endpoint to prevent doing requests that might spend all your quota.
    *
@@ -13416,6 +16261,12 @@ export interface operations {
    * - report:write
    */
   createReport: {
+    parameters: {
+      query?: {
+        /** @description The workspace of the repository to associate the full-scan with. */
+        workspace?: string
+      }
+    }
     requestBody?: {
       content: {
         'multipart/form-data': {
@@ -13517,6 +16368,8 @@ export interface operations {
               github_full_name: string
               /** @default */
               organization_id: string | null
+              /** @default */
+              workspace: string
               latest_project_report?: {
                 /** @default */
                 id: string

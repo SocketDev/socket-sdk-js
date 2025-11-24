@@ -26,10 +26,15 @@ function parseArgs() {
     // Get remaining arguments to pass to vitest
     extra: args.filter(
       arg =>
-        !['--all', '--update', '--coverage', '--cover', '--help', '-h'].includes(
-          arg,
-        ),
-    ),
+        ![
+          '--all',
+          '--update',
+          '--coverage',
+          '--cover',
+          '--help',
+          '-h'
+        ].includes(arg)
+    )
   }
 }
 
@@ -40,7 +45,7 @@ function runCommand(command, args = []) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       stdio: 'inherit',
-      shell: process.platform === 'win32',
+      shell: process.platform === 'win32'
     })
 
     child.on('exit', code => {
@@ -82,7 +87,13 @@ async function main() {
 
     // Step 1: Run checks
     console.log('Running checks...')
-    let exitCode = await runCommand('pnpm', ['exec', 'run-p', '-c', '--aggregate-output', 'check:*'])
+    let exitCode = await runCommand('pnpm', [
+      'exec',
+      'run-p',
+      '-c',
+      '--aggregate-output',
+      'check:*'
+    ])
     if (exitCode !== 0) {
       console.error('Checks failed')
       process.exitCode = exitCode
@@ -92,7 +103,18 @@ async function main() {
     // Step 2: Run test:prepare (build)
     console.log('\nPreparing tests (building)...')
     if (useEnvFile) {
-      exitCode = await runCommand('pnpm', ['exec', 'dotenvx', '-q', 'run', '-f', '.env.test', '--', 'pnpm', 'run', 'build'])
+      exitCode = await runCommand('pnpm', [
+        'exec',
+        'dotenvx',
+        '-q',
+        'run',
+        '-f',
+        '.env.test',
+        '--',
+        'pnpm',
+        'run',
+        'build'
+      ])
     } else {
       exitCode = await runCommand('pnpm', ['run', 'build'])
     }
@@ -122,7 +144,17 @@ async function main() {
     }
 
     if (useEnvFile) {
-      exitCode = await runCommand('pnpm', ['exec', 'dotenvx', '-q', 'run', '-f', '.env.test', '--', 'pnpm', ...vitestArgs])
+      exitCode = await runCommand('pnpm', [
+        'exec',
+        'dotenvx',
+        '-q',
+        'run',
+        '-f',
+        '.env.test',
+        '--',
+        'pnpm',
+        ...vitestArgs
+      ])
     } else {
       exitCode = await runCommand('pnpm', vitestArgs)
     }
