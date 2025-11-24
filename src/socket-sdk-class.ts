@@ -20,6 +20,7 @@ import { urlSearchParamAsBoolean } from '@socketsecurity/lib/url'
 const abortSignal = getAbortSignal()
 
 import {
+  DEFAULT_CACHE_TTL,
   DEFAULT_HTTP_TIMEOUT,
   DEFAULT_RETRIES,
   DEFAULT_RETRY_DELAY,
@@ -116,6 +117,8 @@ export class SocketSdk {
   readonly #apiToken: string
   readonly #baseUrl: string
   readonly #cache: TtlCache | undefined
+  readonly #cacheByTtl: Map<number, TtlCache>
+  readonly #cacheTtlConfig: SocketSdkOptions['cacheTtl']
   readonly #hooks: SocketSdkOptions['hooks']
   readonly #onFileValidation: FileValidationCallback | undefined
   readonly #reqOptions: RequestOptions
@@ -146,7 +149,7 @@ export class SocketSdk {
       agent: agentOrObj,
       baseUrl = 'https://api.socket.dev/v0/',
       cache = false,
-      cacheTtl = 5 * 60 * 1000,
+      cacheTtl,
       hooks,
       onFileValidation,
       retries = DEFAULT_RETRIES,
@@ -180,13 +183,22 @@ export class SocketSdk {
     ) as Agent | undefined
     this.#apiToken = trimmedToken
     this.#baseUrl = normalizeBaseUrl(baseUrl)
+    this.#cacheTtlConfig = cacheTtl
+    // For backward compatibility, if cacheTtl is a number, use it as default TTL.
+    // If it's an object, use the default property or fallback to DEFAULT_CACHE_TTL.
+    const defaultTtl =
+      typeof cacheTtl === 'number'
+        ? cacheTtl
+        : (cacheTtl?.default ?? DEFAULT_CACHE_TTL)
     this.#cache = cache
       ? createTtlCache({
           memoize: true,
           prefix: 'socket-sdk',
-          ttl: cacheTtl,
+          ttl: defaultTtl,
         })
       : /* c8 ignore next - cache disabled by default */ undefined
+    // Map of TTL values to cache instances for per-endpoint caching.
+    this.#cacheByTtl = new Map()
     this.#hooks = hooks
     this.#onFileValidation = onFileValidation
     this.#retries = retries
@@ -367,17 +379,73 @@ export class SocketSdk {
   }
 
   /**
+   * Get the TTL for a specific endpoint.
+   * Returns endpoint-specific TTL if configured, otherwise returns default TTL.
+   */
+  #getTtlForEndpoint(endpoint: string): number | undefined {
+    const cacheTtl = this.#cacheTtlConfig
+    if (typeof cacheTtl === 'number') {
+      return cacheTtl
+    }
+    if (cacheTtl && typeof cacheTtl === 'object') {
+      // Check for endpoint-specific TTL first.
+      const endpointTtl = (cacheTtl as any)[endpoint]
+      if (typeof endpointTtl === 'number') {
+        return endpointTtl
+      }
+      // Fall back to default.
+      return cacheTtl.default
+    }
+    return undefined
+  }
+
+  /**
+   * Get or create a cache instance with the specified TTL.
+   * Reuses existing cache instances to avoid creating duplicates.
+   */
+  #getCacheForTtl(ttl: number): TtlCache {
+    let cache = this.#cacheByTtl.get(ttl)
+    if (!cache) {
+      cache = createTtlCache({
+        memoize: true,
+        prefix: 'socket-sdk',
+        ttl,
+      })
+      this.#cacheByTtl.set(ttl, cache)
+    }
+    return cache
+  }
+
+  /**
    * Execute a GET request with optional caching.
    * Internal method for handling cached GET requests with retry logic.
+   * Supports per-endpoint TTL configuration.
    */
-  async #getCached<T>(cacheKey: string, fetcher: () => Promise<T>): Promise<T> {
+  async #getCached<T>(
+    cacheKey: string,
+    fetcher: () => Promise<T>,
+    endpointName?: string | undefined,
+  ): Promise<T> {
     // If caching is disabled, just execute the request.
     if (!this.#cache) {
       return await this.#executeWithRetry(fetcher)
     }
 
+    // Get endpoint-specific TTL if provided.
+    const endpointTtl = endpointName
+      ? this.#getTtlForEndpoint(endpointName)
+      : undefined
+
+    // Select the appropriate cache instance.
+    // If endpoint has custom TTL, get/create cache for that TTL.
+    // Otherwise use the default cache.
+    const cacheToUse =
+      endpointTtl !== undefined
+        ? this.#getCacheForTtl(endpointTtl)
+        : this.#cache
+
     // Use cache with retry logic.
-    return await this.#cache.getOrFetch(cacheKey, async () => {
+    return await cacheToUse.getOrFetch(cacheKey, async () => {
       return await this.#executeWithRetry(fetcher)
     })
   }
@@ -1789,6 +1857,7 @@ export class SocketSdk {
               this.#hooks,
             ),
           ),
+        'organizations',
       )
       return {
         cause: undefined,
@@ -2370,6 +2439,7 @@ export class SocketSdk {
               this.#hooks,
             ),
           ),
+        'quota',
       )
       return this.#handleApiSuccess<'getQuota'>(data)
       /* c8 ignore start - Standard API error handling, tested via public method error cases */

@@ -302,14 +302,39 @@ export interface SocketSdkOptions {
   baseUrl?: string | undefined
   /**
    * Enable TTL caching for API responses (default: false).
-   * When enabled, GET requests are cached with a 5-minute TTL.
+   * When enabled, GET requests are cached with configurable TTLs.
+   * Only applies to listOrganizations() and getQuota() methods.
    */
   cache?: boolean | undefined
   /**
    * Cache TTL in milliseconds (default: 300_000 = 5 minutes).
    * Only used when cache is enabled.
+   * Can be a single number for all endpoints or an object for per-endpoint TTLs.
+   *
+   * Recommended TTLs by endpoint:
+   * - organizations: 30 minutes (rarely changes)
+   * - quota: 10 minutes (changes incrementally)
+   *
+   * @example
+   * // Single TTL for all endpoints.
+   * cacheTtl: 15 * 60 * 1000  // 15 minutes
+   *
+   * @example
+   * // Per-endpoint TTLs with recommended values.
+   * cacheTtl: {
+   *   default: 5 * 60 * 1000,        // 5 minutes default
+   *   organizations: 30 * 60 * 1000, // 30 minutes (recommended)
+   *   quota: 10 * 60 * 1000          // 10 minutes (recommended)
+   * }
    */
-  cacheTtl?: number | undefined
+  cacheTtl?:
+    | number
+    | {
+        default?: number | undefined
+        organizations?: number | undefined
+        quota?: number | undefined
+      }
+    | undefined
   /**
    * Callback for file validation events.
    * Called when any file-upload method detects unreadable files:
