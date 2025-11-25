@@ -17,7 +17,7 @@ function runCommand(command, args = []) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       stdio: 'inherit',
-      shell: process.platform === 'win32',
+      shell: process.platform === 'win32'
     })
 
     child.on('exit', code => {
@@ -40,7 +40,7 @@ async function main() {
       '-c',
       '--aggregate-output',
       'check:lint',
-      'check:tsc',
+      'check:tsc'
     ])
 
     process.exitCode = exitCode

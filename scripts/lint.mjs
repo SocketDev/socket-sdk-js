@@ -22,7 +22,7 @@ function parseArgs() {
     all: args.includes('--all'),
     help: args.includes('--help') || args.includes('-h'),
     // Get remaining positional arguments (file paths)
-    files: args.filter(arg => !arg.startsWith('--') && !arg.startsWith('-')),
+    files: args.filter(arg => !arg.startsWith('--') && !arg.startsWith('-'))
   }
 }
 
@@ -33,7 +33,7 @@ function runCommand(command, args = []) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       stdio: 'inherit',
-      shell: process.platform === 'win32',
+      shell: process.platform === 'win32'
     })
 
     child.on('exit', code => {
@@ -76,7 +76,7 @@ async function main() {
       'oxlint',
       '-c=.oxlintrc.json',
       '--ignore-path=.oxlintignore',
-      '--tsconfig=tsconfig.json',
+      '--tsconfig=tsconfig.json'
     ]
 
     // Add fix flag if requested
@@ -101,7 +101,17 @@ async function main() {
     const useEnvFile = existsSync('.env.local')
     let exitCode
     if (useEnvFile) {
-      exitCode = await runCommand('pnpm', ['exec', 'dotenvx', '-q', 'run', '-f', '.env.local', '--', 'pnpm', ...oxlintArgs])
+      exitCode = await runCommand('pnpm', [
+        'exec',
+        'dotenvx',
+        '-q',
+        'run',
+        '-f',
+        '.env.local',
+        '--',
+        'pnpm',
+        ...oxlintArgs
+      ])
     } else {
       exitCode = await runCommand('pnpm', oxlintArgs)
     }

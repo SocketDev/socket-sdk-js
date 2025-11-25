@@ -57,4 +57,63 @@ describe('SocketSdk', () => {
       })
     })
   })
+
+  describe('getTelemetryConfig', () => {
+    it('should get telemetry config', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/telemetry/config')
+        .reply(200, { telemetry: { enabled: false } })
+
+      const client = new SocketSdk('yetAnotherApiKey')
+      const res = await client.getTelemetryConfig('test-org')
+
+      expect(res).toEqual({
+        success: true,
+        status: 200,
+        data: { telemetry: { enabled: false } }
+      })
+    })
+  })
+
+  describe('updateOrgTelemetryConfig', () => {
+    it('should update telemetry config', async () => {
+      nock('https://api.socket.dev')
+        .put('/v0/orgs/test-org/telemetry/config', { enabled: true })
+        .reply(200, { telemetry: { enabled: true } })
+
+      const client = new SocketSdk('yetAnotherApiKey')
+      const res = await client.updateOrgTelemetryConfig('test-org', {
+        enabled: true
+      })
+
+      expect(res).toEqual({
+        success: true,
+        status: 200,
+        data: { telemetry: { enabled: true } }
+      })
+    })
+  })
+
+  describe('postOrgTelemetry', () => {
+    it('should post telemetry data', async () => {
+      nock('https://api.socket.dev')
+        .post('/v0/orgs/test-org/telemetry', {
+          event: 'test-event',
+          timestamp: 1234567890
+        })
+        .reply(200, {})
+
+      const client = new SocketSdk('yetAnotherApiKey')
+      const res = await client.postOrgTelemetry('test-org', {
+        event: 'test-event',
+        timestamp: 1234567890
+      })
+
+      expect(res).toEqual({
+        success: true,
+        status: 200,
+        data: {}
+      })
+    })
+  })
 })
