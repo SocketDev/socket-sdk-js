@@ -152,6 +152,20 @@ describe('SocketSdk - API Methods Coverage', () => {
         } else if (url.includes('/quota')) {
           // Quota endpoint
           res.end(JSON.stringify({ data: { limit: 1000, used: 100 } }))
+        } else if (url.includes('/telemetry/config')) {
+          // Telemetry config endpoint
+          if (req.method === 'PUT') {
+            res.end(JSON.stringify({ telemetry: { enabled: true } }))
+          } else {
+            res.end(JSON.stringify({ telemetry: { enabled: false } }))
+          }
+        } else if (url.includes('/telemetry')) {
+          // Telemetry POST endpoint (must come before generic /settings)
+          if (req.method === 'POST') {
+            res.end(JSON.stringify({}))
+          } else {
+            res.end(JSON.stringify({}))
+          }
         } else if (url.includes('/settings')) {
           // Settings endpoint
           res.end(JSON.stringify({ data: { success: true } }))
@@ -489,6 +503,42 @@ describe('SocketSdk - API Methods Coverage', () => {
         enabled: true,
       })
       expect(result.success).toBe(true)
+    })
+  })
+
+  describe('Telemetry Methods', () => {
+    it('covers getTelemetryConfig', async () => {
+      const result = await client.getTelemetryConfig('test-org')
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data).toBeDefined()
+        expect(result.data.telemetry).toBeDefined()
+        expect(result.data.telemetry.enabled).toBe(false)
+      }
+    })
+
+    it('covers updateOrgTelemetryConfig', async () => {
+      const result = await client.updateOrgTelemetryConfig('test-org', {
+        enabled: true,
+      })
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data).toBeDefined()
+        expect(result.data.telemetry).toBeDefined()
+        expect(result.data.telemetry.enabled).toBe(true)
+      }
+    })
+
+    it('covers postOrgTelemetry', async () => {
+      const result = await client.postOrgTelemetry('test-org', {
+        event: 'test-event',
+        timestamp: Date.now(),
+      })
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data).toBeDefined()
+        expect(result.data).toEqual({})
+      }
     })
   })
 
