@@ -31556,132 +31556,6 @@
             }
           },
           {
-            "name": "filters.alertSeverity",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of alert severities (\"low\", \"medium\", \"high\", or \"critical\") that should be included",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.alertSeverity.notIn",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of alert severities (\"low\", \"medium\", \"high\", or \"critical\") that should be excluded",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.repoSlug",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of repo slugs that should be included",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.repoSlug.notIn",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of repo slugs that should be excluded",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.repoFullName",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of repo full names that should be included",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.repoFullName.notIn",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of repo full names that should be excluded",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.repoLabels",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of repo labels that should be included. Use \"\" to filter for repositories with no labels.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.repoLabels.notIn",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of repo labels that should be excluded. Use \"\" to filter for repositories with no labels.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.alertType",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be included",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.alertType.notIn",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be excluded",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.artifactName",
-            "in": "query",
-            "required": false,
-            "description": "Name of artifact",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.artifactName.notIn",
-            "in": "query",
-            "required": false,
-            "description": "Name of artifact",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.artifactType",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be included",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.artifactType.notIn",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be excluded",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "filters.alertAction",
             "in": "query",
             "required": false,
@@ -31713,24 +31587,6 @@
             "in": "query",
             "required": false,
             "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.alertFixType",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of alert fix types (\"upgrade\", \"cve\", or \"remove\") that should be included",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.alertFixType.notIn",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of alert fix types (\"upgrade\", \"cve\", or \"remove\") that should be excluded",
             "schema": {
               "type": "string"
             }
@@ -31826,55 +31682,37 @@
             }
           },
           {
-            "name": "filters.alertReachabilityType",
+            "name": "filters.alertEPSS",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert CVE reachability types (\"direct_dependency\", \"error\", \"maybe_reachable\", \"missing_support\", \"pending\", \"reachable\", \"undeterminable_reachability\", \"unknown\", or \"unreachable\") that should be included",
+            "description": "Alert EPSS (\"low\", \"medium\", \"high\", \"critical\")",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "filters.alertReachabilityType.notIn",
+            "name": "filters.alertEPSS.notIn",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert CVE reachability types (\"direct_dependency\", \"error\", \"maybe_reachable\", \"missing_support\", \"pending\", \"reachable\", \"undeterminable_reachability\", \"unknown\", or \"unreachable\") that should be excluded",
+            "description": "Alert EPSS (\"low\", \"medium\", \"high\", \"critical\")",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "filters.alertReachabilityAnalysisType",
+            "name": "filters.alertFixType",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be included",
+            "description": "Comma-separated list of alert fix types (\"upgrade\", \"cve\", or \"remove\") that should be included",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "filters.alertReachabilityAnalysisType.notIn",
+            "name": "filters.alertFixType.notIn",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be excluded",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.alertPriority",
-            "in": "query",
-            "required": false,
-            "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.alertPriority.notIn",
-            "in": "query",
-            "required": false,
-            "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")",
+            "description": "Comma-separated list of alert fix types (\"upgrade\", \"cve\", or \"remove\") that should be excluded",
             "schema": {
               "type": "string"
             }
@@ -31900,38 +31738,146 @@
             }
           },
           {
-            "name": "filters.alertEPSS",
+            "name": "filters.alertPriority",
             "in": "query",
             "required": false,
-            "description": "Alert EPSS (\"low\", \"medium\", \"high\", \"critical\")",
+            "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "filters.alertEPSS.notIn",
+            "name": "filters.alertPriority.notIn",
             "in": "query",
             "required": false,
-            "description": "Alert EPSS (\"low\", \"medium\", \"high\", \"critical\")",
+            "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "filters.dependencyDirect",
+            "name": "filters.alertReachabilityAnalysisType",
             "in": "query",
             "required": false,
-            "description": "Direct/transitive dependency filter flag",
+            "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertReachabilityAnalysisType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertReachabilityType",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert CVE reachability types (\"direct_dependency\", \"error\", \"maybe_reachable\", \"missing_support\", \"pending\", \"reachable\", \"undeterminable_reachability\", \"unknown\", or \"unreachable\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertReachabilityType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert CVE reachability types (\"direct_dependency\", \"error\", \"maybe_reachable\", \"missing_support\", \"pending\", \"reachable\", \"undeterminable_reachability\", \"unknown\", or \"unreachable\") that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertSeverity",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert severities (\"low\", \"medium\", \"high\", or \"critical\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertSeverity.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert severities (\"low\", \"medium\", \"high\", or \"critical\") that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertType",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactName",
+            "in": "query",
+            "required": false,
+            "description": "Name of artifact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactName.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Name of artifact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactType",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.dependencyDead",
+            "in": "query",
+            "required": false,
+            "description": "Dead/reachable dependency filter flag",
             "schema": {
               "type": "boolean",
               "default": false
             }
           },
           {
-            "name": "filters.dependencyDirect.notIn",
+            "name": "filters.dependencyDead.notIn",
             "in": "query",
             "required": false,
-            "description": "Direct/transitive dependency filter flag",
+            "description": "Dead/reachable dependency filter flag",
             "schema": {
               "type": "boolean",
               "default": false
@@ -31958,23 +31904,77 @@
             }
           },
           {
-            "name": "filters.dependencyDead",
+            "name": "filters.dependencyDirect",
             "in": "query",
             "required": false,
-            "description": "Dead/reachable dependency filter flag",
+            "description": "Direct/transitive dependency filter flag",
             "schema": {
               "type": "boolean",
               "default": false
             }
           },
           {
-            "name": "filters.dependencyDead.notIn",
+            "name": "filters.dependencyDirect.notIn",
             "in": "query",
             "required": false,
-            "description": "Dead/reachable dependency filter flag",
+            "description": "Direct/transitive dependency filter flag",
             "schema": {
               "type": "boolean",
               "default": false
+            }
+          },
+          {
+            "name": "filters.repoFullName",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo full names that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoFullName.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo full names that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoLabels",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo labels that should be included. Use \"\" to filter for repositories with no labels.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoLabels.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo labels that should be excluded. Use \"\" to filter for repositories with no labels.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoSlug",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo slugs that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoSlug.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo slugs that should be excluded",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -32337,70 +32337,16 @@
                           "type": "object",
                           "additionalProperties": false,
                           "properties": {
-                            "alertSeverity": {
-                              "type": "array",
-                              "items": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "description": "Comma-separated list of alert severities (\"low\", \"medium\", \"high\", or \"critical\") that should be excluded"
-                            },
-                            "repoSlug": {
-                              "type": "array",
-                              "items": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "description": "Comma-separated list of repo slugs that should be excluded"
-                            },
-                            "repoFullName": {
-                              "type": "array",
-                              "items": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "description": "Comma-separated list of repo full names that should be excluded"
-                            },
-                            "repoLabels": {
-                              "type": "array",
-                              "items": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "description": "Comma-separated list of repo labels that should be excluded. Use \"\" to filter for repositories with no labels."
-                            },
-                            "alertType": {
-                              "type": "array",
-                              "items": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be excluded"
-                            },
-                            "artifactName": {
-                              "type": "array",
-                              "items": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "description": "Name of artifact"
-                            },
-                            "artifactType": {
-                              "type": "array",
-                              "items": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be excluded"
-                            },
                             "alertAction": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert actions (\"error\", \"warn\", \"monitor\", or \"ignore) that should be included"
+                            },
+                            "alertAction.notIn": {
                               "type": "array",
                               "items": {
                                 "type": "string",
@@ -32416,18 +32362,27 @@
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded"
+                              "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included"
                             },
-                            "alertFixType": {
+                            "alertActionSourceType.notIn": {
                               "type": "array",
                               "items": {
                                 "type": "string",
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Comma-separated list of alert fix types (\"upgrade\", \"cve\", or \"remove\") that should be excluded"
+                              "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded"
                             },
                             "alertCategory": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert categories (\"supplyChainRisk\", \"maintenance\", \"quality\", \"license\", or \"vulnerability\") that should be included"
+                            },
+                            "alertCategory.notIn": {
                               "type": "array",
                               "items": {
                                 "type": "string",
@@ -32445,7 +32400,25 @@
                               },
                               "description": "CVE ID"
                             },
+                            "alertCveId.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "CVE ID"
+                            },
                             "alertCveTitle": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "CVE title"
+                            },
+                            "alertCveTitle.notIn": {
                               "type": "array",
                               "items": {
                                 "type": "string",
@@ -32463,6 +32436,15 @@
                               },
                               "description": "CWE ID"
                             },
+                            "alertCweId.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "CWE ID"
+                            },
                             "alertCweName": {
                               "type": "array",
                               "items": {
@@ -32472,41 +32454,14 @@
                               },
                               "description": "CWE name"
                             },
-                            "alertReachabilityType": {
+                            "alertCweName.notIn": {
                               "type": "array",
                               "items": {
                                 "type": "string",
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Comma-separated list of alert CVE reachability types (\"direct_dependency\", \"error\", \"maybe_reachable\", \"missing_support\", \"pending\", \"reachable\", \"undeterminable_reachability\", \"unknown\", or \"unreachable\") that should be excluded"
-                            },
-                            "alertReachabilityAnalysisType": {
-                              "type": "array",
-                              "items": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be excluded"
-                            },
-                            "alertPriority": {
-                              "type": "array",
-                              "items": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")"
-                            },
-                            "alertKEV": {
-                              "type": "array",
-                              "items": {
-                                "type": "boolean",
-                                "default": false,
-                                "description": ""
-                              },
-                              "description": "Alert KEV (Known Exploited Vulnerability) filter flag"
+                              "description": "CWE name"
                             },
                             "alertEPSS": {
                               "type": "array",
@@ -32517,14 +32472,176 @@
                               },
                               "description": "Alert EPSS (\"low\", \"medium\", \"high\", \"critical\")"
                             },
-                            "dependencyDirect": {
+                            "alertEPSS.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert EPSS (\"low\", \"medium\", \"high\", \"critical\")"
+                            },
+                            "alertFixType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert fix types (\"upgrade\", \"cve\", or \"remove\") that should be included"
+                            },
+                            "alertFixType.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert fix types (\"upgrade\", \"cve\", or \"remove\") that should be excluded"
+                            },
+                            "alertKEV": {
                               "type": "array",
                               "items": {
                                 "type": "boolean",
                                 "default": false,
                                 "description": ""
                               },
-                              "description": "Direct/transitive dependency filter flag"
+                              "description": "Alert KEV (Known Exploited Vulnerability) filter flag"
+                            },
+                            "alertPriority": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")"
+                            },
+                            "alertPriority.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")"
+                            },
+                            "alertReachabilityAnalysisType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be included"
+                            },
+                            "alertReachabilityAnalysisType.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be excluded"
+                            },
+                            "alertReachabilityType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert CVE reachability types (\"direct_dependency\", \"error\", \"maybe_reachable\", \"missing_support\", \"pending\", \"reachable\", \"undeterminable_reachability\", \"unknown\", or \"unreachable\") that should be included"
+                            },
+                            "alertReachabilityType.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert CVE reachability types (\"direct_dependency\", \"error\", \"maybe_reachable\", \"missing_support\", \"pending\", \"reachable\", \"undeterminable_reachability\", \"unknown\", or \"unreachable\") that should be excluded"
+                            },
+                            "alertSeverity": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert severities (\"low\", \"medium\", \"high\", or \"critical\") that should be included"
+                            },
+                            "alertSeverity.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert severities (\"low\", \"medium\", \"high\", or \"critical\") that should be excluded"
+                            },
+                            "alertType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be included"
+                            },
+                            "alertType.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be excluded"
+                            },
+                            "artifactName": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Name of artifact"
+                            },
+                            "artifactName.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Name of artifact"
+                            },
+                            "artifactType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be included"
+                            },
+                            "artifactType.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be excluded"
+                            },
+                            "dependencyDead": {
+                              "type": "array",
+                              "items": {
+                                "type": "boolean",
+                                "default": false,
+                                "description": ""
+                              },
+                              "description": "Dead/reachable dependency filter flag"
                             },
                             "dependencyDev": {
                               "type": "array",
@@ -32535,14 +32652,68 @@
                               },
                               "description": "Development/production dependency filter flag"
                             },
-                            "dependencyDead": {
+                            "dependencyDirect": {
                               "type": "array",
                               "items": {
                                 "type": "boolean",
                                 "default": false,
                                 "description": ""
                               },
-                              "description": "Dead/reachable dependency filter flag"
+                              "description": "Direct/transitive dependency filter flag"
+                            },
+                            "repoFullName": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo full names that should be included"
+                            },
+                            "repoFullName.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo full names that should be excluded"
+                            },
+                            "repoLabels": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo labels that should be included. Use \"\" to filter for repositories with no labels."
+                            },
+                            "repoLabels.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo labels that should be excluded. Use \"\" to filter for repositories with no labels."
+                            },
+                            "repoSlug": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo slugs that should be included"
+                            },
+                            "repoSlug.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo slugs that should be excluded"
                             }
                           },
                           "description": ""
@@ -32632,132 +32803,6 @@
             }
           },
           {
-            "name": "filters.alertSeverity",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of alert severities (\"low\", \"medium\", \"high\", or \"critical\") that should be included",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.alertSeverity.notIn",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of alert severities (\"low\", \"medium\", \"high\", or \"critical\") that should be excluded",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.repoSlug",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of repo slugs that should be included",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.repoSlug.notIn",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of repo slugs that should be excluded",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.repoFullName",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of repo full names that should be included",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.repoFullName.notIn",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of repo full names that should be excluded",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.repoLabels",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of repo labels that should be included. Use \"\" to filter for repositories with no labels.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.repoLabels.notIn",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of repo labels that should be excluded. Use \"\" to filter for repositories with no labels.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.alertType",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be included",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.alertType.notIn",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be excluded",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.artifactName",
-            "in": "query",
-            "required": false,
-            "description": "Name of artifact",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.artifactName.notIn",
-            "in": "query",
-            "required": false,
-            "description": "Name of artifact",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.artifactType",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be included",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.artifactType.notIn",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be excluded",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "filters.alertAction",
             "in": "query",
             "required": false,
@@ -32789,24 +32834,6 @@
             "in": "query",
             "required": false,
             "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.alertFixType",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of alert fix types (\"upgrade\", \"cve\", or \"remove\") that should be included",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.alertFixType.notIn",
-            "in": "query",
-            "required": false,
-            "description": "Comma-separated list of alert fix types (\"upgrade\", \"cve\", or \"remove\") that should be excluded",
             "schema": {
               "type": "string"
             }
@@ -32902,55 +32929,37 @@
             }
           },
           {
-            "name": "filters.alertReachabilityType",
+            "name": "filters.alertEPSS",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert CVE reachability types (\"direct_dependency\", \"error\", \"maybe_reachable\", \"missing_support\", \"pending\", \"reachable\", \"undeterminable_reachability\", \"unknown\", or \"unreachable\") that should be included",
+            "description": "Alert EPSS (\"low\", \"medium\", \"high\", \"critical\")",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "filters.alertReachabilityType.notIn",
+            "name": "filters.alertEPSS.notIn",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert CVE reachability types (\"direct_dependency\", \"error\", \"maybe_reachable\", \"missing_support\", \"pending\", \"reachable\", \"undeterminable_reachability\", \"unknown\", or \"unreachable\") that should be excluded",
+            "description": "Alert EPSS (\"low\", \"medium\", \"high\", \"critical\")",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "filters.alertReachabilityAnalysisType",
+            "name": "filters.alertFixType",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be included",
+            "description": "Comma-separated list of alert fix types (\"upgrade\", \"cve\", or \"remove\") that should be included",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "filters.alertReachabilityAnalysisType.notIn",
+            "name": "filters.alertFixType.notIn",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be excluded",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.alertPriority",
-            "in": "query",
-            "required": false,
-            "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "filters.alertPriority.notIn",
-            "in": "query",
-            "required": false,
-            "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")",
+            "description": "Comma-separated list of alert fix types (\"upgrade\", \"cve\", or \"remove\") that should be excluded",
             "schema": {
               "type": "string"
             }
@@ -32976,38 +32985,146 @@
             }
           },
           {
-            "name": "filters.alertEPSS",
+            "name": "filters.alertPriority",
             "in": "query",
             "required": false,
-            "description": "Alert EPSS (\"low\", \"medium\", \"high\", \"critical\")",
+            "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "filters.alertEPSS.notIn",
+            "name": "filters.alertPriority.notIn",
             "in": "query",
             "required": false,
-            "description": "Alert EPSS (\"low\", \"medium\", \"high\", \"critical\")",
+            "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "filters.dependencyDirect",
+            "name": "filters.alertReachabilityAnalysisType",
             "in": "query",
             "required": false,
-            "description": "Direct/transitive dependency filter flag",
+            "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertReachabilityAnalysisType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertReachabilityType",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert CVE reachability types (\"direct_dependency\", \"error\", \"maybe_reachable\", \"missing_support\", \"pending\", \"reachable\", \"undeterminable_reachability\", \"unknown\", or \"unreachable\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertReachabilityType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert CVE reachability types (\"direct_dependency\", \"error\", \"maybe_reachable\", \"missing_support\", \"pending\", \"reachable\", \"undeterminable_reachability\", \"unknown\", or \"unreachable\") that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertSeverity",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert severities (\"low\", \"medium\", \"high\", or \"critical\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertSeverity.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert severities (\"low\", \"medium\", \"high\", or \"critical\") that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertType",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactName",
+            "in": "query",
+            "required": false,
+            "description": "Name of artifact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactName.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Name of artifact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactType",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.dependencyDead",
+            "in": "query",
+            "required": false,
+            "description": "Dead/reachable dependency filter flag",
             "schema": {
               "type": "boolean",
               "default": false
             }
           },
           {
-            "name": "filters.dependencyDirect.notIn",
+            "name": "filters.dependencyDead.notIn",
             "in": "query",
             "required": false,
-            "description": "Direct/transitive dependency filter flag",
+            "description": "Dead/reachable dependency filter flag",
             "schema": {
               "type": "boolean",
               "default": false
@@ -33034,23 +33151,77 @@
             }
           },
           {
-            "name": "filters.dependencyDead",
+            "name": "filters.dependencyDirect",
             "in": "query",
             "required": false,
-            "description": "Dead/reachable dependency filter flag",
+            "description": "Direct/transitive dependency filter flag",
             "schema": {
               "type": "boolean",
               "default": false
             }
           },
           {
-            "name": "filters.dependencyDead.notIn",
+            "name": "filters.dependencyDirect.notIn",
             "in": "query",
             "required": false,
-            "description": "Dead/reachable dependency filter flag",
+            "description": "Direct/transitive dependency filter flag",
             "schema": {
               "type": "boolean",
               "default": false
+            }
+          },
+          {
+            "name": "filters.repoFullName",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo full names that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoFullName.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo full names that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoLabels",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo labels that should be included. Use \"\" to filter for repositories with no labels.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoLabels.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo labels that should be excluded. Use \"\" to filter for repositories with no labels.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoSlug",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo slugs that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoSlug.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo slugs that should be excluded",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -33138,70 +33309,16 @@
                           "type": "object",
                           "additionalProperties": false,
                           "properties": {
-                            "alertSeverity": {
-                              "type": "array",
-                              "items": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "description": "Comma-separated list of alert severities (\"low\", \"medium\", \"high\", or \"critical\") that should be excluded"
-                            },
-                            "repoSlug": {
-                              "type": "array",
-                              "items": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "description": "Comma-separated list of repo slugs that should be excluded"
-                            },
-                            "repoFullName": {
-                              "type": "array",
-                              "items": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "description": "Comma-separated list of repo full names that should be excluded"
-                            },
-                            "repoLabels": {
-                              "type": "array",
-                              "items": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "description": "Comma-separated list of repo labels that should be excluded. Use \"\" to filter for repositories with no labels."
-                            },
-                            "alertType": {
-                              "type": "array",
-                              "items": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be excluded"
-                            },
-                            "artifactName": {
-                              "type": "array",
-                              "items": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "description": "Name of artifact"
-                            },
-                            "artifactType": {
-                              "type": "array",
-                              "items": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be excluded"
-                            },
                             "alertAction": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert actions (\"error\", \"warn\", \"monitor\", or \"ignore) that should be included"
+                            },
+                            "alertAction.notIn": {
                               "type": "array",
                               "items": {
                                 "type": "string",
@@ -33217,18 +33334,27 @@
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded"
+                              "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included"
                             },
-                            "alertFixType": {
+                            "alertActionSourceType.notIn": {
                               "type": "array",
                               "items": {
                                 "type": "string",
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Comma-separated list of alert fix types (\"upgrade\", \"cve\", or \"remove\") that should be excluded"
+                              "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded"
                             },
                             "alertCategory": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert categories (\"supplyChainRisk\", \"maintenance\", \"quality\", \"license\", or \"vulnerability\") that should be included"
+                            },
+                            "alertCategory.notIn": {
                               "type": "array",
                               "items": {
                                 "type": "string",
@@ -33246,7 +33372,25 @@
                               },
                               "description": "CVE ID"
                             },
+                            "alertCveId.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "CVE ID"
+                            },
                             "alertCveTitle": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "CVE title"
+                            },
+                            "alertCveTitle.notIn": {
                               "type": "array",
                               "items": {
                                 "type": "string",
@@ -33264,6 +33408,15 @@
                               },
                               "description": "CWE ID"
                             },
+                            "alertCweId.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "CWE ID"
+                            },
                             "alertCweName": {
                               "type": "array",
                               "items": {
@@ -33273,41 +33426,14 @@
                               },
                               "description": "CWE name"
                             },
-                            "alertReachabilityType": {
+                            "alertCweName.notIn": {
                               "type": "array",
                               "items": {
                                 "type": "string",
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Comma-separated list of alert CVE reachability types (\"direct_dependency\", \"error\", \"maybe_reachable\", \"missing_support\", \"pending\", \"reachable\", \"undeterminable_reachability\", \"unknown\", or \"unreachable\") that should be excluded"
-                            },
-                            "alertReachabilityAnalysisType": {
-                              "type": "array",
-                              "items": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be excluded"
-                            },
-                            "alertPriority": {
-                              "type": "array",
-                              "items": {
-                                "type": "string",
-                                "description": "",
-                                "default": ""
-                              },
-                              "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")"
-                            },
-                            "alertKEV": {
-                              "type": "array",
-                              "items": {
-                                "type": "boolean",
-                                "default": false,
-                                "description": ""
-                              },
-                              "description": "Alert KEV (Known Exploited Vulnerability) filter flag"
+                              "description": "CWE name"
                             },
                             "alertEPSS": {
                               "type": "array",
@@ -33318,14 +33444,176 @@
                               },
                               "description": "Alert EPSS (\"low\", \"medium\", \"high\", \"critical\")"
                             },
-                            "dependencyDirect": {
+                            "alertEPSS.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert EPSS (\"low\", \"medium\", \"high\", \"critical\")"
+                            },
+                            "alertFixType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert fix types (\"upgrade\", \"cve\", or \"remove\") that should be included"
+                            },
+                            "alertFixType.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert fix types (\"upgrade\", \"cve\", or \"remove\") that should be excluded"
+                            },
+                            "alertKEV": {
                               "type": "array",
                               "items": {
                                 "type": "boolean",
                                 "default": false,
                                 "description": ""
                               },
-                              "description": "Direct/transitive dependency filter flag"
+                              "description": "Alert KEV (Known Exploited Vulnerability) filter flag"
+                            },
+                            "alertPriority": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")"
+                            },
+                            "alertPriority.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")"
+                            },
+                            "alertReachabilityAnalysisType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be included"
+                            },
+                            "alertReachabilityAnalysisType.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be excluded"
+                            },
+                            "alertReachabilityType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert CVE reachability types (\"direct_dependency\", \"error\", \"maybe_reachable\", \"missing_support\", \"pending\", \"reachable\", \"undeterminable_reachability\", \"unknown\", or \"unreachable\") that should be included"
+                            },
+                            "alertReachabilityType.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert CVE reachability types (\"direct_dependency\", \"error\", \"maybe_reachable\", \"missing_support\", \"pending\", \"reachable\", \"undeterminable_reachability\", \"unknown\", or \"unreachable\") that should be excluded"
+                            },
+                            "alertSeverity": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert severities (\"low\", \"medium\", \"high\", or \"critical\") that should be included"
+                            },
+                            "alertSeverity.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert severities (\"low\", \"medium\", \"high\", or \"critical\") that should be excluded"
+                            },
+                            "alertType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be included"
+                            },
+                            "alertType.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert types (e.g. \"usesEval\", \"unmaintained\", etc.) that should be excluded"
+                            },
+                            "artifactName": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Name of artifact"
+                            },
+                            "artifactName.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Name of artifact"
+                            },
+                            "artifactType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be included"
+                            },
+                            "artifactType.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be excluded"
+                            },
+                            "dependencyDead": {
+                              "type": "array",
+                              "items": {
+                                "type": "boolean",
+                                "default": false,
+                                "description": ""
+                              },
+                              "description": "Dead/reachable dependency filter flag"
                             },
                             "dependencyDev": {
                               "type": "array",
@@ -33336,14 +33624,68 @@
                               },
                               "description": "Development/production dependency filter flag"
                             },
-                            "dependencyDead": {
+                            "dependencyDirect": {
                               "type": "array",
                               "items": {
                                 "type": "boolean",
                                 "default": false,
                                 "description": ""
                               },
-                              "description": "Dead/reachable dependency filter flag"
+                              "description": "Direct/transitive dependency filter flag"
+                            },
+                            "repoFullName": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo full names that should be included"
+                            },
+                            "repoFullName.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo full names that should be excluded"
+                            },
+                            "repoLabels": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo labels that should be included. Use \"\" to filter for repositories with no labels."
+                            },
+                            "repoLabels.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo labels that should be excluded. Use \"\" to filter for repositories with no labels."
+                            },
+                            "repoSlug": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo slugs that should be included"
+                            },
+                            "repoSlug.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo slugs that should be excluded"
                             }
                           },
                           "description": ""
@@ -35841,6 +36183,7 @@
               "enum": [
                 "github",
                 "cargo",
+                "composer",
                 "chrome",
                 "golang",
                 "huggingface",
@@ -36128,6 +36471,7 @@
               "enum": [
                 "github",
                 "cargo",
+                "composer",
                 "chrome",
                 "golang",
                 "huggingface",
