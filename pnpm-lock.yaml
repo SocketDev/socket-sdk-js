@@ -12,8 +12,8 @@ importers:
   .:
     dependencies:
       '@socketsecurity/lib':
-        specifier: 4.3.0
-        version: 4.3.0(typescript@5.9.3)
+        specifier: 5.0.0
+        version: 5.0.0(typescript@5.9.3)
     devDependencies:
       '@babel/generator':
         specifier: 7.28.5
@@ -685,8 +685,8 @@ packages:
     resolution: {integrity: sha512-Fl4GNUJ/z3IBJBGj4IsJfuRGUBCRMgX0df0mb5x5buaCPDKC+NhMhAFuxpc3viLSHV12CO2rGaNCf4fBYWI0FA==}
     engines: {node: '>=18', pnpm: '>=10.16.0'}
 
-  '@socketsecurity/lib@4.3.0':
-    resolution: {integrity: sha512-MvuHmyD8puqXpNiO/x9j3ZG3CKffNAuAOq9FyTnSn8jRlMpb2rED9C2WpzuaOh9ZHze/yOkEMX01phMNQOnbEw==}
+  '@socketsecurity/lib@5.0.0':
+    resolution: {integrity: sha512-XQLS07aNUJ82WyxUTZ6hPENdvglj/pHv3zp1hGIVUmPA4c1xxtKSF0UrLhsCXbFWGBhsPG+oR8v5DHWaTCYmDA==}
     engines: {node: '>=22', pnpm: '>=10.22.0'}
     peerDependencies:
       typescript: '>=5.0.0'
@@ -2673,7 +2673,7 @@ snapshots:
 
   '@socketregistry/packageurl-js@1.3.5': {}
 
-  '@socketsecurity/lib@4.3.0(typescript@5.9.3)':
+  '@socketsecurity/lib@5.0.0(typescript@5.9.3)':
     optionalDependencies:
       typescript: 5.9.3
 
