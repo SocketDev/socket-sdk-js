@@ -13,6 +13,8 @@ export interface paths {
      * CycloneDX SBOMs use the purl format to identify components.
      * This endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.
      *
+     * **Note:** This endpoint has a batch size limit (default: 1024 PURLs per request). Requests exceeding this limit will return a 400 Bad Request error.
+     *
      * More information on purl and CycloneDX:
      *
      * - [`purl` Spec](https://github.com/package-url/purl-spec)
@@ -4796,6 +4798,8 @@ export interface operations {
    * CycloneDX SBOMs use the purl format to identify components.
    * This endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.
    *
+   * **Note:** This endpoint has a batch size limit (default: 1024 PURLs per request). Requests exceeding this limit will return a 400 Bad Request error.
+   *
    * More information on purl and CycloneDX:
    *
    * - [`purl` Spec](https://github.com/package-url/purl-spec)
@@ -5168,7 +5172,13 @@ export interface operations {
         /** @description The committers to associate with the full-scan. Set query more than once to set multiple. */
         committers?: string
         /** @description The integration type to associate the full-scan with. Defaults to "Api" if omitted. */
-        integration_type?: 'api' | 'github' | 'gitlab' | 'bitbucket' | 'azure'
+        integration_type?:
+          | 'api'
+          | 'github'
+          | 'gitlab'
+          | 'bitbucket'
+          | 'azure'
+          | 'web'
         /** @description The integration org slug to associate the full-scan with. If omitted, the Socket org name will be used. This is used to generate links and badges. */
         integration_org_slug?: string
         /** @description Set the default branch of the repository to the branch of this full-scan. A branch name is required with this option. */
@@ -5705,7 +5715,13 @@ export interface operations {
         /** @description The committers to associate with the full-scan. Set query more than once to set multiple. */
         committers?: string
         /** @description The integration type to associate the full-scan with. Defaults to "Api" if omitted. */
-        integration_type?: 'api' | 'github' | 'gitlab' | 'bitbucket' | 'azure'
+        integration_type?:
+          | 'api'
+          | 'github'
+          | 'gitlab'
+          | 'bitbucket'
+          | 'azure'
+          | 'web'
         /** @description The integration org slug to associate the full-scan with. If omitted, the Socket org name will be used. This is used to generate links and badges. */
         integration_org_slug?: string
         /** @description Set the default branch of the repository to the branch of this full-scan. A branch name is required with this option. */
@@ -6314,7 +6330,13 @@ export interface operations {
         /** @description The committers to associate the new full-scan with. Set query more than once to set multiple committers. */
         committers?: string
         /** @description The integration type to associate the new full-scan with. Defaults to "api" if omitted. */
-        integration_type?: 'api' | 'github' | 'gitlab' | 'bitbucket' | 'azure'
+        integration_type?:
+          | 'api'
+          | 'github'
+          | 'gitlab'
+          | 'bitbucket'
+          | 'azure'
+          | 'web'
         /** @description The integration org slug to associate the new full-scan with. If omitted, the Socket org name will be used. This is used to generate links and badges. */
         integration_org_slug?: string
         /** @description Set to true when running a diff between a merged commit and its parent commit in the same branch. Set to false when running diffs in an open PR between unmerged commits. */
