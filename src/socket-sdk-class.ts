@@ -2078,6 +2078,48 @@ export class SocketSdk {
   }
 
   /**
+   * Fetch available fixes for vulnerabilities in a repository or scan.
+   * Returns fix recommendations including version upgrades and update types.
+   *
+   * @param orgSlug - Organization identifier
+   * @param options - Fix query options including repo_slug or full_scan_id, vulnerability IDs, and preferences
+   * @returns Fix details for requested vulnerabilities with upgrade recommendations
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgFixes(
+    orgSlug: string,
+    options: {
+      allow_major_updates: boolean
+      full_scan_id?: string | undefined
+      include_details?: boolean | undefined
+      include_responsible_direct_dependencies?: boolean | undefined
+      minimum_release_age?: string | undefined
+      repo_slug?: string | undefined
+      vulnerability_ids: string
+    },
+  ): Promise<SocketSdkResult<'fetch-fixes'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/fixes?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptions,
+              this.#hooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'fetch-fixes'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'fetch-fixes'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
    * Get organization's license policy configuration.* Returns allowed, restricted, and monitored license types.
    *
    * @throws {Error} When server returns 5xx status codes

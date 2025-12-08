@@ -166,6 +166,32 @@ describe('SocketSdk - API Methods Coverage', () => {
           } else {
             res.end(JSON.stringify({}))
           }
+        } else if (url.includes('/fixes')) {
+          // Fixes endpoint
+          res.end(
+            JSON.stringify({
+              fixDetails: {
+                'GHSA-xxxx-yyyy-zzzz': {
+                  type: 'fixFound',
+                  value: {
+                    cve: 'CVE-2024-1234',
+                    fixDetails: {
+                      fixes: [
+                        {
+                          fixedVersion: '2.0.0',
+                          manifestFiles: ['package.json'],
+                          purl: 'pkg:npm/lodash',
+                          updateType: 'major',
+                        },
+                      ],
+                    },
+                    ghsa: 'GHSA-xxxx-yyyy-zzzz',
+                    type: 'fixFound',
+                  },
+                },
+              },
+            }),
+          )
         } else if (url.includes('/webhooks')) {
           // Webhooks endpoints
           if (req.method === 'POST') {
@@ -610,6 +636,54 @@ describe('SocketSdk - API Methods Coverage', () => {
       if (result.success) {
         expect(result.data).toBeDefined()
         expect(result.data).toEqual({})
+      }
+    })
+  })
+
+  describe('Fixes Methods', () => {
+    it('covers getOrgFixes with repo_slug', async () => {
+      const result = await client.getOrgFixes('test-org', {
+        allow_major_updates: true,
+        repo_slug: 'test-repo',
+        vulnerability_ids: 'GHSA-xxxx-yyyy-zzzz',
+      })
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data).toBeDefined()
+        expect(result.data.fixDetails).toBeDefined()
+        expect(result.data.fixDetails['GHSA-xxxx-yyyy-zzzz']).toBeDefined()
+        const fixDetail = result.data.fixDetails['GHSA-xxxx-yyyy-zzzz']
+        if (fixDetail && 'type' in fixDetail && fixDetail.type === 'fixFound') {
+          expect(fixDetail.value.ghsa).toBe('GHSA-xxxx-yyyy-zzzz')
+          expect(fixDetail.value.cve).toBe('CVE-2024-1234')
+          expect(fixDetail.value.fixDetails.fixes).toBeInstanceOf(Array)
+          expect(fixDetail.value.fixDetails.fixes.length).toBeGreaterThan(0)
+          if (fixDetail.value.fixDetails.fixes[0]) {
+            expect(fixDetail.value.fixDetails.fixes[0].purl).toBe(
+              'pkg:npm/lodash',
+            )
+            expect(fixDetail.value.fixDetails.fixes[0].fixedVersion).toBe(
+              '2.0.0',
+            )
+            expect(fixDetail.value.fixDetails.fixes[0].updateType).toBe('major')
+          }
+        }
+      }
+    })
+
+    it('covers getOrgFixes with full_scan_id and options', async () => {
+      const result = await client.getOrgFixes('test-org', {
+        allow_major_updates: false,
+        full_scan_id: 'scan-123',
+        include_details: true,
+        include_responsible_direct_dependencies: true,
+        minimum_release_age: '7d',
+        vulnerability_ids: '*',
+      })
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data).toBeDefined()
+        expect(result.data.fixDetails).toBeDefined()
       }
     })
   })
