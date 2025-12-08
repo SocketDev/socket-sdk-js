@@ -3,6 +3,7 @@
  * Provides complete API functionality for vulnerability scanning, analysis, and reporting.
  */
 import { createWriteStream } from 'node:fs'
+import path from 'node:path'
 import readline from 'node:readline'
 
 import { createTtlCache } from '@socketsecurity/lib/cache-with-ttl'
@@ -1267,6 +1268,65 @@ export class SocketSdk {
         status: errorResult.status,
         success: false,
       }
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Create a full scan from an archive file (.tar, .tar.gz/.tgz, or .zip).
+   * Uploads and scans a compressed archive of project files.
+   *
+   * @param orgSlug - Organization identifier
+   * @param archivePath - Path to the archive file to upload
+   * @param options - Scan configuration options including repo, branch, and metadata
+   * @returns Created full scan details with scan ID and status
+   *
+   * @throws {Error} When server returns 5xx status codes or file cannot be read
+   */
+  async createOrgFullScanFromArchive(
+    orgSlug: string,
+    archivePath: string,
+    options: {
+      branch?: string | undefined
+      commit_hash?: string | undefined
+      commit_message?: string | undefined
+      committers?: string | undefined
+      integration_org_slug?: string | undefined
+      integration_type?:
+        | 'api'
+        | 'azure'
+        | 'bitbucket'
+        | 'github'
+        | 'gitlab'
+        | 'web'
+        | undefined
+      make_default_branch?: boolean | undefined
+      pull_request?: number | undefined
+      repo: string
+      scan_type?: string | undefined
+      set_as_pending_head?: boolean | undefined
+      tmp?: boolean | undefined
+      workspace?: string | undefined
+    },
+  ): Promise<SocketSdkResult<'CreateOrgFullScanArchive'>> {
+    const basePath = path.dirname(archivePath)
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createUploadRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans/archive?${queryToSearchParams(options as QueryParams)}`,
+              createRequestBodyForFilepaths([archivePath], basePath),
+              this.#reqOptions,
+              this.#hooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'CreateOrgFullScanArchive'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'CreateOrgFullScanArchive'>(e)
     }
     /* c8 ignore stop */
   }

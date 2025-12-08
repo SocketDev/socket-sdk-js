@@ -89,7 +89,38 @@ describe('SocketSdk - API Methods Coverage', () => {
             if (req.method === 'DELETE') {
               res.end(JSON.stringify({ success: true }))
             } else if (req.method === 'POST') {
-              res.end(JSON.stringify({ data: { id: 'scan-1' } }))
+              if (url.includes('/archive')) {
+                // Archive upload endpoint
+                res.end(
+                  JSON.stringify({
+                    api_url: null,
+                    branch: 'main',
+                    commit_hash: 'abc123',
+                    commit_message: 'Test commit',
+                    committers: [],
+                    created_at: '2024-01-01T00:00:00Z',
+                    html_report_url: 'https://socket.dev/report/scan-1',
+                    html_url: null,
+                    id: 'scan-1',
+                    integration_branch_url: null,
+                    integration_commit_url: null,
+                    integration_pull_request_url: null,
+                    integration_repo_url: '',
+                    integration_type: 'api',
+                    organization_id: 'org-1',
+                    organization_slug: 'test-org',
+                    pull_request: null,
+                    repo: 'test-repo',
+                    repository_id: 'repo-1',
+                    repository_slug: 'test-repo',
+                    scan_state: 'pending',
+                    updated_at: '2024-01-01T00:00:00Z',
+                    workspace: 'main',
+                  }),
+                )
+              } else {
+                res.end(JSON.stringify({ data: { id: 'scan-1' } }))
+              }
             } else if (url.includes('/metadata')) {
               res.end(
                 JSON.stringify({ data: { id: 'scan-1', status: 'complete' } }),
@@ -766,6 +797,39 @@ describe('SocketSdk - API Methods Coverage', () => {
       if (result.success) {
         expect(result.data).toBeDefined()
         expect(result.data.fixDetails).toBeDefined()
+      }
+    })
+  })
+
+  describe('Full Scan Archive Methods', () => {
+    it('covers createOrgFullScanFromArchive', async () => {
+      // Create a temporary test file to upload
+      const tmpDir = '/tmp'
+      const testFilePath = `${tmpDir}/test-archive-${Date.now()}.tar.gz`
+      const fs = await import('node:fs')
+      fs.writeFileSync(testFilePath, 'test archive content')
+
+      try {
+        const result = await client.createOrgFullScanFromArchive(
+          'test-org',
+          testFilePath,
+          {
+            branch: 'main',
+            commit_hash: 'abc123',
+            commit_message: 'Test commit',
+            repo: 'test-repo',
+          },
+        )
+        // The method executes successfully
+        expect(result.success).toBe(true)
+        expect(result.data).toBeDefined()
+      } finally {
+        // Clean up test file
+        try {
+          fs.unlinkSync(testFilePath)
+        } catch {
+          // Ignore cleanup errors
+        }
       }
     })
   })
