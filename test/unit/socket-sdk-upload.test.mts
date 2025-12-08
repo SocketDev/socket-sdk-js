@@ -20,7 +20,7 @@ import {
   createUploadRequest,
 } from '../../src/file-upload'
 import { SocketSdk } from '../../src/index'
-import { setupNockEnvironment } from '../utils/environment.mts'
+import { isCoverageMode, setupNockEnvironment } from '../utils/environment.mts'
 import { FAST_TEST_CONFIG } from '../utils/fast-test-config.mts'
 
 // =============================================================================
@@ -197,7 +197,7 @@ describe('File Upload - createUploadRequest', () => {
     expect(response.statusCode).toBe(200)
   })
 
-  it('should call hooks when provided', async () => {
+  it.skipIf(isCoverageMode)('should call hooks when provided', async () => {
     let requestCalled = false
     let responseCalled = false
 
@@ -231,7 +231,7 @@ describe('File Upload - createUploadRequest', () => {
     expect(responseCalled).toBe(true)
   })
 
-  it('should handle upload errors', async () => {
+  it.skipIf(isCoverageMode)('should handle upload errors', async () => {
     const testFile = path.join(tempDir, 'test.txt')
     writeFileSync(testFile, 'test content')
 
@@ -251,7 +251,7 @@ describe('File Upload - createUploadRequest', () => {
     expect(response.statusCode).toBe(400)
   })
 
-  it('should handle JSON body in request', async () => {
+  it.skipIf(isCoverageMode)('should handle JSON body in request', async () => {
     const jsonData = { name: 'test-package', version: '1.0.0' }
     const jsonPart = createRequestBodyForJson(jsonData, 'package.json')
 
@@ -269,26 +269,32 @@ describe('File Upload - createUploadRequest', () => {
     expect(response.statusCode).toBe(200)
   })
 
-  it('should handle mixed file and JSON uploads', async () => {
-    const testFile = path.join(tempDir, 'manifest.json')
-    writeFileSync(testFile, '{"dependencies":{}}')
+  it.skipIf(isCoverageMode)(
+    'should handle mixed file and JSON uploads',
+    async () => {
+      const testFile = path.join(tempDir, 'manifest.json')
+      writeFileSync(testFile, '{"dependencies":{}}')
 
-    const fileParts = createRequestBodyForFilepaths([testFile], tempDir)
-    const jsonPart = createRequestBodyForJson({ metadata: 'test' }, 'meta.json')
+      const fileParts = createRequestBodyForFilepaths([testFile], tempDir)
+      const jsonPart = createRequestBodyForJson(
+        { metadata: 'test' },
+        'meta.json',
+      )
 
-    nock('https://api.socket.dev')
-      .post('/v0/test-mixed-upload')
-      .reply(200, { success: true })
+      nock('https://api.socket.dev')
+        .post('/v0/test-mixed-upload')
+        .reply(200, { success: true })
 
-    const response = await createUploadRequest(
-      'https://api.socket.dev',
-      '/v0/test-mixed-upload',
-      [...fileParts, jsonPart],
-      { timeout: 5000 },
-    )
+      const response = await createUploadRequest(
+        'https://api.socket.dev',
+        '/v0/test-mixed-upload',
+        [...fileParts, jsonPart],
+        { timeout: 5000 },
+      )
 
-    expect(response.statusCode).toBe(200)
-  })
+      expect(response.statusCode).toBe(200)
+    },
+  )
 
   it('should handle network connection failures gracefully', async () => {
     const testFile = path.join(tempDir, 'test.txt')
