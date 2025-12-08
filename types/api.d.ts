@@ -1020,6 +1020,18 @@ export interface paths {
      */
     delete: operations['deleteOrgWebhook']
   }
+  '/orgs/{org_slug}/alerts': {
+    /**
+     * List latest alerts (Beta)
+     * @description List latest alerts.
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - alerts:list
+     */
+    get: operations['alertsList']
+  }
   '/license-policy': {
     /**
      * License Policy (Beta)
@@ -13869,6 +13881,12 @@ export interface operations {
                 providerUserId?: string
               }[]
               /**
+               * Format: uuid
+               * @description ID of the Socket user who created the API Token
+               * @default
+               */
+              created_by: string | null
+              /**
                * Format: date
                * @description Timestamp when the API Token was created
                * @default
@@ -14157,6 +14175,12 @@ export interface operations {
       200: {
         content: {
           'application/json': {
+            /**
+             * Format: uuid
+             * @description ID of the Socket user who created the API Token, if available
+             * @default
+             */
+            created_by: string | null
             /** @default */
             token: string
           }
@@ -14357,6 +14381,12 @@ export interface operations {
       200: {
         content: {
           'application/json': {
+            /**
+             * Format: uuid
+             * @description ID of the Socket user who initiated the rotation, if available
+             * @default
+             */
+            created_by: string | null
             /** @default */
             token: string
           }
@@ -15618,6 +15648,351 @@ export interface operations {
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
       404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * List latest alerts (Beta)
+   * @description List latest alerts.
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - alerts:list
+   */
+  alertsList: {
+    parameters: {
+      query?: {
+        /** @description Specify the maximum number of results to return per page (intermediate pages may have fewer than this limit and callers should always check "endCursor" in response body to know if there are more pages) */
+        per_page?: number
+        /** @description The pagination cursor that was returned as the "endCursor" property in previous request */
+        startAfterCursor?: string
+        /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
+        'filters.alertAction'?: string
+        /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
+        'filters.alertAction.notIn'?: string
+        /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
+        'filters.alertCategory'?: string
+        /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be excluded */
+        'filters.alertCategory.notIn'?: string
+        /** @description CVE ID */
+        'filters.alertCveId'?: string
+        /** @description CVE ID */
+        'filters.alertCveId.notIn'?: string
+        /** @description CVE title */
+        'filters.alertCveTitle'?: string
+        /** @description CVE title */
+        'filters.alertCveTitle.notIn'?: string
+        /** @description CWE ID */
+        'filters.alertCweId'?: string
+        /** @description CWE ID */
+        'filters.alertCweId.notIn'?: string
+        /** @description CWE name */
+        'filters.alertCweName'?: string
+        /** @description CWE name */
+        'filters.alertCweName.notIn'?: string
+        /** @description Alert EPSS ("low", "medium", "high", "critical") */
+        'filters.alertEPSS'?: string
+        /** @description Alert EPSS ("low", "medium", "high", "critical") */
+        'filters.alertEPSS.notIn'?: string
+        /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
+        'filters.alertFixType'?: string
+        /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be excluded */
+        'filters.alertFixType.notIn'?: string
+        /** @description Alert KEV (Known Exploited Vulnerability) filter flag */
+        'filters.alertKEV'?: boolean
+        /** @description Alert KEV (Known Exploited Vulnerability) filter flag */
+        'filters.alertKEV.notIn'?: boolean
+        /** @description Alert priority ("low", "medium", "high", or "critical") */
+        'filters.alertPriority'?: string
+        /** @description Alert priority ("low", "medium", "high", or "critical") */
+        'filters.alertPriority.notIn'?: string
+        /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be included */
+        'filters.alertReachabilityType'?: string
+        /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
+        'filters.alertReachabilityType.notIn'?: string
+        /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
+        'filters.alertSeverity'?: string
+        /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be excluded */
+        'filters.alertSeverity.notIn'?: string
+        /** @description A single alert status ("open" or "cleared") */
+        'filters.alertStatus'?: string
+        /** @description A single alert status ("open" or "cleared") */
+        'filters.alertStatus.notIn'?: string
+        /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
+        'filters.alertType'?: string
+        /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be excluded */
+        'filters.alertType.notIn'?: string
+        /** @description Alert updated at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+        'filters.alertUpdatedAt.eq'?: string
+        /** @description Alert updated at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+        'filters.alertUpdatedAt.lt'?: string
+        /** @description Alert updated at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+        'filters.alertUpdatedAt.lte'?: string
+        /** @description Alert updated at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+        'filters.alertUpdatedAt.gt'?: string
+        /** @description Alert updated at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+        'filters.alertUpdatedAt.gte'?: string
+        /** @description Comma-separated list of repo full names that should be included */
+        'filters.repoFullName'?: string
+        /** @description Comma-separated list of repo full names that should be excluded */
+        'filters.repoFullName.notIn'?: string
+        /** @description Comma-separated list of repo labels that should be included. Use "" to filter for repositories with no labels. */
+        'filters.repoLabels'?: string
+        /** @description Comma-separated list of repo labels that should be excluded. Use "" to filter for repositories with no labels. */
+        'filters.repoLabels.notIn'?: string
+        /** @description Comma-separated list of repo slugs that should be included */
+        'filters.repoSlug'?: string
+        /** @description Comma-separated list of repo slugs that should be excluded */
+        'filters.repoSlug.notIn'?: string
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    responses: {
+      /** @description The paginated array of API tokens for the organization, and related metadata. */
+      200: {
+        content: {
+          'application/json': {
+            /** @default */
+            endCursor: string | null
+            items: Array<{
+              /** @default */
+              key: string
+              /** @default */
+              type: string
+              /** @default */
+              category: string
+              fix: {
+                /** @default */
+                type: string
+                /** @default */
+                description: string | null
+              } | null
+              vulnerability: {
+                /** @default */
+                cveId: string | null
+                /** @default */
+                cveTitle: string | null
+                /** @default */
+                cveDescription: string | null
+                /** @default 0 */
+                cvssScore: number
+                cweIds: string[] | null
+                cweNames: string[] | null
+                ghsaIds: string[] | null
+                /** @default 0 */
+                epssScore: number
+                /** @default 0 */
+                epssPercentile: number
+                /** @default false */
+                isKev: boolean
+              } | null
+              /** @default */
+              id: string
+              /** @default 0 */
+              version: number
+              /**
+               * @default open
+               * @enum {string}
+               */
+              status: 'open' | 'cleared'
+              /** @default */
+              createdAt: string
+              /** @default */
+              updatedAt: string
+              /** @default */
+              clearedAt: string | null
+              /** @default */
+              dashboardUrl: string
+              /**
+               * @default low
+               * @enum {string}
+               */
+              severity: 'low' | 'medium' | 'high' | 'critical'
+              locations: {
+                /** @default */
+                action: string
+                /** @default */
+                actionSourceType: string
+                reachability: {
+                  /** @default */
+                  type: string
+                  /** @default */
+                  analysisType: string | null
+                }
+                licenseViolation: {
+                  violationData: {
+                    /** @default */
+                    purl: string | null
+                    /** @default */
+                    spdxAtomOrExtraData: string
+                  }[]
+                } | null
+                prioritization: {
+                  /** @default 0 */
+                  overallScore: number
+                  /** @default 0 */
+                  fixableScore: number
+                  /** @default 0 */
+                  reachableScore: number
+                  /** @default 0 */
+                  severityScore: number
+                }
+                repository: {
+                  /** @default */
+                  fullName: string | null
+                  /** @default */
+                  id: string | null
+                  /** @default */
+                  slug: string | null
+                  /** @default */
+                  workspace: string | null
+                  labels: string[]
+                  labelIds: string[]
+                } | null
+                branch: {
+                  /** @default */
+                  name: string
+                  /** @default */
+                  type: string | null
+                } | null
+                patch: {
+                  /** @default */
+                  uuid: string | null
+                  /**
+                   * @default patch_unavailable
+                   * @enum {string}
+                   */
+                  status:
+                    | 'patch_unavailable'
+                    | 'patch_available'
+                    | 'patch_applied'
+                  /** @default false */
+                  deprecated: boolean
+                }
+                dependency: {
+                  /** @default false */
+                  direct: boolean
+                  /** @default false */
+                  dev: boolean
+                  /** @default false */
+                  dead: boolean
+                  manifestFiles: components['schemas']['SocketManifestReference'][]
+                }
+                artifact: {
+                  /** @default */
+                  type: string
+                  /** @default */
+                  namespace: string | null
+                  /** @default */
+                  name: string
+                  /** @default */
+                  id: string
+                  /** @default */
+                  version: string
+                  /** @default */
+                  author: string | null
+                  /** @default */
+                  license: string | null
+                  scores: components['schemas']['SocketScore']
+                  /** @default */
+                  artifactId: string | null
+                }
+              }[]
+            }>
+            meta: {
+              /** @default */
+              organizationId: string
+              /** @default 0 */
+              queryStartTimestamp: number
+              filters: {
+                /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
+                alertAction?: string[]
+                /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
+                'alertAction.notIn'?: string[]
+                /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
+                alertCategory?: string[]
+                /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be excluded */
+                'alertCategory.notIn'?: string[]
+                /** @description CVE ID */
+                alertCveId?: string[]
+                /** @description CVE ID */
+                'alertCveId.notIn'?: string[]
+                /** @description CVE title */
+                alertCveTitle?: string[]
+                /** @description CVE title */
+                'alertCveTitle.notIn'?: string[]
+                /** @description CWE ID */
+                alertCweId?: string[]
+                /** @description CWE ID */
+                'alertCweId.notIn'?: string[]
+                /** @description CWE name */
+                alertCweName?: string[]
+                /** @description CWE name */
+                'alertCweName.notIn'?: string[]
+                /** @description Alert EPSS ("low", "medium", "high", "critical") */
+                alertEPSS?: string[]
+                /** @description Alert EPSS ("low", "medium", "high", "critical") */
+                'alertEPSS.notIn'?: string[]
+                /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be included */
+                alertFixType?: string[]
+                /** @description Comma-separated list of alert fix types ("upgrade", "cve", or "remove") that should be excluded */
+                'alertFixType.notIn'?: string[]
+                /** @description Alert KEV (Known Exploited Vulnerability) filter flag */
+                alertKEV?: boolean[]
+                /** @description Alert priority ("low", "medium", "high", or "critical") */
+                alertPriority?: string[]
+                /** @description Alert priority ("low", "medium", "high", or "critical") */
+                'alertPriority.notIn'?: string[]
+                /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be included */
+                alertReachabilityType?: string[]
+                /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
+                'alertReachabilityType.notIn'?: string[]
+                /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be included */
+                alertSeverity?: string[]
+                /** @description Comma-separated list of alert severities ("low", "medium", "high", or "critical") that should be excluded */
+                'alertSeverity.notIn'?: string[]
+                /** @description A single alert status ("open" or "cleared") */
+                alertStatus?: string[]
+                /** @description A single alert status ("open" or "cleared") */
+                'alertStatus.notIn'?: string[]
+                /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be included */
+                alertType?: string[]
+                /** @description Comma-separated list of alert types (e.g. "usesEval", "unmaintained", etc.) that should be excluded */
+                'alertType.notIn'?: string[]
+                /** @description Alert updated at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+                'alertUpdatedAt.eq'?: string[]
+                /** @description Alert updated at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+                'alertUpdatedAt.lt'?: string[]
+                /** @description Alert updated at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+                'alertUpdatedAt.lte'?: string[]
+                /** @description Alert updated at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+                'alertUpdatedAt.gt'?: string[]
+                /** @description Alert updated at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+                'alertUpdatedAt.gte'?: string[]
+                /** @description Comma-separated list of repo full names that should be included */
+                repoFullName?: string[]
+                /** @description Comma-separated list of repo full names that should be excluded */
+                'repoFullName.notIn'?: string[]
+                /** @description Comma-separated list of repo labels that should be included. Use "" to filter for repositories with no labels. */
+                repoLabels?: string[]
+                /** @description Comma-separated list of repo labels that should be excluded. Use "" to filter for repositories with no labels. */
+                'repoLabels.notIn'?: string[]
+                /** @description Comma-separated list of repo slugs that should be included */
+                repoSlug?: string[]
+                /** @description Comma-separated list of repo slugs that should be excluded */
+                'repoSlug.notIn'?: string[]
+              }
+            }
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
