@@ -166,6 +166,78 @@ describe('SocketSdk - API Methods Coverage', () => {
           } else {
             res.end(JSON.stringify({}))
           }
+        } else if (url.includes('/webhooks')) {
+          // Webhooks endpoints
+          if (req.method === 'POST') {
+            res.end(
+              JSON.stringify({
+                created_at: '2024-01-01T00:00:00Z',
+                description: 'Test webhook',
+                events: ['full_scan.completed'],
+                filters: null,
+                headers: null,
+                id: 'webhook-1',
+                name: 'test-webhook',
+                secret: 'test-secret',
+                updated_at: '2024-01-01T00:00:00Z',
+                url: 'https://example.com/webhook',
+              }),
+            )
+          } else if (req.method === 'PUT') {
+            res.end(
+              JSON.stringify({
+                created_at: '2024-01-01T00:00:00Z',
+                description: 'Updated webhook',
+                events: ['full_scan.completed'],
+                filters: null,
+                headers: null,
+                id: 'webhook-1',
+                name: 'updated-webhook',
+                secret: 'test-secret',
+                updated_at: '2024-01-01T00:00:00Z',
+                url: 'https://example.com/webhook',
+              }),
+            )
+          } else if (req.method === 'DELETE') {
+            res.end(JSON.stringify({ status: 'ok' }))
+          } else if (url.match(/\/webhooks\/[^/]+$/)) {
+            // GET single webhook
+            res.end(
+              JSON.stringify({
+                created_at: '2024-01-01T00:00:00Z',
+                description: 'Test webhook',
+                events: ['full_scan.completed'],
+                filters: null,
+                headers: null,
+                id: 'webhook-1',
+                name: 'test-webhook',
+                secret: 'test-secret',
+                updated_at: '2024-01-01T00:00:00Z',
+                url: 'https://example.com/webhook',
+              }),
+            )
+          } else {
+            // GET list of webhooks
+            res.end(
+              JSON.stringify({
+                nextPage: null,
+                results: [
+                  {
+                    created_at: '2024-01-01T00:00:00Z',
+                    description: 'Test webhook',
+                    events: ['full_scan.completed'],
+                    filters: null,
+                    headers: null,
+                    id: 'webhook-1',
+                    name: 'test-webhook',
+                    secret: 'test-secret',
+                    updated_at: '2024-01-01T00:00:00Z',
+                    url: 'https://example.com/webhook',
+                  },
+                ],
+              }),
+            )
+          }
         } else if (url.includes('/settings')) {
           // Settings endpoint
           res.end(JSON.stringify({ data: { success: true } }))
@@ -538,6 +610,84 @@ describe('SocketSdk - API Methods Coverage', () => {
       if (result.success) {
         expect(result.data).toBeDefined()
         expect(result.data).toEqual({})
+      }
+    })
+  })
+
+  describe('Webhook Management Methods', () => {
+    it('covers createOrgWebhook', async () => {
+      const result = await client.createOrgWebhook('test-org', {
+        events: ['full_scan.completed'],
+        name: 'test-webhook',
+        secret: 'test-secret',
+        url: 'https://example.com/webhook',
+      })
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data).toBeDefined()
+        expect(result.data.id).toBe('webhook-1')
+        expect(result.data.name).toBe('test-webhook')
+        expect(result.data.url).toBe('https://example.com/webhook')
+        expect(result.data.events).toEqual(['full_scan.completed'])
+      }
+    })
+
+    it('covers getOrgWebhooksList', async () => {
+      const result = await client.getOrgWebhooksList('test-org')
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data).toBeDefined()
+        expect(result.data.results).toBeInstanceOf(Array)
+        expect(result.data.results.length).toBeGreaterThan(0)
+        if (result.data.results[0]) {
+          expect(result.data.results[0].id).toBe('webhook-1')
+        }
+        expect(result.data.nextPage).toBeNull()
+      }
+    })
+
+    it('covers getOrgWebhooksList with pagination', async () => {
+      const result = await client.getOrgWebhooksList('test-org', {
+        page: 1,
+        per_page: 10,
+      })
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data).toBeDefined()
+        expect(result.data.results).toBeInstanceOf(Array)
+      }
+    })
+
+    it('covers getOrgWebhook', async () => {
+      const result = await client.getOrgWebhook('test-org', 'webhook-1')
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data).toBeDefined()
+        expect(result.data.id).toBe('webhook-1')
+        expect(result.data.name).toBe('test-webhook')
+        expect(result.data.url).toBe('https://example.com/webhook')
+      }
+    })
+
+    it('covers updateOrgWebhook', async () => {
+      const result = await client.updateOrgWebhook('test-org', 'webhook-1', {
+        name: 'updated-webhook',
+      })
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data).toBeDefined()
+        expect(result.data.id).toBe('webhook-1')
+        expect(result.data.name).toBe('updated-webhook')
+        expect(result.data.description).toBe('Updated webhook')
+      }
+    })
+
+    it('covers deleteOrgWebhook', async () => {
+      const result = await client.deleteOrgWebhook('test-org', 'webhook-1')
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data).toBeDefined()
+        expect(result.data.status).toBe('ok')
       }
     })
   })
