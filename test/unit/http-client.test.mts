@@ -12,11 +12,14 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { MAX_RESPONSE_SIZE } from '../../src/constants.js'
 import {
   ResponseError,
+  createDeleteRequest,
   createGetRequest,
   createRequestWithJson,
   getErrorResponseBody,
   getHttpModule,
   getResponseJson,
+  isResponseOk,
+  reshapeArtifactForPublicPolicy,
 } from '../../src/http-client.js'
 
 import type { IncomingMessage, Server } from 'node:http'
@@ -272,6 +275,46 @@ describe('HTTP Client - Error Handling', () => {
     })
   })
 
+  describe('createDeleteRequest error handling', () => {
+    it('should create and execute DELETE request successfully', async () => {
+      const response = await createDeleteRequest(baseUrl, '/test', {
+        timeout: 1000,
+      })
+      expect(response.statusCode).toBe(200)
+    })
+
+    it('should handle connection errors', async () => {
+      const invalidUrl = 'http://127.0.0.1:1'
+      await expect(
+        createDeleteRequest(invalidUrl, '/test', { timeout: 100 }),
+      ).rejects.toThrow()
+    })
+
+    it('should handle immediate connection close', async () => {
+      await expect(
+        createDeleteRequest(baseUrl, '/error-immediate', { timeout: 1000 }),
+      ).rejects.toThrow()
+    })
+
+    it('should call hooks when provided', async () => {
+      let requestCalled = false
+      let responseCalled = false
+
+      const hooks = {
+        onRequest: () => {
+          requestCalled = true
+        },
+        onResponse: () => {
+          responseCalled = true
+        },
+      }
+
+      await createDeleteRequest(baseUrl, '/test', { timeout: 1000 }, hooks)
+      expect(requestCalled).toBe(true)
+      expect(responseCalled).toBe(true)
+    })
+  })
+
   describe('getResponseJson error handling', () => {
     it('should handle JSON parsing errors', async () => {
       const response = await createGetRequest(baseUrl, '/invalid-json', {
@@ -455,6 +498,250 @@ describe('HTTP Client - ResponseError Edge Cases', () => {
 
       expect(error.stack).toBeDefined()
       expect(error.stack).toContain('ResponseError')
+    })
+
+    it('should use provided custom message', () => {
+      const mockResponse = {
+        statusCode: 404,
+        statusMessage: 'Not Found',
+      } as IncomingMessage
+
+      const error = new ResponseError(mockResponse, 'Custom operation failed')
+
+      expect(error.message).toContain('Custom operation failed')
+      expect(error.message).toContain('404')
+      expect(error.message).toContain('Not Found')
+    })
+  })
+
+  describe('isResponseOk', () => {
+    it('should return true for 200 OK status', () => {
+      const response = { statusCode: 200 } as IncomingMessage
+      expect(isResponseOk(response)).toBe(true)
+    })
+
+    it('should return true for 201 Created status', () => {
+      const response = { statusCode: 201 } as IncomingMessage
+      expect(isResponseOk(response)).toBe(true)
+    })
+
+    it('should return true for 299 (edge of 2xx range)', () => {
+      const response = { statusCode: 299 } as IncomingMessage
+      expect(isResponseOk(response)).toBe(true)
+    })
+
+    it('should return false for 199 (below 2xx range)', () => {
+      const response = { statusCode: 199 } as IncomingMessage
+      expect(isResponseOk(response)).toBe(false)
+    })
+
+    it('should return false for 300 Redirect status', () => {
+      const response = { statusCode: 300 } as IncomingMessage
+      expect(isResponseOk(response)).toBe(false)
+    })
+
+    it('should return false for 400 Bad Request status', () => {
+      const response = { statusCode: 400 } as IncomingMessage
+      expect(isResponseOk(response)).toBe(false)
+    })
+
+    it('should return false for 404 Not Found status', () => {
+      const response = { statusCode: 404 } as IncomingMessage
+      expect(isResponseOk(response)).toBe(false)
+    })
+
+    it('should return false for 500 Server Error status', () => {
+      const response = { statusCode: 500 } as IncomingMessage
+      expect(isResponseOk(response)).toBe(false)
+    })
+
+    it('should return false when statusCode is undefined', () => {
+      const response = {} as IncomingMessage
+      expect(isResponseOk(response)).toBe(false)
+    })
+  })
+
+  describe('reshapeArtifactForPublicPolicy', () => {
+    it('should return data unchanged when authenticated', () => {
+      const data = {
+        artifacts: [
+          {
+            name: 'test-package',
+            version: '1.0.0',
+            alerts: [{ type: 'malware', severity: 'high', key: 'alert-1' }],
+          },
+        ],
+      }
+      const result = reshapeArtifactForPublicPolicy(data, true)
+      expect(result).toEqual(data)
+    })
+
+    it('should filter low severity alerts when not authenticated', () => {
+      const data = {
+        artifacts: [
+          {
+            name: 'test-package',
+            version: '1.0.0',
+            size: 1000,
+            author: { name: 'test' },
+            type: 'npm',
+            supplyChainRisk: {},
+            scorecards: {},
+            topLevelAncestors: [],
+            alerts: [
+              { type: 'malware', severity: 'high', key: 'alert-1' },
+              { type: 'issue', severity: 'low', key: 'alert-2' },
+              { type: 'vulnerability', severity: 'medium', key: 'alert-3' },
+            ],
+          },
+        ],
+      }
+
+      const result = reshapeArtifactForPublicPolicy(data, false)
+
+      expect(result.artifacts).toBeDefined()
+      expect(result.artifacts?.[0]?.alerts).toHaveLength(2)
+      expect(result.artifacts?.[0]?.alerts?.[0]?.severity).not.toBe('low')
+      expect(result.artifacts?.[0]?.alerts?.[1]?.severity).not.toBe('low')
+    })
+
+    it('should filter alerts by action when actions parameter provided', () => {
+      const data = {
+        artifacts: [
+          {
+            name: 'test-package',
+            version: '1.0.0',
+            size: 1000,
+            author: { name: 'test' },
+            type: 'npm',
+            supplyChainRisk: {},
+            scorecards: {},
+            topLevelAncestors: [],
+            alerts: [
+              {
+                type: 'malware',
+                severity: 'high',
+                key: 'alert-1',
+                action: 'block',
+              },
+              {
+                type: 'issue',
+                severity: 'medium',
+                key: 'alert-2',
+                action: 'warn',
+              },
+              {
+                type: 'vulnerability',
+                severity: 'high',
+                key: 'alert-3',
+                action: 'block',
+              },
+            ],
+          },
+        ],
+      }
+
+      const result = reshapeArtifactForPublicPolicy(data, false, 'block')
+
+      expect(result.artifacts).toBeDefined()
+      expect(result.artifacts?.[0]?.alerts).toHaveLength(2)
+      expect(result.artifacts?.[0]?.alerts?.[0]?.key).toBe('alert-1')
+      expect(result.artifacts?.[0]?.alerts?.[1]?.key).toBe('alert-3')
+    })
+
+    it('should handle single artifact with alerts property', () => {
+      const data = {
+        name: 'test-package',
+        version: '1.0.0',
+        size: 1000,
+        author: { name: 'test' },
+        type: 'npm',
+        supplyChainRisk: {},
+        scorecards: {},
+        topLevelAncestors: [],
+        alerts: [
+          { type: 'malware', severity: 'high', key: 'alert-1' },
+          { type: 'issue', severity: 'low', key: 'alert-2' },
+        ],
+      }
+
+      const result = reshapeArtifactForPublicPolicy(data, false)
+
+      expect(result.alerts).toBeDefined()
+      expect(result.alerts).toHaveLength(1)
+      expect(result.alerts?.[0]?.severity).toBe('high')
+    })
+
+    it('should compact alert objects to only essential fields', () => {
+      const data = {
+        artifacts: [
+          {
+            name: 'test-package',
+            version: '1.0.0',
+            size: 1000,
+            author: { name: 'test' },
+            type: 'npm',
+            supplyChainRisk: {},
+            scorecards: {},
+            topLevelAncestors: [],
+            alerts: [
+              {
+                type: 'malware',
+                severity: 'high',
+                key: 'alert-1',
+                description: 'This is a malware alert',
+                extraData: { foo: 'bar' },
+              },
+            ],
+          },
+        ],
+      }
+
+      const result = reshapeArtifactForPublicPolicy(data, false)
+
+      expect(result.artifacts).toBeDefined()
+      const alert = result.artifacts?.[0]?.alerts?.[0]
+      expect(alert).toEqual({
+        type: 'malware',
+        severity: 'high',
+        key: 'alert-1',
+      })
+      expect(alert).not.toHaveProperty('description')
+      expect(alert).not.toHaveProperty('extraData')
+    })
+
+    it('should handle empty alerts array', () => {
+      const data = {
+        artifacts: [
+          {
+            name: 'test-package',
+            version: '1.0.0',
+            size: 1000,
+            author: { name: 'test' },
+            type: 'npm',
+            supplyChainRisk: {},
+            scorecards: {},
+            topLevelAncestors: [],
+            alerts: [],
+          },
+        ],
+      }
+
+      const result = reshapeArtifactForPublicPolicy(data, false)
+
+      expect(result.artifacts).toBeDefined()
+      expect(result.artifacts?.[0]?.alerts).toEqual([])
+    })
+
+    it('should handle data without artifacts or alerts property', () => {
+      const data = {
+        name: 'test',
+        value: 123,
+      }
+
+      const result = reshapeArtifactForPublicPolicy(data, false)
+
+      expect(result).toEqual(data)
     })
   })
 })
