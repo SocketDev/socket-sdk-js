@@ -16,7 +16,7 @@ function runCommand(command, args = [], options = {}) {
     const child = spawn(command, args, {
       stdio: 'inherit',
       shell: process.platform === 'win32',
-      ...options,
+      ...options
     })
 
     child.on('exit', code => {
@@ -35,31 +35,32 @@ async function main() {
       options: {
         help: {
           type: 'boolean',
-          default: false,
+          default: false
         },
         'dry-run': {
           type: 'boolean',
-          default: false,
+          default: false
         },
         'skip-checks': {
           type: 'boolean',
-          default: false,
+          default: false
         },
         'skip-build': {
           type: 'boolean',
-          default: false,
+          default: false
         },
         tag: {
           type: 'string',
-          default: process.env.DIST_TAG || process.env.NPM_CONFIG_TAG || 'latest',
+          default:
+            process.env.DIST_TAG || process.env.NPM_CONFIG_TAG || 'latest'
         },
         access: {
           type: 'string',
-          default: 'public',
-        },
+          default: 'public'
+        }
       },
       allowPositionals: false,
-      strict: false,
+      strict: false
     })
 
     if (values.help) {
@@ -69,7 +70,9 @@ async function main() {
       console.log('  --dry-run        Perform a dry-run without publishing')
       console.log('  --skip-checks    Skip pre-publish checks')
       console.log('  --skip-build     Skip build step (not allowed in CI)')
-      console.log('  --tag <tag>      npm dist-tag (default: $DIST_TAG or "latest")')
+      console.log(
+        '  --tag <tag>      npm dist-tag (default: $DIST_TAG or "latest")'
+      )
       console.log('  --access <level> Package access level (default: public)')
       console.log('\nEnvironment Variables:')
       console.log('  DIST_TAG         Default npm dist-tag to use')
@@ -121,7 +124,13 @@ async function main() {
     }
 
     // Prepare publish args
-    const publishArgs = ['publish', '--access', values.access, '--tag', values.tag]
+    const publishArgs = [
+      'publish',
+      '--access',
+      values.access,
+      '--tag',
+      values.tag
+    ]
 
     // Add provenance by default (works with trusted publishers in CI)
     if (!values['dry-run']) {
@@ -136,7 +145,7 @@ async function main() {
     console.log(
       values['dry-run']
         ? 'Running dry-run publish...'
-        : `Publishing to npm with tag "${values.tag}"...`,
+        : `Publishing to npm with tag "${values.tag}"...`
     )
     const publishCode = await runCommand('npm', publishArgs)
 
