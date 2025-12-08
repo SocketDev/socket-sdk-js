@@ -14,7 +14,11 @@ import * as path from 'node:path'
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { createRequestBodyForFilepaths } from '../../src/file-upload'
+import {
+  createRequestBodyForFilepaths,
+  createRequestBodyForJson,
+  createUploadRequest,
+} from '../../src/file-upload'
 import { SocketSdk } from '../../src/index'
 import { setupNockEnvironment } from '../utils/environment.mts'
 import { FAST_TEST_CONFIG } from '../utils/fast-test-config.mts'
@@ -102,6 +106,188 @@ describe('File Upload - createRequestBodyForFilepaths', () => {
     if (stream && typeof stream.destroy === 'function') {
       stream.destroy()
     }
+  })
+})
+
+describe('File Upload - createRequestBodyForJson', () => {
+  it('should create request body for JSON data with default basename', () => {
+    const jsonData = { name: 'test', version: '1.0.0' }
+
+    const result = createRequestBodyForJson(jsonData)
+
+    expect(result).toHaveLength(3)
+    expect(result[0]).toContain('Content-Disposition: form-data')
+    expect(result[0]).toContain('name="data"')
+    expect(result[0]).toContain('filename="data.json"')
+    expect(result[0]).toContain('Content-Type: application/json')
+    expect(result[2]).toBe('\r\n')
+
+    // Verify stream contains JSON
+    const stream = result[1] as any
+    expect(stream).toBeDefined()
+  })
+
+  it('should create request body for JSON with custom basename', () => {
+    const jsonData = { foo: 'bar' }
+    const basename = 'custom.json'
+
+    const result = createRequestBodyForJson(jsonData, basename)
+
+    expect(result).toHaveLength(3)
+    expect(result[0]).toContain('name="custom"')
+    expect(result[0]).toContain('filename="custom.json"')
+  })
+
+  it('should handle basename with different extension', () => {
+    const jsonData = { test: true }
+    const basename = 'metadata.txt'
+
+    const result = createRequestBodyForJson(jsonData, basename)
+
+    expect(result[0]).toContain('name="metadata"')
+    expect(result[0]).toContain('filename="metadata.txt"')
+  })
+
+  it('should handle complex JSON objects', () => {
+    const jsonData = {
+      nested: { deeply: { value: 123 } },
+      array: [1, 2, 3],
+      boolean: true,
+      null: null,
+    }
+
+    const result = createRequestBodyForJson(jsonData)
+
+    expect(result).toHaveLength(3)
+    const stream = result[1] as any
+    expect(stream).toBeDefined()
+  })
+})
+
+describe('File Upload - createUploadRequest', () => {
+  let tempDir: string
+
+  beforeEach(() => {
+    tempDir = mkdtempSync(path.join(tmpdir(), 'socket-sdk-upload-request-'))
+  })
+
+  afterEach(() => {
+    if (tempDir) {
+      rmSync(tempDir, { force: true, recursive: true })
+    }
+  })
+
+  it('should create and execute upload request successfully', async () => {
+    const testFile = path.join(tempDir, 'test.txt')
+    writeFileSync(testFile, 'test content')
+
+    const requestBody = createRequestBodyForFilepaths([testFile], tempDir)
+
+    nock('https://api.socket.dev')
+      .post('/v0/test-upload')
+      .reply(200, { success: true })
+
+    const response = await createUploadRequest(
+      'https://api.socket.dev',
+      '/v0/test-upload',
+      requestBody,
+      { timeout: 5000 },
+    )
+
+    expect(response.statusCode).toBe(200)
+  })
+
+  it('should call hooks when provided', async () => {
+    let requestCalled = false
+    let responseCalled = false
+
+    const testFile = path.join(tempDir, 'test.txt')
+    writeFileSync(testFile, 'test content')
+
+    const requestBody = createRequestBodyForFilepaths([testFile], tempDir)
+
+    const hooks = {
+      onRequest: () => {
+        requestCalled = true
+      },
+      onResponse: () => {
+        responseCalled = true
+      },
+    }
+
+    nock('https://api.socket.dev')
+      .post('/v0/test-upload')
+      .reply(200, { success: true })
+
+    await createUploadRequest(
+      'https://api.socket.dev',
+      '/v0/test-upload',
+      requestBody,
+      { timeout: 5000 },
+      hooks,
+    )
+
+    expect(requestCalled).toBe(true)
+    expect(responseCalled).toBe(true)
+  })
+
+  it('should handle upload errors', async () => {
+    const testFile = path.join(tempDir, 'test.txt')
+    writeFileSync(testFile, 'test content')
+
+    const requestBody = createRequestBodyForFilepaths([testFile], tempDir)
+
+    nock('https://api.socket.dev')
+      .post('/v0/test-upload-error')
+      .reply(400, { error: 'Bad Request' })
+
+    const response = await createUploadRequest(
+      'https://api.socket.dev',
+      '/v0/test-upload-error',
+      requestBody,
+      { timeout: 5000 },
+    )
+
+    expect(response.statusCode).toBe(400)
+  })
+
+  it('should handle JSON body in request', async () => {
+    const jsonData = { name: 'test-package', version: '1.0.0' }
+    const jsonPart = createRequestBodyForJson(jsonData, 'package.json')
+
+    nock('https://api.socket.dev')
+      .post('/v0/test-json-upload')
+      .reply(200, { received: true })
+
+    const response = await createUploadRequest(
+      'https://api.socket.dev',
+      '/v0/test-json-upload',
+      [jsonPart],
+      { timeout: 5000 },
+    )
+
+    expect(response.statusCode).toBe(200)
+  })
+
+  it('should handle mixed file and JSON uploads', async () => {
+    const testFile = path.join(tempDir, 'manifest.json')
+    writeFileSync(testFile, '{"dependencies":{}}')
+
+    const fileParts = createRequestBodyForFilepaths([testFile], tempDir)
+    const jsonPart = createRequestBodyForJson({ metadata: 'test' }, 'meta.json')
+
+    nock('https://api.socket.dev')
+      .post('/v0/test-mixed-upload')
+      .reply(200, { success: true })
+
+    const response = await createUploadRequest(
+      'https://api.socket.dev',
+      '/v0/test-mixed-upload',
+      [...fileParts, jsonPart],
+      { timeout: 5000 },
+    )
+
+    expect(response.statusCode).toBe(200)
   })
 })
 
