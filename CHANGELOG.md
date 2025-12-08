@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.2.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.2.0) - 2025-12-08
+
+### Added
+
+- Telemetry configuration management endpoints (`getOrgTelemetryConfig`, `updateOrgTelemetryConfig`)
+- Webhook management endpoints (`getOrgWebhooksList`, `createOrgWebhook`, `getOrgWebhook`, `updateOrgWebhook`, `deleteOrgWebhook`)
+- Vulnerability fixes endpoint for fetching available fixes for vulnerabilities in repositories or scans
+- Alerts listing endpoint for retrieving latest alerts
+- Archive-based full scan creation supporting .tar, .tar.gz/.tgz, and .zip formats
+- Full scan file download as tarball
+- Per-endpoint TTL configuration for API response caching
+- Request/response logging support for debugging and monitoring
+- PURL batch processing enhancements with `cachedResultsOnly` and `summary` options
+
+### Changed
+
+- Updated `@socketsecurity/lib` to v5.0.0
+- Synced with OpenAPI definition
+
 ## [3.1.3](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.1.3) - 2025-11-04
 
 ### Fixed

@@ -3590,6 +3590,199 @@ export class SocketSdk {
     }
     /* c8 ignore stop */
   }
+
+  /**
+   * Create a new webhook for an organization.
+   * Webhooks allow you to receive HTTP POST notifications when specific events occur.
+   *
+   * @param orgSlug - Organization identifier
+   * @param webhookData - Webhook configuration including name, URL, secret, and events
+   * @returns Created webhook details including webhook ID
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async createOrgWebhook(
+    orgSlug: string,
+    webhookData: {
+      description?: null | string | undefined
+      events: string[]
+      filters?: { repositoryIds: null | string[] } | null | undefined
+      headers?: null | Record<string, unknown> | undefined
+      name: string
+      secret: string
+      url: string
+    },
+  ): Promise<SocketSdkResult<'createOrgWebhook'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/webhooks`,
+              webhookData,
+              this.#reqOptions,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'createOrgWebhook'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'createOrgWebhook'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Delete a webhook from an organization.
+   * This will stop all future webhook deliveries to the webhook URL.
+   *
+   * @param orgSlug - Organization identifier
+   * @param webhookId - Webhook ID to delete
+   * @returns Success status
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async deleteOrgWebhook(
+    orgSlug: string,
+    webhookId: string,
+  ): Promise<SocketSdkResult<'deleteOrgWebhook'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createDeleteRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/webhooks/${encodeURIComponent(webhookId)}`,
+              this.#reqOptions,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'deleteOrgWebhook'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'deleteOrgWebhook'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Get details of a specific webhook.
+   * Returns webhook configuration including events, URL, and filters.
+   *
+   * @param orgSlug - Organization identifier
+   * @param webhookId - Webhook ID to retrieve
+   * @returns Webhook details
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgWebhook(
+    orgSlug: string,
+    webhookId: string,
+  ): Promise<SocketSdkResult<'getOrgWebhook'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/webhooks/${encodeURIComponent(webhookId)}`,
+              this.#reqOptions,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgWebhook'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'getOrgWebhook'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * List all webhooks for an organization.
+   * Supports pagination and sorting options.
+   *
+   * @param orgSlug - Organization identifier
+   * @param options - Optional query parameters for pagination and sorting
+   * @returns List of webhooks with pagination info
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgWebhooksList(
+    orgSlug: string,
+    options?: {
+      direction?: string | undefined
+      page?: number | undefined
+      per_page?: number | undefined
+      sort?: string | undefined
+    },
+  ): Promise<SocketSdkResult<'getOrgWebhooksList'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/webhooks?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptions,
+              this.#hooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgWebhooksList'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'getOrgWebhooksList'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Update an existing webhook's configuration.
+   * All fields are optional - only provided fields will be updated.
+   *
+   * @param orgSlug - Organization identifier
+   * @param webhookId - Webhook ID to update
+   * @param webhookData - Updated webhook configuration
+   * @returns Updated webhook details
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async updateOrgWebhook(
+    orgSlug: string,
+    webhookId: string,
+    webhookData: {
+      description?: null | string | undefined
+      events?: string[] | undefined
+      filters?: { repositoryIds: null | string[] } | null | undefined
+      headers?: null | Record<string, unknown> | undefined
+      name?: string | undefined
+      secret?: null | string | undefined
+      url?: string | undefined
+    },
+  ): Promise<SocketSdkResult<'updateOrgWebhook'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'PUT',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/webhooks/${encodeURIComponent(webhookId)}`,
+              webhookData,
+              this.#reqOptions,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'updateOrgWebhook'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgWebhook'>(e)
+    }
+    /* c8 ignore stop */
+  }
 }
 
 // Optional live heap trace.
