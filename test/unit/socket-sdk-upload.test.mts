@@ -223,8 +223,7 @@ describe('File Upload - createUploadRequest', () => {
       'https://api.socket.dev',
       '/v0/test-upload',
       requestBody,
-      { timeout: 5000 },
-      hooks,
+      { hooks, timeout: 5000 },
     )
 
     expect(requestCalled).toBe(true)

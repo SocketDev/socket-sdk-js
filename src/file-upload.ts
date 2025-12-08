@@ -9,7 +9,7 @@ import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 import { getHttpModule, getResponse } from './http-client'
 import { sanitizeHeaders } from './utils/header-sanitization'
 
-import type { RequestOptions, SocketSdkOptions } from './types'
+import type { RequestOptions, RequestOptionsWithHooks } from './types'
 import type { ReadStream } from 'node:fs'
 import type { ClientRequest, IncomingMessage } from 'node:http'
 import type { RequestOptions as HttpsRequestOptions } from 'node:https'
@@ -87,8 +87,7 @@ export async function createUploadRequest(
   baseUrl: string,
   urlPath: string,
   requestBodyNoBoundaries: Array<string | Readable | Array<string | Readable>>,
-  options: RequestOptions,
-  hooks?: SocketSdkOptions['hooks'],
+  options?: RequestOptionsWithHooks | undefined,
 ): Promise<IncomingMessage> {
   // This function constructs and sends a multipart/form-data HTTP POST request
   // where each part is streamed to the server. It supports string payloads
@@ -105,6 +104,12 @@ export async function createUploadRequest(
   // mid-stream, which would otherwise cause hard-to-diagnose failures during file upload.
   //
   // Example failure this mitigates: `socket scan create --org badorg`
+
+  const { hooks, ...rawOpts } = {
+    __proto__: null,
+    ...options,
+  } as any as RequestOptionsWithHooks
+  const opts = { __proto__: null, ...rawOpts } as any as RequestOptions
 
   // eslint-disable-next-line no-async-promise-executor
   return await new Promise(async (pass, fail) => {
@@ -124,14 +129,14 @@ export async function createUploadRequest(
     const url = new URL(urlPath, baseUrl)
     const method = 'POST'
     const headers = {
-      ...(options as HttpsRequestOptions)?.headers,
+      ...(opts as HttpsRequestOptions)?.headers,
       'Content-Type': `multipart/form-data; boundary=${boundary}`,
     }
     const startTime = Date.now()
 
     const req: ClientRequest = getHttpModule(baseUrl).request(url, {
       method,
-      ...options,
+      ...opts,
       headers,
     })
 
@@ -139,7 +144,7 @@ export async function createUploadRequest(
       method,
       url: url.toString(),
       headers: sanitizeHeaders(headers),
-      timeout: options.timeout,
+      timeout: opts.timeout,
     })
 
     // Send headers early to prompt server validation (auth, URL, quota, etc.).

@@ -158,7 +158,18 @@ export type RequestOptions = (
   | (HttpsRequestOptions & { headers?: HeadersRecord | undefined })
   | (HttpRequestOptions & { headers?: HeadersRecord | undefined })
   | (ClientSessionRequestOptions & { headers?: HeadersRecord | undefined })
-) & { timeout?: number | undefined }
+) & {
+  timeout?: number | undefined
+}
+
+export type RequestOptionsWithHooks = RequestOptions & {
+  hooks?:
+    | {
+        onRequest?: (info: RequestInfo) => void
+        onResponse?: (info: ResponseInfo) => void
+      }
+    | undefined
+}
 
 export type SendMethod = 'POST' | 'PUT'
 

@@ -309,7 +309,7 @@ describe('HTTP Client - Error Handling', () => {
         },
       }
 
-      await createDeleteRequest(baseUrl, '/test', { timeout: 1000 }, hooks)
+      await createDeleteRequest(baseUrl, '/test', { hooks, timeout: 1000 })
       expect(requestCalled).toBe(true)
       expect(responseCalled).toBe(true)
     })

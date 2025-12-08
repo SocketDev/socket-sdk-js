@@ -80,6 +80,7 @@ export type {
   QueryParams,
   RequestInfo,
   RequestOptions,
+  RequestOptionsWithHooks,
   ResponseInfo,
   SecurityAlert,
   SendMethod,

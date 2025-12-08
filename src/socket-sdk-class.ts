@@ -947,8 +947,7 @@ export class SocketSdk {
               this.#baseUrl,
               `dependencies/upload?${queryToSearchParams(queryParams)}`,
               createRequestBodyForFilepaths(validPaths, basePath),
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -979,8 +978,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/diff-scans?${queryToSearchParams(queryParams)}`,
               {},
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -1116,8 +1114,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(queryParams as QueryParams)}`,
               createRequestBodyForFilepaths(validPaths, basePath),
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -1183,8 +1180,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/repos`,
               params,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -1247,8 +1243,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/repos/labels`,
               labelData,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -1319,8 +1314,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/full-scans/archive?${queryToSearchParams(options as QueryParams)}`,
               createRequestBodyForFilepaths([archivePath], basePath),
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -1349,8 +1343,7 @@ export class SocketSdk {
             await createDeleteRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/diff-scans/${encodeURIComponent(diffScanId)}`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -1397,8 +1390,7 @@ export class SocketSdk {
             await createDeleteRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -1458,8 +1450,7 @@ export class SocketSdk {
             await createDeleteRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -1519,8 +1510,7 @@ export class SocketSdk {
             await createDeleteRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -1564,8 +1554,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/sbom/export/cdx`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -1594,8 +1583,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/sbom/export/spdx`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -1624,12 +1612,10 @@ export class SocketSdk {
     } as GetOptions
 
     try {
-      const response = await createGetRequest(
-        this.#baseUrl,
-        urlPath,
-        this.#reqOptions,
-        this.#hooks,
-      )
+      const response = await createGetRequest(this.#baseUrl, urlPath, {
+        ...this.#reqOptions,
+        hooks: this.#hooks,
+      })
       // Check for HTTP error status codes first.
       if (!isResponseOk(response)) {
         if (throws) {
@@ -1704,8 +1690,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/tokens`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -1734,8 +1719,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/audit-log?${queryToSearchParams(queryParams)}`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -1764,8 +1748,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/diff-scans/${encodeURIComponent(diffScanId)}`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -1790,8 +1773,7 @@ export class SocketSdk {
           await createGetRequest(
             this.#baseUrl,
             `orgs/${encodeURIComponent(orgSlug)}/entitlements`,
-            this.#reqOptions,
-            this.#hooks,
+            { ...this.#reqOptions, hooks: this.#hooks },
           ),
         ),
     )
@@ -1816,8 +1798,7 @@ export class SocketSdk {
           await createGetRequest(
             this.#baseUrl,
             `orgs/${encodeURIComponent(orgSlug)}/entitlements`,
-            this.#reqOptions,
-            this.#hooks,
+            { ...this.#reqOptions, hooks: this.#hooks },
           ),
         ),
     )
@@ -1842,8 +1823,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `npm/${encodeURIComponent(pkgName)}/${encodeURIComponent(version)}/issues`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -1918,8 +1898,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/alerts?${queryToSearchParams(options as QueryParams)}`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -1947,8 +1926,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `analytics/org/${encodeURIComponent(time)}`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -1989,12 +1967,10 @@ export class SocketSdk {
         'organizations',
         async () =>
           await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              'organizations',
-              this.#reqOptions,
-              this.#hooks,
-            ),
+            await createGetRequest(this.#baseUrl, 'organizations', {
+              ...this.#reqOptions,
+              hooks: this.#hooks,
+            }),
           ),
         'organizations',
       )
@@ -2056,8 +2032,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2124,8 +2099,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(options as QueryParams)}`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2187,8 +2161,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}/metadata`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2243,8 +2216,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/fixes?${queryToSearchParams(options as QueryParams)}`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2271,8 +2243,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/settings/license-policy`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2324,8 +2295,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${orgSlugParam}/repos/${repoSlugParam}`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2387,8 +2357,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2451,8 +2420,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/repos/labels?${queryToSearchParams(options as QueryParams)}`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2518,8 +2486,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/repos?${queryToSearchParams(options as QueryParams)}`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2559,8 +2526,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/settings/security-policy`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2588,8 +2554,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/triage`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2613,12 +2578,10 @@ export class SocketSdk {
         'quota',
         async () =>
           await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              'quota',
-              this.#reqOptions,
-              this.#hooks,
-            ),
+            await createGetRequest(this.#baseUrl, 'quota', {
+              ...this.#reqOptions,
+              hooks: this.#hooks,
+            }),
           ),
         'quota',
       )
@@ -2647,8 +2610,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `analytics/repo/${encodeURIComponent(repo)}/${encodeURIComponent(time)}`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2680,8 +2642,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `npm/${encodeURIComponent(pkgName)}/${encodeURIComponent(version)}/score`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2706,12 +2667,10 @@ export class SocketSdk {
       const data = await this.#executeWithRetry(
         async () =>
           await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              'report/supported',
-              this.#reqOptions,
-              this.#hooks,
-            ),
+            await createGetRequest(this.#baseUrl, 'report/supported', {
+              ...this.#reqOptions,
+              hooks: this.#hooks,
+            }),
           ),
       )
       return this.#handleApiSuccess<'getReportSupportedFiles'>(data)
@@ -2738,8 +2697,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/diff-scans`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2770,8 +2728,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/tokens`,
               tokenData,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2802,8 +2759,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/tokens/${encodeURIComponent(tokenId)}/revoke`,
               {},
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2834,8 +2790,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/tokens/${encodeURIComponent(tokenId)}/rotate`,
               {},
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2867,8 +2822,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/tokens/${encodeURIComponent(tokenId)}/update`,
               updateData,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2898,8 +2852,7 @@ export class SocketSdk {
               this.#baseUrl,
               'settings',
               { json: selectors },
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2929,8 +2882,7 @@ export class SocketSdk {
               this.#baseUrl,
               'dependencies/search',
               queryParams,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -2967,8 +2919,7 @@ export class SocketSdk {
         this.#baseUrl,
         urlPath,
         body,
-        this.#reqOptions,
-        this.#hooks,
+        { ...this.#reqOptions, hooks: this.#hooks },
       )
 
       const data = (await getResponseJson(response)) as T
@@ -3150,8 +3101,7 @@ export class SocketSdk {
         await createGetRequest(
           this.#baseUrl,
           `orgs/${encodeURIComponent(orgSlug)}/patches/scan?scan_id=${encodeURIComponent(scanId)}`,
-          this.#reqOptions,
-          this.#hooks,
+          { ...this.#reqOptions, hooks: this.#hooks },
         ),
     )
 
@@ -3216,8 +3166,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/triage/${encodeURIComponent(alertId)}`,
               triageData,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -3248,8 +3197,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/settings/license-policy?${queryToSearchParams(queryParams)}`,
               policyData,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -3303,8 +3251,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`,
               params,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -3369,8 +3316,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}`,
               labelData,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -3413,8 +3359,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/settings/security-policy`,
               policyData,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -3519,8 +3464,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/upload-manifest-files`,
               createRequestBodyForFilepaths(validPaths, basePath),
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -3547,8 +3491,7 @@ export class SocketSdk {
       await createGetRequest(
         this.#baseUrl,
         `orgs/${encodeURIComponent(orgSlug)}/patches/view/${encodeURIComponent(uuid)}`,
-        this.#reqOptions,
-        this.#hooks,
+        { ...this.#reqOptions, hooks: this.#hooks },
       ),
     )
 
@@ -3766,7 +3709,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/telemetry/config`,
               telemetryData,
-              this.#reqOptions,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -3797,7 +3740,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/telemetry/config`,
-              this.#reqOptions,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -3832,7 +3775,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/telemetry`,
               telemetryData,
-              this.#reqOptions,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )) as PostOrgTelemetryResponse
@@ -3881,7 +3824,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/webhooks`,
               webhookData,
-              this.#reqOptions,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -3914,7 +3857,7 @@ export class SocketSdk {
             await createDeleteRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/webhooks/${encodeURIComponent(webhookId)}`,
-              this.#reqOptions,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -3947,7 +3890,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/webhooks/${encodeURIComponent(webhookId)}`,
-              this.#reqOptions,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -3985,8 +3928,7 @@ export class SocketSdk {
             await createGetRequest(
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/webhooks?${queryToSearchParams(options as QueryParams)}`,
-              this.#reqOptions,
-              this.#hooks,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
@@ -4031,7 +3973,7 @@ export class SocketSdk {
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/webhooks/${encodeURIComponent(webhookId)}`,
               webhookData,
-              this.#reqOptions,
+              { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
