@@ -2,6 +2,7 @@
  * @fileoverview SocketSdk class implementation for Socket security API client.
  * Provides complete API functionality for vulnerability scanning, analysis, and reporting.
  */
+import events from 'node:events'
 import { createWriteStream } from 'node:fs'
 import path from 'node:path'
 import readline from 'node:readline'
@@ -3560,6 +3561,86 @@ export class SocketSdk {
    * Downloads the actual patched file content from the public Socket blob store.
    * This is used after calling viewPatch() to get the patch metadata.
    * No authentication is required as patch blobs are publicly accessible.
+   *
+   * @param hash - The blob hash in SSRI (sha256-base64) or hex format
+   * @param options - Optional configuration
+   * @param options.baseUrl - Override blob store URL (for testing)
+   * @returns Promise<string> - The patch file content as UTF-8 string
+   * @throws Error if blob not found (404) or download fails
+   *
+   * @example
+   * ```typescript
+   * const sdk = new SocketSdk('your-api-token')
+   * // First get patch metadata
+   * const patch = await sdk.viewPatch('my-org', 'patch-uuid')
+   * // Then download the actual patched file
+   * const fileContent = await sdk.downloadPatch(patch.files['index.js'].socketBlob)
+   * ```
+   */
+  async downloadOrgFullScanFilesAsTar(
+    orgSlug: string,
+    fullScanId: string,
+    outputPath: string,
+  ): Promise<SocketSdkResult<'downloadOrgFullScanFilesAsTar'>> {
+    try {
+      const req = getHttpModule(this.#baseUrl)
+        .request(
+          `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/files.tar`,
+          {
+            method: 'GET',
+            ...this.#reqOptions,
+          },
+        )
+        .end()
+      const res = await getResponse(req)
+
+      // Check for HTTP error status codes.
+      if (!isResponseOk(res)) {
+        throw new ResponseError(res)
+      }
+
+      // Stream to file with size limit and error handling.
+      const writeStream = createWriteStream(outputPath)
+      let bytesWritten = 0
+
+      // Monitor stream size to prevent excessive disk usage.
+      res.on('data', (chunk: Buffer) => {
+        bytesWritten += chunk.length
+        /* c8 ignore next 4 - Stream size limit enforcement, difficult to test reliably */
+        if (bytesWritten > MAX_STREAM_SIZE) {
+          res.destroy()
+          writeStream.destroy()
+          throw new Error(
+            `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
+          )
+        }
+      })
+
+      res.pipe(writeStream)
+      /* c8 ignore next 4 - Write stream error handler, difficult to test reliably */
+      writeStream.on('error', error => {
+        throw new Error(`Failed to write to file: ${outputPath}`, {
+          cause: error,
+        })
+      })
+
+      // Wait for the stream to finish writing before returning.
+      await events.once(writeStream, 'finish')
+
+      return this.#handleApiSuccess<'downloadOrgFullScanFilesAsTar'>(res)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'downloadOrgFullScanFilesAsTar'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Download patch file content from Socket blob storage.
+   * Retrieves patched file contents using SSRI hash or hex hash.
+   *
+   * This is a low-level utility method - you'll typically use this after calling
+   * `viewPatch()` to get patch metadata, then download individual patched files.
    *
    * @param hash - The blob hash in SSRI (sha256-base64) or hex format
    * @param options - Optional configuration

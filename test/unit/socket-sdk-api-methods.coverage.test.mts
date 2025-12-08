@@ -121,6 +121,10 @@ describe('SocketSdk - API Methods Coverage', () => {
               } else {
                 res.end(JSON.stringify({ data: { id: 'scan-1' } }))
               }
+            } else if (url.includes('/files.tar')) {
+              // Tar download endpoint
+              res.writeHead(200, { 'Content-Type': 'application/x-tar' })
+              res.end(Buffer.from('test tar content'))
             } else if (url.includes('/metadata')) {
               res.end(
                 JSON.stringify({ data: { id: 'scan-1', status: 'complete' } }),
@@ -827,6 +831,35 @@ describe('SocketSdk - API Methods Coverage', () => {
         // Clean up test file
         try {
           fs.unlinkSync(testFilePath)
+        } catch {
+          // Ignore cleanup errors
+        }
+      }
+    })
+
+    it('covers downloadOrgFullScanFilesAsTar', async () => {
+      // Create a temporary output file path
+      const tmpDir = '/tmp'
+      const outputPath = `${tmpDir}/test-download-${Date.now()}.tar`
+      const fs = await import('node:fs')
+
+      try {
+        const result = await client.downloadOrgFullScanFilesAsTar(
+          'test-org',
+          'scan-1',
+          outputPath,
+        )
+        // The method executes successfully
+        expect(result.success).toBe(true)
+        // Verify the file was written
+        expect(fs.existsSync(outputPath)).toBe(true)
+        // Verify file has content
+        const content = fs.readFileSync(outputPath)
+        expect(content.length).toBeGreaterThan(0)
+      } finally {
+        // Clean up output file
+        try {
+          fs.unlinkSync(outputPath)
         } catch {
           // Ignore cleanup errors
         }
