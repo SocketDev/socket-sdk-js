@@ -7,7 +7,7 @@ import http from 'node:http'
 import https from 'node:https'
 
 import { debugLog } from '@socketsecurity/lib/debug'
-import { jsonParse } from '@socketsecurity/lib/json'
+import { jsonParse } from '@socketsecurity/lib/json/parse'
 import { perfTimer } from '@socketsecurity/lib/performance'
 
 import { MAX_RESPONSE_SIZE } from './constants'
@@ -20,6 +20,7 @@ import type {
   SocketArtifactWithExtras,
   SocketSdkOptions,
 } from './types'
+import type { JsonValue } from '@socketsecurity/lib/json/types'
 import type { ClientRequest, IncomingMessage } from 'node:http'
 
 /**
@@ -396,7 +397,7 @@ export async function getResponse(
 export async function getResponseJson(
   response: IncomingMessage,
   method?: string | undefined,
-) {
+): Promise<JsonValue | undefined> {
   const stopTimer = perfTimer('http:parse-json')
   try {
     if (!isResponseOk(response)) {
