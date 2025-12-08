@@ -315,6 +315,30 @@ describe('HTTP Client - Error Handling', () => {
     })
   })
 
+  describe('getResponse timeout handling', () => {
+    it('should handle timeout errors with detailed message', async () => {
+      await expect(
+        createGetRequest(baseUrl, '/timeout', { timeout: 100 }),
+      ).rejects.toThrow(/timed out/)
+    })
+  })
+
+  describe('getResponse network error handling', () => {
+    it('should handle ECONNREFUSED with helpful message', async () => {
+      const invalidUrl = 'http://127.0.0.1:1'
+      await expect(
+        createGetRequest(invalidUrl, '/test', { timeout: 100 }),
+      ).rejects.toThrow()
+    })
+
+    it('should handle ENOTFOUND with DNS guidance', async () => {
+      const invalidHost = 'http://nonexistent-host-that-does-not-exist.invalid'
+      await expect(
+        createGetRequest(invalidHost, '/test', { timeout: 100 }),
+      ).rejects.toThrow()
+    })
+  })
+
   describe('getResponseJson error handling', () => {
     it('should handle JSON parsing errors', async () => {
       const response = await createGetRequest(baseUrl, '/invalid-json', {

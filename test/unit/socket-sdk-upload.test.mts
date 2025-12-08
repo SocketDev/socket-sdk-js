@@ -289,6 +289,43 @@ describe('File Upload - createUploadRequest', () => {
 
     expect(response.statusCode).toBe(200)
   })
+
+  it('should handle network connection failures gracefully', async () => {
+    const testFile = path.join(tempDir, 'test.txt')
+    writeFileSync(testFile, 'test content')
+
+    const requestBody = createRequestBodyForFilepaths([testFile], tempDir)
+
+    // Don't mock the endpoint - let it fail with connection error
+    await expect(
+      createUploadRequest(
+        'http://127.0.0.1:1',
+        '/v0/test-upload',
+        requestBody,
+        { timeout: 100 },
+      ),
+    ).rejects.toThrow()
+  })
+
+  it('should handle server rejection before upload completes', async () => {
+    const testFile = path.join(tempDir, 'test.txt')
+    writeFileSync(testFile, 'test content')
+
+    const requestBody = createRequestBodyForFilepaths([testFile], tempDir)
+
+    nock('https://api.socket.dev')
+      .post('/v0/test-auth-reject')
+      .reply(401, { error: 'Unauthorized' })
+
+    const response = await createUploadRequest(
+      'https://api.socket.dev',
+      '/v0/test-auth-reject',
+      requestBody,
+      { timeout: 5000 },
+    )
+
+    expect(response.statusCode).toBe(401)
+  })
 })
 
 // =============================================================================
