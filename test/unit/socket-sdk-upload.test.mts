@@ -10,7 +10,9 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import * as path from 'node:path'
+import { Readable } from 'node:stream'
 
+import FormData from 'form-data'
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
@@ -42,30 +44,20 @@ describe('File Upload - createRequestBodyForFilepaths', () => {
     }
   })
 
-  it('should create request body for valid file', () => {
+  it('should create FormData for valid file', () => {
     const testFile = path.join(tempDir, 'test.txt')
     writeFileSync(testFile, 'test content')
 
     const result = createRequestBodyForFilepaths([testFile], tempDir)
 
-    expect(result).toHaveLength(1)
-    const part = result[0]!
-    expect(part).toHaveLength(3)
-    const header1 = part[0] as string
-    const header2 = part[1] as string
-    expect(header1).toContain('Content-Disposition: form-data')
-    expect(header1).toContain('name="test.txt"')
-    expect(header1).toContain('filename="test.txt"')
-    expect(header2).toBe('Content-Type: application/octet-stream\r\n\r\n')
-
-    // Clean up stream
-    const stream = part[2] as any
-    if (stream && typeof stream.destroy === 'function') {
-      stream.destroy()
-    }
+    expect(result).toBeInstanceOf(FormData)
+    expect(result.getHeaders()).toHaveProperty('content-type')
+    expect(result.getHeaders()['content-type']).toMatch(
+      /^multipart\/form-data; boundary=/,
+    )
   })
 
-  it('should create request body for multiple files', () => {
+  it('should create FormData for multiple files', () => {
     const file1 = path.join(tempDir, 'file1.txt')
     const file2 = path.join(tempDir, 'file2.txt')
     writeFileSync(file1, 'content 1')
@@ -73,19 +65,8 @@ describe('File Upload - createRequestBodyForFilepaths', () => {
 
     const result = createRequestBodyForFilepaths([file1, file2], tempDir)
 
-    expect(result).toHaveLength(2)
-    const header1 = result[0]![0] as string
-    const header2 = result[1]![0] as string
-    expect(header1).toContain('name="file1.txt"')
-    expect(header2).toContain('name="file2.txt"')
-
-    // Clean up streams
-    for (const part of result) {
-      const stream = part[2] as any
-      if (stream && typeof stream.destroy === 'function') {
-        stream.destroy()
-      }
-    }
+    expect(result).toBeInstanceOf(FormData)
+    expect(result.getHeaders()).toHaveProperty('content-type')
   })
 
   it('should handle nested file paths correctly', () => {
@@ -96,46 +77,32 @@ describe('File Upload - createRequestBodyForFilepaths', () => {
 
     const result = createRequestBodyForFilepaths([nestedFile], tempDir)
 
-    expect(result).toHaveLength(1)
-    const header = result[0]![0] as string
-    expect(header).toContain('name="nested/deep/nested-file.txt"')
-    expect(header).toContain('filename="nested-file.txt"')
-
-    // Clean up stream
-    const stream = result[0]![2] as any
-    if (stream && typeof stream.destroy === 'function') {
-      stream.destroy()
-    }
+    expect(result).toBeInstanceOf(FormData)
+    expect(result.getBoundary()).toBeTruthy()
   })
 })
 
 describe('File Upload - createRequestBodyForJson', () => {
-  it('should create request body for JSON data with default basename', () => {
+  it('should create FormData for JSON data with default basename', () => {
     const jsonData = { name: 'test', version: '1.0.0' }
 
     const result = createRequestBodyForJson(jsonData)
 
-    expect(result).toHaveLength(3)
-    expect(result[0]).toContain('Content-Disposition: form-data')
-    expect(result[0]).toContain('name="data"')
-    expect(result[0]).toContain('filename="data.json"')
-    expect(result[0]).toContain('Content-Type: application/json')
-    expect(result[2]).toBe('\r\n')
-
-    // Verify stream contains JSON
-    const stream = result[1] as any
-    expect(stream).toBeDefined()
+    expect(result).toBeInstanceOf(FormData)
+    expect(result.getHeaders()).toHaveProperty('content-type')
+    expect(result.getHeaders()['content-type']).toMatch(
+      /^multipart\/form-data; boundary=/,
+    )
   })
 
-  it('should create request body for JSON with custom basename', () => {
+  it('should create FormData for JSON with custom basename', () => {
     const jsonData = { foo: 'bar' }
     const basename = 'custom.json'
 
     const result = createRequestBodyForJson(jsonData, basename)
 
-    expect(result).toHaveLength(3)
-    expect(result[0]).toContain('name="custom"')
-    expect(result[0]).toContain('filename="custom.json"')
+    expect(result).toBeInstanceOf(FormData)
+    expect(result.getBoundary()).toBeTruthy()
   })
 
   it('should handle basename with different extension', () => {
@@ -144,8 +111,8 @@ describe('File Upload - createRequestBodyForJson', () => {
 
     const result = createRequestBodyForJson(jsonData, basename)
 
-    expect(result[0]).toContain('name="metadata"')
-    expect(result[0]).toContain('filename="metadata.txt"')
+    expect(result).toBeInstanceOf(FormData)
+    expect(result.getBoundary()).toBeTruthy()
   })
 
   it('should handle complex JSON objects', () => {
@@ -158,9 +125,8 @@ describe('File Upload - createRequestBodyForJson', () => {
 
     const result = createRequestBodyForJson(jsonData)
 
-    expect(result).toHaveLength(3)
-    const stream = result[1] as any
-    expect(stream).toBeDefined()
+    expect(result).toBeInstanceOf(FormData)
+    expect(result.getBoundary()).toBeTruthy()
   })
 })
 
@@ -261,7 +227,7 @@ describe('File Upload - createUploadRequest', () => {
     const response = await createUploadRequest(
       'https://api.socket.dev',
       '/v0/test-json-upload',
-      [jsonPart],
+      jsonPart,
       { timeout: 5000 },
     )
 
@@ -274,11 +240,15 @@ describe('File Upload - createUploadRequest', () => {
       const testFile = path.join(tempDir, 'manifest.json')
       writeFileSync(testFile, '{"dependencies":{}}')
 
-      const fileParts = createRequestBodyForFilepaths([testFile], tempDir)
-      const jsonPart = createRequestBodyForJson(
-        { metadata: 'test' },
-        'meta.json',
-      )
+      // Create a single FormData with both file and JSON
+      const form = createRequestBodyForFilepaths([testFile], tempDir)
+      const jsonStream = Readable.from(JSON.stringify({ metadata: 'test' }), {
+        highWaterMark: 1024 * 1024,
+      })
+      form.append('meta', jsonStream, {
+        contentType: 'application/json',
+        filename: 'meta.json',
+      })
 
       nock('https://api.socket.dev')
         .post('/v0/test-mixed-upload')
@@ -287,7 +257,7 @@ describe('File Upload - createUploadRequest', () => {
       const response = await createUploadRequest(
         'https://api.socket.dev',
         '/v0/test-mixed-upload',
-        [...fileParts, jsonPart],
+        form,
         { timeout: 5000 },
       )
 

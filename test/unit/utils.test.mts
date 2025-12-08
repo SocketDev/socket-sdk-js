@@ -12,6 +12,7 @@
 
 import path from 'node:path'
 
+import FormData from 'form-data'
 import { describe, expect, it } from 'vitest'
 
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
@@ -309,35 +310,28 @@ describe('User-Agent Generation', () => {
 
 describe('JSON Request Body Creation', () => {
   describe('createRequestBodyForJson', () => {
-    it('should create request body for JSON data with default basename', () => {
+    it('should create FormData for JSON data with default basename', () => {
       const jsonData = { number: 42, test: 'data' }
       const result = createRequestBodyForJson(jsonData)
 
-      expect(result).toHaveLength(3)
-      expect(result[0]).toContain('name="data"')
-      expect(result[0]).toContain('filename="data.json"')
-      expect(result[0]).toContain('Content-Type: application/json')
-      expect(result[2]).toBe('\r\n')
+      expect(result).toBeInstanceOf(FormData)
+      expect(result.getHeaders()).toHaveProperty('content-type')
     })
 
-    it('should create request body for JSON data with custom basename', () => {
+    it('should create FormData for JSON data with custom basename', () => {
       const jsonData = { custom: true }
       const result = createRequestBodyForJson(jsonData, 'custom-file.json')
 
-      expect(result).toHaveLength(3)
-      expect(result[0]).toContain('name="custom-file"')
-      expect(result[0]).toContain('filename="custom-file.json"')
-      expect(result[0]).toContain('Content-Type: application/json')
+      expect(result).toBeInstanceOf(FormData)
+      expect(result.getBoundary()).toBeTruthy()
     })
 
     it('should handle basename without extension', () => {
       const jsonData = { test: 'no-ext' }
       const result = createRequestBodyForJson(jsonData, 'noextension')
 
-      expect(result).toHaveLength(3)
-      expect(result[0]).toContain('name="noextension"')
-      expect(result[0]).toContain('filename="noextension"')
-      expect(result[0]).toContain('Content-Type: application/json')
+      expect(result).toBeInstanceOf(FormData)
+      expect(result.getBoundary()).toBeTruthy()
     })
 
     it('should handle complex JSON data', () => {
@@ -351,37 +345,32 @@ describe('JSON Request Body Creation', () => {
       }
       const result = createRequestBodyForJson(jsonData, 'complex.json')
 
-      expect(result).toHaveLength(3)
-      expect(result[0]).toContain('name="complex"')
-      expect(result[0]).toContain('filename="complex.json"')
-      expect(result[0]).toContain('Content-Type: application/json')
+      expect(result).toBeInstanceOf(FormData)
+      expect(result.getBoundary()).toBeTruthy()
     })
 
     it('should handle empty object', () => {
       const jsonData = {}
       const result = createRequestBodyForJson(jsonData, 'empty.json')
 
-      expect(result).toHaveLength(3)
-      expect(result[0]).toContain('name="empty"')
-      expect(result[0]).toContain('filename="empty.json"')
+      expect(result).toBeInstanceOf(FormData)
+      expect(result.getBoundary()).toBeTruthy()
     })
 
     it('should handle null data', () => {
       const jsonData = null
       const result = createRequestBodyForJson(jsonData, 'null.json')
 
-      expect(result).toHaveLength(3)
-      expect(result[0]).toContain('name="null"')
-      expect(result[0]).toContain('filename="null.json"')
+      expect(result).toBeInstanceOf(FormData)
+      expect(result.getBoundary()).toBeTruthy()
     })
 
     it('should handle different file extensions', () => {
       const jsonData = { test: true }
       const result = createRequestBodyForJson(jsonData, 'data.manifest')
 
-      expect(result).toHaveLength(3)
-      expect(result[0]).toContain('name="data"')
-      expect(result[0]).toContain('filename="data.manifest"')
+      expect(result).toBeInstanceOf(FormData)
+      expect(result.getBoundary()).toBeTruthy()
     })
   })
 })

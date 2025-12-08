@@ -1,8 +1,9 @@
 /** @fileoverview File upload utilities for Socket API with multipart form data support. */
-import events from 'node:events'
 import { createReadStream } from 'node:fs'
 import path from 'node:path'
 import { Readable } from 'node:stream'
+
+import FormData from 'form-data'
 
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
@@ -11,12 +12,8 @@ import { sanitizeHeaders } from './utils/header-sanitization'
 
 import type { RequestOptions, RequestOptionsWithHooks } from './types'
 import type { ReadStream } from 'node:fs'
-import type { ClientRequest, IncomingMessage } from 'node:http'
+import type { IncomingMessage } from 'node:http'
 import type { RequestOptions as HttpsRequestOptions } from 'node:https'
-
-/**
- * Array of sensitive header names that should be redacted in logs
- */
 
 /**
  * Create multipart form-data body parts for file uploads.
@@ -27,8 +24,8 @@ import type { RequestOptions as HttpsRequestOptions } from 'node:https'
 export function createRequestBodyForFilepaths(
   filepaths: string[],
   basePath: string,
-): Array<Array<string | ReadStream>> {
-  const requestBody: Array<Array<string | ReadStream>> = []
+): FormData {
+  const form = new FormData()
   for (const absPath of filepaths) {
     const relPath = normalizePath(path.relative(basePath, absPath))
     const filename = path.basename(absPath)
@@ -50,13 +47,12 @@ export function createRequestBodyForFilepaths(
       }
       throw new Error(message, { cause: error })
     }
-    requestBody.push([
-      `Content-Disposition: form-data; name="${relPath}"; filename="${filename}"\r\n`,
-      'Content-Type: application/octet-stream\r\n\r\n',
-      stream,
-    ])
+    form.append(relPath, stream, {
+      contentType: 'application/octet-stream',
+      filename,
+    })
   }
-  return requestBody
+  return form
 }
 
 /**
@@ -66,35 +62,37 @@ export function createRequestBodyForFilepaths(
 export function createRequestBodyForJson(
   jsonData: unknown,
   basename = 'data.json',
-): Array<string | Readable> {
+): FormData {
   const ext = path.extname(basename)
   const name = path.basename(basename, ext)
-  return [
-    `Content-Disposition: form-data; name="${name}"; filename="${basename}"\r\n` +
-      'Content-Type: application/json\r\n\r\n',
-    Readable.from(JSON.stringify(jsonData), { highWaterMark: 1024 * 1024 }),
-    '\r\n',
-  ]
+  const jsonStream = Readable.from(JSON.stringify(jsonData), {
+    highWaterMark: 1024 * 1024,
+  })
+  const form = new FormData()
+  form.append(name, jsonStream, {
+    contentType: 'application/json',
+    filename: basename,
+  })
+  return form
 }
 
 /**
- * Create and execute a multipart/form-data upload request.
- * Streams large files efficiently with backpressure handling and early server validation.
+ * Create and execute a multipart/form-data upload request using form-data library.
+ * Streams large files efficiently with automatic backpressure handling and early server validation.
  *
  * @throws {Error} When network errors occur or stream processing fails
  */
 export async function createUploadRequest(
   baseUrl: string,
   urlPath: string,
-  requestBodyNoBoundaries: Array<string | Readable | Array<string | Readable>>,
+  form: FormData,
   options?: RequestOptionsWithHooks | undefined,
 ): Promise<IncomingMessage> {
   // This function constructs and sends a multipart/form-data HTTP POST request
-  // where each part is streamed to the server. It supports string payloads
-  // and readable streams (e.g., large file uploads).
-
-  // The body is streamed manually with proper backpressure support to avoid
-  // overwhelming Node.js memory (i.e., avoiding out-of-memory crashes for large inputs).
+  // using the battle-tested form-data library. It automatically handles:
+  // - Proper multipart boundaries and Content-Type headers
+  // - Stream backpressure to avoid memory exhaustion
+  // - Correct Content-Disposition headers with UTF-8 support
 
   // We call `flushHeaders()` early to ensure headers are sent before body transmission
   // begins. If the server rejects the request (e.g., bad org or auth), it will likely
@@ -111,30 +109,19 @@ export async function createUploadRequest(
   } as any as RequestOptionsWithHooks
   const opts = { __proto__: null, ...rawOpts } as any as RequestOptions
 
-  // eslint-disable-next-line no-async-promise-executor
-  return await new Promise(async (pass, fail) => {
-    const boundary = `NodeMultipartBoundary${Date.now()}`
-    const boundarySep = `--${boundary}\r\n`
-    const finalBoundary = `--${boundary}--\r\n`
-
-    const requestBody = [
-      ...requestBodyNoBoundaries.flatMap(part => [
-        boundarySep,
-        /* c8 ignore next - Array.isArray branch for part is defensive coding for edge cases. */
-        ...(Array.isArray(part) ? part : [part]),
-      ]),
-      finalBoundary,
-    ]
-
+  return await new Promise((pass, fail) => {
     const url = new URL(urlPath, baseUrl)
     const method = 'POST'
+
+    // Get headers from form-data with proper boundary
+    const formHeaders = form.getHeaders()
     const headers = {
       ...(opts as HttpsRequestOptions)?.headers,
-      'Content-Type': `multipart/form-data; boundary=${boundary}`,
+      ...formHeaders,
     }
     const startTime = Date.now()
 
-    const req: ClientRequest = getHttpModule(baseUrl).request(url, {
+    const req = getHttpModule(baseUrl).request(url, {
       method,
       ...opts,
       headers,
@@ -174,76 +161,11 @@ export async function createUploadRequest(
       },
     )
 
-    let aborted = false
-    req.on('error', () => (aborted = true))
-    req.on('close', () => (aborted = true))
+    // Pipe form data to request - form-data handles all backpressure automatically
+    form.pipe(req)
 
-    try {
-      for (const part of requestBody) {
-        /* c8 ignore next 3 - aborted state is difficult to test reliably */
-        if (aborted) {
-          break
-        }
-        if (typeof part === 'string') {
-          /* c8 ignore next 5 - backpressure handling requires specific stream conditions */
-          if (!req.write(part)) {
-            // Wait for 'drain' if backpressure is signaled.
-            // eslint-disable-next-line no-await-in-loop
-            await events.once(req, 'drain')
-          }
-        } else if (typeof part?.pipe === 'function') {
-          // Stream data chunk-by-chunk with backpressure support.
-          const stream = part as Readable
-          try {
-            // eslint-disable-next-line no-await-in-loop
-            for await (const chunk of stream) {
-              /* c8 ignore next 3 - aborted state during streaming is difficult to test reliably */
-              if (aborted) {
-                break
-              }
-              /* c8 ignore next 3 - backpressure handling requires specific stream conditions */
-              if (!req.write(chunk)) {
-                await events.once(req, 'drain')
-              }
-            }
-            /* c8 ignore next 13 - File system error handling during streaming requires complex setup */
-          } catch (streamError) {
-            const err = streamError as NodeJS.ErrnoException
-            let message = 'Failed to read file during upload'
-            if (err.code === 'ENOENT') {
-              message +=
-                '\n→ File was deleted during upload. Ensure files remain accessible during the upload process.'
-            } else if (err.code === 'EACCES') {
-              message +=
-                '\n→ Permission denied while reading file. Check file permissions.'
-            } else if (err.code) {
-              message += `\n→ Error code: ${err.code}`
-            }
-            throw new Error(message, { cause: streamError })
-          }
-          // Ensure trailing CRLF after file part.
-          /* c8 ignore next 4 - trailing CRLF backpressure handling is edge case */
-          if (!aborted && !req.write('\r\n')) {
-            // eslint-disable-next-line no-await-in-loop
-            await events.once(req, 'drain')
-          }
-          // Cleanup stream to free memory buffers.
-          if (typeof part.destroy === 'function') {
-            part.destroy()
-          }
-          /* c8 ignore next 3 - defensive check for non-string/stream types */
-        } else {
-          throw new TypeError('Expected "string" or "stream" type')
-        }
-      }
-      /* c8 ignore next 4 - Catch-all error handler for unexpected failures during multipart upload */
-    } catch (e) {
-      req.destroy(e as Error)
-      fail(e)
-    } finally {
-      if (!aborted) {
-        req.end()
-      }
-    }
+    // Handle errors
+    form.on('error', fail)
+    req.on('error', fail)
   })
 }

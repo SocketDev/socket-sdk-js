@@ -225,8 +225,12 @@ export const buildConfig = {
   ),
 
   // External dependencies.
-  // @socketsecurity/lib is external (not bundled) - consumers must install it.
-  external: ['@socketsecurity/lib'],
+  // @socketsecurity/lib, form-data, and @socketregistry/packageurl-js are external (not bundled) - consumers must install them.
+  external: [
+    '@socketsecurity/lib',
+    '@socketregistry/packageurl-js',
+    'form-data',
+  ],
 
   // TypeScript configuration
   tsconfig: path.join(rootPath, 'tsconfig.json'),
