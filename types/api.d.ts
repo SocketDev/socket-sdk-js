@@ -15814,7 +15814,7 @@ export interface operations {
                * @enum {string}
                */
               severity: 'low' | 'medium' | 'high' | 'critical'
-              locations: {
+              locations: Array<{
                 /** @default */
                 action: string
                 /** @default */
@@ -15826,12 +15826,12 @@ export interface operations {
                   analysisType: string | null
                 }
                 licenseViolation: {
-                  violationData: {
+                  violationData: Array<{
                     /** @default */
                     purl: string | null
                     /** @default */
                     spdxAtomOrExtraData: string
-                  }[]
+                  }>
                 } | null
                 prioritization: {
                   /** @default 0 */
@@ -15882,7 +15882,7 @@ export interface operations {
                   dev: boolean
                   /** @default false */
                   dead: boolean
-                  manifestFiles: components['schemas']['SocketManifestReference'][]
+                  manifestFiles: Array<components['schemas']['SocketManifestReference']>
                 }
                 artifact: {
                   /** @default */
@@ -15903,7 +15903,7 @@ export interface operations {
                   /** @default */
                   artifactId: string | null
                 }
-              }[]
+              }>
             }>
             meta: {
               /** @default */
