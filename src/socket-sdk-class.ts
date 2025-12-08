@@ -1795,6 +1795,82 @@ export class SocketSdk {
   }
 
   /**
+   * List latest alerts for an organization (Beta).
+   * Returns paginated alerts with comprehensive filtering options.
+   *
+   * @param orgSlug - Organization identifier
+   * @param options - Optional query parameters for pagination and filtering
+   * @returns Paginated list of alerts with cursor-based pagination
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgAlertsList(
+    orgSlug: string,
+    options?: {
+      'filters.alertAction'?: string | undefined
+      'filters.alertAction.notIn'?: string | undefined
+      'filters.alertCategory'?: string | undefined
+      'filters.alertCategory.notIn'?: string | undefined
+      'filters.alertCveId'?: string | undefined
+      'filters.alertCveId.notIn'?: string | undefined
+      'filters.alertCveTitle'?: string | undefined
+      'filters.alertCveTitle.notIn'?: string | undefined
+      'filters.alertCweId'?: string | undefined
+      'filters.alertCweId.notIn'?: string | undefined
+      'filters.alertCweName'?: string | undefined
+      'filters.alertCweName.notIn'?: string | undefined
+      'filters.alertEPSS'?: string | undefined
+      'filters.alertEPSS.notIn'?: string | undefined
+      'filters.alertFixType'?: string | undefined
+      'filters.alertFixType.notIn'?: string | undefined
+      'filters.alertKEV'?: boolean | undefined
+      'filters.alertKEV.notIn'?: boolean | undefined
+      'filters.alertPriority'?: string | undefined
+      'filters.alertPriority.notIn'?: string | undefined
+      'filters.alertReachabilityType'?: string | undefined
+      'filters.alertReachabilityType.notIn'?: string | undefined
+      'filters.alertSeverity'?: string | undefined
+      'filters.alertSeverity.notIn'?: string | undefined
+      'filters.alertStatus'?: string | undefined
+      'filters.alertStatus.notIn'?: string | undefined
+      'filters.alertType'?: string | undefined
+      'filters.alertType.notIn'?: string | undefined
+      'filters.alertUpdatedAt.eq'?: string | undefined
+      'filters.alertUpdatedAt.gt'?: string | undefined
+      'filters.alertUpdatedAt.gte'?: string | undefined
+      'filters.alertUpdatedAt.lt'?: string | undefined
+      'filters.alertUpdatedAt.lte'?: string | undefined
+      'filters.repoFullName'?: string | undefined
+      'filters.repoFullName.notIn'?: string | undefined
+      'filters.repoLabels'?: string | undefined
+      'filters.repoLabels.notIn'?: string | undefined
+      'filters.repoSlug'?: string | undefined
+      'filters.repoSlug.notIn'?: string | undefined
+      per_page?: number | undefined
+      startAfterCursor?: string | undefined
+    },
+  ): Promise<SocketSdkResult<'alertsList'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/alerts?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptions,
+              this.#hooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'alertsList'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'alertsList'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
    * Get analytics data for organization usage patterns and security metrics.
    * Returns statistical analysis for specified time period.
    *

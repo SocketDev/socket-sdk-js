@@ -166,6 +166,45 @@ describe('SocketSdk - API Methods Coverage', () => {
           } else {
             res.end(JSON.stringify({}))
           }
+        } else if (url.includes('/alerts')) {
+          // Alerts endpoint
+          res.end(
+            JSON.stringify({
+              endCursor: null,
+              items: [
+                {
+                  category: 'vulnerability',
+                  clearedAt: null,
+                  createdAt: '2024-01-01T00:00:00Z',
+                  dashboardUrl: 'https://socket.dev/alerts/alert-1',
+                  fix: {
+                    description: 'Upgrade to version 2.0.0',
+                    type: 'upgrade',
+                  },
+                  id: 'alert-1',
+                  key: 'CVE-2024-1234',
+                  locations: [],
+                  severity: 'high',
+                  status: 'open',
+                  type: 'vulnerableCode',
+                  updatedAt: '2024-01-01T00:00:00Z',
+                  version: 1,
+                  vulnerability: {
+                    cveDescription: 'Test vulnerability',
+                    cveId: 'CVE-2024-1234',
+                    cveTitle: 'Test CVE',
+                    cvssScore: 7.5,
+                    cweIds: ['CWE-79'],
+                    cweNames: ['Cross-site Scripting'],
+                    epssPercentile: 0.9,
+                    epssScore: 0.8,
+                    ghsaIds: ['GHSA-xxxx-yyyy-zzzz'],
+                    isKev: false,
+                  },
+                },
+              ],
+            }),
+          )
         } else if (url.includes('/fixes')) {
           // Fixes endpoint
           res.end(
@@ -636,6 +675,49 @@ describe('SocketSdk - API Methods Coverage', () => {
       if (result.success) {
         expect(result.data).toBeDefined()
         expect(result.data).toEqual({})
+      }
+    })
+  })
+
+  describe('Alerts Methods', () => {
+    it('covers getOrgAlertsList without filters', async () => {
+      const result = await client.getOrgAlertsList('test-org')
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data).toBeDefined()
+        expect(result.data.items).toBeInstanceOf(Array)
+        expect(result.data.items.length).toBeGreaterThan(0)
+        if (result.data.items[0]) {
+          expect(result.data.items[0].id).toBe('alert-1')
+          expect(result.data.items[0].status).toBe('open')
+          expect(result.data.items[0].category).toBe('vulnerability')
+          expect(result.data.items[0].severity).toBe('high')
+        }
+        expect(result.data.endCursor).toBeNull()
+      }
+    })
+
+    it('covers getOrgAlertsList with filters and pagination', async () => {
+      const result = await client.getOrgAlertsList('test-org', {
+        'filters.alertCategory': 'vulnerability',
+        'filters.alertPriority': 'high',
+        'filters.alertStatus': 'open',
+        per_page: 100,
+        startAfterCursor: 'cursor-123',
+      })
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data).toBeDefined()
+        expect(result.data.items).toBeInstanceOf(Array)
+        if (result.data.items[0]) {
+          expect(result.data.items[0].vulnerability).toBeDefined()
+          if (result.data.items[0].vulnerability) {
+            expect(result.data.items[0].vulnerability.cveId).toBe(
+              'CVE-2024-1234',
+            )
+            expect(result.data.items[0].vulnerability.cvssScore).toBe(7.5)
+          }
+        }
       }
     })
   })
