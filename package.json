@@ -1,6 +1,7 @@
 {
   "name": "@socketsecurity/sdk",
   "version": "1.4.94",
+  "packageManager": "pnpm@10.24.0",
   "license": "MIT",
   "description": "SDK for the Socket API client",
   "author": {
