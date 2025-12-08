@@ -58,14 +58,14 @@ describe('SocketSdk', () => {
     })
   })
 
-  describe('getTelemetryConfig', () => {
+  describe('getOrgTelemetryConfig', () => {
     it('should get telemetry config', async () => {
       nock('https://api.socket.dev')
         .get('/v0/orgs/test-org/telemetry/config')
         .reply(200, { telemetry: { enabled: false } })
 
       const client = new SocketSdk('yetAnotherApiKey')
-      const res = await client.getTelemetryConfig('test-org')
+      const res = await client.getOrgTelemetryConfig('test-org')
 
       expect(res).toEqual({
         success: true,

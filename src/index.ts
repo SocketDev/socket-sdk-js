@@ -1800,7 +1800,7 @@ export class SocketSdk {
     }
   }
 
-  async getTelemetryConfig(
+  async getOrgTelemetryConfig(
     orgSlug: string
   ): Promise<SocketSdkResult<'getOrgTelemetryConfig'>> {
     try {
