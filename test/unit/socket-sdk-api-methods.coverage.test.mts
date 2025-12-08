@@ -507,8 +507,8 @@ describe('SocketSdk - API Methods Coverage', () => {
   })
 
   describe('Telemetry Methods', () => {
-    it('covers getTelemetryConfig', async () => {
-      const result = await client.getTelemetryConfig('test-org')
+    it('covers getOrgTelemetryConfig', async () => {
+      const result = await client.getOrgTelemetryConfig('test-org')
       expect(result.success).toBe(true)
       if (result.success) {
         expect(result.data).toBeDefined()

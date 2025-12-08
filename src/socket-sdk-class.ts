@@ -3528,7 +3528,7 @@ export class SocketSdk {
    *
    * @throws {Error} When server returns 5xx status codes
    */
-  async getTelemetryConfig(
+  async getOrgTelemetryConfig(
     orgSlug: string,
   ): Promise<SocketSdkResult<'getOrgTelemetryConfig'>> {
     try {
