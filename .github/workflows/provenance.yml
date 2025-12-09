@@ -23,11 +23,11 @@ permissions:
 
 jobs:
   publish:
-    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@4709a2443e5a036bb0cd94e5d1559f138f05994c # main
+    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@0f9229dbc545a2de7b06024756e41fa5e0debc8b # main
     with:
       debug: ${{ inputs.debug }}
       dist-tag: ${{ inputs.dist-tag }}
       package-name: '@socketsecurity/sdk'
       publish-script: 'publish:ci'
-      setup-script: 'pnpm run build'
+      setup-script: 'ci:validate'
       use-trusted-publishing: true
