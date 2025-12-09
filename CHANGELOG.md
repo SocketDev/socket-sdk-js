@@ -8,15 +8,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- Telemetry configuration management endpoints (`getOrgTelemetryConfig`, `updateOrgTelemetryConfig`)
-- Webhook management endpoints (`getOrgWebhooksList`, `createOrgWebhook`, `getOrgWebhook`, `updateOrgWebhook`, `deleteOrgWebhook`)
-- Vulnerability fixes endpoint for fetching available fixes for vulnerabilities in repositories or scans
-- Alerts listing endpoint for retrieving latest alerts
-- Archive-based full scan creation supporting .tar, .tar.gz/.tgz, and .zip formats
-- Full scan file download as tarball
-- Per-endpoint TTL configuration for API response caching
-- Request/response logging support for debugging and monitoring
-- PURL batch processing enhancements with `cachedResultsOnly` and `summary` options
+- New API methods:
+  - `getOrgTelemetryConfig()` - Get organization telemetry configuration
+  - `updateOrgTelemetryConfig()` - Update organization telemetry configuration
+  - `getOrgWebhooksList()` - List organization webhooks
+  - `createOrgWebhook()` - Create organization webhook
+  - `getOrgWebhook()` - Get organization webhook details
+  - `updateOrgWebhook()` - Update organization webhook
+  - `deleteOrgWebhook()` - Delete organization webhook
+  - `getOrgAlertsList()` - List organization alerts
+  - `getOrgFixes()` - Get available vulnerability fixes for repositories or scans
+  - `createOrgFullScanFromArchive()` - Create full scan from archive file (.tar, .tar.gz/.tgz, or .zip)
+  - `downloadOrgFullScanFilesAsTar()` - Download full scan files as tarball to local filesystem
+- Per-endpoint TTL configuration: `cacheTtl` option accepts object with endpoint-specific TTL values (e.g., `{ default: 300_000, getIssues: 600_000 }`)
+- Request/response logging: `hooks` option with `onRequest(info)` and `onResponse(info)` callbacks for debugging and monitoring
+- PURL batch processing: `cachedResultsOnly` query parameter (return only cached results, skip new scans) and `summary` query parameter (include summary with counts of malformed, resolved, and not found PURLs) in `batchPackageFetch()` and `batchPackageStream()`
+- UTF-8 filename support: `uploadManifestFiles()`, `createFullScan()`, `createDependenciesSnapshot()`, and `createOrgFullScanFromArchive()` automatically handle international filenames (Japanese, Cyrillic, emoji, and other UTF-8 characters)
 
 ### Changed
 
@@ -474,9 +481,9 @@ To migrate from v1.x to v2.0:
 
 ### Changed
 - Synced with OpenAPI definition
-  - Added new `/openapi.json` endpoint for retrieving API specification in JSON format
-  - Updated repo label filter descriptions to document empty string ("") usage for repositories with no labels
-  - Added 'dual' threat category type
+- Added new `/openapi.json` endpoint for retrieving API specification in JSON format
+- Updated repo label filter descriptions to document empty string ("") usage for repositories with no labels
+- Added 'dual' threat category type
 
 ## [1.8.4](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.8.4) - 2025-10-01
 
