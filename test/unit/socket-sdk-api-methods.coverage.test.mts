@@ -6,7 +6,17 @@
  * using actual HTTP, not module patching.
  */
 
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  unlinkSync,
+  writeFileSync,
+} from 'node:fs'
 import { createServer } from 'node:http'
+import os from 'node:os'
+import path from 'node:path'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
@@ -415,8 +425,16 @@ describe('SocketSdk - API Methods Coverage', () => {
     })
   })
 
-  afterAll(() => {
-    server.close()
+  afterAll(async () => {
+    await new Promise<void>((resolve, reject) => {
+      server.close(err => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      })
+    })
   })
 
   describe('Package Analysis Methods', () => {
@@ -507,12 +525,8 @@ describe('SocketSdk - API Methods Coverage', () => {
 
     it('covers createFullScan', async () => {
       // Create a temporary test file
-      const { mkdtempSync, rmSync, writeFileSync } = await import('node:fs')
-      const { tmpdir } = await import('node:os')
-      const { join } = await import('node:path')
-
-      const tempDir = mkdtempSync(join(tmpdir(), 'socket-test-'))
-      const testFile = join(tempDir, 'package.json')
+      const tempDir = mkdtempSync(path.join(os.tmpdir(), 'socket-test-'))
+      const testFile = path.join(tempDir, 'package.json')
       writeFileSync(
         testFile,
         JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
@@ -613,12 +627,8 @@ describe('SocketSdk - API Methods Coverage', () => {
 
     it('covers createDependenciesSnapshot', async () => {
       // Create a temporary test file
-      const { mkdtempSync, rmSync, writeFileSync } = await import('node:fs')
-      const { tmpdir } = await import('node:os')
-      const { join } = await import('node:path')
-
-      const tempDir = mkdtempSync(join(tmpdir(), 'socket-test-'))
-      const testFile = join(tempDir, 'package.json')
+      const tempDir = mkdtempSync(path.join(os.tmpdir(), 'socket-test-'))
+      const testFile = path.join(tempDir, 'package.json')
       writeFileSync(
         testFile,
         JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
@@ -808,10 +818,8 @@ describe('SocketSdk - API Methods Coverage', () => {
   describe('Full Scan Archive Methods', () => {
     it('covers createOrgFullScanFromArchive', async () => {
       // Create a temporary test file to upload
-      const tmpDir = '/tmp'
-      const testFilePath = `${tmpDir}/test-archive-${Date.now()}.tar.gz`
-      const fs = await import('node:fs')
-      fs.writeFileSync(testFilePath, 'test archive content')
+      const testFilePath = `${os.tmpdir()}/test-archive-${Date.now()}.tar.gz`
+      writeFileSync(testFilePath, 'test archive content')
 
       try {
         const result = await client.createOrgFullScanFromArchive(
@@ -830,7 +838,7 @@ describe('SocketSdk - API Methods Coverage', () => {
       } finally {
         // Clean up test file
         try {
-          fs.unlinkSync(testFilePath)
+          unlinkSync(testFilePath)
         } catch {
           // Ignore cleanup errors
         }
@@ -839,9 +847,7 @@ describe('SocketSdk - API Methods Coverage', () => {
 
     it('covers downloadOrgFullScanFilesAsTar', async () => {
       // Create a temporary output file path
-      const tmpDir = '/tmp'
-      const outputPath = `${tmpDir}/test-download-${Date.now()}.tar`
-      const fs = await import('node:fs')
+      const outputPath = `${os.tmpdir()}/test-download-${Date.now()}.tar`
 
       try {
         const result = await client.downloadOrgFullScanFilesAsTar(
@@ -852,14 +858,14 @@ describe('SocketSdk - API Methods Coverage', () => {
         // The method executes successfully
         expect(result.success).toBe(true)
         // Verify the file was written
-        expect(fs.existsSync(outputPath)).toBe(true)
+        expect(existsSync(outputPath)).toBe(true)
         // Verify file has content
-        const content = fs.readFileSync(outputPath)
+        const content = readFileSync(outputPath)
         expect(content.length).toBeGreaterThan(0)
       } finally {
         // Clean up output file
         try {
-          fs.unlinkSync(outputPath)
+          unlinkSync(outputPath)
         } catch {
           // Ignore cleanup errors
         }
@@ -1129,12 +1135,8 @@ describe('SocketSdk - API Methods Coverage', () => {
   describe('Upload Methods', () => {
     it('covers uploadManifestFiles', async () => {
       // Create a temporary test file
-      const { mkdtempSync, rmSync, writeFileSync } = await import('node:fs')
-      const { tmpdir } = await import('node:os')
-      const { join } = await import('node:path')
-
-      const tempDir = mkdtempSync(join(tmpdir(), 'socket-test-'))
-      const testFile = join(tempDir, 'package.json')
+      const tempDir = mkdtempSync(path.join(os.tmpdir(), 'socket-test-'))
+      const testFile = path.join(tempDir, 'package.json')
       writeFileSync(
         testFile,
         JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
