@@ -127,53 +127,8 @@ describe('File Upload - createRequestBodyForFilepaths', () => {
   })
 })
 
-describe('File Upload - createRequestBodyForJson', () => {
-  it('should create FormData for JSON data with default basename', () => {
-    const jsonData = { name: 'test', version: '1.0.0' }
-
-    const result = createRequestBodyForJson(jsonData)
-
-    expect(result).toBeInstanceOf(FormData)
-    expect(result.getHeaders()).toHaveProperty('content-type')
-    expect(result.getHeaders()['content-type']).toMatch(
-      /^multipart\/form-data; boundary=/,
-    )
-  })
-
-  it('should create FormData for JSON with custom basename', () => {
-    const jsonData = { foo: 'bar' }
-    const basename = 'custom.json'
-
-    const result = createRequestBodyForJson(jsonData, basename)
-
-    expect(result).toBeInstanceOf(FormData)
-    expect(result.getBoundary()).toBeTruthy()
-  })
-
-  it('should handle basename with different extension', () => {
-    const jsonData = { test: true }
-    const basename = 'metadata.txt'
-
-    const result = createRequestBodyForJson(jsonData, basename)
-
-    expect(result).toBeInstanceOf(FormData)
-    expect(result.getBoundary()).toBeTruthy()
-  })
-
-  it('should handle complex JSON objects', () => {
-    const jsonData = {
-      nested: { deeply: { value: 123 } },
-      array: [1, 2, 3],
-      boolean: true,
-      null: null,
-    }
-
-    const result = createRequestBodyForJson(jsonData)
-
-    expect(result).toBeInstanceOf(FormData)
-    expect(result.getBoundary()).toBeTruthy()
-  })
-})
+// Note: createRequestBodyForJson tests are in test/unit/utils.test.mts
+// to avoid duplication with more comprehensive test coverage there.
 
 describe('File Upload - createUploadRequest', () => {
   let tempDir: string
