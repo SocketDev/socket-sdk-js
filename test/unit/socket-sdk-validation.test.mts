@@ -5,6 +5,35 @@ import { SocketSdk } from '../../src/index'
 
 describe('SocketSdk - Configuration Validation', () => {
   describe('API token validation', () => {
+    it('should throw TypeError for non-string API token', () => {
+      // Test validation of non-string token
+      expect(() => new SocketSdk(null as any)).toThrow(TypeError)
+      expect(() => new SocketSdk(null as any)).toThrow(
+        '"apiToken" is required and must be a string',
+      )
+    })
+
+    it('should throw TypeError for undefined API token', () => {
+      expect(() => new SocketSdk(undefined as any)).toThrow(TypeError)
+      expect(() => new SocketSdk(undefined as any)).toThrow(
+        '"apiToken" is required and must be a string',
+      )
+    })
+
+    it('should throw TypeError for number as API token', () => {
+      expect(() => new SocketSdk(12_345 as any)).toThrow(TypeError)
+      expect(() => new SocketSdk(12_345 as any)).toThrow(
+        '"apiToken" is required and must be a string',
+      )
+    })
+
+    it('should throw TypeError for object as API token', () => {
+      expect(() => new SocketSdk({ token: 'test' } as any)).toThrow(TypeError)
+      expect(() => new SocketSdk({ token: 'test' } as any)).toThrow(
+        '"apiToken" is required and must be a string',
+      )
+    })
+
     it('should throw error for empty API token', () => {
       // Test validation of empty token
       expect(() => new SocketSdk('')).toThrow(
