@@ -80,6 +80,51 @@ describe('File Upload - createRequestBodyForFilepaths', () => {
     expect(result).toBeInstanceOf(FormData)
     expect(result.getBoundary()).toBeTruthy()
   })
+
+  it('should handle UTF-8 filenames correctly', () => {
+    // Test various UTF-8 characters: Japanese, emoji, special chars
+    const utf8Filename = 'テスト-файл-📦-special.txt'
+    const testFile = path.join(tempDir, utf8Filename)
+    writeFileSync(testFile, 'utf8 content')
+
+    const result = createRequestBodyForFilepaths([testFile], tempDir)
+
+    expect(result).toBeInstanceOf(FormData)
+    expect(result.getBoundary()).toBeTruthy()
+    // form-data should handle UTF-8 encoding per RFC 7578
+    expect(result.getHeaders()['content-type']).toMatch(
+      /^multipart\/form-data; boundary=/,
+    )
+  })
+
+  it('should handle UTF-8 filenames in nested paths', () => {
+    const utf8Dir = path.join(tempDir, 'папка', '文件夹')
+    mkdirSync(utf8Dir, { recursive: true })
+    const utf8File = path.join(utf8Dir, 'файл-テスト.json')
+    writeFileSync(utf8File, '{"test": true}')
+
+    const result = createRequestBodyForFilepaths([utf8File], tempDir)
+
+    expect(result).toBeInstanceOf(FormData)
+    expect(result.getBoundary()).toBeTruthy()
+  })
+
+  it('should handle multiple files with UTF-8 filenames', () => {
+    const files = [
+      path.join(tempDir, '日本語.txt'),
+      path.join(tempDir, 'русский.txt'),
+      path.join(tempDir, 'emoji-🚀-file.txt'),
+    ]
+
+    for (const file of files) {
+      writeFileSync(file, 'content')
+    }
+
+    const result = createRequestBodyForFilepaths(files, tempDir)
+
+    expect(result).toBeInstanceOf(FormData)
+    expect(result.getBoundary()).toBeTruthy()
+  })
 })
 
 describe('File Upload - createRequestBodyForJson', () => {

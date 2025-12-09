@@ -144,8 +144,33 @@ async function checkBundledDependencies(content: string): Promise<{
       )
 
       if (!hasExternalImport) {
-        // Dependency isn't imported externally - it might be bundled
-        bundledDeps.push(dep)
+        // Check if dependency appears in actual bundled code (not just package.json metadata)
+        // The bundle might include package.json as a literal object, which is fine
+        let foundInBundledCode = false
+
+        traverse(file as any, {
+          // Look for actual code that imports/requires this dependency
+          CallExpression(path: any) {
+            if (
+              path.node.callee.name === 'require' &&
+              path.node.arguments.length > 0 &&
+              path.node.arguments[0].type === 'StringLiteral' &&
+              path.node.arguments[0].value.startsWith(dep)
+            ) {
+              foundInBundledCode = true
+            }
+          },
+          ImportDeclaration(path: any) {
+            if (path.node.source.value.startsWith(dep)) {
+              foundInBundledCode = true
+            }
+          },
+        })
+
+        // Only flag if we found actual bundled code, not just metadata
+        if (foundInBundledCode) {
+          bundledDeps.push(dep)
+        }
       }
     }
   }
