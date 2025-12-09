@@ -22,6 +22,11 @@ const distPath = path.join(rootPath, 'dist')
 
 const logger = getDefaultLogger()
 
+// Read package.json to get runtime dependencies
+const packageJsonPath = path.join(rootPath, 'package.json')
+const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'))
+const externalDependencies = Object.keys(packageJson.dependencies || {})
+
 /**
  * Plugin to shorten module paths in bundled output with conflict detection.
  * Uses @babel/parser and magic-string for precise AST-based modifications.
@@ -225,12 +230,8 @@ export const buildConfig = {
   ),
 
   // External dependencies.
-  // @socketsecurity/lib, form-data, and @socketregistry/packageurl-js are external (not bundled) - consumers must install them.
-  external: [
-    '@socketsecurity/lib',
-    '@socketregistry/packageurl-js',
-    'form-data',
-  ],
+  // All runtime dependencies from package.json are external (not bundled) - consumers must install them.
+  external: externalDependencies,
 
   // TypeScript configuration
   tsconfig: path.join(rootPath, 'tsconfig.json'),
