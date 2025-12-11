@@ -268,6 +268,31 @@ export interface paths {
      */
     get: operations['exportCDX']
   }
+  '/orgs/{org_slug}/export/openvex/{id}': {
+    /**
+     * Export OpenVEX Document (Beta)
+     * @description Export vulnerability exploitability data as an OpenVEX v0.2.0 document.
+     *
+     * OpenVEX (Vulnerability Exploitability eXchange) documents communicate the
+     * exploitability status of vulnerabilities in software products. This export
+     * includes:
+     *
+     * - **Patch data**: Vulnerabilities fixed by applied Socket patches are marked as "fixed"
+     * - **Reachability analysis**: Code reachability determines if vulnerable code is exploitable:
+     * - Unreachable code → "not_affected" with justification
+     * - Reachable code → "affected"
+     * - Unknown/pending → "under_investigation"
+     *
+     * Each statement in the document represents a single artifact-vulnerability pair
+     * for granular reachability information.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - report:read
+     */
+    get: operations['exportOpenVEX']
+  }
   '/orgs/{org_slug}/export/spdx/{id}': {
     /**
      * Export SPDX SBOM (Beta)
@@ -1815,6 +1840,25 @@ export interface components {
         }
       }>
     }
+    OpenVEXDocumentSchema: {
+      /** @default https://openvex.dev/ns/v0.2.0 */
+      '@context': string
+      /** @default */
+      '@id': string
+      /** @default Socket Security */
+      author: string
+      /** @default */
+      timestamp: string
+      /** @default 1 */
+      version: number
+      statements: Array<components['schemas']['OpenVEXStatementSchema']>
+      /** @default VEX Generator */
+      role?: string
+      /** @default */
+      last_updated?: string
+      /** @default Socket Security VEX Generator */
+      tooling?: string
+    }
     SPDXManifestSchema: {
       /** @default SPDX-2.3 */
       spdxVersion: string
@@ -2428,6 +2472,32 @@ export interface components {
         }
       }>
       components?: Array<components['schemas']['CDXComponentSchema']>
+    }
+    OpenVEXStatementSchema: {
+      vulnerability: components['schemas']['OpenVEXVulnerabilitySchema']
+      products: Array<components['schemas']['OpenVEXProductSchema']>
+      /** @default affected */
+      status: string
+      /** @default */
+      '@id'?: string
+      /** @default 0 */
+      version?: number
+      /** @default */
+      timestamp?: string
+      /** @default */
+      last_updated?: string
+      /** @default */
+      supplier?: string
+      /** @default */
+      status_notes?: string
+      /** @default */
+      justification?: string
+      /** @default */
+      impact_statement?: string
+      /** @default */
+      action_statement?: string
+      /** @default */
+      action_statement_timestamp?: string
     }
     LicenseAllowListElabbed: {
       strings: string[]
@@ -4405,6 +4475,7 @@ export interface components {
       | 'pub'
       | 'pypi'
       | 'rpm'
+      | 'socket'
       | 'swid'
       | 'swift'
       | 'vscode'
@@ -4452,6 +4523,22 @@ export interface components {
       type: 'precomputed' | 'full-scan'
       /** @description Reachability analysis results for each vulnerability */
       results: Array<components['schemas']['ReachabilityResultItem']>
+    }
+    OpenVEXVulnerabilitySchema: {
+      /** @default */
+      name: string
+      /** @default */
+      '@id'?: string
+      /** @default */
+      description?: string
+      aliases?: string[]
+    }
+    OpenVEXProductSchema: {
+      /** @default */
+      '@id': string
+      identifiers?: components['schemas']['OpenVEXIdentifiersSchema']
+      hashes?: components['schemas']['OpenVEXHashesSchema']
+      subcomponents?: Array<components['schemas']['OpenVEXComponentSchema']>
     }
     SocketIssueBasics: {
       severity: components['schemas']['SocketIssueSeverity']
@@ -4507,6 +4594,46 @@ export interface components {
        * @default
        */
       subprojectPath?: string
+    }
+    OpenVEXIdentifiersSchema: {
+      /** @default */
+      purl?: string
+      /** @default */
+      cpe23?: string
+      /** @default */
+      cpe22?: string
+    }
+    OpenVEXHashesSchema: {
+      /** @default */
+      md5?: string
+      /** @default */
+      sha1?: string
+      /** @default */
+      'sha-256'?: string
+      /** @default */
+      'sha-384'?: string
+      /** @default */
+      'sha-512'?: string
+      /** @default */
+      'sha3-224'?: string
+      /** @default */
+      'sha3-256'?: string
+      /** @default */
+      'sha3-384'?: string
+      /** @default */
+      'sha3-512'?: string
+      /** @default */
+      'blake2s-256'?: string
+      /** @default */
+      'blake2b-256'?: string
+      /** @default */
+      'blake2b-512'?: string
+    }
+    OpenVEXComponentSchema: {
+      /** @default */
+      '@id'?: string
+      identifiers?: components['schemas']['OpenVEXIdentifiersSchema']
+      hashes?: components['schemas']['OpenVEXHashesSchema']
     }
     SocketRefList: Array<components['schemas']['SocketRef']>
     SocketRefFile: {
@@ -5876,6 +6003,58 @@ export interface operations {
       200: {
         content: {
           'application/json': components['schemas']['CDXManifestSchema']
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Export OpenVEX Document (Beta)
+   * @description Export vulnerability exploitability data as an OpenVEX v0.2.0 document.
+   *
+   * OpenVEX (Vulnerability Exploitability eXchange) documents communicate the
+   * exploitability status of vulnerabilities in software products. This export
+   * includes:
+   *
+   * - **Patch data**: Vulnerabilities fixed by applied Socket patches are marked as "fixed"
+   * - **Reachability analysis**: Code reachability determines if vulnerable code is exploitable:
+   * - Unreachable code → "not_affected" with justification
+   * - Reachable code → "affected"
+   * - Unknown/pending → "under_investigation"
+   *
+   * Each statement in the document represents a single artifact-vulnerability pair
+   * for granular reachability information.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - report:read
+   */
+  exportOpenVEX: {
+    parameters: {
+      query?: {
+        /** @description The author of the VEX document. Should be an individual or organization. */
+        author?: string
+        /** @description The role of the document author (e.g., "VEX Generator", "Security Team"). */
+        role?: string
+        /** @description Custom IRI for the VEX document. If not provided, a default IRI will be generated. */
+        document_id?: string
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The full scan OR sbom report ID */
+        id: string
+      }
+    }
+    responses: {
+      /** @description OpenVEX v0.2.0 document */
+      200: {
+        content: {
+          'application/json': components['schemas']['OpenVEXDocumentSchema']
         }
       }
       400: components['responses']['SocketBadRequest']
@@ -14540,6 +14719,7 @@ export interface operations {
           | 'vscode'
           | 'pypi'
           | 'gem'
+          | 'swift'
       }
     }
     responses: {
@@ -14650,6 +14830,7 @@ export interface operations {
           | 'vscode'
           | 'pypi'
           | 'gem'
+          | 'swift'
       }
       path: {
         /** @description The slug of the organization */
