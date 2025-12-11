@@ -1004,6 +1004,67 @@
           "version"
         ]
       },
+      "OpenVEXDocumentSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "@context": {
+            "type": "string",
+            "description": "",
+            "default": "https://openvex.dev/ns/v0.2.0"
+          },
+          "@id": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "author": {
+            "type": "string",
+            "description": "",
+            "default": "Socket Security"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "version": {
+            "type": "number",
+            "description": "",
+            "default": 1
+          },
+          "statements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OpenVEXStatementSchema"
+            },
+            "description": ""
+          },
+          "role": {
+            "type": "string",
+            "description": "",
+            "default": "VEX Generator"
+          },
+          "last_updated": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "tooling": {
+            "type": "string",
+            "description": "",
+            "default": "Socket Security VEX Generator"
+          }
+        },
+        "required": [
+          "@context",
+          "@id",
+          "author",
+          "statements",
+          "timestamp",
+          "version"
+        ]
+      },
       "SPDXManifestSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2560,6 +2621,82 @@
           "purl",
           "type",
           "version"
+        ]
+      },
+      "OpenVEXStatementSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "vulnerability": {
+            "$ref": "#/components/schemas/OpenVEXVulnerabilitySchema"
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OpenVEXProductSchema"
+            },
+            "description": ""
+          },
+          "status": {
+            "type": "string",
+            "description": "",
+            "default": "affected"
+          },
+          "@id": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "version": {
+            "type": "number",
+            "description": "",
+            "default": 0
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "last_updated": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "supplier": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "status_notes": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "justification": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "impact_statement": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "action_statement": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "action_statement_timestamp": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          }
+        },
+        "required": [
+          "products",
+          "status",
+          "vulnerability"
         ]
       },
       "LicenseAllowListElabbed": {
@@ -4942,6 +5079,64 @@
                           "message",
                           "sinkLocations",
                           "sourceLocation"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "recentlyPublished"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "publishedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "checkedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          }
+                        },
+                        "required": [
+                          "checkedAt",
+                          "publishedAt"
                         ]
                       },
                       "usage": {
@@ -9808,6 +10003,7 @@
           "pub",
           "pypi",
           "rpm",
+          "socket",
           "swid",
           "swift",
           "vscode",
@@ -9894,6 +10090,66 @@
         "required": [
           "results",
           "type"
+        ]
+      },
+      "OpenVEXVulnerabilitySchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "@id": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "",
+              "default": ""
+            },
+            "description": ""
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "OpenVEXProductSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "@id": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "identifiers": {
+            "$ref": "#/components/schemas/OpenVEXIdentifiersSchema"
+          },
+          "hashes": {
+            "$ref": "#/components/schemas/OpenVEXHashesSchema"
+          },
+          "subcomponents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OpenVEXComponentSchema"
+            },
+            "description": ""
+          }
+        },
+        "required": [
+          "@id"
         ]
       },
       "SocketIssueBasics": {
@@ -10054,6 +10310,112 @@
         "required": [
           "type"
         ]
+      },
+      "OpenVEXIdentifiersSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "purl": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "cpe23": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "cpe22": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          }
+        },
+        "description": ""
+      },
+      "OpenVEXHashesSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "md5": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "sha1": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "sha-256": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "sha-384": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "sha-512": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "sha3-224": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "sha3-256": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "sha3-384": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "sha3-512": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "blake2s-256": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "blake2b-256": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "blake2b-512": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          }
+        },
+        "description": ""
+      },
+      "OpenVEXComponentSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "@id": {
+            "type": "string",
+            "description": "",
+            "default": ""
+          },
+          "identifiers": {
+            "$ref": "#/components/schemas/OpenVEXIdentifiersSchema"
+          },
+          "hashes": {
+            "$ref": "#/components/schemas/OpenVEXHashesSchema"
+          }
+        }
       },
       "SocketRefList": {
         "type": "array",
@@ -10539,7 +10901,7 @@
             "name": "compact",
             "in": "query",
             "required": false,
-            "description": "Compact metadata.",
+            "description": "Compact metadata. When enabled, excludes metadata fields like author, scores, size, dependencies, and manifest files. Always includes: id, type, name, version, release, namespace, subpath, alerts, and alertPriorities.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -11502,7 +11864,7 @@
             ]
           }
         ],
-        "description": "Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.\n\nTo get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getsupportedfiles) endpoint.\n\nThe maximum number of files you can upload at a time is 5000 and each file can be no bigger than 67 MB.\n\n**Query Parameters:**\n- `scan_type` (optional): The type of scan to perform. Defaults to 'socket'. Must be 32 characters or less. Used for categorizing multiple SBOM heads per repository branch.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:create",
+        "description": "Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.\n\nTo get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getsupportedfiles) endpoint.\n\nThe maximum number of files you can upload at a time is 5000 and each file can be no bigger than 268 MB.\n\n**Query Parameters:**\n- `scan_type` (optional): The type of scan to perform. Defaults to 'socket'. Must be 32 characters or less. Used for categorizing multiple SBOM heads per repository branch.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:create",
         "responses": {
           "201": {
             "content": {
@@ -11742,6 +12104,16 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "name": "cached",
+            "in": "query",
+            "required": false,
+            "description": "Return cached immutable scan results. When enabled and results are cached, returns the pre-computed scan. When results are not yet cached, returns 202 Accepted and enqueues a background job.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "security": [
@@ -11767,6 +12139,34 @@
               }
             },
             "description": "Socket issue lists and scores for all packages"
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "",
+                      "default": "processing"
+                    },
+                    "id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ]
+                }
+              }
+            },
+            "description": "Scan is being processed. Poll again later to retrieve results."
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -13040,7 +13440,7 @@
             ]
           }
         ],
-        "description": "Create a full scan by uploading one or more archives. Supported archive formats include **.tar**, **.tar.gz/.tgz**, and **.zip**.\n\nEach uploaded archive is extracted server-side and any supported manifest files (like package.json, package-lock.json, pnpm-lock.yaml, etc.) are ingested for the scan. If you upload multiple archives in a single request, the manifests from every archive are merged into one full scan. The response includes any files that were ignored.\n\nThe maximum combined number of files extracted from your upload is 5000 and each extracted file can be no bigger than 67 MB.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:create",
+        "description": "Create a full scan by uploading one or more archives. Supported archive formats include **.tar**, **.tar.gz/.tgz**, and **.zip**.\n\nEach uploaded archive is extracted server-side and any supported manifest files (like package.json, package-lock.json, pnpm-lock.yaml, etc.) are ingested for the scan. If you upload multiple archives in a single request, the manifests from every archive are merged into one full scan. The response includes any files that were ignored.\n\nThe maximum combined number of files extracted from your upload is 5000 and each extracted file can be no bigger than 268 MB.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:create",
         "responses": {
           "201": {
             "content": {
@@ -13220,6 +13620,108 @@
         "x-readme": {}
       }
     },
+    "/orgs/{org_slug}/full-scans/{full_scan_id}/rescan": {
+      "post": {
+        "tags": [
+          "Full Scans"
+        ],
+        "summary": "Rescan full scan",
+        "operationId": "rescanOrgFullScan",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "full_scan_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the full scan to rescan",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "required": false,
+            "description": "The rescan mode: \"shallow\" (default) re-applies policies to cached data, \"deep\" re-fetches the SBOM stream.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "shallow",
+                "deep"
+              ],
+              "default": "shallow"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [
+              "full-scans:create"
+            ]
+          },
+          {
+            "basicAuth": [
+              "full-scans:create"
+            ]
+          }
+        ],
+        "description": "Create a new full scan by rescanning an existing scan. A \"shallow\" rescan reapplies the latest policies to the previously cached dependency resolution results. A \"deep\" rescan reruns dependency resolution and applies the latest policies to the results.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:create",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "",
+                      "default": "The ID of the newly created full scan"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "",
+                      "default": "The status of the new scan"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ]
+                }
+              }
+            },
+            "description": "Rescan initiated successfully"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
     "/orgs/{org_slug}/export/cdx/{id}": {
       "get": {
         "tags": [
@@ -13330,6 +13832,103 @@
               }
             },
             "description": "CycloneDX SBOM"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/export/openvex/{id}": {
+      "get": {
+        "tags": [
+          "Full Scans"
+        ],
+        "summary": "Export OpenVEX Document (Beta)",
+        "operationId": "exportOpenVEX",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The full scan OR sbom report ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "author",
+            "in": "query",
+            "required": false,
+            "description": "The author of the VEX document. Should be an individual or organization.",
+            "schema": {
+              "type": "string",
+              "default": "Socket Security"
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "required": false,
+            "description": "The role of the document author (e.g., \"VEX Generator\", \"Security Team\").",
+            "schema": {
+              "type": "string",
+              "default": "VEX Generator"
+            }
+          },
+          {
+            "name": "document_id",
+            "in": "query",
+            "required": false,
+            "description": "Custom IRI for the VEX document. If not provided, a default IRI will be generated.",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [
+              "report:read"
+            ]
+          },
+          {
+            "basicAuth": [
+              "report:read"
+            ]
+          }
+        ],
+        "description": "Export vulnerability exploitability data as an OpenVEX v0.2.0 document.\n\nOpenVEX (Vulnerability Exploitability eXchange) documents communicate the\nexploitability status of vulnerabilities in software products. This export\nincludes:\n\n- **Patch data**: Vulnerabilities fixed by applied Socket patches are marked as \"fixed\"\n- **Reachability analysis**: Code reachability determines if vulnerable code is exploitable:\n- Unreachable code → \"not_affected\" with justification\n- Reachable code → \"affected\"\n- Unknown/pending → \"under_investigation\"\n\nEach statement in the document represents a single artifact-vulnerability pair\nfor granular reachability information.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- report:read",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenVEXDocumentSchema"
+                }
+              }
+            },
+            "description": "OpenVEX v0.2.0 document"
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -14795,7 +15394,7 @@
             ]
           }
         ],
-        "description": "Create a diff scan between the repository's current HEAD full scan and a new full scan from uploaded manifest files.\nReturns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from\nthe [api_url](/reference/getDiffScanById) URL to get the contents of the diff.\n\nThe maximum number of files you can upload at a time is 5000 and each file can be no bigger than 67 MB.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n      - repo:list\n- diff-scans:create\n- full-scans:create",
+        "description": "Create a diff scan between the repository's current HEAD full scan and a new full scan from uploaded manifest files.\nReturns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from\nthe [api_url](/reference/getDiffScanById) URL to get the contents of the diff.\n\nThe maximum number of files you can upload at a time is 5000 and each file can be no bigger than 268 MB.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n      - repo:list\n- diff-scans:create\n- full-scans:create",
         "responses": {
           "201": {
             "content": {
@@ -18326,6 +18925,27 @@
                             "action"
                           ]
                         },
+                        "recentlyPublished": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for recentlyPublished issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "licenseSpdxDisj": {
                           "type": "object",
                           "additionalProperties": false,
@@ -20882,6 +21502,27 @@
                               "ignore"
                             ],
                             "description": "The action to take for ghaContextToEnv issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "recentlyPublished": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for recentlyPublished issues."
                           }
                         },
                         "required": [
@@ -23763,6 +24404,27 @@
                             "action"
                           ]
                         },
+                        "recentlyPublished": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for recentlyPublished issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "licenseSpdxDisj": {
                           "type": "object",
                           "additionalProperties": false,
@@ -26328,6 +26990,27 @@
                           "action"
                         ]
                       },
+                      "recentlyPublished": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for recentlyPublished issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
                       "licenseSpdxDisj": {
                         "type": "object",
                         "additionalProperties": false,
@@ -28840,6 +29523,27 @@
                                 "ignore"
                               ],
                               "description": "The action to take for ghaContextToEnv issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "recentlyPublished": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for recentlyPublished issues."
                             }
                           },
                           "required": [
@@ -34788,6 +35492,7 @@
                 "CreateApiToken",
                 "CreateLabel",
                 "CreateWebhook",
+                "DeleteApiToken",
                 "DeleteFullScan",
                 "DeleteLabel",
                 "DeleteLabelSetting",
@@ -35232,12 +35937,16 @@
                   "properties": {
                     "created_by": {
                       "type": "string",
-                      "description": "ID of the Socket user who created the API Token, if available",
+                      "description": "ID of the Socket user who created the API Token",
                       "default": "",
-                      "format": "uuid",
-                      "nullable": true
+                      "format": "uuid"
                     },
                     "token": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "hash": {
                       "type": "string",
                       "description": "",
                       "default": ""
@@ -35245,12 +35954,13 @@
                   },
                   "required": [
                     "created_by",
+                    "hash",
                     "token"
                   ]
                 }
               }
             },
-            "description": "The newly created api token."
+            "description": "The newly created api token and its hash."
           },
           "401": {
             "$ref": "#/components/responses/SocketUnauthorized"
@@ -35328,6 +36038,20 @@
               "type": "integer",
               "minimum": 1,
               "default": 1
+            }
+          },
+          {
+            "name": "token_values",
+            "in": "query",
+            "required": false,
+            "description": "Whether to include token values in response. Use \"omit\" to exclude tokens entirely.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "include",
+                "omit"
+              ],
+              "default": "include"
             }
           }
         ],
@@ -35410,6 +36134,12 @@
                             "description": "Timestamp when the API Token was created",
                             "default": "",
                             "format": "date"
+                          },
+                          "hash": {
+                            "type": "string",
+                            "description": "SRI-format hash of the token (e.g., sha512-base64hash). Null for tokens created before hash column was added.",
+                            "default": "",
+                            "nullable": true
                           },
                           "id": {
                             "type": "string",
@@ -35520,8 +36250,9 @@
                           },
                           "token": {
                             "type": "string",
-                            "description": "The obfuscated token of the API Token",
-                            "default": ""
+                            "description": "The token of the API Token (redacted or omitted)",
+                            "default": "",
+                            "nullable": true
                           },
                           "visibility": {
                             "type": "string",
@@ -35537,6 +36268,7 @@
                           "committers",
                           "created_at",
                           "created_by",
+                          "hash",
                           "id",
                           "last_used_at",
                           "max_quota",
@@ -35692,11 +36424,6 @@
                     },
                     "description": "List of scopes granted to the API Token"
                   },
-                  "token": {
-                    "type": "string",
-                    "description": "The API token to update",
-                    "default": ""
-                  },
                   "visibility": {
                     "type": "string",
                     "enum": [
@@ -35744,13 +36471,22 @@
                     "type": "string",
                     "description": "Name for the API Token",
                     "default": "api token"
+                  },
+                  "token": {
+                    "type": "string",
+                    "description": "The API token to update (provide either token or hash)",
+                    "default": ""
+                  },
+                  "hash": {
+                    "type": "string",
+                    "description": "The API token hash to update (provide either token or hash)",
+                    "default": ""
                   }
                 },
                 "required": [
                   "committer",
                   "max_quota",
                   "scopes",
-                  "token",
                   "visibility"
                 ]
               }
@@ -35832,21 +36568,23 @@
               "schema": {
                 "type": "object",
                 "additionalProperties": false,
-                "description": "",
                 "properties": {
                   "token": {
                     "type": "string",
                     "description": "",
                     "default": ""
+                  },
+                  "hash": {
+                    "type": "string",
+                    "description": "",
+                    "default": ""
                   }
                 },
-                "required": [
-                  "token"
-                ]
+                "description": "The API Token or hash to rotate. Must provide either token or hash, but not both."
               }
             }
           },
-          "description": "The API Token to rotate",
+          "description": "The API Token or hash to rotate. Must provide either token or hash, but not both.",
           "required": false
         },
         "security": [
@@ -35873,7 +36611,7 @@
                   "properties": {
                     "created_by": {
                       "type": "string",
-                      "description": "ID of the Socket user who initiated the rotation, if available",
+                      "description": "ID of the Socket user who created the API Token",
                       "default": "",
                       "format": "uuid",
                       "nullable": true
@@ -35882,16 +36620,22 @@
                       "type": "string",
                       "description": "",
                       "default": ""
+                    },
+                    "hash": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
                     }
                   },
                   "required": [
                     "created_by",
+                    "hash",
                     "token"
                   ]
                 }
               }
             },
-            "description": "The replacement API Token"
+            "description": "The replacement API Token and its hash"
           },
           "401": {
             "$ref": "#/components/responses/SocketUnauthorized"
@@ -35930,21 +36674,23 @@
               "schema": {
                 "type": "object",
                 "additionalProperties": false,
-                "description": "",
                 "properties": {
                   "token": {
                     "type": "string",
                     "description": "",
                     "default": ""
+                  },
+                  "hash": {
+                    "type": "string",
+                    "description": "",
+                    "default": ""
                   }
                 },
-                "required": [
-                  "token"
-                ]
+                "description": "The token or hash to revoke. Must provide either token or hash, but not both."
               }
             }
           },
-          "description": "The token to revoke.",
+          "description": "The token or hash to revoke. Must provide either token or hash, but not both.",
           "required": false
         },
         "security": [
@@ -36219,7 +36965,9 @@
                 "nuget",
                 "vscode",
                 "pypi",
-                "gem"
+                "gem",
+                "socket",
+                "swift"
               ]
             }
           }
@@ -36507,7 +37255,9 @@
                 "nuget",
                 "vscode",
                 "pypi",
-                "gem"
+                "gem",
+                "socket",
+                "swift"
               ]
             }
           }
@@ -37632,6 +38382,35 @@
                                     "default": "",
                                     "nullable": true
                                   },
+                                  "vulnerableArtifacts": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "additionalProperties": false,
+                                      "description": "",
+                                      "properties": {
+                                        "purl": {
+                                          "type": "string",
+                                          "description": "",
+                                          "default": "The PURL (unique package identifier) of the vulnerable package"
+                                        },
+                                        "manifestFiles": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "string",
+                                            "description": "",
+                                            "default": "The manifest file(s) that contain the package"
+                                          },
+                                          "description": ""
+                                        }
+                                      },
+                                      "required": [
+                                        "manifestFiles",
+                                        "purl"
+                                      ]
+                                    },
+                                    "description": ""
+                                  },
                                   "advisoryDetails": {
                                     "type": "object",
                                     "additionalProperties": false,
@@ -37725,7 +38504,8 @@
                                   "advisoryDetails",
                                   "cve",
                                   "ghsa",
-                                  "type"
+                                  "type",
+                                  "vulnerableArtifacts"
                                 ]
                               }
                             }
@@ -38928,6 +39708,24 @@
             }
           },
           {
+            "name": "filters.alertActionSourceType",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertActionSourceType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "filters.alertCategory",
             "in": "query",
             "required": false,
@@ -38941,6 +39739,96 @@
             "in": "query",
             "required": false,
             "description": "Comma-separated list of alert categories (\"supplyChainRisk\", \"maintenance\", \"quality\", \"license\", or \"vulnerability\") that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertClearedAt.eq",
+            "in": "query",
+            "required": false,
+            "description": "Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertClearedAt.lt",
+            "in": "query",
+            "required": false,
+            "description": "Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertClearedAt.lte",
+            "in": "query",
+            "required": false,
+            "description": "Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertClearedAt.gt",
+            "in": "query",
+            "required": false,
+            "description": "Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertClearedAt.gte",
+            "in": "query",
+            "required": false,
+            "description": "Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCreatedAt.eq",
+            "in": "query",
+            "required": false,
+            "description": "Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCreatedAt.lt",
+            "in": "query",
+            "required": false,
+            "description": "Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCreatedAt.lte",
+            "in": "query",
+            "required": false,
+            "description": "Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCreatedAt.gt",
+            "in": "query",
+            "required": false,
+            "description": "Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertCreatedAt.gte",
+            "in": "query",
+            "required": false,
+            "description": "Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone)",
             "schema": {
               "type": "string"
             }
@@ -39092,6 +39980,24 @@
             }
           },
           {
+            "name": "filters.alertReachabilityAnalysisType",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertReachabilityAnalysisType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "filters.alertReachabilityType",
             "in": "query",
             "required": false,
@@ -39206,6 +40112,102 @@
             "description": "Alert updated at (YYYY-MM-DD HH:MM:SS in UTC time zone)",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactName",
+            "in": "query",
+            "required": false,
+            "description": "Name of artifact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactName.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Name of artifact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactType",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.dependencyDead",
+            "in": "query",
+            "required": false,
+            "description": "Dead/reachable dependency filter flag",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "filters.dependencyDead.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Dead/reachable dependency filter flag",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "filters.dependencyDev",
+            "in": "query",
+            "required": false,
+            "description": "Development/production dependency filter flag",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "filters.dependencyDev.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Development/production dependency filter flag",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "filters.dependencyDirect",
+            "in": "query",
+            "required": false,
+            "description": "Direct/transitive dependency filter flag",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "filters.dependencyDirect.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Direct/transitive dependency filter flag",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           },
           {
@@ -39460,6 +40462,11 @@
                             "nullable": true
                           },
                           "dashboardUrl": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "title": {
                             "type": "string",
                             "description": "",
                             "default": ""
@@ -39826,6 +40833,7 @@
                           "locations",
                           "severity",
                           "status",
+                          "title",
                           "type",
                           "updatedAt",
                           "version",
@@ -39871,6 +40879,24 @@
                               },
                               "description": "Comma-separated list of alert actions (\"error\", \"warn\", \"monitor\", or \"ignore) that should be excluded"
                             },
+                            "alertActionSourceType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included"
+                            },
+                            "alertActionSourceType.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded"
+                            },
                             "alertCategory": {
                               "type": "array",
                               "items": {
@@ -39888,6 +40914,96 @@
                                 "default": ""
                               },
                               "description": "Comma-separated list of alert categories (\"supplyChainRisk\", \"maintenance\", \"quality\", \"license\", or \"vulnerability\") that should be excluded"
+                            },
+                            "alertClearedAt.eq": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone)"
+                            },
+                            "alertClearedAt.lt": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone)"
+                            },
+                            "alertClearedAt.lte": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone)"
+                            },
+                            "alertClearedAt.gt": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone)"
+                            },
+                            "alertClearedAt.gte": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone)"
+                            },
+                            "alertCreatedAt.eq": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone)"
+                            },
+                            "alertCreatedAt.lt": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone)"
+                            },
+                            "alertCreatedAt.lte": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone)"
+                            },
+                            "alertCreatedAt.gt": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone)"
+                            },
+                            "alertCreatedAt.gte": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone)"
                             },
                             "alertCveId": {
                               "type": "array",
@@ -40024,6 +41140,24 @@
                               },
                               "description": "Alert priority (\"low\", \"medium\", \"high\", or \"critical\")"
                             },
+                            "alertReachabilityAnalysisType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be included"
+                            },
+                            "alertReachabilityAnalysisType.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert CVE reachability analysis types (\"full-scan\" or \"precomputed\") that should be excluded"
+                            },
                             "alertReachabilityType": {
                               "type": "array",
                               "items": {
@@ -40141,6 +41275,69 @@
                               },
                               "description": "Alert updated at (YYYY-MM-DD HH:MM:SS in UTC time zone)"
                             },
+                            "artifactName": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Name of artifact"
+                            },
+                            "artifactName.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Name of artifact"
+                            },
+                            "artifactType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be included"
+                            },
+                            "artifactType.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be excluded"
+                            },
+                            "dependencyDead": {
+                              "type": "array",
+                              "items": {
+                                "type": "boolean",
+                                "default": false,
+                                "description": ""
+                              },
+                              "description": "Dead/reachable dependency filter flag"
+                            },
+                            "dependencyDev": {
+                              "type": "array",
+                              "items": {
+                                "type": "boolean",
+                                "default": false,
+                                "description": ""
+                              },
+                              "description": "Development/production dependency filter flag"
+                            },
+                            "dependencyDirect": {
+                              "type": "array",
+                              "items": {
+                                "type": "boolean",
+                                "default": false,
+                                "description": ""
+                              },
+                              "description": "Direct/transitive dependency filter flag"
+                            },
                             "repoFullName": {
                               "type": "array",
                               "items": {
@@ -40214,7 +41411,232 @@
                 }
               }
             },
-            "description": "The paginated array of API tokens for the organization, and related metadata."
+            "description": "The paginated array of alert items for the organization and related metadata."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/alert-full-scan-search": {
+      "get": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "List full scans associated with alert (Beta)",
+        "operationId": "alertFullScans",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "Specify the maximum number of items to return per page (intermediate pages may have fewer than this limit and callers should always check \"endCursor\" in response body to know if there are more pages)",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5000,
+              "default": 1000
+            }
+          },
+          {
+            "name": "startAfterCursor",
+            "in": "query",
+            "required": false,
+            "description": "The pagination cursor that was returned as the \"endCursor\" property in previous request",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "alertKey",
+            "in": "query",
+            "required": true,
+            "description": "One or more alert keys for which to find associated full scans",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "range",
+            "in": "query",
+            "required": false,
+            "description": "The number of days of data to fetch as an offset from current date (e.g. \"-7d\" for past 7 days)",
+            "schema": {
+              "type": "string",
+              "default": "-7d"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [
+              "alerts:list"
+            ]
+          },
+          {
+            "basicAuth": [
+              "alerts:list"
+            ]
+          }
+        ],
+        "description": "List full scans associated with alert.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- alerts:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "endCursor": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "fullScanId": {
+                            "type": "string",
+                            "description": "ID of full scan",
+                            "default": ""
+                          },
+                          "branchName": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "branchType": {
+                            "type": "string",
+                            "enum": [
+                              "default",
+                              "non-default",
+                              "tracked",
+                              "untracked",
+                              ""
+                            ],
+                            "description": "Type of branch that was scanned",
+                            "default": ""
+                          },
+                          "repoFullName": {
+                            "type": "string",
+                            "description": "Full name of repo which contains repo workspace and repo slug",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "sbomCreatedAt": {
+                            "type": "string",
+                            "description": "ISO date when SBOM was created",
+                            "default": ""
+                          },
+                          "scannedAt": {
+                            "type": "string",
+                            "description": "ISO date when SBOM was scanned",
+                            "default": ""
+                          },
+                          "alertKeys": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "description": "Alert keys associated with scan",
+                              "default": ""
+                            },
+                            "description": ""
+                          }
+                        },
+                        "required": [
+                          "alertKeys",
+                          "branchName",
+                          "branchType",
+                          "fullScanId",
+                          "repoFullName",
+                          "sbomCreatedAt",
+                          "scannedAt"
+                        ]
+                      },
+                      "description": ""
+                    },
+                    "meta": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "organizationId": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "alertKeys": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "description": ""
+                        },
+                        "queryStartTimestamp": {
+                          "type": "number",
+                          "description": "",
+                          "default": 0
+                        },
+                        "startDateInclusive": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "endDateInclusive": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        }
+                      },
+                      "required": [
+                        "alertKeys",
+                        "endDateInclusive",
+                        "organizationId",
+                        "queryStartTimestamp",
+                        "startDateInclusive"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "endCursor",
+                    "items",
+                    "meta"
+                  ]
+                }
+              }
+            },
+            "description": "The paginated array of full scans associated with alert for the organization and related metadata."
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
