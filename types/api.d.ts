@@ -4475,6 +4475,7 @@ export interface components {
       | 'pub'
       | 'pypi'
       | 'rpm'
+      | 'socket'
       | 'swid'
       | 'swift'
       | 'vscode'
@@ -14718,6 +14719,7 @@ export interface operations {
           | 'vscode'
           | 'pypi'
           | 'gem'
+          | 'swift'
       }
     }
     responses: {
@@ -14828,6 +14830,7 @@ export interface operations {
           | 'vscode'
           | 'pypi'
           | 'gem'
+          | 'swift'
       }
       path: {
         /** @description The slug of the organization */
