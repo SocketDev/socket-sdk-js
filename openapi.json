@@ -9945,6 +9945,7 @@
           "pub",
           "pypi",
           "rpm",
+          "socket",
           "swid",
           "swift",
           "vscode",
@@ -36619,7 +36620,8 @@
                 "nuget",
                 "vscode",
                 "pypi",
-                "gem"
+                "gem",
+                "swift"
               ]
             }
           }
@@ -36907,7 +36909,8 @@
                 "nuget",
                 "vscode",
                 "pypi",
-                "gem"
+                "gem",
+                "swift"
               ]
             }
           }
