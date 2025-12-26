@@ -135,7 +135,7 @@ export interface paths {
      *
      * To get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getsupportedfiles) endpoint.
      *
-     * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 67 MB.
+     * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 268 MB.
      *
      * **Query Parameters:**
      * - `scan_type` (optional): The type of scan to perform. Defaults to 'socket'. Must be 32 characters or less. Used for categorizing multiple SBOM heads per repository branch.
@@ -233,7 +233,7 @@ export interface paths {
      *
      * Each uploaded archive is extracted server-side and any supported manifest files (like package.json, package-lock.json, pnpm-lock.yaml, etc.) are ingested for the scan. If you upload multiple archives in a single request, the manifests from every archive are merged into one full scan. The response includes any files that were ignored.
      *
-     * The maximum combined number of files extracted from your upload is 5000 and each extracted file can be no bigger than 67 MB.
+     * The maximum combined number of files extracted from your upload is 5000 and each extracted file can be no bigger than 268 MB.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -241,6 +241,18 @@ export interface paths {
      * - full-scans:create
      */
     post: operations['CreateOrgFullScanArchive']
+  }
+  '/orgs/{org_slug}/full-scans/{full_scan_id}/rescan': {
+    /**
+     * Rescan full scan
+     * @description Create a new full scan by rescanning an existing scan. A "shallow" rescan reapplies the latest policies to the previously cached dependency resolution results. A "deep" rescan reruns dependency resolution and applies the latest policies to the results.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - full-scans:create
+     */
+    post: operations['rescanOrgFullScan']
   }
   '/orgs/{org_slug}/export/cdx/{id}': {
     /**
@@ -372,7 +384,7 @@ export interface paths {
      * Returns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from
      * the [api_url](/reference/getDiffScanById) URL to get the contents of the diff.
      *
-     * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 67 MB.
+     * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 268 MB.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -1056,6 +1068,18 @@ export interface paths {
      * - alerts:list
      */
     get: operations['alertsList']
+  }
+  '/orgs/{org_slug}/alert-full-scan-search': {
+    /**
+     * List full scans associated with alert (Beta)
+     * @description List full scans associated with alert.
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - alerts:list
+     */
+    get: operations['alertFullScans']
   }
   '/license-policy': {
     /**
@@ -3244,6 +3268,21 @@ export interface components {
         }
       | {
           /** @enum {string} */
+          type?: 'recentlyPublished'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              publishedAt: string
+              /** @default */
+              checkedAt: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
           type?: 'licenseSpdxDisj'
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
@@ -5015,7 +5054,7 @@ export interface operations {
         alerts?: boolean
         /** @description Include only alerts with comma separated actions defined by security policy. */
         actions?: Array<'error' | 'monitor' | 'warn' | 'ignore'>
-        /** @description Compact metadata. */
+        /** @description Compact metadata. When enabled, excludes metadata fields like author, scores, size, dependencies, and manifest files. Always includes: id, type, name, version, release, namespace, subpath, alerts, and alertPriorities. */
         compact?: boolean
         /** @description Include only fixable alerts. */
         fixable?: boolean
@@ -5283,7 +5322,7 @@ export interface operations {
    *
    * To get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getsupportedfiles) endpoint.
    *
-   * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 67 MB.
+   * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 268 MB.
    *
    * **Query Parameters:**
    * - `scan_type` (optional): The type of scan to perform. Defaults to 'socket'. Must be 32 characters or less. Used for categorizing multiple SBOM heads per repository branch.
@@ -5427,6 +5466,8 @@ export interface operations {
           | Array<'component' | 'formula'>
         /** @description Include license details in the response. This can increase the response size significantly. */
         include_license_details: boolean
+        /** @description Return cached immutable scan results. When enabled and results are cached, returns the pre-computed scan. When results are not yet cached, returns 202 Accepted and enqueues a background job. */
+        cached?: boolean
       }
       path: {
         /** @description The slug of the organization */
@@ -5440,6 +5481,17 @@ export interface operations {
       200: {
         content: {
           'application/x-ndjson': components['schemas']['SocketArtifact']
+        }
+      }
+      /** @description Scan is being processed. Poll again later to retrieve results. */
+      202: {
+        content: {
+          'application/json': {
+            /** @default processing */
+            status: string
+            /** @default */
+            id: string
+          }
         }
       }
       400: components['responses']['SocketBadRequest']
@@ -5829,7 +5881,7 @@ export interface operations {
    *
    * Each uploaded archive is extracted server-side and any supported manifest files (like package.json, package-lock.json, pnpm-lock.yaml, etc.) are ingested for the scan. If you upload multiple archives in a single request, the manifests from every archive are merged into one full scan. The response includes any files that were ignored.
    *
-   * The maximum combined number of files extracted from your upload is 5000 and each extracted file can be no bigger than 67 MB.
+   * The maximum combined number of files extracted from your upload is 5000 and each extracted file can be no bigger than 268 MB.
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -5939,6 +5991,47 @@ export interface operations {
              */
             scan_state?: 'pending' | 'precrawl' | 'resolve' | 'scan' | null
             unmatchedFiles?: string[]
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Rescan full scan
+   * @description Create a new full scan by rescanning an existing scan. A "shallow" rescan reapplies the latest policies to the previously cached dependency resolution results. A "deep" rescan reruns dependency resolution and applies the latest policies to the results.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:create
+   */
+  rescanOrgFullScan: {
+    parameters: {
+      query?: {
+        /** @description The rescan mode: "shallow" (default) re-applies policies to cached data, "deep" re-fetches the SBOM stream. */
+        mode?: 'shallow' | 'deep'
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The ID of the full scan to rescan */
+        full_scan_id: string
+      }
+    }
+    responses: {
+      /** @description Rescan initiated successfully */
+      201: {
+        content: {
+          'application/json': {
+            /** @default The ID of the newly created full scan */
+            id: string
+            /** @default The status of the new scan */
+            status: string
           }
         }
       }
@@ -6494,7 +6587,7 @@ export interface operations {
    * Returns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from
    * the [api_url](/reference/getDiffScanById) URL to get the contents of the diff.
    *
-   * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 67 MB.
+   * The maximum number of files you can upload at a time is 5000 and each file can be no bigger than 268 MB.
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -8105,6 +8198,13 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              recentlyPublished?: {
+                /**
+                 * @description The action to take for recentlyPublished issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               licenseSpdxDisj?: {
                 /**
                  * @description The action to take for licenseSpdxDisj issues.
@@ -8980,6 +9080,13 @@ export interface operations {
             ghaContextToEnv?: {
               /**
                * @description The action to take for ghaContextToEnv issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            recentlyPublished?: {
+              /**
+               * @description The action to take for recentlyPublished issues.
                * @enum {string}
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -10017,6 +10124,13 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              recentlyPublished?: {
+                /**
+                 * @description The action to take for recentlyPublished issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               licenseSpdxDisj?: {
                 /**
                  * @description The action to take for licenseSpdxDisj issues.
@@ -10889,6 +11003,13 @@ export interface operations {
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
             }
+            recentlyPublished?: {
+              /**
+               * @description The action to take for recentlyPublished issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
             licenseSpdxDisj?: {
               /**
                * @description The action to take for licenseSpdxDisj issues.
@@ -11726,6 +11847,13 @@ export interface operations {
               ghaContextToEnv?: {
                 /**
                  * @description The action to take for ghaContextToEnv issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              recentlyPublished?: {
+                /**
+                 * @description The action to take for recentlyPublished issues.
                  * @enum {string}
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -13909,6 +14037,7 @@ export interface operations {
           | 'CreateApiToken'
           | 'CreateLabel'
           | 'CreateWebhook'
+          | 'DeleteApiToken'
           | 'DeleteFullScan'
           | 'DeleteLabel'
           | 'DeleteLabelSetting'
@@ -14023,6 +14152,8 @@ export interface operations {
         per_page?: number
         /** @description The token specifying which page to return. */
         page?: number
+        /** @description Whether to include token values in response. Use "omit" to exclude tokens entirely. */
+        token_values?: 'include' | 'omit'
       }
       path: {
         /** @description The slug of the organization */
@@ -14071,6 +14202,11 @@ export interface operations {
                * @default
                */
               created_at: string
+              /**
+               * @description SRI-format hash of the token (e.g., sha512-base64hash). Null for tokens created before hash column was added.
+               * @default
+               */
+              hash: string | null
               /**
                * @description The ID of the API Token
                * @default
@@ -14170,10 +14306,10 @@ export interface operations {
                 | 'webhooks:delete'
               )[]
               /**
-               * @description The obfuscated token of the API Token
+               * @description The token of the API Token (redacted or omitted)
                * @default
                */
-              token: string
+              token: string | null
               /**
                * @description The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.
                * @default organization
@@ -14350,18 +14486,20 @@ export interface operations {
       }
     }
     responses: {
-      /** @description The newly created api token. */
+      /** @description The newly created api token and its hash. */
       200: {
         content: {
           'application/json': {
             /**
              * Format: uuid
-             * @description ID of the Socket user who created the API Token, if available
+             * @description ID of the Socket user who created the API Token
              * @default
              */
-            created_by: string | null
+            created_by: string
             /** @default */
             token: string
+            /** @default */
+            hash: string
           }
         }
       }
@@ -14473,11 +14611,6 @@ export interface operations {
             | 'webhooks:delete'
           >
           /**
-           * @description The API token to update
-           * @default
-           */
-          token: string
-          /**
            * @description The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.
            * @default organization
            * @enum {string}
@@ -14512,6 +14645,16 @@ export interface operations {
            * @default api token
            */
           name?: string
+          /**
+           * @description The API token to update (provide either token or hash)
+           * @default
+           */
+          token?: string
+          /**
+           * @description The API token hash to update (provide either token or hash)
+           * @default
+           */
+          hash?: string
         }
       }
     }
@@ -14546,28 +14689,32 @@ export interface operations {
         org_slug: string
       }
     }
-    /** @description The API Token to rotate */
+    /** @description The API Token or hash to rotate. Must provide either token or hash, but not both. */
     requestBody?: {
       content: {
         'application/json': {
           /** @default */
-          token: string
+          token?: string
+          /** @default */
+          hash?: string
         }
       }
     }
     responses: {
-      /** @description The replacement API Token */
+      /** @description The replacement API Token and its hash */
       200: {
         content: {
           'application/json': {
             /**
              * Format: uuid
-             * @description ID of the Socket user who initiated the rotation, if available
+             * @description ID of the Socket user who created the API Token
              * @default
              */
             created_by: string | null
             /** @default */
             token: string
+            /** @default */
+            hash: string
           }
         }
       }
@@ -14592,12 +14739,14 @@ export interface operations {
         org_slug: string
       }
     }
-    /** @description The token to revoke. */
+    /** @description The token or hash to revoke. Must provide either token or hash, but not both. */
     requestBody?: {
       content: {
         'application/json': {
           /** @default */
-          token: string
+          token?: string
+          /** @default */
+          hash?: string
         }
       }
     }
@@ -14719,6 +14868,7 @@ export interface operations {
           | 'vscode'
           | 'pypi'
           | 'gem'
+          | 'socket'
           | 'swift'
       }
     }
@@ -14830,6 +14980,7 @@ export interface operations {
           | 'vscode'
           | 'pypi'
           | 'gem'
+          | 'socket'
           | 'swift'
       }
       path: {
@@ -15264,6 +15415,11 @@ export interface operations {
                       ghsa: string
                       /** @default */
                       cve: string | null
+                      vulnerableArtifacts: Array<{
+                        /** @default The PURL (unique package identifier) of the vulnerable package */
+                        purl: string
+                        manifestFiles: string[]
+                      }>
                       advisoryDetails: {
                         /** @default */
                         title?: string | null
@@ -15852,10 +16008,34 @@ export interface operations {
         'filters.alertAction'?: string
         /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
         'filters.alertAction.notIn'?: string
+        /** @description Comma-separated list of alert action source types ("fallback", "injected-alert", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be included */
+        'filters.alertActionSourceType'?: string
+        /** @description Comma-separated list of alert action source types ("fallback", "injected-alert", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
+        'filters.alertActionSourceType.notIn'?: string
         /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
         'filters.alertCategory'?: string
         /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be excluded */
         'filters.alertCategory.notIn'?: string
+        /** @description Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+        'filters.alertClearedAt.eq'?: string
+        /** @description Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+        'filters.alertClearedAt.lt'?: string
+        /** @description Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+        'filters.alertClearedAt.lte'?: string
+        /** @description Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+        'filters.alertClearedAt.gt'?: string
+        /** @description Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+        'filters.alertClearedAt.gte'?: string
+        /** @description Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+        'filters.alertCreatedAt.eq'?: string
+        /** @description Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+        'filters.alertCreatedAt.lt'?: string
+        /** @description Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+        'filters.alertCreatedAt.lte'?: string
+        /** @description Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+        'filters.alertCreatedAt.gt'?: string
+        /** @description Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+        'filters.alertCreatedAt.gte'?: string
         /** @description CVE ID */
         'filters.alertCveId'?: string
         /** @description CVE ID */
@@ -15888,6 +16068,10 @@ export interface operations {
         'filters.alertPriority'?: string
         /** @description Alert priority ("low", "medium", "high", or "critical") */
         'filters.alertPriority.notIn'?: string
+        /** @description Comma-separated list of alert CVE reachability analysis types ("full-scan" or "precomputed") that should be included */
+        'filters.alertReachabilityAnalysisType'?: string
+        /** @description Comma-separated list of alert CVE reachability analysis types ("full-scan" or "precomputed") that should be excluded */
+        'filters.alertReachabilityAnalysisType.notIn'?: string
         /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be included */
         'filters.alertReachabilityType'?: string
         /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
@@ -15914,6 +16098,26 @@ export interface operations {
         'filters.alertUpdatedAt.gt'?: string
         /** @description Alert updated at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
         'filters.alertUpdatedAt.gte'?: string
+        /** @description Name of artifact */
+        'filters.artifactName'?: string
+        /** @description Name of artifact */
+        'filters.artifactName.notIn'?: string
+        /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
+        'filters.artifactType'?: string
+        /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
+        'filters.artifactType.notIn'?: string
+        /** @description Dead/reachable dependency filter flag */
+        'filters.dependencyDead'?: boolean
+        /** @description Dead/reachable dependency filter flag */
+        'filters.dependencyDead.notIn'?: boolean
+        /** @description Development/production dependency filter flag */
+        'filters.dependencyDev'?: boolean
+        /** @description Development/production dependency filter flag */
+        'filters.dependencyDev.notIn'?: boolean
+        /** @description Direct/transitive dependency filter flag */
+        'filters.dependencyDirect'?: boolean
+        /** @description Direct/transitive dependency filter flag */
+        'filters.dependencyDirect.notIn'?: boolean
         /** @description Comma-separated list of repo full names that should be included */
         'filters.repoFullName'?: string
         /** @description Comma-separated list of repo full names that should be excluded */
@@ -15933,7 +16137,7 @@ export interface operations {
       }
     }
     responses: {
-      /** @description The paginated array of API tokens for the organization, and related metadata. */
+      /** @description The paginated array of alert items for the organization and related metadata. */
       200: {
         content: {
           'application/json': {
@@ -15988,6 +16192,8 @@ export interface operations {
               clearedAt: string | null
               /** @default */
               dashboardUrl: string
+              /** @default */
+              title: string
               /**
                * @default low
                * @enum {string}
@@ -16094,10 +16300,34 @@ export interface operations {
                 alertAction?: string[]
                 /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be excluded */
                 'alertAction.notIn'?: string[]
+                /** @description Comma-separated list of alert action source types ("fallback", "injected-alert", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be included */
+                alertActionSourceType?: string[]
+                /** @description Comma-separated list of alert action source types ("fallback", "injected-alert", "org-policy", "reachability", "repo-label-policy", "socket-yml", or "triage") that should be excluded */
+                'alertActionSourceType.notIn'?: string[]
                 /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be included */
                 alertCategory?: string[]
                 /** @description Comma-separated list of alert categories ("supplyChainRisk", "maintenance", "quality", "license", or "vulnerability") that should be excluded */
                 'alertCategory.notIn'?: string[]
+                /** @description Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+                'alertClearedAt.eq'?: string[]
+                /** @description Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+                'alertClearedAt.lt'?: string[]
+                /** @description Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+                'alertClearedAt.lte'?: string[]
+                /** @description Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+                'alertClearedAt.gt'?: string[]
+                /** @description Alert cleared at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+                'alertClearedAt.gte'?: string[]
+                /** @description Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+                'alertCreatedAt.eq'?: string[]
+                /** @description Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+                'alertCreatedAt.lt'?: string[]
+                /** @description Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+                'alertCreatedAt.lte'?: string[]
+                /** @description Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+                'alertCreatedAt.gt'?: string[]
+                /** @description Alert created at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
+                'alertCreatedAt.gte'?: string[]
                 /** @description CVE ID */
                 alertCveId?: string[]
                 /** @description CVE ID */
@@ -16128,6 +16358,10 @@ export interface operations {
                 alertPriority?: string[]
                 /** @description Alert priority ("low", "medium", "high", or "critical") */
                 'alertPriority.notIn'?: string[]
+                /** @description Comma-separated list of alert CVE reachability analysis types ("full-scan" or "precomputed") that should be included */
+                alertReachabilityAnalysisType?: string[]
+                /** @description Comma-separated list of alert CVE reachability analysis types ("full-scan" or "precomputed") that should be excluded */
+                'alertReachabilityAnalysisType.notIn'?: string[]
                 /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be included */
                 alertReachabilityType?: string[]
                 /** @description Comma-separated list of alert CVE reachability types ("direct_dependency", "error", "maybe_reachable", "missing_support", "pending", "reachable", "undeterminable_reachability", "unknown", or "unreachable") that should be excluded */
@@ -16154,6 +16388,20 @@ export interface operations {
                 'alertUpdatedAt.gt'?: string[]
                 /** @description Alert updated at (YYYY-MM-DD HH:MM:SS in UTC time zone) */
                 'alertUpdatedAt.gte'?: string[]
+                /** @description Name of artifact */
+                artifactName?: string[]
+                /** @description Name of artifact */
+                'artifactName.notIn'?: string[]
+                /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be included */
+                artifactType?: string[]
+                /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
+                'artifactType.notIn'?: string[]
+                /** @description Dead/reachable dependency filter flag */
+                dependencyDead?: boolean[]
+                /** @description Development/production dependency filter flag */
+                dependencyDev?: boolean[]
+                /** @description Direct/transitive dependency filter flag */
+                dependencyDirect?: boolean[]
                 /** @description Comma-separated list of repo full names that should be included */
                 repoFullName?: string[]
                 /** @description Comma-separated list of repo full names that should be excluded */
@@ -16167,6 +16415,95 @@ export interface operations {
                 /** @description Comma-separated list of repo slugs that should be excluded */
                 'repoSlug.notIn'?: string[]
               }
+            }
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * List full scans associated with alert (Beta)
+   * @description List full scans associated with alert.
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - alerts:list
+   */
+  alertFullScans: {
+    parameters: {
+      query: {
+        /** @description Specify the maximum number of items to return per page (intermediate pages may have fewer than this limit and callers should always check "endCursor" in response body to know if there are more pages) */
+        per_page?: number
+        /** @description The pagination cursor that was returned as the "endCursor" property in previous request */
+        startAfterCursor?: string
+        /** @description One or more alert keys for which to find associated full scans */
+        alertKey: string
+        /** @description The number of days of data to fetch as an offset from current date (e.g. "-7d" for past 7 days) */
+        range?: string
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    responses: {
+      /** @description The paginated array of full scans associated with alert for the organization and related metadata. */
+      200: {
+        content: {
+          'application/json': {
+            /** @default */
+            endCursor: string | null
+            items: Array<{
+              /**
+               * @description ID of full scan
+               * @default
+               */
+              fullScanId: string
+              /** @default */
+              branchName: string | null
+              /**
+               * @description Type of branch that was scanned
+               * @default
+               * @enum {string}
+               */
+              branchType:
+                | 'default'
+                | 'non-default'
+                | 'tracked'
+                | 'untracked'
+                | ''
+              /**
+               * @description Full name of repo which contains repo workspace and repo slug
+               * @default
+               */
+              repoFullName: string | null
+              /**
+               * @description ISO date when SBOM was created
+               * @default
+               */
+              sbomCreatedAt: string
+              /**
+               * @description ISO date when SBOM was scanned
+               * @default
+               */
+              scannedAt: string
+              alertKeys: string[]
+            }>
+            meta: {
+              /** @default */
+              organizationId: string
+              alertKeys: string[]
+              /** @default 0 */
+              queryStartTimestamp: number
+              /** @default */
+              startDateInclusive: string
+              /** @default */
+              endDateInclusive: string
             }
           }
         }
