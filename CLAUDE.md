@@ -22,6 +22,7 @@ All shared standards (git, testing, code style, cross-platform, CI) defined in s
 - Scripts: Prefer `pnpm run foo --flag` over `foo:bar` scripts
 - Docs: Use `docs/` folder, lowercase-with-hyphens.md filenames, pithy writing with visuals
 - Dependencies: After `package.json` edits, run `pnpm install` to update `pnpm-lock.yaml`
+- Backward Compatibility: 🚨 FORBIDDEN to maintain - actively remove when encountered (see canonical CLAUDE.md)
 
 ---
 
