@@ -404,7 +404,7 @@
           }
         ]
       },
-      "SocketBatchPURLFetch": {
+      "SocketOrgBatchPURLFetch": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
@@ -10861,6 +10861,7 @@
           "Packages"
         ],
         "summary": "Get Packages by PURL",
+        "deprecated": true,
         "externalDocs": {
           "description": "Socket Package URLs (purl)",
           "url": "https://docs.socket.dev/reference/socket-package-urls-purl"
@@ -10972,7 +10973,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SocketBatchPURLFetch"
+                "$ref": "#/components/schemas/SocketOrgBatchPURLFetch"
               }
             }
           },
@@ -10990,7 +10991,7 @@
             ]
           }
         ],
-        "description": "Batch retrieval of package metadata and alerts by PURL strings. Compatible witch CycloneDX reports.\n\nPackage URLs (PURLs) are an ecosystem agnostic way to identify packages.\nCycloneDX SBOMs use the purl format to identify components.\nThis endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.\n\n**Note:** This endpoint has a batch size limit (default: 1024 PURLs per request). Requests exceeding this limit will return a 400 Bad Request error.\n\nMore information on purl and CycloneDX:\n\n- [`purl` Spec](https://github.com/package-url/purl-spec)\n- [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)\n\nThis endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).\nActively running analysis will be returned when available on subsequent runs.\n\n## Examples:\n\n### Looking up an npm package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\n### Looking up an PyPi package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    }\n  ]\n}\n```\n\n### Looking up a Maven package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### Batch lookup\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    },\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    },\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- packages:list",
+        "description": "**This endpoint is deprecated.** Deprecated since 2026-01-05. It will be removed on 2026-07-30.\n\nBatch retrieval of package metadata and alerts by PURL strings. Compatible with CycloneDX reports.\n\nPackage URLs (PURLs) are an ecosystem agnostic way to identify packages.\nCycloneDX SBOMs use the purl format to identify components.\nThis endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.\n\n**Note:** This endpoint has a batch size limit (default: 1024 PURLs per request). Requests exceeding this limit will return a 400 Bad Request error.\n\nMore information on purl and CycloneDX:\n\n- [`purl` Spec](https://github.com/package-url/purl-spec)\n- [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)\n\nThis endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).\nActively running analysis will be returned when available on subsequent runs.\n\n## Examples:\n\n### Looking up an npm package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\n### Looking up an PyPi package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    }\n  ]\n}\n```\n\n### Looking up a Maven package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### Batch lookup\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    },\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    },\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- packages:list",
         "responses": {
           "200": {
             "content": {
@@ -35490,6 +35491,7 @@
                 "ChangeMemberRole",
                 "ChangePlanSubscriptionSeats",
                 "CreateApiToken",
+                "CreateArtifact",
                 "CreateLabel",
                 "CreateWebhook",
                 "DeleteApiToken",
@@ -35812,11 +35814,15 @@
                         "triage",
                         "triage:alerts-list",
                         "triage:alerts-update",
+                        "uploaded-artifacts",
+                        "uploaded-artifacts:create",
+                        "uploaded-artifacts:list",
                         "webhooks",
                         "webhooks:create",
                         "webhooks:list",
                         "webhooks:update",
-                        "webhooks:delete"
+                        "webhooks:delete",
+                        "*"
                       ],
                       "description": "The scope of permissions for this API Token",
                       "default": "repo:list"
@@ -36237,11 +36243,15 @@
                                 "triage",
                                 "triage:alerts-list",
                                 "triage:alerts-update",
+                                "uploaded-artifacts",
+                                "uploaded-artifacts:create",
+                                "uploaded-artifacts:list",
                                 "webhooks",
                                 "webhooks:create",
                                 "webhooks:list",
                                 "webhooks:update",
-                                "webhooks:delete"
+                                "webhooks:delete",
+                                "*"
                               ],
                               "description": "The scope of permissions for this API Token",
                               "default": "repo:list"
@@ -36413,11 +36423,15 @@
                         "triage",
                         "triage:alerts-list",
                         "triage:alerts-update",
+                        "uploaded-artifacts",
+                        "uploaded-artifacts:create",
+                        "uploaded-artifacts:list",
                         "webhooks",
                         "webhooks:create",
                         "webhooks:list",
                         "webhooks:update",
-                        "webhooks:delete"
+                        "webhooks:delete",
+                        "*"
                       ],
                       "description": "The scope of permissions for this API Token",
                       "default": "repo:list"
@@ -37010,6 +37024,12 @@
                             "description": "",
                             "default": ""
                           },
+                          "publishedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
                           "description": {
                             "type": "string",
                             "description": "",
@@ -37300,6 +37320,12 @@
                             "description": "",
                             "default": ""
                           },
+                          "publishedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
                           "description": {
                             "type": "string",
                             "description": "",
@@ -37366,6 +37392,195 @@
               }
             },
             "description": "The paginated list of items in the threat feed and the next page cursor."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/purl": {
+      "post": {
+        "tags": [
+          "Packages"
+        ],
+        "summary": "Get Packages by PURL (Org Scoped)",
+        "externalDocs": {
+          "description": "Socket Package URLs (purl)",
+          "url": "https://docs.socket.dev/reference/socket-package-urls-purl"
+        },
+        "operationId": "batchPackageFetchByOrg",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "labels",
+            "in": "query",
+            "required": false,
+            "description": "Repository label slugs to apply policies. Only one label is supported currently; the parameter is an array to allow future support for multiple labels.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "explode": false,
+            "style": "form"
+          },
+          {
+            "name": "alerts",
+            "in": "query",
+            "required": false,
+            "description": "Include alert metadata.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "actions",
+            "in": "query",
+            "required": false,
+            "description": "Include only alerts with comma separated actions defined by security policy.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "error",
+                  "monitor",
+                  "warn",
+                  "ignore"
+                ]
+              }
+            },
+            "explode": false,
+            "style": "form"
+          },
+          {
+            "name": "compact",
+            "in": "query",
+            "required": false,
+            "description": "Compact metadata. When enabled, excludes metadata fields like author, scores, size, dependencies, and manifest files. Always includes: id, type, name, version, release, namespace, subpath, alerts, and alertPriorities.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "fixable",
+            "in": "query",
+            "required": false,
+            "description": "Include only fixable alerts.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "licenseattrib",
+            "in": "query",
+            "required": false,
+            "description": "Include license attribution data, including license text and author information. Maps attribution/license text to a list of data objects to which that attribution info applies.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "licensedetails",
+            "in": "query",
+            "required": false,
+            "description": "Include detailed license information, including location and match strength, for each license datum.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "purlErrors",
+            "in": "query",
+            "required": false,
+            "description": "Return errors found with handling PURLs as error objects in the stream.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "cachedResultsOnly",
+            "in": "query",
+            "required": false,
+            "description": "Return only cached results, do not attempt to scan new artifacts or rescan stale results.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "summary",
+            "in": "query",
+            "required": false,
+            "description": "Include a summary object at the end of the stream with counts of malformed, resolved, and not found PURLs.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SocketOrgBatchPURLFetch"
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "packages:list"
+            ]
+          },
+          {
+            "basicAuth": [
+              "packages:list"
+            ]
+          }
+        ],
+        "description": "Batch retrieval of package metadata and alerts by PURL strings for a specific organization. Compatible with CycloneDX reports.\n\nPackage URLs (PURLs) are an ecosystem agnostic way to identify packages.\nCycloneDX SBOMs use the purl format to identify components.\nThis endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.\n\n**Note:** This endpoint has a batch size limit (default: 1024 PURLs per request). Requests exceeding this limit will return a 400 Bad Request error.\n\nMore information on purl and CycloneDX:\n\n- [`purl` Spec](https://github.com/package-url/purl-spec)\n- [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)\n\nThis endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).\nActively running analysis will be returned when available on subsequent runs.\n\n## Query Parameters\n\nThis endpoint supports all query parameters from `POST /v0/purl` including: `alerts`, `actions`, `compact`, `fixable`, `licenseattrib`, `licensedetails`, `purlErrors`, `cachedResultsOnly`, and `summary`.\n\nAdditionally, you may provide a `labels` query parameter to apply a repository label's security policies. Pass the label slug as the value (e.g., `?labels=production`). Only one label is currently supported.\n\n## Examples:\n\n### Looking up an npm package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\n### Looking up a PyPi package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    }\n  ]\n}\n```\n\n### Looking up a Maven package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### Batch lookup\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    },\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    },\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### With label and options (query parameters):\n\n```\nPOST /v0/orgs/{org_slug}/purl?labels=production&alerts=true&compact=true\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- packages:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchPurlStreamSchema"
+                }
+              }
+            },
+            "description": "Socket issue lists and scores for all packages, and optional metadata objects"
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -37483,7 +37698,7 @@
             ]
           }
         ],
-        "description": "Fetches available fixes for vulnerabilities in a repository or scan.\nRequires either repo_slug or full_scan_id as well as vulnerability_ids to be provided.\nvulnerability_ids can be a comma-separated list of GHSA or CVE IDs, or \"*\" for all vulnerabilities.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- fixes:list",
+        "description": "Fetches available fixes for vulnerabilities in a repository or scan.\nRequires either repo_slug or full_scan_id as well as vulnerability_ids to be provided.\nvulnerability_ids can be a comma-separated list of GHSA or CVE IDs, or \"*\" for all vulnerabilities.\n\n## Response Structure\n\nThe response contains a `fixDetails` object where each key is a vulnerability ID (GHSA or CVE) and the value is a discriminated union based on the `type` field.\n\n### Common Fields\n\nAll response variants include:\n- `type`: Discriminator field (one of: \"fixFound\", \"partialFixFound\", \"noFixAvailable\", \"fixNotApplicable\", \"errorComputingFix\")\n- `value`: Object containing the variant-specific data\n\nThe `value` object always contains:\n- `ghsa`: string | null - The GHSA ID\n- `cve`: string | null - The CVE ID (if available)\n- `advisoryDetails`: object | null - Advisory details (only if include_details=true)\n\n### Response Variants\n\n**fixFound**: A complete fix is available for all vulnerable packages\n- `value.fixDetails.fixes`: Array of fix objects, each containing:\n  - `purl`: Package URL to upgrade\n  - `fixedVersion`: Version to upgrade to\n  - `manifestFiles`: Array of manifest files containing the package\n  - `updateType`: \"patch\" | \"minor\" | \"major\" | \"unknown\"\n- `value.fixDetails.responsibleDirectDependencies`: (optional) Map of direct dependencies responsible for the vulnerability\n\n**partialFixFound**: Fixes available for some but not all vulnerable packages\n- Same as fixFound, plus:\n- `value.fixDetails.unfixablePurls`: Array of packages that cannot be fixed, each containing:\n  - `purl`: Package URL\n  - `manifestFiles`: Array of manifest files\n\n**noFixAvailable**: No fix exists for this vulnerability (no patched version published)\n\n**fixNotApplicable**: A fix exists but cannot be applied due to version constraints\n- `value.vulnerableArtifacts`: Array of vulnerable packages with their manifest files\n\n**errorComputingFix**: An error occurred while computing fixes\n- `value.message`: Error description\n\n### Advisory Details (when include_details=true)\n\n- `title`: string | null\n- `description`: string | null\n- `cwes`: string[] - CWE identifiers\n- `severity`: \"LOW\" | \"MODERATE\" | \"HIGH\" | \"CRITICAL\"\n- `cvssVector`: string | null\n- `publishedAt`: string (ISO date)\n- `kev`: boolean - Whether it's a Known Exploited Vulnerability\n- `epss`: number | null - Exploit Prediction Scoring System score\n- `affectedPurls`: Array of affected packages with version ranges\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- fixes:list",
         "responses": {
           "200": {
             "content": {
@@ -37491,1031 +37706,17 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
-                  "description": "Response containing fix details for each requested vulnerability ID",
+                  "description": "",
                   "properties": {
                     "fixDetails": {
                       "type": "object",
-                      "description": "Map of vulnerability IDs (GHSA or CVE) to their fix details. Each entry contains information about available fixes, partial fixes, or reasons why fixes are not available.",
                       "additionalProperties": {
-                        "oneOf": [
-                          {
-                            "type": "object",
-                            "required": [
-                              "type",
-                              "value"
-                            ],
-                            "properties": {
-                              "type": {
-                                "type": "string",
-                                "enum": [
-                                  "fixFound"
-                                ]
-                              },
-                              "value": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "description": "",
-                                "properties": {
-                                  "type": {
-                                    "type": "string",
-                                    "enum": [
-                                      "fixFound"
-                                    ],
-                                    "description": "",
-                                    "default": "fixFound"
-                                  },
-                                  "ghsa": {
-                                    "type": "string",
-                                    "description": "",
-                                    "default": ""
-                                  },
-                                  "cve": {
-                                    "type": "string",
-                                    "description": "",
-                                    "default": "",
-                                    "nullable": true
-                                  },
-                                  "fixDetails": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "fixes": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "object",
-                                          "additionalProperties": false,
-                                          "description": "",
-                                          "properties": {
-                                            "purl": {
-                                              "type": "string",
-                                              "description": "",
-                                              "default": "The PURL (unique package identifier) of the package to upgrade"
-                                            },
-                                            "fixedVersion": {
-                                              "type": "string",
-                                              "description": "",
-                                              "default": "The version of the package to upgrade to"
-                                            },
-                                            "manifestFiles": {
-                                              "type": "array",
-                                              "items": {
-                                                "type": "string",
-                                                "description": "",
-                                                "default": "The manifest file(s) that contain the package"
-                                              },
-                                              "description": ""
-                                            },
-                                            "updateType": {
-                                              "type": "string",
-                                              "enum": [
-                                                "patch",
-                                                "minor",
-                                                "major",
-                                                "unknown"
-                                              ],
-                                              "description": "The type of version update (patch, minor, major, or unknown if it cannot be determined)",
-                                              "default": "unknown"
-                                            }
-                                          },
-                                          "required": [
-                                            "fixedVersion",
-                                            "manifestFiles",
-                                            "purl",
-                                            "updateType"
-                                          ]
-                                        },
-                                        "description": ""
-                                      },
-                                      "responsibleDirectDependencies": {
-                                        "type": "object",
-                                        "additionalProperties": {
-                                          "type": "object",
-                                          "additionalProperties": false,
-                                          "properties": {
-                                            "currentVersion": {
-                                              "type": "string",
-                                              "description": "",
-                                              "default": "",
-                                              "format": "The current version of the package"
-                                            },
-                                            "nextAvailableVersion": {
-                                              "type": "object",
-                                              "additionalProperties": false,
-                                              "description": "",
-                                              "properties": {
-                                                "version": {
-                                                  "type": "string",
-                                                  "description": "",
-                                                  "default": "",
-                                                  "format": "The next available version of the package"
-                                                },
-                                                "updateType": {
-                                                  "type": "string",
-                                                  "enum": [
-                                                    "patch",
-                                                    "minor",
-                                                    "major",
-                                                    "unknown"
-                                                  ],
-                                                  "description": "The type of version update (patch, minor, major, or unknown if it cannot be determined)",
-                                                  "default": "unknown"
-                                                }
-                                              },
-                                              "required": [
-                                                "updateType",
-                                                "version"
-                                              ],
-                                              "nullable": true
-                                            },
-                                            "fixByUpgradingTo": {
-                                              "type": "object",
-                                              "additionalProperties": false,
-                                              "description": "The version and update type of the package that is necessary to fix the vulnerability. If the value is null, it means the package does not have to be upgraded to fix the vulnerability",
-                                              "properties": {
-                                                "version": {
-                                                  "type": "string",
-                                                  "description": "",
-                                                  "default": ""
-                                                },
-                                                "updateType": {
-                                                  "type": "string",
-                                                  "enum": [
-                                                    "patch",
-                                                    "minor",
-                                                    "major",
-                                                    "unknown"
-                                                  ],
-                                                  "description": "The type of version update (patch, minor, major, or unknown if it cannot be determined)",
-                                                  "default": "unknown"
-                                                }
-                                              },
-                                              "required": [
-                                                "updateType",
-                                                "version"
-                                              ],
-                                              "nullable": true
-                                            }
-                                          },
-                                          "required": [
-                                            "currentVersion"
-                                          ]
-                                        },
-                                        "properties": {},
-                                        "description": "The keys are the PURL (unique package identifier) of the direct dependency(ies) responsible for introducing the vulnerability.",
-                                        "nullable": true
-                                      }
-                                    },
-                                    "required": [
-                                      "fixes"
-                                    ]
-                                  },
-                                  "advisoryDetails": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "title": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": "",
-                                        "nullable": true
-                                      },
-                                      "description": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": "",
-                                        "nullable": true
-                                      },
-                                      "cwes": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "string",
-                                          "description": "",
-                                          "default": ""
-                                        },
-                                        "description": ""
-                                      },
-                                      "severity": {
-                                        "type": "string",
-                                        "enum": [
-                                          "LOW",
-                                          "MODERATE",
-                                          "HIGH",
-                                          "CRITICAL"
-                                        ],
-                                        "description": "Severity level of the vulnerability",
-                                        "default": "LOW"
-                                      },
-                                      "cvssVector": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": "",
-                                        "nullable": true
-                                      },
-                                      "publishedAt": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": ""
-                                      },
-                                      "kev": {
-                                        "type": "boolean",
-                                        "default": false,
-                                        "description": "Whether the vulnerability is a Known Exploited Vulnerability"
-                                      },
-                                      "epss": {
-                                        "type": "number",
-                                        "description": "Exploit Prediction Scoring System score",
-                                        "default": 0,
-                                        "nullable": true
-                                      },
-                                      "affectedPurls": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "object",
-                                          "additionalProperties": false,
-                                          "description": "",
-                                          "properties": {
-                                            "purl": {
-                                              "type": "string",
-                                              "description": "",
-                                              "default": "",
-                                              "format": "The PURL (unique package identifier) of the affected package"
-                                            },
-                                            "affectedRange": {
-                                              "type": "string",
-                                              "description": "",
-                                              "default": "The range of vulnerable versions"
-                                            }
-                                          },
-                                          "required": [
-                                            "affectedRange",
-                                            "purl"
-                                          ]
-                                        },
-                                        "description": ""
-                                      }
-                                    },
-                                    "description": "",
-                                    "nullable": true
-                                  }
-                                },
-                                "required": [
-                                  "advisoryDetails",
-                                  "cve",
-                                  "fixDetails",
-                                  "ghsa",
-                                  "type"
-                                ]
-                              }
-                            }
-                          },
-                          {
-                            "type": "object",
-                            "required": [
-                              "type",
-                              "value"
-                            ],
-                            "properties": {
-                              "type": {
-                                "type": "string",
-                                "enum": [
-                                  "partialFixFound"
-                                ]
-                              },
-                              "value": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "description": "",
-                                "properties": {
-                                  "type": {
-                                    "type": "string",
-                                    "enum": [
-                                      "partialFixFound"
-                                    ],
-                                    "description": "",
-                                    "default": "partialFixFound"
-                                  },
-                                  "ghsa": {
-                                    "type": "string",
-                                    "description": "",
-                                    "default": ""
-                                  },
-                                  "cve": {
-                                    "type": "string",
-                                    "description": "",
-                                    "default": "",
-                                    "nullable": true
-                                  },
-                                  "fixDetails": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "fixes": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "object",
-                                          "additionalProperties": false,
-                                          "description": "",
-                                          "properties": {
-                                            "purl": {
-                                              "type": "string",
-                                              "description": "",
-                                              "default": "The PURL (unique package identifier) of the package to upgrade"
-                                            },
-                                            "fixedVersion": {
-                                              "type": "string",
-                                              "description": "",
-                                              "default": "The version of the package to upgrade to"
-                                            },
-                                            "manifestFiles": {
-                                              "type": "array",
-                                              "items": {
-                                                "type": "string",
-                                                "description": "",
-                                                "default": "The manifest file(s) that contain the package"
-                                              },
-                                              "description": ""
-                                            },
-                                            "updateType": {
-                                              "type": "string",
-                                              "enum": [
-                                                "patch",
-                                                "minor",
-                                                "major",
-                                                "unknown"
-                                              ],
-                                              "description": "The type of version update (patch, minor, major, or unknown if it cannot be determined)",
-                                              "default": "unknown"
-                                            }
-                                          },
-                                          "required": [
-                                            "fixedVersion",
-                                            "manifestFiles",
-                                            "purl",
-                                            "updateType"
-                                          ]
-                                        },
-                                        "description": ""
-                                      },
-                                      "unfixablePurls": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "object",
-                                          "additionalProperties": false,
-                                          "description": "",
-                                          "properties": {
-                                            "purl": {
-                                              "type": "string",
-                                              "description": "",
-                                              "default": "The PURL (unique package identifier) of the package that cannot be upgraded"
-                                            },
-                                            "manifestFiles": {
-                                              "type": "array",
-                                              "items": {
-                                                "type": "string",
-                                                "description": "",
-                                                "default": "The manifest file(s) that contain the package"
-                                              },
-                                              "description": ""
-                                            }
-                                          },
-                                          "required": [
-                                            "manifestFiles",
-                                            "purl"
-                                          ]
-                                        },
-                                        "description": ""
-                                      },
-                                      "responsibleDirectDependencies": {
-                                        "type": "object",
-                                        "additionalProperties": {
-                                          "type": "object",
-                                          "additionalProperties": false,
-                                          "properties": {
-                                            "currentVersion": {
-                                              "type": "string",
-                                              "description": "",
-                                              "default": "",
-                                              "format": "The current version of the package"
-                                            },
-                                            "nextAvailableVersion": {
-                                              "type": "object",
-                                              "additionalProperties": false,
-                                              "description": "",
-                                              "properties": {
-                                                "version": {
-                                                  "type": "string",
-                                                  "description": "",
-                                                  "default": "",
-                                                  "format": "The next available version of the package"
-                                                },
-                                                "updateType": {
-                                                  "type": "string",
-                                                  "enum": [
-                                                    "patch",
-                                                    "minor",
-                                                    "major",
-                                                    "unknown"
-                                                  ],
-                                                  "description": "The type of version update (patch, minor, major, or unknown if it cannot be determined)",
-                                                  "default": "unknown"
-                                                }
-                                              },
-                                              "required": [
-                                                "updateType",
-                                                "version"
-                                              ],
-                                              "nullable": true
-                                            },
-                                            "fixByUpgradingTo": {
-                                              "type": "object",
-                                              "additionalProperties": false,
-                                              "description": "The version and update type of the package that is necessary to fix the vulnerability. If the value is null, it means the package does not have to be upgraded to fix the vulnerability",
-                                              "properties": {
-                                                "version": {
-                                                  "type": "string",
-                                                  "description": "",
-                                                  "default": ""
-                                                },
-                                                "updateType": {
-                                                  "type": "string",
-                                                  "enum": [
-                                                    "patch",
-                                                    "minor",
-                                                    "major",
-                                                    "unknown"
-                                                  ],
-                                                  "description": "The type of version update (patch, minor, major, or unknown if it cannot be determined)",
-                                                  "default": "unknown"
-                                                }
-                                              },
-                                              "required": [
-                                                "updateType",
-                                                "version"
-                                              ],
-                                              "nullable": true
-                                            }
-                                          },
-                                          "required": [
-                                            "currentVersion"
-                                          ]
-                                        },
-                                        "properties": {},
-                                        "description": "The keys are the PURL (unique package identifier) of the direct dependency(ies) responsible for introducing the vulnerability.",
-                                        "nullable": true
-                                      }
-                                    },
-                                    "required": [
-                                      "fixes",
-                                      "unfixablePurls"
-                                    ]
-                                  },
-                                  "advisoryDetails": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "title": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": "",
-                                        "nullable": true
-                                      },
-                                      "description": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": "",
-                                        "nullable": true
-                                      },
-                                      "cwes": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "string",
-                                          "description": "",
-                                          "default": ""
-                                        },
-                                        "description": ""
-                                      },
-                                      "severity": {
-                                        "type": "string",
-                                        "enum": [
-                                          "LOW",
-                                          "MODERATE",
-                                          "HIGH",
-                                          "CRITICAL"
-                                        ],
-                                        "description": "Severity level of the vulnerability",
-                                        "default": "LOW"
-                                      },
-                                      "cvssVector": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": "",
-                                        "nullable": true
-                                      },
-                                      "publishedAt": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": ""
-                                      },
-                                      "kev": {
-                                        "type": "boolean",
-                                        "default": false,
-                                        "description": "Whether the vulnerability is a Known Exploited Vulnerability"
-                                      },
-                                      "epss": {
-                                        "type": "number",
-                                        "description": "Exploit Prediction Scoring System score",
-                                        "default": 0,
-                                        "nullable": true
-                                      },
-                                      "affectedPurls": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "object",
-                                          "additionalProperties": false,
-                                          "description": "",
-                                          "properties": {
-                                            "purl": {
-                                              "type": "string",
-                                              "description": "",
-                                              "default": "",
-                                              "format": "The PURL (unique package identifier) of the affected package"
-                                            },
-                                            "affectedRange": {
-                                              "type": "string",
-                                              "description": "",
-                                              "default": "The range of vulnerable versions"
-                                            }
-                                          },
-                                          "required": [
-                                            "affectedRange",
-                                            "purl"
-                                          ]
-                                        },
-                                        "description": ""
-                                      }
-                                    },
-                                    "description": "",
-                                    "nullable": true
-                                  }
-                                },
-                                "required": [
-                                  "advisoryDetails",
-                                  "cve",
-                                  "fixDetails",
-                                  "ghsa",
-                                  "type"
-                                ]
-                              }
-                            }
-                          },
-                          {
-                            "type": "object",
-                            "required": [
-                              "type",
-                              "value"
-                            ],
-                            "properties": {
-                              "type": {
-                                "type": "string",
-                                "enum": [
-                                  "errorComputingFix"
-                                ]
-                              },
-                              "value": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "description": "",
-                                "properties": {
-                                  "type": {
-                                    "type": "string",
-                                    "enum": [
-                                      "errorComputingFix"
-                                    ],
-                                    "description": "",
-                                    "default": "errorComputingFix"
-                                  },
-                                  "ghsa": {
-                                    "type": "string",
-                                    "description": "",
-                                    "default": "",
-                                    "nullable": true
-                                  },
-                                  "cve": {
-                                    "type": "string",
-                                    "description": "",
-                                    "default": "",
-                                    "nullable": true
-                                  },
-                                  "message": {
-                                    "type": "string",
-                                    "description": "",
-                                    "default": ""
-                                  },
-                                  "advisoryDetails": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "title": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": "",
-                                        "nullable": true
-                                      },
-                                      "description": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": "",
-                                        "nullable": true
-                                      },
-                                      "cwes": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "string",
-                                          "description": "",
-                                          "default": ""
-                                        },
-                                        "description": ""
-                                      },
-                                      "severity": {
-                                        "type": "string",
-                                        "enum": [
-                                          "LOW",
-                                          "MODERATE",
-                                          "HIGH",
-                                          "CRITICAL"
-                                        ],
-                                        "description": "Severity level of the vulnerability",
-                                        "default": "LOW"
-                                      },
-                                      "cvssVector": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": "",
-                                        "nullable": true
-                                      },
-                                      "publishedAt": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": ""
-                                      },
-                                      "kev": {
-                                        "type": "boolean",
-                                        "default": false,
-                                        "description": "Whether the vulnerability is a Known Exploited Vulnerability"
-                                      },
-                                      "epss": {
-                                        "type": "number",
-                                        "description": "Exploit Prediction Scoring System score",
-                                        "default": 0,
-                                        "nullable": true
-                                      },
-                                      "affectedPurls": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "object",
-                                          "additionalProperties": false,
-                                          "description": "",
-                                          "properties": {
-                                            "purl": {
-                                              "type": "string",
-                                              "description": "",
-                                              "default": "",
-                                              "format": "The PURL (unique package identifier) of the affected package"
-                                            },
-                                            "affectedRange": {
-                                              "type": "string",
-                                              "description": "",
-                                              "default": "The range of vulnerable versions"
-                                            }
-                                          },
-                                          "required": [
-                                            "affectedRange",
-                                            "purl"
-                                          ]
-                                        },
-                                        "description": ""
-                                      }
-                                    },
-                                    "description": "",
-                                    "nullable": true
-                                  }
-                                },
-                                "required": [
-                                  "advisoryDetails",
-                                  "cve",
-                                  "ghsa",
-                                  "message",
-                                  "type"
-                                ]
-                              }
-                            }
-                          },
-                          {
-                            "type": "object",
-                            "required": [
-                              "type",
-                              "value"
-                            ],
-                            "properties": {
-                              "type": {
-                                "type": "string",
-                                "enum": [
-                                  "noFixAvailable"
-                                ]
-                              },
-                              "value": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "description": "",
-                                "properties": {
-                                  "type": {
-                                    "type": "string",
-                                    "enum": [
-                                      "noFixAvailable"
-                                    ],
-                                    "description": "",
-                                    "default": "noFixAvailable"
-                                  },
-                                  "ghsa": {
-                                    "type": "string",
-                                    "description": "",
-                                    "default": ""
-                                  },
-                                  "cve": {
-                                    "type": "string",
-                                    "description": "",
-                                    "default": "",
-                                    "nullable": true
-                                  },
-                                  "advisoryDetails": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "title": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": "",
-                                        "nullable": true
-                                      },
-                                      "description": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": "",
-                                        "nullable": true
-                                      },
-                                      "cwes": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "string",
-                                          "description": "",
-                                          "default": ""
-                                        },
-                                        "description": ""
-                                      },
-                                      "severity": {
-                                        "type": "string",
-                                        "enum": [
-                                          "LOW",
-                                          "MODERATE",
-                                          "HIGH",
-                                          "CRITICAL"
-                                        ],
-                                        "description": "Severity level of the vulnerability",
-                                        "default": "LOW"
-                                      },
-                                      "cvssVector": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": "",
-                                        "nullable": true
-                                      },
-                                      "publishedAt": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": ""
-                                      },
-                                      "kev": {
-                                        "type": "boolean",
-                                        "default": false,
-                                        "description": "Whether the vulnerability is a Known Exploited Vulnerability"
-                                      },
-                                      "epss": {
-                                        "type": "number",
-                                        "description": "Exploit Prediction Scoring System score",
-                                        "default": 0,
-                                        "nullable": true
-                                      },
-                                      "affectedPurls": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "object",
-                                          "additionalProperties": false,
-                                          "description": "",
-                                          "properties": {
-                                            "purl": {
-                                              "type": "string",
-                                              "description": "",
-                                              "default": "",
-                                              "format": "The PURL (unique package identifier) of the affected package"
-                                            },
-                                            "affectedRange": {
-                                              "type": "string",
-                                              "description": "",
-                                              "default": "The range of vulnerable versions"
-                                            }
-                                          },
-                                          "required": [
-                                            "affectedRange",
-                                            "purl"
-                                          ]
-                                        },
-                                        "description": ""
-                                      }
-                                    },
-                                    "description": "",
-                                    "nullable": true
-                                  }
-                                },
-                                "required": [
-                                  "advisoryDetails",
-                                  "cve",
-                                  "ghsa",
-                                  "type"
-                                ]
-                              }
-                            }
-                          },
-                          {
-                            "type": "object",
-                            "required": [
-                              "type",
-                              "value"
-                            ],
-                            "properties": {
-                              "type": {
-                                "type": "string",
-                                "enum": [
-                                  "fixNotApplicable"
-                                ]
-                              },
-                              "value": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "description": "",
-                                "properties": {
-                                  "type": {
-                                    "type": "string",
-                                    "enum": [
-                                      "fixNotApplicable"
-                                    ],
-                                    "description": "",
-                                    "default": "fixNotApplicable"
-                                  },
-                                  "ghsa": {
-                                    "type": "string",
-                                    "description": "",
-                                    "default": ""
-                                  },
-                                  "cve": {
-                                    "type": "string",
-                                    "description": "",
-                                    "default": "",
-                                    "nullable": true
-                                  },
-                                  "vulnerableArtifacts": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "object",
-                                      "additionalProperties": false,
-                                      "description": "",
-                                      "properties": {
-                                        "purl": {
-                                          "type": "string",
-                                          "description": "",
-                                          "default": "The PURL (unique package identifier) of the vulnerable package"
-                                        },
-                                        "manifestFiles": {
-                                          "type": "array",
-                                          "items": {
-                                            "type": "string",
-                                            "description": "",
-                                            "default": "The manifest file(s) that contain the package"
-                                          },
-                                          "description": ""
-                                        }
-                                      },
-                                      "required": [
-                                        "manifestFiles",
-                                        "purl"
-                                      ]
-                                    },
-                                    "description": ""
-                                  },
-                                  "advisoryDetails": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "title": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": "",
-                                        "nullable": true
-                                      },
-                                      "description": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": "",
-                                        "nullable": true
-                                      },
-                                      "cwes": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "string",
-                                          "description": "",
-                                          "default": ""
-                                        },
-                                        "description": ""
-                                      },
-                                      "severity": {
-                                        "type": "string",
-                                        "enum": [
-                                          "LOW",
-                                          "MODERATE",
-                                          "HIGH",
-                                          "CRITICAL"
-                                        ],
-                                        "description": "Severity level of the vulnerability",
-                                        "default": "LOW"
-                                      },
-                                      "cvssVector": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": "",
-                                        "nullable": true
-                                      },
-                                      "publishedAt": {
-                                        "type": "string",
-                                        "description": "",
-                                        "default": ""
-                                      },
-                                      "kev": {
-                                        "type": "boolean",
-                                        "default": false,
-                                        "description": "Whether the vulnerability is a Known Exploited Vulnerability"
-                                      },
-                                      "epss": {
-                                        "type": "number",
-                                        "description": "Exploit Prediction Scoring System score",
-                                        "default": 0,
-                                        "nullable": true
-                                      },
-                                      "affectedPurls": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "object",
-                                          "additionalProperties": false,
-                                          "description": "",
-                                          "properties": {
-                                            "purl": {
-                                              "type": "string",
-                                              "description": "",
-                                              "default": "",
-                                              "format": "The PURL (unique package identifier) of the affected package"
-                                            },
-                                            "affectedRange": {
-                                              "type": "string",
-                                              "description": "",
-                                              "default": "The range of vulnerable versions"
-                                            }
-                                          },
-                                          "required": [
-                                            "affectedRange",
-                                            "purl"
-                                          ]
-                                        },
-                                        "description": ""
-                                      }
-                                    },
-                                    "description": "",
-                                    "nullable": true
-                                  }
-                                },
-                                "required": [
-                                  "advisoryDetails",
-                                  "cve",
-                                  "ghsa",
-                                  "type",
-                                  "vulnerableArtifacts"
-                                ]
-                              }
-                            }
-                          }
-                        ],
-                        "discriminator": {
-                          "propertyName": "type"
-                        }
+                        "type": "object",
+                        "description": "",
+                        "default": null
                       },
-                      "properties": {}
+                      "properties": {},
+                      "description": ""
                     }
                   },
                   "required": [

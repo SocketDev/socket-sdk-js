@@ -7,7 +7,10 @@ export interface paths {
   '/purl': {
     /**
      * Get Packages by PURL
-     * @description Batch retrieval of package metadata and alerts by PURL strings. Compatible witch CycloneDX reports.
+     * @deprecated
+     * @description **This endpoint is deprecated.** Deprecated since 2026-01-05. It will be removed on 2026-07-30.
+     *
+     * Batch retrieval of package metadata and alerts by PURL strings. Compatible with CycloneDX reports.
      *
      * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
      * CycloneDX SBOMs use the purl format to identify components.
@@ -968,12 +971,164 @@ export interface paths {
      */
     get: operations['getOrgThreatFeedItems']
   }
+  '/orgs/{org_slug}/purl': {
+    /**
+     * Get Packages by PURL (Org Scoped)
+     * @description Batch retrieval of package metadata and alerts by PURL strings for a specific organization. Compatible with CycloneDX reports.
+     *
+     * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
+     * CycloneDX SBOMs use the purl format to identify components.
+     * This endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.
+     *
+     * **Note:** This endpoint has a batch size limit (default: 1024 PURLs per request). Requests exceeding this limit will return a 400 Bad Request error.
+     *
+     * More information on purl and CycloneDX:
+     *
+     * - [`purl` Spec](https://github.com/package-url/purl-spec)
+     * - [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)
+     *
+     * This endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).
+     * Actively running analysis will be returned when available on subsequent runs.
+     *
+     * ## Query Parameters
+     *
+     * This endpoint supports all query parameters from `POST /v0/purl` including: `alerts`, `actions`, `compact`, `fixable`, `licenseattrib`, `licensedetails`, `purlErrors`, `cachedResultsOnly`, and `summary`.
+     *
+     * Additionally, you may provide a `labels` query parameter to apply a repository label's security policies. Pass the label slug as the value (e.g., `?labels=production`). Only one label is currently supported.
+     *
+     * ## Examples:
+     *
+     * ### Looking up an npm package:
+     *
+     * ```json
+     * {
+     *   "components": [
+     *     {
+     *       "purl": "pkg:npm/express@4.19.2"
+     *     }
+     *   ]
+     * }
+     * ```
+     *
+     * ### Looking up a PyPi package:
+     *
+     * ```json
+     * {
+     *   "components": [
+     *     {
+     *       "purl": "pkg:pypi/django@5.0.6"
+     *     }
+     *   ]
+     * }
+     * ```
+     *
+     * ### Looking up a Maven package:
+     *
+     * ```json
+     * {
+     *   "components": [
+     *     {
+     *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+     *     }
+     *   ]
+     * }
+     * ```
+     *
+     * ### Batch lookup
+     *
+     * ```json
+     * {
+     *   "components": [
+     *     {
+     *       "purl": "pkg:npm/express@4.19.2"
+     *     },
+     *     {
+     *       "purl": "pkg:pypi/django@5.0.6"
+     *     },
+     *     {
+     *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+     *     }
+     *   ]
+     * }
+     * ```
+     *
+     * ### With label and options (query parameters):
+     *
+     * ```
+     * POST /v0/orgs/{org_slug}/purl?labels=production&alerts=true&compact=true
+     * {
+     *   "components": [
+     *     {
+     *       "purl": "pkg:npm/express@4.19.2"
+     *     }
+     *   ]
+     * }
+     * ```
+     *
+     * This endpoint consumes 100 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - packages:list
+     */
+    post: operations['batchPackageFetchByOrg']
+  }
   '/orgs/{org_slug}/fixes': {
     /**
      * Fetch fixes for vulnerabilities in a repository or scan
      * @description Fetches available fixes for vulnerabilities in a repository or scan.
      * Requires either repo_slug or full_scan_id as well as vulnerability_ids to be provided.
      * vulnerability_ids can be a comma-separated list of GHSA or CVE IDs, or "*" for all vulnerabilities.
+     *
+     * ## Response Structure
+     *
+     * The response contains a `fixDetails` object where each key is a vulnerability ID (GHSA or CVE) and the value is a discriminated union based on the `type` field.
+     *
+     * ### Common Fields
+     *
+     * All response variants include:
+     * - `type`: Discriminator field (one of: "fixFound", "partialFixFound", "noFixAvailable", "fixNotApplicable", "errorComputingFix")
+     * - `value`: Object containing the variant-specific data
+     *
+     * The `value` object always contains:
+     * - `ghsa`: string | null - The GHSA ID
+     * - `cve`: string | null - The CVE ID (if available)
+     * - `advisoryDetails`: object | null - Advisory details (only if include_details=true)
+     *
+     * ### Response Variants
+     *
+     * **fixFound**: A complete fix is available for all vulnerable packages
+     * - `value.fixDetails.fixes`: Array of fix objects, each containing:
+     *   - `purl`: Package URL to upgrade
+     *   - `fixedVersion`: Version to upgrade to
+     *   - `manifestFiles`: Array of manifest files containing the package
+     *   - `updateType`: "patch" | "minor" | "major" | "unknown"
+     * - `value.fixDetails.responsibleDirectDependencies`: (optional) Map of direct dependencies responsible for the vulnerability
+     *
+     * **partialFixFound**: Fixes available for some but not all vulnerable packages
+     * - Same as fixFound, plus:
+     * - `value.fixDetails.unfixablePurls`: Array of packages that cannot be fixed, each containing:
+     *   - `purl`: Package URL
+     *   - `manifestFiles`: Array of manifest files
+     *
+     * **noFixAvailable**: No fix exists for this vulnerability (no patched version published)
+     *
+     * **fixNotApplicable**: A fix exists but cannot be applied due to version constraints
+     * - `value.vulnerableArtifacts`: Array of vulnerable packages with their manifest files
+     *
+     * **errorComputingFix**: An error occurred while computing fixes
+     * - `value.message`: Error description
+     *
+     * ### Advisory Details (when include_details=true)
+     *
+     * - `title`: string | null
+     * - `description`: string | null
+     * - `cwes`: string[] - CWE identifiers
+     * - `severity`: "LOW" | "MODERATE" | "HIGH" | "CRITICAL"
+     * - `cvssVector`: string | null
+     * - `publishedAt`: string (ISO date)
+     * - `kev`: boolean - Whether it's a Known Exploited Vulnerability
+     * - `epss`: number | null - Exploit Prediction Scoring System score
+     * - `affectedPurls`: Array of affected packages with version ranges
      *
      * This endpoint consumes 10 units of your quota.
      *
@@ -1687,7 +1842,7 @@ export interface components {
           _type: 'summary'
           value: components['schemas']['PurlSummarySchema']
         }
-    SocketBatchPURLFetch: {
+    SocketOrgBatchPURLFetch: {
       components: Array<components['schemas']['SocketBatchPURLRequest']>
     }
     SocketArtifact: components['schemas']['SocketPURL'] &
@@ -4970,7 +5125,10 @@ export type external = Record<string, never>
 export interface operations {
   /**
    * Get Packages by PURL
-   * @description Batch retrieval of package metadata and alerts by PURL strings. Compatible witch CycloneDX reports.
+   * @deprecated
+   * @description **This endpoint is deprecated.** Deprecated since 2026-01-05. It will be removed on 2026-07-30.
+   *
+   * Batch retrieval of package metadata and alerts by PURL strings. Compatible with CycloneDX reports.
    *
    * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
    * CycloneDX SBOMs use the purl format to identify components.
@@ -5072,7 +5230,7 @@ export interface operations {
     }
     requestBody?: {
       content: {
-        'application/json': components['schemas']['SocketBatchPURLFetch']
+        'application/json': components['schemas']['SocketOrgBatchPURLFetch']
       }
     }
     responses: {
@@ -14035,6 +14193,7 @@ export interface operations {
           | 'ChangeMemberRole'
           | 'ChangePlanSubscriptionSeats'
           | 'CreateApiToken'
+          | 'CreateArtifact'
           | 'CreateLabel'
           | 'CreateWebhook'
           | 'DeleteApiToken'
@@ -14299,11 +14458,15 @@ export interface operations {
                 | 'triage'
                 | 'triage:alerts-list'
                 | 'triage:alerts-update'
+                | 'uploaded-artifacts'
+                | 'uploaded-artifacts:create'
+                | 'uploaded-artifacts:list'
                 | 'webhooks'
                 | 'webhooks:create'
                 | 'webhooks:list'
                 | 'webhooks:update'
                 | 'webhooks:delete'
+                | '*'
               )[]
               /**
                * @description The token of the API Token (redacted or omitted)
@@ -14423,11 +14586,15 @@ export interface operations {
             | 'triage'
             | 'triage:alerts-list'
             | 'triage:alerts-update'
+            | 'uploaded-artifacts'
+            | 'uploaded-artifacts:create'
+            | 'uploaded-artifacts:list'
             | 'webhooks'
             | 'webhooks:create'
             | 'webhooks:list'
             | 'webhooks:update'
             | 'webhooks:delete'
+            | '*'
           >
           /**
            * @description The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.
@@ -14604,11 +14771,15 @@ export interface operations {
             | 'triage'
             | 'triage:alerts-list'
             | 'triage:alerts-update'
+            | 'uploaded-artifacts'
+            | 'uploaded-artifacts:create'
+            | 'uploaded-artifacts:list'
             | 'webhooks'
             | 'webhooks:create'
             | 'webhooks:list'
             | 'webhooks:update'
             | 'webhooks:delete'
+            | '*'
           >
           /**
            * @description The visibility of the API Token. Warning: this field is deprecated and will be removed in the future.
@@ -14883,6 +15054,8 @@ export interface operations {
               /** @default */
               updatedAt?: string
               /** @default */
+              publishedAt?: string | null
+              /** @default */
               description?: string
               /** @default 0 */
               id?: number
@@ -14999,6 +15172,8 @@ export interface operations {
               /** @default */
               updatedAt?: string
               /** @default */
+              publishedAt?: string | null
+              /** @default */
               description?: string
               /** @default 0 */
               id?: number
@@ -15036,10 +15211,207 @@ export interface operations {
     }
   }
   /**
+   * Get Packages by PURL (Org Scoped)
+   * @description Batch retrieval of package metadata and alerts by PURL strings for a specific organization. Compatible with CycloneDX reports.
+   *
+   * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
+   * CycloneDX SBOMs use the purl format to identify components.
+   * This endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.
+   *
+   * **Note:** This endpoint has a batch size limit (default: 1024 PURLs per request). Requests exceeding this limit will return a 400 Bad Request error.
+   *
+   * More information on purl and CycloneDX:
+   *
+   * - [`purl` Spec](https://github.com/package-url/purl-spec)
+   * - [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)
+   *
+   * This endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).
+   * Actively running analysis will be returned when available on subsequent runs.
+   *
+   * ## Query Parameters
+   *
+   * This endpoint supports all query parameters from `POST /v0/purl` including: `alerts`, `actions`, `compact`, `fixable`, `licenseattrib`, `licensedetails`, `purlErrors`, `cachedResultsOnly`, and `summary`.
+   *
+   * Additionally, you may provide a `labels` query parameter to apply a repository label's security policies. Pass the label slug as the value (e.g., `?labels=production`). Only one label is currently supported.
+   *
+   * ## Examples:
+   *
+   * ### Looking up an npm package:
+   *
+   * ```json
+   * {
+   *   "components": [
+   *     {
+   *       "purl": "pkg:npm/express@4.19.2"
+   *     }
+   *   ]
+   * }
+   * ```
+   *
+   * ### Looking up a PyPi package:
+   *
+   * ```json
+   * {
+   *   "components": [
+   *     {
+   *       "purl": "pkg:pypi/django@5.0.6"
+   *     }
+   *   ]
+   * }
+   * ```
+   *
+   * ### Looking up a Maven package:
+   *
+   * ```json
+   * {
+   *   "components": [
+   *     {
+   *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+   *     }
+   *   ]
+   * }
+   * ```
+   *
+   * ### Batch lookup
+   *
+   * ```json
+   * {
+   *   "components": [
+   *     {
+   *       "purl": "pkg:npm/express@4.19.2"
+   *     },
+   *     {
+   *       "purl": "pkg:pypi/django@5.0.6"
+   *     },
+   *     {
+   *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+   *     }
+   *   ]
+   * }
+   * ```
+   *
+   * ### With label and options (query parameters):
+   *
+   * ```
+   * POST /v0/orgs/{org_slug}/purl?labels=production&alerts=true&compact=true
+   * {
+   *   "components": [
+   *     {
+   *       "purl": "pkg:npm/express@4.19.2"
+   *     }
+   *   ]
+   * }
+   * ```
+   *
+   * This endpoint consumes 100 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - packages:list
+   */
+  batchPackageFetchByOrg: {
+    parameters: {
+      query?: {
+        /** @description Repository label slugs to apply policies. Only one label is supported currently; the parameter is an array to allow future support for multiple labels. */
+        labels?: string[]
+        /** @description Include alert metadata. */
+        alerts?: boolean
+        /** @description Include only alerts with comma separated actions defined by security policy. */
+        actions?: Array<'error' | 'monitor' | 'warn' | 'ignore'>
+        /** @description Compact metadata. When enabled, excludes metadata fields like author, scores, size, dependencies, and manifest files. Always includes: id, type, name, version, release, namespace, subpath, alerts, and alertPriorities. */
+        compact?: boolean
+        /** @description Include only fixable alerts. */
+        fixable?: boolean
+        /** @description Include license attribution data, including license text and author information. Maps attribution/license text to a list of data objects to which that attribution info applies. */
+        licenseattrib?: boolean
+        /** @description Include detailed license information, including location and match strength, for each license datum. */
+        licensedetails?: boolean
+        /** @description Return errors found with handling PURLs as error objects in the stream. */
+        purlErrors?: boolean
+        /** @description Return only cached results, do not attempt to scan new artifacts or rescan stale results. */
+        cachedResultsOnly?: boolean
+        /** @description Include a summary object at the end of the stream with counts of malformed, resolved, and not found PURLs. */
+        summary?: boolean
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+      }
+    }
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['SocketOrgBatchPURLFetch']
+      }
+    }
+    responses: {
+      /** @description Socket issue lists and scores for all packages, and optional metadata objects */
+      200: {
+        content: {
+          'application/x-ndjson': components['schemas']['BatchPurlStreamSchema']
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
    * Fetch fixes for vulnerabilities in a repository or scan
    * @description Fetches available fixes for vulnerabilities in a repository or scan.
    * Requires either repo_slug or full_scan_id as well as vulnerability_ids to be provided.
    * vulnerability_ids can be a comma-separated list of GHSA or CVE IDs, or "*" for all vulnerabilities.
+   *
+   * ## Response Structure
+   *
+   * The response contains a `fixDetails` object where each key is a vulnerability ID (GHSA or CVE) and the value is a discriminated union based on the `type` field.
+   *
+   * ### Common Fields
+   *
+   * All response variants include:
+   * - `type`: Discriminator field (one of: "fixFound", "partialFixFound", "noFixAvailable", "fixNotApplicable", "errorComputingFix")
+   * - `value`: Object containing the variant-specific data
+   *
+   * The `value` object always contains:
+   * - `ghsa`: string | null - The GHSA ID
+   * - `cve`: string | null - The CVE ID (if available)
+   * - `advisoryDetails`: object | null - Advisory details (only if include_details=true)
+   *
+   * ### Response Variants
+   *
+   * **fixFound**: A complete fix is available for all vulnerable packages
+   * - `value.fixDetails.fixes`: Array of fix objects, each containing:
+   *   - `purl`: Package URL to upgrade
+   *   - `fixedVersion`: Version to upgrade to
+   *   - `manifestFiles`: Array of manifest files containing the package
+   *   - `updateType`: "patch" | "minor" | "major" | "unknown"
+   * - `value.fixDetails.responsibleDirectDependencies`: (optional) Map of direct dependencies responsible for the vulnerability
+   *
+   * **partialFixFound**: Fixes available for some but not all vulnerable packages
+   * - Same as fixFound, plus:
+   * - `value.fixDetails.unfixablePurls`: Array of packages that cannot be fixed, each containing:
+   *   - `purl`: Package URL
+   *   - `manifestFiles`: Array of manifest files
+   *
+   * **noFixAvailable**: No fix exists for this vulnerability (no patched version published)
+   *
+   * **fixNotApplicable**: A fix exists but cannot be applied due to version constraints
+   * - `value.vulnerableArtifacts`: Array of vulnerable packages with their manifest files
+   *
+   * **errorComputingFix**: An error occurred while computing fixes
+   * - `value.message`: Error description
+   *
+   * ### Advisory Details (when include_details=true)
+   *
+   * - `title`: string | null
+   * - `description`: string | null
+   * - `cwes`: string[] - CWE identifiers
+   * - `severity`: "LOW" | "MODERATE" | "HIGH" | "CRITICAL"
+   * - `cvssVector`: string | null
+   * - `publishedAt`: string (ISO date)
+   * - `kev`: boolean - Whether it's a Known Exploited Vulnerability
+   * - `epss`: number | null - Exploit Prediction Scoring System score
+   * - `affectedPurls`: Array of affected packages with version ranges
    *
    * This endpoint consumes 10 units of your quota.
    *
@@ -15074,390 +15446,8 @@ export interface operations {
       200: {
         content: {
           'application/json': {
-            /** @description Map of vulnerability IDs (GHSA or CVE) to their fix details. Each entry contains information about available fixes, partial fixes, or reasons why fixes are not available. */
             fixDetails: {
-              [key: string]:
-                | {
-                    /** @enum {string} */
-                    type: 'fixFound'
-                    value: {
-                      /**
-                       * @default fixFound
-                       * @enum {string}
-                       */
-                      type: 'fixFound'
-                      /** @default */
-                      ghsa: string
-                      /** @default */
-                      cve: string | null
-                      fixDetails: {
-                        fixes: Array<{
-                          /** @default The PURL (unique package identifier) of the package to upgrade */
-                          purl: string
-                          /** @default The version of the package to upgrade to */
-                          fixedVersion: string
-                          manifestFiles: string[]
-                          /**
-                           * @description The type of version update (patch, minor, major, or unknown if it cannot be determined)
-                           * @default unknown
-                           * @enum {string}
-                           */
-                          updateType: 'patch' | 'minor' | 'major' | 'unknown'
-                        }>
-                        /** @description The keys are the PURL (unique package identifier) of the direct dependency(ies) responsible for introducing the vulnerability. */
-                        responsibleDirectDependencies?: {
-                          [key: string]: {
-                            /**
-                             * Format: The current version of the package
-                             * @default
-                             */
-                            currentVersion: string
-                            nextAvailableVersion?: {
-                              /**
-                               * Format: The next available version of the package
-                               * @default
-                               */
-                              version: string
-                              /**
-                               * @description The type of version update (patch, minor, major, or unknown if it cannot be determined)
-                               * @default unknown
-                               * @enum {string}
-                               */
-                              updateType:
-                                | 'patch'
-                                | 'minor'
-                                | 'major'
-                                | 'unknown'
-                            } | null
-                            /** @description The version and update type of the package that is necessary to fix the vulnerability. If the value is null, it means the package does not have to be upgraded to fix the vulnerability */
-                            fixByUpgradingTo?: {
-                              /** @default */
-                              version: string
-                              /**
-                               * @description The type of version update (patch, minor, major, or unknown if it cannot be determined)
-                               * @default unknown
-                               * @enum {string}
-                               */
-                              updateType:
-                                | 'patch'
-                                | 'minor'
-                                | 'major'
-                                | 'unknown'
-                            } | null
-                          }
-                        } | null
-                      }
-                      advisoryDetails: {
-                        /** @default */
-                        title?: string | null
-                        /** @default */
-                        description?: string | null
-                        cwes?: string[]
-                        /**
-                         * @description Severity level of the vulnerability
-                         * @default LOW
-                         * @enum {string}
-                         */
-                        severity?: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL'
-                        /** @default */
-                        cvssVector?: string | null
-                        /** @default */
-                        publishedAt?: string
-                        /**
-                         * @description Whether the vulnerability is a Known Exploited Vulnerability
-                         * @default false
-                         */
-                        kev?: boolean
-                        /**
-                         * @description Exploit Prediction Scoring System score
-                         * @default 0
-                         */
-                        epss?: number | null
-                        affectedPurls?: Array<{
-                          /**
-                           * Format: The PURL (unique package identifier) of the affected package
-                           * @default
-                           */
-                          purl: string
-                          /** @default The range of vulnerable versions */
-                          affectedRange: string
-                        }>
-                      } | null
-                    }
-                  }
-                | {
-                    /** @enum {string} */
-                    type: 'partialFixFound'
-                    value: {
-                      /**
-                       * @default partialFixFound
-                       * @enum {string}
-                       */
-                      type: 'partialFixFound'
-                      /** @default */
-                      ghsa: string
-                      /** @default */
-                      cve: string | null
-                      fixDetails: {
-                        fixes: Array<{
-                          /** @default The PURL (unique package identifier) of the package to upgrade */
-                          purl: string
-                          /** @default The version of the package to upgrade to */
-                          fixedVersion: string
-                          manifestFiles: string[]
-                          /**
-                           * @description The type of version update (patch, minor, major, or unknown if it cannot be determined)
-                           * @default unknown
-                           * @enum {string}
-                           */
-                          updateType: 'patch' | 'minor' | 'major' | 'unknown'
-                        }>
-                        unfixablePurls: Array<{
-                          /** @default The PURL (unique package identifier) of the package that cannot be upgraded */
-                          purl: string
-                          manifestFiles: string[]
-                        }>
-                        /** @description The keys are the PURL (unique package identifier) of the direct dependency(ies) responsible for introducing the vulnerability. */
-                        responsibleDirectDependencies?: {
-                          [key: string]: {
-                            /**
-                             * Format: The current version of the package
-                             * @default
-                             */
-                            currentVersion: string
-                            nextAvailableVersion?: {
-                              /**
-                               * Format: The next available version of the package
-                               * @default
-                               */
-                              version: string
-                              /**
-                               * @description The type of version update (patch, minor, major, or unknown if it cannot be determined)
-                               * @default unknown
-                               * @enum {string}
-                               */
-                              updateType:
-                                | 'patch'
-                                | 'minor'
-                                | 'major'
-                                | 'unknown'
-                            } | null
-                            /** @description The version and update type of the package that is necessary to fix the vulnerability. If the value is null, it means the package does not have to be upgraded to fix the vulnerability */
-                            fixByUpgradingTo?: {
-                              /** @default */
-                              version: string
-                              /**
-                               * @description The type of version update (patch, minor, major, or unknown if it cannot be determined)
-                               * @default unknown
-                               * @enum {string}
-                               */
-                              updateType:
-                                | 'patch'
-                                | 'minor'
-                                | 'major'
-                                | 'unknown'
-                            } | null
-                          }
-                        } | null
-                      }
-                      advisoryDetails: {
-                        /** @default */
-                        title?: string | null
-                        /** @default */
-                        description?: string | null
-                        cwes?: string[]
-                        /**
-                         * @description Severity level of the vulnerability
-                         * @default LOW
-                         * @enum {string}
-                         */
-                        severity?: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL'
-                        /** @default */
-                        cvssVector?: string | null
-                        /** @default */
-                        publishedAt?: string
-                        /**
-                         * @description Whether the vulnerability is a Known Exploited Vulnerability
-                         * @default false
-                         */
-                        kev?: boolean
-                        /**
-                         * @description Exploit Prediction Scoring System score
-                         * @default 0
-                         */
-                        epss?: number | null
-                        affectedPurls?: Array<{
-                          /**
-                           * Format: The PURL (unique package identifier) of the affected package
-                           * @default
-                           */
-                          purl: string
-                          /** @default The range of vulnerable versions */
-                          affectedRange: string
-                        }>
-                      } | null
-                    }
-                  }
-                | {
-                    /** @enum {string} */
-                    type: 'errorComputingFix'
-                    value: {
-                      /**
-                       * @default errorComputingFix
-                       * @enum {string}
-                       */
-                      type: 'errorComputingFix'
-                      /** @default */
-                      ghsa: string | null
-                      /** @default */
-                      cve: string | null
-                      /** @default */
-                      message: string
-                      advisoryDetails: {
-                        /** @default */
-                        title?: string | null
-                        /** @default */
-                        description?: string | null
-                        cwes?: string[]
-                        /**
-                         * @description Severity level of the vulnerability
-                         * @default LOW
-                         * @enum {string}
-                         */
-                        severity?: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL'
-                        /** @default */
-                        cvssVector?: string | null
-                        /** @default */
-                        publishedAt?: string
-                        /**
-                         * @description Whether the vulnerability is a Known Exploited Vulnerability
-                         * @default false
-                         */
-                        kev?: boolean
-                        /**
-                         * @description Exploit Prediction Scoring System score
-                         * @default 0
-                         */
-                        epss?: number | null
-                        affectedPurls?: Array<{
-                          /**
-                           * Format: The PURL (unique package identifier) of the affected package
-                           * @default
-                           */
-                          purl: string
-                          /** @default The range of vulnerable versions */
-                          affectedRange: string
-                        }>
-                      } | null
-                    }
-                  }
-                | {
-                    /** @enum {string} */
-                    type: 'noFixAvailable'
-                    value: {
-                      /**
-                       * @default noFixAvailable
-                       * @enum {string}
-                       */
-                      type: 'noFixAvailable'
-                      /** @default */
-                      ghsa: string
-                      /** @default */
-                      cve: string | null
-                      advisoryDetails: {
-                        /** @default */
-                        title?: string | null
-                        /** @default */
-                        description?: string | null
-                        cwes?: string[]
-                        /**
-                         * @description Severity level of the vulnerability
-                         * @default LOW
-                         * @enum {string}
-                         */
-                        severity?: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL'
-                        /** @default */
-                        cvssVector?: string | null
-                        /** @default */
-                        publishedAt?: string
-                        /**
-                         * @description Whether the vulnerability is a Known Exploited Vulnerability
-                         * @default false
-                         */
-                        kev?: boolean
-                        /**
-                         * @description Exploit Prediction Scoring System score
-                         * @default 0
-                         */
-                        epss?: number | null
-                        affectedPurls?: Array<{
-                          /**
-                           * Format: The PURL (unique package identifier) of the affected package
-                           * @default
-                           */
-                          purl: string
-                          /** @default The range of vulnerable versions */
-                          affectedRange: string
-                        }>
-                      } | null
-                    }
-                  }
-                | {
-                    /** @enum {string} */
-                    type: 'fixNotApplicable'
-                    value: {
-                      /**
-                       * @default fixNotApplicable
-                       * @enum {string}
-                       */
-                      type: 'fixNotApplicable'
-                      /** @default */
-                      ghsa: string
-                      /** @default */
-                      cve: string | null
-                      vulnerableArtifacts: Array<{
-                        /** @default The PURL (unique package identifier) of the vulnerable package */
-                        purl: string
-                        manifestFiles: string[]
-                      }>
-                      advisoryDetails: {
-                        /** @default */
-                        title?: string | null
-                        /** @default */
-                        description?: string | null
-                        cwes?: string[]
-                        /**
-                         * @description Severity level of the vulnerability
-                         * @default LOW
-                         * @enum {string}
-                         */
-                        severity?: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL'
-                        /** @default */
-                        cvssVector?: string | null
-                        /** @default */
-                        publishedAt?: string
-                        /**
-                         * @description Whether the vulnerability is a Known Exploited Vulnerability
-                         * @default false
-                         */
-                        kev?: boolean
-                        /**
-                         * @description Exploit Prediction Scoring System score
-                         * @default 0
-                         */
-                        epss?: number | null
-                        affectedPurls?: Array<{
-                          /**
-                           * Format: The PURL (unique package identifier) of the affected package
-                           * @default
-                           */
-                          purl: string
-                          /** @default The range of vulnerable versions */
-                          affectedRange: string
-                        }>
-                      } | null
-                    }
-                  }
+              [key: string]: Record<string, never>
             }
           }
         }
