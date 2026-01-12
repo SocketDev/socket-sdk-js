@@ -779,20 +779,35 @@ describe('SocketSdk - API Methods Coverage', () => {
         expect(result.data).toBeDefined()
         expect(result.data.fixDetails).toBeDefined()
         expect(result.data.fixDetails['GHSA-xxxx-yyyy-zzzz']).toBeDefined()
-        const fixDetail = result.data.fixDetails['GHSA-xxxx-yyyy-zzzz']
-        if (fixDetail && 'type' in fixDetail && fixDetail.type === 'fixFound') {
-          expect(fixDetail.value.ghsa).toBe('GHSA-xxxx-yyyy-zzzz')
-          expect(fixDetail.value.cve).toBe('CVE-2024-1234')
-          expect(fixDetail.value.fixDetails.fixes).toBeInstanceOf(Array)
-          expect(fixDetail.value.fixDetails.fixes.length).toBeGreaterThan(0)
-          if (fixDetail.value.fixDetails.fixes[0]) {
-            expect(fixDetail.value.fixDetails.fixes[0].purl).toBe(
-              'pkg:npm/lodash',
-            )
-            expect(fixDetail.value.fixDetails.fixes[0].fixedVersion).toBe(
-              '2.0.0',
-            )
-            expect(fixDetail.value.fixDetails.fixes[0].updateType).toBe('major')
+        const fixDetail = result.data.fixDetails[
+          'GHSA-xxxx-yyyy-zzzz'
+        ] as unknown
+        if (
+          fixDetail &&
+          typeof fixDetail === 'object' &&
+          'type' in fixDetail &&
+          fixDetail.type === 'fixFound' &&
+          'value' in fixDetail
+        ) {
+          const value = fixDetail.value as {
+            ghsa: string
+            cve: string
+            fixDetails: {
+              fixes: Array<{
+                purl: string
+                fixedVersion: string
+                updateType: string
+              }>
+            }
+          }
+          expect(value.ghsa).toBe('GHSA-xxxx-yyyy-zzzz')
+          expect(value.cve).toBe('CVE-2024-1234')
+          expect(value.fixDetails.fixes).toBeInstanceOf(Array)
+          expect(value.fixDetails.fixes.length).toBeGreaterThan(0)
+          if (value.fixDetails.fixes[0]) {
+            expect(value.fixDetails.fixes[0].purl).toBe('pkg:npm/lodash')
+            expect(value.fixDetails.fixes[0].fixedVersion).toBe('2.0.0')
+            expect(value.fixDetails.fixes[0].updateType).toBe('major')
           }
         }
       }
