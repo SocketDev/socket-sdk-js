@@ -32,10 +32,9 @@ async function main() {
     }
 
     // Build taze command with appropriate flags for monorepo.
-    const tazeArgs = ['exec', 'taze', '-r']
+    const tazeArgs = ['exec', 'taze', '-r', '-w']
 
     if (apply) {
-      tazeArgs.push('-w')
       if (!quiet) {
         logger.progress('Updating dependencies across monorepo...')
       }
