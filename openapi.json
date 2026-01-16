@@ -318,6 +318,45 @@
         },
         "description": "Internal server error"
       },
+      "SocketConflict": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "",
+              "properties": {
+                "error": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    },
+                    "details": {
+                      "type": "object",
+                      "description": "",
+                      "default": null,
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "details",
+                    "message"
+                  ]
+                }
+              },
+              "required": [
+                "error"
+              ]
+            }
+          }
+        },
+        "description": "Resource already exists"
+      },
       "SocketGone": {
         "content": {
           "application/json": {
@@ -4546,6 +4585,58 @@
                         "additionalProperties": false,
                         "description": "",
                         "properties": {}
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "tooManyFiles"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "fileCount": {
+                            "type": "integer",
+                            "description": "",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "fileCount"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
@@ -15717,6 +15808,9 @@
           "404": {
             "$ref": "#/components/responses/SocketNotFoundResponse"
           },
+          "409": {
+            "$ref": "#/components/responses/SocketConflict"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
@@ -16113,6 +16207,9 @@
           },
           "404": {
             "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "409": {
+            "$ref": "#/components/responses/SocketConflict"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -18758,6 +18855,27 @@
                             "action"
                           ]
                         },
+                        "tooManyFiles": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for tooManyFiles issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "generic": {
                           "type": "object",
                           "additionalProperties": false,
@@ -21335,6 +21453,27 @@
                               "ignore"
                             ],
                             "description": "The action to take for shrinkwrap issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "tooManyFiles": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for tooManyFiles issues."
                           }
                         },
                         "required": [
@@ -24237,6 +24376,27 @@
                             "action"
                           ]
                         },
+                        "tooManyFiles": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for tooManyFiles issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "generic": {
                           "type": "object",
                           "additionalProperties": false,
@@ -26823,6 +26983,27 @@
                           "action"
                         ]
                       },
+                      "tooManyFiles": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for tooManyFiles issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
                       "generic": {
                         "type": "object",
                         "additionalProperties": false,
@@ -29356,6 +29537,27 @@
                                 "ignore"
                               ],
                               "description": "The action to take for shrinkwrap issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "tooManyFiles": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for tooManyFiles issues."
                             }
                           },
                           "required": [
@@ -35945,6 +36147,13 @@
                       "type": "string",
                       "description": "ID of the Socket user who created the API Token",
                       "default": "",
+                      "format": "uuid",
+                      "nullable": true
+                    },
+                    "group_uuid": {
+                      "type": "string",
+                      "description": "The stable group UUID that remains constant across token rotations",
+                      "default": "",
                       "format": "uuid"
                     },
                     "token": {
@@ -35960,13 +36169,14 @@
                   },
                   "required": [
                     "created_by",
+                    "group_uuid",
                     "hash",
                     "token"
                   ]
                 }
               }
             },
-            "description": "The newly created api token and its hash."
+            "description": "The newly created api token with its stable UUID and hash."
           },
           "401": {
             "$ref": "#/components/responses/SocketUnauthorized"
@@ -36057,7 +36267,7 @@
                 "include",
                 "omit"
               ],
-              "default": "include"
+              "default": "omit"
             }
           }
         ],
@@ -36140,6 +36350,12 @@
                             "description": "Timestamp when the API Token was created",
                             "default": "",
                             "format": "date"
+                          },
+                          "group_uuid": {
+                            "type": "string",
+                            "description": "The stable group UUID that remains constant across token rotations",
+                            "default": "",
+                            "format": "uuid"
                           },
                           "hash": {
                             "type": "string",
@@ -36278,6 +36494,7 @@
                           "committers",
                           "created_at",
                           "created_by",
+                          "group_uuid",
                           "hash",
                           "id",
                           "last_used_at",
@@ -36486,14 +36703,25 @@
                     "description": "Name for the API Token",
                     "default": "api token"
                   },
+                  "uuid": {
+                    "type": "string",
+                    "description": "The stable group UUID to update (provide uuid, id, token, or hash. May provide uuid+hash together for validation)",
+                    "default": "",
+                    "format": "uuid"
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "The API token ID to update (provide uuid, id, token, or hash)",
+                    "default": ""
+                  },
                   "token": {
                     "type": "string",
-                    "description": "The API token to update (provide either token or hash)",
+                    "description": "The API token to update (provide uuid, id, token, or hash)",
                     "default": ""
                   },
                   "hash": {
                     "type": "string",
-                    "description": "The API token hash to update (provide either token or hash)",
+                    "description": "The API token hash to update (provide uuid, id, token, or hash)",
                     "default": ""
                   }
                 },
@@ -36531,14 +36759,14 @@
                   "additionalProperties": false,
                   "description": "",
                   "properties": {
-                    "token": {
+                    "hash": {
                       "type": "string",
-                      "description": "",
+                      "description": "SRI-format hash of the API token (e.g., sha512-base64hash)",
                       "default": ""
                     }
                   },
                   "required": [
-                    "token"
+                    "hash"
                   ]
                 }
               }
@@ -36583,6 +36811,12 @@
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
+                  "uuid": {
+                    "type": "string",
+                    "description": "The stable group UUID of the API token to rotate",
+                    "default": "",
+                    "format": "uuid"
+                  },
                   "token": {
                     "type": "string",
                     "description": "",
@@ -36594,11 +36828,11 @@
                     "default": ""
                   }
                 },
-                "description": "The API Token or hash to rotate. Must provide either token or hash, but not both."
+                "description": "The API Token identifier to rotate. Provide uuid (recommended), token, or hash. May provide uuid+hash together for validation."
               }
             }
           },
-          "description": "The API Token or hash to rotate. Must provide either token or hash, but not both.",
+          "description": "The API Token identifier to rotate. Provide uuid (recommended), token, or hash. May provide uuid+hash together for validation.",
           "required": false
         },
         "security": [
@@ -36623,6 +36857,17 @@
                   "additionalProperties": false,
                   "description": "",
                   "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The database ID of the new API token",
+                      "default": ""
+                    },
+                    "group_uuid": {
+                      "type": "string",
+                      "description": "The stable group UUID (unchanged after rotation)",
+                      "default": "",
+                      "format": "uuid"
+                    },
                     "created_by": {
                       "type": "string",
                       "description": "ID of the Socket user who created the API Token",
@@ -36643,13 +36888,15 @@
                   },
                   "required": [
                     "created_by",
+                    "group_uuid",
                     "hash",
+                    "id",
                     "token"
                   ]
                 }
               }
             },
-            "description": "The replacement API Token and its hash"
+            "description": "The replacement API Token with its stable UUID, new token value, and hash"
           },
           "401": {
             "$ref": "#/components/responses/SocketUnauthorized"
@@ -36689,6 +36936,12 @@
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
+                  "uuid": {
+                    "type": "string",
+                    "description": "The stable group UUID of the API token to revoke",
+                    "default": "",
+                    "format": "uuid"
+                  },
                   "token": {
                     "type": "string",
                     "description": "",
@@ -36700,11 +36953,11 @@
                     "default": ""
                   }
                 },
-                "description": "The token or hash to revoke. Must provide either token or hash, but not both."
+                "description": "The API token identifier to revoke. Provide uuid (recommended), token, or hash. May provide uuid+hash together for validation."
               }
             }
           },
-          "description": "The token or hash to revoke. Must provide either token or hash, but not both.",
+          "description": "The API token identifier to revoke. Provide uuid (recommended), token, or hash. May provide uuid+hash together for validation.",
           "required": false
         },
         "security": [
