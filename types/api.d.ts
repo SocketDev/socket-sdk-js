@@ -3296,6 +3296,19 @@ export interface components {
         }
       | {
           /** @enum {string} */
+          type?: 'tooManyFiles'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default 0 */
+              fileCount: number
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
           type?: 'generic'
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
@@ -5087,6 +5100,19 @@ export interface components {
     }
     /** @description Internal server error */
     SocketInternalServerError: {
+      content: {
+        'application/json': {
+          error: {
+            /** @default */
+            message: string
+            /** @default null */
+            details: Record<string, unknown> | null
+          }
+        }
+      }
+    }
+    /** @description Resource already exists */
+    SocketConflict: {
       content: {
         'application/json': {
           error: {
@@ -6893,6 +6919,7 @@ export interface operations {
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
       404: components['responses']['SocketNotFoundResponse']
+      409: components['responses']['SocketConflict']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -7019,6 +7046,7 @@ export interface operations {
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
       404: components['responses']['SocketNotFoundResponse']
+      409: components['responses']['SocketConflict']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -8300,6 +8328,13 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              tooManyFiles?: {
+                /**
+                 * @description The action to take for tooManyFiles issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               generic?: {
                 /**
                  * @description The action to take for generic issues.
@@ -9182,6 +9217,13 @@ export interface operations {
             shrinkwrap?: {
               /**
                * @description The action to take for shrinkwrap issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            tooManyFiles?: {
+              /**
+               * @description The action to take for tooManyFiles issues.
                * @enum {string}
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -10226,6 +10268,13 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              tooManyFiles?: {
+                /**
+                 * @description The action to take for tooManyFiles issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               generic?: {
                 /**
                  * @description The action to take for generic issues.
@@ -11105,6 +11154,13 @@ export interface operations {
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
             }
+            tooManyFiles?: {
+              /**
+               * @description The action to take for tooManyFiles issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
             generic?: {
               /**
                * @description The action to take for generic issues.
@@ -11949,6 +12005,13 @@ export interface operations {
               shrinkwrap?: {
                 /**
                  * @description The action to take for shrinkwrap issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              tooManyFiles?: {
+                /**
+                 * @description The action to take for tooManyFiles issues.
                  * @enum {string}
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -14362,6 +14425,12 @@ export interface operations {
                */
               created_at: string
               /**
+               * Format: uuid
+               * @description The stable group UUID that remains constant across token rotations
+               * @default
+               */
+              group_uuid: string
+              /**
                * @description SRI-format hash of the token (e.g., sha512-base64hash). Null for tokens created before hash column was added.
                * @default
                */
@@ -14653,7 +14722,7 @@ export interface operations {
       }
     }
     responses: {
-      /** @description The newly created api token and its hash. */
+      /** @description The newly created api token with its stable UUID and hash. */
       200: {
         content: {
           'application/json': {
@@ -14662,7 +14731,13 @@ export interface operations {
              * @description ID of the Socket user who created the API Token
              * @default
              */
-            created_by: string
+            created_by: string | null
+            /**
+             * Format: uuid
+             * @description The stable group UUID that remains constant across token rotations
+             * @default
+             */
+            group_uuid: string
             /** @default */
             token: string
             /** @default */
@@ -14817,12 +14892,23 @@ export interface operations {
            */
           name?: string
           /**
-           * @description The API token to update (provide either token or hash)
+           * Format: uuid
+           * @description The stable group UUID to update (provide uuid, id, token, or hash. May provide uuid+hash together for validation)
+           * @default
+           */
+          uuid?: string
+          /**
+           * @description The API token ID to update (provide uuid, id, token, or hash)
+           * @default
+           */
+          id?: string
+          /**
+           * @description The API token to update (provide uuid, id, token, or hash)
            * @default
            */
           token?: string
           /**
-           * @description The API token hash to update (provide either token or hash)
+           * @description The API token hash to update (provide uuid, id, token, or hash)
            * @default
            */
           hash?: string
@@ -14834,8 +14920,11 @@ export interface operations {
       200: {
         content: {
           'application/json': {
-            /** @default */
-            token: string
+            /**
+             * @description SRI-format hash of the API token (e.g., sha512-base64hash)
+             * @default
+             */
+            hash: string
           }
         }
       }
@@ -14860,10 +14949,16 @@ export interface operations {
         org_slug: string
       }
     }
-    /** @description The API Token or hash to rotate. Must provide either token or hash, but not both. */
+    /** @description The API Token identifier to rotate. Provide uuid (recommended), token, or hash. May provide uuid+hash together for validation. */
     requestBody?: {
       content: {
         'application/json': {
+          /**
+           * Format: uuid
+           * @description The stable group UUID of the API token to rotate
+           * @default
+           */
+          uuid?: string
           /** @default */
           token?: string
           /** @default */
@@ -14872,10 +14967,21 @@ export interface operations {
       }
     }
     responses: {
-      /** @description The replacement API Token and its hash */
+      /** @description The replacement API Token with its stable UUID, new token value, and hash */
       200: {
         content: {
           'application/json': {
+            /**
+             * @description The database ID of the new API token
+             * @default
+             */
+            id: string
+            /**
+             * Format: uuid
+             * @description The stable group UUID (unchanged after rotation)
+             * @default
+             */
+            group_uuid: string
             /**
              * Format: uuid
              * @description ID of the Socket user who created the API Token
@@ -14910,10 +15016,16 @@ export interface operations {
         org_slug: string
       }
     }
-    /** @description The token or hash to revoke. Must provide either token or hash, but not both. */
+    /** @description The API token identifier to revoke. Provide uuid (recommended), token, or hash. May provide uuid+hash together for validation. */
     requestBody?: {
       content: {
         'application/json': {
+          /**
+           * Format: uuid
+           * @description The stable group UUID of the API token to revoke
+           * @default
+           */
+          uuid?: string
           /** @default */
           token?: string
           /** @default */
