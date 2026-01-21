@@ -45,7 +45,7 @@ export function assertSuccess<T>(
 export function assertError<T>(
   result: SocketSdkGenericResult<T>,
   statusCode: number,
-  errorSubstring?: string,
+  errorSubstring?: string | undefined,
 ): asserts result is Extract<SocketSdkGenericResult<T>, { success: false }> {
   expect(result.success).toBe(false)
   expect(result.status).toBe(statusCode)

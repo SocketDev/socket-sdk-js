@@ -35,7 +35,7 @@ export type FullScanItem = {
   integration_commit_url: string | null
   integration_pull_request_url: string | null
   scan_state: 'pending' | 'precrawl' | 'resolve' | 'scan' | null
-  unmatchedFiles?: string[]
+  unmatchedFiles?: string[] | undefined
 }
 
 /**
@@ -51,9 +51,9 @@ export type FullScanListData = {
  * Strict type for full scan list result.
  */
 export type FullScanListResult = {
-  cause?: undefined
+  cause?: undefined | undefined
   data: FullScanListData
-  error?: undefined
+  error?: undefined | undefined
   status: number
   success: true
 }
@@ -62,9 +62,9 @@ export type FullScanListResult = {
  * Strict type for single full scan result.
  */
 export type FullScanResult = {
-  cause?: undefined
+  cause?: undefined | undefined
   data: FullScanItem
-  error?: undefined
+  error?: undefined | undefined
   status: number
   success: true
 }
@@ -73,43 +73,49 @@ export type FullScanResult = {
  * Options for listing full scans.
  */
 export type ListFullScansOptions = {
-  sort?: 'name' | 'created_at'
-  direction?: 'asc' | 'desc'
-  per_page?: number
-  page?: number
-  startAfterCursor?: string
-  use_cursor?: boolean
-  from?: string
-  repo?: string
-  branch?: string
-  pull_request?: string
-  commit_hash?: string
+  sort?: 'name' | 'created_at' | undefined
+  direction?: 'asc' | 'desc' | undefined
+  per_page?: number | undefined
+  page?: number | undefined
+  startAfterCursor?: string | undefined
+  use_cursor?: boolean | undefined
+  from?: string | undefined
+  repo?: string | undefined
+  branch?: string | undefined
+  pull_request?: string | undefined
+  commit_hash?: string | undefined
 }
 
 /**
  * Options for creating a full scan.
  */
 export type CreateFullScanOptions = {
-  pathsRelativeTo?: string
+  pathsRelativeTo?: string | undefined
   repo: string
-  branch?: string
-  commit_message?: string
-  commit_hash?: string
-  pull_request?: number
-  committers?: string
-  integration_type?: 'api' | 'github' | 'gitlab' | 'bitbucket' | 'azure'
-  integration_org_slug?: string
-  make_default_branch?: boolean
-  set_as_pending_head?: boolean
-  tmp?: boolean
-  scan_type?: string
+  branch?: string | undefined
+  commit_message?: string | undefined
+  commit_hash?: string | undefined
+  pull_request?: number | undefined
+  committers?: string | undefined
+  integration_type?:
+    | 'api'
+    | 'github'
+    | 'gitlab'
+    | 'bitbucket'
+    | 'azure'
+    | undefined
+  integration_org_slug?: string | undefined
+  make_default_branch?: boolean | undefined
+  set_as_pending_head?: boolean | undefined
+  tmp?: boolean | undefined
+  scan_type?: string | undefined
 }
 
 /**
  * Options for streaming a full scan.
  */
 export type StreamFullScanOptions = {
-  output?: boolean | string
+  output?: boolean | string | undefined
 }
 
 /**
@@ -117,7 +123,7 @@ export type StreamFullScanOptions = {
  */
 export type StrictErrorResult = {
   cause?: string | undefined
-  data?: undefined
+  data?: undefined | undefined
   error: string
   status: number
   success: false
@@ -128,9 +134,9 @@ export type StrictErrorResult = {
  */
 export type StrictResult<T> =
   | {
-      cause?: undefined
+      cause?: undefined | undefined
       data: T
-      error?: undefined
+      error?: undefined | undefined
       status: number
       success: true
     }
@@ -152,11 +158,11 @@ export type OrganizationItem = {
  * Strict type for organizations list result.
  */
 export type OrganizationsResult = {
-  cause?: undefined
+  cause?: undefined | undefined
   data: {
     organizations: OrganizationItem[]
   }
-  error?: undefined
+  error?: undefined | undefined
   status: number
   success: true
 }
@@ -190,9 +196,9 @@ export type RepositoriesListData = {
  * Strict type for repositories list result.
  */
 export type RepositoriesListResult = {
-  cause?: undefined
+  cause?: undefined | undefined
   data: RepositoriesListData
-  error?: undefined
+  error?: undefined | undefined
   status: number
   success: true
 }
@@ -201,21 +207,21 @@ export type RepositoriesListResult = {
  * Options for listing repositories.
  */
 export type ListRepositoriesOptions = {
-  sort?: 'name' | 'created_at'
-  direction?: 'asc' | 'desc'
-  per_page?: number
-  page?: number
-  startAfterCursor?: string
-  use_cursor?: boolean
+  sort?: 'name' | 'created_at' | undefined
+  direction?: 'asc' | 'desc' | undefined
+  per_page?: number | undefined
+  page?: number | undefined
+  startAfterCursor?: string | undefined
+  use_cursor?: boolean | undefined
 }
 
 /**
  * Strict type for delete operation result.
  */
 export type DeleteResult = {
-  cause?: undefined
+  cause?: undefined | undefined
   data: { success: boolean }
-  error?: undefined
+  error?: undefined | undefined
   status: number
   success: true
 }
@@ -224,9 +230,9 @@ export type DeleteResult = {
  * Strict type for single repository result.
  */
 export type RepositoryResult = {
-  cause?: undefined
+  cause?: undefined | undefined
   data: RepositoryItem
-  error?: undefined
+  error?: undefined | undefined
   status: number
   success: true
 }
@@ -240,9 +246,9 @@ export type RepositoryLabelItem = {
   name: string
 
   // Optional fields
-  repository_ids?: string[]
-  has_security_policy?: boolean
-  has_license_policy?: boolean
+  repository_ids?: string[] | undefined
+  has_security_policy?: boolean | undefined
+  has_license_policy?: boolean | undefined
 }
 
 /**
@@ -257,9 +263,9 @@ export type RepositoryLabelsListData = {
  * Strict type for repository labels list result.
  */
 export type RepositoryLabelsListResult = {
-  cause?: undefined
+  cause?: undefined | undefined
   data: RepositoryLabelsListData
-  error?: undefined
+  error?: undefined | undefined
   status: number
   success: true
 }
@@ -268,9 +274,9 @@ export type RepositoryLabelsListResult = {
  * Strict type for single repository label result.
  */
 export type RepositoryLabelResult = {
-  cause?: undefined
+  cause?: undefined | undefined
   data: RepositoryLabelItem
-  error?: undefined
+  error?: undefined | undefined
   status: number
   success: true
 }
@@ -279,9 +285,9 @@ export type RepositoryLabelResult = {
  * Strict type for delete repository label result.
  */
 export type DeleteRepositoryLabelResult = {
-  cause?: undefined
+  cause?: undefined | undefined
   data: { status: string }
-  error?: undefined
+  error?: undefined | undefined
   status: number
   success: true
 }

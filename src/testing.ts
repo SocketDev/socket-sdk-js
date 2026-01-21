@@ -56,7 +56,7 @@ export function mockSuccessResponse<T>(
 export function mockErrorResponse<T>(
   error: string,
   status = 500,
-  cause?: string,
+  cause?: string | undefined,
 ): SocketSdkGenericResult<T> {
   return {
     cause,
@@ -83,8 +83,10 @@ export function mockErrorResponse<T>(
  */
 export function mockApiErrorBody(
   message: string,
-  details?: Record<string, unknown>,
-): { error: { message: string; details?: Record<string, unknown> } } {
+  details?: Record<string, unknown> | undefined,
+): {
+  error: { message: string; details?: Record<string, unknown> | undefined }
+} {
   return {
     error: {
       message,
@@ -294,19 +296,19 @@ export const fixtures = {
 export function mockSdkResult<T extends SocketSdkOperations>(
   success: true,
   data: SocketSdkSuccessResult<T>['data'],
-  status?: number,
+  status?: number | undefined,
 ): SocketSdkSuccessResult<T>
 export function mockSdkResult<T extends SocketSdkOperations>(
   success: false,
   error: string,
-  status?: number,
-  cause?: string,
+  status?: number | undefined,
+  cause?: string | undefined,
 ): SocketSdkErrorResult<T>
 export function mockSdkResult<T extends SocketSdkOperations>(
   success: boolean,
   dataOrError: unknown,
   status = success ? 200 : 500,
-  cause?: string,
+  cause?: string | undefined,
 ): SocketSdkResult<T> {
   if (success) {
     return {
@@ -343,11 +345,11 @@ export function mockSdkResult<T extends SocketSdkOperations>(
 export function mockSdkError(
   type: 'NOT_FOUND' | 'UNAUTHORIZED' | 'FORBIDDEN' | 'SERVER_ERROR' | 'TIMEOUT',
   options: {
-    cause?: string
-    message?: string
-    status?: number
+    cause?: string | undefined
+    message?: string | undefined
+    status?: number | undefined
   } = {},
-): Error & { status: number; cause?: string } {
+): Error & { status: number; cause?: string | undefined } {
   const statusMap = {
     FORBIDDEN: 403,
     NOT_FOUND: 404,
@@ -369,7 +371,7 @@ export function mockSdkError(
 
   const error = new Error(message) as Error & {
     status: number
-    cause?: string
+    cause?: string | undefined
   }
   error.status = status
   if (options.cause) {

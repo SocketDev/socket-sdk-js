@@ -165,8 +165,8 @@ export type RequestOptions = (
 export type RequestOptionsWithHooks = RequestOptions & {
   hooks?:
     | {
-        onRequest?: (info: RequestInfo) => void
-        onResponse?: (info: ResponseInfo) => void
+        onRequest?: ((info: RequestInfo) => void) | undefined
+        onResponse?: ((info: ResponseInfo) => void) | undefined
       }
     | undefined
 }
@@ -196,21 +196,21 @@ export type SocketArtifactAlert = Remap<
 export type SocketSdkOperations = keyof operations
 
 export type SocketSdkSuccessResult<T extends SocketSdkOperations> = {
-  cause?: undefined
+  cause?: undefined | undefined
   data: OpReturnType<operations[T]>
-  error?: undefined
+  error?: undefined | undefined
   status: number
   success: true
 }
 
 export type SocketSdkErrorResult<T extends SocketSdkOperations> = {
   cause?: string | undefined
-  data?: undefined
+  data?: undefined | undefined
   error: string
   status: number
   success: false
   // Phantom type to use T
-  _operation?: T
+  _operation?: T | undefined
 }
 
 export type SocketSdkResult<T extends SocketSdkOperations> =
@@ -240,15 +240,15 @@ export type SocketSdkArrayElement<
 // Generic result type for methods not mapped to specific operations
 export type SocketSdkGenericResult<T> =
   | {
-      cause?: undefined
+      cause?: undefined | undefined
       data: T
-      error?: undefined
+      error?: undefined | undefined
       status: number
       success: true
     }
   | {
       cause?: string | undefined
-      data?: undefined
+      data?: undefined | undefined
       error: string
       status: number
       success: false
@@ -364,8 +364,8 @@ export interface SocketSdkOptions {
   /** Request/response logging hooks */
   hooks?:
     | {
-        onRequest?: (info: RequestInfo) => void
-        onResponse?: (info: ResponseInfo) => void
+        onRequest?: ((info: RequestInfo) => void) | undefined
+        onResponse?: ((info: ResponseInfo) => void) | undefined
       }
     | undefined
   /**
@@ -391,16 +391,16 @@ export type UploadManifestFilesResponse = {
 }
 
 export type UploadManifestFilesReturnType = {
-  cause?: undefined
+  cause?: undefined | undefined
   data: UploadManifestFilesResponse
-  error?: undefined
+  error?: undefined | undefined
   status: 200
   success: true
 }
 
 export type UploadManifestFilesError = {
   cause?: string | undefined
-  data?: undefined
+  data?: undefined | undefined
   error: string
   status: number
   success: false
