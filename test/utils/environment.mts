@@ -58,7 +58,7 @@ export function setupTestEnvironment() {
  */
 export function createTestClient(
   token = 'test-api-token',
-  options?: ConstructorParameters<typeof SocketSdk>[1],
+  options?: ConstructorParameters<typeof SocketSdk>[1] | undefined,
 ): SocketSdk {
   return new SocketSdk(token, { ...FAST_TEST_CONFIG, ...options })
 }
@@ -85,7 +85,7 @@ export function createTestClient(
  */
 export function setupTestClient(
   token = 'test-api-token',
-  options?: ConstructorParameters<typeof SocketSdk>[1],
+  options?: ConstructorParameters<typeof SocketSdk>[1] | undefined,
 ): () => SocketSdk {
   let client: SocketSdk
 

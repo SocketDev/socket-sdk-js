@@ -1847,49 +1847,51 @@ export class SocketSdk {
    */
   async getOrgAlertsList(
     orgSlug: string,
-    options?: {
-      'filters.alertAction'?: string | undefined
-      'filters.alertAction.notIn'?: string | undefined
-      'filters.alertCategory'?: string | undefined
-      'filters.alertCategory.notIn'?: string | undefined
-      'filters.alertCveId'?: string | undefined
-      'filters.alertCveId.notIn'?: string | undefined
-      'filters.alertCveTitle'?: string | undefined
-      'filters.alertCveTitle.notIn'?: string | undefined
-      'filters.alertCweId'?: string | undefined
-      'filters.alertCweId.notIn'?: string | undefined
-      'filters.alertCweName'?: string | undefined
-      'filters.alertCweName.notIn'?: string | undefined
-      'filters.alertEPSS'?: string | undefined
-      'filters.alertEPSS.notIn'?: string | undefined
-      'filters.alertFixType'?: string | undefined
-      'filters.alertFixType.notIn'?: string | undefined
-      'filters.alertKEV'?: boolean | undefined
-      'filters.alertKEV.notIn'?: boolean | undefined
-      'filters.alertPriority'?: string | undefined
-      'filters.alertPriority.notIn'?: string | undefined
-      'filters.alertReachabilityType'?: string | undefined
-      'filters.alertReachabilityType.notIn'?: string | undefined
-      'filters.alertSeverity'?: string | undefined
-      'filters.alertSeverity.notIn'?: string | undefined
-      'filters.alertStatus'?: string | undefined
-      'filters.alertStatus.notIn'?: string | undefined
-      'filters.alertType'?: string | undefined
-      'filters.alertType.notIn'?: string | undefined
-      'filters.alertUpdatedAt.eq'?: string | undefined
-      'filters.alertUpdatedAt.gt'?: string | undefined
-      'filters.alertUpdatedAt.gte'?: string | undefined
-      'filters.alertUpdatedAt.lt'?: string | undefined
-      'filters.alertUpdatedAt.lte'?: string | undefined
-      'filters.repoFullName'?: string | undefined
-      'filters.repoFullName.notIn'?: string | undefined
-      'filters.repoLabels'?: string | undefined
-      'filters.repoLabels.notIn'?: string | undefined
-      'filters.repoSlug'?: string | undefined
-      'filters.repoSlug.notIn'?: string | undefined
-      per_page?: number | undefined
-      startAfterCursor?: string | undefined
-    },
+    options?:
+      | {
+          'filters.alertAction'?: string | undefined
+          'filters.alertAction.notIn'?: string | undefined
+          'filters.alertCategory'?: string | undefined
+          'filters.alertCategory.notIn'?: string | undefined
+          'filters.alertCveId'?: string | undefined
+          'filters.alertCveId.notIn'?: string | undefined
+          'filters.alertCveTitle'?: string | undefined
+          'filters.alertCveTitle.notIn'?: string | undefined
+          'filters.alertCweId'?: string | undefined
+          'filters.alertCweId.notIn'?: string | undefined
+          'filters.alertCweName'?: string | undefined
+          'filters.alertCweName.notIn'?: string | undefined
+          'filters.alertEPSS'?: string | undefined
+          'filters.alertEPSS.notIn'?: string | undefined
+          'filters.alertFixType'?: string | undefined
+          'filters.alertFixType.notIn'?: string | undefined
+          'filters.alertKEV'?: boolean | undefined
+          'filters.alertKEV.notIn'?: boolean | undefined
+          'filters.alertPriority'?: string | undefined
+          'filters.alertPriority.notIn'?: string | undefined
+          'filters.alertReachabilityType'?: string | undefined
+          'filters.alertReachabilityType.notIn'?: string | undefined
+          'filters.alertSeverity'?: string | undefined
+          'filters.alertSeverity.notIn'?: string | undefined
+          'filters.alertStatus'?: string | undefined
+          'filters.alertStatus.notIn'?: string | undefined
+          'filters.alertType'?: string | undefined
+          'filters.alertType.notIn'?: string | undefined
+          'filters.alertUpdatedAt.eq'?: string | undefined
+          'filters.alertUpdatedAt.gt'?: string | undefined
+          'filters.alertUpdatedAt.gte'?: string | undefined
+          'filters.alertUpdatedAt.lt'?: string | undefined
+          'filters.alertUpdatedAt.lte'?: string | undefined
+          'filters.repoFullName'?: string | undefined
+          'filters.repoFullName.notIn'?: string | undefined
+          'filters.repoLabels'?: string | undefined
+          'filters.repoLabels.notIn'?: string | undefined
+          'filters.repoSlug'?: string | undefined
+          'filters.repoSlug.notIn'?: string | undefined
+          per_page?: number | undefined
+          startAfterCursor?: string | undefined
+        }
+      | undefined,
   ): Promise<SocketSdkResult<'alertsList'>> {
     try {
       const data = await this.#executeWithRetry(
@@ -3602,7 +3604,7 @@ export class SocketSdk {
    */
   async downloadPatch(
     hash: string,
-    options?: { baseUrl?: string },
+    options?: { baseUrl?: string | undefined } | undefined,
   ): Promise<string> {
     const https = await import('node:https')
     const http = await import('node:http')
@@ -3914,12 +3916,14 @@ export class SocketSdk {
    */
   async getOrgWebhooksList(
     orgSlug: string,
-    options?: {
-      direction?: string | undefined
-      page?: number | undefined
-      per_page?: number | undefined
-      sort?: string | undefined
-    },
+    options?:
+      | {
+          direction?: string | undefined
+          page?: number | undefined
+          per_page?: number | undefined
+          sort?: string | undefined
+        }
+      | undefined,
   ): Promise<SocketSdkResult<'getOrgWebhooksList'>> {
     try {
       const data = await this.#executeWithRetry(
