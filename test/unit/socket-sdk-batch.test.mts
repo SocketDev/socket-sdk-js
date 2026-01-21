@@ -486,6 +486,34 @@ describe('SocketSdk - Batch Operations', () => {
       expect(contentType).toContain('boundary=')
     })
 
+    it('should upload files with createFullScan with workspace option', async () => {
+      nock('https://api.socket.dev')
+        .post('/v0/orgs/test-org/full-scans')
+        .query({ repo: 'test-repo', workspace: 'my-workspace' })
+        .reply(200, {
+          id: 'org-scan-789',
+          organization_slug: 'test-org',
+          status: 'complete',
+          workspace: 'my-workspace',
+        })
+
+      const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
+      const res = await client.createFullScan(
+        'test-org',
+        [packageJsonPath, packageLockPath],
+        {
+          pathsRelativeTo: tempDir,
+          repo: 'test-repo',
+          workspace: 'my-workspace',
+        },
+      )
+
+      expect(res.success).toBe(true)
+      if (res.success) {
+        expect(res.data.id).toBe('org-scan-789')
+      }
+    })
+
     it('should handle connection interruption during upload', async () => {
       nock('https://api.socket.dev')
         .post('/v0/dependencies/upload')

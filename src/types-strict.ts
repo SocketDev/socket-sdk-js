@@ -73,42 +73,44 @@ export type FullScanResult = {
  * Options for listing full scans.
  */
 export type ListFullScansOptions = {
-  sort?: 'name' | 'created_at' | undefined
+  branch?: string | undefined
+  commit_hash?: string | undefined
   direction?: 'asc' | 'desc' | undefined
-  per_page?: number | undefined
+  from?: string | undefined
   page?: number | undefined
+  per_page?: number | undefined
+  pull_request?: string | undefined
+  repo?: string | undefined
+  sort?: 'created_at' | 'name' | undefined
   startAfterCursor?: string | undefined
   use_cursor?: boolean | undefined
-  from?: string | undefined
-  repo?: string | undefined
-  branch?: string | undefined
-  pull_request?: string | undefined
-  commit_hash?: string | undefined
+  workspace?: string | undefined
 }
 
 /**
  * Options for creating a full scan.
  */
 export type CreateFullScanOptions = {
-  pathsRelativeTo?: string | undefined
-  repo: string
   branch?: string | undefined
-  commit_message?: string | undefined
   commit_hash?: string | undefined
-  pull_request?: number | undefined
+  commit_message?: string | undefined
   committers?: string | undefined
+  integration_org_slug?: string | undefined
   integration_type?:
     | 'api'
+    | 'azure'
+    | 'bitbucket'
     | 'github'
     | 'gitlab'
-    | 'bitbucket'
-    | 'azure'
     | undefined
-  integration_org_slug?: string | undefined
   make_default_branch?: boolean | undefined
+  pathsRelativeTo?: string | undefined
+  pull_request?: number | undefined
+  repo: string
+  scan_type?: string | undefined
   set_as_pending_head?: boolean | undefined
   tmp?: boolean | undefined
-  scan_type?: string | undefined
+  workspace?: string | undefined
 }
 
 /**
@@ -204,13 +206,20 @@ export type RepositoriesListResult = {
 }
 
 /**
+ * Options for getting a single repository.
+ */
+export type GetRepositoryOptions = {
+  workspace?: string | undefined
+}
+
+/**
  * Options for listing repositories.
  */
 export type ListRepositoriesOptions = {
-  sort?: 'name' | 'created_at' | undefined
   direction?: 'asc' | 'desc' | undefined
-  per_page?: number | undefined
   page?: number | undefined
+  per_page?: number | undefined
+  sort?: 'created_at' | 'name' | undefined
   startAfterCursor?: string | undefined
   use_cursor?: boolean | undefined
 }
