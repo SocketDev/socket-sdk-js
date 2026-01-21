@@ -114,6 +114,7 @@ export type {
   FullScanListData,
   FullScanListResult,
   FullScanResult,
+  GetRepositoryOptions,
   ListFullScansOptions,
   ListRepositoriesOptions,
   OrganizationItem,

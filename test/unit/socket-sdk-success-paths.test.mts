@@ -69,6 +69,50 @@ describe('SocketSdk - Success Path Coverage', () => {
 
       expect(result.success).toBe(true)
     })
+
+    it('should successfully get a repository with workspace option', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/repos/test-repo')
+        .query({ workspace: 'my-workspace' })
+        .reply(200, { data: { name: 'test-repo', workspace: 'my-workspace' } })
+
+      const result = await getClient().getRepository('test-org', 'test-repo', {
+        workspace: 'my-workspace',
+      })
+
+      expect(result.success).toBe(true)
+    })
+
+    it('should successfully delete a repository with workspace option', async () => {
+      nock('https://api.socket.dev')
+        .delete('/v0/orgs/test-org/repos/test-repo')
+        .query({ workspace: 'my-workspace' })
+        .reply(200, { success: true })
+
+      const result = await getClient().deleteRepository(
+        'test-org',
+        'test-repo',
+        { workspace: 'my-workspace' },
+      )
+
+      expect(result.success).toBe(true)
+    })
+
+    it('should successfully update a repository with workspace option', async () => {
+      nock('https://api.socket.dev')
+        .post('/v0/orgs/test-org/repos/test-repo')
+        .query({ workspace: 'my-workspace' })
+        .reply(200, { data: { name: 'test-repo', workspace: 'my-workspace' } })
+
+      const result = await getClient().updateRepository(
+        'test-org',
+        'test-repo',
+        { defaultBranch: 'develop' },
+        { workspace: 'my-workspace' },
+      )
+
+      expect(result.success).toBe(true)
+    })
   })
 
   describe('Repository Labels', () => {
@@ -162,6 +206,21 @@ describe('SocketSdk - Success Path Coverage', () => {
         'test-org',
         'scan-123',
       )
+
+      expect(result.success).toBe(true)
+    })
+
+    it('should successfully list full scans with workspace option', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/full-scans')
+        .query({ workspace: 'my-workspace' })
+        .reply(200, {
+          results: [{ id: 'scan-123', workspace: 'my-workspace' }],
+        })
+
+      const result = await getClient().listFullScans('test-org', {
+        workspace: 'my-workspace',
+      })
 
       expect(result.success).toBe(true)
     })

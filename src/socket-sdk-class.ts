@@ -99,6 +99,7 @@ import type {
   FullScanItem,
   FullScanListResult,
   FullScanResult,
+  GetRepositoryOptions,
   ListFullScansOptions,
   ListRepositoriesOptions,
   OrganizationsResult,
@@ -1422,6 +1423,7 @@ export class SocketSdk {
    *
    * @param orgSlug - Organization identifier
    * @param repoSlug - Repository slug/name to delete
+   * @param options - Optional parameters including workspace
    * @returns Success confirmation
    *
    * @example
@@ -1442,14 +1444,22 @@ export class SocketSdk {
   async deleteRepository(
     orgSlug: string,
     repoSlug: string,
+    options?: GetRepositoryOptions | undefined,
   ): Promise<DeleteResult | StrictErrorResult> {
+    const { workspace } = {
+      __proto__: null,
+      ...options,
+    } as GetRepositoryOptions
+    const queryString = workspace
+      ? `?${queryToSearchParams({ workspace } as QueryParams)}`
+      : ''
     try {
       const data = await this.#executeWithRetry(
         async () =>
           await getResponseJson(
             await createDeleteRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}${queryString}`,
               { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
@@ -2264,6 +2274,7 @@ export class SocketSdk {
    *
    * @param orgSlug - Organization identifier
    * @param repoSlug - Repository slug/name
+   * @param options - Optional parameters including workspace
    * @returns Repository details with configuration
    *
    * @example
@@ -2286,9 +2297,17 @@ export class SocketSdk {
   async getRepository(
     orgSlug: string,
     repoSlug: string,
+    options?: GetRepositoryOptions | undefined,
   ): Promise<RepositoryResult | StrictErrorResult> {
     const orgSlugParam = encodeURIComponent(orgSlug)
     const repoSlugParam = encodeURIComponent(repoSlug)
+    const { workspace } = {
+      __proto__: null,
+      ...options,
+    } as GetRepositoryOptions
+    const queryString = workspace
+      ? `?${queryToSearchParams({ workspace } as QueryParams)}`
+      : ''
 
     try {
       const data = await this.#executeWithRetry(
@@ -2296,7 +2315,7 @@ export class SocketSdk {
           await getResponseJson(
             await createGetRequest(
               this.#baseUrl,
-              `orgs/${orgSlugParam}/repos/${repoSlugParam}`,
+              `orgs/${orgSlugParam}/repos/${repoSlugParam}${queryString}`,
               { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
@@ -3219,6 +3238,7 @@ export class SocketSdk {
    * @param orgSlug - Organization identifier
    * @param repoSlug - Repository slug/name
    * @param params - Configuration updates (description, homepage, default_branch, etc.)
+   * @param options - Optional parameters including workspace
    * @returns Updated repository details
    *
    * @example
@@ -3243,7 +3263,15 @@ export class SocketSdk {
     orgSlug: string,
     repoSlug: string,
     params?: QueryParams | undefined,
+    options?: GetRepositoryOptions | undefined,
   ): Promise<RepositoryResult | StrictErrorResult> {
+    const { workspace } = {
+      __proto__: null,
+      ...options,
+    } as GetRepositoryOptions
+    const queryString = workspace
+      ? `?${queryToSearchParams({ workspace } as QueryParams)}`
+      : ''
     try {
       const data = await this.#executeWithRetry(
         async () =>
@@ -3251,7 +3279,7 @@ export class SocketSdk {
             await createRequestWithJson(
               'POST',
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}`,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}${queryString}`,
               params,
               { ...this.#reqOptions, hooks: this.#hooks },
             ),
