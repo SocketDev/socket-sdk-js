@@ -243,16 +243,12 @@ describe.sequential('Strict Types - v3.0', () => {
             id: 'org-1',
             name: 'Test Org',
             slug: 'test-org',
-            created_at: '2025-01-01T00:00:00Z',
-            updated_at: '2025-01-01T00:00:00Z',
             plan: 'pro',
           },
           {
             id: 'org-2',
             name: 'Another Org',
             slug: 'another-org',
-            created_at: '2025-01-01T00:00:00Z',
-            updated_at: '2025-01-01T00:00:00Z',
             plan: 'free',
           },
         ],
@@ -277,8 +273,6 @@ describe.sequential('Strict Types - v3.0', () => {
           expect(typeof org.id).toBe('string')
           expect(typeof org.name).toBe('string')
           expect(typeof org.slug).toBe('string')
-          expect(typeof org.created_at).toBe('string')
-          expect(typeof org.updated_at).toBe('string')
           expect(typeof org.plan).toBe('string')
         })
 

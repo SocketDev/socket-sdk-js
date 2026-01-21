@@ -2,67 +2,83 @@
 /**
  * @fileoverview SDK generation script.
  * Orchestrates the complete SDK generation process:
- * 1. Prettifies the OpenAPI JSON
+ * 1. Fetches and formats OpenAPI JSON
  * 2. Generates TypeScript types from OpenAPI
- * 3. Formats and lints the generated code
+ * 3. Generates strict types from OpenAPI
  *
  * Usage:
  *   node scripts/generate-sdk.mjs
  */
 
-import { spawn } from 'node:child_process'
-import { readFileSync, writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { promises as fs } from 'node:fs'
+import path from 'node:path'
 
 import { parse } from '@babel/parser'
 import { default as traverse } from '@babel/traverse'
 import * as t from '@babel/types'
 import MagicString from 'magic-string'
 
+import { httpGetJson } from '@socketsecurity/lib/http-request'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { spawn } from '@socketsecurity/lib/spawn'
 
 import { getRootPath } from './utils/path-helpers.mjs'
 import { runCommand } from './utils/run-command.mjs'
 
+const OPENAPI_URL = 'https://api.socket.dev/v0/openapi'
+
 const rootPath = getRootPath(import.meta.url)
-const typesPath = resolve(rootPath, 'types/api.d.ts')
+const openApiPath = path.resolve(rootPath, 'openapi.json')
+const typesPath = path.resolve(rootPath, 'types/api.d.ts')
 
 // Initialize logger
 const logger = getDefaultLogger()
 
-async function generateTypes() {
-  return new Promise((resolve, reject) => {
-    const child = spawn('node', ['scripts/generate-types.mjs'], {
-      cwd: rootPath,
-      stdio: ['inherit', 'pipe', 'inherit'],
-    })
+async function fetchOpenApi() {
+  const data = await httpGetJson(OPENAPI_URL)
+  await fs.writeFile(openApiPath, JSON.stringify(data, null, 2), 'utf8')
+  logger.log(`Downloaded from ${OPENAPI_URL}`)
+}
 
-    let output = ''
-
-    child.stdout.on('data', data => {
-      output += data.toString()
-    })
-
-    child.on('exit', code => {
-      if (code !== 0) {
-        reject(new Error(`Type generation failed with exit code ${code}`))
-        return
-      }
-
-      try {
-        writeFileSync(typesPath, output, 'utf8')
-        // Fix array syntax after writing to disk
-        fixArraySyntax(typesPath)
-        // Add SDK v3 method name aliases
-        addSdkMethodAliases(typesPath)
-        resolve()
-      } catch (error) {
-        reject(error)
-      }
-    })
-
-    child.on('error', reject)
+async function generateStrictTypes() {
+  await spawn('node', ['scripts/generate-strict-types.mjs'], {
+    cwd: rootPath,
+    stdio: 'inherit',
   })
+  const exitCode = await runCommand('pnpm', [
+    'exec',
+    'biome',
+    'format',
+    '--log-level=none',
+    '--fix',
+    'src/types-strict.ts',
+  ])
+  if (exitCode !== 0) {
+    throw new Error(`Formatting strict types failed with exit code ${exitCode}`)
+  }
+}
+
+async function generateTypes() {
+  await spawn('node', ['scripts/generate-types.mjs'], {
+    cwd: rootPath,
+    stdio: 'inherit',
+  })
+  // Fix array syntax after writing to disk
+  await fixArraySyntax(typesPath)
+  // Add SDK v3 method name aliases
+  await addSdkMethodAliases(typesPath)
+  // Format generated types
+  const exitCode = await runCommand('pnpm', [
+    'exec',
+    'biome',
+    'format',
+    '--log-level=none',
+    '--fix',
+    'types/api.d.ts',
+  ])
+  if (exitCode !== 0) {
+    throw new Error(`Formatting types failed with exit code ${exitCode}`)
+  }
 }
 
 /**
@@ -70,14 +86,14 @@ async function generateTypes() {
  * These aliases map the new SDK method names to their underlying OpenAPI operation names.
  * @param {string} filePath - The path to the TypeScript file to update
  */
-function addSdkMethodAliases(filePath) {
-  const content = readFileSync(filePath, 'utf8')
+async function addSdkMethodAliases(filePath) {
+  const content = await fs.readFile(filePath, 'utf8')
 
   // Find the closing brace of the operations interface
   const operationsInterfaceEnd = content.lastIndexOf('\n}')
 
   if (operationsInterfaceEnd === -1) {
-    logger.error('    Could not find operations interface closing brace')
+    logger.error('Could not find operations interface closing brace')
     return
   }
 
@@ -101,8 +117,8 @@ function addSdkMethodAliases(filePath) {
     content.slice(0, operationsInterfaceEnd) +
     aliases +
     content.slice(operationsInterfaceEnd)
-  writeFileSync(filePath, updated, 'utf8')
-  logger.log('    Added SDK v3 method name aliases')
+  await fs.writeFile(filePath, updated, 'utf8')
+  logger.log('Added SDK v3 method name aliases')
 }
 
 /**
@@ -111,8 +127,8 @@ function addSdkMethodAliases(filePath) {
  * Complex types use Array<T> syntax.
  * @param {string} filePath - The path to the TypeScript file to fix
  */
-function fixArraySyntax(filePath) {
-  const content = readFileSync(filePath, 'utf8')
+async function fixArraySyntax(filePath) {
+  const content = await fs.readFile(filePath, 'utf8')
   const magicString = new MagicString(content)
 
   // Parse the TypeScript file
@@ -186,12 +202,8 @@ function fixArraySyntax(filePath) {
     },
   })
 
-  logger.log(
-    `    Found ${transformCount + skipCount} complex arrays to transform`,
-  )
-  logger.log(
-    `    Transformed ${transformCount}, skipped ${skipCount} (overlaps)`,
-  )
+  logger.log(`Found ${transformCount + skipCount} complex arrays to transform`)
+  logger.log(`Transformed ${transformCount}, skipped ${skipCount} (overlaps)`)
 
   if (transformCount > 0) {
     const transformed = magicString.toString()
@@ -200,65 +212,33 @@ function fixArraySyntax(filePath) {
     const objectArrayCount = (transformed.match(/\}\[\]/g) || []).length
     const arrayGenericCount = (transformed.match(/Array</g) || []).length
     logger.log(
-      `    Final check: ${objectArrayCount} object arrays with }[], ${arrayGenericCount} Array< generics`,
+      `Final check: ${objectArrayCount} object arrays with }[], ${arrayGenericCount} Array< generics`,
     )
 
-    writeFileSync(filePath, transformed, 'utf8')
+    await fs.writeFile(filePath, transformed, 'utf8')
   }
 }
 
 async function main() {
   try {
-    logger.log('Generating SDK from OpenAPI...')
+    logger.group('Generating SDK from OpenAPI…')
 
-    // Step 1: Prettify OpenAPI JSON
-    logger.log('  1. Prettifying OpenAPI JSON...')
-    let exitCode = await runCommand('node', ['scripts/prettify-base-json.mjs'])
-    if (exitCode !== 0) {
-      process.exitCode = exitCode
-      return
-    }
+    // Step 1: Fetch and format OpenAPI JSON
+    logger.log('1. Fetching OpenAPI definition…')
+    await fetchOpenApi()
 
     // Step 2: Generate types
-    logger.log('  2. Generating TypeScript types...')
+    logger.log('2. Generating TypeScript types…')
     await generateTypes()
 
-    // Step 3: Format generated files
-    logger.log('  3. Formatting generated files...')
-    exitCode = await runCommand('pnpm', [
-      'exec',
-      'biome',
-      'format',
-      '--log-level=none',
-      '--fix',
-      'openapi.json',
-      'types/api.d.ts',
-    ])
-    if (exitCode !== 0) {
-      process.exitCode = exitCode
-      return
-    }
+    // Step 3: Generate strict types
+    logger.log('3. Generating strict types…')
+    await generateStrictTypes()
 
-    // Step 4: Run ESLint auto-fix to handle any remaining array syntax issues
-    logger.log('  4. Running ESLint auto-fix on types/api.d.ts...')
-    exitCode = await runCommand('pnpm', [
-      'exec',
-      'eslint',
-      '--config',
-      '.config/eslint.config.mjs',
-      '--fix',
-      'types/api.d.ts',
-    ])
-    // ESLint returns 0 if successful, 1 if there were fixable issues that were fixed
-    // Only fail if exit code is 2 (unfixable errors)
-    if (exitCode === 2) {
-      logger.error('    ESLint found unfixable errors')
-      process.exitCode = exitCode
-      return
-    }
-
+    logger.groupEnd()
     logger.log('SDK generation complete')
   } catch (error) {
+    logger.groupEnd()
     logger.error('SDK generation failed:', error.message)
     process.exitCode = 1
   }

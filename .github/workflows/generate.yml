@@ -6,9 +6,9 @@ on:
       - main
     paths:
       - '.github/workflows/generate.yml'
-      - 'openapi.json'
+      - 'scripts/generate-sdk.mjs'
       - 'scripts/generate-types.mjs'
-      - 'scripts/prettify-base-json.mjs'
+      - 'scripts/generate-strict-types.mjs'
   schedule:
     # At 07:23 on every day-of-week from Monday through Friday.
     - cron: '23 7 * * 1-5'
@@ -46,34 +46,20 @@ jobs:
 
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@4709a2443e5a036bb0cd94e5d1559f138f05994c # main
 
-      - name: Fetch latest OpenAPI definition
-        id: fetch
-        run: |
-          echo "Fetching latest OpenAPI definition..."
-          curl -sSL https://api.socket.dev/v0/openapi -o openapi-new.json
-
-          # Check if file changed
-          if [ -f openapi.json ]; then
-            if diff -q openapi.json openapi-new.json > /dev/null; then
-              echo "No changes detected"
-              echo "changed=false" >> $GITHUB_OUTPUT
-            else
-              echo "Changes detected"
-              echo "changed=true" >> $GITHUB_OUTPUT
-              mv openapi-new.json openapi.json
-            fi
-          else
-            echo "OpenAPI file doesn't exist, creating new one"
-            echo "changed=true" >> $GITHUB_OUTPUT
-            mv openapi-new.json openapi.json
-          fi
-
-      - name: Run post-sync script
-        if: steps.fetch.outputs.changed == 'true' || github.event.inputs.force == 'true'
+      - name: Generate SDK
         run: pnpm run generate-sdk
 
+      - name: Check for changes
+        id: check
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Configure git
-        if: steps.fetch.outputs.changed == 'true' || github.event.inputs.force == 'true'
+        if: steps.check.outputs.has_changes == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -81,16 +67,6 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           # Configure git to use the GitHub token for authentication
           git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
-
-      - name: Check for changes
-        id: check
-        if: steps.fetch.outputs.changed == 'true' || github.event.inputs.force == 'true'
-        run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "has_changes=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-          fi
 
       - name: Commit and push changes
         if: steps.check.outputs.has_changes == 'true'

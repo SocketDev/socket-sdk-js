@@ -45,6 +45,9 @@ importers:
       '@eslint/js':
         specifier: 9.35.0
         version: 9.35.0
+      '@sveltejs/acorn-typescript':
+        specifier: 1.0.8
+        version: 1.0.8(acorn@8.15.0)
       '@types/babel__traverse':
         specifier: 7.28.0
         version: 7.28.0
@@ -57,6 +60,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: 4.0.3
         version: 4.0.3(vitest@4.0.3(@types/node@24.9.2)(jiti@2.6.1)(yaml@2.8.2))
+      acorn:
+        specifier: 8.15.0
+        version: 8.15.0
       del:
         specifier: 8.0.1
         version: 8.0.1
@@ -700,6 +706,11 @@ packages:
 
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
+
+  '@sveltejs/acorn-typescript@1.0.8':
+    resolution: {integrity: sha512-esgN+54+q0NjB0Y/4BomT9samII7jGwNy/2a3wNZbT2A2RpmXsXwUt24LvLhx6jUq2gVk4cWEvcRO6MFQbOfNA==}
+    peerDependencies:
+      acorn: ^8.9.0
 
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
@@ -2763,6 +2774,10 @@ snapshots:
       typescript: 5.9.3
 
   '@standard-schema/spec@1.0.0': {}
+
+  '@sveltejs/acorn-typescript@1.0.8(acorn@8.15.0)':
+    dependencies:
+      acorn: 8.15.0
 
   '@tybys/wasm-util@0.10.1':
     dependencies:

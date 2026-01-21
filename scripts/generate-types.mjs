@@ -2,6 +2,7 @@
  * @fileoverview TypeScript type generation script for Socket API.
  * Generates type definitions from OpenAPI schema for Socket SDK.
  */
+import { promises as fs } from 'node:fs'
 import path from 'node:path'
 
 import openapiTS from 'openapi-typescript'
@@ -14,6 +15,7 @@ const logger = getDefaultLogger()
 
 const rootPath = getRootPath(import.meta.url)
 const openApiJsonPath = path.join(rootPath, 'openapi.json')
+const typesPath = path.join(rootPath, 'types/api.d.ts')
 
 async function main() {
   try {
@@ -24,7 +26,8 @@ async function main() {
         }
       },
     })
-    logger.log(output)
+    await fs.writeFile(typesPath, output, 'utf8')
+    logger.log(`  Written to ${typesPath}`)
   } catch (e) {
     process.exitCode = 1
     logger.error('Failed with error:', e.message)
