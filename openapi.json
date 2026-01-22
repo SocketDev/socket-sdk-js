@@ -14458,6 +14458,16 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "name": "cached",
+            "in": "query",
+            "required": false,
+            "description": "Return cached immutable scan results. When enabled and results are cached, returns the pre-computed scan. When results are not yet cached, returns 202 Accepted and enqueues a background job. Note: When cached=true, the omit_license_details parameter is ignored as cached results always includes license details.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "security": [
@@ -14822,6 +14832,34 @@
               }
             },
             "description": "The difference between the two Full Scans in the diff scan."
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "",
+                      "default": "processing"
+                    },
+                    "id": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ]
+                }
+              }
+            },
+            "description": "Scan is being processed. Poll again later to retrieve results."
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
