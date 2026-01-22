@@ -6495,6 +6495,8 @@ export interface operations {
         omit_license_details?: boolean
         /** @description Omit unchanged artifacts from the response. When set to true, the unchanged field will be set to null. */
         omit_unchanged?: boolean
+        /** @description Return cached immutable scan results. When enabled and results are cached, returns the pre-computed scan. When results are not yet cached, returns 202 Accepted and enqueues a background job. Note: When cached=true, the omit_license_details parameter is ignored as cached results always includes license details. */
+        cached?: boolean
       }
       path: {
         /** @description The slug of the organization */
@@ -6597,6 +6599,17 @@ export interface operations {
                 updated: Array<components['schemas']['SocketDiffArtifact']>
               }
             }
+          }
+        }
+      }
+      /** @description Scan is being processed. Poll again later to retrieve results. */
+      202: {
+        content: {
+          'application/json': {
+            /** @default processing */
+            status: string
+            /** @default */
+            id: string
           }
         }
       }
