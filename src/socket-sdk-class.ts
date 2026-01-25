@@ -697,6 +697,97 @@ export class SocketSdk {
   }
 
   /**
+   * Get package metadata and alerts by PURL strings for a specific organization.
+   * Organization-scoped version of batchPackageFetch with security policy label support.
+   *
+   * @param orgSlug - Organization identifier
+   * @param componentsObj - Object containing array of components with PURL strings
+   * @param queryParams - Optional query parameters including labels, alerts, compact, etc.
+   * @returns Package metadata and alerts for the requested PURLs
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.batchOrgPackageFetch('my-org',
+   *   {
+   *     components: [
+   *       { purl: 'pkg:npm/express@4.19.2' },
+   *       { purl: 'pkg:pypi/django@5.0.6' }
+   *     ]
+   *   },
+   *   { labels: ['production'], alerts: true }
+   * )
+   *
+   * if (result.success) {
+   *   for (const artifact of result.data) {
+   *     console.log(`${artifact.name}@${artifact.version}`)
+   *   }
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/batchpackagefetchbyorg
+   * @apiEndpoint POST /orgs/{org_slug}/purl
+   * @quota 100 units
+   * @scopes packages:list
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async batchOrgPackageFetch(
+    orgSlug: string,
+    componentsObj: { components: Array<{ purl: string }> },
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'batchPackageFetchByOrg'>> {
+    let res: IncomingMessage | undefined
+    try {
+      const req = getHttpModule(this.#baseUrl)
+        .request(
+          `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/purl?${queryToSearchParams(queryParams)}`,
+          {
+            method: 'POST',
+            ...this.#reqOptions,
+          },
+        )
+        .end(JSON.stringify(componentsObj))
+      res = await getResponse(req)
+
+      // Throw ResponseError for non-2xx status codes so retry logic works properly.
+      /* c8 ignore next 3 - Error response handling for batch requests, requires API to return errors */
+      if (!isResponseOk(res)) {
+        throw new ResponseError(res)
+      }
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'batchPackageFetchByOrg'>(e)
+    }
+    /* c8 ignore stop */
+    // Validate response before processing.
+    /* c8 ignore next 3 - Defensive check, response should always be defined after successful request */
+    if (!res) {
+      throw new Error('Failed to get response from batch PURL request')
+    }
+    // Parse the newline delimited JSON response.
+    const rli = readline.createInterface({
+      input: res,
+      crlfDelay: Number.POSITIVE_INFINITY,
+      signal: abortSignal,
+    })
+    const results: SocketArtifact[] = []
+    for await (const line of rli) {
+      const trimmed = line.trim()
+      const artifact = trimmed
+        ? (jsonParse(line, { throws: false }) as SocketArtifact)
+        : /* c8 ignore next - Empty line handling in batch parsing. */ null
+      if (isObjectObject(artifact)) {
+        results.push(artifact!)
+      }
+    }
+    const compact = urlSearchParamAsBoolean(
+      getOwn(queryParams, 'compact') as string | null | undefined,
+    )
+    return this.#handleApiSuccess<'batchPackageFetchByOrg'>(
+      compact ? (results as CompactSocketArtifact[]) : results,
+    )
+  }
+
+  /**
    * Fetch package analysis data for multiple packages in a single batch request.
    * Returns all results at once after processing is complete.
    *
@@ -857,97 +948,6 @@ export class SocketSdk {
   }
 
   /**
-   * Get package metadata and alerts by PURL strings for a specific organization.
-   * Organization-scoped version of batchPackageFetch with security policy label support.
-   *
-   * @param orgSlug - Organization identifier
-   * @param componentsObj - Object containing array of components with PURL strings
-   * @param queryParams - Optional query parameters including labels, alerts, compact, etc.
-   * @returns Package metadata and alerts for the requested PURLs
-   *
-   * @example
-   * ```typescript
-   * const result = await sdk.batchOrgPackageFetch('my-org',
-   *   {
-   *     components: [
-   *       { purl: 'pkg:npm/express@4.19.2' },
-   *       { purl: 'pkg:pypi/django@5.0.6' }
-   *     ]
-   *   },
-   *   { labels: ['production'], alerts: true }
-   * )
-   *
-   * if (result.success) {
-   *   for (const artifact of result.data) {
-   *     console.log(`${artifact.name}@${artifact.version}`)
-   *   }
-   * }
-   * ```
-   *
-   * @see https://docs.socket.dev/reference/batchpackagefetchbyorg
-   * @apiEndpoint POST /orgs/{org_slug}/purl
-   * @quota 100 units
-   * @scopes packages:list
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async batchOrgPackageFetch(
-    orgSlug: string,
-    componentsObj: { components: Array<{ purl: string }> },
-    queryParams?: QueryParams | undefined,
-  ): Promise<SocketSdkResult<'batchPackageFetchByOrg'>> {
-    let res: IncomingMessage | undefined
-    try {
-      const req = getHttpModule(this.#baseUrl)
-        .request(
-          `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/purl?${queryToSearchParams(queryParams)}`,
-          {
-            method: 'POST',
-            ...this.#reqOptions,
-          },
-        )
-        .end(JSON.stringify(componentsObj))
-      res = await getResponse(req)
-
-      // Throw ResponseError for non-2xx status codes so retry logic works properly.
-      /* c8 ignore next 3 - Error response handling for batch requests, requires API to return errors */
-      if (!isResponseOk(res)) {
-        throw new ResponseError(res)
-      }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'batchPackageFetchByOrg'>(e)
-    }
-    /* c8 ignore stop */
-    // Validate response before processing.
-    /* c8 ignore next 3 - Defensive check, response should always be defined after successful request */
-    if (!res) {
-      throw new Error('Failed to get response from batch PURL request')
-    }
-    // Parse the newline delimited JSON response.
-    const rli = readline.createInterface({
-      input: res,
-      crlfDelay: Number.POSITIVE_INFINITY,
-      signal: abortSignal,
-    })
-    const results: SocketArtifact[] = []
-    for await (const line of rli) {
-      const trimmed = line.trim()
-      const artifact = trimmed
-        ? (jsonParse(line, { throws: false }) as SocketArtifact)
-        : /* c8 ignore next - Empty line handling in batch parsing. */ null
-      if (isObjectObject(artifact)) {
-        results.push(artifact!)
-      }
-    }
-    const compact = urlSearchParamAsBoolean(
-      getOwn(queryParams, 'compact') as string | null | undefined,
-    )
-    return this.#handleApiSuccess<'batchPackageFetchByOrg'>(
-      compact ? (results as CompactSocketArtifact[]) : results,
-    )
-  }
-
-  /**
    * Create a snapshot of project dependencies by uploading manifest files.
    * Analyzes dependency files to generate a comprehensive security report.
    *
@@ -1047,37 +1047,6 @@ export class SocketSdk {
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'createDependenciesSnapshot'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Create a diff scan from two full scan IDs.
-   * Compares two existing full scans to identify changes.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async createOrgDiffScanFromIds(
-    orgSlug: string,
-    queryParams?: QueryParams | undefined,
-  ): Promise<SocketSdkResult<'createOrgDiffScanFromIds'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createRequestWithJson(
-              'POST',
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/diff-scans?${queryToSearchParams(queryParams)}`,
-              {},
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'createOrgDiffScanFromIds'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'createOrgDiffScanFromIds'>(e)
     }
     /* c8 ignore stop */
   }
@@ -1232,6 +1201,138 @@ export class SocketSdk {
   }
 
   /**
+   * Create a diff scan from two full scan IDs.
+   * Compares two existing full scans to identify changes.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async createOrgDiffScanFromIds(
+    orgSlug: string,
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'createOrgDiffScanFromIds'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/diff-scans?${queryToSearchParams(queryParams)}`,
+              {},
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'createOrgDiffScanFromIds'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'createOrgDiffScanFromIds'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Create a full scan from an archive file (.tar, .tar.gz/.tgz, or .zip).
+   * Uploads and scans a compressed archive of project files.
+   *
+   * @param orgSlug - Organization identifier
+   * @param archivePath - Path to the archive file to upload
+   * @param options - Scan configuration options including repo, branch, and metadata
+   * @returns Created full scan details with scan ID and status
+   *
+   * @throws {Error} When server returns 5xx status codes or file cannot be read
+   */
+  async createOrgFullScanFromArchive(
+    orgSlug: string,
+    archivePath: string,
+    options: {
+      branch?: string | undefined
+      commit_hash?: string | undefined
+      commit_message?: string | undefined
+      committers?: string | undefined
+      integration_org_slug?: string | undefined
+      integration_type?:
+        | 'api'
+        | 'azure'
+        | 'bitbucket'
+        | 'github'
+        | 'gitlab'
+        | 'web'
+        | undefined
+      make_default_branch?: boolean | undefined
+      pull_request?: number | undefined
+      repo: string
+      scan_type?: string | undefined
+      set_as_pending_head?: boolean | undefined
+      tmp?: boolean | undefined
+      workspace?: string | undefined
+    },
+  ): Promise<SocketSdkResult<'CreateOrgFullScanArchive'>> {
+    const basePath = path.dirname(archivePath)
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createUploadRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans/archive?${queryToSearchParams(options as QueryParams)}`,
+              createRequestBodyForFilepaths([archivePath], basePath),
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'CreateOrgFullScanArchive'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'CreateOrgFullScanArchive'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Create a new webhook for an organization.
+   * Webhooks allow you to receive HTTP POST notifications when specific events occur.
+   *
+   * @param orgSlug - Organization identifier
+   * @param webhookData - Webhook configuration including name, URL, secret, and events
+   * @returns Created webhook details including webhook ID
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async createOrgWebhook(
+    orgSlug: string,
+    webhookData: {
+      description?: null | string | undefined
+      events: string[]
+      filters?: { repositoryIds: null | string[] } | null | undefined
+      headers?: null | Record<string, unknown> | undefined
+      name: string
+      secret: string
+      url: string
+    },
+  ): Promise<SocketSdkResult<'createOrgWebhook'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/webhooks`,
+              webhookData,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'createOrgWebhook'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'createOrgWebhook'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
    * Create a new repository in an organization.
    *
    * Registers a repository for monitoring and security scanning.
@@ -1361,93 +1462,6 @@ export class SocketSdk {
   }
 
   /**
-   * Create a full scan from an archive file (.tar, .tar.gz/.tgz, or .zip).
-   * Uploads and scans a compressed archive of project files.
-   *
-   * @param orgSlug - Organization identifier
-   * @param archivePath - Path to the archive file to upload
-   * @param options - Scan configuration options including repo, branch, and metadata
-   * @returns Created full scan details with scan ID and status
-   *
-   * @throws {Error} When server returns 5xx status codes or file cannot be read
-   */
-  async createOrgFullScanFromArchive(
-    orgSlug: string,
-    archivePath: string,
-    options: {
-      branch?: string | undefined
-      commit_hash?: string | undefined
-      commit_message?: string | undefined
-      committers?: string | undefined
-      integration_org_slug?: string | undefined
-      integration_type?:
-        | 'api'
-        | 'azure'
-        | 'bitbucket'
-        | 'github'
-        | 'gitlab'
-        | 'web'
-        | undefined
-      make_default_branch?: boolean | undefined
-      pull_request?: number | undefined
-      repo: string
-      scan_type?: string | undefined
-      set_as_pending_head?: boolean | undefined
-      tmp?: boolean | undefined
-      workspace?: string | undefined
-    },
-  ): Promise<SocketSdkResult<'CreateOrgFullScanArchive'>> {
-    const basePath = path.dirname(archivePath)
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createUploadRequest(
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/full-scans/archive?${queryToSearchParams(options as QueryParams)}`,
-              createRequestBodyForFilepaths([archivePath], basePath),
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'CreateOrgFullScanArchive'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'CreateOrgFullScanArchive'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Delete a diff scan from an organization.
-   * Permanently removes diff scan data and results.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async deleteOrgDiffScan(
-    orgSlug: string,
-    diffScanId: string,
-  ): Promise<SocketSdkResult<'deleteOrgDiffScan'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createDeleteRequest(
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/diff-scans/${encodeURIComponent(diffScanId)}`,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'deleteOrgDiffScan'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'deleteOrgDiffScan'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
    * Delete a full scan from an organization.
    *
    * Permanently removes scan data and results.
@@ -1503,6 +1517,68 @@ export class SocketSdk {
         status: errorResult.status,
         success: false,
       }
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Delete a diff scan from an organization.
+   * Permanently removes diff scan data and results.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async deleteOrgDiffScan(
+    orgSlug: string,
+    diffScanId: string,
+  ): Promise<SocketSdkResult<'deleteOrgDiffScan'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createDeleteRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/diff-scans/${encodeURIComponent(diffScanId)}`,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'deleteOrgDiffScan'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'deleteOrgDiffScan'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Delete a webhook from an organization.
+   * This will stop all future webhook deliveries to the webhook URL.
+   *
+   * @param orgSlug - Organization identifier
+   * @param webhookId - Webhook ID to delete
+   * @returns Success status
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async deleteOrgWebhook(
+    orgSlug: string,
+    webhookId: string,
+  ): Promise<SocketSdkResult<'deleteOrgWebhook'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createDeleteRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/webhooks/${encodeURIComponent(webhookId)}`,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'deleteOrgWebhook'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'deleteOrgWebhook'>(e)
     }
     /* c8 ignore stop */
   }
@@ -1638,6 +1714,195 @@ export class SocketSdk {
 
   /**
    * Delete a legacy scan report permanently.
+
+  /**
+   * Download patch file content by hash.
+   *
+   * Downloads the actual patched file content from the public Socket blob store.
+   * This is used after calling viewPatch() to get the patch metadata.
+   * No authentication is required as patch blobs are publicly accessible.
+   *
+   * @param hash - The blob hash in SSRI (sha256-base64) or hex format
+   * @param options - Optional configuration
+   * @param options.baseUrl - Override blob store URL (for testing)
+   * @returns Promise<string> - The patch file content as UTF-8 string
+   * @throws Error if blob not found (404) or download fails
+   *
+   * @example
+   * ```typescript
+   * const sdk = new SocketSdk('your-api-token')
+   * // First get patch metadata
+   * const patch = await sdk.viewPatch('my-org', 'patch-uuid')
+   * // Then download the actual patched file
+   * const fileContent = await sdk.downloadPatch(patch.files['index.js'].socketBlob)
+   * ```
+   */
+  async downloadOrgFullScanFilesAsTar(
+    orgSlug: string,
+    fullScanId: string,
+    outputPath: string,
+  ): Promise<SocketSdkResult<'downloadOrgFullScanFilesAsTar'>> {
+    try {
+      const req = getHttpModule(this.#baseUrl)
+        .request(
+          `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/files.tar`,
+          {
+            method: 'GET',
+            ...this.#reqOptions,
+          },
+        )
+        .end()
+      const res = await getResponse(req)
+
+      // Check for HTTP error status codes.
+      if (!isResponseOk(res)) {
+        throw new ResponseError(res)
+      }
+
+      // Stream to file with size limit and error handling.
+      const writeStream = createWriteStream(outputPath)
+      let bytesWritten = 0
+
+      // Monitor stream size to prevent excessive disk usage.
+      res.on('data', (chunk: Buffer) => {
+        bytesWritten += chunk.length
+        /* c8 ignore next 4 - Stream size limit enforcement, difficult to test reliably */
+        if (bytesWritten > MAX_STREAM_SIZE) {
+          res.destroy()
+          writeStream.destroy()
+          throw new Error(
+            `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
+          )
+        }
+      })
+
+      res.pipe(writeStream)
+      /* c8 ignore next 4 - Write stream error handler, difficult to test reliably */
+      writeStream.on('error', error => {
+        throw new Error(`Failed to write to file: ${outputPath}`, {
+          cause: error,
+        })
+      })
+
+      // Wait for the stream to finish writing before returning.
+      await events.once(writeStream, 'finish')
+
+      return this.#handleApiSuccess<'downloadOrgFullScanFilesAsTar'>(res)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'downloadOrgFullScanFilesAsTar'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Download patch file content from Socket blob storage.
+   * Retrieves patched file contents using SSRI hash or hex hash.
+   *
+   * This is a low-level utility method - you'll typically use this after calling
+   * `viewPatch()` to get patch metadata, then download individual patched files.
+   *
+   * @param hash - The blob hash in SSRI (sha256-base64) or hex format
+   * @param options - Optional configuration
+   * @param options.baseUrl - Override blob store URL (for testing)
+   * @returns Promise<string> - The patch file content as UTF-8 string
+   * @throws Error if blob not found (404) or download fails
+   *
+   * @example
+   * ```typescript
+   * const sdk = new SocketSdk('your-api-token')
+   * // First get patch metadata
+   * const patch = await sdk.viewPatch('my-org', 'patch-uuid')
+   * // Then download the actual patched file
+   * const fileContent = await sdk.downloadPatch(patch.files['index.js'].socketBlob)
+   * ```
+   */
+  async downloadPatch(
+    hash: string,
+    options?: { baseUrl?: string | undefined } | undefined,
+  ): Promise<string> {
+    const https = await import('node:https')
+    const http = await import('node:http')
+    const blobPath = `/blob/${encodeURIComponent(hash)}`
+    const blobBaseUrl = options?.baseUrl || SOCKET_PUBLIC_BLOB_STORE_URL
+    const url = `${blobBaseUrl}${blobPath}`
+    const isHttps = url.startsWith('https:')
+
+    return await new Promise((resolve, reject) => {
+      const client = isHttps ? https : http
+      client
+        .get(url, res => {
+          if (res.statusCode === 404) {
+            const message = [
+              `Blob not found: ${hash}`,
+              `→ URL: ${url}`,
+              '→ The patch file may have expired or the hash is incorrect.',
+              '→ Verify: The blob hash is correct.',
+              '→ Note: Blob URLs may expire after a certain time period.',
+            ].join('\n')
+            reject(new Error(message))
+            return
+          }
+          if (res.statusCode !== 200) {
+            const message = [
+              `Failed to download blob: ${res.statusCode} ${res.statusMessage}`,
+              `→ Hash: ${hash}`,
+              `→ URL: ${url}`,
+              '→ The blob storage service may be temporarily unavailable.',
+              res.statusCode && res.statusCode >= 500
+                ? '→ Try: Retry the download after a short delay.'
+                : '→ Verify: The blob hash and URL are correct.',
+            ].join('\n')
+            reject(new Error(message))
+            return
+          }
+
+          let data = ''
+          res.on('data', chunk => {
+            data += chunk
+          })
+          res.on('end', () => {
+            resolve(data)
+          })
+          /* c8 ignore next 3 - Response stream error during blob download, difficult to reliably trigger */
+          res.on('error', err => {
+            reject(err)
+          })
+        })
+        .on('error', err => {
+          const nodeErr = err as NodeJS.ErrnoException
+          const message = [
+            `Error downloading blob: ${hash}`,
+            `→ URL: ${url}`,
+            `→ Network error: ${nodeErr.message}`,
+          ]
+
+          // Add specific guidance based on error code.
+          if (nodeErr.code === 'ENOTFOUND') {
+            message.push(
+              '→ DNS lookup failed. Cannot resolve blob storage hostname.',
+              '→ Check: Internet connection and DNS settings.',
+            )
+          } else if (nodeErr.code === 'ECONNREFUSED') {
+            message.push(
+              '→ Connection refused. Blob storage service is unreachable.',
+              '→ Check: Network connectivity and firewall settings.',
+            )
+            /* c8 ignore next 4 - ETIMEDOUT requires non-routable IPs which cause unreliable test timeouts */
+          } else if (nodeErr.code === 'ETIMEDOUT') {
+            message.push(
+              '→ Connection timed out.',
+              '→ Try: Check network connectivity and retry.',
+            )
+          } else if (nodeErr.code) {
+            message.push(`→ Error code: ${nodeErr.code}`)
+          }
+
+          reject(new Error(message.join('\n'), { cause: err }))
+        })
+    })
+  }
+
   /**
    * Export scan results in CycloneDX SBOM format.
    * Returns Software Bill of Materials compliant with CycloneDX standard.
@@ -1663,35 +1928,6 @@ export class SocketSdk {
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'exportCDX'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Export scan results in SPDX SBOM format.
-   * Returns Software Bill of Materials compliant with SPDX standard.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async exportSPDX(
-    orgSlug: string,
-    fullScanId: string,
-  ): Promise<SocketSdkResult<'exportSPDX'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/sbom/export/spdx`,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'exportSPDX'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'exportSPDX'>(e)
     }
     /* c8 ignore stop */
   }
@@ -1753,6 +1989,35 @@ export class SocketSdk {
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'exportOpenVEX'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Export scan results in SPDX SBOM format.
+   * Returns Software Bill of Materials compliant with SPDX standard.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async exportSPDX(
+    orgSlug: string,
+    fullScanId: string,
+  ): Promise<SocketSdkResult<'exportSPDX'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/sbom/export/spdx`,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'exportSPDX'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'exportSPDX'>(e)
     }
     /* c8 ignore stop */
   }
@@ -1969,6 +2234,131 @@ export class SocketSdk {
   }
 
   /**
+   * Get complete full scan results buffered in memory.
+   *
+   * Returns entire scan data as JSON for programmatic processing.
+   * For large scans, consider using streamFullScan() instead.
+   *
+   * @param orgSlug - Organization identifier
+   * @param scanId - Full scan identifier
+   * @returns Complete full scan data including all artifacts
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.getFullScan('my-org', 'scan_123')
+   *
+   * if (result.success) {
+   *   console.log('Scan status:', result.data.scan_state)
+   *   console.log('Repository:', result.data.repository_slug)
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/getorgfullscan
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
+   * @quota 1 unit
+   * @scopes full-scans:list
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getFullScan(
+    orgSlug: string,
+    scanId: string,
+  ): Promise<FullScanResult | StrictErrorResult> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as FullScanItem,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'getOrgFullScan'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Get metadata for a specific full scan.
+   *
+   * Returns scan configuration, status, and summary information without full artifact data.
+   * Useful for checking scan status without downloading complete results.
+   *
+   * @param orgSlug - Organization identifier
+   * @param scanId - Full scan identifier
+   * @returns Scan metadata including status and configuration
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.getFullScanMetadata('my-org', 'scan_123')
+   *
+   * if (result.success) {
+   *   console.log('Scan state:', result.data.scan_state)
+   *   console.log('Branch:', result.data.branch)
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/getorgfullscanmetadata
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}/metadata
+   * @quota 1 unit
+   * @scopes full-scans:list
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getFullScanMetadata(
+    orgSlug: string,
+    scanId: string,
+  ): Promise<FullScanResult | StrictErrorResult> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}/metadata`,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as FullScanItem,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      const errorResult =
+        await this.#handleApiError<'getOrgFullScanMetadata'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
    * Get security issues for a specific npm package and version.
    * Returns detailed vulnerability and security alert information.
    *
@@ -1993,6 +2383,63 @@ export class SocketSdk {
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getIssuesByNPMPackage'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * List full scans associated with a specific alert.
+   * Returns paginated full scan references for alert investigation.
+   *
+   * @param orgSlug - Organization identifier
+   * @param options - Query parameters including alertKey, range, pagination
+   * @returns Paginated array of full scans associated with the alert
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.getOrgAlertFullScans('my-org', {
+   *   alertKey: 'npm/lodash/cve-2021-23337',
+   *   range: '-7d',
+   *   per_page: 50
+   * })
+   *
+   * if (result.success) {
+   *   for (const item of result.data.items) {
+   *     console.log('Full Scan ID:', item.fullScanId)
+   *   }
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/alertfullscans
+   * @apiEndpoint GET /orgs/{org_slug}/alert-full-scan-search
+   * @quota 10 units
+   * @scopes alerts:list
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgAlertFullScans(
+    orgSlug: string,
+    options: {
+      alertKey: string
+      per_page?: number | undefined
+      range?: string | undefined
+      startAfterCursor?: string | undefined
+    },
+  ): Promise<SocketSdkResult<'alertFullScans'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/alert-full-scan-search?${queryToSearchParams(options as QueryParams)}`,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'alertFullScans'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'alertFullScans'>(e)
     }
     /* c8 ignore stop */
   }
@@ -2075,63 +2522,6 @@ export class SocketSdk {
   }
 
   /**
-   * List full scans associated with a specific alert.
-   * Returns paginated full scan references for alert investigation.
-   *
-   * @param orgSlug - Organization identifier
-   * @param options - Query parameters including alertKey, range, pagination
-   * @returns Paginated array of full scans associated with the alert
-   *
-   * @example
-   * ```typescript
-   * const result = await sdk.getOrgAlertFullScans('my-org', {
-   *   alertKey: 'npm/lodash/cve-2021-23337',
-   *   range: '-7d',
-   *   per_page: 50
-   * })
-   *
-   * if (result.success) {
-   *   for (const item of result.data.items) {
-   *     console.log('Full Scan ID:', item.fullScanId)
-   *   }
-   * }
-   * ```
-   *
-   * @see https://docs.socket.dev/reference/alertfullscans
-   * @apiEndpoint GET /orgs/{org_slug}/alert-full-scan-search
-   * @quota 10 units
-   * @scopes alerts:list
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getOrgAlertFullScans(
-    orgSlug: string,
-    options: {
-      alertKey: string
-      per_page?: number | undefined
-      range?: string | undefined
-      startAfterCursor?: string | undefined
-    },
-  ): Promise<SocketSdkResult<'alertFullScans'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/alert-full-scan-search?${queryToSearchParams(options as QueryParams)}`,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'alertFullScans'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'alertFullScans'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
    * Get analytics data for organization usage patterns and security metrics.
    * Returns statistical analysis for specified time period.
    *
@@ -2155,255 +2545,6 @@ export class SocketSdk {
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgAnalytics'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * List all organizations accessible to the current user.
-   *
-   * Returns organization details and access permissions with guaranteed required fields.
-   *
-   * @returns List of organizations with metadata
-   *
-   * @example
-   * ```typescript
-   * const result = await sdk.listOrganizations()
-   *
-   * if (result.success) {
-   *   result.data.organizations.forEach(org => {
-   *     console.log(org.name, org.slug)  // Guaranteed fields
-   *   })
-   * }
-   * ```
-   *
-   * @see https://docs.socket.dev/reference/getorganizations
-   * @apiEndpoint GET /organizations
-   * @quota 1 unit
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async listOrganizations(): Promise<OrganizationsResult | StrictErrorResult> {
-    try {
-      const data = await this.#getCached(
-        'organizations',
-        async () =>
-          await getResponseJson(
-            await createGetRequest(this.#baseUrl, 'organizations', {
-              ...this.#reqOptions,
-              hooks: this.#hooks,
-            }),
-          ),
-        'organizations',
-      )
-      return {
-        cause: undefined,
-        data: data as OrganizationsResult['data'],
-        error: undefined,
-        status: 200,
-        success: true,
-      }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      const errorResult = await this.#handleApiError<'getOrganizations'>(e)
-      return {
-        cause: errorResult.cause,
-        data: undefined,
-        error: errorResult.error,
-        status: errorResult.status,
-        success: false,
-      }
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Get complete full scan results buffered in memory.
-   *
-   * Returns entire scan data as JSON for programmatic processing.
-   * For large scans, consider using streamFullScan() instead.
-   *
-   * @param orgSlug - Organization identifier
-   * @param scanId - Full scan identifier
-   * @returns Complete full scan data including all artifacts
-   *
-   * @example
-   * ```typescript
-   * const result = await sdk.getFullScan('my-org', 'scan_123')
-   *
-   * if (result.success) {
-   *   console.log('Scan status:', result.data.scan_state)
-   *   console.log('Repository:', result.data.repository_slug)
-   * }
-   * ```
-   *
-   * @see https://docs.socket.dev/reference/getorgfullscan
-   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
-   * @quota 1 unit
-   * @scopes full-scans:list
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getFullScan(
-    orgSlug: string,
-    scanId: string,
-  ): Promise<FullScanResult | StrictErrorResult> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return {
-        cause: undefined,
-        data: data as FullScanItem,
-        error: undefined,
-        status: 200,
-        success: true,
-      }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      const errorResult = await this.#handleApiError<'getOrgFullScan'>(e)
-      return {
-        cause: errorResult.cause,
-        data: undefined,
-        error: errorResult.error,
-        status: errorResult.status,
-        success: false,
-      }
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * List all full scans for an organization.
-   *
-   * Returns paginated list of full scan metadata with guaranteed required fields
-   * for improved TypeScript autocomplete.
-   *
-   * @param orgSlug - Organization identifier
-   * @param options - Filtering and pagination options
-   * @returns List of full scans with metadata
-   *
-   * @example
-   * ```typescript
-   * const result = await sdk.listFullScans('my-org', {
-   *   branch: 'main',
-   *   per_page: 50,
-   *   use_cursor: true
-   * })
-   *
-   * if (result.success) {
-   *   result.data.results.forEach(scan => {
-   *     console.log(scan.id, scan.created_at)  // Guaranteed fields
-   *   })
-   * }
-   * ```
-   *
-   * @see https://docs.socket.dev/reference/getorgfullscanlist
-   * @apiEndpoint GET /orgs/{org_slug}/full-scans
-   * @quota 1 unit
-   * @scopes full-scans:list
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async listFullScans(
-    orgSlug: string,
-    options?: ListFullScansOptions | undefined,
-  ): Promise<FullScanListResult | StrictErrorResult> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(options as QueryParams)}`,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return {
-        cause: undefined,
-        data: data as FullScanListResult['data'],
-        error: undefined,
-        status: 200,
-        success: true,
-      }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      const errorResult = await this.#handleApiError<'getOrgFullScanList'>(e)
-      return {
-        cause: errorResult.cause,
-        data: undefined,
-        error: errorResult.error,
-        status: errorResult.status,
-        success: false,
-      }
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Get metadata for a specific full scan.
-   *
-   * Returns scan configuration, status, and summary information without full artifact data.
-   * Useful for checking scan status without downloading complete results.
-   *
-   * @param orgSlug - Organization identifier
-   * @param scanId - Full scan identifier
-   * @returns Scan metadata including status and configuration
-   *
-   * @example
-   * ```typescript
-   * const result = await sdk.getFullScanMetadata('my-org', 'scan_123')
-   *
-   * if (result.success) {
-   *   console.log('Scan state:', result.data.scan_state)
-   *   console.log('Branch:', result.data.branch)
-   * }
-   * ```
-   *
-   * @see https://docs.socket.dev/reference/getorgfullscanmetadata
-   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}/metadata
-   * @quota 1 unit
-   * @scopes full-scans:list
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getFullScanMetadata(
-    orgSlug: string,
-    scanId: string,
-  ): Promise<FullScanResult | StrictErrorResult> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}/metadata`,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return {
-        cause: undefined,
-        data: data as FullScanItem,
-        error: undefined,
-        status: 200,
-        success: true,
-      }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      const errorResult =
-        await this.#handleApiError<'getOrgFullScanMetadata'>(e)
-      return {
-        cause: errorResult.cause,
-        data: undefined,
-        error: errorResult.error,
-        status: errorResult.status,
-        success: false,
-      }
     }
     /* c8 ignore stop */
   }
@@ -2475,6 +2616,225 @@ export class SocketSdk {
     }
     /* c8 ignore stop */
   }
+
+  /**
+   * Get organization's security policy configuration.* Returns alert rules, severity thresholds, and enforcement settings.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgSecurityPolicy(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'getOrgSecurityPolicy'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/settings/security-policy`,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgSecurityPolicy'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'getOrgSecurityPolicy'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Get organization's telemetry configuration.
+   * Returns whether telemetry is enabled for the organization.
+   *
+   * @param orgSlug - Organization identifier
+   * @returns Telemetry configuration with enabled status
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgTelemetryConfig(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'getOrgTelemetryConfig'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/telemetry/config`,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgTelemetryConfig'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'getOrgTelemetryConfig'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Get organization triage settings and status.
+   * Returns alert triage configuration and current state.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgTriage(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'getOrgTriage'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/triage`,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgTriage'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'getOrgTriage'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Get details of a specific webhook.
+   * Returns webhook configuration including events, URL, and filters.
+   *
+   * @param orgSlug - Organization identifier
+   * @param webhookId - Webhook ID to retrieve
+   * @returns Webhook details
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgWebhook(
+    orgSlug: string,
+    webhookId: string,
+  ): Promise<SocketSdkResult<'getOrgWebhook'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/webhooks/${encodeURIComponent(webhookId)}`,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgWebhook'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'getOrgWebhook'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * List all webhooks for an organization.
+   * Supports pagination and sorting options.
+   *
+   * @param orgSlug - Organization identifier
+   * @param options - Optional query parameters for pagination and sorting
+   * @returns List of webhooks with pagination info
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgWebhooksList(
+    orgSlug: string,
+    options?:
+      | {
+          direction?: string | undefined
+          page?: number | undefined
+          per_page?: number | undefined
+          sort?: string | undefined
+        }
+      | undefined,
+  ): Promise<SocketSdkResult<'getOrgWebhooksList'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/webhooks?${queryToSearchParams(options as QueryParams)}`,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgWebhooksList'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'getOrgWebhooksList'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Get current API quota usage and limits.
+   * Returns remaining requests, rate limits, and quota reset times.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getQuota(): Promise<SocketSdkResult<'getQuota'>> {
+    try {
+      const data = await this.#getCached(
+        'quota',
+        async () =>
+          await getResponseJson(
+            await createGetRequest(this.#baseUrl, 'quota', {
+              ...this.#reqOptions,
+              hooks: this.#hooks,
+            }),
+          ),
+        'quota',
+      )
+      return this.#handleApiSuccess<'getQuota'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'getQuota'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Get analytics data for a specific repository.
+   * Returns security metrics, dependency trends, and vulnerability statistics.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getRepoAnalytics(
+    repo: string,
+    time: string,
+  ): Promise<SocketSdkResult<'getRepoAnalytics'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `analytics/repo/${encodeURIComponent(repo)}/${encodeURIComponent(time)}`,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getRepoAnalytics'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'getRepoAnalytics'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Get detailed results for a legacy scan report.
+  /**
 
   /**
    * Get details for a specific repository.
@@ -2613,57 +2973,117 @@ export class SocketSdk {
   }
 
   /**
-   * List all repository labels for an organization.
+   * Get security score for a specific npm package and version.
+   * Returns numerical security rating and scoring breakdown.
    *
-   * Returns paginated list of labels configured for repository organization and policy management.
-   *
-   * @param orgSlug - Organization identifier
-   * @param options - Pagination options
-   * @returns List of labels with guaranteed id and name fields
-   *
-   * @example
-   * ```typescript
-   * const result = await sdk.listRepositoryLabels('my-org', { per_page: 50, page: 1 })
-   *
-   * if (result.success) {
-   *   result.data.results.forEach(label => {
-   *     console.log('Label:', label.name)
-   *     console.log('Associated repos:', label.repository_ids?.length || 0)
-   *   })
-   * }
-   * ```
-   *
-   * @see https://docs.socket.dev/reference/getorgrepolabellist
-   * @apiEndpoint GET /orgs/{org_slug}/repos/labels
-   * @quota 1 unit
-   * @scopes repo-label:list
    * @throws {Error} When server returns 5xx status codes
    */
-  async listRepositoryLabels(
-    orgSlug: string,
-    options?: QueryParams | undefined,
-  ): Promise<RepositoryLabelsListResult | StrictErrorResult> {
+  async getScoreByNpmPackage(
+    pkgName: string,
+    version: string,
+  ): Promise<SocketSdkResult<'getScoreByNPMPackage'>> {
     try {
       const data = await this.#executeWithRetry(
         async () =>
           await getResponseJson(
             await createGetRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/repos/labels?${queryToSearchParams(options as QueryParams)}`,
+              `npm/${encodeURIComponent(pkgName)}/${encodeURIComponent(version)}/score`,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getScoreByNPMPackage'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'getScoreByNPMPackage'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Get list of file types and formats supported for scanning.
+   * Returns supported manifest files, lockfiles, and configuration formats.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getSupportedScanFiles(): Promise<
+    SocketSdkResult<'getReportSupportedFiles'>
+  > {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(this.#baseUrl, 'report/supported', {
+              ...this.#reqOptions,
+              hooks: this.#hooks,
+            }),
+          ),
+      )
+      return this.#handleApiSuccess<'getReportSupportedFiles'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'getReportSupportedFiles'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * List all full scans for an organization.
+   *
+   * Returns paginated list of full scan metadata with guaranteed required fields
+   * for improved TypeScript autocomplete.
+   *
+   * @param orgSlug - Organization identifier
+   * @param options - Filtering and pagination options
+   * @returns List of full scans with metadata
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.listFullScans('my-org', {
+   *   branch: 'main',
+   *   per_page: 50,
+   *   use_cursor: true
+   * })
+   *
+   * if (result.success) {
+   *   result.data.results.forEach(scan => {
+   *     console.log(scan.id, scan.created_at)  // Guaranteed fields
+   *   })
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/getorgfullscanlist
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans
+   * @quota 1 unit
+   * @scopes full-scans:list
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async listFullScans(
+    orgSlug: string,
+    options?: ListFullScansOptions | undefined,
+  ): Promise<FullScanListResult | StrictErrorResult> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(options as QueryParams)}`,
               { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
       return {
         cause: undefined,
-        data: data as RepositoryLabelsListResult['data'],
+        data: data as FullScanListResult['data'],
         error: undefined,
         status: 200,
         success: true,
       }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      const errorResult = await this.#handleApiError<'getOrgRepoLabelList'>(e)
+      const errorResult = await this.#handleApiError<'getOrgFullScanList'>(e)
       return {
         cause: errorResult.cause,
         data: undefined,
@@ -2671,6 +3091,91 @@ export class SocketSdk {
         status: errorResult.status,
         success: false,
       }
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * List all organizations accessible to the current user.
+   *
+   * Returns organization details and access permissions with guaranteed required fields.
+   *
+   * @returns List of organizations with metadata
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.listOrganizations()
+   *
+   * if (result.success) {
+   *   result.data.organizations.forEach(org => {
+   *     console.log(org.name, org.slug)  // Guaranteed fields
+   *   })
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/getorganizations
+   * @apiEndpoint GET /organizations
+   * @quota 1 unit
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async listOrganizations(): Promise<OrganizationsResult | StrictErrorResult> {
+    try {
+      const data = await this.#getCached(
+        'organizations',
+        async () =>
+          await getResponseJson(
+            await createGetRequest(this.#baseUrl, 'organizations', {
+              ...this.#reqOptions,
+              hooks: this.#hooks,
+            }),
+          ),
+        'organizations',
+      )
+      return {
+        cause: undefined,
+        data: data as OrganizationsResult['data'],
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'getOrganizations'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * List all diff scans for an organization.
+   * Returns paginated list of diff scan metadata and status.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async listOrgDiffScans(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'listOrgDiffScans'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/diff-scans`,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'listOrgDiffScans'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'listOrgDiffScans'>(e)
     }
     /* c8 ignore stop */
   }
@@ -2742,199 +3247,64 @@ export class SocketSdk {
   }
 
   /**
-   * Get organization's security policy configuration.* Returns alert rules, severity thresholds, and enforcement settings.
+   * List all repository labels for an organization.
    *
+   * Returns paginated list of labels configured for repository organization and policy management.
+   *
+   * @param orgSlug - Organization identifier
+   * @param options - Pagination options
+   * @returns List of labels with guaranteed id and name fields
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.listRepositoryLabels('my-org', { per_page: 50, page: 1 })
+   *
+   * if (result.success) {
+   *   result.data.results.forEach(label => {
+   *     console.log('Label:', label.name)
+   *     console.log('Associated repos:', label.repository_ids?.length || 0)
+   *   })
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/getorgrepolabellist
+   * @apiEndpoint GET /orgs/{org_slug}/repos/labels
+   * @quota 1 unit
+   * @scopes repo-label:list
    * @throws {Error} When server returns 5xx status codes
    */
-  async getOrgSecurityPolicy(
+  async listRepositoryLabels(
     orgSlug: string,
-  ): Promise<SocketSdkResult<'getOrgSecurityPolicy'>> {
+    options?: QueryParams | undefined,
+  ): Promise<RepositoryLabelsListResult | StrictErrorResult> {
     try {
       const data = await this.#executeWithRetry(
         async () =>
           await getResponseJson(
             await createGetRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/settings/security-policy`,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels?${queryToSearchParams(options as QueryParams)}`,
               { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
       )
-      return this.#handleApiSuccess<'getOrgSecurityPolicy'>(data)
+      return {
+        cause: undefined,
+        data: data as RepositoryLabelsListResult['data'],
+        error: undefined,
+        status: 200,
+        success: true,
+      }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      return await this.#handleApiError<'getOrgSecurityPolicy'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Get organization triage settings and status.
-   * Returns alert triage configuration and current state.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getOrgTriage(
-    orgSlug: string,
-  ): Promise<SocketSdkResult<'getOrgTriage'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/triage`,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'getOrgTriage'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'getOrgTriage'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Get current API quota usage and limits.
-   * Returns remaining requests, rate limits, and quota reset times.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getQuota(): Promise<SocketSdkResult<'getQuota'>> {
-    try {
-      const data = await this.#getCached(
-        'quota',
-        async () =>
-          await getResponseJson(
-            await createGetRequest(this.#baseUrl, 'quota', {
-              ...this.#reqOptions,
-              hooks: this.#hooks,
-            }),
-          ),
-        'quota',
-      )
-      return this.#handleApiSuccess<'getQuota'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'getQuota'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Get analytics data for a specific repository.
-   * Returns security metrics, dependency trends, and vulnerability statistics.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getRepoAnalytics(
-    repo: string,
-    time: string,
-  ): Promise<SocketSdkResult<'getRepoAnalytics'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              `analytics/repo/${encodeURIComponent(repo)}/${encodeURIComponent(time)}`,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'getRepoAnalytics'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'getRepoAnalytics'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Get detailed results for a legacy scan report.
-  /**
-  /**
-   * Get security score for a specific npm package and version.
-   * Returns numerical security rating and scoring breakdown.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getScoreByNpmPackage(
-    pkgName: string,
-    version: string,
-  ): Promise<SocketSdkResult<'getScoreByNPMPackage'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              `npm/${encodeURIComponent(pkgName)}/${encodeURIComponent(version)}/score`,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'getScoreByNPMPackage'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'getScoreByNPMPackage'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Get list of file types and formats supported for scanning.
-   * Returns supported manifest files, lockfiles, and configuration formats.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getSupportedScanFiles(): Promise<
-    SocketSdkResult<'getReportSupportedFiles'>
-  > {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(this.#baseUrl, 'report/supported', {
-              ...this.#reqOptions,
-              hooks: this.#hooks,
-            }),
-          ),
-      )
-      return this.#handleApiSuccess<'getReportSupportedFiles'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'getReportSupportedFiles'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * List all diff scans for an organization.
-   * Returns paginated list of diff scan metadata and status.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async listOrgDiffScans(
-    orgSlug: string,
-  ): Promise<SocketSdkResult<'listOrgDiffScans'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/diff-scans`,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'listOrgDiffScans'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'listOrgDiffScans'>(e)
+      const errorResult = await this.#handleApiError<'getOrgRepoLabelList'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
     }
     /* c8 ignore stop */
   }
@@ -3065,6 +3435,47 @@ export class SocketSdk {
   }
 
   /**
+   * Post telemetry data for an organization.
+   * Sends telemetry events and analytics data for monitoring and analysis.
+   *
+   * @param orgSlug - Organization identifier
+   * @param telemetryData - Telemetry payload containing events and metrics
+   * @returns Empty object on successful submission
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async postOrgTelemetry(
+    orgSlug: string,
+    telemetryData: PostOrgTelemetryPayload,
+  ): Promise<SocketSdkGenericResult<PostOrgTelemetryResponse>> {
+    try {
+      const data = (await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/telemetry`,
+              telemetryData,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )) as PostOrgTelemetryResponse
+      return {
+        cause: undefined,
+        data,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return this.#createQueryErrorResult<PostOrgTelemetryResponse>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
    * Update user or organization settings.
    * Configures preferences, notifications, and security policies.
    *
@@ -3090,6 +3501,72 @@ export class SocketSdk {
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'postSettings'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Create a new full scan by rescanning an existing scan.
+   * Supports shallow (policy reapplication) and deep (dependency resolution rerun) modes.
+   *
+   * @param orgSlug - Organization identifier
+   * @param fullScanId - Full scan ID to rescan
+   * @param options - Rescan options including mode (shallow or deep)
+   * @returns New scan ID and status
+   *
+   * @example
+   * ```typescript
+   * // Shallow rescan (reapply policies to cached data)
+   * const result = await sdk.rescanFullScan('my-org', 'scan_123', {
+   *   mode: 'shallow'
+   * })
+   *
+   * if (result.success) {
+   *   console.log('New Scan ID:', result.data.id)
+   *   console.log('Status:', result.data.status)
+   * }
+   *
+   * // Deep rescan (rerun dependency resolution)
+   * const deepResult = await sdk.rescanFullScan('my-org', 'scan_123', {
+   *   mode: 'deep'
+   * })
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/rescanorgfullscan
+   * @apiEndpoint POST /orgs/{org_slug}/full-scans/{full_scan_id}/rescan
+   * @quota 1 unit
+   * @scopes full-scans:create
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async rescanFullScan(
+    orgSlug: string,
+    fullScanId: string,
+    options?:
+      | {
+          mode?: 'shallow' | 'deep' | undefined
+        }
+      | undefined,
+  ): Promise<SocketSdkResult<'rescanOrgFullScan'>> {
+    const queryString = options
+      ? `?${queryToSearchParams(options as QueryParams)}`
+      : ''
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/rescan${queryString}`,
+              {},
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'rescanOrgFullScan'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'rescanOrgFullScan'>(e)
     }
     /* c8 ignore stop */
   }
@@ -3196,72 +3673,6 @@ export class SocketSdk {
       }
       /* c8 ignore stop */
     }
-  }
-
-  /**
-   * Create a new full scan by rescanning an existing scan.
-   * Supports shallow (policy reapplication) and deep (dependency resolution rerun) modes.
-   *
-   * @param orgSlug - Organization identifier
-   * @param fullScanId - Full scan ID to rescan
-   * @param options - Rescan options including mode (shallow or deep)
-   * @returns New scan ID and status
-   *
-   * @example
-   * ```typescript
-   * // Shallow rescan (reapply policies to cached data)
-   * const result = await sdk.rescanFullScan('my-org', 'scan_123', {
-   *   mode: 'shallow'
-   * })
-   *
-   * if (result.success) {
-   *   console.log('New Scan ID:', result.data.id)
-   *   console.log('Status:', result.data.status)
-   * }
-   *
-   * // Deep rescan (rerun dependency resolution)
-   * const deepResult = await sdk.rescanFullScan('my-org', 'scan_123', {
-   *   mode: 'deep'
-   * })
-   * ```
-   *
-   * @see https://docs.socket.dev/reference/rescanorgfullscan
-   * @apiEndpoint POST /orgs/{org_slug}/full-scans/{full_scan_id}/rescan
-   * @quota 1 unit
-   * @scopes full-scans:create
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async rescanFullScan(
-    orgSlug: string,
-    fullScanId: string,
-    options?:
-      | {
-          mode?: 'shallow' | 'deep' | undefined
-        }
-      | undefined,
-  ): Promise<SocketSdkResult<'rescanOrgFullScan'>> {
-    const queryString = options
-      ? `?${queryToSearchParams(options as QueryParams)}`
-      : ''
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createRequestWithJson(
-              'POST',
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/rescan${queryString}`,
-              {},
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'rescanOrgFullScan'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'rescanOrgFullScan'>(e)
-    }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3506,6 +3917,116 @@ export class SocketSdk {
   }
 
   /**
+   * Update organization's security policy configuration.* Modifies alert rules, severity thresholds, and enforcement settings.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async updateOrgSecurityPolicy(
+    orgSlug: string,
+    policyData: QueryParams,
+  ): Promise<SocketSdkResult<'updateOrgSecurityPolicy'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/settings/security-policy`,
+              policyData,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'updateOrgSecurityPolicy'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgSecurityPolicy'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Update organization's telemetry configuration.
+   * Enables or disables telemetry for the organization.
+   *
+   * @param orgSlug - Organization identifier
+   * @param telemetryData - Telemetry configuration with enabled flag
+   * @returns Updated telemetry configuration
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async updateOrgTelemetryConfig(
+    orgSlug: string,
+    telemetryData: { enabled?: boolean | undefined },
+  ): Promise<SocketSdkResult<'updateOrgTelemetryConfig'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'PUT',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/telemetry/config`,
+              telemetryData,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'updateOrgTelemetryConfig'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgTelemetryConfig'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * Update an existing webhook's configuration.
+   * All fields are optional - only provided fields will be updated.
+   *
+   * @param orgSlug - Organization identifier
+   * @param webhookId - Webhook ID to update
+   * @param webhookData - Updated webhook configuration
+   * @returns Updated webhook details
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async updateOrgWebhook(
+    orgSlug: string,
+    webhookId: string,
+    webhookData: {
+      description?: null | string | undefined
+      events?: string[] | undefined
+      filters?: { repositoryIds: null | string[] } | null | undefined
+      headers?: null | Record<string, unknown> | undefined
+      name?: string | undefined
+      secret?: null | string | undefined
+      url?: string | undefined
+    },
+  ): Promise<SocketSdkResult<'updateOrgWebhook'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'PUT',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/webhooks/${encodeURIComponent(webhookId)}`,
+              webhookData,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'updateOrgWebhook'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgWebhook'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
    * Update configuration for a repository.
    *
    * Modifies monitoring settings, branch configuration, and scan preferences.
@@ -3647,36 +4168,6 @@ export class SocketSdk {
   }
 
   /**
-   * Update organization's security policy configuration.* Modifies alert rules, severity thresholds, and enforcement settings.
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async updateOrgSecurityPolicy(
-    orgSlug: string,
-    policyData: QueryParams,
-  ): Promise<SocketSdkResult<'updateOrgSecurityPolicy'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createRequestWithJson(
-              'POST',
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/settings/security-policy`,
-              policyData,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'updateOrgSecurityPolicy'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'updateOrgSecurityPolicy'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
    * Upload manifest files for dependency analysis.
    * Processes package files to create dependency snapshots and security analysis.
    *
@@ -3801,495 +4292,6 @@ export class SocketSdk {
     )
 
     return data as PatchViewResponse
-  }
-
-  /**
-   * Download patch file content by hash.
-   *
-   * Downloads the actual patched file content from the public Socket blob store.
-   * This is used after calling viewPatch() to get the patch metadata.
-   * No authentication is required as patch blobs are publicly accessible.
-   *
-   * @param hash - The blob hash in SSRI (sha256-base64) or hex format
-   * @param options - Optional configuration
-   * @param options.baseUrl - Override blob store URL (for testing)
-   * @returns Promise<string> - The patch file content as UTF-8 string
-   * @throws Error if blob not found (404) or download fails
-   *
-   * @example
-   * ```typescript
-   * const sdk = new SocketSdk('your-api-token')
-   * // First get patch metadata
-   * const patch = await sdk.viewPatch('my-org', 'patch-uuid')
-   * // Then download the actual patched file
-   * const fileContent = await sdk.downloadPatch(patch.files['index.js'].socketBlob)
-   * ```
-   */
-  async downloadOrgFullScanFilesAsTar(
-    orgSlug: string,
-    fullScanId: string,
-    outputPath: string,
-  ): Promise<SocketSdkResult<'downloadOrgFullScanFilesAsTar'>> {
-    try {
-      const req = getHttpModule(this.#baseUrl)
-        .request(
-          `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/files.tar`,
-          {
-            method: 'GET',
-            ...this.#reqOptions,
-          },
-        )
-        .end()
-      const res = await getResponse(req)
-
-      // Check for HTTP error status codes.
-      if (!isResponseOk(res)) {
-        throw new ResponseError(res)
-      }
-
-      // Stream to file with size limit and error handling.
-      const writeStream = createWriteStream(outputPath)
-      let bytesWritten = 0
-
-      // Monitor stream size to prevent excessive disk usage.
-      res.on('data', (chunk: Buffer) => {
-        bytesWritten += chunk.length
-        /* c8 ignore next 4 - Stream size limit enforcement, difficult to test reliably */
-        if (bytesWritten > MAX_STREAM_SIZE) {
-          res.destroy()
-          writeStream.destroy()
-          throw new Error(
-            `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
-          )
-        }
-      })
-
-      res.pipe(writeStream)
-      /* c8 ignore next 4 - Write stream error handler, difficult to test reliably */
-      writeStream.on('error', error => {
-        throw new Error(`Failed to write to file: ${outputPath}`, {
-          cause: error,
-        })
-      })
-
-      // Wait for the stream to finish writing before returning.
-      await events.once(writeStream, 'finish')
-
-      return this.#handleApiSuccess<'downloadOrgFullScanFilesAsTar'>(res)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'downloadOrgFullScanFilesAsTar'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Download patch file content from Socket blob storage.
-   * Retrieves patched file contents using SSRI hash or hex hash.
-   *
-   * This is a low-level utility method - you'll typically use this after calling
-   * `viewPatch()` to get patch metadata, then download individual patched files.
-   *
-   * @param hash - The blob hash in SSRI (sha256-base64) or hex format
-   * @param options - Optional configuration
-   * @param options.baseUrl - Override blob store URL (for testing)
-   * @returns Promise<string> - The patch file content as UTF-8 string
-   * @throws Error if blob not found (404) or download fails
-   *
-   * @example
-   * ```typescript
-   * const sdk = new SocketSdk('your-api-token')
-   * // First get patch metadata
-   * const patch = await sdk.viewPatch('my-org', 'patch-uuid')
-   * // Then download the actual patched file
-   * const fileContent = await sdk.downloadPatch(patch.files['index.js'].socketBlob)
-   * ```
-   */
-  async downloadPatch(
-    hash: string,
-    options?: { baseUrl?: string | undefined } | undefined,
-  ): Promise<string> {
-    const https = await import('node:https')
-    const http = await import('node:http')
-    const blobPath = `/blob/${encodeURIComponent(hash)}`
-    const blobBaseUrl = options?.baseUrl || SOCKET_PUBLIC_BLOB_STORE_URL
-    const url = `${blobBaseUrl}${blobPath}`
-    const isHttps = url.startsWith('https:')
-
-    return await new Promise((resolve, reject) => {
-      const client = isHttps ? https : http
-      client
-        .get(url, res => {
-          if (res.statusCode === 404) {
-            const message = [
-              `Blob not found: ${hash}`,
-              `→ URL: ${url}`,
-              '→ The patch file may have expired or the hash is incorrect.',
-              '→ Verify: The blob hash is correct.',
-              '→ Note: Blob URLs may expire after a certain time period.',
-            ].join('\n')
-            reject(new Error(message))
-            return
-          }
-          if (res.statusCode !== 200) {
-            const message = [
-              `Failed to download blob: ${res.statusCode} ${res.statusMessage}`,
-              `→ Hash: ${hash}`,
-              `→ URL: ${url}`,
-              '→ The blob storage service may be temporarily unavailable.',
-              res.statusCode && res.statusCode >= 500
-                ? '→ Try: Retry the download after a short delay.'
-                : '→ Verify: The blob hash and URL are correct.',
-            ].join('\n')
-            reject(new Error(message))
-            return
-          }
-
-          let data = ''
-          res.on('data', chunk => {
-            data += chunk
-          })
-          res.on('end', () => {
-            resolve(data)
-          })
-          /* c8 ignore next 3 - Response stream error during blob download, difficult to reliably trigger */
-          res.on('error', err => {
-            reject(err)
-          })
-        })
-        .on('error', err => {
-          const nodeErr = err as NodeJS.ErrnoException
-          const message = [
-            `Error downloading blob: ${hash}`,
-            `→ URL: ${url}`,
-            `→ Network error: ${nodeErr.message}`,
-          ]
-
-          // Add specific guidance based on error code.
-          if (nodeErr.code === 'ENOTFOUND') {
-            message.push(
-              '→ DNS lookup failed. Cannot resolve blob storage hostname.',
-              '→ Check: Internet connection and DNS settings.',
-            )
-          } else if (nodeErr.code === 'ECONNREFUSED') {
-            message.push(
-              '→ Connection refused. Blob storage service is unreachable.',
-              '→ Check: Network connectivity and firewall settings.',
-            )
-            /* c8 ignore next 4 - ETIMEDOUT requires non-routable IPs which cause unreliable test timeouts */
-          } else if (nodeErr.code === 'ETIMEDOUT') {
-            message.push(
-              '→ Connection timed out.',
-              '→ Try: Check network connectivity and retry.',
-            )
-          } else if (nodeErr.code) {
-            message.push(`→ Error code: ${nodeErr.code}`)
-          }
-
-          reject(new Error(message.join('\n'), { cause: err }))
-        })
-    })
-  }
-
-  /**
-   * Update organization's telemetry configuration.
-   * Enables or disables telemetry for the organization.
-   *
-   * @param orgSlug - Organization identifier
-   * @param telemetryData - Telemetry configuration with enabled flag
-   * @returns Updated telemetry configuration
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async updateOrgTelemetryConfig(
-    orgSlug: string,
-    telemetryData: { enabled?: boolean | undefined },
-  ): Promise<SocketSdkResult<'updateOrgTelemetryConfig'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createRequestWithJson(
-              'PUT',
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/telemetry/config`,
-              telemetryData,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'updateOrgTelemetryConfig'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'updateOrgTelemetryConfig'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Get organization's telemetry configuration.
-   * Returns whether telemetry is enabled for the organization.
-   *
-   * @param orgSlug - Organization identifier
-   * @returns Telemetry configuration with enabled status
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getOrgTelemetryConfig(
-    orgSlug: string,
-  ): Promise<SocketSdkResult<'getOrgTelemetryConfig'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/telemetry/config`,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'getOrgTelemetryConfig'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'getOrgTelemetryConfig'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Post telemetry data for an organization.
-   * Sends telemetry events and analytics data for monitoring and analysis.
-   *
-   * @param orgSlug - Organization identifier
-   * @param telemetryData - Telemetry payload containing events and metrics
-   * @returns Empty object on successful submission
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async postOrgTelemetry(
-    orgSlug: string,
-    telemetryData: PostOrgTelemetryPayload,
-  ): Promise<SocketSdkGenericResult<PostOrgTelemetryResponse>> {
-    try {
-      const data = (await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createRequestWithJson(
-              'POST',
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/telemetry`,
-              telemetryData,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )) as PostOrgTelemetryResponse
-      return {
-        cause: undefined,
-        data,
-        error: undefined,
-        status: 200,
-        success: true,
-      }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return this.#createQueryErrorResult<PostOrgTelemetryResponse>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Create a new webhook for an organization.
-   * Webhooks allow you to receive HTTP POST notifications when specific events occur.
-   *
-   * @param orgSlug - Organization identifier
-   * @param webhookData - Webhook configuration including name, URL, secret, and events
-   * @returns Created webhook details including webhook ID
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async createOrgWebhook(
-    orgSlug: string,
-    webhookData: {
-      description?: null | string | undefined
-      events: string[]
-      filters?: { repositoryIds: null | string[] } | null | undefined
-      headers?: null | Record<string, unknown> | undefined
-      name: string
-      secret: string
-      url: string
-    },
-  ): Promise<SocketSdkResult<'createOrgWebhook'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createRequestWithJson(
-              'POST',
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/webhooks`,
-              webhookData,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'createOrgWebhook'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'createOrgWebhook'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Delete a webhook from an organization.
-   * This will stop all future webhook deliveries to the webhook URL.
-   *
-   * @param orgSlug - Organization identifier
-   * @param webhookId - Webhook ID to delete
-   * @returns Success status
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async deleteOrgWebhook(
-    orgSlug: string,
-    webhookId: string,
-  ): Promise<SocketSdkResult<'deleteOrgWebhook'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createDeleteRequest(
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/webhooks/${encodeURIComponent(webhookId)}`,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'deleteOrgWebhook'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'deleteOrgWebhook'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Get details of a specific webhook.
-   * Returns webhook configuration including events, URL, and filters.
-   *
-   * @param orgSlug - Organization identifier
-   * @param webhookId - Webhook ID to retrieve
-   * @returns Webhook details
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getOrgWebhook(
-    orgSlug: string,
-    webhookId: string,
-  ): Promise<SocketSdkResult<'getOrgWebhook'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/webhooks/${encodeURIComponent(webhookId)}`,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'getOrgWebhook'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'getOrgWebhook'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * List all webhooks for an organization.
-   * Supports pagination and sorting options.
-   *
-   * @param orgSlug - Organization identifier
-   * @param options - Optional query parameters for pagination and sorting
-   * @returns List of webhooks with pagination info
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getOrgWebhooksList(
-    orgSlug: string,
-    options?:
-      | {
-          direction?: string | undefined
-          page?: number | undefined
-          per_page?: number | undefined
-          sort?: string | undefined
-        }
-      | undefined,
-  ): Promise<SocketSdkResult<'getOrgWebhooksList'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/webhooks?${queryToSearchParams(options as QueryParams)}`,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'getOrgWebhooksList'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'getOrgWebhooksList'>(e)
-    }
-    /* c8 ignore stop */
-  }
-
-  /**
-   * Update an existing webhook's configuration.
-   * All fields are optional - only provided fields will be updated.
-   *
-   * @param orgSlug - Organization identifier
-   * @param webhookId - Webhook ID to update
-   * @param webhookData - Updated webhook configuration
-   * @returns Updated webhook details
-   *
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async updateOrgWebhook(
-    orgSlug: string,
-    webhookId: string,
-    webhookData: {
-      description?: null | string | undefined
-      events?: string[] | undefined
-      filters?: { repositoryIds: null | string[] } | null | undefined
-      headers?: null | Record<string, unknown> | undefined
-      name?: string | undefined
-      secret?: null | string | undefined
-      url?: string | undefined
-    },
-  ): Promise<SocketSdkResult<'updateOrgWebhook'>> {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createRequestWithJson(
-              'PUT',
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/webhooks/${encodeURIComponent(webhookId)}`,
-              webhookData,
-              { ...this.#reqOptions, hooks: this.#hooks },
-            ),
-          ),
-      )
-      return this.#handleApiSuccess<'updateOrgWebhook'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
-    } catch (e) {
-      return await this.#handleApiError<'updateOrgWebhook'>(e)
-    }
-    /* c8 ignore stop */
   }
 }
 

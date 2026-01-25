@@ -504,6 +504,77 @@ export async function getResponseJson(
 }
 
 /**
+ * Create DELETE request with automatic retry logic.
+ * Retries on network errors and 5xx responses.
+ *
+ * @param retries - Number of retry attempts (default: 0, retries disabled)
+ * @param retryDelay - Initial delay in ms (default: 100)
+ */
+/* c8 ignore start - Retry wrapper depends on withRetry which is already ignored */
+export async function createDeleteRequestWithRetry(
+  baseUrl: string,
+  urlPath: string,
+  options?: RequestOptionsWithHooks | undefined,
+  retries = 0,
+  retryDelay = 100,
+): Promise<IncomingMessage> {
+  return await withRetry(
+    () => createDeleteRequest(baseUrl, urlPath, options),
+    retries,
+    retryDelay,
+  )
+}
+/* c8 ignore stop */
+
+/**
+ * Create GET request with automatic retry logic.
+ * Retries on network errors and 5xx responses.
+ *
+ * @param retries - Number of retry attempts (default: 0, retries disabled)
+ * @param retryDelay - Initial delay in ms (default: 100)
+ */
+/* c8 ignore start - Retry wrapper depends on withRetry which is already ignored */
+export async function createGetRequestWithRetry(
+  baseUrl: string,
+  urlPath: string,
+  options?: RequestOptionsWithHooks | undefined,
+  retries = 0,
+  retryDelay = 100,
+): Promise<IncomingMessage> {
+  return await withRetry(
+    () => createGetRequest(baseUrl, urlPath, options),
+    retries,
+    retryDelay,
+  )
+}
+/* c8 ignore stop */
+
+/**
+ * Create request with JSON payload and automatic retry logic.
+ * Retries on network errors and 5xx responses.
+ *
+ * @param retries - Number of retry attempts (default: 0, retries disabled)
+ * @param retryDelay - Initial delay in ms (default: 100)
+ */
+/* c8 ignore start - Retry wrapper depends on withRetry which is already ignored */
+export async function createRequestWithJsonAndRetry(
+  method: SendMethod,
+  baseUrl: string,
+  urlPath: string,
+  json: unknown,
+  options?: RequestOptionsWithHooks | undefined,
+  retries = 0,
+  retryDelay = 100,
+): Promise<IncomingMessage> {
+  return await withRetry(
+    () => createRequestWithJson(method, baseUrl, urlPath, json, options),
+    retries,
+    retryDelay,
+  )
+}
+/* c8 ignore stop */
+
+/**
  * Check if HTTP response has a successful status code (2xx range).
  * Returns true for status codes between 200-299, false otherwise.
  */
@@ -645,76 +716,5 @@ export async function withRetry<T>(
 
   // Fallback error if lastError is somehow undefined.
   throw lastError || new Error('Request failed after retries')
-}
-/* c8 ignore stop */
-
-/**
- * Create GET request with automatic retry logic.
- * Retries on network errors and 5xx responses.
- *
- * @param retries - Number of retry attempts (default: 0, retries disabled)
- * @param retryDelay - Initial delay in ms (default: 100)
- */
-/* c8 ignore start - Retry wrapper depends on withRetry which is already ignored */
-export async function createGetRequestWithRetry(
-  baseUrl: string,
-  urlPath: string,
-  options?: RequestOptionsWithHooks | undefined,
-  retries = 0,
-  retryDelay = 100,
-): Promise<IncomingMessage> {
-  return await withRetry(
-    () => createGetRequest(baseUrl, urlPath, options),
-    retries,
-    retryDelay,
-  )
-}
-/* c8 ignore stop */
-
-/**
- * Create DELETE request with automatic retry logic.
- * Retries on network errors and 5xx responses.
- *
- * @param retries - Number of retry attempts (default: 0, retries disabled)
- * @param retryDelay - Initial delay in ms (default: 100)
- */
-/* c8 ignore start - Retry wrapper depends on withRetry which is already ignored */
-export async function createDeleteRequestWithRetry(
-  baseUrl: string,
-  urlPath: string,
-  options?: RequestOptionsWithHooks | undefined,
-  retries = 0,
-  retryDelay = 100,
-): Promise<IncomingMessage> {
-  return await withRetry(
-    () => createDeleteRequest(baseUrl, urlPath, options),
-    retries,
-    retryDelay,
-  )
-}
-/* c8 ignore stop */
-
-/**
- * Create request with JSON payload and automatic retry logic.
- * Retries on network errors and 5xx responses.
- *
- * @param retries - Number of retry attempts (default: 0, retries disabled)
- * @param retryDelay - Initial delay in ms (default: 100)
- */
-/* c8 ignore start - Retry wrapper depends on withRetry which is already ignored */
-export async function createRequestWithJsonAndRetry(
-  method: SendMethod,
-  baseUrl: string,
-  urlPath: string,
-  json: unknown,
-  options?: RequestOptionsWithHooks | undefined,
-  retries = 0,
-  retryDelay = 100,
-): Promise<IncomingMessage> {
-  return await withRetry(
-    () => createRequestWithJson(method, baseUrl, urlPath, json, options),
-    retries,
-    retryDelay,
-  )
 }
 /* c8 ignore stop */
