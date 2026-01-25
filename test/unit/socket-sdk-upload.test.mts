@@ -11,6 +11,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import * as path from 'node:path'
 import { Readable } from 'node:stream'
+import { setTimeout as sleep } from 'node:timers/promises'
 
 import FormData from 'form-data'
 import nock from 'nock'
@@ -137,7 +138,9 @@ describe('File Upload - createUploadRequest', () => {
     tempDir = mkdtempSync(path.join(tmpdir(), 'socket-sdk-upload-request-'))
   })
 
-  afterEach(() => {
+  afterEach(async () => {
+    // Allow time for any async operations to complete
+    await sleep(10)
     if (tempDir) {
       rmSync(tempDir, { force: true, recursive: true })
     }
@@ -326,7 +329,9 @@ describe('SocketSdk - Upload Manifest', () => {
     sdk = new SocketSdk('test-token', FAST_TEST_CONFIG)
   })
 
-  afterEach(() => {
+  afterEach(async () => {
+    // Allow time for any async operations to complete
+    await sleep(10)
     if (tempDir) {
       rmSync(tempDir, { force: true, recursive: true })
     }
