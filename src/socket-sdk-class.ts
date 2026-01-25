@@ -857,6 +857,97 @@ export class SocketSdk {
   }
 
   /**
+   * Get package metadata and alerts by PURL strings for a specific organization.
+   * Organization-scoped version of batchPackageFetch with security policy label support.
+   *
+   * @param orgSlug - Organization identifier
+   * @param componentsObj - Object containing array of components with PURL strings
+   * @param queryParams - Optional query parameters including labels, alerts, compact, etc.
+   * @returns Package metadata and alerts for the requested PURLs
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.batchOrgPackageFetch('my-org',
+   *   {
+   *     components: [
+   *       { purl: 'pkg:npm/express@4.19.2' },
+   *       { purl: 'pkg:pypi/django@5.0.6' }
+   *     ]
+   *   },
+   *   { labels: ['production'], alerts: true }
+   * )
+   *
+   * if (result.success) {
+   *   for (const artifact of result.data) {
+   *     console.log(`${artifact.name}@${artifact.version}`)
+   *   }
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/batchpackagefetchbyorg
+   * @apiEndpoint POST /orgs/{org_slug}/purl
+   * @quota 100 units
+   * @scopes packages:list
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async batchOrgPackageFetch(
+    orgSlug: string,
+    componentsObj: { components: Array<{ purl: string }> },
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'batchPackageFetchByOrg'>> {
+    let res: IncomingMessage | undefined
+    try {
+      const req = getHttpModule(this.#baseUrl)
+        .request(
+          `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/purl?${queryToSearchParams(queryParams)}`,
+          {
+            method: 'POST',
+            ...this.#reqOptions,
+          },
+        )
+        .end(JSON.stringify(componentsObj))
+      res = await getResponse(req)
+
+      // Throw ResponseError for non-2xx status codes so retry logic works properly.
+      /* c8 ignore next 3 - Error response handling for batch requests, requires API to return errors */
+      if (!isResponseOk(res)) {
+        throw new ResponseError(res)
+      }
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'batchPackageFetchByOrg'>(e)
+    }
+    /* c8 ignore stop */
+    // Validate response before processing.
+    /* c8 ignore next 3 - Defensive check, response should always be defined after successful request */
+    if (!res) {
+      throw new Error('Failed to get response from batch PURL request')
+    }
+    // Parse the newline delimited JSON response.
+    const rli = readline.createInterface({
+      input: res,
+      crlfDelay: Number.POSITIVE_INFINITY,
+      signal: abortSignal,
+    })
+    const results: SocketArtifact[] = []
+    for await (const line of rli) {
+      const trimmed = line.trim()
+      const artifact = trimmed
+        ? (jsonParse(line, { throws: false }) as SocketArtifact)
+        : /* c8 ignore next - Empty line handling in batch parsing. */ null
+      if (isObjectObject(artifact)) {
+        results.push(artifact!)
+      }
+    }
+    const compact = urlSearchParamAsBoolean(
+      getOwn(queryParams, 'compact') as string | null | undefined,
+    )
+    return this.#handleApiSuccess<'batchPackageFetchByOrg'>(
+      compact ? (results as CompactSocketArtifact[]) : results,
+    )
+  }
+
+  /**
    * Create a snapshot of project dependencies by uploading manifest files.
    * Analyzes dependency files to generate a comprehensive security report.
    *
@@ -1606,6 +1697,67 @@ export class SocketSdk {
   }
 
   /**
+   * Export vulnerability exploitability data as an OpenVEX v0.2.0 document.
+   * Includes patch data and reachability analysis for vulnerability assessment.
+   *
+   * @param orgSlug - Organization identifier
+   * @param id - Full scan or SBOM report ID
+   * @param options - Optional parameters including author, role, and document_id
+   * @returns OpenVEX document with vulnerability exploitability information
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.exportOpenVEX('my-org', 'scan-id', {
+   *   author: 'Security Team',
+   *   role: 'VEX Generator'
+   * })
+   *
+   * if (result.success) {
+   *   console.log('VEX Version:', result.data.version)
+   *   console.log('Statements:', result.data.statements.length)
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/exportopenvex
+   * @apiEndpoint GET /orgs/{org_slug}/export/openvex/{id}
+   * @quota 1 unit
+   * @scopes report:read
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async exportOpenVEX(
+    orgSlug: string,
+    id: string,
+    options?:
+      | {
+          author?: string | undefined
+          document_id?: string | undefined
+          role?: string | undefined
+        }
+      | undefined,
+  ): Promise<SocketSdkResult<'exportOpenVEX'>> {
+    const queryString = options
+      ? `?${queryToSearchParams(options as QueryParams)}`
+      : ''
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/export/openvex/${encodeURIComponent(id)}${queryString}`,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'exportOpenVEX'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'exportOpenVEX'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
    * Execute a raw GET request to any API endpoint with configurable response type.
    * Supports both throwing (default) and non-throwing modes.
    * @param urlPath - API endpoint path (e.g., 'organizations')
@@ -1918,6 +2070,63 @@ export class SocketSdk {
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'alertsList'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
+   * List full scans associated with a specific alert.
+   * Returns paginated full scan references for alert investigation.
+   *
+   * @param orgSlug - Organization identifier
+   * @param options - Query parameters including alertKey, range, pagination
+   * @returns Paginated array of full scans associated with the alert
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.getOrgAlertFullScans('my-org', {
+   *   alertKey: 'npm/lodash/cve-2021-23337',
+   *   range: '-7d',
+   *   per_page: 50
+   * })
+   *
+   * if (result.success) {
+   *   for (const item of result.data.items) {
+   *     console.log('Full Scan ID:', item.fullScanId)
+   *   }
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/alertfullscans
+   * @apiEndpoint GET /orgs/{org_slug}/alert-full-scan-search
+   * @quota 10 units
+   * @scopes alerts:list
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgAlertFullScans(
+    orgSlug: string,
+    options: {
+      alertKey: string
+      per_page?: number | undefined
+      range?: string | undefined
+      startAfterCursor?: string | undefined
+    },
+  ): Promise<SocketSdkResult<'alertFullScans'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/alert-full-scan-search?${queryToSearchParams(options as QueryParams)}`,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'alertFullScans'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'alertFullScans'>(e)
     }
     /* c8 ignore stop */
   }
@@ -2987,6 +3196,72 @@ export class SocketSdk {
       }
       /* c8 ignore stop */
     }
+  }
+
+  /**
+   * Create a new full scan by rescanning an existing scan.
+   * Supports shallow (policy reapplication) and deep (dependency resolution rerun) modes.
+   *
+   * @param orgSlug - Organization identifier
+   * @param fullScanId - Full scan ID to rescan
+   * @param options - Rescan options including mode (shallow or deep)
+   * @returns New scan ID and status
+   *
+   * @example
+   * ```typescript
+   * // Shallow rescan (reapply policies to cached data)
+   * const result = await sdk.rescanFullScan('my-org', 'scan_123', {
+   *   mode: 'shallow'
+   * })
+   *
+   * if (result.success) {
+   *   console.log('New Scan ID:', result.data.id)
+   *   console.log('Status:', result.data.status)
+   * }
+   *
+   * // Deep rescan (rerun dependency resolution)
+   * const deepResult = await sdk.rescanFullScan('my-org', 'scan_123', {
+   *   mode: 'deep'
+   * })
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/rescanorgfullscan
+   * @apiEndpoint POST /orgs/{org_slug}/full-scans/{full_scan_id}/rescan
+   * @quota 1 unit
+   * @scopes full-scans:create
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async rescanFullScan(
+    orgSlug: string,
+    fullScanId: string,
+    options?:
+      | {
+          mode?: 'shallow' | 'deep' | undefined
+        }
+      | undefined,
+  ): Promise<SocketSdkResult<'rescanOrgFullScan'>> {
+    const queryString = options
+      ? `?${queryToSearchParams(options as QueryParams)}`
+      : ''
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/rescan${queryString}`,
+              {},
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'rescanOrgFullScan'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'rescanOrgFullScan'>(e)
+    }
+    /* c8 ignore stop */
   }
 
   /**
