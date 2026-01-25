@@ -30,25 +30,6 @@ export class PromiseQueue {
     }
   }
 
-  /**
-   * Add a task to the queue
-   * @param fn - Async function to execute
-   * @returns Promise that resolves with the function's result
-   */
-  async add<T>(fn: () => Promise<T>): Promise<T> {
-    return await new Promise<T>((resolve, reject) => {
-      const task: QueuedTask<T> = { fn, resolve, reject }
-
-      if (this.maxQueueLength && this.queue.length >= this.maxQueueLength) {
-        // Drop oldest task to prevent memory buildup
-        this.queue.shift()
-      }
-
-      this.queue.push(task as QueuedTask<unknown>)
-      this.runNext()
-    })
-  }
-
   private runNext(): void {
     if (this.running >= this.maxConcurrency || !this.queue.length) {
       return
@@ -73,6 +54,39 @@ export class PromiseQueue {
   }
 
   /**
+   * Get the number of tasks currently running
+   */
+  get activeCount(): number {
+    return this.running
+  }
+
+  /**
+   * Add a task to the queue
+   * @param fn - Async function to execute
+   * @returns Promise that resolves with the function's result
+   */
+  async add<T>(fn: () => Promise<T>): Promise<T> {
+    return await new Promise<T>((resolve, reject) => {
+      const task: QueuedTask<T> = { fn, resolve, reject }
+
+      if (this.maxQueueLength && this.queue.length >= this.maxQueueLength) {
+        // Drop oldest task to prevent memory buildup
+        this.queue.shift()
+      }
+
+      this.queue.push(task as QueuedTask<unknown>)
+      this.runNext()
+    })
+  }
+
+  /**
+   * Clear all pending tasks from the queue (does not affect running tasks)
+   */
+  clear(): void {
+    this.queue = []
+  }
+
+  /**
    * Wait for all queued and running tasks to complete
    */
   async onIdle(): Promise<void> {
@@ -89,23 +103,9 @@ export class PromiseQueue {
   }
 
   /**
-   * Get the number of tasks currently running
-   */
-  get activeCount(): number {
-    return this.running
-  }
-
-  /**
    * Get the number of tasks waiting in the queue
    */
   get pendingCount(): number {
     return this.queue.length
-  }
-
-  /**
-   * Clear all pending tasks from the queue (does not affect running tasks)
-   */
-  clear(): void {
-    this.queue = []
   }
 }
