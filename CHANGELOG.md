@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.3.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.3.0) - 2026-01-25
+
+### Added
+
+- New SDK convenience methods for OpenAPI v3.3.0 endpoints:
+  - `batchOrgPackageFetch(orgSlug, components, options)` - Organization-scoped PURL batch lookup with security policy label support
+  - `exportOpenVEX(orgSlug, id, options)` - Export vulnerability exploitability data as OpenVEX v0.2.0 documents (includes patch data and reachability analysis)
+  - `getOrgAlertFullScans(orgSlug, options)` - List full scans associated with specific alerts
+  - `rescanFullScan(orgSlug, fullScanId, options)` - Rescan existing full scans with shallow (policy reapplication) or deep (dependency resolution rerun) modes
+- Repository endpoints now support optional `workspace` parameter for workspace-scoped operations:
+  - `createRepository(orgSlug, params, { workspace })`
+  - `deleteRepository(orgSlug, repoSlug, { workspace })`
+  - `getRepository(orgSlug, repoSlug, { workspace })`
+  - `updateRepository(orgSlug, repoSlug, params, { workspace })`
+
+### Changed
+
+- Updated `@socketsecurity/lib` to v5.5.3
+- TypeScript: Auto-generated strict types from OpenAPI schema for improved type safety
+- TypeScript: All optional properties now explicitly include `| undefined` for better null checking
+- Synced OpenAPI type definitions with latest API specification
+
 ## [3.2.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.2.0) - 2025-12-08
 
 ### Added
