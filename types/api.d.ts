@@ -7092,10 +7092,35 @@ export interface operations {
           'application/json': {
             results: Array<{
               /**
+               * @description The uuid of the triage action
+               * @default
+               */
+              uuid?: string | null
+              /**
+               * @description The package type associated with the triage state
+               * @default
+               */
+              package_type?: string | null
+              /**
+               * @description The package namespace associated with the triage state
+               * @default
+               */
+              package_namespace?: string | null
+              /**
+               * @description The package name associated with the triage state
+               * @default
+               */
+              package_name?: string | null
+              /**
+               * @description The package version associated with the triage state
+               * @default
+               */
+              package_version?: string | null
+              /**
                * @description The alert_key associated with the triage state
                * @default
                */
-              alert_key?: string
+              alert_key?: string | null
               /**
                * @description The creation date of the triage action
                * @default
@@ -7155,6 +7180,16 @@ export interface operations {
       content: {
         'application/json': {
           alertTriage: Array<{
+            /** @default */
+            uuid?: string
+            /** @default */
+            packageType?: string
+            /** @default */
+            packageNamespace?: string
+            /** @default */
+            packageName?: string
+            /** @default */
+            packageVersion?: string
             /** @default */
             alertKey?: string
             /** @default */
