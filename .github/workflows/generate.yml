@@ -47,6 +47,7 @@ jobs:
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@4709a2443e5a036bb0cd94e5d1559f138f05994c # main
 
       - name: Generate SDK
+        # Fetches OpenAPI, generates types/api.d.ts and src/types-strict.ts
         run: pnpm run generate-sdk
 
       - name: Check for changes
@@ -93,11 +94,12 @@ jobs:
 
           The OpenAPI definition in the API has been updated. This PR automatically:
           - Downloads the latest OpenAPI specification
-          - Regenerates TypeScript types
+          - Regenerates TypeScript types (types/api.d.ts)
+          - Regenerates strict TypeScript types (src/types-strict.ts)
           - Updates SDK method signatures if needed
 
           ### What's Changed
-          See the file changes below for specific updates to the API types and methods.
+          See the file changes below for specific updates to the API types, strict types, and methods.
 
           ⚠️ **Please review carefully for any breaking changes in the API.**" \
               --label "dependencies" \
