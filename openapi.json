@@ -16345,10 +16345,41 @@
                         "type": "object",
                         "additionalProperties": false,
                         "properties": {
+                          "uuid": {
+                            "type": "string",
+                            "description": "The uuid of the triage action",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "package_type": {
+                            "type": "string",
+                            "description": "The package type associated with the triage state",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "package_namespace": {
+                            "type": "string",
+                            "description": "The package namespace associated with the triage state",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "package_name": {
+                            "type": "string",
+                            "description": "The package name associated with the triage state",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "package_version": {
+                            "type": "string",
+                            "description": "The package version associated with the triage state",
+                            "default": "",
+                            "nullable": true
+                          },
                           "alert_key": {
                             "type": "string",
                             "description": "The alert_key associated with the triage state",
-                            "default": ""
+                            "default": "",
+                            "nullable": true
                           },
                           "created_at": {
                             "type": "string",
@@ -16452,6 +16483,31 @@
                       "type": "object",
                       "additionalProperties": false,
                       "properties": {
+                        "uuid": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "packageType": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "packageNamespace": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "packageName": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "packageVersion": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
                         "alertKey": {
                           "type": "string",
                           "description": "",
