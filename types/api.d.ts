@@ -13495,6 +13495,10 @@ export interface operations {
         'filters.artifactType'?: string
         /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
         'filters.artifactType.notIn'?: string
+        /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be included */
+        'filters.cvePatchStatus'?: string
+        /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be excluded */
+        'filters.cvePatchStatus.notIn'?: string
         /** @description Dead/reachable dependency filter flag */
         'filters.dependencyDead'?: boolean
         /** @description Dead/reachable dependency filter flag */
@@ -13694,6 +13698,10 @@ export interface operations {
                 artifactType?: string[]
                 /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
                 'artifactType.notIn'?: string[]
+                /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be included */
+                cvePatchStatus?: string[]
+                /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be excluded */
+                'cvePatchStatus.notIn'?: string[]
                 /** @description Dead/reachable dependency filter flag */
                 dependencyDead?: boolean[]
                 /** @description Development/production dependency filter flag */
@@ -13739,7 +13747,7 @@ export interface operations {
         date?: string
         /** @description The number of days of data to fetch as an offset from input date */
         range?: string
-        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoFullName,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,alertReachabilityAnalysisType,alertPriority,alertKEV,alertEPSS,dependencyDirect,dependencyDev,dependencyDead) */
+        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoFullName,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,cvePatchStatus,alertReachabilityAnalysisType,alertPriority,alertKEV,alertEPSS,dependencyDirect,dependencyDev,dependencyDead) */
         'aggregation.fields'?: string
         /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
         'filters.alertAction'?: string
@@ -13809,6 +13817,10 @@ export interface operations {
         'filters.artifactType'?: string
         /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
         'filters.artifactType.notIn'?: string
+        /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be included */
+        'filters.cvePatchStatus'?: string
+        /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be excluded */
+        'filters.cvePatchStatus.notIn'?: string
         /** @description Dead/reachable dependency filter flag */
         'filters.dependencyDead'?: boolean
         /** @description Dead/reachable dependency filter flag */
@@ -13924,6 +13936,10 @@ export interface operations {
                 artifactType?: string[]
                 /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
                 'artifactType.notIn'?: string[]
+                /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be included */
+                cvePatchStatus?: string[]
+                /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be excluded */
+                'cvePatchStatus.notIn'?: string[]
                 /** @description Dead/reachable dependency filter flag */
                 dependencyDead?: boolean[]
                 /** @description Development/production dependency filter flag */
@@ -14570,6 +14586,8 @@ export interface operations {
                 | 'socket-basics:read'
                 | 'telemetry-policy'
                 | 'telemetry-policy:update'
+                | 'telemetry-events'
+                | 'telemetry-events:list'
                 | 'threat-feed'
                 | 'threat-feed:list'
                 | 'triage'
@@ -14698,6 +14716,8 @@ export interface operations {
             | 'socket-basics:read'
             | 'telemetry-policy'
             | 'telemetry-policy:update'
+            | 'telemetry-events'
+            | 'telemetry-events:list'
             | 'threat-feed'
             | 'threat-feed:list'
             | 'triage'
@@ -14889,6 +14909,8 @@ export interface operations {
             | 'socket-basics:read'
             | 'telemetry-policy'
             | 'telemetry-policy:update'
+            | 'telemetry-events'
+            | 'telemetry-events:list'
             | 'threat-feed'
             | 'threat-feed:list'
             | 'triage'
@@ -16256,6 +16278,10 @@ export interface operations {
         'filters.artifactType'?: string
         /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
         'filters.artifactType.notIn'?: string
+        /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be included */
+        'filters.cvePatchStatus'?: string
+        /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be excluded */
+        'filters.cvePatchStatus.notIn'?: string
         /** @description Dead/reachable dependency filter flag */
         'filters.dependencyDead'?: boolean
         /** @description Dead/reachable dependency filter flag */
@@ -16546,6 +16572,10 @@ export interface operations {
                 artifactType?: string[]
                 /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
                 'artifactType.notIn'?: string[]
+                /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be included */
+                cvePatchStatus?: string[]
+                /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be excluded */
+                'cvePatchStatus.notIn'?: string[]
                 /** @description Dead/reachable dependency filter flag */
                 dependencyDead?: boolean[]
                 /** @description Development/production dependency filter flag */
