@@ -13814,6 +13814,302 @@
         "x-readme": {}
       }
     },
+    "/orgs/{org_slug}/full-scans/{full_scan_id}/format/csv": {
+      "post": {
+        "tags": [
+          "Full Scans"
+        ],
+        "summary": "Export CSV of alerts for full scan",
+        "operationId": "getOrgFullScanCsv",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "full_scan_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the full scan",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "include_alert_priority_details",
+            "in": "query",
+            "required": false,
+            "description": "Control which alert priority fields to include in the response. Set to \"true\" to include all fields, \"false\" to exclude all fields, or specify individual fields like \"components,formula\" to include only those fields.",
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "boolean",
+                  "default": false
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "component",
+                      "formula"
+                    ]
+                  }
+                }
+              ],
+              "default": false
+            }
+          },
+          {
+            "name": "include_license_details",
+            "in": "query",
+            "required": true,
+            "description": "Include license details in the response.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "filters": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "value": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "description": ""
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "value"
+                      ]
+                    },
+                    "description": ""
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "full-scans:list"
+            ]
+          },
+          {
+            "basicAuth": [
+              "full-scans:list"
+            ]
+          }
+        ],
+        "description": "Export a CSV file containing all alerts from a full scan.\n\nThe CSV includes details about each alert and the affected packages.\nYou can optionally filter using the request body \"filters\" array. Supported filter IDs include:\n- alert.action (error|warn|monitor|ignore)\n- alert.type\n- alert.category\n- alert.severity (low|medium|middle|high|critical or 0-3)\n- artifact.type (purl type, e.g. npm, pypi)\n- dependency.type (direct|transitive)\n- dependency.scope (dev|normal)\n- dependency.usage (used|unused)\n- manifest.file\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
+        "responses": {
+          "200": {
+            "content": {
+              "text/csv": {}
+            },
+            "description": "CSV export of alerts"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/full-scans/{full_scan_id}/format/pdf": {
+      "post": {
+        "tags": [
+          "Full Scans"
+        ],
+        "summary": "Generate PDF report for full scan",
+        "operationId": "getOrgFullScanPdf",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "full_scan_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the full scan",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "include_alert_priority_details",
+            "in": "query",
+            "required": false,
+            "description": "Control which alert priority fields to include in the response. Set to \"true\" to include all fields, \"false\" to exclude all fields, or specify individual fields like \"components,formula\" to include only those fields.",
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "boolean",
+                  "default": false
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "component",
+                      "formula"
+                    ]
+                  }
+                }
+              ],
+              "default": false
+            }
+          },
+          {
+            "name": "include_license_details",
+            "in": "query",
+            "required": true,
+            "description": "Include license details in the response.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "filters": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "value": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "description": ""
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "value"
+                      ]
+                    },
+                    "description": ""
+                  },
+                  "groupBy": {
+                    "type": "string",
+                    "description": "",
+                    "default": ""
+                  },
+                  "additionalInformation": {
+                    "type": "string",
+                    "description": "",
+                    "default": ""
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "full-scans:list"
+            ]
+          },
+          {
+            "basicAuth": [
+              "full-scans:list"
+            ]
+          }
+        ],
+        "description": "Generate a PDF report for all alerts in a full scan.\n\nThis endpoint streams a PDF document containing all alerts found in the full scan,\nwith optional filtering and grouping options.\n\nSupported request body filter IDs include:\n- alert.action (error|warn|monitor|ignore)\n- alert.type\n- alert.category\n- alert.severity (low|medium|middle|high|critical or 0-3)\n- artifact.type (purl type, e.g. npm, pypi)\n- dependency.type (direct|transitive)\n- dependency.scope (dev|normal)\n- dependency.usage (used|unused)\n- manifest.file\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/pdf": {}
+            },
+            "description": "PDF report of alerts"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
     "/orgs/{org_slug}/export/cdx/{id}": {
       "get": {
         "tags": [
@@ -16371,7 +16667,7 @@
                           },
                           "package_version": {
                             "type": "string",
-                            "description": "The package version associated with the triage state",
+                            "description": "The package version associated with the triage state, it can contain a * suffix for wildcard matching",
                             "default": "",
                             "nullable": true
                           },
@@ -16467,6 +16763,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "description": "Set to true to force broad triage updates, these are triages lacking a specific alertKey or granular artifact information which may have limited introspection to see what they apply to.",
+            "schema": {
+              "type": "string",
+              "default": "false"
+            }
           }
         ],
         "requestBody": {
@@ -16486,32 +16792,38 @@
                         "uuid": {
                           "type": "string",
                           "description": "",
-                          "default": ""
+                          "default": "",
+                          "nullable": true
                         },
                         "packageType": {
                           "type": "string",
                           "description": "",
-                          "default": ""
+                          "default": "",
+                          "nullable": true
                         },
                         "packageNamespace": {
                           "type": "string",
                           "description": "",
-                          "default": ""
+                          "default": "",
+                          "nullable": true
                         },
                         "packageName": {
                           "type": "string",
                           "description": "",
-                          "default": ""
+                          "default": "",
+                          "nullable": true
                         },
                         "packageVersion": {
                           "type": "string",
                           "description": "",
-                          "default": ""
+                          "default": "",
+                          "nullable": true
                         },
                         "alertKey": {
                           "type": "string",
                           "description": "",
-                          "default": ""
+                          "default": "",
+                          "nullable": true
                         },
                         "note": {
                           "type": "string",
@@ -16555,9 +16867,9 @@
             ]
           }
         ],
-        "description": "Update triage actions on organizaton alerts.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- triage:alerts-update",
+        "description": "Update triage actions on organization alerts.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- triage:alerts-update",
         "responses": {
-          "202": {
+          "200": {
             "content": {
               "application/json": {
                 "schema": {
@@ -16578,6 +16890,88 @@
               }
             },
             "description": "Updated Alert Triage"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/triage/alerts/{uuid}": {
+      "delete": {
+        "tags": [
+          "Triage"
+        ],
+        "summary": "Delete Org Alert Triage",
+        "operationId": "deleteOrgAlertTriage",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the alert triage entry to delete",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [
+              "triage:alerts-update"
+            ]
+          },
+          {
+            "basicAuth": [
+              "triage:alerts-update"
+            ]
+          }
+        ],
+        "description": "Delete a specific triage rule by UUID.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- triage:alerts-update",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "result": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            },
+            "description": "Deleted Alert Triage"
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -32868,6 +33262,24 @@
             }
           },
           {
+            "name": "filters.cvePatchStatus",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of patch statuses (\"patch_unavailable\", \"patch_available\", or \"patch_applied\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.cvePatchStatus.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of patch statuses (\"patch_unavailable\", \"patch_available\", or \"patch_applied\") that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "filters.dependencyDead",
             "in": "query",
             "required": false,
@@ -33638,6 +34050,24 @@
                               },
                               "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be excluded"
                             },
+                            "cvePatchStatus": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of patch statuses (\"patch_unavailable\", \"patch_available\", or \"patch_applied\") that should be included"
+                            },
+                            "cvePatchStatus.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of patch statuses (\"patch_unavailable\", \"patch_available\", or \"patch_applied\") that should be excluded"
+                            },
                             "dependencyDead": {
                               "type": "array",
                               "items": {
@@ -33800,7 +34230,7 @@
             "name": "aggregation.fields",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoFullName,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,alertReachabilityAnalysisType,alertPriority,alertKEV,alertEPSS,dependencyDirect,dependencyDev,dependencyDead)",
+            "description": "Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoFullName,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,cvePatchStatus,alertReachabilityAnalysisType,alertPriority,alertKEV,alertEPSS,dependencyDirect,dependencyDev,dependencyDead)",
             "schema": {
               "type": "string",
               "default": ""
@@ -34110,6 +34540,24 @@
             "in": "query",
             "required": false,
             "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.cvePatchStatus",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of patch statuses (\"patch_unavailable\", \"patch_available\", or \"patch_applied\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.cvePatchStatus.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of patch statuses (\"patch_unavailable\", \"patch_available\", or \"patch_applied\") that should be excluded",
             "schema": {
               "type": "string"
             }
@@ -34609,6 +35057,24 @@
                                 "default": ""
                               },
                               "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be excluded"
+                            },
+                            "cvePatchStatus": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of patch statuses (\"patch_unavailable\", \"patch_available\", or \"patch_applied\") that should be included"
+                            },
+                            "cvePatchStatus.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of patch statuses (\"patch_unavailable\", \"patch_available\", or \"patch_applied\") that should be excluded"
                             },
                             "dependencyDead": {
                               "type": "array",
@@ -35790,6 +36256,7 @@
                 "CreateArtifact",
                 "CreateLabel",
                 "CreateWebhook",
+                "DeleteAlertTriage",
                 "DeleteApiToken",
                 "DeleteFullScan",
                 "DeleteLabel",
@@ -36105,6 +36572,8 @@
                         "socket-basics:read",
                         "telemetry-policy",
                         "telemetry-policy:update",
+                        "telemetry-events",
+                        "telemetry-events:list",
                         "threat-feed",
                         "threat-feed:list",
                         "triage",
@@ -36548,6 +37017,8 @@
                                 "socket-basics:read",
                                 "telemetry-policy",
                                 "telemetry-policy:update",
+                                "telemetry-events",
+                                "telemetry-events:list",
                                 "threat-feed",
                                 "threat-feed:list",
                                 "triage",
@@ -36729,6 +37200,8 @@
                         "socket-basics:read",
                         "telemetry-policy",
                         "telemetry-policy:update",
+                        "telemetry-events",
+                        "telemetry-events:list",
                         "threat-feed",
                         "threat-feed:list",
                         "triage",
@@ -39699,6 +40172,24 @@
             }
           },
           {
+            "name": "filters.cvePatchStatus",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of patch statuses (\"patch_unavailable\", \"patch_available\", or \"patch_applied\") that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.cvePatchStatus.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of patch statuses (\"patch_unavailable\", \"patch_available\", or \"patch_applied\") that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "filters.dependencyDead",
             "in": "query",
             "required": false,
@@ -40858,6 +41349,24 @@
                                 "default": ""
                               },
                               "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be excluded"
+                            },
+                            "cvePatchStatus": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of patch statuses (\"patch_unavailable\", \"patch_available\", or \"patch_applied\") that should be included"
+                            },
+                            "cvePatchStatus.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of patch statuses (\"patch_unavailable\", \"patch_available\", or \"patch_applied\") that should be excluded"
                             },
                             "dependencyDead": {
                               "type": "array",

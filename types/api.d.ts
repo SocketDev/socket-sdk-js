@@ -257,6 +257,56 @@ export interface paths {
      */
     post: operations['rescanOrgFullScan']
   }
+  '/orgs/{org_slug}/full-scans/{full_scan_id}/format/csv': {
+    /**
+     * Export CSV of alerts for full scan
+     * @description Export a CSV file containing all alerts from a full scan.
+     *
+     * The CSV includes details about each alert and the affected packages.
+     * You can optionally filter using the request body "filters" array. Supported filter IDs include:
+     * - alert.action (error|warn|monitor|ignore)
+     * - alert.type
+     * - alert.category
+     * - alert.severity (low|medium|middle|high|critical or 0-3)
+     * - artifact.type (purl type, e.g. npm, pypi)
+     * - dependency.type (direct|transitive)
+     * - dependency.scope (dev|normal)
+     * - dependency.usage (used|unused)
+     * - manifest.file
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - full-scans:list
+     */
+    post: operations['getOrgFullScanCsv']
+  }
+  '/orgs/{org_slug}/full-scans/{full_scan_id}/format/pdf': {
+    /**
+     * Generate PDF report for full scan
+     * @description Generate a PDF report for all alerts in a full scan.
+     *
+     * This endpoint streams a PDF document containing all alerts found in the full scan,
+     * with optional filtering and grouping options.
+     *
+     * Supported request body filter IDs include:
+     * - alert.action (error|warn|monitor|ignore)
+     * - alert.type
+     * - alert.category
+     * - alert.severity (low|medium|middle|high|critical or 0-3)
+     * - artifact.type (purl type, e.g. npm, pypi)
+     * - dependency.type (direct|transitive)
+     * - dependency.scope (dev|normal)
+     * - dependency.usage (used|unused)
+     * - manifest.file
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - full-scans:list
+     */
+    post: operations['getOrgFullScanPdf']
+  }
   '/orgs/{org_slug}/export/cdx/{id}': {
     /**
      * Export CycloneDX SBOM (Beta)
@@ -426,7 +476,7 @@ export interface paths {
     get: operations['getOrgTriage']
     /**
      * Update Org Alert Triage
-     * @description Update triage actions on organizaton alerts.
+     * @description Update triage actions on organization alerts.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -434,6 +484,18 @@ export interface paths {
      * - triage:alerts-update
      */
     post: operations['updateOrgAlertTriage']
+  }
+  '/orgs/{org_slug}/triage/alerts/{uuid}': {
+    /**
+     * Delete Org Alert Triage
+     * @description Delete a specific triage rule by UUID.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - triage:alerts-update
+     */
+    delete: operations['deleteOrgAlertTriage']
   }
   '/orgs/{org_slug}/repos': {
     /**
@@ -6227,6 +6289,138 @@ export interface operations {
     }
   }
   /**
+   * Export CSV of alerts for full scan
+   * @description Export a CSV file containing all alerts from a full scan.
+   *
+   * The CSV includes details about each alert and the affected packages.
+   * You can optionally filter using the request body "filters" array. Supported filter IDs include:
+   * - alert.action (error|warn|monitor|ignore)
+   * - alert.type
+   * - alert.category
+   * - alert.severity (low|medium|middle|high|critical or 0-3)
+   * - artifact.type (purl type, e.g. npm, pypi)
+   * - dependency.type (direct|transitive)
+   * - dependency.scope (dev|normal)
+   * - dependency.usage (used|unused)
+   * - manifest.file
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:list
+   */
+  getOrgFullScanCsv: {
+    parameters: {
+      query: {
+        /** @description Control which alert priority fields to include in the response. Set to "true" to include all fields, "false" to exclude all fields, or specify individual fields like "components,formula" to include only those fields. */
+        include_alert_priority_details?:
+          | boolean
+          | Array<'component' | 'formula'>
+        /** @description Include license details in the response. */
+        include_license_details: boolean
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The ID of the full scan */
+        full_scan_id: string
+      }
+    }
+    requestBody?: {
+      content: {
+        'application/json': {
+          filters?: Array<{
+            /** @default */
+            id: string
+            value: string[]
+          }>
+        }
+      }
+    }
+    responses: {
+      /** @description CSV export of alerts */
+      200: {
+        content: {
+          'text/csv': unknown
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Generate PDF report for full scan
+   * @description Generate a PDF report for all alerts in a full scan.
+   *
+   * This endpoint streams a PDF document containing all alerts found in the full scan,
+   * with optional filtering and grouping options.
+   *
+   * Supported request body filter IDs include:
+   * - alert.action (error|warn|monitor|ignore)
+   * - alert.type
+   * - alert.category
+   * - alert.severity (low|medium|middle|high|critical or 0-3)
+   * - artifact.type (purl type, e.g. npm, pypi)
+   * - dependency.type (direct|transitive)
+   * - dependency.scope (dev|normal)
+   * - dependency.usage (used|unused)
+   * - manifest.file
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - full-scans:list
+   */
+  getOrgFullScanPdf: {
+    parameters: {
+      query: {
+        /** @description Control which alert priority fields to include in the response. Set to "true" to include all fields, "false" to exclude all fields, or specify individual fields like "components,formula" to include only those fields. */
+        include_alert_priority_details?:
+          | boolean
+          | Array<'component' | 'formula'>
+        /** @description Include license details in the response. */
+        include_license_details: boolean
+      }
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The ID of the full scan */
+        full_scan_id: string
+      }
+    }
+    requestBody?: {
+      content: {
+        'application/json': {
+          filters?: Array<{
+            /** @default */
+            id: string
+            value: string[]
+          }>
+          /** @default */
+          groupBy?: string
+          /** @default */
+          additionalInformation?: string
+        }
+      }
+    }
+    responses: {
+      /** @description PDF report of alerts */
+      200: {
+        content: {
+          'application/pdf': unknown
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
    * Export CycloneDX SBOM (Beta)
    * @description Export a Socket SBOM as a CycloneDX SBOM
    *
@@ -7112,7 +7306,7 @@ export interface operations {
                */
               package_name?: string | null
               /**
-               * @description The package version associated with the triage state
+               * @description The package version associated with the triage state, it can contain a * suffix for wildcard matching
                * @default
                */
               package_version?: string | null
@@ -7162,7 +7356,7 @@ export interface operations {
   }
   /**
    * Update Org Alert Triage
-   * @description Update triage actions on organizaton alerts.
+   * @description Update triage actions on organization alerts.
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -7171,6 +7365,10 @@ export interface operations {
    */
   updateOrgAlertTriage: {
     parameters: {
+      query?: {
+        /** @description Set to true to force broad triage updates, these are triages lacking a specific alertKey or granular artifact information which may have limited introspection to see what they apply to. */
+        force?: string
+      }
       path: {
         /** @description The slug of the organization */
         org_slug: string
@@ -7181,17 +7379,17 @@ export interface operations {
         'application/json': {
           alertTriage: Array<{
             /** @default */
-            uuid?: string
+            uuid?: string | null
             /** @default */
-            packageType?: string
+            packageType?: string | null
             /** @default */
-            packageNamespace?: string
+            packageNamespace?: string | null
             /** @default */
-            packageName?: string
+            packageName?: string | null
             /** @default */
-            packageVersion?: string
+            packageVersion?: string | null
             /** @default */
-            alertKey?: string
+            alertKey?: string | null
             /** @default */
             note?: string
             /**
@@ -7205,7 +7403,42 @@ export interface operations {
     }
     responses: {
       /** @description Updated Alert Triage */
-      202: {
+      200: {
+        content: {
+          'application/json': {
+            /** @default */
+            result: string
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Delete Org Alert Triage
+   * @description Delete a specific triage rule by UUID.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - triage:alerts-update
+   */
+  deleteOrgAlertTriage: {
+    parameters: {
+      path: {
+        /** @description The slug of the organization */
+        org_slug: string
+        /** @description The UUID of the alert triage entry to delete */
+        uuid: string
+      }
+    }
+    responses: {
+      /** @description Deleted Alert Triage */
+      200: {
         content: {
           'application/json': {
             /** @default */
@@ -13495,6 +13728,10 @@ export interface operations {
         'filters.artifactType'?: string
         /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
         'filters.artifactType.notIn'?: string
+        /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be included */
+        'filters.cvePatchStatus'?: string
+        /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be excluded */
+        'filters.cvePatchStatus.notIn'?: string
         /** @description Dead/reachable dependency filter flag */
         'filters.dependencyDead'?: boolean
         /** @description Dead/reachable dependency filter flag */
@@ -13694,6 +13931,10 @@ export interface operations {
                 artifactType?: string[]
                 /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
                 'artifactType.notIn'?: string[]
+                /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be included */
+                cvePatchStatus?: string[]
+                /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be excluded */
+                'cvePatchStatus.notIn'?: string[]
                 /** @description Dead/reachable dependency filter flag */
                 dependencyDead?: boolean[]
                 /** @description Development/production dependency filter flag */
@@ -13739,7 +13980,7 @@ export interface operations {
         date?: string
         /** @description The number of days of data to fetch as an offset from input date */
         range?: string
-        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoFullName,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,alertReachabilityAnalysisType,alertPriority,alertKEV,alertEPSS,dependencyDirect,dependencyDev,dependencyDead) */
+        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoFullName,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,cvePatchStatus,alertReachabilityAnalysisType,alertPriority,alertKEV,alertEPSS,dependencyDirect,dependencyDev,dependencyDead) */
         'aggregation.fields'?: string
         /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
         'filters.alertAction'?: string
@@ -13809,6 +14050,10 @@ export interface operations {
         'filters.artifactType'?: string
         /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
         'filters.artifactType.notIn'?: string
+        /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be included */
+        'filters.cvePatchStatus'?: string
+        /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be excluded */
+        'filters.cvePatchStatus.notIn'?: string
         /** @description Dead/reachable dependency filter flag */
         'filters.dependencyDead'?: boolean
         /** @description Dead/reachable dependency filter flag */
@@ -13924,6 +14169,10 @@ export interface operations {
                 artifactType?: string[]
                 /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
                 'artifactType.notIn'?: string[]
+                /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be included */
+                cvePatchStatus?: string[]
+                /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be excluded */
+                'cvePatchStatus.notIn'?: string[]
                 /** @description Dead/reachable dependency filter flag */
                 dependencyDead?: boolean[]
                 /** @description Development/production dependency filter flag */
@@ -14307,6 +14556,7 @@ export interface operations {
           | 'CreateArtifact'
           | 'CreateLabel'
           | 'CreateWebhook'
+          | 'DeleteAlertTriage'
           | 'DeleteApiToken'
           | 'DeleteFullScan'
           | 'DeleteLabel'
@@ -14570,6 +14820,8 @@ export interface operations {
                 | 'socket-basics:read'
                 | 'telemetry-policy'
                 | 'telemetry-policy:update'
+                | 'telemetry-events'
+                | 'telemetry-events:list'
                 | 'threat-feed'
                 | 'threat-feed:list'
                 | 'triage'
@@ -14698,6 +14950,8 @@ export interface operations {
             | 'socket-basics:read'
             | 'telemetry-policy'
             | 'telemetry-policy:update'
+            | 'telemetry-events'
+            | 'telemetry-events:list'
             | 'threat-feed'
             | 'threat-feed:list'
             | 'triage'
@@ -14889,6 +15143,8 @@ export interface operations {
             | 'socket-basics:read'
             | 'telemetry-policy'
             | 'telemetry-policy:update'
+            | 'telemetry-events'
+            | 'telemetry-events:list'
             | 'threat-feed'
             | 'threat-feed:list'
             | 'triage'
@@ -16256,6 +16512,10 @@ export interface operations {
         'filters.artifactType'?: string
         /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
         'filters.artifactType.notIn'?: string
+        /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be included */
+        'filters.cvePatchStatus'?: string
+        /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be excluded */
+        'filters.cvePatchStatus.notIn'?: string
         /** @description Dead/reachable dependency filter flag */
         'filters.dependencyDead'?: boolean
         /** @description Dead/reachable dependency filter flag */
@@ -16546,6 +16806,10 @@ export interface operations {
                 artifactType?: string[]
                 /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
                 'artifactType.notIn'?: string[]
+                /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be included */
+                cvePatchStatus?: string[]
+                /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be excluded */
+                'cvePatchStatus.notIn'?: string[]
                 /** @description Dead/reachable dependency filter flag */
                 dependencyDead?: boolean[]
                 /** @description Development/production dependency filter flag */
