@@ -1204,11 +1204,44 @@ export class SocketSdk {
    * Create a diff scan from two full scan IDs.
    * Compares two existing full scans to identify changes.
    *
+   * @param orgSlug - Organization identifier
+   * @param options - Diff scan creation options
+   * @param options.after - ID of the after/head full scan (newer)
+   * @param options.before - ID of the before/base full scan (older)
+   * @param options.description - Description of the diff scan
+   * @param options.external_href - External URL to associate with the diff scan
+   * @param options.merge - Set true for merged commits, false for open PR diffs
+   * @returns Diff scan details
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.createOrgDiffScanFromIds('my-org', {
+   *   before: 'scan-id-1',
+   *   after: 'scan-id-2',
+   *   description: 'Compare versions',
+   *   merge: false
+   * })
+   *
+   * if (result.success) {
+   *   console.log('Diff scan created:', result.data.diff_scan.id)
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/createorgdiffscanfromids
+   * @apiEndpoint POST /orgs/{org_slug}/diff-scans/from-ids
+   * @quota 1 unit
+   * @scopes diff-scans:create, full-scans:list
    * @throws {Error} When server returns 5xx status codes
    */
   async createOrgDiffScanFromIds(
     orgSlug: string,
-    queryParams?: QueryParams | undefined,
+    options: {
+      after: string
+      before: string
+      description?: string | undefined
+      external_href?: string | undefined
+      merge?: boolean | undefined
+    },
   ): Promise<SocketSdkResult<'createOrgDiffScanFromIds'>> {
     try {
       const data = await this.#executeWithRetry(
@@ -1217,7 +1250,7 @@ export class SocketSdk {
             await createRequestWithJson(
               'POST',
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/diff-scans?${queryToSearchParams(queryParams)}`,
+              `orgs/${encodeURIComponent(orgSlug)}/diff-scans/from-ids?${queryToSearchParams(options)}`,
               {},
               { ...this.#reqOptions, hooks: this.#hooks },
             ),
@@ -1338,7 +1371,14 @@ export class SocketSdk {
    * Registers a repository for monitoring and security scanning.
    *
    * @param orgSlug - Organization identifier
-   * @param params - Repository configuration (name, description, homepage, etc.)
+   * @param params - Repository configuration
+   * @param params.archived - Whether the repository is archived
+   * @param params.default_branch - Default branch of the repository
+   * @param params.description - Description of the repository
+   * @param params.homepage - Homepage URL of the repository
+   * @param params.name - Name of the repository
+   * @param params.visibility - Visibility setting ('public' or 'private')
+   * @param params.workspace - Workspace of the repository
    * @returns Created repository details
    *
    * @example
@@ -1346,7 +1386,8 @@ export class SocketSdk {
    * const result = await sdk.createRepository('my-org', {
    *   name: 'my-repo',
    *   description: 'My project repository',
-   *   homepage: 'https://example.com'
+   *   homepage: 'https://example.com',
+   *   visibility: 'private'
    * })
    *
    * if (result.success) {
@@ -1362,7 +1403,17 @@ export class SocketSdk {
    */
   async createRepository(
     orgSlug: string,
-    params?: QueryParams | undefined,
+    params?:
+      | {
+          archived?: boolean | undefined
+          default_branch?: null | string | undefined
+          description?: null | string | undefined
+          homepage?: null | string | undefined
+          name?: string | undefined
+          visibility?: 'private' | 'public' | undefined
+          workspace?: string | undefined
+        }
+      | undefined,
   ): Promise<RepositoryResult | StrictErrorResult> {
     try {
       const data = await this.#executeWithRetry(
@@ -2188,6 +2239,56 @@ export class SocketSdk {
   }
 
   /**
+   * Get GitHub-flavored markdown comments for a diff scan.
+   * Returns dependency overview and alert comments suitable for pull requests.
+   *
+   * @param orgSlug - Organization identifier
+   * @param diffScanId - Diff scan identifier
+   * @param options - Optional query parameters
+   * @param options.github_installation_id - GitHub installation ID for settings
+   * @returns Diff scan metadata with formatted markdown comments
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.getDiffScanGfm('my-org', 'diff-scan-id')
+   *
+   * if (result.success) {
+   *   console.log(result.data.dependency_overview_comment)
+   *   console.log(result.data.dependency_alert_comment)
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/getdiffscangfm
+   * @apiEndpoint GET /orgs/{org_slug}/diff-scans/{diff_scan_id}/gfm
+   * @quota 1 unit
+   * @scopes diff-scans:list
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getDiffScanGfm(
+    orgSlug: string,
+    diffScanId: string,
+    options?: { github_installation_id?: string | undefined } | undefined,
+  ): Promise<SocketSdkResult<'GetDiffScanGfm'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/diff-scans/${encodeURIComponent(diffScanId)}/gfm${options ? `?${queryToSearchParams(options)}` : ''}`,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'GetDiffScanGfm'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'GetDiffScanGfm'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
    * Retrieve the enabled entitlements for an organization.
    *
    * This method fetches the organization's entitlements and filters for only* the enabled ones, returning their keys. Entitlements represent Socket
@@ -3002,9 +3103,62 @@ export class SocketSdk {
   }
 
   /**
+   * Get list of supported file types for full scan generation.
+   * Returns glob patterns for supported manifest files, lockfiles, and configuration formats.
+   *
+   * Files whose names match the patterns returned by this endpoint can be uploaded
+   * for report generation. Examples include `package.json`, `package-lock.json`, and `yarn.lock`.
+   *
+   * @param orgSlug - Organization identifier
+   * @returns Nested object with environment and file type patterns
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.getSupportedFiles('my-org')
+   *
+   * if (result.success) {
+   *   console.log('NPM patterns:', result.data.NPM)
+   *   console.log('PyPI patterns:', result.data.PyPI)
+   * }
+   * ```
+   *
+   * @see https://docs.socket.dev/reference/getsupportedfiles
+   * @apiEndpoint GET /orgs/{org_slug}/supported-files
+   * @quota 1 unit
+   * @scopes No scopes required, but authentication is required
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getSupportedFiles(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'getSupportedFiles'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/supported-files`,
+              {
+                ...this.#reqOptions,
+                hooks: this.#hooks,
+              },
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getSupportedFiles'>(data)
+      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+    } catch (e) {
+      return await this.#handleApiError<'getSupportedFiles'>(e)
+    }
+    /* c8 ignore stop */
+  }
+
+  /**
    * Get list of file types and formats supported for scanning.
    * Returns supported manifest files, lockfiles, and configuration formats.
    *
+   * @deprecated Use getSupportedFiles() instead. This endpoint has been deprecated
+   * since 2023-01-15 and now uses the /report/supported endpoint.
    * @throws {Error} When server returns 5xx status codes
    */
   async getSupportedScanFiles(): Promise<
