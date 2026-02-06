@@ -126,6 +126,7 @@ export type {
   RepositoryLabelResult,
   RepositoryLabelsListData,
   RepositoryLabelsListResult,
+  RepositoryListItem,
   RepositoryResult,
   StreamFullScanOptions,
   StrictErrorResult,

@@ -491,6 +491,19 @@ describe('SocketSdk - API Methods Coverage', () => {
       expect(result.success).toBe(true)
     })
 
+    it('covers createRepository with all options', async () => {
+      const result = await client.createRepository('test-org', {
+        archived: false,
+        default_branch: 'main',
+        description: 'Test repository',
+        homepage: 'https://example.com',
+        name: 'test-repo',
+        visibility: 'private',
+        workspace: 'default',
+      })
+      expect(result.success).toBe(true)
+    })
+
     it('covers getRepository', async () => {
       const result = await client.getRepository('test-org', 'test-repo')
       expect(result.success).toBe(true)
@@ -555,14 +568,37 @@ describe('SocketSdk - API Methods Coverage', () => {
   describe('Diff Scan Methods', () => {
     it('covers createOrgDiffScanFromIds', async () => {
       const result = await client.createOrgDiffScanFromIds('test-org', {
-        from: 'from-id',
-        to: 'to-id',
+        after: 'after-id',
+        before: 'before-id',
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('covers createOrgDiffScanFromIds with all options', async () => {
+      const result = await client.createOrgDiffScanFromIds('test-org', {
+        after: 'after-id',
+        before: 'before-id',
+        description: 'Compare versions',
+        external_href: 'https://github.com/org/repo/pull/123',
+        merge: false,
       })
       expect(result.success).toBe(true)
     })
 
     it('covers getDiffScanById', async () => {
       const result = await client.getDiffScanById('test-org', 'diff-1')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers getDiffScanGfm', async () => {
+      const result = await client.getDiffScanGfm('test-org', 'diff-1')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers getDiffScanGfm with options', async () => {
+      const result = await client.getDiffScanGfm('test-org', 'diff-1', {
+        github_installation_id: 'install-123',
+      })
       expect(result.success).toBe(true)
     })
 
@@ -1026,7 +1062,12 @@ describe('SocketSdk - API Methods Coverage', () => {
   })
 
   describe('Supported Files Methods', () => {
-    it('covers getSupportedScanFiles', async () => {
+    it('covers getSupportedFiles', async () => {
+      const result = await client.getSupportedFiles('test-org')
+      expect(result.success).toBe(true)
+    })
+
+    it('covers getSupportedScanFiles (deprecated)', async () => {
       const result = await client.getSupportedScanFiles()
       expect(result.success).toBe(true)
     })
