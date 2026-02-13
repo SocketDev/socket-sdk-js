@@ -2202,6 +2202,11 @@ export interface components {
        * @default false
        */
       unsafe: boolean
+      /**
+       * @description Package contains remote URL(s) in the source code
+       * @default false
+       */
+      url: boolean
     }
     Qualifiers: unknown
     SocketScore: {
@@ -5486,6 +5491,8 @@ export interface operations {
         pull_request?: string
         /** @description A commit hash to filter full-scans by. */
         commit_hash?: string
+        /** @description A scan type to filter full-scans by (e.g. socket, socket_tier1, socket_basics). */
+        scan_type?: string
       }
       path: {
         /** @description The slug of the organization */
@@ -5541,6 +5548,8 @@ export interface operations {
               integration_commit_url?: string | null
               /** @default */
               integration_pull_request_url?: string | null
+              /** @default */
+              scan_type?: string | null
               /**
                * @description The current processing status of the SBOM
                * @default pending
@@ -5674,6 +5683,8 @@ export interface operations {
             integration_commit_url?: string | null
             /** @default */
             integration_pull_request_url?: string | null
+            /** @default */
+            scan_type?: string | null
             /**
              * @description The current processing status of the SBOM
              * @default pending
@@ -5848,6 +5859,8 @@ export interface operations {
             integration_commit_url?: string | null
             /** @default */
             integration_pull_request_url?: string | null
+            /** @default */
+            scan_type?: string | null
             /**
              * @description The current processing status of the SBOM
              * @default pending
@@ -6230,6 +6243,8 @@ export interface operations {
             integration_commit_url?: string | null
             /** @default */
             integration_pull_request_url?: string | null
+            /** @default */
+            scan_type?: string | null
             /**
              * @description The current processing status of the SBOM
              * @default pending
@@ -16560,6 +16575,8 @@ export interface operations {
               type: string
               /** @default */
               category: string
+              /** @default */
+              description: string | null
               fix: {
                 /** @default */
                 type: string
@@ -16575,6 +16592,8 @@ export interface operations {
                 cveDescription: string | null
                 /** @default 0 */
                 cvssScore: number
+                /** @default */
+                cvssVectorString: string | null
                 cweIds: string[] | null
                 cweNames: string[] | null
                 ghsaIds: string[] | null
@@ -16584,6 +16603,10 @@ export interface operations {
                 epssPercentile: number
                 /** @default false */
                 isKev: boolean
+                /** @default */
+                firstPatchedVersionIdentifier: string | null
+                /** @default */
+                url: string | null
               } | null
               /** @default */
               id: string
@@ -16697,6 +16720,43 @@ export interface operations {
                   scores: components['schemas']['SocketScore']
                   /** @default */
                   artifactId: string | null
+                  capabilities: {
+                    /**
+                     * @description Package can read or modify environment variables
+                     * @default false
+                     */
+                    env: boolean
+                    /**
+                     * @description Package uses dynamic code evaluation (eval, Function constructor, etc.)
+                     * @default false
+                     */
+                    eval: boolean
+                    /**
+                     * @description Package can read or write to the file system
+                     * @default false
+                     */
+                    fs: boolean
+                    /**
+                     * @description Package can make network requests or create servers
+                     * @default false
+                     */
+                    net: boolean
+                    /**
+                     * @description Package can execute shell commands or spawn processes
+                     * @default false
+                     */
+                    shell: boolean
+                    /**
+                     * @description Package uses unsafe or dangerous operations that could compromise security
+                     * @default false
+                     */
+                    unsafe: boolean
+                    /**
+                     * @description Package contains remote URL(s) in the source code
+                     * @default false
+                     */
+                    url: boolean
+                  } | null
                 }
               }[]
             }>

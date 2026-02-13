@@ -1441,6 +1441,11 @@
             "type": "boolean",
             "default": false,
             "description": "Package uses unsafe or dangerous operations that could compromise security"
+          },
+          "url": {
+            "type": "boolean",
+            "default": false,
+            "description": "Package contains remote URL(s) in the source code"
           }
         },
         "required": [
@@ -1449,7 +1454,8 @@
           "fs",
           "net",
           "shell",
-          "unsafe"
+          "unsafe",
+          "url"
         ]
       },
       "Qualifiers": {},
@@ -11564,6 +11570,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "scan_type",
+            "in": "query",
+            "required": false,
+            "description": "A scan type to filter full-scans by (e.g. socket, socket_tier1, socket_basics).",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "security": [
@@ -11713,6 +11728,12 @@
                             "nullable": true
                           },
                           "integration_pull_request_url": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "scan_type": {
                             "type": "string",
                             "description": "",
                             "default": "",
@@ -12084,6 +12105,12 @@
                       "nullable": true
                     },
                     "integration_pull_request_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "scan_type": {
                       "type": "string",
                       "description": "",
                       "default": "",
@@ -12526,6 +12553,12 @@
                       "nullable": true
                     },
                     "integration_pull_request_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "scan_type": {
                       "type": "string",
                       "description": "",
                       "default": "",
@@ -13660,6 +13693,12 @@
                       "nullable": true
                     },
                     "integration_pull_request_url": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "scan_type": {
                       "type": "string",
                       "description": "",
                       "default": "",
@@ -40354,6 +40393,12 @@
                             "description": "",
                             "default": ""
                           },
+                          "description": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
                           "fix": {
                             "type": "object",
                             "additionalProperties": false,
@@ -40405,6 +40450,12 @@
                                 "description": "",
                                 "default": 0
                               },
+                              "cvssVectorString": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
                               "cweIds": {
                                 "type": "array",
                                 "items": {
@@ -40449,6 +40500,18 @@
                                 "type": "boolean",
                                 "default": false,
                                 "description": ""
+                              },
+                              "firstPatchedVersionIdentifier": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
+                              },
+                              "url": {
+                                "type": "string",
+                                "description": "",
+                                "default": "",
+                                "nullable": true
                               }
                             },
                             "required": [
@@ -40456,12 +40519,15 @@
                               "cveId",
                               "cveTitle",
                               "cvssScore",
+                              "cvssVectorString",
                               "cweIds",
                               "cweNames",
                               "epssPercentile",
                               "epssScore",
+                              "firstPatchedVersionIdentifier",
                               "ghsaIds",
-                              "isKev"
+                              "isKev",
+                              "url"
                             ],
                             "nullable": true
                           },
@@ -40830,11 +40896,64 @@
                                       "description": "",
                                       "default": "",
                                       "nullable": true
+                                    },
+                                    "capabilities": {
+                                      "type": "object",
+                                      "additionalProperties": false,
+                                      "description": "",
+                                      "properties": {
+                                        "env": {
+                                          "type": "boolean",
+                                          "default": false,
+                                          "description": "Package can read or modify environment variables"
+                                        },
+                                        "eval": {
+                                          "type": "boolean",
+                                          "default": false,
+                                          "description": "Package uses dynamic code evaluation (eval, Function constructor, etc.)"
+                                        },
+                                        "fs": {
+                                          "type": "boolean",
+                                          "default": false,
+                                          "description": "Package can read or write to the file system"
+                                        },
+                                        "net": {
+                                          "type": "boolean",
+                                          "default": false,
+                                          "description": "Package can make network requests or create servers"
+                                        },
+                                        "shell": {
+                                          "type": "boolean",
+                                          "default": false,
+                                          "description": "Package can execute shell commands or spawn processes"
+                                        },
+                                        "unsafe": {
+                                          "type": "boolean",
+                                          "default": false,
+                                          "description": "Package uses unsafe or dangerous operations that could compromise security"
+                                        },
+                                        "url": {
+                                          "type": "boolean",
+                                          "default": false,
+                                          "description": "Package contains remote URL(s) in the source code"
+                                        }
+                                      },
+                                      "required": [
+                                        "env",
+                                        "eval",
+                                        "fs",
+                                        "net",
+                                        "shell",
+                                        "unsafe",
+                                        "url"
+                                      ],
+                                      "nullable": true
                                     }
                                   },
                                   "required": [
                                     "artifactId",
                                     "author",
+                                    "capabilities",
                                     "id",
                                     "license",
                                     "name",
@@ -40866,6 +40985,7 @@
                           "clearedAt",
                           "createdAt",
                           "dashboardUrl",
+                          "description",
                           "fix",
                           "id",
                           "key",
