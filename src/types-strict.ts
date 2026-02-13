@@ -60,6 +60,7 @@ export type FullScanItem = {
   repository_id: string
   repository_slug: string
   scan_state?: 'pending' | 'precrawl' | 'resolve' | 'scan' | null | undefined
+  scan_type?: string | null | undefined
   updated_at: string
   workspace?: string | undefined
 }
@@ -92,6 +93,7 @@ export type ListFullScansOptions = {
   per_page?: number | undefined
   pull_request?: string | undefined
   repo?: string | undefined
+  scan_type?: string | undefined
   sort?: 'name' | 'created_at' | undefined
   startAfterCursor?: string | undefined
   use_cursor?: boolean | undefined
