@@ -485,19 +485,16 @@ describe('SocketSdk - API Methods Coverage', () => {
     })
 
     it('covers createRepository', async () => {
-      const result = await client.createRepository('test-org', {
-        name: 'test-repo',
-      })
+      const result = await client.createRepository('test-org', 'test-repo')
       expect(result.success).toBe(true)
     })
 
     it('covers createRepository with all options', async () => {
-      const result = await client.createRepository('test-org', {
+      const result = await client.createRepository('test-org', 'test-repo', {
         archived: false,
         default_branch: 'main',
         description: 'Test repository',
         homepage: 'https://example.com',
-        name: 'test-repo',
         visibility: 'private',
         workspace: 'default',
       })

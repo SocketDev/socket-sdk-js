@@ -16,10 +16,13 @@ describe('SocketSdk - Success Path Coverage', () => {
         .post('/v0/orgs/test-org/repos')
         .reply(200, { data: { name: 'test-repo' } })
 
-      const result = await getClient().createRepository('test-org', {
-        description: 'Test repository',
-        name: 'test-repo',
-      })
+      const result = await getClient().createRepository(
+        'test-org',
+        'test-repo',
+        {
+          description: 'Test repository',
+        },
+      )
 
       expect(result.success).toBe(true)
     })

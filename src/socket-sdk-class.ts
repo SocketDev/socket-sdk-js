@@ -1371,20 +1371,19 @@ export class SocketSdk {
    * Registers a repository for monitoring and security scanning.
    *
    * @param orgSlug - Organization identifier
-   * @param params - Repository configuration
+   * @param repoSlug - Repository name/slug
+   * @param params - Additional repository configuration
    * @param params.archived - Whether the repository is archived
    * @param params.default_branch - Default branch of the repository
    * @param params.description - Description of the repository
    * @param params.homepage - Homepage URL of the repository
-   * @param params.name - Name of the repository
    * @param params.visibility - Visibility setting ('public' or 'private')
    * @param params.workspace - Workspace of the repository
    * @returns Created repository details
    *
    * @example
    * ```typescript
-   * const result = await sdk.createRepository('my-org', {
-   *   name: 'my-repo',
+   * const result = await sdk.createRepository('my-org', 'my-repo', {
    *   description: 'My project repository',
    *   homepage: 'https://example.com',
    *   visibility: 'private'
@@ -1403,13 +1402,13 @@ export class SocketSdk {
    */
   async createRepository(
     orgSlug: string,
+    repoSlug: string,
     params?:
       | {
           archived?: boolean | undefined
           default_branch?: null | string | undefined
           description?: null | string | undefined
           homepage?: null | string | undefined
-          name?: string | undefined
           visibility?: 'private' | 'public' | undefined
           workspace?: string | undefined
         }
@@ -1423,7 +1422,7 @@ export class SocketSdk {
               'POST',
               this.#baseUrl,
               `orgs/${encodeURIComponent(orgSlug)}/repos`,
-              params,
+              { ...params, name: repoSlug },
               { ...this.#reqOptions, hooks: this.#hooks },
             ),
           ),
