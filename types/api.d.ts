@@ -2202,6 +2202,11 @@ export interface components {
        * @default false
        */
       unsafe: boolean
+      /**
+       * @description Package contains remote URL(s) in the source code
+       * @default false
+       */
+      url: boolean
     }
     Qualifiers: unknown
     SocketScore: {
@@ -5486,6 +5491,8 @@ export interface operations {
         pull_request?: string
         /** @description A commit hash to filter full-scans by. */
         commit_hash?: string
+        /** @description A scan type to filter full-scans by (e.g. socket, socket_tier1, socket_basics). */
+        scan_type?: string
       }
       path: {
         /** @description The slug of the organization */
@@ -5541,6 +5548,8 @@ export interface operations {
               integration_commit_url?: string | null
               /** @default */
               integration_pull_request_url?: string | null
+              /** @default */
+              scan_type?: string | null
               /**
                * @description The current processing status of the SBOM
                * @default pending
@@ -5674,6 +5683,8 @@ export interface operations {
             integration_commit_url?: string | null
             /** @default */
             integration_pull_request_url?: string | null
+            /** @default */
+            scan_type?: string | null
             /**
              * @description The current processing status of the SBOM
              * @default pending
@@ -5848,6 +5859,8 @@ export interface operations {
             integration_commit_url?: string | null
             /** @default */
             integration_pull_request_url?: string | null
+            /** @default */
+            scan_type?: string | null
             /**
              * @description The current processing status of the SBOM
              * @default pending
@@ -6230,6 +6243,8 @@ export interface operations {
             integration_commit_url?: string | null
             /** @default */
             integration_pull_request_url?: string | null
+            /** @default */
+            scan_type?: string | null
             /**
              * @description The current processing status of the SBOM
              * @default pending
@@ -13728,6 +13743,10 @@ export interface operations {
         'filters.artifactType'?: string
         /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
         'filters.artifactType.notIn'?: string
+        /** @description Comma-separated list of branch names that should be included */
+        'filters.branch'?: string
+        /** @description Comma-separated list of branch names that should be excluded */
+        'filters.branch.notIn'?: string
         /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be included */
         'filters.cvePatchStatus'?: string
         /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be excluded */
@@ -13931,6 +13950,10 @@ export interface operations {
                 artifactType?: string[]
                 /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
                 'artifactType.notIn'?: string[]
+                /** @description Comma-separated list of branch names that should be included */
+                branch?: string[]
+                /** @description Comma-separated list of branch names that should be excluded */
+                'branch.notIn'?: string[]
                 /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be included */
                 cvePatchStatus?: string[]
                 /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be excluded */
@@ -13980,7 +14003,7 @@ export interface operations {
         date?: string
         /** @description The number of days of data to fetch as an offset from input date */
         range?: string
-        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoFullName,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,cvePatchStatus,alertReachabilityAnalysisType,alertPriority,alertKEV,alertEPSS,dependencyDirect,dependencyDev,dependencyDead) */
+        /** @description Comma-separated list of fields that should be used for count aggregation (allowed: alertSeverity,repoSlug,repoFullName,branch,repoLabels,alertType,artifactType,alertAction,alertActionSourceType,alertFixType,alertCategory,alertCveId,alertCveTitle,alertCweId,alertCweName,alertReachabilityType,cvePatchStatus,alertReachabilityAnalysisType,alertPriority,alertKEV,alertEPSS,dependencyDirect,dependencyDev,dependencyDead) */
         'aggregation.fields'?: string
         /** @description Comma-separated list of alert actions ("error", "warn", "monitor", or "ignore) that should be included */
         'filters.alertAction'?: string
@@ -14050,6 +14073,10 @@ export interface operations {
         'filters.artifactType'?: string
         /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
         'filters.artifactType.notIn'?: string
+        /** @description Comma-separated list of branch names that should be included */
+        'filters.branch'?: string
+        /** @description Comma-separated list of branch names that should be excluded */
+        'filters.branch.notIn'?: string
         /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be included */
         'filters.cvePatchStatus'?: string
         /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be excluded */
@@ -14169,6 +14196,10 @@ export interface operations {
                 artifactType?: string[]
                 /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
                 'artifactType.notIn'?: string[]
+                /** @description Comma-separated list of branch names that should be included */
+                branch?: string[]
+                /** @description Comma-separated list of branch names that should be excluded */
+                'branch.notIn'?: string[]
                 /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be included */
                 cvePatchStatus?: string[]
                 /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be excluded */
@@ -16512,6 +16543,10 @@ export interface operations {
         'filters.artifactType'?: string
         /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
         'filters.artifactType.notIn'?: string
+        /** @description Comma-separated list of branch names that should be included */
+        'filters.branch'?: string
+        /** @description Comma-separated list of branch names that should be excluded */
+        'filters.branch.notIn'?: string
         /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be included */
         'filters.cvePatchStatus'?: string
         /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be excluded */
@@ -16560,6 +16595,8 @@ export interface operations {
               type: string
               /** @default */
               category: string
+              /** @default */
+              description: string | null
               fix: {
                 /** @default */
                 type: string
@@ -16575,6 +16612,8 @@ export interface operations {
                 cveDescription: string | null
                 /** @default 0 */
                 cvssScore: number
+                /** @default */
+                cvssVectorString: string | null
                 cweIds: string[] | null
                 cweNames: string[] | null
                 ghsaIds: string[] | null
@@ -16584,6 +16623,10 @@ export interface operations {
                 epssPercentile: number
                 /** @default false */
                 isKev: boolean
+                /** @default */
+                firstPatchedVersionIdentifier: string | null
+                /** @default */
+                url: string | null
               } | null
               /** @default */
               id: string
@@ -16697,6 +16740,43 @@ export interface operations {
                   scores: components['schemas']['SocketScore']
                   /** @default */
                   artifactId: string | null
+                  capabilities: {
+                    /**
+                     * @description Package can read or modify environment variables
+                     * @default false
+                     */
+                    env: boolean
+                    /**
+                     * @description Package uses dynamic code evaluation (eval, Function constructor, etc.)
+                     * @default false
+                     */
+                    eval: boolean
+                    /**
+                     * @description Package can read or write to the file system
+                     * @default false
+                     */
+                    fs: boolean
+                    /**
+                     * @description Package can make network requests or create servers
+                     * @default false
+                     */
+                    net: boolean
+                    /**
+                     * @description Package can execute shell commands or spawn processes
+                     * @default false
+                     */
+                    shell: boolean
+                    /**
+                     * @description Package uses unsafe or dangerous operations that could compromise security
+                     * @default false
+                     */
+                    unsafe: boolean
+                    /**
+                     * @description Package contains remote URL(s) in the source code
+                     * @default false
+                     */
+                    url: boolean
+                  } | null
                 }
               }[]
             }>
@@ -16806,6 +16886,10 @@ export interface operations {
                 artifactType?: string[]
                 /** @description Comma-separated list of artifact types (e.g. "npm", "pypi", "gem", "maven", "golang", etc.) that should be excluded */
                 'artifactType.notIn'?: string[]
+                /** @description Comma-separated list of branch names that should be included */
+                branch?: string[]
+                /** @description Comma-separated list of branch names that should be excluded */
+                'branch.notIn'?: string[]
                 /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be included */
                 cvePatchStatus?: string[]
                 /** @description Comma-separated list of patch statuses ("patch_unavailable", "patch_available", or "patch_applied") that should be excluded */
