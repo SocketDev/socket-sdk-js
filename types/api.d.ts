@@ -2012,9 +2012,9 @@ export interface components {
       }>
       vulnerabilities?: Array<{
         /** @default */
-        ref: string
-        /** @default */
         id: string
+        /** @default */
+        ref?: string
         source?: {
           /** @default */
           name?: string
@@ -7331,6 +7331,26 @@ export interface operations {
                */
               alert_key?: string | null
               /**
+               * @description The alert type (e.g., criticalCVE, highCVE) associated with the triage state
+               * @default
+               */
+              alert_type?: string | null
+              /**
+               * @description Whether a fix must be available, unavailable, or * for any
+               * @default
+               */
+              fix_available?: string | null
+              /**
+               * @description Whether a patch must be available, unavailable, or * for any
+               * @default
+               */
+              patch_available?: string | null
+              /**
+               * @description CVSS score comparison (e.g., >=7.5, >5.0, ==8.0)
+               * @default
+               */
+              cvss_score_cmp?: string | null
+              /**
                * @description The creation date of the triage action
                * @default
                */
@@ -7356,6 +7376,21 @@ export interface operations {
                * @enum {string}
                */
               state?: 'block' | 'ignore' | 'inherit' | 'monitor' | 'warn'
+              /**
+               * @description CVE or GHSA ID associated with the triage state
+               * @default
+               */
+              cve_or_ghsa_id?: string | null
+              /**
+               * @description The reachability of the alert, can be reachable, unreachable, other, or * for any
+               * @default
+               */
+              reachability?: string | null
+              /**
+               * @description Whether the alert has a CISA KEV (Known Exploited Vulnerability), can be exist, none, or * for any
+               * @default
+               */
+              kevs?: string | null
             }>
             /** @default 0 */
             nextPage: number | null
@@ -7405,6 +7440,20 @@ export interface operations {
             packageVersion?: string | null
             /** @default */
             alertKey?: string | null
+            /** @default */
+            alertType?: string | null
+            /** @default */
+            fixAvailable?: string | null
+            /** @default */
+            patchAvailable?: string | null
+            /** @default */
+            kevs?: string | null
+            /** @default */
+            cveOrGhsaId?: string | null
+            /** @default */
+            reachability?: string | null
+            /** @default */
+            cvssScoreCmp?: string | null
             /** @default */
             note?: string
             /**
@@ -15486,7 +15535,6 @@ export interface operations {
           | 'vscode'
           | 'pypi'
           | 'gem'
-          | 'socket'
           | 'swift'
       }
     }
@@ -15600,7 +15648,6 @@ export interface operations {
           | 'vscode'
           | 'pypi'
           | 'gem'
-          | 'socket'
           | 'swift'
       }
       path: {
