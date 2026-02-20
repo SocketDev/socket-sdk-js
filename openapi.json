@@ -807,12 +807,12 @@
               "type": "object",
               "additionalProperties": false,
               "properties": {
-                "ref": {
+                "id": {
                   "type": "string",
                   "description": "",
                   "default": ""
                 },
-                "id": {
+                "ref": {
                   "type": "string",
                   "description": "",
                   "default": ""
@@ -1026,8 +1026,7 @@
                 }
               },
               "required": [
-                "id",
-                "ref"
+                "id"
               ]
             },
             "description": ""
@@ -16716,6 +16715,30 @@
                             "default": "",
                             "nullable": true
                           },
+                          "alert_type": {
+                            "type": "string",
+                            "description": "The alert type (e.g., criticalCVE, highCVE) associated with the triage state",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "fix_available": {
+                            "type": "string",
+                            "description": "Whether a fix must be available, unavailable, or * for any",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "patch_available": {
+                            "type": "string",
+                            "description": "Whether a patch must be available, unavailable, or * for any",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "cvss_score_cmp": {
+                            "type": "string",
+                            "description": "CVSS score comparison (e.g., >=7.5, >5.0, ==8.0)",
+                            "default": "",
+                            "nullable": true
+                          },
                           "created_at": {
                             "type": "string",
                             "description": "The creation date of the triage action",
@@ -16747,6 +16770,24 @@
                             ],
                             "description": "The triage state of the alert",
                             "default": "inherit"
+                          },
+                          "cve_or_ghsa_id": {
+                            "type": "string",
+                            "description": "CVE or GHSA ID associated with the triage state",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "reachability": {
+                            "type": "string",
+                            "description": "The reachability of the alert, can be reachable, unreachable, other, or * for any",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "kevs": {
+                            "type": "string",
+                            "description": "Whether the alert has a CISA KEV (Known Exploited Vulnerability), can be exist, none, or * for any",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "description": ""
@@ -16859,6 +16900,48 @@
                           "nullable": true
                         },
                         "alertKey": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "alertType": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "fixAvailable": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "patchAvailable": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "kevs": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "cveOrGhsaId": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "reachability": {
+                          "type": "string",
+                          "description": "",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "cvssScoreCmp": {
                           "type": "string",
                           "description": "",
                           "default": "",
@@ -37911,7 +37994,6 @@
                 "vscode",
                 "pypi",
                 "gem",
-                "socket",
                 "swift"
               ]
             }
@@ -38207,7 +38289,6 @@
                 "vscode",
                 "pypi",
                 "gem",
-                "socket",
                 "swift"
               ]
             }
