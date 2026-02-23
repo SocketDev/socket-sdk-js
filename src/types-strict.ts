@@ -123,35 +123,15 @@ export type OrganizationItem = {
 }
 
 /**
- * Strict type for repository list item.
- * Used in list repositories endpoint - excludes fields only available in get repository.
- */
-export type RepositoryListItem = {
-  archived: boolean
-  created_at: string
-  default_branch: string | null
-  description: string | null
-  head_full_scan_id: string | null
-  homepage: string | null
-  id: string
-  name: string
-  slug: string
-  updated_at: string
-  visibility: 'public' | 'private'
-  workspace: string
-}
-
-/**
  * Strict type for repositories list data.
  */
 export type RepositoriesListData = {
   nextPage?: number | null | undefined
-  results: RepositoryListItem[]
+  results: RepositoryItem[]
 }
 
 /**
- * Strict type for single repository item.
- * Used in get repository endpoint - includes all fields including integration_meta and slig.
+ * Strict type for repository item.
  */
 export type RepositoryItem = {
   archived: boolean
@@ -188,7 +168,7 @@ export type RepositoryItem = {
     }
   } | null
   name: string
-  slig: string
+  slig?: string | undefined
   slug: string
   updated_at: string
   visibility: 'public' | 'private'

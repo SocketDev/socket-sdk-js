@@ -8110,6 +8110,774 @@
               "type": {
                 "type": "string",
                 "enum": [
+                  "skillAutonomyAbuse"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "notes": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          },
+                          "severity": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "confidence",
+                          "notes",
+                          "severity"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "skillCommandInjection"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "notes": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          },
+                          "severity": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "confidence",
+                          "notes",
+                          "severity"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "skillDataExfiltration"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "notes": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          },
+                          "severity": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "confidence",
+                          "notes",
+                          "severity"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "skillDiscoveryAbuse"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "notes": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          },
+                          "severity": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "confidence",
+                          "notes",
+                          "severity"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "skillHardcodedSecrets"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "notes": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          },
+                          "severity": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "confidence",
+                          "notes",
+                          "severity"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "skillObfuscation"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "notes": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          },
+                          "severity": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "confidence",
+                          "notes",
+                          "severity"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "skillPromptInjection"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "notes": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          },
+                          "severity": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "confidence",
+                          "notes",
+                          "severity"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "skillResourceAbuse"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "notes": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          },
+                          "severity": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "confidence",
+                          "notes",
+                          "severity"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "skillSupplyChain"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "notes": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          },
+                          "severity": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "confidence",
+                          "notes",
+                          "severity"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "skillToolAbuse"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "notes": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          },
+                          "severity": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "confidence",
+                          "notes",
+                          "severity"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "skillToolChaining"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "notes": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          },
+                          "severity": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "confidence",
+                          "notes",
+                          "severity"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "skillTransitiveTrust"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "notes": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          },
+                          "severity": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "confidence",
+                          "notes",
+                          "severity"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
                   "socketUpgradeAvailable"
                 ]
               },
@@ -20788,6 +21556,258 @@
                             "action"
                           ]
                         },
+                        "skillAutonomyAbuse": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillAutonomyAbuse issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillCommandInjection": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillCommandInjection issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillDataExfiltration": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillDataExfiltration issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillDiscoveryAbuse": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillDiscoveryAbuse issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillHardcodedSecrets": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillHardcodedSecrets issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillObfuscation": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillObfuscation issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillPromptInjection": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillPromptInjection issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillResourceAbuse": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillResourceAbuse issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillSupplyChain": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillSupplyChain issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillToolAbuse": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillToolAbuse issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillToolChaining": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillToolChaining issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillTransitiveTrust": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillTransitiveTrust issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "socketUpgradeAvailable": {
                           "type": "object",
                           "additionalProperties": false,
@@ -23386,6 +24406,258 @@
                               "ignore"
                             ],
                             "description": "The action to take for unpopularPackage issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillAutonomyAbuse": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillAutonomyAbuse issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillCommandInjection": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillCommandInjection issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillDataExfiltration": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillDataExfiltration issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillDiscoveryAbuse": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillDiscoveryAbuse issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillHardcodedSecrets": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillHardcodedSecrets issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillObfuscation": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillObfuscation issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillPromptInjection": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillPromptInjection issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillResourceAbuse": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillResourceAbuse issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillSupplyChain": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillSupplyChain issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillToolAbuse": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillToolAbuse issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillToolChaining": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillToolChaining issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillTransitiveTrust": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillTransitiveTrust issues."
                           }
                         },
                         "required": [
@@ -26309,6 +27581,258 @@
                             "action"
                           ]
                         },
+                        "skillAutonomyAbuse": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillAutonomyAbuse issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillCommandInjection": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillCommandInjection issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillDataExfiltration": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillDataExfiltration issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillDiscoveryAbuse": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillDiscoveryAbuse issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillHardcodedSecrets": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillHardcodedSecrets issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillObfuscation": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillObfuscation issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillPromptInjection": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillPromptInjection issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillResourceAbuse": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillResourceAbuse issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillSupplyChain": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillSupplyChain issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillToolAbuse": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillToolAbuse issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillToolChaining": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillToolChaining issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillTransitiveTrust": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillTransitiveTrust issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "socketUpgradeAvailable": {
                           "type": "object",
                           "additionalProperties": false,
@@ -28916,6 +30440,258 @@
                           "action"
                         ]
                       },
+                      "skillAutonomyAbuse": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillAutonomyAbuse issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillCommandInjection": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillCommandInjection issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillDataExfiltration": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillDataExfiltration issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillDiscoveryAbuse": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillDiscoveryAbuse issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillHardcodedSecrets": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillHardcodedSecrets issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillObfuscation": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillObfuscation issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillPromptInjection": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillPromptInjection issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillResourceAbuse": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillResourceAbuse issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillSupplyChain": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillSupplyChain issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillToolAbuse": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillToolAbuse issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillToolChaining": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillToolChaining issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillTransitiveTrust": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillTransitiveTrust issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
                       "socketUpgradeAvailable": {
                         "type": "object",
                         "additionalProperties": false,
@@ -31470,6 +33246,258 @@
                                 "ignore"
                               ],
                               "description": "The action to take for unpopularPackage issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillAutonomyAbuse": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillAutonomyAbuse issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillCommandInjection": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillCommandInjection issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillDataExfiltration": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillDataExfiltration issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillDiscoveryAbuse": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillDiscoveryAbuse issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillHardcodedSecrets": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillHardcodedSecrets issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillObfuscation": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillObfuscation issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillPromptInjection": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillPromptInjection issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillResourceAbuse": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillResourceAbuse issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillSupplyChain": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillSupplyChain issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillToolAbuse": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillToolAbuse issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillToolChaining": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillToolChaining issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillTransitiveTrust": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillTransitiveTrust issues."
                             }
                           },
                           "required": [
