@@ -27,7 +27,7 @@ import {
 
 // Get method cost
 getQuotaCost('batchPackageFetch')  // 100
-getQuotaCost('createOrgFullScan')  // 10
+getQuotaCost('getOrgAnalytics')    // 10
 getQuotaCost('getQuota')           // 0
 
 // Calculate total

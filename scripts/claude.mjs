@@ -1080,7 +1080,7 @@ async function runClaude(claudeCmd, prompt, options = {}) {
             )
           }
           // Update every 10 seconds.
-        }, 10_000)
+        }, 10_000).unref()
       }
 
       // Run command with timeout
@@ -1202,7 +1202,7 @@ async function ensureClaudeAuthenticated(claudeCmd) {
           `Testing authentication... (${Math.round(elapsed / 1000)}s/15s)`,
         )
         // Update every 3 seconds.
-      }, 3000)
+      }, 3000).unref()
 
       const testResult = await runCommandWithOutput(claudeCmd, ['--print'], {
         input: testPrompt,
@@ -1972,7 +1972,7 @@ async function runParallel(tasks, description = 'tasks', taskNames = []) {
         `Progress: ${completed}/${tasks.length} complete, ${pending} running (${elapsed}s elapsed)`,
       )
     }
-  }, 15_000)
+  }, 15_000).unref()
   // Update every 15 seconds
 
   const results = await Promise.allSettled(trackedTasks)
@@ -4085,7 +4085,7 @@ Fix this issue now by making the necessary changes.`
               `[${repoName}] Claude working... (${Math.round(elapsed / 1000)}s)`,
             )
           }
-        }, 10_000)
+        }, 10_000).unref()
         // Update every 10 seconds
 
         await new Promise(resolve => {
@@ -4689,7 +4689,7 @@ Fix all issues by making necessary file changes. Be direct, don't ask questions.
             )
           }
           // Update every 10 seconds.
-        }, 10_000)
+        }, 10_000).unref()
 
         try {
           // Write prompt to temp file
@@ -4999,7 +4999,7 @@ Fix the issue by making necessary file changes. Be direct, don't ask questions.`
                     `Claude fixing ${job.name}... (${Math.round(elapsed / 1000)}s)`,
                   )
                 }
-              }, 10_000)
+              }, 10_000).unref()
 
               try {
                 // Write prompt to temp file

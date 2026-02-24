@@ -4048,8 +4048,13 @@ export class SocketSdk {
           /* c8 ignore next - Streaming error handler, difficult to test reliably. */
           controller.error(error)
         } finally {
+          rli.close()
           controller.close()
         }
+      },
+      /* c8 ignore next 3 - Stream cancellation cleanup, difficult to test reliably. */
+      cancel() {
+        rli.close()
       },
     })
   }
