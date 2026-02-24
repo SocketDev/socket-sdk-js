@@ -95,7 +95,7 @@ export class PromiseQueue {
         if (this.running === 0 && !this.queue.length) {
           resolve()
         } else {
-          setImmediate(check)
+          setImmediate(check).unref()
         }
       }
       check()

@@ -3946,10 +3946,23 @@ export class SocketSdk {
           }
         })
 
-        res.pipe(process.stdout)
-        /* c8 ignore next 3 - Stdout error handler, difficult to test reliably */
-        process.stdout.on('error', _error => {
+        // Create error handler with cleanup to prevent listener leak
+        /* c8 ignore next 4 - Stdout error handler, difficult to test reliably */
+        const stdoutErrorHandler = (_error: Error) => {
           res.destroy()
+          process.stdout.removeListener('error', stdoutErrorHandler)
+        }
+        process.stdout.on('error', stdoutErrorHandler)
+
+        res.pipe(process.stdout)
+
+        // Clean up listener when response ends to prevent memory leak
+        res.on('end', () => {
+          process.stdout.removeListener('error', stdoutErrorHandler)
+        })
+        /* c8 ignore next 3 - Response error cleanup, difficult to test reliably */
+        res.on('error', () => {
+          process.stdout.removeListener('error', stdoutErrorHandler)
         })
       }
 
