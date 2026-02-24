@@ -4233,6 +4233,210 @@ export interface components {
         }
       | {
           /** @enum {string} */
+          type?: 'skillAutonomyAbuse'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              notes: string
+              /** @default 0 */
+              confidence: number
+              /** @default 0 */
+              severity: number
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'skillCommandInjection'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              notes: string
+              /** @default 0 */
+              confidence: number
+              /** @default 0 */
+              severity: number
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'skillDataExfiltration'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              notes: string
+              /** @default 0 */
+              confidence: number
+              /** @default 0 */
+              severity: number
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'skillDiscoveryAbuse'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              notes: string
+              /** @default 0 */
+              confidence: number
+              /** @default 0 */
+              severity: number
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'skillHardcodedSecrets'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              notes: string
+              /** @default 0 */
+              confidence: number
+              /** @default 0 */
+              severity: number
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'skillObfuscation'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              notes: string
+              /** @default 0 */
+              confidence: number
+              /** @default 0 */
+              severity: number
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'skillPromptInjection'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              notes: string
+              /** @default 0 */
+              confidence: number
+              /** @default 0 */
+              severity: number
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'skillResourceAbuse'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              notes: string
+              /** @default 0 */
+              confidence: number
+              /** @default 0 */
+              severity: number
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'skillSupplyChain'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              notes: string
+              /** @default 0 */
+              confidence: number
+              /** @default 0 */
+              severity: number
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'skillToolAbuse'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              notes: string
+              /** @default 0 */
+              confidence: number
+              /** @default 0 */
+              severity: number
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'skillToolChaining'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              notes: string
+              /** @default 0 */
+              confidence: number
+              /** @default 0 */
+              severity: number
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'skillTransitiveTrust'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              notes: string
+              /** @default 0 */
+              confidence: number
+              /** @default 0 */
+              severity: number
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
           type?: 'socketUpgradeAvailable'
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
@@ -9114,6 +9318,90 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              skillAutonomyAbuse?: {
+                /**
+                 * @description The action to take for skillAutonomyAbuse issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillCommandInjection?: {
+                /**
+                 * @description The action to take for skillCommandInjection issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillDataExfiltration?: {
+                /**
+                 * @description The action to take for skillDataExfiltration issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillDiscoveryAbuse?: {
+                /**
+                 * @description The action to take for skillDiscoveryAbuse issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillHardcodedSecrets?: {
+                /**
+                 * @description The action to take for skillHardcodedSecrets issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillObfuscation?: {
+                /**
+                 * @description The action to take for skillObfuscation issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillPromptInjection?: {
+                /**
+                 * @description The action to take for skillPromptInjection issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillResourceAbuse?: {
+                /**
+                 * @description The action to take for skillResourceAbuse issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillSupplyChain?: {
+                /**
+                 * @description The action to take for skillSupplyChain issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillToolAbuse?: {
+                /**
+                 * @description The action to take for skillToolAbuse issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillToolChaining?: {
+                /**
+                 * @description The action to take for skillToolChaining issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillTransitiveTrust?: {
+                /**
+                 * @description The action to take for skillTransitiveTrust issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               socketUpgradeAvailable?: {
                 /**
                  * @description The action to take for socketUpgradeAvailable issues.
@@ -10003,6 +10291,90 @@ export interface operations {
             unpopularPackage?: {
               /**
                * @description The action to take for unpopularPackage issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillAutonomyAbuse?: {
+              /**
+               * @description The action to take for skillAutonomyAbuse issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillCommandInjection?: {
+              /**
+               * @description The action to take for skillCommandInjection issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillDataExfiltration?: {
+              /**
+               * @description The action to take for skillDataExfiltration issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillDiscoveryAbuse?: {
+              /**
+               * @description The action to take for skillDiscoveryAbuse issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillHardcodedSecrets?: {
+              /**
+               * @description The action to take for skillHardcodedSecrets issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillObfuscation?: {
+              /**
+               * @description The action to take for skillObfuscation issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillPromptInjection?: {
+              /**
+               * @description The action to take for skillPromptInjection issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillResourceAbuse?: {
+              /**
+               * @description The action to take for skillResourceAbuse issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillSupplyChain?: {
+              /**
+               * @description The action to take for skillSupplyChain issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillToolAbuse?: {
+              /**
+               * @description The action to take for skillToolAbuse issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillToolChaining?: {
+              /**
+               * @description The action to take for skillToolChaining issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillTransitiveTrust?: {
+              /**
+               * @description The action to take for skillTransitiveTrust issues.
                * @enum {string}
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -11054,6 +11426,90 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              skillAutonomyAbuse?: {
+                /**
+                 * @description The action to take for skillAutonomyAbuse issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillCommandInjection?: {
+                /**
+                 * @description The action to take for skillCommandInjection issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillDataExfiltration?: {
+                /**
+                 * @description The action to take for skillDataExfiltration issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillDiscoveryAbuse?: {
+                /**
+                 * @description The action to take for skillDiscoveryAbuse issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillHardcodedSecrets?: {
+                /**
+                 * @description The action to take for skillHardcodedSecrets issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillObfuscation?: {
+                /**
+                 * @description The action to take for skillObfuscation issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillPromptInjection?: {
+                /**
+                 * @description The action to take for skillPromptInjection issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillResourceAbuse?: {
+                /**
+                 * @description The action to take for skillResourceAbuse issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillSupplyChain?: {
+                /**
+                 * @description The action to take for skillSupplyChain issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillToolAbuse?: {
+                /**
+                 * @description The action to take for skillToolAbuse issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillToolChaining?: {
+                /**
+                 * @description The action to take for skillToolChaining issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillTransitiveTrust?: {
+                /**
+                 * @description The action to take for skillTransitiveTrust issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               socketUpgradeAvailable?: {
                 /**
                  * @description The action to take for socketUpgradeAvailable issues.
@@ -11940,6 +12396,90 @@ export interface operations {
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
             }
+            skillAutonomyAbuse?: {
+              /**
+               * @description The action to take for skillAutonomyAbuse issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillCommandInjection?: {
+              /**
+               * @description The action to take for skillCommandInjection issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillDataExfiltration?: {
+              /**
+               * @description The action to take for skillDataExfiltration issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillDiscoveryAbuse?: {
+              /**
+               * @description The action to take for skillDiscoveryAbuse issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillHardcodedSecrets?: {
+              /**
+               * @description The action to take for skillHardcodedSecrets issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillObfuscation?: {
+              /**
+               * @description The action to take for skillObfuscation issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillPromptInjection?: {
+              /**
+               * @description The action to take for skillPromptInjection issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillResourceAbuse?: {
+              /**
+               * @description The action to take for skillResourceAbuse issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillSupplyChain?: {
+              /**
+               * @description The action to take for skillSupplyChain issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillToolAbuse?: {
+              /**
+               * @description The action to take for skillToolAbuse issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillToolChaining?: {
+              /**
+               * @description The action to take for skillToolChaining issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillTransitiveTrust?: {
+              /**
+               * @description The action to take for skillTransitiveTrust issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
             socketUpgradeAvailable?: {
               /**
                * @description The action to take for socketUpgradeAvailable issues.
@@ -12791,6 +13331,90 @@ export interface operations {
               unpopularPackage?: {
                 /**
                  * @description The action to take for unpopularPackage issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillAutonomyAbuse?: {
+                /**
+                 * @description The action to take for skillAutonomyAbuse issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillCommandInjection?: {
+                /**
+                 * @description The action to take for skillCommandInjection issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillDataExfiltration?: {
+                /**
+                 * @description The action to take for skillDataExfiltration issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillDiscoveryAbuse?: {
+                /**
+                 * @description The action to take for skillDiscoveryAbuse issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillHardcodedSecrets?: {
+                /**
+                 * @description The action to take for skillHardcodedSecrets issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillObfuscation?: {
+                /**
+                 * @description The action to take for skillObfuscation issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillPromptInjection?: {
+                /**
+                 * @description The action to take for skillPromptInjection issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillResourceAbuse?: {
+                /**
+                 * @description The action to take for skillResourceAbuse issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillSupplyChain?: {
+                /**
+                 * @description The action to take for skillSupplyChain issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillToolAbuse?: {
+                /**
+                 * @description The action to take for skillToolAbuse issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillToolChaining?: {
+                /**
+                 * @description The action to take for skillToolChaining issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillTransitiveTrust?: {
+                /**
+                 * @description The action to take for skillTransitiveTrust issues.
                  * @enum {string}
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
