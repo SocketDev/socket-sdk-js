@@ -35,9 +35,18 @@ const typesPath = path.resolve(rootPath, 'types/api.d.ts')
 const logger = getDefaultLogger()
 
 async function fetchOpenApi() {
-  const data = await httpGetJson(OPENAPI_URL)
-  await fs.writeFile(openApiPath, JSON.stringify(data, null, 2), 'utf8')
-  logger.log(`Downloaded from ${OPENAPI_URL}`)
+  try {
+    const data = await httpGetJson(OPENAPI_URL)
+    await fs.writeFile(openApiPath, JSON.stringify(data, null, 2), 'utf8')
+    logger.log(`Downloaded from ${OPENAPI_URL}`)
+  } catch (error) {
+    logger.error(`Failed to fetch OpenAPI definition from ${OPENAPI_URL}`)
+    logger.error(`Network error: ${error.message}`)
+    logger.info(
+      'Ensure the API endpoint is accessible and try again. If the issue persists, check your network connection.',
+    )
+    throw error
+  }
 }
 
 async function generateStrictTypes() {
@@ -185,6 +194,11 @@ async function fixArraySyntax(filePath) {
       const end = node.end
 
       if (start === null || end === null) {
+        return
+      }
+
+      // Check elementType positions before accessing
+      if (elementType.start === null || elementType.end === null) {
         return
       }
 

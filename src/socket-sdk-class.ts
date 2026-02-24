@@ -1816,22 +1816,21 @@ export class SocketSdk {
       // Monitor stream size to prevent excessive disk usage.
       res.on('data', (chunk: Buffer) => {
         bytesWritten += chunk.length
-        /* c8 ignore next 4 - Stream size limit enforcement, difficult to test reliably */
+        /* c8 ignore next 5 - Stream size limit enforcement, difficult to test reliably */
         if (bytesWritten > MAX_STREAM_SIZE) {
-          res.destroy()
-          writeStream.destroy()
-          throw new Error(
+          const error = new Error(
             `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
           )
+          res.destroy(error)
+          writeStream.destroy(error)
         }
       })
 
       res.pipe(writeStream)
       /* c8 ignore next 4 - Write stream error handler, difficult to test reliably */
       writeStream.on('error', error => {
-        throw new Error(`Failed to write to file: ${outputPath}`, {
-          cause: error,
-        })
+        res.destroy()
+        writeStream.destroy(error)
       })
 
       // Wait for the stream to finish writing before returning.
@@ -3895,22 +3894,21 @@ export class SocketSdk {
         // Monitor stream size to prevent excessive disk usage.
         res.on('data', (chunk: Buffer) => {
           bytesWritten += chunk.length
-          /* c8 ignore next 4 - Stream size limit enforcement, difficult to test reliably */
+          /* c8 ignore next 5 - Stream size limit enforcement, difficult to test reliably */
           if (bytesWritten > MAX_STREAM_SIZE) {
-            res.destroy()
-            writeStream.destroy()
-            throw new Error(
+            const error = new Error(
               `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
             )
+            res.destroy(error)
+            writeStream.destroy(error)
           }
         })
 
         res.pipe(writeStream)
         /* c8 ignore next 4 - Write stream error handler, difficult to test reliably */
         writeStream.on('error', error => {
-          throw new Error(`Failed to write to file: ${output}`, {
-            cause: error,
-          })
+          res.destroy()
+          writeStream.destroy(error)
         })
       } else if (output === true) {
         // Stream to stdout with size limit and error handling.
@@ -3919,19 +3917,19 @@ export class SocketSdk {
         // Monitor stream size for stdout as well.
         res.on('data', (chunk: Buffer) => {
           bytesWritten += chunk.length
-          /* c8 ignore next 3 - Stream size limit enforcement, difficult to test reliably */
+          /* c8 ignore next 4 - Stream size limit enforcement, difficult to test reliably */
           if (bytesWritten > MAX_STREAM_SIZE) {
-            res.destroy()
-            throw new Error(
+            const error = new Error(
               `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
             )
+            res.destroy(error)
           }
         })
 
         res.pipe(process.stdout)
         /* c8 ignore next 3 - Stdout error handler, difficult to test reliably */
-        process.stdout.on('error', error => {
-          throw new Error('Failed to write to stdout', { cause: error })
+        process.stdout.on('error', _error => {
+          res.destroy()
         })
       }
 

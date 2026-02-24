@@ -2,7 +2,7 @@
 
 [![Socket Badge](https://socket.dev/api/badge/npm/package/@socketsecurity/sdk)](https://socket.dev/npm/package/@socketsecurity/sdk)
 [![CI](https://github.com/SocketDev/socket-sdk-js/actions/workflows/ci.yml/badge.svg)](https://github.com/SocketDev/socket-sdk-js/actions/workflows/ci.yml)
-![Coverage](https://img.shields.io/badge/coverage-80%25-brightgreen)
+![Coverage](https://img.shields.io/badge/coverage-40%25-orange)
 
 [![Follow @SocketSecurity](https://img.shields.io/twitter/follow/SocketSecurity?style=social)](https://twitter.com/SocketSecurity)
 [![Follow @socket.dev on Bluesky](https://img.shields.io/badge/Follow-@socket.dev-1DA1F2?style=social&logo=bluesky)](https://bsky.app/profile/socket.dev)
@@ -51,21 +51,8 @@ const batchResult = await client.batchPackageFetch({
 
 | Guide | Description |
 |-------|-------------|
-| **[Getting Started](./docs/getting-started.md)** | Quick start for contributors (5 min setup) |
 | **[API Reference](./docs/api-reference.md)** | Complete API method documentation |
-| **[Usage Examples](./docs/usage-examples.md)** | Real-world patterns and code samples |
 | **[Quota Management](./docs/quota-management.md)** | Cost tiers (0/10/100) and utilities |
-| **[Testing Guide](./docs/dev/testing.md)** | Test helpers, fixtures, and patterns |
-| **[Method Reference](./docs/when-to-use-what.md)** | Quick method selection guide |
-
-## Examples
-
-See **[usage-examples.md](./docs/usage-examples.md)** for complete examples including:
-- Package security analysis
-- Batch operations
-- Full scans with SBOM
-- Policy management
-- Quota planning
 
 ## License
 

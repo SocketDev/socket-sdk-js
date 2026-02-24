@@ -38,7 +38,12 @@ Efficiently analyze multiple packages in parallel:
 
 ```typescript
 const result = await sdk.batchPackageFetch(
-  ['react@18.2.0', 'vue@3.3.4'],
+  {
+    components: [
+      { purl: 'pkg:npm/react@18.2.0' },
+      { purl: 'pkg:npm/vue@3.3.4' }
+    ]
+  },
   { includeTopLevelAncestors: true }
 )
 

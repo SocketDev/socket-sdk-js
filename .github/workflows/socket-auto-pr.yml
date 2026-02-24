@@ -9,11 +9,8 @@ on:
       debug:
         description: 'Enable debug output'
         required: false
-        default: '0'
-        type: string
-        options:
-          - '0'
-          - '1'
+        default: false
+        type: boolean
 
 permissions:
   contents: write
