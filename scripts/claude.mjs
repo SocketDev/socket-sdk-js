@@ -397,7 +397,7 @@ class ProgressTracker {
     const totalElapsed = Date.now() - this.startTime
     const eta = this.getTotalETA()
 
-    logger.log(colors.cyan('\n⏱️  Progress:'))
+    logger.log(colors.cyan('\nProgress:'))
     logger.log(`  Elapsed: ${formatDuration(totalElapsed)}`)
     if (eta) {
       logger.log(`  ETA: ${formatDuration(eta)}`)
@@ -861,9 +861,7 @@ function displayAnalysis(analysis) {
 
   if (analysis.isEnvironmental) {
     logger.log(
-      colors.yellow(
-        '\n  ⚠ This appears to be an environmental issue (runner/network/external)',
-      ),
+      `\n  ${colors.yellow('⚠')} This appears to be an environmental issue (runner/network/external)`,
     )
     if (analysis.environmentalFactors.length > 0) {
       logger.log(colors.yellow('  Factors to check:'))

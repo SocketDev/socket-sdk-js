@@ -7,6 +7,8 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import colors from 'yoctocolors-cjs'
+
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 const logger = getDefaultLogger()
@@ -67,7 +69,7 @@ async function main() {
     return
   }
 
-  logger.error('❌ esbuild minify validation failed\n')
+  logger.error(`${colors.red('✗')} esbuild minify validation failed\n`)
 
   for (const violation of violations) {
     logger.error(`  ${violation.message}`)

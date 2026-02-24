@@ -513,17 +513,17 @@ async function interactiveReviewChangelog(claudeCmd, changelogEntry) {
     const action = await prompts.select({
       message: 'What would you like to do?',
       choices: [
-        { value: 'accept', name: '✅ Accept this changelog' },
+        { value: 'accept', name: 'Accept this changelog' },
         {
           value: 'regenerate',
-          name: '🔄 Regenerate entirely (fresh perspective)',
+          name: 'Regenerate entirely (fresh perspective)',
         },
-        { value: 'refine', name: '✏️  Refine with specific feedback' },
-        { value: 'add', name: '➕ Add missing information' },
-        { value: 'simplify', name: '📝 Simplify and make more concise' },
-        { value: 'technical', name: '🔧 Make more technical/detailed' },
-        { value: 'manual', name: '✍️  Write manually' },
-        { value: 'cancel', name: '❌ Cancel' },
+        { value: 'refine', name: 'Refine with specific feedback' },
+        { value: 'add', name: 'Add missing information' },
+        { value: 'simplify', name: 'Simplify and make more concise' },
+        { value: 'technical', name: 'Make more technical/detailed' },
+        { value: 'manual', name: 'Write manually' },
+        { value: 'cancel', name: 'Cancel' },
       ],
     })
 
