@@ -1829,15 +1829,17 @@ export class SocketSdk {
 
       // Monitor stream size to prevent excessive disk usage.
       res.on('data', (chunk: Buffer) => {
-        bytesWritten += chunk.length
-        /* c8 ignore next 5 - Stream size limit enforcement, difficult to test reliably */
-        if (bytesWritten > MAX_STREAM_SIZE) {
+        /* c8 ignore next 6 - Stream size limit enforcement, difficult to test reliably */
+        // Check BEFORE accumulating to prevent exceeding limit
+        if (bytesWritten + chunk.length > MAX_STREAM_SIZE) {
           const error = new Error(
             `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
           )
           res.destroy(error)
           writeStream.destroy(error)
+          return
         }
+        bytesWritten += chunk.length
       })
 
       res.pipe(writeStream)
@@ -1846,8 +1848,6 @@ export class SocketSdk {
         res.destroy()
         writeStream.destroy(error)
       })
-
-      // Wait for the stream to finish writing before returning.
       await events.once(writeStream, 'finish')
 
       return this.#handleApiSuccess<'downloadOrgFullScanFilesAsTar'>(res)
@@ -1926,12 +1926,12 @@ export class SocketSdk {
           const MAX_PATCH_SIZE = 50 * 1024 * 1024
 
           res.on('data', chunk => {
-            bytesRead += chunk.length
-            if (bytesRead > MAX_PATCH_SIZE) {
+            // Check BEFORE accumulating to prevent exceeding limit
+            if (bytesRead + chunk.length > MAX_PATCH_SIZE) {
               const error = new Error(
                 [
                   `Patch file exceeds maximum size of ${MAX_PATCH_SIZE} bytes`,
-                  `→ Current size: ${bytesRead} bytes`,
+                  `→ Current size: ${bytesRead + chunk.length} bytes`,
                   '→ This may indicate an incorrect hash or corrupted blob.',
                 ].join('\n'),
               )
@@ -1939,6 +1939,7 @@ export class SocketSdk {
               reject(error)
               return
             }
+            bytesRead += chunk.length
             data += chunk
           })
           res.on('end', () => {
@@ -3924,15 +3925,17 @@ export class SocketSdk {
 
         // Monitor stream size to prevent excessive disk usage.
         res.on('data', (chunk: Buffer) => {
-          bytesWritten += chunk.length
-          /* c8 ignore next 5 - Stream size limit enforcement, difficult to test reliably */
-          if (bytesWritten > MAX_STREAM_SIZE) {
+          /* c8 ignore next 6 - Stream size limit enforcement, difficult to test reliably */
+          // Check BEFORE accumulating to prevent exceeding limit
+          if (bytesWritten + chunk.length > MAX_STREAM_SIZE) {
             const error = new Error(
               `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
             )
             res.destroy(error)
             writeStream.destroy(error)
+            return
           }
+          bytesWritten += chunk.length
         })
 
         res.pipe(writeStream)
@@ -3941,8 +3944,6 @@ export class SocketSdk {
           res.destroy()
           writeStream.destroy(error)
         })
-
-        // Wait for the stream to finish writing before returning.
         await events.once(writeStream, 'finish')
       } else if (output === true) {
         // Stream to stdout with size limit and error handling.
@@ -3950,14 +3951,16 @@ export class SocketSdk {
 
         // Monitor stream size for stdout as well.
         res.on('data', (chunk: Buffer) => {
-          bytesWritten += chunk.length
-          /* c8 ignore next 4 - Stream size limit enforcement, difficult to test reliably */
-          if (bytesWritten > MAX_STREAM_SIZE) {
+          /* c8 ignore next 5 - Stream size limit enforcement, difficult to test reliably */
+          // Check BEFORE accumulating to prevent exceeding limit
+          if (bytesWritten + chunk.length > MAX_STREAM_SIZE) {
             const error = new Error(
               `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
             )
             res.destroy(error)
+            return
           }
+          bytesWritten += chunk.length
         })
 
         // Create error handler with cleanup to prevent listener leak
