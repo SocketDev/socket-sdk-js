@@ -75,4 +75,7 @@ async function main() {
   }
 }
 
-main()
+main().catch(error => {
+  logger.error('Unhandled error in main():', error)
+  process.exitCode = 1
+})

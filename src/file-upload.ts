@@ -138,7 +138,7 @@ export async function createUploadRequest(
     req.flushHeaders()
 
     // Concurrently wait for response while we stream body.
-    getResponse(req).then(
+    void getResponse(req).then(
       response => {
         hooks?.onResponse?.({
           method,

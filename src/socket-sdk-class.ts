@@ -1941,7 +1941,7 @@ export class SocketSdk {
               return
             }
             bytesRead += chunk.length
-            data += chunk
+            data += chunk.toString('utf8')
           })
           res.on('end', () => {
             resolve(data)
