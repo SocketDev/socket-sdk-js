@@ -90,7 +90,7 @@ describe('PromiseQueue', () => {
       await new Promise(resolve => setTimeout(resolve, 10))
 
       // Task2 will be queued
-      limitedQueue.add(async () => {
+      const task2Promise = limitedQueue.add(async () => {
         completed.push(2)
         return 2
       })
@@ -106,6 +106,11 @@ describe('PromiseQueue', () => {
         completed.push(4)
         return 4
       })
+
+      // Task2 should be rejected
+      await expect(task2Promise).rejects.toThrow(
+        'Task dropped: queue at maximum capacity',
+      )
 
       // Wait for all running and queued tasks to complete
       await limitedQueue.onIdle()

@@ -251,23 +251,27 @@ export class SocketSdk {
       signal: abortSignal,
     })
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
-    for await (const line of rli) {
-      const trimmed = line.trim()
-      const artifact = trimmed
-        ? (jsonParse(line, { throws: false }) as SocketArtifact)
-        : /* c8 ignore next - Empty line handling in batch streaming response parsing. */ null
-      if (isObjectObject(artifact)) {
-        yield this.#handleApiSuccess<'batchPackageFetch'>(
-          /* c8 ignore next 7 - Public token artifact reshaping branch for policy compliance. */
-          isPublicToken
-            ? reshapeArtifactForPublicPolicy(
-                artifact!,
-                false,
-                queryParams?.['actions'] as string,
-              )
-            : artifact!,
-        )
+    try {
+      for await (const line of rli) {
+        const trimmed = line.trim()
+        const artifact = trimmed
+          ? (jsonParse(line, { throws: false }) as SocketArtifact)
+          : /* c8 ignore next - Empty line handling in batch streaming response parsing. */ null
+        if (isObjectObject(artifact)) {
+          yield this.#handleApiSuccess<'batchPackageFetch'>(
+            /* c8 ignore next 7 - Public token artifact reshaping branch for policy compliance. */
+            isPublicToken
+              ? reshapeArtifactForPublicPolicy(
+                  artifact!,
+                  false,
+                  queryParams?.['actions'] as string,
+                )
+              : artifact!,
+          )
+        }
       }
+    } finally {
+      rli.close()
     }
   }
 
@@ -770,14 +774,18 @@ export class SocketSdk {
       signal: abortSignal,
     })
     const results: SocketArtifact[] = []
-    for await (const line of rli) {
-      const trimmed = line.trim()
-      const artifact = trimmed
-        ? (jsonParse(line, { throws: false }) as SocketArtifact)
-        : /* c8 ignore next - Empty line handling in batch parsing. */ null
-      if (isObjectObject(artifact)) {
-        results.push(artifact!)
+    try {
+      for await (const line of rli) {
+        const trimmed = line.trim()
+        const artifact = trimmed
+          ? (jsonParse(line, { throws: false }) as SocketArtifact)
+          : /* c8 ignore next - Empty line handling in batch parsing. */ null
+        if (isObjectObject(artifact)) {
+          results.push(artifact!)
+        }
       }
+    } finally {
+      rli.close()
     }
     const compact = urlSearchParamAsBoolean(
       getOwn(queryParams, 'compact') as string | null | undefined,
@@ -818,23 +826,27 @@ export class SocketSdk {
     })
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
     const results: SocketArtifact[] = []
-    for await (const line of rli) {
-      const trimmed = line.trim()
-      const artifact = trimmed
-        ? (jsonParse(line, { throws: false }) as SocketArtifact)
-        : /* c8 ignore next - Empty line handling in batch parsing. */ null
-      if (isObjectObject(artifact)) {
-        results.push(
-          /* c8 ignore next 7 - Public token artifact reshaping for policy compliance. */
-          isPublicToken
-            ? reshapeArtifactForPublicPolicy(
-                artifact!,
-                false,
-                queryParams?.['actions'] as string,
-              )
-            : artifact!,
-        )
+    try {
+      for await (const line of rli) {
+        const trimmed = line.trim()
+        const artifact = trimmed
+          ? (jsonParse(line, { throws: false }) as SocketArtifact)
+          : /* c8 ignore next - Empty line handling in batch parsing. */ null
+        if (isObjectObject(artifact)) {
+          results.push(
+            /* c8 ignore next 7 - Public token artifact reshaping for policy compliance. */
+            isPublicToken
+              ? reshapeArtifactForPublicPolicy(
+                  artifact!,
+                  false,
+                  queryParams?.['actions'] as string,
+                )
+              : artifact!,
+          )
+        }
       }
+    } finally {
+      rli.close()
     }
     const compact = urlSearchParamAsBoolean(
       getOwn(queryParams, 'compact') as string | null | undefined,
@@ -927,12 +939,14 @@ export class SocketSdk {
         running.map(entry => entry.promise),
       )
       // Remove generator with safe index lookup.
-      const index = running.findIndex(entry => entry.generator === generator)
+      const runningIndex = running.findIndex(
+        entry => entry.generator === generator,
+      )
       /* c8 ignore next 3 - Defensive check for concurrent generator cleanup edge case. */
-      if (index === -1) {
+      if (runningIndex === -1) {
         continue
       }
-      running.splice(index, 1)
+      running.splice(runningIndex, 1)
       // Yield the value if one is given, even when done:true.
       if (iteratorResult.value) {
         yield iteratorResult.value

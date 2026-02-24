@@ -710,7 +710,7 @@ export async function withRetry<T>(
       const delayMs = retryDelay * 2 ** attempt
       debugLog('withRetry', `Waiting ${delayMs}ms before retry`)
       // eslint-disable-next-line no-await-in-loop
-      await new Promise(resolve => setTimeout(resolve, delayMs))
+      await new Promise(resolve => setTimeout(resolve, delayMs).unref())
     }
   }
 

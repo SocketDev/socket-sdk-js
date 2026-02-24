@@ -81,10 +81,10 @@ Socket SDK for JavaScript/TypeScript - Programmatic access to Socket.dev securit
 - **Build**: `pnpm build` (production build)
 - **Watch**: `pnpm build --watch` (dev mode with 68% faster incremental builds)
 - **Test**: `pnpm test`
-- **Type check**: `pnpm tsc`
-- **Lint**: `pnpm lint`
+- **Type check**: `pnpm run type`
+- **Lint**: `pnpm run lint`
 - **Check all**: `pnpm check`
-- **Coverage**: `pnpm cover`
+- **Coverage**: `pnpm run cover`
 
 **Development tip:** Use `pnpm build --watch` for 68% faster rebuilds (9ms vs 27ms).
 
@@ -205,9 +205,8 @@ if (isCoverageMode) {
 
 #### Running Tests
 - **All tests**: `pnpm test`
-- **Specific file**: `pnpm run test:run <file>` (glob support)
-- **Coverage**: `pnpm run cover` or `pnpm run test:unit:coverage`
-- **Coverage percentage**: `pnpm run coverage:percent`
+- **Specific file**: `pnpm test <file>` (glob support)
+- **Coverage**: `pnpm run cover`
 
 #### Best Practices
 - **Use setupTestClient()**: Combines nock setup and client creation in one call
@@ -216,7 +215,7 @@ if (isCoverageMode) {
 - **Auto cleanup**: Nock mocks cleaned automatically in beforeEach/afterEach
 - **Test both paths**: Success + error paths for all methods
 - **Cross-platform**: Test path handling on Windows and Unix
-- **Follow patterns**: See `test/getapi-sendapi-methods.test.mts` for examples
+- **Follow patterns**: See `test/unit/getapi-sendapi-methods.test.mts` for examples
 
 ### CI Testing
 - **🚨 MANDATORY**: `SocketDev/socket-registry/.github/workflows/ci.yml@<SHA>` with full SHA
