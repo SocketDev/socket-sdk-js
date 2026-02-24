@@ -115,35 +115,34 @@ Fix: [Specific code change to fix it]
 Impact: [What happens if this bug is triggered]
 
 Example:
-File: packages/node-smol-builder/scripts/binary-released/shared/apply-patches.mjs:145
-Issue: Unhandled promise rejection in patch application
+File: src/http-client.ts:145
+Issue: Unhandled promise rejection in API request
 Severity: Critical
-Pattern: `applyPatch(patchFile, targetPath)`
-Trigger: When patch file contains malformed unified diff format
-Fix: `await applyPatch(patchFile, targetPath).catch(err => { log.error(err); throw new Error(\`Patch failed: \${err.message}\`) })`
-Impact: Uncaught exception crashes build process, leaving Node.js source in inconsistent state
+Pattern: `makeRequest(url, options)`
+Trigger: When network request fails without error handler
+Fix: `await makeRequest(url, options).catch(err => { logger.error(err); throw new Error(\`API request failed: \${err.message}\`) })`
+Impact: Uncaught exception crashes SDK, leaving user application in error state
 
-Example (C/C++):
-File: packages/binject/src/socketsecurity/binject/binject.c:234
-Issue: Potential null pointer dereference after malloc
+Example:
+File: src/socket-sdk-class.ts:234
+Issue: Potential null pointer access on response data
 Severity: Critical
-Pattern: `uint8_t* buffer = malloc(size); memcpy(buffer, data, size);`
-Trigger: When malloc fails due to insufficient memory
-Fix: `uint8_t* buffer = malloc(size); if (!buffer) return BINJECT_ERROR_MEMORY; memcpy(buffer, data, size);`
-Impact: Segmentation fault crashes binary injection process
+Pattern: `const result = response.data.items[0]`
+Trigger: When API returns empty array
+Fix: `const items = response.data?.items ?? []; if (items.length === 0) throw new Error('No items found'); const result = items[0]`
+Impact: TypeError crashes SDK when API returns empty results
 </output_format>
 
 <quality_guidelines>
 - Only report actual bugs, not style issues or minor improvements
 - Verify bugs are not already handled by surrounding code
-- Prioritize bugs affecting build reliability and binary correctness
-- For C/C++: Focus on memory safety, null checks, buffer overflows
+- Prioritize bugs affecting SDK reliability and API correctness
 - For TypeScript: Focus on promise handling, type guards, external input validation
 - Skip false positives (TypeScript type guards are sufficient in many cases)
-- Scan across all packages: node-smol-builder, binject, bin-infra, build-infra, binsuite
+- Focus on src/ (SDK source), scripts/ (build scripts), and test/ (test files)
 </quality_guidelines>
 
-Scan systematically through all packages/ directories and report all critical bugs found. If no critical bugs are found, state that explicitly.
+Scan systematically through src/, scripts/, and test/ directories and report all critical bugs found. If no critical bugs are found, state that explicitly.
 ```
 
 ---
@@ -268,33 +267,33 @@ Fix: [Corrected code]
 Impact: [What incorrect output is produced]
 
 Example:
-File: packages/node-smol-builder/scripts/binary-released/shared/apply-patches.mjs:89
-Issue: Off-by-one in patch hunk line counting
+File: src/http-client.ts:89
+Issue: Off-by-one in retry attempt counting
 Severity: High
-Edge Case: When patch hunk has trailing context lines
-Pattern: `for (let i = 0; i < hunkLines.length - 1; i++)`
-Fix: `for (let i = 0; i < hunkLines.length; i++)`
-Impact: Last line of patch hunk is silently omitted, causing patch application to fail or produce incorrect output
+Edge Case: When max retries is set to 0
+Pattern: `for (let i = 0; i < maxRetries - 1; i++)`
+Fix: `for (let i = 0; i < maxRetries; i++)`
+Impact: SDK retries one fewer time than configured, missing last retry attempt
 
-Example (C code):
-File: packages/binject/src/socketsecurity/binject/elf_inject.c:234
-Issue: Incorrect section size calculation with alignment
+Example:
+File: src/utils.ts:234
+Issue: Incorrect array slicing in pagination
 Severity: High
-Edge Case: When injecting data into sections requiring alignment
-Pattern: `new_size = existing_size + data_size;`
-Fix: `new_size = ALIGN_UP(existing_size + data_size, section_alignment);`
-Impact: Injected data misaligned, causing segfault when binary loads section
+Edge Case: When requesting last page with partial results
+Pattern: `items.slice(offset, offset + limit - 1)`
+Fix: `items.slice(offset, offset + limit)`
+Impact: Last item on each page is omitted, causing incomplete results
 </output_format>
 
 <quality_guidelines>
-- Prioritize code handling external data (patches, binary files, build configs)
-- Focus on errors affecting build correctness and binary integrity
+- Prioritize code handling external data (API responses, user input, configuration)
+- Focus on errors affecting API correctness and data integrity
 - Verify logic errors aren't false alarms due to type narrowing
-- Consider real-world edge cases: malformed patches, unusual binary formats, cross-platform paths
-- Pay special attention to C/C++ pointer arithmetic and buffer calculations
+- Consider real-world edge cases: malformed API responses, empty arrays, cross-platform paths
+- Pay special attention to array/string operations and validation logic
 </quality_guidelines>
 
-Analyze systematically across all packages and report all logic errors found. If no errors are found, state that explicitly.
+Analyze systematically across src/, scripts/, and test/ and report all logic errors found. If no errors are found, state that explicitly.
 ```
 
 ---
@@ -1052,40 +1051,40 @@ Severity Guidelines:
 - Low: Minor inaccuracies or missing non-critical information
 
 Example:
-File: packages/binject/README.md:46
-Issue: Incorrect description of NODE_SEA section compression format
+File: README.md:46
+Issue: Incorrect method name in API example
 Severity: High
-Pattern: "NODE_SEA - Compressed application code (Brotli, ~70-80% reduction)"
-Actual: NODE_SEA contains uncompressed blobs generated by Node.js itself, not Brotli-compressed data
-Fix: Change to: "NODE_SEA - Single Executable Application code (generated by Node.js)"
-Impact: Misleads developers about the actual format, causing confusion when inspecting binaries
+Pattern: "sdk.getPackageDetails('react')"
+Actual: SDK method is named "getScoreByNpmPackage" not "getPackageDetails"
+Fix: Change to: "sdk.getScoreByNpmPackage('react')"
+Impact: Example code will fail with "getPackageDetails is not a function" error
 
 Example:
 File: README.md:25
-Issue: Incorrect package name in build command
+Issue: Incorrect package name in installation command
 Severity: High
-Pattern: "pnpm --filter @socketbin/node-smol-builder run build"
-Actual: package.json shows "name": "node-smol-builder" without @socketbin scope
-Fix: Change to: "pnpm --filter node-smol-builder run build"
-Impact: Command will fail with "No projects matched" error
+Pattern: "npm install socket-sdk"
+Actual: package.json shows "name": "@socketsecurity/sdk" with scope
+Fix: Change to: "npm install @socketsecurity/sdk"
+Impact: Installation command will fail with "package not found" error
 
 Example:
-File: packages/build-infra/README.md:14
-Issue: References non-existent module name
+File: docs/api-reference.md:14
+Issue: References non-existent configuration option
 Severity: Medium
-Pattern: "paths - Standard directory structure"
-Actual: Module is exported as "path-builder" in package.json exports
-Fix: Change to: "path-builder - Standard directory structure"
-Impact: Developers looking for "paths" module will not find it
+Pattern: "maxRetries - Maximum retry attempts (default: 5)"
+Actual: Default is 3 retries (verified in src/http-client.ts constants)
+Fix: Change to: "maxRetries - Maximum retry attempts (default: 3)"
+Impact: Developers may expect different retry behavior than actual
 
 Example:
-File: packages/binject/README.md:227
-Issue: Incorrect config size documented
+File: docs/quota-management.md:227
+Issue: Incorrect quota cost documented
 Severity: Low
-Pattern: "Config stored in binary format (1112 bytes)"
-Actual: Config is 1176 bytes (verified in source code)
-Fix: Change to: "Config stored in binary format (1176 bytes)"
-Impact: Minor inaccuracy in technical specification
+Pattern: "createFullScan costs 50 quota"
+Actual: createFullScan costs 0 quota (verified in data/api-method-quota-and-permissions.json)
+Fix: Change to: "createFullScan costs 0 quota (free tier)"
+Impact: Minor inaccuracy in quota documentation
 </output_format>
 
 <quality_guidelines>

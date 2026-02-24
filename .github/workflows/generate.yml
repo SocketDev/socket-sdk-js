@@ -71,9 +71,7 @@ jobs:
           git checkout -b automated/open-api
           git add .
           git commit -m "fix(openapi): sync with openapi definition"
-          # Safe to use --no-verify: automated workflow doesn't generate AI attribution
-          # and commit-msg hook already stripped any if present
-          git push origin automated/open-api -fu --no-verify
+          git push origin automated/open-api -fu
 
       - name: Create Pull Request
         if: steps.check.outputs.has_changes == 'true'
