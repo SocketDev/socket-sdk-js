@@ -25,8 +25,8 @@ jobs:
     name: Sync OpenAPI definition
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
+      contents: write       # To push generated SDK code
+      pull-requests: write  # To create PRs for review
     outputs:
       has_changes: ${{ steps.check.outputs.has_changes }}
     steps:
@@ -71,6 +71,8 @@ jobs:
           git checkout -b automated/open-api
           git add .
           git commit -m "fix(openapi): sync with openapi definition"
+          # Safe to use --no-verify: automated workflow doesn't generate AI attribution
+          # and commit-msg hook already stripped any if present
           git push origin automated/open-api -fu --no-verify
 
       - name: Create Pull Request

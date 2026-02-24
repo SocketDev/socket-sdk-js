@@ -18,8 +18,8 @@ on:
           - '1'
 
 permissions:
-  contents: write
-  id-token: write
+  contents: write   # To create GitHub releases
+  id-token: write   # For npm trusted publishing via OIDC
 
 jobs:
   publish:

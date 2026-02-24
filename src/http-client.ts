@@ -598,7 +598,7 @@ export function reshapeArtifactForPublicPolicy<
   // optimized for the public free-tier experience.
   if (!isAuthenticated) {
     // Parse actions parameter for alert filtering.
-    const allowedActions = actions ? actions.split(',') : undefined
+    const allowedActions = actions?.trim() ? actions.split(',') : undefined
 
     const reshapeArtifact = (artifact: SocketArtifactWithExtras) => ({
       name: artifact.name,

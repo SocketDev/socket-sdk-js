@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  id-token: write
-  pull-requests: read
+  contents: read         # To read repository code
+  id-token: write        # For OIDC authentication to Socket.dev
+  pull-requests: read    # To read PR details
 
 jobs:
   auto-review:

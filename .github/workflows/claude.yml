@@ -12,10 +12,10 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  id-token: write
-  issues: write
-  pull-requests: write
+  contents: read         # To read repository code
+  id-token: write        # For OIDC authentication to Socket.dev
+  issues: write          # To comment on issues
+  pull-requests: write   # To create/update PRs
 
 jobs:
   claude:

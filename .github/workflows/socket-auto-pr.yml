@@ -13,8 +13,8 @@ on:
         type: boolean
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: write       # To push commits to branches
+  pull-requests: write  # To create/update PRs
 
 jobs:
   socket-auto-pr:

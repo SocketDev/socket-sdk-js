@@ -167,6 +167,7 @@ export class SocketSdk {
     if (timeout !== undefined) {
       if (
         typeof timeout !== 'number' ||
+        Number.isNaN(timeout) ||
         timeout < MIN_HTTP_TIMEOUT ||
         timeout > MAX_HTTP_TIMEOUT
       ) {
