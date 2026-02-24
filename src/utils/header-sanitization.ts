@@ -1,4 +1,9 @@
 /**
+ * @fileoverview HTTP header sanitization utilities for secure logging.
+ * Provides functions to redact sensitive header values from logs.
+ */
+
+/**
  * List of sensitive HTTP headers that should be redacted in logs.
  */
 export const SENSITIVE_HEADERS: readonly string[] = [

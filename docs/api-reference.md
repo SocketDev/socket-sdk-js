@@ -38,7 +38,12 @@ Efficiently analyze multiple packages in parallel:
 
 ```typescript
 const result = await sdk.batchPackageFetch(
-  ['react@18.2.0', 'vue@3.3.4'],
+  {
+    components: [
+      { purl: 'pkg:npm/react@18.2.0' },
+      { purl: 'pkg:npm/vue@3.3.4' }
+    ]
+  },
   { includeTopLevelAncestors: true }
 )
 
@@ -76,8 +81,8 @@ Check API quota usage before making expensive calls:
 ```typescript
 const quotaResult = await sdk.getQuota()
 if (quotaResult.success) {
-  const { total, used, remaining } = quotaResult.data.quota
-  console.log(`Quota: ${used}/${total} (${remaining} remaining)`)
+  const quota = quotaResult.data.quota
+  console.log(`Available quota: ${quota} units`)
 }
 ```
 

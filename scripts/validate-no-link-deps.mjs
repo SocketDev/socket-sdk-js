@@ -123,7 +123,7 @@ async function main() {
   }
 
   if (allViolations.length > 0) {
-    logger.error('❌ Found link: dependencies (prohibited)')
+    logger.fail('Found link: dependencies (prohibited)')
     logger.error('')
     logger.error(
       'Use workspace: protocol for monorepo packages or catalog: for centralized versions.',

@@ -268,12 +268,13 @@ export async function getErrorResponseBody(
     response.on('data', (chunk: string) => {
       // Track size in bytes (not characters) for accurate limit enforcement
       const chunkBytes = Buffer.byteLength(chunk, 'utf8')
-      totalBytes += chunkBytes
 
-      if (totalBytes > MAX_RESPONSE_SIZE) {
+      // Check BEFORE accumulating to prevent exceeding limit
+      if (totalBytes + chunkBytes > MAX_RESPONSE_SIZE) {
         // Destroy the response stream to stop receiving data
         response.destroy()
-        const sizeMB = (totalBytes / (1024 * 1024)).toFixed(2)
+        const projectedSize = totalBytes + chunkBytes
+        const sizeMB = (projectedSize / (1024 * 1024)).toFixed(2)
         const maxMB = (MAX_RESPONSE_SIZE / (1024 * 1024)).toFixed(2)
         const message = [
           `Response exceeds maximum size limit (${sizeMB}MB > ${maxMB}MB)`,
@@ -286,6 +287,7 @@ export async function getErrorResponseBody(
         return
       }
 
+      totalBytes += chunkBytes
       body += chunk
     })
 
@@ -596,7 +598,7 @@ export function reshapeArtifactForPublicPolicy<
   // optimized for the public free-tier experience.
   if (!isAuthenticated) {
     // Parse actions parameter for alert filtering.
-    const allowedActions = actions ? actions.split(',') : undefined
+    const allowedActions = actions?.trim() ? actions.split(',') : undefined
 
     const reshapeArtifact = (artifact: SocketArtifactWithExtras) => ({
       name: artifact.name,
@@ -710,7 +712,7 @@ export async function withRetry<T>(
       const delayMs = retryDelay * 2 ** attempt
       debugLog('withRetry', `Waiting ${delayMs}ms before retry`)
       // eslint-disable-next-line no-await-in-loop
-      await new Promise(resolve => setTimeout(resolve, delayMs))
+      await new Promise(resolve => setTimeout(resolve, delayMs).unref())
     }
   }
 

@@ -138,7 +138,7 @@ export async function createUploadRequest(
     req.flushHeaders()
 
     // Concurrently wait for response while we stream body.
-    getResponse(req).then(
+    void getResponse(req).then(
       response => {
         hooks?.onResponse?.({
           method,
@@ -164,9 +164,8 @@ export async function createUploadRequest(
     // Pipe form data to request - form-data handles all backpressure automatically
     form.pipe(req)
 
-    // Handle errors
-    /* c8 ignore next 2 - form-data error events require stream failures that are difficult to test reliably */
+    // Handle form stream errors (request errors already handled by getResponse)
+    /* c8 ignore next 1 - form-data error events require stream failures that are difficult to test reliably */
     form.on('error', fail)
-    req.on('error', fail)
   })
 }

@@ -17,12 +17,13 @@ on:
           - '0'
           - '1'
 
-permissions:
-  contents: write
-  id-token: write
+permissions: {}
 
 jobs:
   publish:
+    permissions:
+      contents: write   # To create GitHub releases
+      id-token: write   # For npm trusted publishing via OIDC
     uses: SocketDev/socket-registry/.github/workflows/provenance.yml@0f9229dbc545a2de7b06024756e41fa5e0debc8b # main
     with:
       debug: ${{ inputs.debug }}

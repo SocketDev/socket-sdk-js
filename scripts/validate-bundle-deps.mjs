@@ -295,7 +295,7 @@ async function validateBundleDeps() {
   const distFiles = await findDistFiles(distPath)
 
   if (distFiles.length === 0) {
-    logger.log('ℹ No dist files found - run build first')
+    logger.info('No dist files found - run build first')
     return { violations: [], warnings: [] }
   }
 
@@ -371,7 +371,7 @@ async function main() {
     }
 
     if (violations.length > 0) {
-      logger.error('❌ Bundle dependencies validation failed\n')
+      logger.fail('Bundle dependencies validation failed\n')
 
       for (const violation of violations) {
         logger.error(`  ${violation.message}`)
@@ -381,7 +381,7 @@ async function main() {
     }
 
     if (warnings.length > 0) {
-      logger.log('⚠ Warnings:\n')
+      logger.warn('Warnings:\n')
 
       for (const warning of warnings) {
         logger.log(`  ${warning.message}`)
@@ -397,4 +397,7 @@ async function main() {
   }
 }
 
-main()
+main().catch(error => {
+  logger.error('Unhandled error in main():', error)
+  process.exitCode = 1
+})

@@ -6,8 +6,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
-import colors from 'yoctocolors-cjs'
-
 import { isQuiet } from '@socketsecurity/lib/argv/flags'
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
 import { getChangedFiles, getStagedFiles } from '@socketsecurity/lib/git'
@@ -228,7 +226,7 @@ async function runLintOnFiles(files, options = {}) {
 
   if (!quiet) {
     logger.stdout.clearLine()
-    logger.log(`${colors.green('✓')} Linting passed`)
+    logger.success('Linting passed')
     // Add newline after message (use error to write to same stream)
     logger.error('')
   }
@@ -303,7 +301,7 @@ async function runLintOnAll(options = {}) {
 
   if (!quiet) {
     logger.stdout.clearLine()
-    logger.log(`${colors.green('✓')} Linting passed`)
+    logger.success('Linting passed')
     // Add newline after message (use error to write to same stream)
     logger.error('')
   }
@@ -480,7 +478,7 @@ async function main() {
     } else {
       if (!quiet) {
         logger.log('')
-        logger.log(`${colors.green('✓')} All lint checks passed!`)
+        logger.success('All lint checks passed!')
       }
     }
   } catch (error) {

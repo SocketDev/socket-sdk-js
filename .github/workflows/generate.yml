@@ -20,13 +20,19 @@ on:
         default: false
         type: boolean
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
 jobs:
   fetch_and_update:
     name: Sync OpenAPI definition
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
+      contents: write       # To push generated SDK code
+      pull-requests: write  # To create PRs for review
     outputs:
       has_changes: ${{ steps.check.outputs.has_changes }}
     steps:
@@ -61,13 +67,9 @@ jobs:
 
       - name: Configure git
         if: steps.check.outputs.has_changes == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          # Configure git to use the GitHub token for authentication
-          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
 
       - name: Commit and push changes
         if: steps.check.outputs.has_changes == 'true'
@@ -75,7 +77,7 @@ jobs:
           git checkout -b automated/open-api
           git add .
           git commit -m "fix(openapi): sync with openapi definition"
-          git push origin automated/open-api -fu --no-verify
+          git push origin automated/open-api -fu
 
       - name: Create Pull Request
         if: steps.check.outputs.has_changes == 'true'

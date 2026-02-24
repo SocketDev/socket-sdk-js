@@ -67,7 +67,7 @@ async function main() {
     return
   }
 
-  logger.error('❌ esbuild minify validation failed\n')
+  logger.fail('esbuild minify validation failed\n')
 
   for (const violation of violations) {
     logger.error(`  ${violation.message}`)

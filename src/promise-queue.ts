@@ -70,8 +70,11 @@ export class PromiseQueue {
       const task: QueuedTask<T> = { fn, resolve, reject }
 
       if (this.maxQueueLength && this.queue.length >= this.maxQueueLength) {
-        // Drop oldest task to prevent memory buildup
-        this.queue.shift()
+        // Drop oldest task and notify caller
+        const dropped = this.queue.shift()
+        if (dropped) {
+          dropped.reject(new Error('Task dropped: queue at maximum capacity'))
+        }
       }
 
       this.queue.push(task as QueuedTask<unknown>)
@@ -95,7 +98,7 @@ export class PromiseQueue {
         if (this.running === 0 && !this.queue.length) {
           resolve()
         } else {
-          setImmediate(check)
+          setImmediate(check).unref()
         }
       }
       check()

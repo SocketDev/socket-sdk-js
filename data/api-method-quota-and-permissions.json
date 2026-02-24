@@ -227,6 +227,22 @@
     "sendApi": {
       "quota": 0,
       "permissions": []
+    },
+    "batchOrgPackageFetch": {
+      "quota": 100,
+      "permissions": ["packages:list"]
+    },
+    "exportOpenVEX": {
+      "quota": 0,
+      "permissions": ["report:read"]
+    },
+    "getOrgAlertFullScans": {
+      "quota": 10,
+      "permissions": ["alerts:list"]
+    },
+    "rescanFullScan": {
+      "quota": 0,
+      "permissions": ["full-scans:create"]
     }
   }
 }

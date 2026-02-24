@@ -489,12 +489,10 @@ async function main() {
       spinner.stop()
     } catch {}
     removeExitHandler()
-    // Explicitly exit to prevent hanging
-    process.exit(process.exitCode || 0)
   }
 }
 
 main().catch(error => {
   logger.error(error)
-  process.exit(1)
+  process.exitCode = 1
 })

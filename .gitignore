@@ -6,7 +6,9 @@ desktop.ini
 *.lnk
 
 # Environment & config
-/.claude
+/.claude/*
+!/.claude/commands/
+!/.claude/skills/
 /.env
 /.env.local
 /.env.*.local

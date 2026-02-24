@@ -7,7 +7,6 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { build, context } from 'esbuild'
-import colors from 'yoctocolors-cjs'
 
 import { isQuiet } from '@socketsecurity/lib/argv/flags'
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
@@ -291,7 +290,7 @@ async function main() {
       }
       exitCode = await buildTypes({ quiet, verbose })
       if (exitCode === 0 && !quiet) {
-        logger.log(colors.green('✓ Type Declarations'))
+        logger.success('Type Declarations')
       }
     }
     // Build source only
@@ -306,7 +305,7 @@ async function main() {
       } = await buildSource({ quiet, verbose, analyze: values.analyze })
       exitCode = srcExitCode
       if (exitCode === 0 && !quiet) {
-        logger.log(colors.green(`✓ Source Bundle (${buildTime}ms)`))
+        logger.success(`Source Bundle (${buildTime}ms)`)
 
         if (values.analyze && result?.metafile) {
           const analysis = analyzeMetafile(result.metafile)
@@ -340,7 +339,7 @@ async function main() {
       }
 
       if (!quiet) {
-        logger.log(colors.green('✓ Build Cleaned'))
+        logger.success('Build Cleaned')
       }
 
       // Run source and types builds in parallel
@@ -361,7 +360,7 @@ async function main() {
       // Log completion messages
       if (!quiet) {
         if (srcResult.exitCode === 0) {
-          logger.log(colors.green(`✓ Source Bundle (${srcResult.buildTime}ms)`))
+          logger.success(`Source Bundle (${srcResult.buildTime}ms)`)
 
           if (values.analyze && srcResult.result?.metafile) {
             const analysis = analyzeMetafile(srcResult.result.metafile)
@@ -374,7 +373,7 @@ async function main() {
         }
 
         if (typesExitCode === 0) {
-          logger.log(colors.green('✓ Type Declarations'))
+          logger.success('Type Declarations')
         }
       }
 
@@ -384,9 +383,9 @@ async function main() {
     // Print final status and footer
     if (!quiet) {
       if (exitCode === 0) {
-        logger.log(colors.green('✓ Build completed successfully!'))
+        logger.success('Build completed successfully!')
       } else {
-        logger.error(colors.red('✗ Build failed'))
+        logger.fail('Build failed')
       }
       printFooter()
     }

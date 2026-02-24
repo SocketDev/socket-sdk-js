@@ -167,6 +167,7 @@ export class SocketSdk {
     if (timeout !== undefined) {
       if (
         typeof timeout !== 'number' ||
+        Number.isNaN(timeout) ||
         timeout < MIN_HTTP_TIMEOUT ||
         timeout > MAX_HTTP_TIMEOUT
       ) {
@@ -251,23 +252,27 @@ export class SocketSdk {
       signal: abortSignal,
     })
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
-    for await (const line of rli) {
-      const trimmed = line.trim()
-      const artifact = trimmed
-        ? (jsonParse(line, { throws: false }) as SocketArtifact)
-        : /* c8 ignore next - Empty line handling in batch streaming response parsing. */ null
-      if (isObjectObject(artifact)) {
-        yield this.#handleApiSuccess<'batchPackageFetch'>(
-          /* c8 ignore next 7 - Public token artifact reshaping branch for policy compliance. */
-          isPublicToken
-            ? reshapeArtifactForPublicPolicy(
-                artifact!,
-                false,
-                queryParams?.['actions'] as string,
-              )
-            : artifact!,
-        )
+    try {
+      for await (const line of rli) {
+        const trimmed = line.trim()
+        const artifact = trimmed
+          ? (jsonParse(line, { throws: false }) as SocketArtifact)
+          : /* c8 ignore next - Empty line handling in batch streaming response parsing. */ null
+        if (isObjectObject(artifact)) {
+          yield this.#handleApiSuccess<'batchPackageFetch'>(
+            /* c8 ignore next 7 - Public token artifact reshaping branch for policy compliance. */
+            isPublicToken
+              ? reshapeArtifactForPublicPolicy(
+                  artifact!,
+                  false,
+                  queryParams?.['actions'] as string,
+                )
+              : artifact!,
+          )
+        }
       }
+    } finally {
+      rli.close()
     }
   }
 
@@ -770,14 +775,18 @@ export class SocketSdk {
       signal: abortSignal,
     })
     const results: SocketArtifact[] = []
-    for await (const line of rli) {
-      const trimmed = line.trim()
-      const artifact = trimmed
-        ? (jsonParse(line, { throws: false }) as SocketArtifact)
-        : /* c8 ignore next - Empty line handling in batch parsing. */ null
-      if (isObjectObject(artifact)) {
-        results.push(artifact!)
+    try {
+      for await (const line of rli) {
+        const trimmed = line.trim()
+        const artifact = trimmed
+          ? (jsonParse(line, { throws: false }) as SocketArtifact)
+          : /* c8 ignore next - Empty line handling in batch parsing. */ null
+        if (isObjectObject(artifact)) {
+          results.push(artifact!)
+        }
       }
+    } finally {
+      rli.close()
     }
     const compact = urlSearchParamAsBoolean(
       getOwn(queryParams, 'compact') as string | null | undefined,
@@ -818,23 +827,27 @@ export class SocketSdk {
     })
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
     const results: SocketArtifact[] = []
-    for await (const line of rli) {
-      const trimmed = line.trim()
-      const artifact = trimmed
-        ? (jsonParse(line, { throws: false }) as SocketArtifact)
-        : /* c8 ignore next - Empty line handling in batch parsing. */ null
-      if (isObjectObject(artifact)) {
-        results.push(
-          /* c8 ignore next 7 - Public token artifact reshaping for policy compliance. */
-          isPublicToken
-            ? reshapeArtifactForPublicPolicy(
-                artifact!,
-                false,
-                queryParams?.['actions'] as string,
-              )
-            : artifact!,
-        )
+    try {
+      for await (const line of rli) {
+        const trimmed = line.trim()
+        const artifact = trimmed
+          ? (jsonParse(line, { throws: false }) as SocketArtifact)
+          : /* c8 ignore next - Empty line handling in batch parsing. */ null
+        if (isObjectObject(artifact)) {
+          results.push(
+            /* c8 ignore next 7 - Public token artifact reshaping for policy compliance. */
+            isPublicToken
+              ? reshapeArtifactForPublicPolicy(
+                  artifact!,
+                  false,
+                  queryParams?.['actions'] as string,
+                )
+              : artifact!,
+          )
+        }
       }
+    } finally {
+      rli.close()
     }
     const compact = urlSearchParamAsBoolean(
       getOwn(queryParams, 'compact') as string | null | undefined,
@@ -927,12 +940,14 @@ export class SocketSdk {
         running.map(entry => entry.promise),
       )
       // Remove generator with safe index lookup.
-      const index = running.findIndex(entry => entry.generator === generator)
+      const runningIndex = running.findIndex(
+        entry => entry.generator === generator,
+      )
       /* c8 ignore next 3 - Defensive check for concurrent generator cleanup edge case. */
-      if (index === -1) {
+      if (runningIndex === -1) {
         continue
       }
-      running.splice(index, 1)
+      running.splice(runningIndex, 1)
       // Yield the value if one is given, even when done:true.
       if (iteratorResult.value) {
         yield iteratorResult.value
@@ -1083,7 +1098,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/createorgfullscan
    * @apiEndpoint POST /orgs/{org_slug}/full-scans
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes full-scans:create
    * @throws {Error} When server returns 5xx status codes
    */
@@ -1229,7 +1244,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/createorgdiffscanfromids
    * @apiEndpoint POST /orgs/{org_slug}/diff-scans/from-ids
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes diff-scans:create, full-scans:list
    * @throws {Error} When server returns 5xx status codes
    */
@@ -1396,7 +1411,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/createorgrepo
    * @apiEndpoint POST /orgs/{org_slug}/repos
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo:write
    * @throws {Error} When server returns 5xx status codes
    */
@@ -1469,7 +1484,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/createorgrepolabel
    * @apiEndpoint POST /orgs/{org_slug}/repos/labels
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo-label:create
    * @throws {Error} When server returns 5xx status codes
    */
@@ -1531,7 +1546,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/deleteorgfullscan
    * @apiEndpoint DELETE /orgs/{org_slug}/full-scans/{full_scan_id}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes full-scans:delete
    * @throws {Error} When server returns 5xx status codes
    */
@@ -1654,7 +1669,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/deleteorgrepo
    * @apiEndpoint DELETE /orgs/{org_slug}/repos/{repo_slug}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo:write
    * @throws {Error} When server returns 5xx status codes
    */
@@ -1722,7 +1737,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/deleteorgrepolabel
    * @apiEndpoint DELETE /orgs/{org_slug}/repos/labels/{label_id}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo-label:delete
    * @throws {Error} When server returns 5xx status codes
    */
@@ -1815,26 +1830,25 @@ export class SocketSdk {
 
       // Monitor stream size to prevent excessive disk usage.
       res.on('data', (chunk: Buffer) => {
-        bytesWritten += chunk.length
-        /* c8 ignore next 4 - Stream size limit enforcement, difficult to test reliably */
-        if (bytesWritten > MAX_STREAM_SIZE) {
-          res.destroy()
-          writeStream.destroy()
-          throw new Error(
+        /* c8 ignore next 6 - Stream size limit enforcement, difficult to test reliably */
+        // Check BEFORE accumulating to prevent exceeding limit
+        if (bytesWritten + chunk.length > MAX_STREAM_SIZE) {
+          const error = new Error(
             `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
           )
+          res.destroy(error)
+          writeStream.destroy(error)
+          return
         }
+        bytesWritten += chunk.length
       })
 
       res.pipe(writeStream)
       /* c8 ignore next 4 - Write stream error handler, difficult to test reliably */
       writeStream.on('error', error => {
-        throw new Error(`Failed to write to file: ${outputPath}`, {
-          cause: error,
-        })
+        res.destroy()
+        writeStream.destroy(error)
       })
-
-      // Wait for the stream to finish writing before returning.
       await events.once(writeStream, 'finish')
 
       return this.#handleApiSuccess<'downloadOrgFullScanFilesAsTar'>(res)
@@ -1908,8 +1922,26 @@ export class SocketSdk {
           }
 
           let data = ''
+          let bytesRead = 0
+          // 50MB limit
+          const MAX_PATCH_SIZE = 50 * 1024 * 1024
+
           res.on('data', chunk => {
-            data += chunk
+            // Check BEFORE accumulating to prevent exceeding limit
+            if (bytesRead + chunk.length > MAX_PATCH_SIZE) {
+              const error = new Error(
+                [
+                  `Patch file exceeds maximum size of ${MAX_PATCH_SIZE} bytes`,
+                  `→ Current size: ${bytesRead + chunk.length} bytes`,
+                  '→ This may indicate an incorrect hash or corrupted blob.',
+                ].join('\n'),
+              )
+              res.destroy(error)
+              reject(error)
+              return
+            }
+            bytesRead += chunk.length
+            data += chunk.toString('utf8')
           })
           res.on('end', () => {
             resolve(data)
@@ -2006,7 +2038,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/exportopenvex
    * @apiEndpoint GET /orgs/{org_slug}/export/openvex/{id}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes report:read
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2259,7 +2291,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getdiffscangfm
    * @apiEndpoint GET /orgs/{org_slug}/diff-scans/{diff_scan_id}/gfm
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes diff-scans:list
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2355,7 +2387,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getorgfullscan
    * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes full-scans:list
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2417,7 +2449,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getorgfullscanmetadata
    * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}/metadata
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes full-scans:list
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2959,7 +2991,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getorgrepo
    * @apiEndpoint GET /orgs/{org_slug}/repos/{repo_slug}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo:read
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3032,7 +3064,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getorgrepolabel
    * @apiEndpoint GET /orgs/{org_slug}/repos/labels/{label_id}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo-label:list
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3123,7 +3155,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getsupportedfiles
    * @apiEndpoint GET /orgs/{org_slug}/supported-files
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes No scopes required, but authentication is required
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3208,7 +3240,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getorgfullscanlist
    * @apiEndpoint GET /orgs/{org_slug}/full-scans
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes full-scans:list
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3268,7 +3300,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getorganizations
    * @apiEndpoint GET /organizations
-   * @quota 1 unit
+   * @quota 0 units
    * @throws {Error} When server returns 5xx status codes
    */
   async listOrganizations(): Promise<OrganizationsResult | StrictErrorResult> {
@@ -3359,7 +3391,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getorgrepolist
    * @apiEndpoint GET /orgs/{org_slug}/repos
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo:list
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3422,7 +3454,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getorgrepolabellist
    * @apiEndpoint GET /orgs/{org_slug}/repos/labels
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo-label:list
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3687,7 +3719,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/rescanorgfullscan
    * @apiEndpoint POST /orgs/{org_slug}/full-scans/{full_scan_id}/rescan
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes full-scans:create
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3857,7 +3889,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getorgfullscan
    * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes full-scans:list
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3894,44 +3926,61 @@ export class SocketSdk {
 
         // Monitor stream size to prevent excessive disk usage.
         res.on('data', (chunk: Buffer) => {
-          bytesWritten += chunk.length
-          /* c8 ignore next 4 - Stream size limit enforcement, difficult to test reliably */
-          if (bytesWritten > MAX_STREAM_SIZE) {
-            res.destroy()
-            writeStream.destroy()
-            throw new Error(
+          /* c8 ignore next 6 - Stream size limit enforcement, difficult to test reliably */
+          // Check BEFORE accumulating to prevent exceeding limit
+          if (bytesWritten + chunk.length > MAX_STREAM_SIZE) {
+            const error = new Error(
               `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
             )
+            res.destroy(error)
+            writeStream.destroy(error)
+            return
           }
+          bytesWritten += chunk.length
         })
 
         res.pipe(writeStream)
         /* c8 ignore next 4 - Write stream error handler, difficult to test reliably */
         writeStream.on('error', error => {
-          throw new Error(`Failed to write to file: ${output}`, {
-            cause: error,
-          })
+          res.destroy()
+          writeStream.destroy(error)
         })
+        await events.once(writeStream, 'finish')
       } else if (output === true) {
         // Stream to stdout with size limit and error handling.
         let bytesWritten = 0
 
         // Monitor stream size for stdout as well.
         res.on('data', (chunk: Buffer) => {
-          bytesWritten += chunk.length
-          /* c8 ignore next 3 - Stream size limit enforcement, difficult to test reliably */
-          if (bytesWritten > MAX_STREAM_SIZE) {
-            res.destroy()
-            throw new Error(
+          /* c8 ignore next 5 - Stream size limit enforcement, difficult to test reliably */
+          // Check BEFORE accumulating to prevent exceeding limit
+          if (bytesWritten + chunk.length > MAX_STREAM_SIZE) {
+            const error = new Error(
               `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
             )
+            res.destroy(error)
+            return
           }
+          bytesWritten += chunk.length
         })
 
+        // Create error handler with cleanup to prevent listener leak
+        /* c8 ignore next 4 - Stdout error handler, difficult to test reliably */
+        const stdoutErrorHandler = (_error: Error) => {
+          res.destroy()
+          process.stdout.removeListener('error', stdoutErrorHandler)
+        }
+        process.stdout.on('error', stdoutErrorHandler)
+
         res.pipe(process.stdout)
-        /* c8 ignore next 3 - Stdout error handler, difficult to test reliably */
-        process.stdout.on('error', error => {
-          throw new Error('Failed to write to stdout', { cause: error })
+
+        // Clean up listener when response ends to prevent memory leak
+        res.on('end', () => {
+          process.stdout.removeListener('error', stdoutErrorHandler)
+        })
+        /* c8 ignore next 3 - Response error cleanup, difficult to test reliably */
+        res.on('error', () => {
+          process.stdout.removeListener('error', stdoutErrorHandler)
         })
       }
 
@@ -4000,8 +4049,13 @@ export class SocketSdk {
           /* c8 ignore next - Streaming error handler, difficult to test reliably. */
           controller.error(error)
         } finally {
+          rli.close()
           controller.close()
         }
+      },
+      /* c8 ignore next 3 - Stream cancellation cleanup, difficult to test reliably. */
+      cancel() {
+        rli.close()
       },
     })
   }
@@ -4204,7 +4258,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/updateorgrepo
    * @apiEndpoint POST /orgs/{org_slug}/repos/{repo_slug}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo:write
    * @throws {Error} When server returns 5xx status codes
    */
@@ -4277,7 +4331,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/updateorgrepolabel
    * @apiEndpoint PUT /orgs/{org_slug}/repos/labels/{label_id}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo-label:update
    * @throws {Error} When server returns 5xx status codes
    */
