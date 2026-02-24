@@ -13,10 +13,6 @@
 
 ## 📚 SHARED STANDARDS
 
-**Canonical reference**: `../socket-registry/CLAUDE.md`
-
-All shared standards (git, testing, code style, cross-platform, CI) defined in socket-registry/CLAUDE.md.
-
 **Quick references**:
 - Commits: [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) `<type>(<scope>): <description>` - NO AI attribution
 - Scripts: Prefer `pnpm run foo --flag` over `foo:bar` scripts
@@ -85,13 +81,12 @@ Socket SDK for JavaScript/TypeScript - Programmatic access to Socket.dev securit
 - **Build**: `pnpm build` (production build)
 - **Watch**: `pnpm build --watch` (dev mode with 68% faster incremental builds)
 - **Test**: `pnpm test`
-- **Test runner**: `pnpm run test:run` (glob support)
 - **Type check**: `pnpm tsc`
-- **Lint**: `pnpm check:lint`
+- **Lint**: `pnpm lint`
 - **Check all**: `pnpm check`
-- **Coverage**: `pnpm run test:unit:coverage`, `pnpm run coverage:percent`
+- **Coverage**: `pnpm cover`
 
-**Development tip:** Use `pnpm build --watch` for 68% faster rebuilds (9ms vs 27ms). See `docs/incremental-builds.md` for details.
+**Development tip:** Use `pnpm build --watch` for 68% faster rebuilds (9ms vs 27ms).
 
 ### Configuration Files
 
@@ -155,7 +150,7 @@ Documentation organized alphabetically within functional categories
 
 ### Testing
 
-**Vitest Configuration**: This repo uses the shared vitest configuration patterns documented in `../socket-registry/CLAUDE.md` (see "Vitest Configuration Variants" section). Two configs available:
+**Vitest Configuration**: Two configs available:
 - `.config/vitest.config.mts` - Main config (default)
 - `.config/vitest.config.isolated.mts` - Full process isolation for vi.doMock()
 
@@ -228,7 +223,6 @@ if (isCoverageMode) {
 - **Format**: `@662bbcab1b7533e24ba8e3446cffd8a7e5f7617e # main`
 - **Custom runner**: `scripts/test.mjs` with glob expansion
 - **Memory**: Auto heap size (CI: 8GB, local: 4GB)
-- **Docs**: `docs/CI_TESTING.md`, `socket-registry/docs/CI_TESTING_TOOLS.md`
 
 ### Changelog Management
 **🚨 MANDATORY**: When creating changelog entries for version bumps:

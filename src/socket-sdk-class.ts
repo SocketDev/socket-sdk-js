@@ -1907,7 +1907,24 @@ export class SocketSdk {
           }
 
           let data = ''
+          let bytesRead = 0
+          // 50MB limit
+          const MAX_PATCH_SIZE = 50 * 1024 * 1024
+
           res.on('data', chunk => {
+            bytesRead += chunk.length
+            if (bytesRead > MAX_PATCH_SIZE) {
+              const error = new Error(
+                [
+                  `Patch file exceeds maximum size of ${MAX_PATCH_SIZE} bytes`,
+                  `→ Current size: ${bytesRead} bytes`,
+                  '→ This may indicate an incorrect hash or corrupted blob.',
+                ].join('\n'),
+              )
+              res.destroy(error)
+              reject(error)
+              return
+            }
             data += chunk
           })
           res.on('end', () => {

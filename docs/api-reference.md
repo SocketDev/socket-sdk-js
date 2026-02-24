@@ -81,8 +81,8 @@ Check API quota usage before making expensive calls:
 ```typescript
 const quotaResult = await sdk.getQuota()
 if (quotaResult.success) {
-  const { total, used, remaining } = quotaResult.data.quota
-  console.log(`Quota: ${used}/${total} (${remaining} remaining)`)
+  const quota = quotaResult.data.quota
+  console.log(`Available quota: ${quota} units`)
 }
 ```
 

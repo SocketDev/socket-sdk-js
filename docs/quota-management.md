@@ -97,9 +97,9 @@ if (quota.success && quota.data.quota >= batchCost) {
 
 ## Cost Reference
 
-- **Free (0):** `getQuota`, `getOrganizations`, `getEnabledEntitlements`, `getEntitlements`
-- **Standard (10):** `createOrgFullScan`, `getScan`, `getScanList`, `getOrgAnalytics`, `getOrgSecurityPolicy`, `updateOrgSecurityPolicy`
-- **Expensive (100):** `batchPackageFetch`, `batchPackageStream`, `uploadManifestFiles`, `createDependenciesSnapshot`
+- **Free (0):** `getQuota`, `getOrganizations`, `getEnabledEntitlements`, `getEntitlements`, `createOrgFullScan`, `getScan`, `getScanList`, `getOrgSecurityPolicy`, `updateOrgSecurityPolicy`
+- **Standard (10):** `getOrgAnalytics`, `getRepoAnalytics`, `getAuditLogEvents`, `getIssuesByNpmPackage`
+- **Expensive (100):** `batchPackageFetch`, `batchPackageStream`, `uploadManifestFiles`, `createDependenciesSnapshot`, `searchDependencies`
 
 ## Best Practices
 
