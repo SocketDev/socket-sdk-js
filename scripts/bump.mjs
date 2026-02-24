@@ -11,7 +11,6 @@ import readline from 'node:readline'
 import { fileURLToPath } from 'node:url'
 
 import semver from 'semver'
-import colors from 'yoctocolors-cjs'
 
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
@@ -424,11 +423,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
  * Uses interactive prompts if available, falls back to basic readline prompts.
  */
 async function reviewChangelog(claudeCmd, changelogEntry, interactive = false) {
-  logger.log(`\n${colors.blue('━'.repeat(60))}`)
-  logger.log(colors.blue('Proposed Changelog Entry:'))
-  logger.log(colors.blue('━'.repeat(60)))
+  logger.log(`\n${'━'.repeat(60)}`)
+  logger.log('Proposed Changelog Entry:')
+  logger.log('━'.repeat(60))
   logger.log(changelogEntry)
-  logger.log(`${colors.blue('━'.repeat(60))}\n`)
+  logger.log(`${'━'.repeat(60)}\n`)
 
   // Use interactive prompts if available and requested.
   if (interactive && prompts) {
@@ -473,11 +472,11 @@ Provide the refined changelog entry in the same format.`
         changelogEntry = refineResult.stdout.trim()
         log.done('Changelog refined')
 
-        logger.log(`\n${colors.blue('━'.repeat(60))}`)
-        logger.log(colors.blue('Refined Changelog Entry:'))
-        logger.log(colors.blue('━'.repeat(60)))
+        logger.log(`\n${'━'.repeat(60)}`)
+        logger.log('Refined Changelog Entry:')
+        logger.log('━'.repeat(60))
         logger.log(changelogEntry)
-        logger.log(`${colors.blue('━'.repeat(60))}\n`)
+        logger.log(`${'━'.repeat(60)}\n`)
       } else {
         log.failed('Failed to refine changelog')
       }
@@ -504,10 +503,10 @@ async function interactiveReviewChangelog(claudeCmd, changelogEntry) {
 
   while (true) {
     // Show the current changelog.
-    logger.log(`\n${colors.cyan('Current Changelog Entry:')}`)
-    logger.log(colors.dim('─'.repeat(60)))
+    logger.log('\nCurrent Changelog Entry:')
+    logger.log('─'.repeat(60))
     logger.log(currentEntry)
-    logger.log(`${colors.dim('─'.repeat(60))}\n`)
+    logger.log(`${'─'.repeat(60)}\n`)
 
     // Offer action choices.
     const action = await prompts.select({

@@ -31,21 +31,22 @@
 - ℹ Info - MUST be blue (NOT ℹ️)
 - → Step/progress - MUST be cyan (NOT ➜ or ▶)
 
-**Color Requirements** (apply color to icon ONLY, not entire message):
+**Usage** (use logger methods, NOT manual color application):
 ```javascript
-import colors from 'yoctocolors-cjs'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
+const logger = getDefaultLogger()
 
-`${colors.green('✓')} ${msg}`   // Success
-`${colors.red('✗')} ${msg}`     // Error
-`${colors.yellow('⚠')} ${msg}`  // Warning
-`${colors.blue('ℹ')} ${msg}`    // Info
-`${colors.cyan('→')} ${msg}`    // Step/Progress
+logger.success(msg)   // Green ✓
+logger.fail(msg)      // Red ✗
+logger.warn(msg)      // Yellow ⚠
+logger.info(msg)      // Blue ℹ
+logger.step(msg)      // Cyan →
 ```
 
-**Color Package**:
-- Use `yoctocolors-cjs` (NOT `yoctocolors` ESM package)
-- Pinned dev dependency in all Socket projects
-- CommonJS compatibility for scripts and tooling
+**Important**:
+- Always use logger methods for status symbols
+- Never manually apply colors with yoctocolors-cjs or similar
+- Logger automatically handles colored symbols
 
 **Allowed Emojis** (use sparingly):
 - 📦 Packages
