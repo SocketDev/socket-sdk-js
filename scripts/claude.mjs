@@ -5332,8 +5332,6 @@ async function runWatchMode(claudeCmd, options = {}) {
 
     log.success('Watch mode stopped')
     process.exitCode = 0
-
-    process.exit(0)
   })
 
   // Keep process alive

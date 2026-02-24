@@ -3927,6 +3927,9 @@ export class SocketSdk {
           res.destroy()
           writeStream.destroy(error)
         })
+
+        // Wait for the stream to finish writing before returning.
+        await events.once(writeStream, 'finish')
       } else if (output === true) {
         // Stream to stdout with size limit and error handling.
         let bytesWritten = 0
