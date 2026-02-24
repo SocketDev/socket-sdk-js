@@ -8,6 +8,7 @@ desktop.ini
 # Environment & config
 /.claude/*
 !/.claude/commands/
+!/.claude/skills/
 /.env
 /.env.local
 /.env.*.local
