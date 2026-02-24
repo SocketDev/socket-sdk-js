@@ -3,6 +3,7 @@
  * Uses openapi-typescript to generate types, then acorn + acorn-typescript to
  * parse and transform them into strict versions with required fields properly marked.
  */
+import { spawnSync } from 'node:child_process'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 
@@ -110,8 +111,30 @@ const STRICT_TYPE_CONFIG = {
     sourcePath: [],
     requiredFields: ['results'],
     typeOverrides: {
-      results: 'RepositoryItem[]',
+      results: 'RepositoryListItem[]',
     },
+  },
+
+  // Repository List Item - from getOrgRepoList results array
+  repositoryListItem: {
+    operationId: 'getOrgRepoList',
+    responseCode: 200,
+    typeName: 'RepositoryListItem',
+    sourcePath: ['results', 'Array', 'items'],
+    requiredFields: [
+      'archived',
+      'created_at',
+      'default_branch',
+      'description',
+      'head_full_scan_id',
+      'homepage',
+      'id',
+      'name',
+      'slug',
+      'updated_at',
+      'visibility',
+      'workspace',
+    ],
   },
 
   // Repository Item - from getOrgRepo response
@@ -130,6 +153,7 @@ const STRICT_TYPE_CONFIG = {
       'id',
       'integration_meta',
       'name',
+      'slig',
       'slug',
       'updated_at',
       'visibility',
@@ -510,6 +534,59 @@ export type DeleteRepositoryLabelResult = {
 }
 
 /**
+ * Update index.ts to export all generated types.
+ */
+async function updateIndexExports() {
+  const indexPath = path.resolve(rootPath, 'src/index.ts')
+  const indexContent = await fs.readFile(indexPath, 'utf8')
+
+  // Extract type names from generated types
+  const typeNames = []
+  for (const config of Object.values(STRICT_TYPE_CONFIG)) {
+    typeNames.push(config.typeName)
+  }
+
+  // Also add wrapper types
+  const wrapperTypes = [
+    'DeleteRepositoryLabelResult',
+    'DeleteResult',
+    'FullScanListResult',
+    'FullScanResult',
+    'OrganizationsResult',
+    'RepositoriesListResult',
+    'RepositoryLabelResult',
+    'RepositoryLabelsListResult',
+    'RepositoryResult',
+    'StrictErrorResult',
+    'StrictResult',
+    'StreamFullScanOptions',
+  ]
+  typeNames.push(...wrapperTypes)
+
+  // Sort alphabetically
+  typeNames.sort()
+
+  // Find the types-strict import section
+  const importRegex = /export type \{[^}]*\} from '\.\/types-strict'/s
+  const match = indexContent.match(importRegex)
+
+  if (!match) {
+    logger.log('  Warning: Could not find types-strict export in index.ts')
+    return
+  }
+
+  // Build new export statement
+  const newExport = `export type {\n  ${typeNames.join(',\n  ')},\n} from './types-strict'`
+
+  // Replace the old export
+  const newIndexContent = indexContent.replace(importRegex, newExport)
+
+  // Write back to file
+  await fs.writeFile(indexPath, newIndexContent, 'utf8')
+  logger.log(`  Updated ${indexPath} with ${typeNames.length} type exports`)
+}
+
+/**
  * Main generation function.
  */
 async function main() {
@@ -623,6 +700,24 @@ ${generateWrapperTypes()}
     // Step 6: Write the output file
     await fs.writeFile(strictTypesPath, output, 'utf8')
     logger.log(`  Written to ${strictTypesPath}`)
+
+    // Step 7: Update index.ts exports
+    await updateIndexExports()
+
+    // Step 8: Format generated files with Biome
+    logger.log('  Formatting generated files...')
+    const formatResult = spawnSync(
+      'npx',
+      ['@biomejs/biome', 'format', '--write', strictTypesPath],
+      { cwd: rootPath, encoding: 'utf8' },
+    )
+    if (formatResult.error) {
+      logger.log(
+        '  Warning: Could not format files:',
+        formatResult.error.message,
+      )
+    }
+
     logger.log('Strict type generation complete')
   } catch (error) {
     logger.error('Strict type generation failed:', error.message)

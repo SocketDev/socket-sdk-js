@@ -127,7 +127,54 @@ export type OrganizationItem = {
  */
 export type RepositoriesListData = {
   nextPage?: number | null | undefined
-  results: RepositoryItem[]
+  results: RepositoryListItem[]
+}
+
+/**
+ * Strict type for repository list item.
+ */
+export type RepositoryListItem = {
+  archived: boolean
+  created_at: string
+  default_branch: string | null
+  description: string | null
+  head_full_scan_id: string | null
+  homepage: string | null
+  id: string
+  integration_meta?:
+    | {
+        /** @enum {string} */
+        type?: 'github'
+        value?: {
+          /**
+           * @description The GitHub installation_id of the active associated Socket GitHub App
+           * @default
+           */
+          installation_id: string
+          /**
+           * @description The GitHub login name that the active Socket GitHub App installation is installed to
+           * @default
+           */
+          installation_login: string
+          /**
+           * @description The name of the associated GitHub repo.
+           * @default
+           */
+          repo_name: string | null
+          /**
+           * @description The id of the associated GitHub repo.
+           * @default
+           */
+          repo_id: string | null
+        }
+      }
+    | null
+    | undefined
+  name: string
+  slug: string
+  updated_at: string
+  visibility: 'public' | 'private'
+  workspace: string
 }
 
 /**
@@ -168,7 +215,7 @@ export type RepositoryItem = {
     }
   } | null
   name: string
-  slig?: string | undefined
+  slig: string
   slug: string
   updated_at: string
   visibility: 'public' | 'private'
