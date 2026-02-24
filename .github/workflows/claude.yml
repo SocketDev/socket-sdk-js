@@ -11,14 +11,15 @@ on:
     types: [submitted]
   workflow_dispatch:
 
-permissions:
-  contents: read         # To read repository code
-  id-token: write        # For OIDC authentication to Socket.dev
-  issues: write          # To comment on issues
-  pull-requests: write   # To create/update PRs
+permissions: {}
 
 jobs:
   claude:
+    permissions:
+      contents: read         # To read repository code
+      id-token: write        # For OIDC authentication to Socket.dev
+      issues: write          # To comment on issues
+      pull-requests: write   # To create/update PRs
     uses: SocketDev/socket-registry/.github/workflows/claude.yml@4709a2443e5a036bb0cd94e5d1559f138f05994c # main
     secrets:
       anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}

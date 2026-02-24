@@ -20,6 +20,12 @@ on:
         default: false
         type: boolean
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
 jobs:
   fetch_and_update:
     name: Sync OpenAPI definition
