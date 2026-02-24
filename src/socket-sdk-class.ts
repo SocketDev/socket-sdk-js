@@ -1097,7 +1097,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/createorgfullscan
    * @apiEndpoint POST /orgs/{org_slug}/full-scans
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes full-scans:create
    * @throws {Error} When server returns 5xx status codes
    */
@@ -1243,7 +1243,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/createorgdiffscanfromids
    * @apiEndpoint POST /orgs/{org_slug}/diff-scans/from-ids
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes diff-scans:create, full-scans:list
    * @throws {Error} When server returns 5xx status codes
    */
@@ -1410,7 +1410,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/createorgrepo
    * @apiEndpoint POST /orgs/{org_slug}/repos
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo:write
    * @throws {Error} When server returns 5xx status codes
    */
@@ -1483,7 +1483,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/createorgrepolabel
    * @apiEndpoint POST /orgs/{org_slug}/repos/labels
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo-label:create
    * @throws {Error} When server returns 5xx status codes
    */
@@ -1545,7 +1545,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/deleteorgfullscan
    * @apiEndpoint DELETE /orgs/{org_slug}/full-scans/{full_scan_id}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes full-scans:delete
    * @throws {Error} When server returns 5xx status codes
    */
@@ -1668,7 +1668,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/deleteorgrepo
    * @apiEndpoint DELETE /orgs/{org_slug}/repos/{repo_slug}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo:write
    * @throws {Error} When server returns 5xx status codes
    */
@@ -1736,7 +1736,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/deleteorgrepolabel
    * @apiEndpoint DELETE /orgs/{org_slug}/repos/labels/{label_id}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo-label:delete
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2037,7 +2037,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/exportopenvex
    * @apiEndpoint GET /orgs/{org_slug}/export/openvex/{id}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes report:read
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2290,7 +2290,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getdiffscangfm
    * @apiEndpoint GET /orgs/{org_slug}/diff-scans/{diff_scan_id}/gfm
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes diff-scans:list
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2386,7 +2386,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getorgfullscan
    * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes full-scans:list
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2448,7 +2448,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getorgfullscanmetadata
    * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}/metadata
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes full-scans:list
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2990,7 +2990,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getorgrepo
    * @apiEndpoint GET /orgs/{org_slug}/repos/{repo_slug}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo:read
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3063,7 +3063,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getorgrepolabel
    * @apiEndpoint GET /orgs/{org_slug}/repos/labels/{label_id}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo-label:list
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3154,7 +3154,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getsupportedfiles
    * @apiEndpoint GET /orgs/{org_slug}/supported-files
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes No scopes required, but authentication is required
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3239,7 +3239,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getorgfullscanlist
    * @apiEndpoint GET /orgs/{org_slug}/full-scans
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes full-scans:list
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3299,7 +3299,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getorganizations
    * @apiEndpoint GET /organizations
-   * @quota 1 unit
+   * @quota 0 units
    * @throws {Error} When server returns 5xx status codes
    */
   async listOrganizations(): Promise<OrganizationsResult | StrictErrorResult> {
@@ -3390,7 +3390,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getorgrepolist
    * @apiEndpoint GET /orgs/{org_slug}/repos
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo:list
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3453,7 +3453,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getorgrepolabellist
    * @apiEndpoint GET /orgs/{org_slug}/repos/labels
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo-label:list
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3718,7 +3718,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/rescanorgfullscan
    * @apiEndpoint POST /orgs/{org_slug}/full-scans/{full_scan_id}/rescan
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes full-scans:create
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3888,7 +3888,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/getorgfullscan
    * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes full-scans:list
    * @throws {Error} When server returns 5xx status codes
    */
@@ -4257,7 +4257,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/updateorgrepo
    * @apiEndpoint POST /orgs/{org_slug}/repos/{repo_slug}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo:write
    * @throws {Error} When server returns 5xx status codes
    */
@@ -4330,7 +4330,7 @@ export class SocketSdk {
    *
    * @see https://docs.socket.dev/reference/updateorgrepolabel
    * @apiEndpoint PUT /orgs/{org_slug}/repos/labels/{label_id}
-   * @quota 1 unit
+   * @quota 0 units
    * @scopes repo-label:update
    * @throws {Error} When server returns 5xx status codes
    */

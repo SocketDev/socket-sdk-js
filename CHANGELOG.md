@@ -342,8 +342,6 @@ Strict types now mark guaranteed API fields as required instead of optional, imp
 
 - File-upload methods automatically skip unreadable files with warnings instead of failing
 
-See [docs/migration-v3.md](./docs/migration-v3.md) and [docs/when-to-use-what.md](./docs/when-to-use-what.md) for migration guidance.
-
 ## [2.0.7](https://github.com/SocketDev/socket-sdk-js/releases/tag/v2.0.7) - 2025-10-22
 
 ### Changed
