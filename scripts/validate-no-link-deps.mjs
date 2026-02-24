@@ -8,8 +8,6 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import colors from 'yoctocolors-cjs'
-
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 const logger = getDefaultLogger()
@@ -125,7 +123,7 @@ async function main() {
   }
 
   if (allViolations.length > 0) {
-    logger.error(`${colors.red('✗')} Found link: dependencies (prohibited)`)
+    logger.fail('Found link: dependencies (prohibited)')
     logger.error('')
     logger.error(
       'Use workspace: protocol for monorepo packages or catalog: for centralized versions.',

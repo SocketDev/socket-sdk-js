@@ -14,8 +14,6 @@ import { builtinModules } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import colors from 'yoctocolors-cjs'
-
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 const logger = getDefaultLogger()
@@ -297,7 +295,7 @@ async function validateBundleDeps() {
   const distFiles = await findDistFiles(distPath)
 
   if (distFiles.length === 0) {
-    logger.log(`${colors.blue('ℹ')} No dist files found - run build first`)
+    logger.info('No dist files found - run build first')
     return { violations: [], warnings: [] }
   }
 
@@ -373,7 +371,7 @@ async function main() {
     }
 
     if (violations.length > 0) {
-      logger.error(`${colors.red('✗')} Bundle dependencies validation failed\n`)
+      logger.fail('Bundle dependencies validation failed\n')
 
       for (const violation of violations) {
         logger.error(`  ${violation.message}`)
@@ -383,7 +381,7 @@ async function main() {
     }
 
     if (warnings.length > 0) {
-      logger.log(`${colors.yellow('⚠')} Warnings:\n`)
+      logger.warn('Warnings:\n')
 
       for (const warning of warnings) {
         logger.log(`  ${warning.message}`)

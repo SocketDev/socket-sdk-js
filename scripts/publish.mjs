@@ -8,8 +8,6 @@ import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import colors from 'yoctocolors-cjs'
-
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
@@ -22,20 +20,20 @@ const WIN32 = process.platform === 'win32'
 // Simple inline logger.
 const log = {
   info: msg => logger.log(msg),
-  error: msg => logger.error(`${colors.red('✗')} ${msg}`),
-  success: msg => logger.log(`${colors.green('✓')} ${msg}`),
+  error: msg => logger.fail(msg),
+  success: msg => logger.success(msg),
   step: msg => logger.log(`\n${msg}`),
-  substep: msg => logger.log(`  ${msg}`),
+  substep: msg => logger.substep(msg),
   progress: msg => logger.progress(msg),
   done: msg => {
-    process.stdout.write('\r\x1b[K')
-    logger.log(`  ${colors.green('✓')} ${msg}`)
+    logger.clearLine()
+    logger.substep(msg)
   },
   failed: msg => {
-    process.stdout.write('\r\x1b[K')
-    logger.log(`  ${colors.red('✗')} ${msg}`)
+    logger.clearLine()
+    logger.substep(msg)
   },
-  warn: msg => logger.log(`${colors.yellow('⚠')} ${msg}`),
+  warn: msg => logger.warn(msg),
 }
 
 function printHeader(title) {
@@ -47,7 +45,7 @@ function printHeader(title) {
 function printFooter(message) {
   logger.log(`\n${'─'.repeat(60)}`)
   if (message) {
-    logger.log(`  ${colors.green('✓')} ${message}`)
+    logger.substep(message)
   }
 }
 
