@@ -145,6 +145,7 @@ export type SocketSdkErrorResult<T extends SocketSdkOperations> = Omit<
 > & {
   error: string
   cause?: string | undefined
+  url?: string | undefined
 }
 
 export type SocketSdkResult<T extends SocketSdkOperations> =
@@ -339,7 +340,8 @@ function sanitizeHeaders(
 
 class ResponseError extends Error {
   response: IncomingMessage
-  constructor(response: IncomingMessage, message: string = '') {
+  url?: string | undefined
+  constructor(response: IncomingMessage, message: string = '', url?: string) {
     const statusCode = response.statusCode ?? 'unknown'
     const statusMessage = response.statusMessage ?? 'No status message'
     super(
@@ -347,6 +349,7 @@ class ResponseError extends Error {
     )
     this.name = 'ResponseError'
     this.response = response
+    this.url = url
     Error.captureStackTrace(this, ResponseError)
   }
 }
@@ -375,7 +378,7 @@ async function createDeleteRequest(
         ...options
       })
       .end()
-    const response = await getResponse(req)
+    const response = await getResponse(req, url)
 
     hooks?.onResponse?.({
       method,
@@ -423,7 +426,7 @@ async function createGetRequest(
         ...options
       })
       .end()
-    const response = await getResponse(req)
+    const response = await getResponse(req, url)
 
     hooks?.onResponse?.({
       method,
@@ -481,7 +484,7 @@ async function createPostRequest(
     req.write(body)
     req.end()
 
-    const response = await getResponse(req)
+    const response = await getResponse(req, url)
 
     hooks?.onResponse?.({
       method,
@@ -539,7 +542,7 @@ async function createPutRequest(
     req.write(body)
     req.end()
 
-    const response = await getResponse(req)
+    const response = await getResponse(req, url)
 
     hooks?.onResponse?.({
       method,
@@ -654,7 +657,7 @@ async function createUploadRequest(
     req.flushHeaders()
 
     // Concurrently wait for response while we stream body.
-    getResponse(req).then(
+    getResponse(req, url.toString()).then(
       response => {
         hooks?.onResponse?.({
           method,
@@ -778,7 +781,10 @@ function getHttpModule(url: string): typeof http | typeof https {
   return urlObj?.protocol === 'http:' ? http : https
 }
 
-async function getResponse(req: ClientRequest): Promise<IncomingMessage> {
+async function getResponse(
+  req: ClientRequest,
+  url?: string
+): Promise<IncomingMessage> {
   const res = await new Promise<IncomingMessage>((resolve, reject) => {
     const cleanup = () => {
       req.off('response', onResponse)
@@ -811,7 +817,7 @@ async function getResponse(req: ClientRequest): Promise<IncomingMessage> {
   })
 
   if (!isResponseOk(res)) {
-    throw new ResponseError(res, `${req.method} request failed`)
+    throw new ResponseError(res, `${req.method} request failed`, url)
   }
   return res
 }
@@ -993,13 +999,14 @@ export class SocketSdk {
     queryParams?: QueryParams | undefined
   ): Promise<IncomingMessage> {
     // Adds the first 'abort' listener to abortSignal.
+    const url = `${this.#baseUrl}purl?${queryToSearchParams(queryParams)}`
     const req = getHttpModule(this.#baseUrl)
-      .request(`${this.#baseUrl}purl?${queryToSearchParams(queryParams)}`, {
+      .request(url, {
         method: 'POST',
         ...this.#reqOptions
       })
       .end(JSON.stringify(componentsObj))
-    return await getResponse(req)
+    return await getResponse(req, url)
   }
 
   async *#createBatchPurlGenerator(
@@ -1081,7 +1088,8 @@ export class SocketSdk {
       success: false,
       status: statusCode ?? 0,
       error: error.message ?? 'Unknown error',
-      cause: body
+      cause: body,
+      url: error.url
     } as SocketSdkErrorResult<T>
   }
 
@@ -1472,16 +1480,14 @@ export class SocketSdk {
     file?: string
   ): Promise<SocketSdkResult<'getOrgFullScan'>> {
     try {
+      const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`
       const req = getHttpModule(this.#baseUrl)
-        .request(
-          `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}`,
-          {
-            method: 'GET',
-            ...this.#reqOptions
-          }
-        )
+        .request(url, {
+          method: 'GET',
+          ...this.#reqOptions
+        })
         .end()
-      const res = await getResponse(req)
+      const res = await getResponse(req, url)
       if (file) {
         res.pipe(createWriteStream(file))
       } else {
@@ -1863,6 +1869,7 @@ export class SocketSdk {
         status: number
         error: string
         cause?: string
+        url?: string
       } = {
         success: false,
         status: statusCode ?? 0,
@@ -1870,6 +1877,9 @@ export class SocketSdk {
       }
       if (body) {
         result.cause = body
+      }
+      if (e.url) {
+        result.url = e.url
       }
       return result
     }
