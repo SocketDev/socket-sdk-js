@@ -33,12 +33,17 @@ import type { ClientRequest, IncomingMessage } from 'node:http'
  */
 export class ResponseError extends Error {
   response: IncomingMessage
+  url?: string | undefined
 
   /**
    * Create a new ResponseError from an HTTP response.
    * Automatically formats error message with status code and message.
    */
-  constructor(response: IncomingMessage, message = '') {
+  constructor(
+    response: IncomingMessage,
+    message = '',
+    url?: string | undefined,
+  ) {
     /* c8 ignore next 2 - statusCode and statusMessage may be undefined in edge cases */
     const statusCode = response.statusCode ?? 'unknown'
     const statusMessage = response.statusMessage ?? 'No status message'
@@ -48,6 +53,7 @@ export class ResponseError extends Error {
     )
     this.name = 'ResponseError'
     this.response = response
+    this.url = url
     Error.captureStackTrace(this, ResponseError)
   }
 }
@@ -411,6 +417,7 @@ export async function getResponse(
 export async function getResponseJson(
   response: IncomingMessage,
   method?: string | undefined,
+  url?: string | undefined,
 ): Promise<JsonValue | undefined> {
   const stopTimer = perfTimer('http:parse-json')
   try {
@@ -418,6 +425,7 @@ export async function getResponseJson(
       throw new ResponseError(
         response,
         method ? `${method} Request failed` : undefined,
+        url,
       )
     }
     const responseBody = await getErrorResponseBody(response)

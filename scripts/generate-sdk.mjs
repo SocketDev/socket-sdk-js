@@ -18,7 +18,8 @@ import { default as traverse } from '@babel/traverse'
 import * as t from '@babel/types'
 import MagicString from 'magic-string'
 
-import { httpGetJson } from '@socketsecurity/lib/http-request'
+import httpRequest from '@socketsecurity/lib/http-request'
+const { httpGetJson } = httpRequest
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { spawn } from '@socketsecurity/lib/spawn'
 

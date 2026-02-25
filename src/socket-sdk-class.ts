@@ -284,9 +284,10 @@ export class SocketSdk {
     componentsObj: { components: Array<{ purl: string }> },
     queryParams?: QueryParams | undefined,
   ): Promise<IncomingMessage> {
+    const url = `${this.#baseUrl}purl?${queryToSearchParams(queryParams)}`
     // Adds the first 'abort' listener to abortSignal.
     const req = getHttpModule(this.#baseUrl)
-      .request(`${this.#baseUrl}purl?${queryToSearchParams(queryParams)}`, {
+      .request(url, {
         method: 'POST',
         ...this.#reqOptions,
       })
@@ -296,7 +297,7 @@ export class SocketSdk {
     // Throw ResponseError for non-2xx status codes so retry logic works properly.
     /* c8 ignore next 3 - Error response handling for batch requests, requires API to return errors */
     if (!isResponseOk(response)) {
-      throw new ResponseError(response)
+      throw new ResponseError(response, '', url)
     }
 
     return response
@@ -618,6 +619,7 @@ export class SocketSdk {
       /* c8 ignore next - fallback for missing status code in edge cases. */
       status: statusCode ?? 0,
       success: false,
+      url: error.url,
     } as SocketSdkErrorResult<T>
   }
 
@@ -740,23 +742,21 @@ export class SocketSdk {
     componentsObj: { components: Array<{ purl: string }> },
     queryParams?: QueryParams | undefined,
   ): Promise<SocketSdkResult<'batchPackageFetchByOrg'>> {
+    const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/purl?${queryToSearchParams(queryParams)}`
     let res: IncomingMessage | undefined
     try {
       const req = getHttpModule(this.#baseUrl)
-        .request(
-          `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/purl?${queryToSearchParams(queryParams)}`,
-          {
-            method: 'POST',
-            ...this.#reqOptions,
-          },
-        )
+        .request(url, {
+          method: 'POST',
+          ...this.#reqOptions,
+        })
         .end(JSON.stringify(componentsObj))
       res = await getResponse(req)
 
       // Throw ResponseError for non-2xx status codes so retry logic works properly.
       /* c8 ignore next 3 - Error response handling for batch requests, requires API to return errors */
       if (!isResponseOk(res)) {
-        throw new ResponseError(res)
+        throw new ResponseError(res, '', url)
       }
       /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
@@ -1807,21 +1807,19 @@ export class SocketSdk {
     fullScanId: string,
     outputPath: string,
   ): Promise<SocketSdkResult<'downloadOrgFullScanFilesAsTar'>> {
+    const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/files.tar`
     try {
       const req = getHttpModule(this.#baseUrl)
-        .request(
-          `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/files.tar`,
-          {
-            method: 'GET',
-            ...this.#reqOptions,
-          },
-        )
+        .request(url, {
+          method: 'GET',
+          ...this.#reqOptions,
+        })
         .end()
       const res = await getResponse(req)
 
       // Check for HTTP error status codes.
       if (!isResponseOk(res)) {
-        throw new ResponseError(res)
+        throw new ResponseError(res, '', url)
       }
 
       // Stream to file with size limit and error handling.
@@ -2120,6 +2118,7 @@ export class SocketSdk {
       ...options,
     } as GetOptions
 
+    const url = `${this.#baseUrl}${urlPath}`
     try {
       const response = await createGetRequest(this.#baseUrl, urlPath, {
         ...this.#reqOptions,
@@ -2128,10 +2127,10 @@ export class SocketSdk {
       // Check for HTTP error status codes first.
       if (!isResponseOk(response)) {
         if (throws) {
-          throw new ResponseError(response)
+          throw new ResponseError(response, '', url)
         }
         const errorResult = await this.#handleApiError<never>(
-          new ResponseError(response),
+          new ResponseError(response, '', url),
         )
         return {
           cause: errorResult.cause,
@@ -2139,6 +2138,7 @@ export class SocketSdk {
           error: errorResult.error,
           status: errorResult.status,
           success: false,
+          url: errorResult.url,
         }
       }
 
@@ -3902,21 +3902,19 @@ export class SocketSdk {
       __proto__: null,
       ...options,
     } as StreamOrgFullScanOptions
+    const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`
     try {
       const req = getHttpModule(this.#baseUrl)
-        .request(
-          `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`,
-          {
-            method: 'GET',
-            ...this.#reqOptions,
-          },
-        )
+        .request(url, {
+          method: 'GET',
+          ...this.#reqOptions,
+        })
         .end()
       const res = await getResponse(req)
 
       // Check for HTTP error status codes.
       if (!isResponseOk(res)) {
-        throw new ResponseError(res)
+        throw new ResponseError(res, '', url)
       }
 
       if (typeof output === 'string') {
@@ -4005,18 +4003,19 @@ export class SocketSdk {
     orgSlug: string,
     scanId: string,
   ): Promise<ReadableStream<ArtifactPatches>> {
+    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/patches/scan?scan_id=${encodeURIComponent(scanId)}`
+    const url = `${this.#baseUrl}${urlPath}`
     const response = await this.#executeWithRetry(
       async () =>
-        await createGetRequest(
-          this.#baseUrl,
-          `orgs/${encodeURIComponent(orgSlug)}/patches/scan?scan_id=${encodeURIComponent(scanId)}`,
-          { ...this.#reqOptions, hooks: this.#hooks },
-        ),
+        await createGetRequest(this.#baseUrl, urlPath, {
+          ...this.#reqOptions,
+          hooks: this.#hooks,
+        }),
     )
 
     // Check for HTTP error status codes.
     if (!isResponseOk(response)) {
-      throw new ResponseError(response, 'GET Request failed')
+      throw new ResponseError(response, 'GET Request failed', url)
     }
 
     // Use readline for proper line buffering across chunks.
