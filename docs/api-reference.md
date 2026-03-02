@@ -20,6 +20,7 @@ All SDK methods return a result object with this shape:
   status: number
   error: string
   cause?: string  // Additional error context
+  url?: string    // Request URL (useful for debugging)
 }
 ```
 
@@ -44,7 +45,7 @@ const result = await sdk.batchPackageFetch(
       { purl: 'pkg:npm/vue@3.3.4' }
     ]
   },
-  { includeTopLevelAncestors: true }
+  { alerts: true, compact: true }
 )
 
 if (result.success) {
