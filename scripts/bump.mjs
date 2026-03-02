@@ -42,7 +42,7 @@ const packagePromptsPath = path.join(
   'prompts.js',
 )
 
-let promptsPath = null
+let promptsPath
 if (existsSync(localPromptsPath)) {
   promptsPath = localPromptsPath
 } else if (existsSync(packagePromptsPath)) {
@@ -52,7 +52,7 @@ if (existsSync(localPromptsPath)) {
 const hasInteractivePrompts = !!promptsPath
 
 // Conditionally import interactive prompts.
-let prompts = null
+let prompts
 if (hasInteractivePrompts) {
   try {
     prompts = await import(promptsPath)
@@ -765,7 +765,7 @@ async function main() {
     }
 
     // Check for Claude if not skipping changelog.
-    let claudeCmd = null
+    let claudeCmd
     if (!values['skip-changelog']) {
       log.progress('Checking for Claude CLI')
       claudeCmd = await checkClaude()
@@ -832,7 +832,7 @@ async function main() {
     }
 
     // Generate and review changelog.
-    let changelogEntry = null
+    let changelogEntry
     if (!values['skip-changelog'] && claudeCmd) {
       changelogEntry = await generateChangelog(
         claudeCmd,

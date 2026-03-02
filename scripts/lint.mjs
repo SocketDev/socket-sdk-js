@@ -329,20 +329,20 @@ async function getFilesToLint(options) {
     mode = 'staged'
     changedFiles = await getStagedFiles({ absolute: false })
     if (!changedFiles.length) {
-      return { files: null, reason: 'no staged files', mode }
+      return { files: undefined, reason: 'no staged files', mode }
     }
   } else if (changed) {
     mode = 'changed'
     changedFiles = await getChangedFiles({ absolute: false })
     if (!changedFiles.length) {
-      return { files: null, reason: 'no changed files', mode }
+      return { files: undefined, reason: 'no changed files', mode }
     }
   } else {
     // Default to changed files if no specific flag
     mode = 'changed'
     changedFiles = await getChangedFiles({ absolute: false })
     if (!changedFiles.length) {
-      return { files: null, reason: 'no changed files', mode }
+      return { files: undefined, reason: 'no changed files', mode }
     }
   }
 
@@ -355,10 +355,10 @@ async function getFilesToLint(options) {
   // Filter to lintable files
   const lintableFiles = filterLintableFiles(changedFiles)
   if (!lintableFiles.length) {
-    return { files: null, reason: 'no lintable files changed', mode }
+    return { files: undefined, reason: 'no lintable files changed', mode }
   }
 
-  return { files: lintableFiles, reason: null, mode }
+  return { files: lintableFiles, reason: undefined, mode }
 }
 
 async function main() {
@@ -443,7 +443,7 @@ async function main() {
       // Get files to lint based on flags
       const { files, mode, reason } = await getFilesToLint(values)
 
-      if (files === null) {
+      if (files === undefined) {
         if (!quiet) {
           logger.step('Skipping lint')
           logger.substep(reason)
