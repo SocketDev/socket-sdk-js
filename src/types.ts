@@ -209,6 +209,7 @@ export type SocketSdkErrorResult<T extends SocketSdkOperations> = {
   error: string
   status: number
   success: false
+  url?: string | undefined
   // Phantom type to use T
   _operation?: T | undefined
 }
@@ -252,6 +253,7 @@ export type SocketSdkGenericResult<T> =
       error: string
       status: number
       success: false
+      url?: string | undefined
     }
 
 /**

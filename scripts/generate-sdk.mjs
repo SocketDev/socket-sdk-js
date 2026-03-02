@@ -18,7 +18,7 @@ import { default as traverse } from '@babel/traverse'
 import * as t from '@babel/types'
 import MagicString from 'magic-string'
 
-import { httpGetJson } from '@socketsecurity/lib/http-request'
+import { httpJson } from '@socketsecurity/lib/http-request'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { spawn } from '@socketsecurity/lib/spawn'
 
@@ -36,7 +36,7 @@ const logger = getDefaultLogger()
 
 async function fetchOpenApi() {
   try {
-    const data = await httpGetJson(OPENAPI_URL)
+    const data = await httpJson(OPENAPI_URL)
     await fs.writeFile(openApiPath, JSON.stringify(data, null, 2), 'utf8')
     logger.log(`Downloaded from ${OPENAPI_URL}`)
   } catch (error) {
