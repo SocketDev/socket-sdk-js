@@ -102,7 +102,7 @@ For the complete list of API method quota costs, see [data/api-method-quota-and-
 **Summary:**
 - **Free (0):** 44 methods including `getQuota`, `getOrganizations`, `getEntitlements`, `createFullScan`, `getScan`, `getScanList`, `getOrgSecurityPolicy`, `updateOrgSecurityPolicy`, repo management, triage, labels, diff scans, exports, and more
 - **Standard (10):** `getOrgAnalytics`, `getRepoAnalytics`, `getAuditLogEvents`, `getIssuesByNpmPackage`, `getScoreByNpmPackage`, `getOrgAlertFullScans`, API token operations
-- **Expensive (100):** `batchPackageFetch`, `batchOrgPackageFetch`, `batchPackageStream`, `uploadManifestFiles`, `createDependenciesSnapshot`, `searchDependencies`
+- **Expensive (100):** `batchPackageFetch`, `batchOrgPackageFetch`, `batchPackageStream`, `createDependenciesSnapshot`, `createScanFromFilepaths`, `searchDependencies`, `uploadManifestFiles`
 
 ## Best Practices
 

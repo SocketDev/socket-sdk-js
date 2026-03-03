@@ -411,18 +411,36 @@ try {
       if (mainCoverage && isolatedCoverage) {
         // Read coverage JSON files to get line counts for proper weighting
         const fs = await import('node:fs/promises')
-        const mainCoverageJson = JSON.parse(
-          await fs.readFile(
-            path.join(rootPath, 'coverage/coverage-summary.json'),
-            'utf8',
-          ),
+        const mainCoveragePath = path.join(
+          rootPath,
+          'coverage/coverage-summary.json',
         )
-        const isolatedCoverageJson = JSON.parse(
-          await fs.readFile(
-            path.join(rootPath, 'coverage-isolated/coverage-summary.json'),
-            'utf8',
-          ),
+        const isolatedCoveragePath = path.join(
+          rootPath,
+          'coverage-isolated/coverage-summary.json',
         )
+        let mainCoverageJson
+        let isolatedCoverageJson
+        try {
+          mainCoverageJson = JSON.parse(
+            await fs.readFile(mainCoveragePath, 'utf8'),
+          )
+        } catch (e) {
+          throw new Error(
+            `Failed to parse ${mainCoveragePath}: ${e?.message || 'Unknown error'}`,
+            { cause: e },
+          )
+        }
+        try {
+          isolatedCoverageJson = JSON.parse(
+            await fs.readFile(isolatedCoveragePath, 'utf8'),
+          )
+        } catch (e) {
+          throw new Error(
+            `Failed to parse ${isolatedCoveragePath}: ${e?.message || 'Unknown error'}`,
+            { cause: e },
+          )
+        }
 
         const mainTotal = mainCoverageJson.total
         const isolatedTotal = isolatedCoverageJson.total
