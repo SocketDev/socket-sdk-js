@@ -8,7 +8,7 @@ export interface paths {
     /**
      * Get Packages by PURL
      * @deprecated
-     * @description **This endpoint is deprecated.** Deprecated since 2026-01-05. It will be removed on 2026-07-30.
+     * @description **This endpoint is deprecated.** Deprecated since 2026-01-05.
      *
      * Batch retrieval of package metadata and alerts by PURL strings. Compatible with CycloneDX reports.
      *
@@ -2614,13 +2614,11 @@ export interface components {
       alertKeysToReachabilityTypes?: {
         [key: string]: string[]
       }
-      /** @description Mapping of alert keys to arrays of reachability summaries. Each summary contains a reachability type and a hash pointing to detailed analysis data (call stacks, file locations, confidence scores). Used for efficient storage and retrieval of comprehensive reachability analysis results without duplicating large analysis payloads. */
+      /** @description Mapping of alert keys to arrays of reachability summaries. Each summary contains a reachability type indicating the result of reachability analysis for the corresponding vulnerability alert. */
       alertKeysToReachabilitySummaries?: {
         [key: string]: Array<{
           /** @default */
           type: string
-          /** @default */
-          hash: string
         }>
       }
     }
@@ -4931,6 +4929,7 @@ export interface components {
       | 'cocoapods'
       | 'cargo'
       | 'chrome'
+      | 'clawhub'
       | 'composer'
       | 'conan'
       | 'conda'
@@ -5423,7 +5422,7 @@ export interface operations {
   /**
    * Get Packages by PURL
    * @deprecated
-   * @description **This endpoint is deprecated.** Deprecated since 2026-01-05. It will be removed on 2026-07-30.
+   * @description **This endpoint is deprecated.** Deprecated since 2026-01-05.
    *
    * Batch retrieval of package metadata and alerts by PURL strings. Compatible with CycloneDX reports.
    *
@@ -7541,14 +7540,16 @@ export interface operations {
               alert_type?: string | null
               /**
                * @description Whether a fix must be available, unavailable, or * for any
-               * @default
+               * @default *
+               * @enum {string|null}
                */
-              fix_available?: string | null
+              fix_available?: 'available' | 'unavailable' | '*' | null
               /**
                * @description Whether a patch must be available, unavailable, or * for any
-               * @default
+               * @default *
+               * @enum {string|null}
                */
-              patch_available?: string | null
+              patch_available?: 'available' | 'unavailable' | '*' | null
               /**
                * @description CVSS score comparison (e.g., >=7.5, >5.0, ==8.0)
                * @default
@@ -7587,14 +7588,16 @@ export interface operations {
               cve_or_ghsa_id?: string | null
               /**
                * @description The reachability of the alert, can be reachable, unreachable, other, or * for any
-               * @default
+               * @default *
+               * @enum {string|null}
                */
-              reachability?: string | null
+              reachability?: 'reachable' | 'unreachable' | 'other' | '*' | null
               /**
                * @description Whether the alert has a CISA KEV (Known Exploited Vulnerability), can be exist, none, or * for any
-               * @default
+               * @default *
+               * @enum {string|null}
                */
-              kevs?: string | null
+              kevs?: 'exist' | 'none' | '*' | null
             }>
             /** @default 0 */
             nextPage: number | null
@@ -7646,16 +7649,28 @@ export interface operations {
             alertKey?: string | null
             /** @default */
             alertType?: string | null
-            /** @default */
-            fixAvailable?: string | null
-            /** @default */
-            patchAvailable?: string | null
-            /** @default */
-            kevs?: string | null
+            /**
+             * @description Whether a fix is available, unavailable, or * for any
+             * @enum {string}
+             */
+            fixAvailable?: 'available' | 'unavailable' | '*'
+            /**
+             * @description Whether a patch is available, unavailable, or * for any
+             * @enum {string}
+             */
+            patchAvailable?: 'available' | 'unavailable' | '*'
+            /**
+             * @description Whether the alert has a CISA KEV, can be exist, none, or * for any
+             * @enum {string}
+             */
+            kevs?: 'exist' | 'none' | '*'
             /** @default */
             cveOrGhsaId?: string | null
-            /** @default */
-            reachability?: string | null
+            /**
+             * @description The reachability of the alert, can be reachable, unreachable, other, or * for any
+             * @enum {string}
+             */
+            reachability?: 'reachable' | 'unreachable' | 'other' | '*'
             /** @default */
             cvssScoreCmp?: string | null
             /** @default */
@@ -16124,7 +16139,7 @@ export interface operations {
         discovery_period?: '1h' | '6h' | '1d' | '7d' | '30d' | '90d' | '365d'
         /** @description Ordering direction of the sort attribute */
         direction?: 'desc' | 'asc'
-        /** @description Filter what type of threats to return */
+        /** @description Filter by threat classification. Supported values: `mal` (malware, including possible malware), `vuln` (vulnerability), `typo` (typosquat, including possible typosquat), `anom` (anomaly), `spy` (telemetry), `obf` (obfuscated code), `dual` (dual-use tool), `joke` (protestware or joke package), `tp` (all confirmed true positives), `fp` (false positive), `u` (unreviewed), `c` (classified, i.e. anything except unreviewed). */
         filter?:
           | 'u'
           | 'c'
@@ -16136,7 +16151,6 @@ export interface operations {
           | 'joke'
           | 'spy'
           | 'typo'
-          | 'secret'
           | 'obf'
           | 'dual'
         /** @description Filter threats by package name */
@@ -16145,10 +16159,11 @@ export interface operations {
         version?: string
         /** @description Only return threats which have been human-reviewed */
         is_human_reviewed?: boolean
-        /** @description Filter threats by package ecosystem type */
+        /** @description Filter threats by package ecosystem. */
         ecosystem?:
           | 'github'
           | 'cargo'
+          | 'clawhub'
           | 'composer'
           | 'chrome'
           | 'golang'
@@ -16168,25 +16183,61 @@ export interface operations {
         content: {
           'application/json': {
             results: Array<{
-              /** @default */
+              /**
+               * Format: date-time
+               * @description ISO 8601 timestamp of when the threat in the package artifact was first discovered
+               * @default
+               */
               createdAt?: string
-              /** @default */
+              /**
+               * Format: date-time
+               * @description ISO 8601 timestamp of when the threat record for the package artifact was last updated (e.g., classification changed, package removed from registry, etc.)
+               * @default
+               */
               updatedAt?: string
-              /** @default */
+              /**
+               * Format: date-time
+               * @description ISO 8601 timestamp of when the package artifact was published to the respective registry
+               * @default
+               */
               publishedAt?: string | null
-              /** @default */
+              /**
+               * @description Detailed description of the underlying threat
+               * @default
+               */
               description?: string
-              /** @default 0 */
+              /**
+               * @description Unique identifier of the threat feed entry
+               * @default 0
+               */
               id?: number
-              /** @default */
+              /**
+               * Format: uri
+               * @description URL to the threat details page on Socket
+               * @default
+               */
               locationHtmlUrl?: string
-              /** @default */
+              /**
+               * Format: uri
+               * @description URL to the affected package page on Socket
+               * @default
+               */
               packageHtmlUrl?: string
-              /** @default */
+              /**
+               * @description Package URL (PURL) of the affected package artifact
+               * @default
+               */
               purl?: string
-              /** @default */
+              /**
+               * Format: date-time
+               * @description ISO 8601 timestamp of when the package artifact was removed from the respective registry, or null if the package is still available on the registry
+               * @default
+               */
               removedAt?: string | null
-              /** @default */
+              /**
+               * @description Threat classification. Possible values: `malware` (known malware), `possible_malware` (AI-detected potential malware), `vulnerability` (potential vulnerability), `typosquat` (human-reviewed typosquat), `possible_typosquat` (AI-detected potential typosquat), `anomaly` (anomalous behavior), `telemetry` (telemetry), `obfuscated` (obfuscated code), `dual_use` (dual-use tool), `troll` (protestware or joke package), `unreviewed` (not yet reviewed), `false_positive` (confirmed false positive).
+               * @default
+               */
               threatType?: string
               /**
                * @description Whether the threat still is in need of human review by the threat research team
@@ -16237,7 +16288,7 @@ export interface operations {
         created_after?: string
         /** @description Order direction of the provided sort field. */
         direction?: 'desc' | 'asc'
-        /** @description Filter what type of threats to return */
+        /** @description Filter by threat classification. Supported values: `mal` (malware, including possible malware), `vuln` (vulnerability), `typo` (typosquat, including possible typosquat), `anom` (anomaly), `spy` (telemetry), `obf` (obfuscated code), `dual` (dual-use tool), `joke` (protestware or joke package), `tp` (all confirmed true positives), `fp` (false positive), `u` (unreviewed), `c` (classified, i.e. anything except unreviewed). */
         filter?:
           | 'u'
           | 'c'
@@ -16249,7 +16300,6 @@ export interface operations {
           | 'joke'
           | 'spy'
           | 'typo'
-          | 'secret'
           | 'obf'
           | 'dual'
         /** @description Filter threats by package name */
@@ -16258,10 +16308,11 @@ export interface operations {
         version?: string
         /** @description Only return threats which have been human-reviewed */
         is_human_reviewed?: boolean
-        /** @description Filter threats by package ecosystem type */
+        /** @description Filter threats by package ecosystem. */
         ecosystem?:
           | 'github'
           | 'cargo'
+          | 'clawhub'
           | 'composer'
           | 'chrome'
           | 'golang'
@@ -16285,25 +16336,61 @@ export interface operations {
         content: {
           'application/json': {
             results: Array<{
-              /** @default */
+              /**
+               * Format: date-time
+               * @description ISO 8601 timestamp of when the threat in the package artifact was first discovered
+               * @default
+               */
               createdAt?: string
-              /** @default */
+              /**
+               * Format: date-time
+               * @description ISO 8601 timestamp of when the threat record for the package artifact was last updated (e.g., classification changed, package removed from registry, etc.)
+               * @default
+               */
               updatedAt?: string
-              /** @default */
+              /**
+               * Format: date-time
+               * @description ISO 8601 timestamp of when the package artifact was published to the respective registry
+               * @default
+               */
               publishedAt?: string | null
-              /** @default */
+              /**
+               * @description Detailed description of the underlying threat
+               * @default
+               */
               description?: string
-              /** @default 0 */
+              /**
+               * @description Unique identifier of the threat feed entry
+               * @default 0
+               */
               id?: number
-              /** @default */
+              /**
+               * Format: uri
+               * @description URL to the threat details page on Socket
+               * @default
+               */
               locationHtmlUrl?: string
-              /** @default */
+              /**
+               * Format: uri
+               * @description URL to the affected package page on Socket
+               * @default
+               */
               packageHtmlUrl?: string
-              /** @default */
+              /**
+               * @description Package URL (PURL) of the affected package artifact
+               * @default
+               */
               purl?: string
-              /** @default */
+              /**
+               * Format: date-time
+               * @description ISO 8601 timestamp of when the package artifact was removed from the respective registry, or null if the package is still available on the registry
+               * @default
+               */
               removedAt?: string | null
-              /** @default */
+              /**
+               * @description Threat classification. Possible values: `malware` (known malware), `possible_malware` (AI-detected potential malware), `vulnerability` (potential vulnerability), `typosquat` (human-reviewed typosquat), `possible_typosquat` (AI-detected potential typosquat), `anomaly` (anomalous behavior), `telemetry` (telemetry), `obfuscated` (obfuscated code), `dual_use` (dual-use tool), `troll` (protestware or joke package), `unreviewed` (not yet reviewed), `false_positive` (confirmed false positive).
+               * @default
+               */
               threatType?: string
               /**
                * @description Whether the threat still is in need of human review by the threat research team
@@ -18171,12 +18258,16 @@ export interface operations {
    */
   getQuota: {
     responses: {
-      /** @description Quota amount */
+      /** @description Quota information */
       200: {
         content: {
           'application/json': {
             /** @default 0 */
             quota: number
+            /** @default 0 */
+            maxQuota: number
+            /** @default */
+            nextWindowRefresh: string | null
           }
         }
       }

@@ -12,64 +12,64 @@
   ],
   "tags": [
     {
-      "name": "Packages"
+      "name": "packages"
     },
     {
-      "name": "Dependencies"
+      "name": "dependencies"
     },
     {
-      "name": "Alerts"
+      "name": "alerts"
     },
     {
-      "name": "Full Scans"
+      "name": "full-scans"
     },
     {
-      "name": "Fixes"
+      "name": "fixes"
     },
     {
-      "name": "Diff Scans"
+      "name": "diff-scans"
     },
     {
-      "name": "Triage"
+      "name": "triage"
     },
     {
-      "name": "Repos"
+      "name": "repos"
     },
     {
-      "name": "Repo Labels"
+      "name": "repo-labels"
     },
     {
-      "name": "Threat Feed"
+      "name": "threat-feed"
     },
     {
-      "name": "Org Snapshots"
+      "name": "org-snapshots"
     },
     {
-      "name": "Security Policy"
+      "name": "security-policy"
     },
     {
-      "name": "License Policy"
+      "name": "license-policy"
     },
     {
-      "name": "Org Settings"
+      "name": "org-settings"
     },
     {
-      "name": "Audit Log"
+      "name": "audit-log"
     },
     {
-      "name": "API Tokens"
+      "name": "api-tokens"
     },
     {
-      "name": "Webhooks"
+      "name": "webhooks"
     },
     {
-      "name": "Metadata"
+      "name": "metadata"
     },
     {
-      "name": "Deprecated"
+      "name": "deprecated"
     },
     {
-      "name": "Telemetry"
+      "name": "telemetry"
     }
   ],
   "components": {
@@ -2320,22 +2320,16 @@
                     "type": "string",
                     "description": "",
                     "default": ""
-                  },
-                  "hash": {
-                    "type": "string",
-                    "description": "",
-                    "default": ""
                   }
                 },
                 "required": [
-                  "hash",
                   "type"
                 ]
               },
               "description": ""
             },
             "properties": {},
-            "description": "Mapping of alert keys to arrays of reachability summaries. Each summary contains a reachability type and a hash pointing to detailed analysis data (call stacks, file locations, confidence scores). Used for efficient storage and retrieval of comprehensive reachability analysis results without duplicating large analysis payloads."
+            "description": "Mapping of alert keys to arrays of reachability summaries. Each summary contains a reachability type indicating the result of reachability analysis for the corresponding vulnerability alert."
           }
         },
         "description": ""
@@ -10845,6 +10839,7 @@
           "cocoapods",
           "cargo",
           "chrome",
+          "clawhub",
           "composer",
           "conan",
           "conda",
@@ -11722,7 +11717,7 @@
     "/purl": {
       "post": {
         "tags": [
-          "Packages"
+          "packages"
         ],
         "summary": "Get Packages by PURL",
         "deprecated": true,
@@ -11855,7 +11850,7 @@
             ]
           }
         ],
-        "description": "**This endpoint is deprecated.** Deprecated since 2026-01-05. It will be removed on 2026-07-30.\n\nBatch retrieval of package metadata and alerts by PURL strings. Compatible with CycloneDX reports.\n\nPackage URLs (PURLs) are an ecosystem agnostic way to identify packages.\nCycloneDX SBOMs use the purl format to identify components.\nThis endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.\n\n**Note:** This endpoint has a batch size limit (default: 1024 PURLs per request). Requests exceeding this limit will return a 400 Bad Request error.\n\nMore information on purl and CycloneDX:\n\n- [`purl` Spec](https://github.com/package-url/purl-spec)\n- [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)\n\nThis endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).\nActively running analysis will be returned when available on subsequent runs.\n\n## Examples:\n\n### Looking up an npm package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\n### Looking up an PyPi package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    }\n  ]\n}\n```\n\n### Looking up a Maven package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### Batch lookup\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    },\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    },\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- packages:list",
+        "description": "**This endpoint is deprecated.** Deprecated since 2026-01-05.\n\nBatch retrieval of package metadata and alerts by PURL strings. Compatible with CycloneDX reports.\n\nPackage URLs (PURLs) are an ecosystem agnostic way to identify packages.\nCycloneDX SBOMs use the purl format to identify components.\nThis endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.\n\n**Note:** This endpoint has a batch size limit (default: 1024 PURLs per request). Requests exceeding this limit will return a 400 Bad Request error.\n\nMore information on purl and CycloneDX:\n\n- [`purl` Spec](https://github.com/package-url/purl-spec)\n- [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)\n\nThis endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).\nActively running analysis will be returned when available on subsequent runs.\n\n## Examples:\n\n### Looking up an npm package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\n### Looking up an PyPi package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    }\n  ]\n}\n```\n\n### Looking up a Maven package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### Batch lookup\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    },\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    },\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- packages:list",
         "responses": {
           "200": {
             "content": {
@@ -11889,7 +11884,7 @@
     "/dependencies/search": {
       "post": {
         "tags": [
-          "Dependencies"
+          "dependencies"
         ],
         "summary": "Search dependencies",
         "operationId": "searchDependencies",
@@ -12092,7 +12087,7 @@
     "/dependencies/upload": {
       "post": {
         "tags": [
-          "Deprecated"
+          "deprecated"
         ],
         "summary": "Create a snapshot of all dependencies from manifest information",
         "deprecated": true,
@@ -12200,7 +12195,7 @@
     "/orgs/{org_slug}/full-scans": {
       "get": {
         "tags": [
-          "Full Scans"
+          "full-scans"
         ],
         "summary": "List full scans",
         "operationId": "getOrgFullScanList",
@@ -12566,7 +12561,7 @@
       },
       "post": {
         "tags": [
-          "Full Scans"
+          "full-scans"
         ],
         "summary": "Create full scan",
         "operationId": "CreateOrgFullScan",
@@ -12933,7 +12928,7 @@
     "/orgs/{org_slug}/full-scans/{full_scan_id}": {
       "get": {
         "tags": [
-          "Full Scans"
+          "full-scans"
         ],
         "summary": "Stream full scan",
         "operationId": "getOrgFullScan",
@@ -13074,7 +13069,7 @@
       },
       "delete": {
         "tags": [
-          "Full Scans"
+          "full-scans"
         ],
         "summary": "Delete full scan",
         "operationId": "deleteOrgFullScan",
@@ -13156,7 +13151,7 @@
     "/orgs/{org_slug}/full-scans/{full_scan_id}/metadata": {
       "get": {
         "tags": [
-          "Full Scans"
+          "full-scans"
         ],
         "summary": "Get full scan metadata",
         "operationId": "getOrgFullScanMetadata",
@@ -13372,7 +13367,7 @@
     "/orgs/{org_slug}/full-scans/diff": {
       "get": {
         "tags": [
-          "Deprecated"
+          "deprecated"
         ],
         "summary": "Diff Full Scans",
         "deprecated": true,
@@ -13750,7 +13745,7 @@
     "/orgs/{org_slug}/full-scans/diff/gfm": {
       "get": {
         "tags": [
-          "Deprecated"
+          "deprecated"
         ],
         "summary": "SCM Comment for Scan Diff",
         "deprecated": true,
@@ -14088,7 +14083,7 @@
     "/orgs/{org_slug}/full-scans/{full_scan_id}/files/tar": {
       "get": {
         "tags": [
-          "Full Scans"
+          "full-scans"
         ],
         "summary": "Download full scan files as tarball",
         "operationId": "downloadOrgFullScanFilesAsTar",
@@ -14154,7 +14149,7 @@
     "/orgs/{org_slug}/full-scans/archive": {
       "post": {
         "tags": [
-          "Full Scans"
+          "full-scans"
         ],
         "summary": "Create full scan from archive",
         "operationId": "CreateOrgFullScanArchive",
@@ -14521,7 +14516,7 @@
     "/orgs/{org_slug}/full-scans/{full_scan_id}/rescan": {
       "post": {
         "tags": [
-          "Full Scans"
+          "full-scans"
         ],
         "summary": "Rescan full scan",
         "operationId": "rescanOrgFullScan",
@@ -14623,7 +14618,7 @@
     "/orgs/{org_slug}/full-scans/{full_scan_id}/format/csv": {
       "post": {
         "tags": [
-          "Full Scans"
+          "full-scans"
         ],
         "summary": "Export CSV of alerts for full scan",
         "operationId": "getOrgFullScanCsv",
@@ -14766,7 +14761,7 @@
     "/orgs/{org_slug}/full-scans/{full_scan_id}/format/pdf": {
       "post": {
         "tags": [
-          "Full Scans"
+          "full-scans"
         ],
         "summary": "Generate PDF report for full scan",
         "operationId": "getOrgFullScanPdf",
@@ -14919,7 +14914,7 @@
     "/orgs/{org_slug}/export/cdx/{id}": {
       "get": {
         "tags": [
-          "Full Scans"
+          "full-scans"
         ],
         "summary": "Export CycloneDX SBOM (Beta)",
         "operationId": "exportCDX",
@@ -15046,7 +15041,7 @@
     "/orgs/{org_slug}/export/openvex/{id}": {
       "get": {
         "tags": [
-          "Full Scans"
+          "full-scans"
         ],
         "summary": "Export OpenVEX Document (Beta)",
         "operationId": "exportOpenVEX",
@@ -15143,7 +15138,7 @@
     "/orgs/{org_slug}/export/spdx/{id}": {
       "get": {
         "tags": [
-          "Full Scans"
+          "full-scans"
         ],
         "summary": "Export SPDX SBOM (Beta)",
         "operationId": "exportSPDX",
@@ -15270,7 +15265,7 @@
     "/orgs/{org_slug}/diff-scans": {
       "get": {
         "tags": [
-          "Diff Scans"
+          "diff-scans"
         ],
         "summary": "List diff scans",
         "operationId": "listOrgDiffScans",
@@ -15517,7 +15512,7 @@
     "/orgs/{org_slug}/diff-scans/{diff_scan_id}": {
       "get": {
         "tags": [
-          "Diff Scans"
+          "diff-scans"
         ],
         "summary": "Get diff scan",
         "operationId": "getDiffScanById",
@@ -15983,7 +15978,7 @@
       },
       "delete": {
         "tags": [
-          "Diff Scans"
+          "diff-scans"
         ],
         "summary": "Delete diff scan",
         "operationId": "deleteOrgDiffScan",
@@ -16066,7 +16061,7 @@
     "/orgs/{org_slug}/diff-scans/{diff_scan_id}/gfm": {
       "get": {
         "tags": [
-          "Diff Scans"
+          "diff-scans"
         ],
         "summary": "SCM Comment for Diff Scan",
         "operationId": "GetDiffScanGfm",
@@ -16456,7 +16451,7 @@
     "/orgs/{org_slug}/diff-scans/from-repo/{repo_slug}": {
       "post": {
         "tags": [
-          "Diff Scans"
+          "diff-scans"
         ],
         "summary": "Create diff scan from repository HEAD full-scan",
         "operationId": "createOrgRepoDiff",
@@ -16961,7 +16956,7 @@
     "/orgs/{org_slug}/diff-scans/from-ids": {
       "post": {
         "tags": [
-          "Diff Scans"
+          "diff-scans"
         ],
         "summary": "Create diff scan from full scan IDs",
         "operationId": "createOrgDiffScanFromIds",
@@ -17361,7 +17356,7 @@
     "/orgs/{org_slug}/triage/alerts": {
       "get": {
         "tags": [
-          "Triage"
+          "triage"
         ],
         "summary": "List Org Alert Triage",
         "operationId": "getOrgTriage",
@@ -17491,14 +17486,24 @@
                           },
                           "fix_available": {
                             "type": "string",
+                            "enum": [
+                              "available",
+                              "unavailable",
+                              "*"
+                            ],
                             "description": "Whether a fix must be available, unavailable, or * for any",
-                            "default": "",
+                            "default": "*",
                             "nullable": true
                           },
                           "patch_available": {
                             "type": "string",
+                            "enum": [
+                              "available",
+                              "unavailable",
+                              "*"
+                            ],
                             "description": "Whether a patch must be available, unavailable, or * for any",
-                            "default": "",
+                            "default": "*",
                             "nullable": true
                           },
                           "cvss_score_cmp": {
@@ -17547,14 +17552,25 @@
                           },
                           "reachability": {
                             "type": "string",
+                            "enum": [
+                              "reachable",
+                              "unreachable",
+                              "other",
+                              "*"
+                            ],
                             "description": "The reachability of the alert, can be reachable, unreachable, other, or * for any",
-                            "default": "",
+                            "default": "*",
                             "nullable": true
                           },
                           "kevs": {
                             "type": "string",
+                            "enum": [
+                              "exist",
+                              "none",
+                              "*"
+                            ],
                             "description": "Whether the alert has a CISA KEV (Known Exploited Vulnerability), can be exist, none, or * for any",
-                            "default": "",
+                            "default": "*",
                             "nullable": true
                           }
                         },
@@ -17598,7 +17614,7 @@
       },
       "post": {
         "tags": [
-          "Triage"
+          "triage"
         ],
         "summary": "Update Org Alert Triage",
         "operationId": "updateOrgAlertTriage",
@@ -17681,21 +17697,30 @@
                         },
                         "fixAvailable": {
                           "type": "string",
-                          "description": "",
-                          "default": "",
-                          "nullable": true
+                          "enum": [
+                            "available",
+                            "unavailable",
+                            "*"
+                          ],
+                          "description": "Whether a fix is available, unavailable, or * for any"
                         },
                         "patchAvailable": {
                           "type": "string",
-                          "description": "",
-                          "default": "",
-                          "nullable": true
+                          "enum": [
+                            "available",
+                            "unavailable",
+                            "*"
+                          ],
+                          "description": "Whether a patch is available, unavailable, or * for any"
                         },
                         "kevs": {
                           "type": "string",
-                          "description": "",
-                          "default": "",
-                          "nullable": true
+                          "enum": [
+                            "exist",
+                            "none",
+                            "*"
+                          ],
+                          "description": "Whether the alert has a CISA KEV, can be exist, none, or * for any"
                         },
                         "cveOrGhsaId": {
                           "type": "string",
@@ -17705,9 +17730,13 @@
                         },
                         "reachability": {
                           "type": "string",
-                          "description": "",
-                          "default": "",
-                          "nullable": true
+                          "enum": [
+                            "reachable",
+                            "unreachable",
+                            "other",
+                            "*"
+                          ],
+                          "description": "The reachability of the alert, can be reachable, unreachable, other, or * for any"
                         },
                         "cvssScoreCmp": {
                           "type": "string",
@@ -17803,7 +17832,7 @@
     "/orgs/{org_slug}/triage/alerts/{uuid}": {
       "delete": {
         "tags": [
-          "Triage"
+          "triage"
         ],
         "summary": "Delete Org Alert Triage",
         "operationId": "deleteOrgAlertTriage",
@@ -17885,7 +17914,7 @@
     "/orgs/{org_slug}/repos": {
       "get": {
         "tags": [
-          "Repos"
+          "repos"
         ],
         "summary": "List repositories",
         "operationId": "getOrgRepoList",
@@ -18142,7 +18171,7 @@
       },
       "post": {
         "tags": [
-          "Repos"
+          "repos"
         ],
         "summary": "Create repository",
         "operationId": "createOrgRepo",
@@ -18383,7 +18412,7 @@
     "/orgs/{org_slug}/repos/{repo_slug}": {
       "get": {
         "tags": [
-          "Repos"
+          "repos"
         ],
         "summary": "Get repository",
         "operationId": "getOrgRepo",
@@ -18605,7 +18634,7 @@
       },
       "post": {
         "tags": [
-          "Repos"
+          "repos"
         ],
         "summary": "Update repository",
         "operationId": "updateOrgRepo",
@@ -18862,7 +18891,7 @@
       },
       "delete": {
         "tags": [
-          "Repos"
+          "repos"
         ],
         "summary": "Delete repository",
         "operationId": "deleteOrgRepo",
@@ -18953,7 +18982,7 @@
     "/orgs/{org_slug}/repos/labels/{label_id}/associate": {
       "post": {
         "tags": [
-          "Repo Labels"
+          "repo-labels"
         ],
         "summary": "Associate repository label (beta)",
         "operationId": "associateOrgRepoLabel",
@@ -19051,7 +19080,7 @@
     "/orgs/{org_slug}/repos/labels": {
       "post": {
         "tags": [
-          "Repo Labels"
+          "repo-labels"
         ],
         "summary": "Create repository label (beta)",
         "operationId": "createOrgRepoLabel",
@@ -19204,7 +19233,7 @@
       },
       "get": {
         "tags": [
-          "Repo Labels"
+          "repo-labels"
         ],
         "summary": "List repository labels (beta)",
         "operationId": "getOrgRepoLabelList",
@@ -19342,7 +19371,7 @@
     "/orgs/{org_slug}/repos/labels/{label_id}": {
       "delete": {
         "tags": [
-          "Repo Labels"
+          "repo-labels"
         ],
         "summary": "Delete repository label (beta)",
         "operationId": "deleteOrgRepoLabel",
@@ -19422,7 +19451,7 @@
       },
       "get": {
         "tags": [
-          "Repo Labels"
+          "repo-labels"
         ],
         "summary": "Get repository label (beta)",
         "operationId": "getOrgRepoLabel",
@@ -19523,7 +19552,7 @@
       },
       "put": {
         "tags": [
-          "Repo Labels"
+          "repo-labels"
         ],
         "summary": "Update repository label (beta)",
         "operationId": "updateOrgRepoLabel",
@@ -19687,7 +19716,7 @@
     "/orgs/{org_slug}/repos/labels/{label_id}/label-setting": {
       "delete": {
         "tags": [
-          "Repo Labels"
+          "repo-labels"
         ],
         "summary": "Delete repository label setting (beta)",
         "operationId": "deleteOrgRepoLabelSetting",
@@ -19776,7 +19805,7 @@
       },
       "get": {
         "tags": [
-          "Repo Labels"
+          "repo-labels"
         ],
         "summary": "Get repository label setting (beta)",
         "operationId": "getOrgRepoLabelSetting",
@@ -22655,7 +22684,7 @@
       },
       "put": {
         "tags": [
-          "Repo Labels"
+          "repo-labels"
         ],
         "summary": "Update repository label setting (beta)",
         "operationId": "updateOrgRepoLabelSetting",
@@ -25544,7 +25573,7 @@
     "/orgs/{org_slug}/repos/labels/{label_id}/disassociate": {
       "post": {
         "tags": [
-          "Repo Labels"
+          "repo-labels"
         ],
         "summary": "Disassociate repository label (beta)",
         "operationId": "disassociateOrgRepoLabel",
@@ -25642,7 +25671,7 @@
     "/orgs/{org_slug}/settings/integrations/{integration_id}/events": {
       "get": {
         "tags": [
-          "Org Settings"
+          "org-settings"
         ],
         "summary": "Get integration events",
         "operationId": "getIntegrationEvents",
@@ -25809,7 +25838,7 @@
     "/orgs/{org_slug}/settings/security-policy": {
       "get": {
         "tags": [
-          "Security Policy"
+          "security-policy"
         ],
         "summary": "Get Organization Security Policy",
         "operationId": "getOrgSecurityPolicy",
@@ -28672,7 +28701,7 @@
       },
       "post": {
         "tags": [
-          "Security Policy"
+          "security-policy"
         ],
         "summary": "Update Security Policy",
         "operationId": "updateOrgSecurityPolicy",
@@ -34345,7 +34374,7 @@
     "/orgs/{org_slug}/settings/license-policy": {
       "get": {
         "tags": [
-          "Deprecated"
+          "deprecated"
         ],
         "summary": "Get Organization License Policy",
         "deprecated": true,
@@ -34407,7 +34436,7 @@
       },
       "post": {
         "tags": [
-          "License Policy"
+          "license-policy"
         ],
         "summary": "Update License Policy",
         "operationId": "updateOrgLicensePolicy",
@@ -34492,7 +34521,7 @@
     "/orgs/{org_slug}/settings/license-policy/view": {
       "get": {
         "tags": [
-          "License Policy"
+          "license-policy"
         ],
         "summary": "Get License Policy (Beta)",
         "operationId": "viewLicensePolicy",
@@ -34556,7 +34585,7 @@
     "/orgs/{org_slug}/settings/socket-basics": {
       "get": {
         "tags": [
-          "Org Settings"
+          "org-settings"
         ],
         "summary": "Get Socket Basics configuration, including toggles for the various tools it supports.",
         "operationId": "getSocketBasicsConfig",
@@ -35047,7 +35076,7 @@
     "/orgs/{org_slug}/historical/alerts": {
       "get": {
         "tags": [
-          "Alerts"
+          "alerts"
         ],
         "summary": "List historical alerts (Beta)",
         "operationId": "historicalAlertsList",
@@ -36378,7 +36407,7 @@
     "/orgs/{org_slug}/historical/alerts/trend": {
       "get": {
         "tags": [
-          "Alerts"
+          "alerts"
         ],
         "summary": "Trend of historical alerts (Beta)",
         "operationId": "historicalAlertsTrend",
@@ -37482,7 +37511,7 @@
     "/orgs/{org_slug}/historical/dependencies/trend": {
       "get": {
         "tags": [
-          "Dependencies"
+          "dependencies"
         ],
         "summary": "Trend of historical dependencies (Beta)",
         "operationId": "historicalDependenciesTrend",
@@ -38051,7 +38080,7 @@
     "/orgs/{org_slug}/historical/snapshots": {
       "get": {
         "tags": [
-          "Org Snapshots"
+          "org-snapshots"
         ],
         "summary": "List details of periodic historical data snapshots (Beta)",
         "operationId": "historicalSnapshotsList",
@@ -38365,7 +38394,7 @@
       },
       "post": {
         "tags": [
-          "Org Snapshots"
+          "org-snapshots"
         ],
         "summary": "Start historical data snapshot job (Beta)",
         "operationId": "historicalSnapshotsStart",
@@ -38447,7 +38476,7 @@
     "/orgs/{org_slug}/audit-log": {
       "get": {
         "tags": [
-          "Audit Log"
+          "audit-log"
         ],
         "summary": "Get Audit Log Events",
         "operationId": "getAuditLogEvents",
@@ -38698,7 +38727,7 @@
     "/orgs/{org_slug}/api-tokens": {
       "post": {
         "tags": [
-          "API Tokens"
+          "api-tokens"
         ],
         "summary": "Create API Token",
         "operationId": "postAPIToken",
@@ -38977,7 +39006,7 @@
       },
       "get": {
         "tags": [
-          "API Tokens"
+          "api-tokens"
         ],
         "summary": "List API Tokens",
         "operationId": "getAPITokens",
@@ -39326,7 +39355,7 @@
     "/orgs/{org_slug}/api-tokens/update": {
       "post": {
         "tags": [
-          "API Tokens"
+          "api-tokens"
         ],
         "summary": "Update API Token",
         "operationId": "postAPITokenUpdate",
@@ -39578,7 +39607,7 @@
     "/orgs/{org_slug}/api-tokens/rotate": {
       "post": {
         "tags": [
-          "API Tokens"
+          "api-tokens"
         ],
         "summary": "Rotate API Token",
         "operationId": "postAPITokensRotate",
@@ -39703,7 +39732,7 @@
     "/orgs/{org_slug}/api-tokens/revoke": {
       "post": {
         "tags": [
-          "API Tokens"
+          "api-tokens"
         ],
         "summary": "Revoke API Token",
         "operationId": "postAPITokensRevoke",
@@ -39801,9 +39830,9 @@
     "/orgs/{org_slug}/supported-files": {
       "get": {
         "tags": [
-          "Metadata",
-          "Full Scans",
-          "Diff Scans"
+          "metadata",
+          "full-scans",
+          "diff-scans"
         ],
         "summary": "Get supported file types",
         "operationId": "getSupportedFiles",
@@ -39873,7 +39902,7 @@
     "/threat-feed": {
       "get": {
         "tags": [
-          "Deprecated"
+          "deprecated"
         ],
         "summary": "Get Threat Feed Items (Deprecated)",
         "deprecated": true,
@@ -39951,7 +39980,7 @@
             "name": "filter",
             "in": "query",
             "required": false,
-            "description": "Filter what type of threats to return",
+            "description": "Filter by threat classification. Supported values: `mal` (malware, including possible malware), `vuln` (vulnerability), `typo` (typosquat, including possible typosquat), `anom` (anomaly), `spy` (telemetry), `obf` (obfuscated code), `dual` (dual-use tool), `joke` (protestware or joke package), `tp` (all confirmed true positives), `fp` (false positive), `u` (unreviewed), `c` (classified, i.e. anything except unreviewed).",
             "schema": {
               "type": "string",
               "enum": [
@@ -39965,7 +39994,6 @@
                 "joke",
                 "spy",
                 "typo",
-                "secret",
                 "obf",
                 "dual"
               ],
@@ -40006,12 +40034,13 @@
             "name": "ecosystem",
             "in": "query",
             "required": false,
-            "description": "Filter threats by package ecosystem type",
+            "description": "Filter threats by package ecosystem.",
             "schema": {
               "type": "string",
               "enum": [
                 "github",
                 "cargo",
+                "clawhub",
                 "composer",
                 "chrome",
                 "golang",
@@ -40057,54 +40086,60 @@
                         "properties": {
                           "createdAt": {
                             "type": "string",
-                            "description": "",
-                            "default": ""
+                            "description": "ISO 8601 timestamp of when the threat in the package artifact was first discovered",
+                            "default": "",
+                            "format": "date-time"
                           },
                           "updatedAt": {
                             "type": "string",
-                            "description": "",
-                            "default": ""
+                            "description": "ISO 8601 timestamp of when the threat record for the package artifact was last updated (e.g., classification changed, package removed from registry, etc.)",
+                            "default": "",
+                            "format": "date-time"
                           },
                           "publishedAt": {
                             "type": "string",
-                            "description": "",
+                            "description": "ISO 8601 timestamp of when the package artifact was published to the respective registry",
                             "default": "",
+                            "format": "date-time",
                             "nullable": true
                           },
                           "description": {
                             "type": "string",
-                            "description": "",
+                            "description": "Detailed description of the underlying threat",
                             "default": ""
                           },
                           "id": {
                             "type": "integer",
-                            "description": "",
+                            "description": "Unique identifier of the threat feed entry",
                             "default": 0
                           },
                           "locationHtmlUrl": {
                             "type": "string",
-                            "description": "",
-                            "default": ""
+                            "description": "URL to the threat details page on Socket",
+                            "default": "",
+                            "format": "uri"
                           },
                           "packageHtmlUrl": {
                             "type": "string",
-                            "description": "",
-                            "default": ""
+                            "description": "URL to the affected package page on Socket",
+                            "default": "",
+                            "format": "uri"
                           },
                           "purl": {
                             "type": "string",
-                            "description": "",
+                            "description": "Package URL (PURL) of the affected package artifact",
                             "default": ""
                           },
                           "removedAt": {
                             "type": "string",
-                            "description": "",
+                            "description": "ISO 8601 timestamp of when the package artifact was removed from the respective registry, or null if the package is still available on the registry",
                             "default": "",
+                            "format": "date-time",
                             "nullable": true
                           },
                           "threatType": {
                             "type": "string",
-                            "description": "",
+                            "description": "Threat classification. Possible values: `malware` (known malware), `possible_malware` (AI-detected potential malware), `vulnerability` (potential vulnerability), `typosquat` (human-reviewed typosquat), `possible_typosquat` (AI-detected potential typosquat), `anomaly` (anomalous behavior), `telemetry` (telemetry), `obfuscated` (obfuscated code), `dual_use` (dual-use tool), `troll` (protestware or joke package), `unreviewed` (not yet reviewed), `false_positive` (confirmed false positive).",
                             "default": ""
                           },
                           "needsHumanReview": {
@@ -40160,7 +40195,7 @@
     "/orgs/{org_slug}/threat-feed": {
       "get": {
         "tags": [
-          "Threat Feed"
+          "threat-feed"
         ],
         "summary": "Get Threat Feed Items (Beta)",
         "operationId": "getOrgThreatFeedItems",
@@ -40246,7 +40281,7 @@
             "name": "filter",
             "in": "query",
             "required": false,
-            "description": "Filter what type of threats to return",
+            "description": "Filter by threat classification. Supported values: `mal` (malware, including possible malware), `vuln` (vulnerability), `typo` (typosquat, including possible typosquat), `anom` (anomaly), `spy` (telemetry), `obf` (obfuscated code), `dual` (dual-use tool), `joke` (protestware or joke package), `tp` (all confirmed true positives), `fp` (false positive), `u` (unreviewed), `c` (classified, i.e. anything except unreviewed).",
             "schema": {
               "type": "string",
               "enum": [
@@ -40260,7 +40295,6 @@
                 "joke",
                 "spy",
                 "typo",
-                "secret",
                 "obf",
                 "dual"
               ],
@@ -40301,12 +40335,13 @@
             "name": "ecosystem",
             "in": "query",
             "required": false,
-            "description": "Filter threats by package ecosystem type",
+            "description": "Filter threats by package ecosystem.",
             "schema": {
               "type": "string",
               "enum": [
                 "github",
                 "cargo",
+                "clawhub",
                 "composer",
                 "chrome",
                 "golang",
@@ -40352,54 +40387,60 @@
                         "properties": {
                           "createdAt": {
                             "type": "string",
-                            "description": "",
-                            "default": ""
+                            "description": "ISO 8601 timestamp of when the threat in the package artifact was first discovered",
+                            "default": "",
+                            "format": "date-time"
                           },
                           "updatedAt": {
                             "type": "string",
-                            "description": "",
-                            "default": ""
+                            "description": "ISO 8601 timestamp of when the threat record for the package artifact was last updated (e.g., classification changed, package removed from registry, etc.)",
+                            "default": "",
+                            "format": "date-time"
                           },
                           "publishedAt": {
                             "type": "string",
-                            "description": "",
+                            "description": "ISO 8601 timestamp of when the package artifact was published to the respective registry",
                             "default": "",
+                            "format": "date-time",
                             "nullable": true
                           },
                           "description": {
                             "type": "string",
-                            "description": "",
+                            "description": "Detailed description of the underlying threat",
                             "default": ""
                           },
                           "id": {
                             "type": "integer",
-                            "description": "",
+                            "description": "Unique identifier of the threat feed entry",
                             "default": 0
                           },
                           "locationHtmlUrl": {
                             "type": "string",
-                            "description": "",
-                            "default": ""
+                            "description": "URL to the threat details page on Socket",
+                            "default": "",
+                            "format": "uri"
                           },
                           "packageHtmlUrl": {
                             "type": "string",
-                            "description": "",
-                            "default": ""
+                            "description": "URL to the affected package page on Socket",
+                            "default": "",
+                            "format": "uri"
                           },
                           "purl": {
                             "type": "string",
-                            "description": "",
+                            "description": "Package URL (PURL) of the affected package artifact",
                             "default": ""
                           },
                           "removedAt": {
                             "type": "string",
-                            "description": "",
+                            "description": "ISO 8601 timestamp of when the package artifact was removed from the respective registry, or null if the package is still available on the registry",
                             "default": "",
+                            "format": "date-time",
                             "nullable": true
                           },
                           "threatType": {
                             "type": "string",
-                            "description": "",
+                            "description": "Threat classification. Possible values: `malware` (known malware), `possible_malware` (AI-detected potential malware), `vulnerability` (potential vulnerability), `typosquat` (human-reviewed typosquat), `possible_typosquat` (AI-detected potential typosquat), `anomaly` (anomalous behavior), `telemetry` (telemetry), `obfuscated` (obfuscated code), `dual_use` (dual-use tool), `troll` (protestware or joke package), `unreviewed` (not yet reviewed), `false_positive` (confirmed false positive).",
                             "default": ""
                           },
                           "needsHumanReview": {
@@ -40455,7 +40496,7 @@
     "/orgs/{org_slug}/purl": {
       "post": {
         "tags": [
-          "Packages"
+          "packages"
         ],
         "summary": "Get Packages by PURL (Org Scoped)",
         "externalDocs": {
@@ -40644,7 +40685,7 @@
     "/orgs/{org_slug}/fixes": {
       "get": {
         "tags": [
-          "Fixes"
+          "fixes"
         ],
         "summary": "Fetch fixes for vulnerabilities in a repository or scan",
         "operationId": "fetch-fixes",
@@ -40789,7 +40830,7 @@
     "/orgs/{org_slug}/telemetry/config": {
       "get": {
         "tags": [
-          "Telemetry"
+          "telemetry"
         ],
         "summary": "Get Organization Telemetry Config",
         "operationId": "getOrgTelemetryConfig",
@@ -40866,7 +40907,7 @@
       },
       "put": {
         "tags": [
-          "Telemetry"
+          "telemetry"
         ],
         "summary": "Update Telemetry Config",
         "operationId": "updateOrgTelemetryConfig",
@@ -40968,7 +41009,7 @@
     "/orgs/{org_slug}/webhooks": {
       "get": {
         "tags": [
-          "Webhooks"
+          "webhooks"
         ],
         "summary": "List all webhooks",
         "externalDocs": {
@@ -41184,7 +41225,7 @@
       },
       "post": {
         "tags": [
-          "Webhooks"
+          "webhooks"
         ],
         "summary": "Create a webhook",
         "externalDocs": {
@@ -41414,7 +41455,7 @@
     "/orgs/{org_slug}/webhooks/{webhook_id}": {
       "get": {
         "tags": [
-          "Webhooks"
+          "webhooks"
         ],
         "summary": "Get webhook",
         "externalDocs": {
@@ -41575,7 +41616,7 @@
       },
       "put": {
         "tags": [
-          "Webhooks"
+          "webhooks"
         ],
         "summary": "Update webhook",
         "externalDocs": {
@@ -41808,7 +41849,7 @@
       },
       "delete": {
         "tags": [
-          "Webhooks"
+          "webhooks"
         ],
         "summary": "Delete webhook",
         "externalDocs": {
@@ -41894,7 +41935,7 @@
     "/orgs/{org_slug}/alerts": {
       "get": {
         "tags": [
-          "Alerts"
+          "alerts"
         ],
         "summary": "List latest alerts (Beta)",
         "operationId": "alertsList",
@@ -43826,7 +43867,7 @@
     "/orgs/{org_slug}/alert-full-scan-search": {
       "get": {
         "tags": [
-          "Alerts"
+          "alerts"
         ],
         "summary": "List full scans associated with alert (Beta)",
         "operationId": "alertFullScans",
@@ -44051,7 +44092,7 @@
     "/license-policy": {
       "post": {
         "tags": [
-          "License Policy"
+          "license-policy"
         ],
         "summary": "License Policy (Beta)",
         "operationId": "licensePolicy",
@@ -44160,7 +44201,7 @@
     "/saturate-license-policy": {
       "post": {
         "tags": [
-          "Deprecated"
+          "deprecated"
         ],
         "summary": "Saturate License Policy (Legacy)",
         "deprecated": true,
@@ -44304,8 +44345,8 @@
     "/license-metadata": {
       "post": {
         "tags": [
-          "Metadata",
-          "License Policy"
+          "metadata",
+          "license-policy"
         ],
         "summary": "License Metadata",
         "operationId": "licenseMetadata",
@@ -44354,9 +44395,9 @@
     "/alert-types": {
       "post": {
         "tags": [
-          "Metadata",
-          "Full Scans",
-          "Diff Scans"
+          "metadata",
+          "full-scans",
+          "diff-scans"
         ],
         "summary": "Alert Types Metadata",
         "operationId": "alertTypes",
@@ -44477,7 +44518,7 @@
     "/openapi": {
       "get": {
         "tags": [
-          "Metadata"
+          "metadata"
         ],
         "summary": "Returns the OpenAPI definition",
         "operationId": "getOpenAPI",
@@ -44500,7 +44541,7 @@
     "/openapi.json": {
       "get": {
         "tags": [
-          "Metadata"
+          "metadata"
         ],
         "summary": "Returns the OpenAPI definition",
         "operationId": "getOpenAPIJSON",
@@ -44523,7 +44564,7 @@
     "/quota": {
       "get": {
         "tags": [
-          "API Tokens"
+          "api-tokens"
         ],
         "summary": "Get quota",
         "operationId": "getQuota",
@@ -44550,15 +44591,29 @@
                       "description": "",
                       "default": 0,
                       "minimum": 0
+                    },
+                    "maxQuota": {
+                      "type": "integer",
+                      "description": "",
+                      "default": 0,
+                      "minimum": 0
+                    },
+                    "nextWindowRefresh": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
                     }
                   },
                   "required": [
+                    "maxQuota",
+                    "nextWindowRefresh",
                     "quota"
                   ]
                 }
               }
             },
-            "description": "Quota amount"
+            "description": "Quota information"
           },
           "401": {
             "$ref": "#/components/responses/SocketUnauthorized"
@@ -44573,7 +44628,7 @@
     "/organizations": {
       "get": {
         "tags": [
-          "API Tokens"
+          "api-tokens"
         ],
         "summary": "List organizations",
         "operationId": "getOrganizations",
@@ -44663,7 +44718,7 @@
     "/settings": {
       "post": {
         "tags": [
-          "Deprecated"
+          "deprecated"
         ],
         "summary": "Calculate settings",
         "deprecated": true,
@@ -44822,7 +44877,7 @@
     "/report/supported": {
       "get": {
         "tags": [
-          "Deprecated"
+          "deprecated"
         ],
         "summary": "Get supported files for report",
         "deprecated": true,
@@ -44875,7 +44930,7 @@
     "/report/delete/{id}": {
       "delete": {
         "tags": [
-          "Deprecated"
+          "deprecated"
         ],
         "summary": "Delete a report",
         "deprecated": true,
@@ -44949,7 +45004,7 @@
     "/report/list": {
       "get": {
         "tags": [
-          "Deprecated"
+          "deprecated"
         ],
         "summary": "Get list of reports",
         "deprecated": true,
@@ -45078,7 +45133,7 @@
     "/report/upload": {
       "put": {
         "tags": [
-          "Deprecated"
+          "deprecated"
         ],
         "summary": "Create a report",
         "deprecated": true,
@@ -45187,7 +45242,7 @@
     "/report/view/{id}": {
       "get": {
         "tags": [
-          "Deprecated"
+          "deprecated"
         ],
         "summary": "View a report",
         "deprecated": true,
@@ -45252,7 +45307,7 @@
     "/repo/list": {
       "get": {
         "tags": [
-          "Deprecated"
+          "deprecated"
         ],
         "summary": "List GitHub repositories",
         "deprecated": true,
@@ -45410,7 +45465,7 @@
     "/npm/{package}/{version}/issues": {
       "get": {
         "tags": [
-          "Deprecated"
+          "deprecated"
         ],
         "summary": "Get issues by package",
         "deprecated": true,
@@ -45476,7 +45531,7 @@
     "/npm/{package}/{version}/score": {
       "get": {
         "tags": [
-          "Deprecated"
+          "deprecated"
         ],
         "summary": "Get score by package",
         "deprecated": true,
@@ -45542,7 +45597,7 @@
     "/analytics/org/{filter}": {
       "get": {
         "tags": [
-          "Deprecated"
+          "deprecated"
         ],
         "summary": "Get organization analytics (unstable)",
         "deprecated": true,
@@ -45719,7 +45774,7 @@
     "/analytics/repo/{name}/{filter}": {
       "get": {
         "tags": [
-          "Deprecated"
+          "deprecated"
         ],
         "summary": "Get repository analytics",
         "deprecated": true,
