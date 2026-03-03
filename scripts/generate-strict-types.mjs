@@ -224,19 +224,19 @@ function extractProperties(node, source, config) {
 function extractQueryParams(operationsNode, operationId, source, config) {
   const opProp = findProperty(operationsNode, operationId)
   if (!opProp) {
-    return null
+    return undefined
   }
 
   const opType = opProp.typeAnnotation?.typeAnnotation
   const paramsProp = findProperty(opType, 'parameters')
   if (!paramsProp) {
-    return null
+    return undefined
   }
 
   const paramsType = paramsProp.typeAnnotation?.typeAnnotation
   const queryProp = findProperty(paramsType, 'query')
   if (!queryProp) {
-    return null
+    return undefined
   }
 
   const queryType = queryProp.typeAnnotation?.typeAnnotation
@@ -293,31 +293,31 @@ function extractResponseType(
 ) {
   const opProp = findProperty(operationsNode, operationId)
   if (!opProp) {
-    return null
+    return undefined
   }
 
   const opType = opProp.typeAnnotation?.typeAnnotation
   const responsesProp = findProperty(opType, 'responses')
   if (!responsesProp) {
-    return null
+    return undefined
   }
 
   const responsesType = responsesProp.typeAnnotation?.typeAnnotation
   const codeProp = findProperty(responsesType, responseCode)
   if (!codeProp) {
-    return null
+    return undefined
   }
 
   const codeType = codeProp.typeAnnotation?.typeAnnotation
   const contentProp = findProperty(codeType, 'content')
   if (!contentProp) {
-    return null
+    return undefined
   }
 
   const contentType = contentProp.typeAnnotation?.typeAnnotation
   const jsonProp = findProperty(contentType, 'application/json')
   if (!jsonProp) {
-    return null
+    return undefined
   }
 
   let targetType = jsonProp.typeAnnotation?.typeAnnotation
@@ -328,7 +328,7 @@ function extractResponseType(
   }
 
   if (!targetType) {
-    return null
+    return undefined
   }
 
   return extractProperties(targetType, source, config)
@@ -354,7 +354,7 @@ function findExportByName(ast, name) {
       return node.declaration
     }
   }
-  return null
+  return undefined
 }
 
 /**
@@ -372,7 +372,7 @@ function findProperty(node, propName) {
       }
     }
   }
-  return null
+  return undefined
 }
 
 /**
@@ -733,7 +733,7 @@ function navigateToPath(node, path) {
   let current = unwrapType(node)
   for (const segment of path) {
     if (!current) {
-      return null
+      return undefined
     }
     current = unwrapType(current)
 
@@ -770,7 +770,7 @@ function navigateToPath(node, path) {
     if (prop?.typeAnnotation?.typeAnnotation) {
       current = unwrapType(prop.typeAnnotation.typeAnnotation)
     } else {
-      return null
+      return undefined
     }
   }
   return current
@@ -802,7 +802,7 @@ function typeNodeToString(node, source) {
  */
 function unwrapType(node) {
   if (!node) {
-    return null
+    return undefined
   }
   // Unwrap parenthesized types: (T) -> T
   if (node.type === 'TSParenthesizedType') {

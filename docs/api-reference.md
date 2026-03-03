@@ -20,6 +20,7 @@ All SDK methods return a result object with this shape:
   status: number
   error: string
   cause?: string  // Additional error context
+  url?: string    // Request URL (useful for debugging)
 }
 ```
 
@@ -44,12 +45,12 @@ const result = await sdk.batchPackageFetch(
       { purl: 'pkg:npm/vue@3.3.4' }
     ]
   },
-  { includeTopLevelAncestors: true }
+  { alerts: true, compact: true }
 )
 
 if (result.success) {
-  for (const pkg of result.data.packages) {
-    console.log(`${pkg.name}@${pkg.version}: ${pkg.score}/100`)
+  for (const pkg of result.data) {
+    console.log(`${pkg.name}@${pkg.version}: ${pkg.score?.overall ?? 'N/A'}`)
   }
 }
 ```
@@ -70,7 +71,7 @@ const result = await sdk.createFullScan(
 
 if (result.success) {
   console.log(`Scan ID: ${result.data.id}`)
-  console.log(`Status: ${result.data.status}`)
+  console.log(`Scan State: ${result.data.scan_state}`)
 }
 ```
 

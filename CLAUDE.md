@@ -134,6 +134,7 @@ All `logger.error()` and `logger.log()` calls include empty string:
 - **Semicolons**: Use semicolons (unlike other Socket projects)
 - **Type safety**: ❌ FORBIDDEN `any`; use `unknown` or specific
 - **Type imports**: Always `import type`
+- **Nullish values**: Prefer `undefined` over `null` - use `undefined` for absent/missing values
 
 #### Working Directory
 - **🚨 NEVER use `process.chdir()`** - use `{ cwd }` options and absolute paths instead

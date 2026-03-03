@@ -35,7 +35,7 @@ if (quota.success) {
 // Analyze a package
 const result = await client.getScoreByNpmPackage('express', '4.18.0')
 if (result.success) {
-  console.log(`Security Score: ${result.data.score}/100`)
+  console.log(`Dependency Score: ${result.data.depscore}`)
 }
 
 // Batch analyze multiple packages

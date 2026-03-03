@@ -12,6 +12,10 @@
       "quota": 100,
       "permissions": ["report:write"]
     },
+    "createFullScan": {
+      "quota": 0,
+      "permissions": ["full-scans:create"]
+    },
     "createOrgFullScan": {
       "quota": 0,
       "permissions": ["full-scans:create"]

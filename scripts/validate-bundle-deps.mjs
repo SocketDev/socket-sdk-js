@@ -224,12 +224,12 @@ async function extractBundledPackages(filePath) {
 function getPackageName(specifier) {
   // Relative imports are not packages
   if (specifier.startsWith('.') || specifier.startsWith('/')) {
-    return null
+    return undefined
   }
 
   // Subpath imports (Node.js internal imports starting with #)
   if (specifier.startsWith('#')) {
-    return null
+    return undefined
   }
 
   // Filter out template strings, boolean strings, and other non-package patterns
@@ -254,7 +254,7 @@ function getPackageName(specifier) {
     specifier.includes("'") ||
     specifier.includes('\\')
   ) {
-    return null
+    return undefined
   }
 
   // Scoped package: @scope/package or @scope/package/subpath
@@ -263,12 +263,12 @@ function getPackageName(specifier) {
     if (parts.length >= 2) {
       return `${parts[0]}/${parts[1]}`
     }
-    return null
+    return undefined
   }
 
   // Regular package: package or package/subpath
   const parts = specifier.split('/')
-  return parts[0]
+  return parts[0] || undefined
 }
 
 /**

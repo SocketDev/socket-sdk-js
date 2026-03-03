@@ -371,14 +371,13 @@ export interface SocketSdkOptions {
       }
     | undefined
   /**
-   * Number of retry attempts on failure (default: 0, retries disabled).
-   * Retries are opt-in following Node.js fs.rm() pattern.
-   * Recommended: 3 for production, 0 for testing.
+   * Number of retry attempts on failure (default: 3).
+   * Uses exponential backoff between retries.
    */
   retries?: number | undefined
   /**
-   * Initial delay in milliseconds between retries (default: 100).
-   * Uses exponential backoff: 100ms, 200ms, 400ms, etc.
+   * Initial delay in milliseconds between retries (default: 1000).
+   * Uses exponential backoff: 1000ms, 2000ms, 4000ms, etc.
    */
   retryDelay?: number | undefined
   /** Request timeout in milliseconds */

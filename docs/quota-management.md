@@ -1,6 +1,6 @@
 # Quota Management
 
-API methods cost: 0 (free), 10 (standard), or 100 (resource-intensive)) units.
+API methods cost: 0 (free), 10 (standard), or 100 (resource-intensive) units.
 
 ## Check Quota
 
@@ -40,7 +40,7 @@ const cost = calculateTotalQuotaCost([
 // Check quota
 const canProceed = hasQuotaForMethods(availableQuota, [
   'batchPackageFetch',
-  'createOrgFullScan'
+  'createFullScan'
 ])
 
 // Methods by cost
@@ -100,9 +100,9 @@ if (quota.success && quota.data.quota >= batchCost) {
 For the complete list of API method quota costs, see [data/api-method-quota-and-permissions.json](../data/api-method-quota-and-permissions.json).
 
 **Summary:**
-- **Free (0):** 43 methods including `getQuota`, `getOrganizations`, `getEntitlements`, `createOrgFullScan`, `getScan`, `getScanList`, `getOrgSecurityPolicy`, `updateOrgSecurityPolicy`, repo management, triage, labels, diff scans, exports, and more
+- **Free (0):** 44 methods including `getQuota`, `getOrganizations`, `getEntitlements`, `createFullScan`, `getScan`, `getScanList`, `getOrgSecurityPolicy`, `updateOrgSecurityPolicy`, repo management, triage, labels, diff scans, exports, and more
 - **Standard (10):** `getOrgAnalytics`, `getRepoAnalytics`, `getAuditLogEvents`, `getIssuesByNpmPackage`, `getScoreByNpmPackage`, `getOrgAlertFullScans`, API token operations
-- **Expensive (100):** `batchPackageFetch`, `batchOrgPackageFetch`, `batchPackageStream`, `uploadManifestFiles`, `createDependenciesSnapshot`, `createScanFromFilepaths`, `searchDependencies`
+- **Expensive (100):** `batchPackageFetch`, `batchOrgPackageFetch`, `batchPackageStream`, `uploadManifestFiles`, `createDependenciesSnapshot`, `searchDependencies`
 
 ## Best Practices
 

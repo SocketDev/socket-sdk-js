@@ -215,7 +215,7 @@ try {
       }
 
       // Compute aggregate coverage from both test suites
-      let aggregateCoverage = null
+      let aggregateCoverage
       if (mainCoverage && isolatedCoverage) {
         try {
           // Read coverage JSON files to get line counts for proper weighting
@@ -407,7 +407,7 @@ try {
       }
 
       // Compute aggregate coverage from both test suites
-      let aggregateCoverage = null
+      let aggregateCoverage
       if (mainCoverage && isolatedCoverage) {
         // Read coverage JSON files to get line counts for proper weighting
         const fs = await import('node:fs/promises')
