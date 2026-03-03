@@ -46,6 +46,7 @@ jobs:
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
+          persist-credentials: false
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@67a3db92603c23c58031586611c7cc852244c87c # main
@@ -73,11 +74,12 @@ jobs:
         if: steps.check.outputs.has_changes == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
           git checkout -b automated/open-api
           git add .
           git commit -m "fix(openapi): sync with openapi definition"
-          git push https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git automated/open-api -fu
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" automated/open-api -fu
 
       - name: Create Pull Request
         if: steps.check.outputs.has_changes == 'true'

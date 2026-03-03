@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.3.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.3.1) - 2026-03-03
+
+### Changed
+
+- **createRepository**: Now requires `repoSlug` as second parameter with typed options including `workspace`, `visibility`, `homepage`, `archived`, `default_branch`, and `description`
+
+### Added
+
+- New API endpoints from OpenAPI sync: CSV/PDF export for full scans, delete triage alerts, new alert types
+
 ## [3.3.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.3.0) - 2026-01-25
 
 ### Added

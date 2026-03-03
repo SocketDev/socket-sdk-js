@@ -277,7 +277,14 @@ function getPackageName(specifier) {
 async function readPackageJson() {
   const packageJsonPath = path.join(rootPath, 'package.json')
   const content = await fs.readFile(packageJsonPath, 'utf8')
-  return JSON.parse(content)
+  try {
+    return JSON.parse(content)
+  } catch (e) {
+    throw new Error(
+      `Failed to parse ${packageJsonPath}: ${e?.message || 'Unknown error'}`,
+      { cause: e },
+    )
+  }
 }
 
 /**

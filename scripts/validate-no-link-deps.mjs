@@ -50,7 +50,15 @@ async function findPackageJsonFiles(dir) {
  */
 async function checkPackageJson(filePath) {
   const content = await fs.readFile(filePath, 'utf8')
-  const pkg = JSON.parse(content)
+  let pkg
+  try {
+    pkg = JSON.parse(content)
+  } catch (e) {
+    throw new Error(
+      `Failed to parse ${filePath}: ${e?.message || 'Unknown error'}`,
+      { cause: e },
+    )
+  }
 
   const violations = []
 
