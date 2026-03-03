@@ -19,7 +19,7 @@ jobs:
     permissions:
       contents: write       # To push commits to branches
       pull-requests: write  # To create/update PRs
-    uses: SocketDev/socket-registry/.github/workflows/socket-auto-pr.yml@8504f327a7ad48c3a99f41d1fad01effbdecb897 # main
+    uses: SocketDev/socket-registry/.github/workflows/socket-auto-pr.yml@67a3db92603c23c58031586611c7cc852244c87c # main
     with:
       debug: ${{ inputs.debug }}
       autopilot: true
