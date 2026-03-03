@@ -13,6 +13,6 @@ jobs:
       contents: read         # To read repository code
       id-token: write        # For OIDC authentication to Socket.dev
       pull-requests: read    # To read PR details
-    uses: SocketDev/socket-registry/.github/workflows/claude-auto-review.yml@4709a2443e5a036bb0cd94e5d1559f138f05994c # main
+    uses: SocketDev/socket-registry/.github/workflows/claude-auto-review.yml@67a3db92603c23c58031586611c7cc852244c87c # main
     secrets:
       anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
