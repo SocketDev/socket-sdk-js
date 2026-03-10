@@ -109,6 +109,7 @@ export type ListRepositoriesOptions = {
   page?: number | undefined
   per_page?: number | undefined
   sort?: string | undefined
+  workspace?: string | undefined
 }
 
 /**

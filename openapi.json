@@ -17980,6 +17980,15 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "name": "workspace",
+            "in": "query",
+            "required": false,
+            "description": "Filter repositories by workspace. When provided (including empty string), only repos in that workspace are returned.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "security": [
