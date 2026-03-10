@@ -7754,6 +7754,8 @@ export interface operations {
         page?: number
         /** @description Include archived repositories in the results */
         include_archived?: boolean
+        /** @description Filter repositories by workspace. When provided (including empty string), only repos in that workspace are returned. */
+        workspace?: string
       }
       path: {
         /** @description The slug of the organization */
