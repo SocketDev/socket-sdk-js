@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.4.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.4.0) - 2026-03-11
+
+### Added
+
+- **listRepositories**: New `workspace` query parameter to filter repositories by workspace (when provided, only repos in that workspace are returned)
+- New audit log action types for OAuth refresh tokens and repository access rules:
+  - `CreateOauthRefreshToken` - Track OAuth refresh token creation
+  - `RotateOauthRefreshToken` - Track OAuth refresh token rotation
+  - `CreateRepoAccessRule` - Track repository access rule creation
+  - `UpdateRepoAccessRule` - Track repository access rule updates
+  - `DeleteRepoAccessRule` - Track repository access rule deletion
+
+### Changed
+
+- Synced OpenAPI type definitions with latest API specification
+
 ## [3.3.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.3.1) - 2026-03-03
 
 ### Changed

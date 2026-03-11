@@ -56,10 +56,7 @@ async function generateStrictTypes() {
   })
   const exitCode = await runCommand('pnpm', [
     'exec',
-    'biome',
-    'format',
-    '--log-level=none',
-    '--fix',
+    'oxfmt',
     'src/types-strict.ts',
   ])
   if (exitCode !== 0) {
@@ -77,14 +74,7 @@ async function generateTypes() {
   // Add SDK v3 method name aliases
   await addSdkMethodAliases(typesPath)
   // Format generated types
-  const exitCode = await runCommand('pnpm', [
-    'exec',
-    'biome',
-    'format',
-    '--log-level=none',
-    '--fix',
-    'types/api.d.ts',
-  ])
+  const exitCode = await runCommand('pnpm', ['exec', 'oxfmt', 'types/api.d.ts'])
   if (exitCode !== 0) {
     throw new Error(`Formatting types failed with exit code ${exitCode}`)
   }
