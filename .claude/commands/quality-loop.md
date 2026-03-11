@@ -26,6 +26,7 @@ Run the quality-scan skill and fix all issues found. Repeat until zero issues re
 **Root Cause**: Cache keys are computed AFTER `prepareExternalSources()` syncs source packages to additions/. Since cache keys hash files in additions/ (which are now synced), they match the checkpoint even though source packages changed.
 
 **Scenario**:
+
 1. Developer modifies `packages/binject/src/socketsecurity/binject/file.c`
 2. Runs `pnpm --filter node-smol-builder clean && pnpm build`
 3. `prepareExternalSources()` syncs binject → additions/source-patched/src/socketsecurity/binject/
@@ -36,10 +37,12 @@ Run the quality-scan skill and fix all issues found. Repeat until zero issues re
 **Impact**: Silent build incorrectness when modifying source packages
 
 **Proposed Solutions** (require architectural review):
+
 - Option 1: Include source package mtimes in cache key metadata
 - Option 2: Make `prepareExternalSources()` idempotent, always re-sync
 
 **Files Affected**:
+
 - packages/node-smol-builder/scripts/common/shared/build.mjs (collectBuildSourceFiles)
 - packages/node-smol-builder/scripts/common/shared/checkpoints.mjs (cache key generation)
 

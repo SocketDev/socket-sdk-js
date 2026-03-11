@@ -168,35 +168,31 @@ describe('SocketSdk - Batch Operations', () => {
       }
     })
 
-    it.sequential(
-      'should handle network timeouts for reachability checks',
-      async () => {
-        // Use fake timers to avoid actual delay
-        vi.useFakeTimers()
+    it.sequential('should handle network timeouts for reachability checks', async () => {
+      // Use fake timers to avoid actual delay
+      vi.useFakeTimers()
 
-        nock('https://api.socket.dev')
-          .post('/v0/purl')
-          .delayConnection(6000)
-          .reply(200, {})
+      nock('https://api.socket.dev')
+        .post('/v0/purl')
+        .delayConnection(6000)
+        .reply(200, {})
 
-        const client = new SocketSdk('test-token', {
-          ...FAST_TEST_CONFIG,
-          timeout: 5000,
-        })
+      const client = new SocketSdk('test-token', {
+        ...FAST_TEST_CONFIG,
+        timeout: 5000,
+      })
 
-        const promise = client.batchPackageFetch({
-          components: [{ purl: 'pkg:npm/test@1.0.0' }],
-        })
+      const promise = client.batchPackageFetch({
+        components: [{ purl: 'pkg:npm/test@1.0.0' }],
+      })
 
-        // Advance timers to trigger timeout
-        await vi.advanceTimersByTimeAsync(5001)
+      // Advance timers to trigger timeout
+      await vi.advanceTimersByTimeAsync(5001)
 
-        await expect(promise).rejects.toThrow()
+      await expect(promise).rejects.toThrow()
 
-        vi.useRealTimers()
-      },
-      10_000,
-    )
+      vi.useRealTimers()
+    }, 10_000)
 
     it('should handle partial response data', async () => {
       nock('https://api.socket.dev')

@@ -1,19 +1,25 @@
 {
   "name": "@socketsecurity/sdk",
   "version": "3.3.1",
-  "packageManager": "pnpm@10.30.3",
-  "license": "MIT",
   "description": "SDK for the Socket API client",
+  "homepage": "https://github.com/SocketDev/socket-sdk-js",
+  "license": "MIT",
   "author": {
     "name": "Socket Inc",
     "email": "eng@socket.dev",
     "url": "https://socket.dev"
   },
-  "homepage": "https://github.com/SocketDev/socket-sdk-js",
   "repository": {
     "type": "git",
     "url": "git://github.com/SocketDev/socket-sdk-js.git"
   },
+  "files": [
+    "CHANGELOG.md",
+    "data/*.json",
+    "dist/*.d.ts",
+    "dist/*.js",
+    "types/*.d.ts"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -42,6 +48,8 @@
     "clean": "node scripts/clean.mjs",
     "cover": "node scripts/cover.mjs",
     "fix": "node scripts/lint.mjs --fix",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
     "generate-sdk": "node scripts/generate-sdk.mjs",
     "lint": "node scripts/lint.mjs",
     "precommit": "pnpm run check --lint --staged",
@@ -57,7 +65,7 @@
   },
   "dependencies": {
     "@socketregistry/packageurl-js": "1.3.5",
-    "@socketsecurity/lib": "5.7.0",
+    "@socketsecurity/lib": "5.8.0",
     "form-data": "4.0.5"
   },
   "devDependencies": {
@@ -65,10 +73,8 @@
     "@babel/parser": "7.26.3",
     "@babel/traverse": "7.26.4",
     "@babel/types": "7.26.3",
-    "@biomejs/biome": "2.2.4",
-    "@dotenvx/dotenvx": "^1.52.0",
-    "@eslint/compat": "1.3.2",
-    "@eslint/js": "9.35.0",
+    "@dotenvx/dotenvx": "1.54.1",
+    "@oxlint/migrate": "1.52.0",
     "@sveltejs/acorn-typescript": "1.0.8",
     "@types/babel__traverse": "7.28.0",
     "@types/node": "24.9.2",
@@ -78,26 +84,35 @@
     "del": "8.0.1",
     "dev-null-cli": "2.0.0",
     "esbuild": "0.25.11",
-    "eslint": "9.35.0",
-    "eslint-import-resolver-typescript": "4.4.4",
-    "eslint-plugin-import-x": "4.16.1",
-    "eslint-plugin-jsdoc": "57.0.8",
-    "eslint-plugin-n": "17.23.1",
-    "eslint-plugin-sort-destructure-keys": "2.0.0",
-    "eslint-plugin-unicorn": "56.0.1",
     "fast-glob": "3.3.3",
-    "globals": "16.4.0",
     "http2-wrapper": "2.2.1",
     "husky": "9.1.7",
     "magic-string": "0.30.14",
     "nock": "14.0.10",
     "openapi-typescript": "6.7.6",
+    "oxfmt": "0.37.0",
+    "oxlint": "1.52.0",
     "semver": "7.7.2",
     "taze": "19.9.2",
     "type-coverage": "2.29.7",
-    "typescript-eslint": "8.44.1",
     "vitest": "4.0.3"
   },
+  "typeCoverage": {
+    "atLeast": 99,
+    "cache": true,
+    "ignore-files": "test/*",
+    "ignore-non-null-assertion": true,
+    "ignore-type-assertion": true,
+    "ignoreAsAssertion": true,
+    "ignoreCatch": true,
+    "ignoreEmptyType": true,
+    "strict": true
+  },
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=10.25.0"
+  },
+  "packageManager": "pnpm@10.32.1",
   "pnpm": {
     "ignoredBuiltDependencies": [
       "esbuild",
@@ -106,27 +121,5 @@
     "overrides": {
       "vite": "7.1.12"
     }
-  },
-  "engines": {
-    "node": ">=18",
-    "pnpm": ">=10.25.0"
-  },
-  "files": [
-    "CHANGELOG.md",
-    "data/*.json",
-    "dist/*.d.ts",
-    "dist/*.js",
-    "types/*.d.ts"
-  ],
-  "typeCoverage": {
-    "cache": true,
-    "atLeast": 99,
-    "ignoreAsAssertion": true,
-    "ignoreCatch": true,
-    "ignoreEmptyType": true,
-    "ignore-non-null-assertion": true,
-    "ignore-type-assertion": true,
-    "ignore-files": "test/*",
-    "strict": true
   }
 }
