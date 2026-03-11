@@ -57,7 +57,7 @@
     "ci:validate": "node scripts/ci-validate.mjs",
     "prepublishOnly": "echo 'ERROR: Use GitHub Actions workflow for publishing' && exit 1",
     "publish": "node scripts/publish.mjs",
-    "publish:ci": "node scripts/publish.mjs --skip-git --skip-build --tag ${DIST_TAG:-latest}",
+    "publish:ci": "node scripts/publish.mjs --tag ${DIST_TAG:-latest}",
     "claude": "node scripts/claude.mjs",
     "test": "node scripts/test.mjs",
     "type": "tsgo --noEmit -p .config/tsconfig.check.json",

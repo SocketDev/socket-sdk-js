@@ -13,6 +13,7 @@
   "bracketSpacing": true,
   "singleAttributePerLine": false,
   "ignorePatterns": [
+    "**/openapi.json",
     "**/.cache",
     "**/.claude",
     "**/.DS_Store",
