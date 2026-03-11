@@ -1,5 +1,33 @@
 # quality-scan Reference Documentation
 
+## Core Principles
+
+### KISS (Keep It Simple, Stupid)
+
+**Always prioritize simplicity** - the simpler the code, the fewer bugs it will have.
+
+Common violations to flag:
+- **Over-abstraction**: Creating utilities, helpers, or wrappers for one-time operations
+- **Premature optimization**: Complex caching, memoization, or performance tricks before profiling
+- **Unnecessary indirection**: Multiple layers of function calls when direct code would be clearer
+- **Complex path construction**: Building paths manually instead of using helper return values
+- **Feature creep**: Adding "nice to have" features that complicate the core logic
+
+Examples:
+
+**BAD - Ignoring return values and reconstructing paths:**
+```javascript
+await downloadSocketBtmRelease({ asset, downloadDir, tool: 'lief' })
+const downloadedPath = path.join(downloadDir, 'lief', 'assets', asset)  // ❌ Assumes path structure
+```
+
+**GOOD - Use the return value:**
+```javascript
+const downloadedPath = await downloadSocketBtmRelease({ asset, downloadDir })  // ✅ Simple, trust the function
+```
+
+**Principle**: If a function returns what you need, use it. Don't reconstruct or assume.
+
 ## Agent Prompts
 
 ### Critical Scan Agent
@@ -10,29 +38,26 @@
 
 **Prompt Template:**
 ```
-Your task is to perform a critical bug scan on socket-sdk-js, the Socket Security TypeScript/JavaScript SDK. Identify bugs that could cause crashes, API failures, data corruption, or security vulnerabilities.
+Your task is to perform a critical bug scan on the codebase. Identify bugs that could cause crashes, data corruption, or security vulnerabilities.
 
 <context>
-This is Socket Security's official SDK for TypeScript/JavaScript:
-- **HTTP Client**: Implements retry logic, rate limiting, and error handling (src/http-client.ts)
-- **SDK Class**: Main API interface with all Socket.dev methods (src/socket-sdk-class.ts)
-- **Type Generation**: Scripts that generate TypeScript types from OpenAPI specs (scripts/generate-*.mjs)
-- **Type Definitions**: Strict TypeScript types for SDK methods (src/types-strict.ts)
-- **Utilities**: Shared helper functions and validators (src/utils.ts)
+[CONDITIONAL: Adapt this context based on the repository you're scanning]
 
-Key characteristics:
-- Uses TypeScript with .ts/.mts extension for source and scripts
-- Implements comprehensive HTTP client with retries and timeouts
-- Generates types from OpenAPI specification automatically
-- Handles API authentication and request/response validation
-- Must gracefully handle network errors, rate limits, and API changes
-- Provides strict TypeScript types for all API methods
-- Supports streaming responses and file uploads
+Common characteristics to look for:
+- TypeScript/JavaScript files (.ts, .mts, .mjs, .js)
+- Async operations and promise handling
+- External API integrations
+- File system operations
+- Cross-platform compatibility requirements
+- Error handling patterns
+- Resource management (connections, file handles, timers)
 </context>
 
 <instructions>
 Scan all code files for these critical bug patterns:
-- TypeScript/JavaScript: src/**/*.ts, scripts/**/*.mjs, test/**/*.mts
+- [IF single package] TypeScript/JavaScript: scripts/**/*.{mjs,mts}, src/**/*.{mjs,mts}
+- [IF single package] TypeScript/JavaScript: src/**/*.{ts,mts,mjs,js}, lib/**/*.{ts,mts,mjs,js}
+- [IF C/C++ code exists] C/C++: src/**/*.{c,cc,cpp,h}
 - Focus on:
 
 <pattern name="null_undefined_access">
@@ -76,31 +101,95 @@ Scan all code files for these critical bug patterns:
 - Buffer operations without size checks
 </pattern>
 
-<quality_guidelines>
-For each potential issue found, use explicit chain-of-thought reasoning with `<thinking>` tags:
+<pattern name="primordials_protection">
+**CRITICAL for Node.js internal code (IF repository has Node.js internals):**
+- Direct Promise method calls (Promise.all, Promise.allSettled, Promise.race, Promise.any) instead of primordials
+- Missing primordials import in internal/ modules
+- Using Promise.all where Promise.allSettled would be safer for error collection
+- [SOCKET-BTM SPECIFIC] Check additions/source-patched/lib/internal/socketsecurity/smol/*.js for SafePromiseAllSettled usage
+- [SOCKET-BTM SPECIFIC] Check additions/source-patched/deps/fast-webstreams/*.js for SafePromiseAllReturnVoid usage
+- [SOCKET-BTM SPECIFIC] Verify sync scripts (vendor-fast-webstreams/sync.mjs) inject primordials when syncing from upstream
+</pattern>
 
-<thinking>
-1. Can this actually crash/fail in production?
-   - Code path analysis: [describe the execution flow]
-   - Production scenarios: [real-world conditions]
-   - Result: [yes/no with justification]
+<pattern name="cross_platform_binary_bugs">
+**[SOCKET-BTM SPECIFIC] CRITICAL for binary tooling (binject, binpress, stubs-builder):**
+Cross-platform binary processing that uses compile-time platform detection:
+- `#ifdef __APPLE__` / `#ifdef _WIN32` selecting sizes, offsets, or behaviors for binary operations
+- Host platform detection instead of target binary format detection
+- Example buggy pattern (causes "Cannot inject into uncompressed stub" errors):
+  ```c
+  #ifdef __APPLE__
+  size_t search_size = SEARCH_SIZE_MACHO;  // Uses macOS size even for Linux ELF binaries!
+  #else
+  size_t search_size = SEARCH_SIZE_ELF;
+  #endif
+  ```
+- Fix: Use runtime binary format detection based on the executable being processed:
+  ```c
+  binject_format_t format = binject_detect_format(executable);
+  size_t search_size = get_search_size_for_format(format);
+  ```
+- Impact: Cross-platform CI (e.g., macOS building Linux binaries) silently produces broken binaries
+</pattern>
 
-2. What input would trigger this issue?
-   - Trigger conditions: [specific inputs/states]
-   - Edge cases: [boundary conditions]
-   - Likelihood: [HIGH/MEDIUM/LOW]
+<pattern name="pe_resource_requirements">
+**[SOCKET-BTM SPECIFIC] CRITICAL for Windows binary tooling:**
+Windows PE binaries missing required .rsrc sections for LIEF injection:
+- LIEF cannot create resource sections from scratch - must exist in the binary
+- Symptoms: "Binary has no resources section" error during SEA injection
+- Check Windows Makefiles (Makefile.windows) for:
+  1. Missing .rc resource file compilation with windres
+  2. Missing RESOURCE_OBJ in the final link step
+- Required for any PE binary that will receive NODE_SEA_BLOB or other injected resources
+</pattern>
 
-3. Are there existing safeguards I'm missing?
-   - Defensive code: [try-catch, validation, guards]
-   - Framework protections: [built-in safety]
-   - Result: [SAFEGUARDED/VULNERABLE]
+<pattern name="binsuite_self_compression_in_tests">
+**[SOCKET-BTM SPECIFIC] CRITICAL for test reliability and CI stability:**
+Tests compressing binsuite binaries (binpress, binflate, binject) as test input cause:
+- Flaky/slow tests: These binaries vary between builds, causing inconsistent test behavior
+- CI timeouts: Large binary compression takes excessive time
+- Parallel test interference: Tests using static paths collide in parallel runs
 
-Overall assessment: [REPORT/SKIP]
-Decision: [If REPORT, include in findings. If SKIP, explain why it's a false positive]
-</thinking>
+**Bad patterns to flag:**
+```typescript
+// BAD - compressing binsuite tools themselves
+const originalBinary = BINPRESS  // or BINFLATE, BINJECT
+await execCommand(BINPRESS, [BINFLATE, '-o', output])
 
-Only report issues that pass all three checks. Use `<thinking>` tags to show your reasoning explicitly.
-</quality_guidelines>
+// BAD - static testDir paths (parallel collision risk)
+const testDir = path.join(PACKAGE_DIR, 'test-tmp')
+```
+
+**Correct patterns:**
+```typescript
+// GOOD - use Node.js binary (consistent across builds)
+const NODE_BINARY = process.execPath
+let testDir: string
+let testBinary: string
+
+beforeAll(async () => {
+  // Unique testDir isolates parallel test runs
+  const uniqueId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  testDir = path.join(os.tmpdir(), `package-test-${uniqueId}`)
+  await safeMkdir(testDir)
+  // Copy Node.js as consistent test input
+  testBinary = path.join(testDir, 'test-node')
+  await fs.copyFile(NODE_BINARY, testBinary)
+})
+```
+
+**Where to check:**
+- test/**/*.test.ts
+- test/**/*.test.mts
+- Any test that uses external binaries or performs heavy I/O operations
+
+**Impact:** Tests performing intensive operations can cause CI timeouts
+</pattern>
+
+For each bug found, think through:
+1. Can this actually crash in production?
+2. What input would trigger it?
+3. Is there existing safeguards I'm missing?
 </instructions>
 
 <output_format>
@@ -115,66 +204,64 @@ Fix: [Specific code change to fix it]
 Impact: [What happens if this bug is triggered]
 
 Example:
-File: src/http-client.ts:145
-Issue: Unhandled promise rejection in API request
+File: src/path/to/file.mjs:145
+Issue: Unhandled promise rejection in async operation
 Severity: Critical
-Pattern: `makeRequest(url, options)`
-Trigger: When network request fails without error handler
-Fix: `await makeRequest(url, options).catch(err => { logger.error(err); throw new Error(\`API request failed: \${err.message}\`) })`
-Impact: Uncaught exception crashes SDK, leaving user application in error state
+Pattern: `await asyncOperation()`
+Trigger: When operation fails without error handling
+Fix: `await asyncOperation().catch(err => { logger.error(err); throw new Error(\`Operation failed: \${err.message}\`) })`
+Impact: Uncaught exception crashes process
 
-Example:
-File: src/socket-sdk-class.ts:234
-Issue: Potential null pointer access on response data
+Example (C/C++):
+File: src/path/to/file.c:234
+Issue: Potential null pointer dereference after malloc
 Severity: Critical
-Pattern: `const result = response.data.items[0]`
-Trigger: When API returns empty array
-Fix: `const items = response.data?.items ?? []; if (items.length === 0) throw new Error('No items found'); const result = items[0]`
-Impact: TypeError crashes SDK when API returns empty results
+Pattern: `uint8_t* buffer = malloc(size); memcpy(buffer, data, size);`
+Trigger: When malloc fails due to insufficient memory
+Fix: `uint8_t* buffer = malloc(size); if (!buffer) return ERROR_MEMORY; memcpy(buffer, data, size);`
+Impact: Segmentation fault crashes process
 </output_format>
 
 <quality_guidelines>
 - Only report actual bugs, not style issues or minor improvements
 - Verify bugs are not already handled by surrounding code
-- Prioritize bugs affecting SDK reliability and API correctness
+- Prioritize bugs affecting reliability and correctness
+- For C/C++: Focus on memory safety, null checks, buffer overflows
 - For TypeScript: Focus on promise handling, type guards, external input validation
 - Skip false positives (TypeScript type guards are sufficient in many cases)
-- Focus on src/ (SDK source), scripts/ (build scripts), and test/ (test files)
+- [IF monorepo] Scan across all packages systematically
+- [IF single package] Scan all source directories (src/, lib/, scripts/)
 </quality_guidelines>
 
-Scan systematically through src/, scripts/, and test/ directories and report all critical bugs found. If no critical bugs are found, state that explicitly.
+Scan systematically and report all critical bugs found. If no critical bugs are found, state that explicitly.
 ```
 
 ---
 
 ### Logic Scan Agent
 
-**Mission**: Detect logical errors in build scripts, patch algorithms, and binary manipulation that could produce incorrect builds or corrupted binaries.
+**Mission**: Detect logical errors in algorithms, data processing, and business logic that could produce incorrect output or incorrect behavior.
 
-**Scan Targets**: All packages in the monorepo
+**Scan Targets**: All source code files
 
 **Prompt Template:**
 ```
-Your task is to detect logic errors in socket-sdk-js that could cause incorrect API calls, data validation failures, or type safety issues. Focus on algorithm correctness, edge case handling, and data validation.
+Your task is to detect logic errors in the codebase that could produce incorrect output or incorrect behavior. Focus on algorithm correctness, edge case handling, and data validation.
 
 <context>
-socket-sdk-js is the Socket Security TypeScript/JavaScript SDK:
-- **HTTP Client**: Request/response handling, retry logic, rate limiting (src/http-client.ts)
-- **SDK Class**: API method implementations, parameter validation (src/socket-sdk-class.ts)
-- **Type Generation**: OpenAPI to TypeScript conversion (scripts/generate-*.mjs)
-- **Utilities**: Helper functions, validators, data transformers (src/utils.ts)
+[CONDITIONAL: Adapt this context based on the repository you're scanning]
 
-Critical operations:
-- HTTP request building and error handling
-- JSON parsing and response validation
-- API parameter validation and transformation
-- Rate limit handling and retry logic
-- Type generation from OpenAPI specifications
-- Cross-platform path handling
+Common areas to analyze:
+- Algorithm implementation and correctness
+- Data parsing and transformation logic
+- Input validation and sanitization
+- Edge case handling
+- Cross-platform compatibility
+- Business logic implementation
 </context>
 
 <instructions>
-Analyze all packages for these logic error patterns:
+Analyze code for these logic error patterns:
 
 <pattern name="off_by_one">
 Off-by-one errors in loops and slicing:
@@ -203,15 +290,15 @@ Unhandled edge cases in string/array operations:
 
 <pattern name="algorithm_correctness">
 Algorithm implementation issues:
-- Patch parsing: Hunk header line counts not validated, @@ parsing errors
+- [IF parsing logic exists] Parsing: Header/format validation, delimiter handling errors
 - Version comparison: Failing on semver edge cases (prerelease, build metadata)
 - Path resolution: Symlink handling, relative vs absolute path logic
-- File ordering: Incorrect dependency ordering in build sequences
-- Deduplication: Missing deduplication of duplicate files/patches
+- File ordering: Incorrect dependency ordering in sequences
+- Deduplication: Missing deduplication of duplicate items
 </pattern>
 
 <pattern name="patch_handling">
-Patch application logic errors:
+**[SOCKET-BTM SPECIFIC] Patch application logic errors:**
 - Unified diff parsing: Line offset calculation errors, context matching failures
 - Hunk application: Off-by-one in line number calculations
 - Patch validation: Missing validation of patch format (malformed hunks)
@@ -220,7 +307,7 @@ Patch application logic errors:
 </pattern>
 
 <pattern name="binary_format">
-Binary format handling errors:
+**[SOCKET-BTM SPECIFIC] Binary format handling errors:**
 - Format detection: Misidentifying ELF/Mach-O/PE headers
 - Section/segment: Off-by-one in offset calculations, size validation missing
 - Endianness: Not handling big-endian vs little-endian correctly
@@ -228,31 +315,59 @@ Binary format handling errors:
 - Cross-platform: Windows vs Unix path separators, line endings
 </pattern>
 
-<quality_guidelines>
-For each potential issue found, use explicit chain-of-thought reasoning with `<thinking>` tags:
+<pattern name="compile_time_vs_runtime_platform">
+**[SOCKET-BTM SPECIFIC] Cross-platform binary processing bugs (CRITICAL - causes silent failures):**
+- Using `#ifdef __APPLE__` / `#ifdef _WIN32` to select binary format-specific behavior
+- Code uses host platform instead of target binary format for size/offset calculations
+- Magic marker search using compile-time constants instead of runtime binary format detection
+- Example bug pattern:
+  ```c
+  // BAD - uses compile-time platform, breaks cross-platform builds
+  #ifdef __APPLE__
+  size_t search_size = 64 * 1024;   // Mach-O size
+  #elif defined(_WIN32)
+  size_t search_size = 128 * 1024;  // PE size
+  #else
+  size_t search_size = 1408 * 1024; // ELF size
+  #endif
 
-<thinking>
-1. Can this actually crash/fail in production?
-   - Code path analysis: [describe the execution flow]
-   - Production scenarios: [real-world conditions]
-   - Result: [yes/no with justification]
+  // GOOD - runtime detection based on binary being processed
+  binject_format_t format = binject_detect_format(executable);
+  size_t search_size = get_search_size_for_format(format);
+  ```
+- Symptoms: "Cannot inject into uncompressed stub binary" when building Linux binaries on macOS
+- Critical for: binject, binpress, stubs-builder, any code manipulating binaries cross-platform
+- Real-world impact: macOS CI processing Linux ELF binaries uses wrong search size, fails to find markers
+</pattern>
 
-2. What input would trigger this issue?
-   - Trigger conditions: [specific inputs/states]
-   - Edge cases: [boundary conditions]
-   - Likelihood: [HIGH/MEDIUM/LOW]
+<pattern name="missing_pe_resources">
+**[SOCKET-BTM SPECIFIC] Windows PE binaries missing required resource sections:**
+- PE stub binaries without .rsrc section cannot receive LIEF-injected resources
+- LIEF cannot create resource sections from scratch - binary must have existing resources
+- Symptoms: "Binary has no resources section" error during Windows SEA injection
+- Check Windows Makefiles for:
+  1. Missing .rc resource file (stub.rc or similar)
+  2. Missing windres compilation step: `$(WINDRES) -i $(RESOURCE_RC) -o $@`
+  3. Missing resource object in link step: `$(CC) ... $(RESOURCE_OBJ) ...`
+- Required for binaries that need NODE_SEA_BLOB or other injected resources
+- Example fix for Makefile.windows:
+  ```makefile
+  RESOURCE_RC = src/socketsecurity/stubs-builder/stub.rc
+  RESOURCE_OBJ = $(OUT_DIR)/stub.res.o
+  WINDRES ?= windres
 
-3. Are there existing safeguards I'm missing?
-   - Defensive code: [try-catch, validation, guards]
-   - Framework protections: [built-in safety]
-   - Result: [SAFEGUARDED/VULNERABLE]
+  $(RESOURCE_OBJ): $(RESOURCE_RC) | $(OUT_DIR)
+      $(WINDRES) -i $(RESOURCE_RC) -o $@
 
-Overall assessment: [REPORT/SKIP]
-Decision: [If REPORT, include in findings. If SKIP, explain why it's a false positive]
-</thinking>
+  $(OUT_DIR)/$(TARGET): $(SOURCE) $(RESOURCE_OBJ) ...
+      $(CC) ... $(SOURCE) $(RESOURCE_OBJ) ...
+  ```
+</pattern>
 
-Only report issues that pass all three checks. Use `<thinking>` tags to show your reasoning explicitly.
-</quality_guidelines>
+Before reporting, think through:
+1. Does this logic error produce incorrect output?
+2. What specific input would trigger it?
+3. Is the error already handled elsewhere?
 </instructions>
 
 <output_format>
@@ -267,59 +382,59 @@ Fix: [Corrected code]
 Impact: [What incorrect output is produced]
 
 Example:
-File: src/http-client.ts:89
-Issue: Off-by-one in retry attempt counting
+File: src/path/to/file.mjs:89
+Issue: Off-by-one in array iteration
 Severity: High
-Edge Case: When max retries is set to 0
-Pattern: `for (let i = 0; i < maxRetries - 1; i++)`
-Fix: `for (let i = 0; i < maxRetries; i++)`
-Impact: SDK retries one fewer time than configured, missing last retry attempt
+Edge Case: When array has trailing elements
+Pattern: `for (let i = 0; i < items.length - 1; i++)`
+Fix: `for (let i = 0; i < items.length; i++)`
+Impact: Last item is silently omitted, causing incorrect processing
 
-Example:
-File: src/utils.ts:234
-Issue: Incorrect array slicing in pagination
+Example (C code):
+File: src/path/to/file.c:234
+Issue: Incorrect size calculation with alignment
 Severity: High
-Edge Case: When requesting last page with partial results
-Pattern: `items.slice(offset, offset + limit - 1)`
-Fix: `items.slice(offset, offset + limit)`
-Impact: Last item on each page is omitted, causing incomplete results
+Edge Case: When data requires alignment
+Pattern: `new_size = existing_size + data_size;`
+Fix: `new_size = ALIGN_UP(existing_size + data_size, alignment);`
+Impact: Misaligned data causes segfault
 </output_format>
 
 <quality_guidelines>
-- Prioritize code handling external data (API responses, user input, configuration)
-- Focus on errors affecting API correctness and data integrity
+- Prioritize code handling external data (user input, file parsing, API responses)
+- Focus on errors affecting correctness and data integrity
 - Verify logic errors aren't false alarms due to type narrowing
-- Consider real-world edge cases: malformed API responses, empty arrays, cross-platform paths
-- Pay special attention to array/string operations and validation logic
+- Consider real-world edge cases: malformed input, unusual formats, cross-platform paths
+- [IF C/C++ exists] Pay special attention to pointer arithmetic and buffer calculations
 </quality_guidelines>
 
-Analyze systematically across src/, scripts/, and test/ and report all logic errors found. If no errors are found, state that explicitly.
+Analyze systematically and report all logic errors found. If no errors are found, state that explicitly.
 ```
 
 ---
 
 ### Cache Scan Agent
 
-**Mission**: Identify caching bugs that cause stale builds, checkpoint corruption, or incorrect behavior.
+**Mission**: Identify caching bugs that cause stale data, cache corruption, or incorrect behavior.
 
-**Scan Targets**: Build checkpoint system and caching logic across all packages
+**Scan Targets**: Caching logic across the codebase (if applicable)
 
 **Prompt Template:**
 ```
-Your task is to analyze socket-btm's checkpoint and caching implementation for correctness, staleness bugs, and performance issues. Focus on checkpoint corruption, cache invalidation failures, and race conditions.
+Your task is to analyze caching implementation for correctness, staleness bugs, and performance issues. Focus on cache corruption, invalidation failures, and race conditions.
 
 <context>
-socket-btm uses a multi-stage checkpoint system to speed up builds:
-- **Checkpoint stages**: source-copied, source-patched, configured, compiled, stripped, compressed, final
-- **Storage**: tar.gz archives stored in build/checkpoints/{platform}-{arch}/
-- **Invalidation**: Based on cache keys (hashes of patches, config, source version)
-- **Progressive builds**: Can restore from any checkpoint and continue
-- **Cross-platform**: Must work on Windows, macOS, Linux (ARM64, x64)
-- **Critical**: Stale checkpoints cause incorrect builds that are hard to debug
+**[SOCKET-BTM SPECIFIC - Adapt for your repository's caching strategy]**
 
-Caching locations:
-- packages/node-smol-builder/scripts/common/shared/checkpoints.mjs
-- packages/node-smol-builder/build/checkpoints/
+This project may use caching for build artifacts or API responses:
+- **Storage**: Cache files or API response caching
+- **Invalidation**: Based on cache keys (content hashes, timestamps, versions)
+- **Cross-platform**: Must work on Windows, macOS, Linux
+- **Critical**: Stale cache can cause incorrect behavior that's hard to debug
+
+Caching locations (if applicable):
+- Build cache directories
+- API response caching (nock fixtures for tests)
 - Cache key generation and validation logic
 </context>
 
@@ -344,6 +459,9 @@ Checkpoint key generation correctness:
 - Arch isolation: Are ARM64/x64 checkpoints kept separate?
 - Additions: Are build-infra/binject changes invalidating checkpoints?
 - Environment: Are env vars (NODE_OPTIONS, etc.) affecting builds included?
+
+**NOTE**: Platform-agnostic operations may share cache keys across platforms,
+while platform-specific operations should include platform/arch in cache keys.
 </pattern>
 
 <pattern name="checkpoint_corruption">
@@ -383,37 +501,16 @@ Uncommon scenarios:
 - Permission changes during caching
 </pattern>
 
-<quality_guidelines>
-For each potential issue found, use explicit chain-of-thought reasoning with `<thinking>` tags:
-
-<thinking>
-1. Can this actually crash/fail in production?
-   - Code path analysis: [describe the execution flow]
-   - Production scenarios: [real-world conditions]
-   - Result: [yes/no with justification]
-
-2. What input would trigger this issue?
-   - Trigger conditions: [specific inputs/states]
-   - Edge cases: [boundary conditions]
-   - Likelihood: [HIGH/MEDIUM/LOW]
-
-3. Are there existing safeguards I'm missing?
-   - Defensive code: [try-catch, validation, guards]
-   - Framework protections: [built-in safety]
-   - Result: [SAFEGUARDED/VULNERABLE]
-
-Overall assessment: [REPORT/SKIP]
-Decision: [If REPORT, include in findings. If SKIP, explain why it's a false positive]
-</thinking>
-
-Only report issues that pass all three checks. Use `<thinking>` tags to show your reasoning explicitly.
-</quality_guidelines>
+Think through each issue:
+1. Can this actually happen in production?
+2. What observable behavior results?
+3. How likely/severe is the impact?
 </instructions>
 
 <output_format>
 For each finding, report:
 
-File: packages/node-smol-builder/scripts/common/shared/checkpoints.mjs:lineNumber
+File: src/path/to/cache-module.ts:lineNumber
 Issue: [One-line description]
 Severity: High | Medium
 Scenario: [Step-by-step sequence showing how bug manifests]
@@ -422,8 +519,8 @@ Fix: [Specific code change]
 Impact: [Observable effect - wrong output, performance, crash]
 
 Example:
-File: packages/node-smol-builder/scripts/common/shared/checkpoints.mjs:145
-Issue: Cache key missing patch content hashes
+File: src/path/to/cache-module.ts:145
+Issue: Cache key missing content hashes
 Severity: High
 Scenario: 1) Build with patch v1, creates checkpoint. 2) Patch file modified to v2 (same filename). 3) Build restores v1 checkpoint. 4) Produces binary with v1 patches but v2 expected
 Pattern: `const cacheKey = \`\${nodeVersion}-\${platform}-\${arch}\``
@@ -446,28 +543,28 @@ Analyze the checkpoint implementation thoroughly across all checkpoint stages an
 
 ### Workflow Scan Agent
 
-**Mission**: Detect problems in build scripts, CI configuration, git hooks, and developer workflows in socket-sdk-js.
+**Mission**: Detect problems in build scripts, CI configuration, git hooks, and developer workflows across the socket-btm monorepo.
 
-**Scan Targets**: `scripts/`, `package.json`, `.github/workflows/*`
+**Scan Targets**: All `scripts/`, `package.json`, `.git-hooks/*`, `.github/workflows/*` across packages
 
 **Prompt Template:**
 ```
-Your task is to identify issues in socket-sdk-js development workflows, build scripts, and CI configuration that could cause build failures, test flakiness, or poor developer experience.
+Your task is to identify issues in socket-btm's development workflows, build scripts, and CI configuration that could cause build failures, test flakiness, or poor developer experience.
 
 <context>
-socket-sdk-js is a TypeScript SDK repository with:
-- **Build scripts**: scripts/**/*.mjs (ESM, cross-platform Node.js)
-- **Package manager**: pnpm with scripts in package.json
+socket-btm is a pnpm monorepo with:
+- **Build scripts**: scripts/**/*.{mjs,mts} (ESM, cross-platform Node.js)
+- **Package manager**: pnpm workspaces with scripts in each package.json
+- **Git hooks**: .git-hooks/* for pre-commit, pre-push validation
 - **CI**: GitHub Actions (.github/workflows/)
 - **Platforms**: Must work on Windows, macOS, Linux (ARM64, x64)
 - **CLAUDE.md**: Defines conventions (no process.exit(), no backward compat, etc.)
-- **Critical**: Type generation scripts parse OpenAPI and generate TypeScript - must handle errors gracefully
+- **Critical**: Build scripts compile C/C++ code and apply patches - must handle errors gracefully
 
-Components:
-- SDK source: src/ (TypeScript files)
-- Type generation: scripts/generate-*.mjs
-- Tests: test/ (Vitest test files)
-- Build tooling: esbuild configuration
+Packages:
+- node-smol-builder: Main build orchestration
+- binject: C/C++ binary injection library
+- bin-infra, build-infra: Utilities used by node-smol-builder
 </context>
 
 <instructions>
@@ -491,6 +588,44 @@ Error handling in scripts:
 - Dependency checks: Do scripts check for required tools before use?
 
 **Note on file existence checks**: existsSync() is ACCEPTABLE and actually PREFERRED over async fs.access() for synchronous file checks. Node.js has quirks where the synchronous check is more reliable for immediate validation. Do NOT flag existsSync() as an issue.
+</pattern>
+
+<pattern name="import_conventions">
+Import style conventions (Socket Security standards):
+- Use `@socketsecurity/lib/logger` instead of custom log functions or cherry-picked console methods
+- Use `@socketsecurity/lib/spawn` instead of `node:child_process` (except in `additions/` directory)
+- For Node.js built-in modules: **Cherry-pick fs, default import path/os/url/crypto**
+  - For `fs`: cherry-pick sync methods, use promises namespace for async
+  - For `child_process`: **avoid direct usage** - prefer `@socketsecurity/lib/spawn`
+  - For `path`, `os`, `url`, `crypto`: use default imports
+  - Examples:
+    - `import { existsSync, promises as fs } from 'node:fs'` ✅
+    - `import { spawn } from '@socketsecurity/lib/spawn'` ✅ (preferred over node:child_process)
+    - `import path from 'node:path'` ✅
+    - `import os from 'node:os'` ✅
+    - `import { fileURLToPath } from 'node:url'` ✅ (exception: cherry-pick specific exports from url)
+- Prefer standard library patterns over custom implementations
+
+Examples of what to flag:
+- Custom log functions: `function log(msg) { console.log(msg) }` → use `@socketsecurity/lib/logger`
+- Direct child_process usage (except in additions/):
+  - `import { execSync } from 'node:child_process'` → use `import { spawn } from '@socketsecurity/lib/spawn'`
+  - `execSync('cmd arg1')` → use `await spawn('cmd', ['arg1'])`
+- Default imports for fs:
+  - `import fs from 'node:fs'` → use `import { existsSync, promises as fs } from 'node:fs'`
+- Cherry-picking from path/os:
+  - `import { join, resolve } from 'node:path'` → use `import path from 'node:path'`
+  - `import { platform, arch } from 'node:os'` → use `import os from 'node:os'`
+- Wrong async imports: `import { readFile } from 'node:fs/promises'` → use `import { promises as fs } from 'node:fs'`
+
+Why this matters:
+- Consistent logging across all packages (formatting, levels, CI integration)
+- @socketsecurity/lib/spawn provides better error handling and cross-platform support than raw child_process
+- Cherry-picked fs methods are explicit and tree-shakeable
+- Promises namespace clearly distinguishes async operations from sync
+- Default imports for path/os/crypto show which module provides the function
+- Easier refactoring and IDE navigation
+- Avoids naming conflicts
 </pattern>
 
 <pattern name="package_json_scripts">
@@ -528,31 +663,63 @@ Documentation and setup:
 - Environment variables: Are required env vars documented?
 </pattern>
 
-<quality_guidelines>
-For each potential issue found, use explicit chain-of-thought reasoning with `<thinking>` tags:
+<pattern name="build_infrastructure">
+Build script architecture and helper methods (CRITICAL for consistent builds):
 
-<thinking>
-1. Can this actually crash/fail in production?
-   - Code path analysis: [describe the execution flow]
-   - Production scenarios: [real-world conditions]
-   - Result: [yes/no with justification]
+**Package Build Entry Points:**
+- Packages MUST use `scripts/build.mjs` as the build entry point, never direct Makefile invocation
+- build.mjs handles: dependency downloads, environment setup, then Make invocation
+- Direct `make -f Makefile.<platform>` bypasses critical setup (curl/LIEF downloads)
 
-2. What input would trigger this issue?
-   - Trigger conditions: [specific inputs/states]
-   - Edge cases: [boundary conditions]
-   - Likelihood: [HIGH/MEDIUM/LOW]
+**Required build.mjs patterns:**
+```javascript
+// CORRECT - uses buildBinSuitePackage from bin-infra
+import { buildBinSuitePackage } from 'bin-infra/lib/builder'
 
-3. Are there existing safeguards I'm missing?
-   - Defensive code: [try-catch, validation, guards]
-   - Framework protections: [built-in safety]
-   - Result: [SAFEGUARDED/VULNERABLE]
+buildBinSuitePackage({
+  packageName: 'tool-name',
+  packageDir: packageRoot,
+  beforeBuild: async () => {
+    // Download dependencies BEFORE Make runs
+    await ensureCurl()  // stubs-builder
+    await ensureLief()          // binject, binpress
+  },
+  smokeTest: async (binaryPath) => { ... }
+})
+```
 
-Overall assessment: [REPORT/SKIP]
-Decision: [If REPORT, include in findings. If SKIP, explain why it's a false positive]
-</thinking>
+**Dependency download helpers:**
+- `ensureCurl()` - Downloads curl+mbedTLS from releases (stubs-builder)
+- `ensureLief()` - Downloads LIEF library from releases (binject, binpress)
+- `downloadSocketBtmRelease()` - Generic helper from `@socketsecurity/lib/releases/socket-btm`
 
-Only report issues that pass all three checks. Use `<thinking>` tags to show your reasoning explicitly.
-</quality_guidelines>
+**Common mistakes to flag:**
+1. Makefile invoked directly without pnpm wrapper:
+   - Bug: `make -f Makefile.macos` in documentation or scripts
+   - Fix: Use `pnpm run build` or `pnpm --filter <package> build`
+
+2. Missing beforeBuild hook:
+   - Bug: build.mjs doesn't download dependencies before Make
+   - Fix: Add beforeBuild with appropriate ensure* calls
+
+3. Wrong dependency helper:
+   - Bug: Manually downloading curl/LIEF with curl/wget
+   - Fix: Use downloadSocketBtmRelease() or package-specific helpers
+
+4. Not using buildBinSuitePackage:
+   - Bug: Custom build script without standard patterns
+   - Fix: Use bin-infra/lib/builder for consistent behavior
+
+**Check these files:**
+- scripts/build.mjs - Build orchestration script
+- Build scripts should be cross-platform compatible
+- README.md files - Should document `pnpm run build`, not direct make
+</pattern>
+
+For each issue, consider:
+1. Does this actually affect developers or CI?
+2. How often would this be encountered?
+3. Is there a simple fix?
 </instructions>
 
 <output_format>
@@ -885,6 +1052,203 @@ Group findings by severity (Error → High → Medium → Low → Info)
 
 ---
 
+## Workflow Optimization Scan Agent
+
+**Mission**: Verify GitHub Actions workflows optimize CI time by checking `build-required` conditions on expensive installation/setup steps when checkpoint caching is used.
+
+**Scan Targets**: All `.github/workflows/*.yml` files that use checkpoint caching
+
+**Prompt Template:**
+```
+Your task is to verify GitHub Actions workflows properly skip expensive tool installation steps when builds are restored from cache by checking for `build-required` conditions.
+
+<context>
+**Why Workflow Optimization Matters:**
+CI workflows waste significant time installing build tools (compilers, CMake, toolchains) even when builds are restored from cache. For socket-btm with 9 workflows building Node.js binaries across multiple platforms, these optimizations save:
+- **Windows**: 1-3 minutes per run (MinGW/LLVM/CMake installation)
+- **macOS**: 30-60 seconds per run (brew installs, Xcode setup)
+- **Linux**: 30-60 seconds per run (apt-get installs, toolchain setup)
+
+**socket-btm Checkpoint Caching System:**
+socket-btm uses a sophisticated checkpoint caching system to speed up builds:
+- `restore-checkpoint` action: Restores build artifacts from cache (yoga-layout, models, lief, onnxruntime, node-smol)
+- `setup-checkpoints` action: Manages checkpoints for binsuite tools (binpress, binflate, binject)
+- `build-required` output: Indicates if actual build is needed (false when cache restored)
+
+**Workflows Using Checkpoints:**
+1. binsuite.yml - Uses `setup-checkpoints` (binpress, binflate, binject jobs)
+2. node-smol.yml - Uses `restore-checkpoint`
+3. lief.yml - Uses `restore-checkpoint`
+4. onnxruntime.yml - Uses `restore-checkpoint`
+5. yoga-layout.yml - Uses `restore-checkpoint` (Docker-only, no native steps)
+6. models.yml - Uses `restore-checkpoint` (Docker-only, no native steps)
+7. curl.yml - No checkpoint caching
+8. stubs.yml - No checkpoint caching for native builds
+
+**Expected Pattern:**
+Installation steps should check `build-required` before running:
+```yaml
+- name: Install CMake (Windows)
+  if: steps.setup-checkpoints.outputs.build-required == 'true' && matrix.os == 'windows'
+  run: choco install cmake -y
+```
+
+Or the full cache validation pattern:
+```yaml
+- name: Setup build toolchain (macOS)
+  if: |
+    matrix.os == 'macos' &&
+    ((steps.lief-checkpoint-cache.outputs.cache-hit != 'true' || steps.validate-cache.outputs.valid == 'false') ||
+    steps.restore-checkpoint.outputs.build-required == 'true')
+  run: brew install cmake ccache
+```
+</context>
+
+<instructions>
+Systematically verify all workflows that use checkpoint caching properly optimize installation steps:
+
+**Step 1: Identify workflows with checkpoint caching**
+```bash
+grep -l "restore-checkpoint\|setup-checkpoints" .github/workflows/*.yml
+```
+
+**Step 2: For each workflow, check:**
+1. Which checkpoint action is used (`restore-checkpoint` or `setup-checkpoints`)
+2. Identify ALL installation/setup steps:
+   - Steps with names: "Install", "Setup", "Select Xcode"
+   - Steps running: `choco install`, `apt-get install`, `brew install`, `xcode-select`
+   - Steps downloading tools: llvm-mingw downloads, toolchain downloads
+
+**Step 3: Verify each installation step has correct condition:**
+- For `setup-checkpoints`: `steps.setup-checkpoints.outputs.build-required == 'true'`
+- For `restore-checkpoint`: `steps.restore-checkpoint.outputs.build-required == 'true'`
+- OR full cache check: `(cache-hit != 'true' || valid == 'false') || build-required == 'true'`
+
+**Step 4: Exceptions (steps that should NOT check build-required):**
+- pnpm/Node.js setup (needed to run build scripts)
+- QEMU/Docker setup for testing (not build dependencies)
+- Depot CLI setup (needed for Docker builds)
+- Steps in workflows without checkpoint caching
+
+<pattern name="missing_build_required_check">
+Installation step runs unconditionally even when cache is restored:
+```yaml
+# BAD - no build-required check
+- name: Install CMake (Windows)
+  if: matrix.os == 'windows'
+  run: choco install cmake -y
+
+# GOOD - checks build-required
+- name: Install CMake (Windows)
+  if: steps.setup-checkpoints.outputs.build-required == 'true' && matrix.os == 'windows'
+  run: choco install cmake -y
+```
+
+Look for steps that:
+- Install compilers (gcc, clang, MinGW, llvm-mingw)
+- Install build tools (cmake, ninja, make, ccache)
+- Setup toolchains (musl-tools, cross-compilers)
+- Select Xcode versions
+- Download toolchain archives
+</pattern>
+
+<pattern name="wrong_checkpoint_reference">
+Step references wrong checkpoint action output:
+```yaml
+# BAD - binsuite.yml uses setup-checkpoints, not restore-checkpoint
+- name: Install tools
+  if: steps.restore-checkpoint.outputs.build-required == 'true'
+
+# GOOD - correct reference
+- name: Install tools
+  if: steps.setup-checkpoints.outputs.build-required == 'true'
+```
+
+socket-btm conventions:
+- binsuite.yml (binpress/binflate/binject): Use `steps.setup-checkpoints.outputs.build-required`
+- node-smol.yml, lief.yml, onnxruntime.yml: Use `steps.restore-checkpoint.outputs.build-required`
+</pattern>
+
+<pattern name="incomplete_condition">
+Step checks some conditions but misses build-required:
+```yaml
+# BAD - checks platform but not build-required
+- name: Setup toolchain (Windows ARM64)
+  if: matrix.os == 'windows' && matrix.cross_compile
+  run: |
+    curl -o llvm-mingw.zip https://...
+    7z x llvm-mingw.zip
+
+# GOOD - includes build-required check
+- name: Setup toolchain (Windows ARM64)
+  if: |
+    matrix.os == 'windows' && matrix.cross_compile &&
+    ((steps.cache.outputs.cache-hit != 'true' || steps.validate.outputs.valid == 'false') ||
+    steps.restore-checkpoint.outputs.build-required == 'true')
+```
+</pattern>
+
+**socket-btm-Specific Workflow Patterns:**
+
+1. **binsuite.yml** (binpress, binflate, binject jobs):
+   - Uses: `setup-checkpoints` action
+   - Steps to check: Compiler setup, dependency installation, toolchain setup, Xcode selection, CMake installation
+
+2. **node-smol.yml**:
+   - Uses: `restore-checkpoint` action
+   - Steps to check: musl toolchain, Xcode selection, Windows tools, compression dependencies
+
+3. **lief.yml**:
+   - Uses: `restore-checkpoint` action with full cache validation
+   - Steps to check: macOS toolchain (brew install cmake ccache), Windows toolchains
+
+4. **onnxruntime.yml**:
+   - Uses: `restore-checkpoint` action
+   - Steps to check: Build tools installation (ninja-build)
+
+For each issue found:
+1. Identify the workflow file and line number
+2. Show the current condition
+3. Explain why build-required check is missing or incorrect
+4. Provide the corrected condition
+5. Estimate time savings from the fix
+</instructions>
+
+<output_format>
+For each finding, report:
+
+File: .github/workflows/workflow-name.yml:line
+Issue: Installation step missing build-required check
+Severity: Medium
+Impact: Wastes N seconds/minutes installing tools when cache is restored
+Pattern: [current condition]
+Fix: [corrected condition with build-required check]
+Savings: Estimated ~N seconds per cached CI run
+
+Example:
+File: .github/workflows/lief.yml:310
+Issue: macOS toolchain setup missing build-required check
+Severity: Medium
+Impact: Wastes 30-60 seconds installing cmake/ccache when LIEF is restored from cache
+Pattern: `if: matrix.os == 'macos'`
+Fix: `if: matrix.os == 'macos' && ((steps.lief-checkpoint-cache.outputs.cache-hit != 'true' || steps.validate-cache.outputs.valid == 'false') || steps.restore-checkpoint.outputs.build-required == 'true')`
+Savings: ~45 seconds per cached macOS CI run
+</output_format>
+
+<quality_guidelines>
+- Only report installation/setup steps that install tools needed for building
+- Don't report steps needed for running build scripts (pnpm, Node.js)
+- Verify the checkpoint action type before suggesting fix
+- Calculate realistic time savings based on actual tool installation times
+- If all workflows are optimized, state that explicitly
+- Group findings by workflow file
+</quality_guidelines>
+
+Systematically analyze all workflows with checkpoints and report all missing optimizations. If workflows are fully optimized, state: "✓ All workflows properly optimize installation steps with build-required checks."
+```
+
+---
+
 ## Documentation Scan Agent
 
 **Mission**: Verify documentation accuracy by checking README files, code comments, and examples against actual codebase implementation.
@@ -997,6 +1361,16 @@ Look for:
 - Dependency versions that don't match package.json
 - Tool version requirements that are incorrect
 - Patch counts that don't match actual patches
+
+**CRITICAL: For third-party library versions (LIEF, Node.js, ONNX Runtime, etc.):**
+- DO NOT blindly "correct" documented versions without verification
+- For socket-btm specifically, versions must align with what Node.js upstream uses
+- LIEF version: Documented version (v0.17.0) is correct - aligned with Node.js needs
+- Node.js version: Check .node-version file (source of truth)
+- ONNX Runtime, Yoga: Verify against package configurations
+- If unsure about a version, SKIP reporting it as incorrect - ask user to verify
+- NEVER change version numbers based on git describe output from dependencies
+- When in doubt, assume documentation is correct unless you can definitively verify otherwise
 </pattern>
 
 <pattern name="missing_documentation">
@@ -1007,31 +1381,54 @@ Look for:
 - Critical sections (75%+ of package) not mentioned
 </pattern>
 
-<quality_guidelines>
-For each potential issue found, use explicit chain-of-thought reasoning with `<thinking>` tags:
+<pattern name="junior_dev_friendliness">
+**CRITICAL: Evaluate documentation from a junior developer perspective**
 
-<thinking>
-1. Can this actually crash/fail in production?
-   - Code path analysis: [describe the execution flow]
-   - Production scenarios: [real-world conditions]
-   - Result: [yes/no with justification]
+Check for junior-developer unfriendly patterns:
+- Missing "Why" explanations (e.g., "Use binject to inject SEA" without explaining what SEA is)
+- Assumed knowledge not documented (Node.js SEA, LIEF, VFS concepts)
+- No examples for common workflows (first-time setup, typical usage)
+- Missing troubleshooting sections
+- No explanation of error messages
+- Complex architecture diagrams without beginner-friendly overview
+- Technical jargon without definitions/links
+- Missing prerequisites or setup instructions
+- No "Getting Started" or "Quick Start" section
+- Undocumented debugging techniques
 
-2. What input would trigger this issue?
-   - Trigger conditions: [specific inputs/states]
-   - Edge cases: [boundary conditions]
-   - Likelihood: [HIGH/MEDIUM/LOW]
+**Pay special attention to:**
+1. **Root README.md** - First thing junior devs see, must be welcoming and clear
+2. **Package READMEs** - Should explain purpose, use cases, and provide examples
+3. **CLAUDE.md** - Project guidelines must be understandable by junior contributors
+4. **Build/setup docs** - Critical for onboarding, must be step-by-step
+5. **Error message handling** - Should help debug, not confuse
 
-3. Are there existing safeguards I'm missing?
-   - Defensive code: [try-catch, validation, guards]
-   - Framework protections: [built-in safety]
-   - Result: [SAFEGUARDED/VULNERABLE]
+**Areas requiring extra scrutiny:**
+- Binary manipulation concepts (SEA, VFS, section injection)
+- Build system complexity (checkpoints, caching, cross-compilation)
+- Patch management (upstream sync, patch regeneration)
+- C/C++ integration points (LIEF, native code)
+- Cross-platform differences (Linux musl/glibc, macOS universal binaries, Windows)
 
-Overall assessment: [REPORT/SKIP]
-Decision: [If REPORT, include in findings. If SKIP, explain why it's a false positive]
-</thinking>
+For each junior-dev issue:
+- Identify the knowledge gap or assumption
+- Explain why this is confusing for juniors
+- Suggest specific documentation additions (not just "add more docs")
+- Provide example of clear explanation
 
-Only report issues that pass all three checks. Use `<thinking>` tags to show your reasoning explicitly.
-</quality_guidelines>
+Example findings:
+- "README assumes knowledge of Node.js SEA without explaining it"
+- "No explanation of what 'upstream sync' means or why it matters"
+- "Technical term 'checkpoint caching' used without definition"
+- "Build errors not documented in troubleshooting section"
+</pattern>
+
+For each issue found:
+1. Read the documented information
+2. Read the actual code/config to verify
+3. Determine the discrepancy
+4. Provide the correct information
+5. Evaluate junior developer friendliness
 </instructions>
 
 <output_format>
@@ -1052,39 +1449,86 @@ Severity Guidelines:
 
 Example:
 File: README.md:46
-Issue: Incorrect method name in API example
+Issue: Incorrect description of API method behavior
 Severity: High
-Pattern: "sdk.getPackageDetails('react')"
-Actual: SDK method is named "getScoreByNpmPackage" not "getPackageDetails"
-Fix: Change to: "sdk.getScoreByNpmPackage('react')"
-Impact: Example code will fail with "getPackageDetails is not a function" error
+Pattern: "getFullReport() - Returns comprehensive security analysis"
+Actual: Method only returns issues data, not full report with metadata
+Fix: Change to: "getFullReport() - Returns security issues with scores and alerts"
+Impact: Misleads developers about the actual return value structure
 
 Example:
 File: README.md:25
 Issue: Incorrect package name in installation command
 Severity: High
-Pattern: "npm install socket-sdk"
-Actual: package.json shows "name": "@socketsecurity/sdk" with scope
+Pattern: "npm install @socket/sdk-js"
+Actual: package.json shows "name": "@socketsecurity/sdk"
 Fix: Change to: "npm install @socketsecurity/sdk"
-Impact: Installation command will fail with "package not found" error
+Impact: Installation command will fail with package not found error
 
 Example:
-File: docs/api-reference.md:14
-Issue: References non-existent configuration option
+File: README.md:14
+Issue: References non-existent export name
 Severity: Medium
-Pattern: "maxRetries - Maximum retry attempts (default: 5)"
-Actual: Default is 3 retries (verified in src/http-client.ts constants)
-Fix: Change to: "maxRetries - Maximum retry attempts (default: 3)"
-Impact: Developers may expect different retry behavior than actual
+Pattern: "import { SocketClient } from '@socketsecurity/sdk'"
+Actual: Module exports as "SocketSdk" not "SocketClient" in package.json
+Fix: Change to: "import { SocketSdk } from '@socketsecurity/sdk'"
+Impact: Import will fail with module not found error
 
 Example:
-File: docs/quota-management.md:227
-Issue: Incorrect quota cost documented
+File: README.md:87
+Issue: Incorrect API response size documented
 Severity: Low
-Pattern: "createFullScan costs 50 quota"
-Actual: createFullScan costs 0 quota (verified in data/api-method-quota-and-permissions.json)
-Fix: Change to: "createFullScan costs 0 quota (free tier)"
-Impact: Minor inaccuracy in quota documentation
+Pattern: "Response payload limited to 1MB"
+Actual: API limits responses to 5MB (verified in source code)
+Fix: Change to: "Response payload limited to 5MB"
+Impact: Minor inaccuracy in technical specification
+
+**Junior Developer Friendliness Examples:**
+
+Example:
+File: README.md:1-50
+Issue: Missing beginner-friendly introduction explaining project purpose
+Severity: High
+Pattern: Jumps directly to API documentation without explaining what the SDK does
+Actual: Junior devs need context: "What does this SDK do?", "When should I use it?", "How does it help?"
+Fix: Add "What is Socket SDK?" section explaining: (1) Programmatic access to Socket.dev API, (2) Security analysis for packages, (3) Use cases (CI/CD, automated scanning, custom tooling)
+Impact: Junior devs confused about project purpose, may not understand if they need it
+
+Example:
+File: README.md:15
+Issue: Assumes knowledge of Socket.dev API without explanation
+Severity: Medium
+Pattern: "Queries Socket.dev security API for package analysis"
+Actual: Junior devs don't know what Socket.dev is or what security data it provides
+Fix: Add: "Socket.dev API - provides security analysis for npm packages including supply chain risk detection, malware scanning, and vulnerability tracking. This SDK provides programmatic access to all Socket.dev features."
+Impact: Technical jargon barrier prevents junior devs from understanding SDK purpose
+
+Example:
+File: README.md:80
+Issue: No troubleshooting section for common API errors
+Severity: Medium
+Pattern: Documentation shows happy path but no error handling guidance
+Actual: Junior devs hit errors like "401 Unauthorized" or "Rate limit exceeded" with no guidance
+Fix: Add "Troubleshooting" section covering: (1) Authentication failures → check API token, (2) Rate limits → implement retry logic, (3) Timeout errors → increase timeout setting
+Impact: Junior devs stuck when errors occur, need hand-holding for common issues
+
+Example:
+File: CLAUDE.md:125
+Issue: Complex architecture explanation without visual diagram or simple explanation
+Severity: Medium
+Pattern: Dense text explaining module relationships and data flow
+Actual: Junior devs need visual representation and concrete examples to understand architecture
+Fix: Add ASCII diagram showing: API Request → HTTP Client → Response Parser → Type Validation → Return, plus example: "When you call getFullReport(), the SDK makes a GET request to /v0/report/... endpoint"
+Impact: Junior contributors may struggle to understand internal architecture
+
+Example:
+File: README.md:1-100
+Issue: Missing "Getting Started" section with minimal working example
+Severity: High
+Pattern: Extensive API documentation but no simple end-to-end example
+Actual: Junior devs need: "How do I scan my first package? Step 1, Step 2, Step 3"
+Fix: Add "Quick Start" section: "(1) Install: npm install @socketsecurity/sdk, (2) Create client: const sdk = new SocketSdk('your-api-key'), (3) Scan package: const report = await sdk.getIssuesByNPMPackage('lodash', '4.17.21')"
+Impact: Without concrete starting point, juniors struggle to use SDK effectively
 </output_format>
 
 <quality_guidelines>
@@ -1111,63 +1555,63 @@ Scan all README.md files in the repository and report all documentation inaccura
 ### High Severity - 3 issues
 
 #### README.md:25
-- **Issue**: Incorrect package name in build command
-- **Pattern**: `pnpm --filter @socketbin/node-smol-builder run build`
-- **Actual**: package.json shows `"name": "node-smol-builder"` without scope
-- **Fix**: Change to: `pnpm --filter node-smol-builder run build`
-- **Impact**: Command fails with "No projects matched" error
+- **Issue**: Incorrect package name in installation command
+- **Pattern**: `npm install @socket/sdk-js`
+- **Actual**: package.json shows `"name": "@socketsecurity/sdk"`
+- **Fix**: Change to: `npm install @socketsecurity/sdk`
+- **Impact**: Installation fails with package not found error
 
-#### packages/binject/README.md:100
-- **Issue**: Documents obsolete --update-config flag
-- **Pattern**: `binject inject -e ./node-smol -o ./my-app --sea app.blob --update-config update-config.json`
-- **Actual**: Flag was removed, config now embedded via sea-config.json smol.update section
-- **Fix**: Remove --update-config example, document sea-config.json approach instead
-- **Impact**: Users will get "unknown flag" error, approach no longer works
+#### README.md:100
+- **Issue**: Documents obsolete method name
+- **Pattern**: `sdk.getReport(packageName, version)`
+- **Actual**: Method was renamed to `getFullReport()` in v2.0
+- **Fix**: Update all examples to use `getFullReport()`
+- **Impact**: Users will get method not found error
 
-#### packages/build-infra/README.md:12
-- **Issue**: Documents non-existent "c-package" builder
-- **Pattern**: "*-builder - Build strategies (cmake, rust, emscripten, c-package)"
-- **Actual**: No c-package-builder.mjs exists; actual builders are: cmake, rust, emscripten, docker, clean
-- **Fix**: List actual builders: "cmake, rust, emscripten, docker, clean"
-- **Impact**: Users looking for c-package builder will be confused
+#### README.md:12
+- **Issue**: Documents non-existent export
+- **Pattern**: "Import { SocketClient } from '@socketsecurity/sdk'"
+- **Actual**: Export is named "SocketSdk" not "SocketClient"
+- **Fix**: Change to: "import { SocketSdk } from '@socketsecurity/sdk'"
+- **Impact**: Import will fail with module not found error
 
 ### Medium Severity - 3 issues
 
-#### packages/binject/README.md:62
-- **Issue**: Output path missing build mode variants
-- **Pattern**: "Outputs to `build/prod/out/Final/binject`"
-- **Actual**: Build system supports both dev and prod modes: `build/{dev|prod}/out/Final/binject`
-- **Fix**: Change to: "Outputs to `build/{dev|prod}/out/Final/binject`"
-- **Impact**: Confusing for developers doing dev builds
+#### README.md:62
+- **Issue**: Build output path incorrect
+- **Pattern**: "Build outputs to `build/out/`"
+- **Actual**: Build system outputs to `dist/` directory
+- **Fix**: Change to: "Build outputs to `dist/`"
+- **Impact**: Confusing for developers looking for build artifacts
 
-#### packages/node-smol-builder/README.md:182
-- **Issue**: Incorrect patch count
-- **Pattern**: "Applies 13 patches to Node.js source"
-- **Actual**: Only 12 patches in patches/source-patched/ directory
-- **Fix**: Change to: "Applies 12 patches to Node.js source"
-- **Impact**: Minor discrepancy in technical details
+#### README.md:182
+- **Issue**: Incorrect supported Node.js versions
+- **Pattern**: "Supports Node.js 14, 16, 18"
+- **Actual**: Minimum version is Node.js 18.0.0 (verified in package.json engines)
+- **Fix**: Change to: "Supports Node.js 18+"
+- **Impact**: Users may try unsupported Node versions
 
-#### packages/bin-infra/README.md:1-21
-- **Issue**: Missing 75% of package contents in documentation
-- **Pattern**: Only documents src/ and make/, omits lib/, test/, scripts/, upstream/, patches/
-- **Actual**: Package has extensive JavaScript API (lib/), test utilities, build scripts, and upstream dependencies
-- **Fix**: Add comprehensive documentation of all 17 C files, 3 JS modules with API examples, test helpers, scripts, and upstream submodules
-- **Impact**: Developers unaware of most package functionality
+#### README.md:1-21
+- **Issue**: Missing 75% of API methods in documentation
+- **Pattern**: Only documents getFullReport() and getIssues(), omits organization, repository, and settings methods
+- **Actual**: SDK has extensive API covering organizations, repositories, SBOM, npm packages
+- **Fix**: Add comprehensive API documentation for all 30+ methods with examples
+- **Impact**: Developers unaware of most SDK functionality
 
 ### Low Severity - 2 issues
 
-#### packages/binject/README.md:227
-- **Issue**: Incorrect config size
-- **Pattern**: "1112 bytes"
-- **Actual**: Config is 1176 bytes (verified in source)
-- **Fix**: Change all occurrences to: "1176 bytes"
+#### README.md:227
+- **Issue**: Incorrect default timeout value
+- **Pattern**: "Default timeout: 10000ms"
+- **Actual**: Default is 30000ms (verified in source)
+- **Fix**: Change to: "Default timeout: 30000ms"
 - **Impact**: Minor technical inaccuracy
 
-#### packages/binflate/README.md:18
-- **Issue**: Claims caching functionality
-- **Pattern**: "Uses cache at ~/.socket/_dlx/"
-- **Actual**: binflate only extracts; self-extracting stubs (not binflate) implement caching
-- **Fix**: Clarify that binflate extracts only, stubs handle caching
-- **Impact**: Confusion about which component caches
+#### README.md:18
+- **Issue**: Claims automatic retry on rate limit
+- **Pattern**: "SDK automatically retries on rate limit errors"
+- **Actual**: SDK does not retry automatically; users must implement retry logic
+- **Fix**: Remove automatic retry claim, document manual retry approach
+- **Impact**: Users expect automatic behavior that doesn't exist
 ```
 
