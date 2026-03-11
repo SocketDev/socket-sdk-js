@@ -31,8 +31,8 @@ jobs:
     name: Sync OpenAPI definition
     runs-on: ubuntu-latest
     permissions:
-      contents: write       # To push generated SDK code
-      pull-requests: write  # To create PRs for review
+      contents: write # To push generated SDK code
+      pull-requests: write # To create PRs for review
     outputs:
       has_changes: ${{ steps.check.outputs.has_changes }}
     steps:

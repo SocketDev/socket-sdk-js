@@ -27,6 +27,7 @@ All SDK methods return a result object with this shape:
 ## Complete API Reference
 
 For complete API method signatures and types:
+
 - **TypeScript Types**: See `types/api.d.ts` in this repository (generated from OpenAPI spec)
 - **Official API Docs**: https://docs.socket.dev/reference/
 - **IntelliSense**: Your IDE provides autocomplete for all methods and parameters
@@ -42,10 +43,10 @@ const result = await sdk.batchPackageFetch(
   {
     components: [
       { purl: 'pkg:npm/react@18.2.0' },
-      { purl: 'pkg:npm/vue@3.3.4' }
-    ]
+      { purl: 'pkg:npm/vue@3.3.4' },
+    ],
   },
-  { alerts: true, compact: true }
+  { alerts: true, compact: true },
 )
 
 if (result.success) {
@@ -65,8 +66,8 @@ const result = await sdk.createFullScan(
   ['package.json', 'package-lock.json'],
   {
     repo: 'my-repo',
-    branch: 'main'
-  }
+    branch: 'main',
+  },
 )
 
 if (result.success) {

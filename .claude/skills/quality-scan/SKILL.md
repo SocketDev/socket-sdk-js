@@ -14,6 +14,7 @@ Your task is to perform comprehensive quality scans across the codebase using sp
 Quality scanning uses specialized AI agents to systematically analyze code for different categories of issues. Each agent type focuses on specific problem domains and reports findings with severity levels and actionable fixes.
 
 **Scan Types Available:**
+
 1. **critical** - Crashes, security vulnerabilities, resource leaks, data corruption
 2. **logic** - Algorithm errors, edge cases, type guards, off-by-one errors
 3. **cache** - Cache staleness, race conditions, invalidation bugs
@@ -23,6 +24,7 @@ Quality scanning uses specialized AI agents to systematically analyze code for d
 7. **documentation** - README accuracy, outdated docs, missing documentation, junior developer friendliness
 
 **Why Quality Scanning Matters:**
+
 - Catches bugs before they reach production
 - Identifies security vulnerabilities early
 - Improves code quality systematically
@@ -43,18 +45,20 @@ All agent prompts are embedded in `reference.md` with structured <context>, <ins
 - All findings must include suggested fixes
 
 **Do NOT:**
+
 - Fix issues during scan (analysis only - report findings)
 - Skip critical scan types without user permission
 - Report findings without file/line references
 - Proceed if codebase has uncommitted changes (warn but continue)
 
 **Do ONLY:**
+
 - Run enabled scan types in priority order (critical → logic → cache → workflow)
 - Generate structured findings with severity levels
 - Provide actionable improvement tasks with specific code changes
 - Report statistics and coverage metrics
 - Deduplicate findings across scans
-</constraints>
+  </constraints>
 
 <instructions>
 
@@ -79,6 +83,7 @@ git status
 - Node modules installed
 
 **If working directory dirty:**
+
 - Warn user: "Working directory has uncommitted changes - continuing with scan"
 - Continue with scans (quality scanning is read-only)
 
@@ -105,6 +110,7 @@ pnpm run update
 - Continue with scan even if update fails
 
 **Track for reporting:**
+
 - Packages updated: N
 - Update status: Success/Failed (with warning)
 
@@ -176,9 +182,11 @@ find . -type f -name '*.log' \
 5. Report files removed
 
 **If no junk files found:**
+
 - Report: "✓ Repository is clean - no junk files found"
 
 **Important:**
+
 - Always get user confirmation before deleting
 - Show file contents if user is unsure
 - Track deleted files for reporting
@@ -202,6 +210,7 @@ node scripts/check-consistency.mjs
 ```
 
 **The consistency checker validates:**
+
 1. **Required files** - README.md, package.json existence
 2. **Vitest configurations** - Proper mergeConfig usage
 3. **Test scripts** - Correct test patterns per package type
@@ -209,7 +218,7 @@ node scripts/check-consistency.mjs
 5. **External tools** - external-tools.json format validation
 6. **Build output structure** - Standard build/{mode}/out/Final/ layout
 7. **Package.json structure** - Standard fields and structure
-8. **Workspace dependencies** - Proper workspace:* and catalog: usage
+8. **Workspace dependencies** - Proper workspace:\* and catalog: usage
 
 <validation>
 **Expected Results:**
@@ -218,16 +227,19 @@ node scripts/check-consistency.mjs
 - Info: Multiple info messages are normal (observations only)
 
 **If errors found:**
+
 1. Report as Critical findings in the final report
 2. Include file:line references from checker output
 3. Suggest fixes based on checker recommendations
 4. Continue with remaining scans
 
 **If warnings found:**
+
 - Report as Low findings (these are expected deviations)
 - Document in final report under "Structural Validation"
 
 **Track for reporting:**
+
 - Number of packages validated
 - Number of errors/warnings/info messages
 - Any architectural pattern violations
@@ -243,6 +255,7 @@ Ask user which scans to run:
 </action>
 
 **Default Scan Types** (run all unless user specifies):
+
 1. **critical** - Critical bugs (crashes, security, resource leaks)
 2. **logic** - Logic errors (algorithms, edge cases, type guards)
 3. **cache** - Caching issues (staleness, races, invalidation)
@@ -253,6 +266,7 @@ Ask user which scans to run:
 
 **User Interaction:**
 Use AskUserQuestion tool:
+
 - Question: "Which quality scans would you like to run?"
 - Header: "Scan Types"
 - multiSelect: true
@@ -287,8 +301,8 @@ For each enabled scan type, spawn a specialized agent using Task tool:
 ```typescript
 // Example: Critical scan
 Task({
-  subagent_type: "general-purpose",
-  description: "Critical bugs scan",
+  subagent_type: 'general-purpose',
+  description: 'Critical bugs scan',
   prompt: `${CRITICAL_SCAN_PROMPT_FROM_REFERENCE_MD}
 
 [IF monorepo] Focus on packages/ directories and root-level scripts/.
@@ -303,11 +317,12 @@ Report findings in this format:
 - Fix: Suggested fix
 - Impact: What happens if triggered
 
-Scan systematically and report all findings. If no issues found, state that explicitly.`
+Scan systematically and report all findings. If no issues found, state that explicitly.`,
 })
 ```
 
 **For each scan:**
+
 1. Load agent prompt template from `reference.md`
 2. Customize for repository context (determine monorepo vs single package structure)
 3. Spawn agent with Task tool using "general-purpose" subagent_type
@@ -315,12 +330,14 @@ Scan systematically and report all findings. If no issues found, state that expl
 5. Parse and categorize results
 
 **Execution Order:** Run scans sequentially in priority order:
+
 - critical (highest priority)
 - logic
 - cache
 - workflow (lowest priority)
 
 **Agent Prompt Sources:**
+
 - Critical scan: reference.md starting at line ~12
 - Logic scan: reference.md starting at line ~100
 - Cache scan: reference.md starting at line ~200
@@ -347,23 +364,25 @@ Collect all findings from agents and aggregate:
 
 ```typescript
 interface Finding {
-  file: string           // "src/path/to/file.mts:89" or "packages/pkg/src/file.mts:89"
-  issue: string          // "Potential null pointer access"
-  severity: "Critical" | "High" | "Medium" | "Low"
-  scanType: string       // "critical"
-  pattern: string        // Code snippet showing the issue
-  trigger: string        // What causes this issue
-  fix: string            // Suggested code change
-  impact: string         // What happens if triggered
+  file: string // "src/path/to/file.mts:89" or "packages/pkg/src/file.mts:89"
+  issue: string // "Potential null pointer access"
+  severity: 'Critical' | 'High' | 'Medium' | 'Low'
+  scanType: string // "critical"
+  pattern: string // Code snippet showing the issue
+  trigger: string // What causes this issue
+  fix: string // Suggested code change
+  impact: string // What happens if triggered
 }
 ```
 
 **Deduplication:**
+
 - Remove duplicate findings across scans (same file:line, same issue)
 - Keep the finding from the highest priority scan
 - Track which scans found the same issue
 
 **Prioritization:**
+
 - Sort by severity: Critical → High → Medium → Low
 - Within same severity, sort by scanType priority
 - Within same severity+scanType, sort alphabetically by file path
@@ -401,6 +420,7 @@ Create structured quality report with all findings:
 ## Structural Validation
 
 **Consistency Checker Results:**
+
 - Packages validated: 12
 - Errors: N (reported as Critical below)
 - Warnings: N (reported as Low below)
@@ -419,6 +439,7 @@ Create structured quality report with all findings:
 ## Critical Issues (Priority 1) - N found
 
 ### src/path/to/file.mts:89
+
 - **Issue**: [Description of critical issue]
 - **Pattern**: [Problematic code snippet]
 - **Trigger**: [What triggers this issue]
@@ -457,11 +478,13 @@ Create structured quality report with all findings:
 ## No Findings
 
 [If a scan found no issues, list it here:]
+
 - Critical scan: ✓ Clean
 - Logic scan: ✓ Clean
 ```
 
 **Output Report:**
+
 1. Display report to console (user sees it)
 2. Offer to save to file (optional): `reports/quality-scan-YYYY-MM-DD.md`
 
@@ -479,16 +502,18 @@ Create structured quality report with all findings:
 ### Phase 9: Complete
 
 <completion_signal>
+
 ```xml
 <promise>QUALITY_SCAN_COMPLETE</promise>
 ```
+
 </completion_signal>
 
 <summary>
 Report these final metrics to the user:
 
-**Quality Scan Complete**
-========================
+# **Quality Scan Complete**
+
 ✓ Dependency updates: N packages updated
 ✓ Structural validation: [IF applicable] N packages validated (N errors, N warnings)
 ✓ Repository cleanup: N junk files removed
@@ -499,33 +524,39 @@ Report these final metrics to the user:
 ✓ Scan duration: [calculated from start to end]
 
 **Dependency Update Summary:**
+
 - Packages updated: N
 - Update status: Success/Failed
 
 **Structural Validation Summary:**
 [IF consistency checker exists]
+
 - Packages validated: N
 - Consistency errors: N (included in critical findings)
 - Consistency warnings: N (included in low findings)
 - Architectural patterns checked: N
 
 **Repository Cleanup Summary:**
+
 - SCREAMING_TEXT.md files removed: N
 - Temporary test files removed: N
 - Temp/backup files removed: N
 - Log files cleaned up: N
 
 **Critical Issues Requiring Immediate Attention:**
+
 - N critical issues found
 - Review report above for details and fixes
 
 **Next Steps:**
+
 1. Address critical issues immediately
 2. Review high-severity findings
 3. Schedule medium/low issues appropriately
 4. Re-run scans after fixes to verify
 
 All findings include file:line references and suggested fixes.
+
 </summary>
 
 </instructions>
@@ -561,6 +592,7 @@ This skill is self-contained. No external commands needed.
 ## Context
 
 This skill provides systematic code quality analysis by:
+
 - Spawning specialized agents for targeted analysis
 - Using Task tool to run agents autonomously
 - Embedding agent prompts in reference.md following best practices

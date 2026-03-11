@@ -273,9 +273,8 @@ describe('Quota Utils', () => {
         once: (fn: unknown) => fn,
       }))
 
-      const { getQuotaCost: getQuotaCostMocked } = await import(
-        '../../src/quota-utils'
-      )
+      const { getQuotaCost: getQuotaCostMocked } =
+        await import('../../src/quota-utils')
 
       expect(() => getQuotaCostMocked('someMethod')).toThrow(
         'Failed to load SDK method requirements',
@@ -293,9 +292,8 @@ describe('Quota Utils', () => {
         once: (fn: unknown) => fn,
       }))
 
-      const { getQuotaCost: getQuotaCostMocked } = await import(
-        '../../src/quota-utils'
-      )
+      const { getQuotaCost: getQuotaCostMocked } =
+        await import('../../src/quota-utils')
 
       expect(() => getQuotaCostMocked('someMethod')).toThrow(
         'Failed to load SDK method requirements',
@@ -313,9 +311,8 @@ describe('Quota Utils', () => {
         once: (fn: unknown) => fn,
       }))
 
-      const { getQuotaCost: getQuotaCostMocked } = await import(
-        '../../src/quota-utils'
-      )
+      const { getQuotaCost: getQuotaCostMocked } =
+        await import('../../src/quota-utils')
 
       expect(() => getQuotaCostMocked('someMethod')).toThrow(
         'Failed to load SDK method requirements',

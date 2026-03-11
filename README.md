@@ -21,9 +21,9 @@ pnpm add @socketsecurity/sdk
 import { SocketSdk } from '@socketsecurity/sdk'
 
 const client = new SocketSdk('your-api-key', {
-  retries: 3,        // Retry failed requests up to 3 times
-  retryDelay: 1000,  // Start with 1s delay, exponential backoff
-  timeout: 30000,    // 30 second timeout
+  retries: 3, // Retry failed requests up to 3 times
+  retryDelay: 1000, // Start with 1s delay, exponential backoff
+  timeout: 30000, // 30 second timeout
 })
 
 // Check your quota
@@ -42,16 +42,16 @@ if (result.success) {
 const batchResult = await client.batchPackageFetch({
   components: [
     { purl: 'pkg:npm/express@4.18.0' },
-    { purl: 'pkg:npm/react@18.0.0' }
-  ]
+    { purl: 'pkg:npm/react@18.0.0' },
+  ],
 })
 ```
 
 ## Documentation
 
-| Guide | Description |
-|-------|-------------|
-| **[API Reference](./docs/api-reference.md)** | Complete API method documentation |
+| Guide                                              | Description                         |
+| -------------------------------------------------- | ----------------------------------- |
+| **[API Reference](./docs/api-reference.md)**       | Complete API method documentation   |
 | **[Quota Management](./docs/quota-management.md)** | Cost tiers (0/10/100) and utilities |
 
 ## License

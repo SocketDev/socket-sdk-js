@@ -7,6 +7,7 @@
 **Always prioritize simplicity** - the simpler the code, the fewer bugs it will have.
 
 Common violations to flag:
+
 - **Over-abstraction**: Creating utilities, helpers, or wrappers for one-time operations
 - **Premature optimization**: Complex caching, memoization, or performance tricks before profiling
 - **Unnecessary indirection**: Multiple layers of function calls when direct code would be clearer
@@ -16,14 +17,16 @@ Common violations to flag:
 Examples:
 
 **BAD - Ignoring return values and reconstructing paths:**
+
 ```javascript
 await downloadSocketBtmRelease({ asset, downloadDir, tool: 'lief' })
-const downloadedPath = path.join(downloadDir, 'lief', 'assets', asset)  // ❌ Assumes path structure
+const downloadedPath = path.join(downloadDir, 'lief', 'assets', asset) // ❌ Assumes path structure
 ```
 
 **GOOD - Use the return value:**
+
 ```javascript
-const downloadedPath = await downloadSocketBtmRelease({ asset, downloadDir })  // ✅ Simple, trust the function
+const downloadedPath = await downloadSocketBtmRelease({ asset, downloadDir }) // ✅ Simple, trust the function
 ```
 
 **Principle**: If a function returns what you need, use it. Don't reconstruct or assume.
@@ -37,7 +40,8 @@ const downloadedPath = await downloadSocketBtmRelease({ asset, downloadDir })  /
 **Scan Targets**: All `.mts` files in `src/`
 
 **Prompt Template:**
-```
+
+````
 Your task is to perform a critical bug scan on the codebase. Identify bugs that could cause crashes, data corruption, or security vulnerabilities.
 
 <context>
@@ -123,14 +127,15 @@ Cross-platform binary processing that uses compile-time platform detection:
   #else
   size_t search_size = SEARCH_SIZE_ELF;
   #endif
-  ```
+````
+
 - Fix: Use runtime binary format detection based on the executable being processed:
   ```c
   binject_format_t format = binject_detect_format(executable);
   size_t search_size = get_search_size_for_format(format);
   ```
 - Impact: Cross-platform CI (e.g., macOS building Linux binaries) silently produces broken binaries
-</pattern>
+  </pattern>
 
 <pattern name="pe_resource_requirements">
 **[SOCKET-BTM SPECIFIC] CRITICAL for Windows binary tooling:**
@@ -151,9 +156,10 @@ Tests compressing binsuite binaries (binpress, binflate, binject) as test input 
 - Parallel test interference: Tests using static paths collide in parallel runs
 
 **Bad patterns to flag:**
+
 ```typescript
 // BAD - compressing binsuite tools themselves
-const originalBinary = BINPRESS  // or BINFLATE, BINJECT
+const originalBinary = BINPRESS // or BINFLATE, BINJECT
 await execCommand(BINPRESS, [BINFLATE, '-o', output])
 
 // BAD - static testDir paths (parallel collision risk)
@@ -161,6 +167,7 @@ const testDir = path.join(PACKAGE_DIR, 'test-tmp')
 ```
 
 **Correct patterns:**
+
 ```typescript
 // GOOD - use Node.js binary (consistent across builds)
 const NODE_BINARY = process.execPath
@@ -179,18 +186,20 @@ beforeAll(async () => {
 ```
 
 **Where to check:**
-- test/**/*.test.ts
-- test/**/*.test.mts
+
+- test/\*_/_.test.ts
+- test/\*_/_.test.mts
 - Any test that uses external binaries or performs heavy I/O operations
 
 **Impact:** Tests performing intensive operations can cause CI timeouts
 </pattern>
 
 For each bug found, think through:
+
 1. Can this actually crash in production?
 2. What input would trigger it?
 3. Is there existing safeguards I'm missing?
-</instructions>
+   </instructions>
 
 <output_format>
 For each finding, report:
@@ -223,6 +232,7 @@ Impact: Segmentation fault crashes process
 </output_format>
 
 <quality_guidelines>
+
 - Only report actual bugs, not style issues or minor improvements
 - Verify bugs are not already handled by surrounding code
 - Prioritize bugs affecting reliability and correctness
@@ -231,9 +241,10 @@ Impact: Segmentation fault crashes process
 - Skip false positives (TypeScript type guards are sufficient in many cases)
 - [IF monorepo] Scan across all packages systematically
 - [IF single package] Scan all source directories (src/, lib/, scripts/)
-</quality_guidelines>
+  </quality_guidelines>
 
 Scan systematically and report all critical bugs found. If no critical bugs are found, state that explicitly.
+
 ```
 
 ---
@@ -246,19 +257,21 @@ Scan systematically and report all critical bugs found. If no critical bugs are 
 
 **Prompt Template:**
 ```
+
 Your task is to detect logic errors in the codebase that could produce incorrect output or incorrect behavior. Focus on algorithm correctness, edge case handling, and data validation.
 
 <context>
 [CONDITIONAL: Adapt this context based on the repository you're scanning]
 
 Common areas to analyze:
+
 - Algorithm implementation and correctness
 - Data parsing and transformation logic
 - Input validation and sanitization
 - Edge case handling
 - Cross-platform compatibility
 - Business logic implementation
-</context>
+  </context>
 
 <instructions>
 Analyze code for these logic error patterns:
@@ -331,10 +344,11 @@ Algorithm implementation issues:
   size_t search_size = 1408 * 1024; // ELF size
   #endif
 
-  // GOOD - runtime detection based on binary being processed
-  binject_format_t format = binject_detect_format(executable);
-  size_t search_size = get_search_size_for_format(format);
-  ```
+// GOOD - runtime detection based on binary being processed
+binject_format_t format = binject_detect_format(executable);
+size_t search_size = get_search_size_for_format(format);
+
+````
 - Symptoms: "Cannot inject into uncompressed stub binary" when building Linux binaries on macOS
 - Critical for: binject, binpress, stubs-builder, any code manipulating binaries cross-platform
 - Real-world impact: macOS CI processing Linux ELF binaries uses wrong search size, fails to find markers
@@ -346,29 +360,31 @@ Algorithm implementation issues:
 - LIEF cannot create resource sections from scratch - binary must have existing resources
 - Symptoms: "Binary has no resources section" error during Windows SEA injection
 - Check Windows Makefiles for:
-  1. Missing .rc resource file (stub.rc or similar)
-  2. Missing windres compilation step: `$(WINDRES) -i $(RESOURCE_RC) -o $@`
-  3. Missing resource object in link step: `$(CC) ... $(RESOURCE_OBJ) ...`
+1. Missing .rc resource file (stub.rc or similar)
+2. Missing windres compilation step: `$(WINDRES) -i $(RESOURCE_RC) -o $@`
+3. Missing resource object in link step: `$(CC) ... $(RESOURCE_OBJ) ...`
 - Required for binaries that need NODE_SEA_BLOB or other injected resources
 - Example fix for Makefile.windows:
-  ```makefile
-  RESOURCE_RC = src/socketsecurity/stubs-builder/stub.rc
-  RESOURCE_OBJ = $(OUT_DIR)/stub.res.o
-  WINDRES ?= windres
+```makefile
+RESOURCE_RC = src/socketsecurity/stubs-builder/stub.rc
+RESOURCE_OBJ = $(OUT_DIR)/stub.res.o
+WINDRES ?= windres
 
-  $(RESOURCE_OBJ): $(RESOURCE_RC) | $(OUT_DIR)
-      $(WINDRES) -i $(RESOURCE_RC) -o $@
+$(RESOURCE_OBJ): $(RESOURCE_RC) | $(OUT_DIR)
+    $(WINDRES) -i $(RESOURCE_RC) -o $@
 
-  $(OUT_DIR)/$(TARGET): $(SOURCE) $(RESOURCE_OBJ) ...
-      $(CC) ... $(SOURCE) $(RESOURCE_OBJ) ...
-  ```
+$(OUT_DIR)/$(TARGET): $(SOURCE) $(RESOURCE_OBJ) ...
+    $(CC) ... $(SOURCE) $(RESOURCE_OBJ) ...
+````
+
 </pattern>
 
 Before reporting, think through:
+
 1. Does this logic error produce incorrect output?
 2. What specific input would trigger it?
 3. Is the error already handled elsewhere?
-</instructions>
+   </instructions>
 
 <output_format>
 For each finding, report:
@@ -401,14 +417,16 @@ Impact: Misaligned data causes segfault
 </output_format>
 
 <quality_guidelines>
+
 - Prioritize code handling external data (user input, file parsing, API responses)
 - Focus on errors affecting correctness and data integrity
 - Verify logic errors aren't false alarms due to type narrowing
 - Consider real-world edge cases: malformed input, unusual formats, cross-platform paths
 - [IF C/C++ exists] Pay special attention to pointer arithmetic and buffer calculations
-</quality_guidelines>
+  </quality_guidelines>
 
 Analyze systematically and report all logic errors found. If no errors are found, state that explicitly.
+
 ```
 
 ---
@@ -421,22 +439,25 @@ Analyze systematically and report all logic errors found. If no errors are found
 
 **Prompt Template:**
 ```
+
 Your task is to analyze caching implementation for correctness, staleness bugs, and performance issues. Focus on cache corruption, invalidation failures, and race conditions.
 
 <context>
 **[SOCKET-BTM SPECIFIC - Adapt for your repository's caching strategy]**
 
 This project may use caching for build artifacts or API responses:
+
 - **Storage**: Cache files or API response caching
 - **Invalidation**: Based on cache keys (content hashes, timestamps, versions)
 - **Cross-platform**: Must work on Windows, macOS, Linux
 - **Critical**: Stale cache can cause incorrect behavior that's hard to debug
 
 Caching locations (if applicable):
+
 - Build cache directories
 - API response caching (nock fixtures for tests)
 - Cache key generation and validation logic
-</context>
+  </context>
 
 <instructions>
 Analyze caching implementation for these issue categories:
@@ -502,10 +523,11 @@ Uncommon scenarios:
 </pattern>
 
 Think through each issue:
+
 1. Can this actually happen in production?
 2. What observable behavior results?
 3. How likely/severe is the impact?
-</instructions>
+   </instructions>
 
 <output_format>
 For each finding, report:
@@ -523,20 +545,21 @@ File: src/path/to/cache-module.ts:145
 Issue: Cache key missing content hashes
 Severity: High
 Scenario: 1) Build with patch v1, creates checkpoint. 2) Patch file modified to v2 (same filename). 3) Build restores v1 checkpoint. 4) Produces binary with v1 patches but v2 expected
-Pattern: `const cacheKey = \`\${nodeVersion}-\${platform}-\${arch}\``
-Fix: `const patchHashes = await hashAllPatches(); const cacheKey = \`\${nodeVersion}-\${platform}-\${arch}-\${patchHashes}\``
+Pattern: `const cacheKey = \`\${nodeVersion}-\${platform}-\${arch}\``Fix:`const patchHashes = await hashAllPatches(); const cacheKey = \`\${nodeVersion}-\${platform}-\${arch}-\${patchHashes}\``
 Impact: Stale checkpoints produce incorrect Node.js binaries with wrong patches applied
 </output_format>
 
 <quality_guidelines>
+
 - Focus on correctness issues that produce wrong builds or corrupted checkpoints
 - Consider cross-platform differences (Windows, macOS, Linux)
 - Evaluate checkpoint invalidation scenarios (patches changed, additions changed)
 - Prioritize issues causing silent build incorrectness over performance
 - Verify issues aren't prevented by existing cache key generation
-</quality_guidelines>
+  </quality_guidelines>
 
 Analyze the checkpoint implementation thoroughly across all checkpoint stages and report all issues found. If the implementation is sound, state that explicitly.
+
 ```
 
 ---
@@ -549,6 +572,7 @@ Analyze the checkpoint implementation thoroughly across all checkpoint stages an
 
 **Prompt Template:**
 ```
+
 Your task is to identify issues in socket-btm's development workflows, build scripts, and CI configuration that could cause build failures, test flakiness, or poor developer experience.
 
 <context>
@@ -562,10 +586,11 @@ socket-btm is a pnpm monorepo with:
 - **Critical**: Build scripts compile C/C++ code and apply patches - must handle errors gracefully
 
 Packages:
+
 - node-smol-builder: Main build orchestration
 - binject: C/C++ binary injection library
 - bin-infra, build-infra: Utilities used by node-smol-builder
-</context>
+  </context>
 
 <instructions>
 Analyze workflow files for these issue categories:
@@ -607,6 +632,7 @@ Import style conventions (Socket Security standards):
 - Prefer standard library patterns over custom implementations
 
 Examples of what to flag:
+
 - Custom log functions: `function log(msg) { console.log(msg) }` → use `@socketsecurity/lib/logger`
 - Direct child_process usage (except in additions/):
   - `import { execSync } from 'node:child_process'` → use `import { spawn } from '@socketsecurity/lib/spawn'`
@@ -619,6 +645,7 @@ Examples of what to flag:
 - Wrong async imports: `import { readFile } from 'node:fs/promises'` → use `import { promises as fs } from 'node:fs'`
 
 Why this matters:
+
 - Consistent logging across all packages (formatting, levels, CI integration)
 - @socketsecurity/lib/spawn provides better error handling and cross-platform support than raw child_process
 - Cherry-picked fs methods are explicit and tree-shakeable
@@ -626,7 +653,7 @@ Why this matters:
 - Default imports for path/os/crypto show which module provides the function
 - Easier refactoring and IDE navigation
 - Avoids naming conflicts
-</pattern>
+  </pattern>
 
 <pattern name="package_json_scripts">
 package.json script correctness:
@@ -667,11 +694,13 @@ Documentation and setup:
 Build script architecture and helper methods (CRITICAL for consistent builds):
 
 **Package Build Entry Points:**
+
 - Packages MUST use `scripts/build.mjs` as the build entry point, never direct Makefile invocation
 - build.mjs handles: dependency downloads, environment setup, then Make invocation
 - Direct `make -f Makefile.<platform>` bypasses critical setup (curl/LIEF downloads)
 
 **Required build.mjs patterns:**
+
 ```javascript
 // CORRECT - uses buildBinSuitePackage from bin-infra
 import { buildBinSuitePackage } from 'bin-infra/lib/builder'
@@ -689,18 +718,20 @@ buildBinSuitePackage({
 ```
 
 **Dependency download helpers:**
+
 - `ensureCurl()` - Downloads curl+mbedTLS from releases (stubs-builder)
 - `ensureLief()` - Downloads LIEF library from releases (binject, binpress)
 - `downloadSocketBtmRelease()` - Generic helper from `@socketsecurity/lib/releases/socket-btm`
 
 **Common mistakes to flag:**
+
 1. Makefile invoked directly without pnpm wrapper:
    - Bug: `make -f Makefile.macos` in documentation or scripts
    - Fix: Use `pnpm run build` or `pnpm --filter <package> build`
 
 2. Missing beforeBuild hook:
    - Bug: build.mjs doesn't download dependencies before Make
-   - Fix: Add beforeBuild with appropriate ensure* calls
+   - Fix: Add beforeBuild with appropriate ensure\* calls
 
 3. Wrong dependency helper:
    - Bug: Manually downloading curl/LIEF with curl/wget
@@ -711,16 +742,18 @@ buildBinSuitePackage({
    - Fix: Use bin-infra/lib/builder for consistent behavior
 
 **Check these files:**
+
 - scripts/build.mjs - Build orchestration script
 - Build scripts should be cross-platform compatible
 - README.md files - Should document `pnpm run build`, not direct make
-</pattern>
+  </pattern>
 
 For each issue, consider:
+
 1. Does this actually affect developers or CI?
 2. How often would this be encountered?
 3. Is there a simple fix?
-</instructions>
+   </instructions>
 
 <output_format>
 For each finding, report:
@@ -750,14 +783,16 @@ Fix: `"test": "pnpm build && pnpm vitest"`
 </output_format>
 
 <quality_guidelines>
+
 - Focus on issues that cause actual build/test failures
 - Consider cross-platform scenarios (Windows, macOS, Linux)
 - Verify conventions match CLAUDE.md requirements
 - Prioritize developer experience issues (confusing errors, missing docs)
-</quality_guidelines>
+  </quality_guidelines>
 
 Analyze workflow files systematically and report all issues found. If workflows are well-configured, state that explicitly.
-```
+
+````
 
 ---
 
@@ -803,7 +838,7 @@ Each finding should include:
   suggestion: "Use atomic operations or locking",
   impact: "Could return stale data under concurrent access"
 }
-```
+````
 
 ### Example Report Output
 
@@ -818,12 +853,14 @@ Each finding should include:
 ## Critical Issues (Priority 1) - 2 found
 
 ### src/utils/file-cache.mts:89
+
 - **Issue**: Potential null pointer access on cache miss
 - **Pattern**: `const stats = await fs.stat(normalizedPath)`
 - **Fix**: Add try-catch or check file existence first
 - **Impact**: Crashes when file deleted between cache check and stat
 
 ### src/parsers/npm/index.mts:234
+
 - **Issue**: Unhandled promise rejection
 - **Pattern**: `parsePackageJson(path)` without await or .catch()
 - **Fix**: Add await or .catch() handler
@@ -832,6 +869,7 @@ Each finding should include:
 ## High Issues (Priority 2) - 5 found
 
 ### src/parsers/pypi/index.mts:512
+
 - **Issue**: Off-by-one error in bracket depth calculation
 - **Pattern**: `bracketDepth - 1` can go negative
 - **Fix**: Use `Math.max(0, bracketDepth - 1)`
@@ -840,12 +878,14 @@ Each finding should include:
 ...
 
 ## Scan Coverage
+
 - **Critical scan**: 127 files analyzed in src/
 - **Logic scan**: 19 parsers + 15 utils analyzed
 - **Cache scan**: 1 file + related code paths
 - **Workflow scan**: 12 scripts + package.json + 3 hooks
 
 ## Recommendations
+
 1. Address 2 critical issues immediately before next release
 2. Review 5 high-severity logic errors in parsers
 3. Schedule medium issues for next sprint
@@ -859,6 +899,7 @@ Each finding should include:
 ### No Findings
 
 If scan finds no issues:
+
 ```markdown
 # Quality Scan Report
 
@@ -877,6 +918,7 @@ All scans completed successfully with no findings.
 ### Scan Failures
 
 If an agent fails or times out:
+
 ```markdown
 ## Scan Errors
 
@@ -892,6 +934,7 @@ If an agent fails or times out:
 ### Partial Scans
 
 User can request specific scan types:
+
 ```bash
 # Only run critical and logic scans
 quality-scan --types critical,logic
@@ -908,7 +951,8 @@ Report only includes requested scan types and notes which were skipped.
 **Scan Targets**: All `.yml` files in `.github/workflows/`
 
 **Prompt Template:**
-```
+
+````
 Your task is to run the zizmor security scanner on GitHub Actions workflows to identify security vulnerabilities such as template injection, cache poisoning, and other workflow security issues.
 
 <context>
@@ -939,13 +983,14 @@ chmod +x /usr/local/bin/zizmor
 # Linux x64:
 curl -L https://github.com/zizmorcore/zizmor/releases/download/v1.22.0/zizmor-x86_64-unknown-linux-musl -o /usr/local/bin/zizmor
 chmod +x /usr/local/bin/zizmor
-```
+````
 
 **Alternative Methods:**
+
 - Homebrew: `brew install zizmor@1.22.0`
 - Cargo: `cargo install zizmor --version 1.22.0`
 - See https://docs.zizmor.sh/installation/ for all options
-</context>
+  </context>
 
 <instructions>
 1. Run zizmor on all GitHub Actions workflow files:
@@ -971,7 +1016,7 @@ chmod +x /usr/local/bin/zizmor
 4. If zizmor reports no findings, state explicitly: "✓ No security issues found in GitHub Actions workflows"
 
 5. Note any suppressed findings (shown by zizmor but marked as suppressed)
-</instructions>
+   </instructions>
 
 <pattern name="template_injection">
 Look for findings like:
@@ -1000,29 +1045,31 @@ Look for findings like:
 For each finding, output in this structured format:
 
 {
-  file: ".github/workflows/workflow-name.yml:123",
-  issue: "Template injection vulnerability in run block",
-  severity: "High",
-  scanType: "security",
-  pattern: "run: echo ${{ github.event.comment.body }}",
+file: ".github/workflows/workflow-name.yml:123",
+issue: "Template injection vulnerability in run block",
+severity: "High",
+scanType: "security",
+pattern: "run: echo ${{ github.event.comment.body }}",
   trigger: "Untrusted user input from PR comment",
   fix: "Use environment variables: env: COMMENT: ${{ github.event.comment.body }} then echo \"$COMMENT\"",
-  impact: "Attacker can execute arbitrary code in CI environment",
-  autofix: true
+impact: "Attacker can execute arbitrary code in CI environment",
+autofix: true
 }
 
 Group findings by severity (Error → High → Medium → Low → Info)
 </output_format>
 
 <quality_guidelines>
+
 - Only report actual zizmor findings (don't invent issues)
 - Include all details from zizmor output
 - Note the audit confidence level for each finding
 - Indicate if auto-fix is available
 - If no findings, explicitly state the workflows are secure
 - Report suppressed findings separately
-</quality_guidelines>
-```
+  </quality_guidelines>
+
+````
 
 ### Example Security Scan Output
 
@@ -1048,7 +1095,7 @@ Group findings by severity (Error → High → Medium → Low → Info)
 - **Impact**: Attacker could poison dependency cache and inject malicious code into releases
 - **Auto-fix**: Not available
 - **Confidence**: Low
-```
+````
 
 ---
 
@@ -1059,7 +1106,8 @@ Group findings by severity (Error → High → Medium → Low → Info)
 **Scan Targets**: All `.github/workflows/*.yml` files that use checkpoint caching
 
 **Prompt Template:**
-```
+
+````
 Your task is to verify GitHub Actions workflows properly skip expensive tool installation steps when builds are restored from cache by checking for `build-required` conditions.
 
 <context>
@@ -1091,9 +1139,10 @@ Installation steps should check `build-required` before running:
 - name: Install CMake (Windows)
   if: steps.setup-checkpoints.outputs.build-required == 'true' && matrix.os == 'windows'
   run: choco install cmake -y
-```
+````
 
 Or the full cache validation pattern:
+
 ```yaml
 - name: Setup build toolchain (macOS)
   if: |
@@ -1102,17 +1151,20 @@ Or the full cache validation pattern:
     steps.restore-checkpoint.outputs.build-required == 'true')
   run: brew install cmake ccache
 ```
+
 </context>
 
 <instructions>
 Systematically verify all workflows that use checkpoint caching properly optimize installation steps:
 
 **Step 1: Identify workflows with checkpoint caching**
+
 ```bash
 grep -l "restore-checkpoint\|setup-checkpoints" .github/workflows/*.yml
 ```
 
 **Step 2: For each workflow, check:**
+
 1. Which checkpoint action is used (`restore-checkpoint` or `setup-checkpoints`)
 2. Identify ALL installation/setup steps:
    - Steps with names: "Install", "Setup", "Select Xcode"
@@ -1120,11 +1172,13 @@ grep -l "restore-checkpoint\|setup-checkpoints" .github/workflows/*.yml
    - Steps downloading tools: llvm-mingw downloads, toolchain downloads
 
 **Step 3: Verify each installation step has correct condition:**
+
 - For `setup-checkpoints`: `steps.setup-checkpoints.outputs.build-required == 'true'`
 - For `restore-checkpoint`: `steps.restore-checkpoint.outputs.build-required == 'true'`
 - OR full cache check: `(cache-hit != 'true' || valid == 'false') || build-required == 'true'`
 
 **Step 4: Exceptions (steps that should NOT check build-required):**
+
 - pnpm/Node.js setup (needed to run build scripts)
 - QEMU/Docker setup for testing (not build dependencies)
 - Depot CLI setup (needed for Docker builds)
@@ -1139,10 +1193,12 @@ Installation step runs unconditionally even when cache is restored:
   run: choco install cmake -y
 
 # GOOD - checks build-required
+
 - name: Install CMake (Windows)
   if: steps.setup-checkpoints.outputs.build-required == 'true' && matrix.os == 'windows'
   run: choco install cmake -y
-```
+
+````
 
 Look for steps that:
 - Install compilers (gcc, clang, MinGW, llvm-mingw)
@@ -1162,12 +1218,13 @@ Step references wrong checkpoint action output:
 # GOOD - correct reference
 - name: Install tools
   if: steps.setup-checkpoints.outputs.build-required == 'true'
-```
+````
 
 socket-btm conventions:
+
 - binsuite.yml (binpress/binflate/binject): Use `steps.setup-checkpoints.outputs.build-required`
 - node-smol.yml, lief.yml, onnxruntime.yml: Use `steps.restore-checkpoint.outputs.build-required`
-</pattern>
+  </pattern>
 
 <pattern name="incomplete_condition">
 Step checks some conditions but misses build-required:
@@ -1180,11 +1237,13 @@ Step checks some conditions but misses build-required:
     7z x llvm-mingw.zip
 
 # GOOD - includes build-required check
+
 - name: Setup toolchain (Windows ARM64)
   if: |
-    matrix.os == 'windows' && matrix.cross_compile &&
-    ((steps.cache.outputs.cache-hit != 'true' || steps.validate.outputs.valid == 'false') ||
-    steps.restore-checkpoint.outputs.build-required == 'true')
+  matrix.os == 'windows' && matrix.cross_compile &&
+  ((steps.cache.outputs.cache-hit != 'true' || steps.validate.outputs.valid == 'false') ||
+  steps.restore-checkpoint.outputs.build-required == 'true')
+
 ```
 </pattern>
 
@@ -1256,7 +1315,8 @@ Systematically analyze all workflows with checkpoints and report all missing opt
 **Scan Targets**: All README.md files, documentation files, and inline code examples
 
 **Prompt Template:**
-```
+
+````
 Your task is to verify documentation accuracy across all README files and documentation by comparing documented behavior, examples, commands, and API descriptions against the actual codebase implementation.
 
 <context>
@@ -1283,7 +1343,7 @@ Systematically verify all README files and documentation against the actual code
 1. **Find all documentation files**:
    ```bash
    find . -name "README.md" -o -name "*.md" -path "*/docs/*"
-   ```
+````
 
 2. **For each README, verify**:
    - Package names match package.json "name" field
@@ -1363,6 +1423,7 @@ Look for:
 - Patch counts that don't match actual patches
 
 **CRITICAL: For third-party library versions (LIEF, Node.js, ONNX Runtime, etc.):**
+
 - DO NOT blindly "correct" documented versions without verification
 - For socket-btm specifically, versions must align with what Node.js upstream uses
 - LIEF version: Documented version (v0.17.0) is correct - aligned with Node.js needs
@@ -1371,7 +1432,7 @@ Look for:
 - If unsure about a version, SKIP reporting it as incorrect - ask user to verify
 - NEVER change version numbers based on git describe output from dependencies
 - When in doubt, assume documentation is correct unless you can definitively verify otherwise
-</pattern>
+  </pattern>
 
 <pattern name="missing_documentation">
 Look for:
@@ -1385,6 +1446,7 @@ Look for:
 **CRITICAL: Evaluate documentation from a junior developer perspective**
 
 Check for junior-developer unfriendly patterns:
+
 - Missing "Why" explanations (e.g., "Use binject to inject SEA" without explaining what SEA is)
 - Assumed knowledge not documented (Node.js SEA, LIEF, VFS concepts)
 - No examples for common workflows (first-time setup, typical usage)
@@ -1397,6 +1459,7 @@ Check for junior-developer unfriendly patterns:
 - Undocumented debugging techniques
 
 **Pay special attention to:**
+
 1. **Root README.md** - First thing junior devs see, must be welcoming and clear
 2. **Package READMEs** - Should explain purpose, use cases, and provide examples
 3. **CLAUDE.md** - Project guidelines must be understandable by junior contributors
@@ -1404,6 +1467,7 @@ Check for junior-developer unfriendly patterns:
 5. **Error message handling** - Should help debug, not confuse
 
 **Areas requiring extra scrutiny:**
+
 - Binary manipulation concepts (SEA, VFS, section injection)
 - Build system complexity (checkpoints, caching, cross-compilation)
 - Patch management (upstream sync, patch regeneration)
@@ -1411,25 +1475,28 @@ Check for junior-developer unfriendly patterns:
 - Cross-platform differences (Linux musl/glibc, macOS universal binaries, Windows)
 
 For each junior-dev issue:
+
 - Identify the knowledge gap or assumption
 - Explain why this is confusing for juniors
 - Suggest specific documentation additions (not just "add more docs")
 - Provide example of clear explanation
 
 Example findings:
+
 - "README assumes knowledge of Node.js SEA without explaining it"
 - "No explanation of what 'upstream sync' means or why it matters"
 - "Technical term 'checkpoint caching' used without definition"
 - "Build errors not documented in troubleshooting section"
-</pattern>
+  </pattern>
 
 For each issue found:
+
 1. Read the documented information
 2. Read the actual code/config to verify
 3. Determine the discrepancy
 4. Provide the correct information
 5. Evaluate junior developer friendliness
-</instructions>
+   </instructions>
 
 <output_format>
 For each finding, report:
@@ -1443,6 +1510,7 @@ Fix: [Exact documentation correction needed]
 Impact: [Why this matters - confusion, errors, etc.]
 
 Severity Guidelines:
+
 - High: Critical inaccuracies that would cause errors if followed (wrong commands, non-existent APIs)
 - Medium: Outdated information that misleads but doesn't immediately break (wrong paths, old examples)
 - Low: Minor inaccuracies or missing non-critical information
@@ -1532,6 +1600,7 @@ Impact: Without concrete starting point, juniors struggle to use SDK effectively
 </output_format>
 
 <quality_guidelines>
+
 - Verify every claim against actual code - don't assume documentation is correct
 - Read package.json files to check names, scripts, versions
 - Run --help commands to verify CLI flags when possible
@@ -1542,10 +1611,11 @@ Impact: Without concrete starting point, juniors struggle to use SDK effectively
 - Group related issues (e.g., "5 packages using @scope incorrectly")
 - Provide exact fixes, not vague suggestions
 - If a README is mostly missing (75%+ of package undocumented), report as single high-severity issue
-</quality_guidelines>
+  </quality_guidelines>
 
 Scan all README.md files in the repository and report all documentation inaccuracies found. If documentation is accurate, state that explicitly.
-```
+
+````
 
 ### Example Documentation Scan Output
 
@@ -1613,5 +1683,4 @@ Scan all README.md files in the repository and report all documentation inaccura
 - **Actual**: SDK does not retry automatically; users must implement retry logic
 - **Fix**: Remove automatic retry claim, document manual retry approach
 - **Impact**: Users expect automatic behavior that doesn't exist
-```
-
+````

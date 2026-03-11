@@ -22,31 +22,31 @@ import {
   getQuotaCost,
   calculateTotalQuotaCost,
   hasQuotaForMethods,
-  getMethodsByQuotaCost
+  getMethodsByQuotaCost,
 } from '@socketsecurity/sdk'
 
 // Get method cost
-getQuotaCost('batchPackageFetch')  // 100
-getQuotaCost('getOrgAnalytics')    // 10
-getQuotaCost('getQuota')           // 0
+getQuotaCost('batchPackageFetch') // 100
+getQuotaCost('getOrgAnalytics') // 10
+getQuotaCost('getQuota') // 0
 
 // Calculate total
 const cost = calculateTotalQuotaCost([
-  'batchPackageFetch',  // 100
-  'getOrgAnalytics',    // 10
-  'getQuota'            // 0
-])  // Returns: 110
+  'batchPackageFetch', // 100
+  'getOrgAnalytics', // 10
+  'getQuota', // 0
+]) // Returns: 110
 
 // Check quota
 const canProceed = hasQuotaForMethods(availableQuota, [
   'batchPackageFetch',
-  'createFullScan'
+  'createFullScan',
 ])
 
 // Methods by cost
-getMethodsByQuotaCost(0)    // Free methods
-getMethodsByQuotaCost(10)   // Standard methods
-getMethodsByQuotaCost(100)  // Expensive methods
+getMethodsByQuotaCost(0) // Free methods
+getMethodsByQuotaCost(10) // Standard methods
+getMethodsByQuotaCost(100) // Expensive methods
 ```
 
 ## Examples
@@ -100,6 +100,7 @@ if (quota.success && quota.data.quota >= batchCost) {
 For the complete list of API method quota costs, see [data/api-method-quota-and-permissions.json](../data/api-method-quota-and-permissions.json).
 
 **Summary:**
+
 - **Free (0):** 44 methods including `getQuota`, `getOrganizations`, `getEntitlements`, `createFullScan`, `getScan`, `getScanList`, `getOrgSecurityPolicy`, `updateOrgSecurityPolicy`, repo management, triage, labels, diff scans, exports, and more
 - **Standard (10):** `getOrgAnalytics`, `getRepoAnalytics`, `getAuditLogEvents`, `getIssuesByNpmPackage`, `getScoreByNpmPackage`, `getOrgAlertFullScans`, API token operations
 - **Expensive (100):** `batchPackageFetch`, `batchOrgPackageFetch`, `batchPackageStream`, `createDependenciesSnapshot`, `createScanFromFilepaths`, `searchDependencies`, `uploadManifestFiles`
