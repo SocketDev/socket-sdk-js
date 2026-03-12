@@ -466,7 +466,7 @@ export interface paths {
   '/orgs/{org_slug}/triage/alerts': {
     /**
      * List Org Alert Triage
-     * @description Get alert triage actions for an organization.
+     * @description List triage actions for an organization. Results are paginated and can be sorted by created_at or updated_at.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -475,8 +475,8 @@ export interface paths {
      */
     get: operations['getOrgTriage']
     /**
-     * Update Org Alert Triage
-     * @description Update triage actions on organization alerts.
+     * Create/Update Org Alert Triage
+     * @description Create or update triage actions on organization alerts. Accepts a batch of triage entries. Omit `uuid` to create a new entry; provide an existing `uuid` to update it. Use `?force=true` for broad triages that lack a specific `alertKey` or granular package information.
      *
      * This endpoint consumes 1 unit of your quota.
      *
@@ -7477,7 +7477,7 @@ export interface operations {
   }
   /**
    * List Org Alert Triage
-   * @description Get alert triage actions for an organization.
+   * @description List triage actions for an organization. Results are paginated and can be sorted by created_at or updated_at.
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -7487,9 +7487,13 @@ export interface operations {
   getOrgTriage: {
     parameters: {
       query?: {
+        /** @description Field to sort by. One of: created_at, updated_at. */
         sort?: string
+        /** @description Sort direction. One of: asc, desc. */
         direction?: string
+        /** @description Number of results per page (1–100, default 30). */
         per_page?: number
+        /** @description Page number (1-based). */
         page?: number
       }
       path: {
@@ -7612,8 +7616,8 @@ export interface operations {
     }
   }
   /**
-   * Update Org Alert Triage
-   * @description Update triage actions on organization alerts.
+   * Create/Update Org Alert Triage
+   * @description Create or update triage actions on organization alerts. Accepts a batch of triage entries. Omit `uuid` to create a new entry; provide an existing `uuid` to update it. Use `?force=true` for broad triages that lack a specific `alertKey` or granular package information.
    *
    * This endpoint consumes 1 unit of your quota.
    *
@@ -7635,19 +7639,40 @@ export interface operations {
       content: {
         'application/json': {
           alertTriage: Array<{
-            /** @default */
+            /**
+             * @description The UUID of the triage entry. Omit to create a new entry; provide to update an existing one.
+             * @default
+             */
             uuid?: string | null
-            /** @default */
+            /**
+             * @description The package ecosystem type (e.g., npm, pypi). Use null or "*" for wildcard.
+             * @default
+             */
             packageType?: string | null
-            /** @default */
+            /**
+             * @description The package namespace or scope. Use null or "*" for wildcard.
+             * @default
+             */
             packageNamespace?: string | null
-            /** @default */
+            /**
+             * @description The package name. Use null or "*" for wildcard.
+             * @default
+             */
             packageName?: string | null
-            /** @default */
+            /**
+             * @description The package version. Supports a "*" suffix for wildcard prefix matching. Use null for any version.
+             * @default
+             */
             packageVersion?: string | null
-            /** @default */
+            /**
+             * @description The specific alert key to target.
+             * @default
+             */
             alertKey?: string | null
-            /** @default */
+            /**
+             * @description The alert type (e.g., criticalCVE, highCVE).
+             * @default
+             */
             alertType?: string | null
             /**
              * @description Whether a fix is available, unavailable, or * for any
@@ -7664,16 +7689,25 @@ export interface operations {
              * @enum {string}
              */
             kevs?: 'exist' | 'none' | '*'
-            /** @default */
+            /**
+             * @description CVE or GHSA ID to match against.
+             * @default
+             */
             cveOrGhsaId?: string | null
             /**
              * @description The reachability of the alert, can be reachable, unreachable, other, or * for any
              * @enum {string}
              */
             reachability?: 'reachable' | 'unreachable' | 'other' | '*'
-            /** @default */
+            /**
+             * @description CVSS score comparison operator and value (e.g., >=7.5, >5.0, ==8.0).
+             * @default
+             */
             cvssScoreCmp?: string | null
-            /** @default */
+            /**
+             * @description A note or comment for the triage action.
+             * @default
+             */
             note?: string
             /**
              * @description The triage state of the alert
