@@ -14,15 +14,10 @@ on:
 permissions:
   contents: read
 
-env:
-  # Opt-in to Node.js 24 for GitHub Actions to avoid deprecation warnings.
-  # See: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   ci:
     name: Run CI Pipeline
-    uses: SocketDev/socket-registry/.github/workflows/ci.yml@d83e76d998a5b13e7e844273898ccee35bb991c4 # main
+    uses: SocketDev/socket-registry/.github/workflows/ci.yml@db024ea0ebbf1e6c73acdb8a6fb02a8c5e2c7410 # main
     with:
       fail-fast: false
       lint-script: 'pnpm run lint --all'
