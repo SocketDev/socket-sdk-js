@@ -15,8 +15,8 @@ importers:
         specifier: 1.3.5
         version: 1.3.5
       '@socketsecurity/lib':
-        specifier: 5.8.1
-        version: 5.8.1(typescript@5.9.3)
+        specifier: 5.8.2
+        version: 5.8.2(typescript@5.9.3)
       form-data:
         specifier: 4.0.5
         version: 4.0.5
@@ -919,8 +919,8 @@ packages:
     resolution: {integrity: sha512-Fl4GNUJ/z3IBJBGj4IsJfuRGUBCRMgX0df0mb5x5buaCPDKC+NhMhAFuxpc3viLSHV12CO2rGaNCf4fBYWI0FA==}
     engines: {node: '>=18', pnpm: '>=10.16.0'}
 
-  '@socketsecurity/lib@5.8.1':
-    resolution: {integrity: sha512-/O8n5ImSe4UF1c/lo6iXC5hNqIMQVOsd3Ukuh6BCNvKxoihRQcqc9bZsVc3criIoNi/BnmyOAc82zT1EaaJbCA==}
+  '@socketsecurity/lib@5.8.2':
+    resolution: {integrity: sha512-DBm741XLIotu9vUpOwEEcHMXk1Dc0QYRvPLx6snxJgnn322OO2TboQfsQiG80Lyc8oN4jS7enNRgkfX45KdpLQ==}
     engines: {node: '>=22', pnpm: '>=10.25.0'}
     peerDependencies:
       typescript: '>=5.0.0'
@@ -2458,7 +2458,7 @@ snapshots:
 
   '@socketregistry/packageurl-js@1.3.5': {}
 
-  '@socketsecurity/lib@5.8.1(typescript@5.9.3)':
+  '@socketsecurity/lib@5.8.2(typescript@5.9.3)':
     optionalDependencies:
       typescript: 5.9.3
 
