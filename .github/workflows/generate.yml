@@ -50,7 +50,7 @@ jobs:
           persist-credentials: false
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@b5641338627b8c60caf16ec3d3cf17b1f29e1d74 # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@b56413387eccc05dd8a392d421602289971ac1fe # main
 
       - name: Generate SDK
         # Fetches OpenAPI, generates types/api.d.ts and src/types-strict.ts
@@ -128,7 +128,7 @@ jobs:
           persist-credentials: false
           ref: automated/open-api
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@b5641338627b8c60caf16ec3d3cf17b1f29e1d74 # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@b56413387eccc05dd8a392d421602289971ac1fe # main
 
       - name: Build SDK
         run: pnpm run build
