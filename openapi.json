@@ -12039,6 +12039,11 @@
                             "type": "string",
                             "description": "",
                             "default": ""
+                          },
+                          "workspace": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
                           }
                         },
                         "required": [
@@ -38430,7 +38435,7 @@
             ]
           }
         ],
-        "description": "This API endpoint is used to start a historical snapshot job.\nWhile snapshots are typically taken at least once a day, this endpoint can be used to start an \"on demand\" snapshot job to ensure the latest data is collected and stored for historical purposes.\n\nAn historical snapshot will contain details and raw data for the following resources:\n\n- Repositories\n- Alerts\n- Dependencies\n- Artifacts\n- Users\n- Settings\n\nHistorical snapshot data is bucketed to the nearest day which is described in more detail at: [Historical Data Endpoints](/reference/historical-data-endpoints)\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- historical:snapshots-start",
+        "description": "This API endpoint is used to start a historical snapshot job.\nWhile snapshots are typically taken multiple times a day for paid plans and once a day for free plans, this endpoint can be used to start an \"on demand\" snapshot job to ensure the latest data is collected and stored for historical purposes.\n\nAn historical snapshot will contain details and raw data for the following resources:\n\n- Repositories\n- Alerts\n- Dependencies\n- Artifacts\n- Users\n- Settings\n\nHistorical snapshot data is bucketed to the nearest day which is described in more detail at: [Historical Data Endpoints](/reference/historical-data-endpoints)\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- historical:snapshots-start",
         "responses": {
           "200": {
             "content": {

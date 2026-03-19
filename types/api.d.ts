@@ -896,7 +896,7 @@ export interface paths {
     /**
      * Start historical data snapshot job (Beta)
      * @description This API endpoint is used to start a historical snapshot job.
-     * While snapshots are typically taken at least once a day, this endpoint can be used to start an "on demand" snapshot job to ensure the latest data is collected and stored for historical purposes.
+     * While snapshots are typically taken multiple times a day for paid plans and once a day for free plans, this endpoint can be used to start an "on demand" snapshot job to ensure the latest data is collected and stored for historical purposes.
      *
      * An historical snapshot will contain details and raw data for the following resources:
      *
@@ -5598,6 +5598,8 @@ export interface operations {
               version?: string
               /** @default */
               release?: string
+              /** @default */
+              workspace?: string
             }>
           }
         }
@@ -15243,7 +15245,7 @@ export interface operations {
   /**
    * Start historical data snapshot job (Beta)
    * @description This API endpoint is used to start a historical snapshot job.
-   * While snapshots are typically taken at least once a day, this endpoint can be used to start an "on demand" snapshot job to ensure the latest data is collected and stored for historical purposes.
+   * While snapshots are typically taken multiple times a day for paid plans and once a day for free plans, this endpoint can be used to start an "on demand" snapshot job to ensure the latest data is collected and stored for historical purposes.
    *
    * An historical snapshot will contain details and raw data for the following resources:
    *
