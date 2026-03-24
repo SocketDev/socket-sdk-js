@@ -1,5 +1,7 @@
 /** @fileoverview Vitest setup file for test utilities. */
 
+import process from 'node:process'
+
 import nock from 'nock'
 
 import { getAbortSignal } from '@socketsecurity/lib/constants/process'

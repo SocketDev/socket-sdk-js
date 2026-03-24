@@ -13,6 +13,8 @@
  *   --staged   Run on staged files only
  */
 
+import process from 'node:process'
+
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { printFooter, printHeader } from '@socketsecurity/lib/stdio/header'
 

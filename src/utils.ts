@@ -3,6 +3,7 @@
  * Provides URL normalization, query parameter handling, and path resolution utilities.
  */
 import path from 'node:path'
+import process from 'node:process'
 
 import { memoize } from '@socketsecurity/lib/memoization'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'

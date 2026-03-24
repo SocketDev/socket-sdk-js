@@ -3,6 +3,8 @@
  * Standardized across all socket-* repositories.
  */
 
+import process from 'node:process'
+
 import { runWithMask } from '@socketsecurity/lib/stdio/mask'
 
 /**

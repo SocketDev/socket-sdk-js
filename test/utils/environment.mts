@@ -1,4 +1,6 @@
 /** @fileoverview Test environment setup and cleanup utilities. */
+import process from 'node:process'
+
 import nock from 'nock'
 import { afterEach, beforeEach } from 'vitest'
 

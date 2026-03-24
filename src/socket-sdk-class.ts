@@ -5,6 +5,7 @@
 import events from 'node:events'
 import { createWriteStream } from 'node:fs'
 import path from 'node:path'
+import process from 'node:process'
 import readline from 'node:readline'
 
 import { createTtlCache } from '@socketsecurity/lib/cache-with-ttl'
