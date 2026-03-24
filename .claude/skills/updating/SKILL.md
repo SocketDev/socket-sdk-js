@@ -16,7 +16,7 @@ Your task is to update all npm dependencies to their latest versions, ensuring a
 This skill updates npm packages for security patches, bug fixes, and new features.
 
 **Update Targets:**
-- npm packages via `pnpm run update` or `pnpm update`
+- npm packages via `pnpm run update`
 </context>
 
 <constraints>
@@ -71,23 +71,19 @@ git status --porcelain
 ### Phase 2: Update npm Packages
 
 <action>
-Run pnpm update to update npm dependencies:
+Run pnpm run update to update npm dependencies:
 </action>
 
 ```bash
-# Update npm packages (use pnpm run update if script exists, otherwise pnpm update)
-if grep -q '"update"' package.json; then
-  pnpm run update
-else
-  pnpm update
-fi
+# Update npm packages
+pnpm run update
 
 # Check if there are changes
 if [ -n "$(git status --porcelain pnpm-lock.yaml package.json)" ]; then
   git add pnpm-lock.yaml package.json
   git commit -m "chore: update npm dependencies
 
-Updated npm packages via pnpm update."
+Updated npm packages via pnpm run update."
   echo "npm packages updated"
 else
   echo "npm packages already up to date"
@@ -108,7 +104,8 @@ if [ "$CI_MODE" = "true" ]; then
   echo "Commits created - ready for push by CI workflow"
 else
   echo "Interactive mode: Running full validation..."
-  pnpm run check
+  pnpm run fix --all
+  pnpm run check --all
   pnpm test
 fi
 ```
