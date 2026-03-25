@@ -1,5 +1,7 @@
 /** @fileoverview Utility for running shell commands with proper error handling. */
 
+import process from 'node:process'
+
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { spawn, spawnSync } from '@socketsecurity/lib/spawn'
 
