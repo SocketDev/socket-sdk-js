@@ -1,2 +1,3 @@
-secrets-outside-env:
-  disable: true
+rules:
+  secrets-outside-env:
+    disable: true
