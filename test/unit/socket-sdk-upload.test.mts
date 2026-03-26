@@ -379,6 +379,11 @@ describe('SocketSdk - Upload Manifest', () => {
       'should handle errors in uploadManifestFiles',
       { retry: 2 },
       async () => {
+        const noRetrySdk = new SocketSdk('test-token', {
+          ...FAST_TEST_CONFIG,
+          retries: 0,
+        })
+
         nock('https://api.socket.dev')
           .post('/v0/orgs/test-org/upload-manifest-files')
           .reply(400, {
@@ -387,7 +392,7 @@ describe('SocketSdk - Upload Manifest', () => {
             },
           })
 
-        const result = await sdk.uploadManifestFiles('test-org', [
+        const result = await noRetrySdk.uploadManifestFiles('test-org', [
           packageJsonPath,
         ])
 
