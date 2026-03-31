@@ -12,8 +12,8 @@ importers:
   .:
     dependencies:
       '@socketregistry/packageurl-js':
-        specifier: 1.4.0
-        version: 1.4.0
+        specifier: 1.4.1
+        version: 1.4.1
       '@socketsecurity/lib':
         specifier: 5.11.4
         version: 5.11.4(typescript@5.9.3)
@@ -915,8 +915,8 @@ packages:
     resolution: {integrity: sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==}
     engines: {node: '>=18'}
 
-  '@socketregistry/packageurl-js@1.4.0':
-    resolution: {integrity: sha512-FkZLsxg01R/V83ojvhRmMB6mMMx44tEzABtxdViZqL3dRW7wtG/cYXgks3xQmRITjnmGXUy4UtXpw/FmoQM1XQ==}
+  '@socketregistry/packageurl-js@1.4.1':
+    resolution: {integrity: sha512-t/UrOd1DMYXcGuKo2v07WMbuHCMlKBKOriTHu4cn9OIxfj1qWKoF/kpOswGHOWkG5zwj2Ke/2+qLiDugmx5z+A==}
     engines: {node: '>=18.20.4', pnpm: '>=10.25.0'}
 
   '@socketsecurity/lib@5.11.4':
@@ -2456,7 +2456,7 @@ snapshots:
 
   '@sindresorhus/merge-streams@2.3.0': {}
 
-  '@socketregistry/packageurl-js@1.4.0':
+  '@socketregistry/packageurl-js@1.4.1':
     dependencies:
       picomatch: 4.0.3
 
