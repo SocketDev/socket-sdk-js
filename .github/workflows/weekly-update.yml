@@ -24,22 +24,7 @@ jobs:
     outputs:
       has-updates: ${{ steps.check.outputs.has-updates }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
-
-      - name: Setup Node.js
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
-        with:
-          node-version-file: .node-version
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@adb5697306eb2619b3255c2406e52e04cc99d555 # main
 
       - name: Check for npm updates
         id: check
@@ -62,23 +47,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
-
-      - name: Setup Node.js
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
-        with:
-          node-version-file: .node-version
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@adb5697306eb2619b3255c2406e52e04cc99d555 # main
 
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code
