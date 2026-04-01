@@ -11,6 +11,55 @@
 - **Example**: If git shows "John-David Dalton <jdalton@example.com>", refer to them as "John-David"
 - **Other contributors**: Use their actual names from commit history/context
 
+## PRE-ACTION PROTOCOL
+
+- Before ANY structural refactor on a file >300 LOC: remove dead code, unused exports, unused imports first — commit that cleanup separately before the real work
+- Multi-file changes: break into phases (≤5 files each), verify each phase before the next
+- When pointed to existing code as a reference: study it before building — working code is a better spec than any description
+- Work from raw error data, not theories — if a bug report has no error output, ask for it
+- On "yes", "do it", or "go": execute immediately, no plan recap
+
+## VERIFICATION PROTOCOL
+
+**MANDATORY**: Before claiming any task is complete:
+
+1. Run the actual command — execute the script, run the test, check the output
+2. State what you verified, not just "looks good"
+3. **FORBIDDEN**: Claiming "Done" when any test output shows failures, or characterizing incomplete/broken work as complete
+4. If type-check or lint is configured, run it and fix ALL errors before reporting done
+5. Re-read every file modified; confirm nothing references something that no longer exists
+
+## CONTEXT & EDIT SAFETY
+
+- After 10+ messages: re-read any file before editing it — do not trust remembered contents
+- Read files >500 LOC in chunks using offset/limit; never assume one read captured the whole file
+- Before every edit: re-read the file. After every edit: re-read to confirm the change applied correctly
+- When renaming anything, search separately for: direct calls, type references, string literals, dynamic imports, re-exports, test files — one grep is not enough
+
+## JUDGMENT PROTOCOL
+
+- If the user's request is based on a misconception, say so before executing
+- If you spot a bug adjacent to what was asked, flag it: "I also noticed X — want me to fix it?"
+- You are a collaborator, not just an executor
+
+## SCOPE PROTOCOL
+
+- Do not add features, refactor, or make improvements beyond what was asked
+- Try the simplest approach first; if architecture is actually flawed, flag it and wait for approval before restructuring
+- When asked to "make a plan," output only the plan — no code until given the go-ahead
+
+## SELF-EVALUATION
+
+- Before calling anything done: present two views — what a perfectionist would reject vs. what a pragmatist would ship
+- After fixing a bug: explain why it happened
+- If a fix doesn't work after two attempts: stop, re-read the relevant section top-down, state where the mental model was wrong, propose something fundamentally different
+- If asked to "step back" or "going in circles": drop everything, rethink from scratch
+
+## HOUSEKEEPING
+
+- Before risky changes: offer to checkpoint — "want me to commit before this?"
+- If a file is getting unwieldy (>400 LOC): flag it — "this is big enough to cause pain — want me to split it?"
+
 ## 📚 SHARED STANDARDS
 
 **Quick references**:
@@ -137,6 +186,10 @@ All `logger.error()` and `logger.log()` calls include empty string:
 
 - ✅ `logger.error('')`, `logger.log('')`
 - ❌ `logger.error()`, `logger.log()`
+
+#### Comments
+
+Default to NO comments. Only add one when the WHY is non-obvious to a senior engineer reading the code cold.
 
 #### File Structure
 
