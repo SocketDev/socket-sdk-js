@@ -49,9 +49,6 @@ jobs:
     steps:
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@24323cbd9e61a7e3a600b8c7e99eb27a29642a54 # main
 
-      - name: Install Claude Code
-        run: npm install -g @anthropic-ai/claude-code
-
       - name: Create update branch
         id: branch
         env:
@@ -78,7 +75,7 @@ jobs:
           fi
 
           set +e
-          claude --print --dangerously-skip-permissions \
+          pnpm exec claude --print --dangerously-skip-permissions \
             --model sonnet \
             "/updating - Run the updating skill to update all dependencies. Create atomic commits for each update. You are running in CI mode - skip builds and tests. Do not push or create a PR." \
             2>&1 | tee claude-output.log
