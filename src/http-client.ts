@@ -10,7 +10,7 @@ import { debugLog } from '@socketsecurity/lib/debug'
 import { jsonParse } from '@socketsecurity/lib/json/parse'
 import { perfTimer } from '@socketsecurity/lib/performance'
 
-import { MAX_RESPONSE_SIZE } from './constants'
+import { MAX_RESPONSE_SIZE, publicPolicy } from './constants'
 import { sanitizeHeaders } from './utils/header-sanitization'
 
 import type {
@@ -621,24 +621,23 @@ export function reshapeArtifactForPublicPolicy<
       // requests.
       alerts: artifact.alerts
         ?.filter((alert: SocketArtifactAlert) => {
+          // Derive action from publicPolicy instead of trusting server value.
+          const action = publicPolicy.get(alert.type)
           // Filter by severity (remove low severity alerts).
           if (alert.severity === 'low') {
             return false
           }
           // Filter by actions if specified.
-          if (
-            allowedActions &&
-            alert.action &&
-            !allowedActions.includes(alert.action)
-          ) {
+          if (allowedActions && action && !allowedActions.includes(action)) {
             return false
           }
           return true
         })
         .map((alert: SocketArtifactAlert) => ({
-          type: alert.type,
-          severity: alert.severity,
+          action: publicPolicy.get(alert.type),
           key: alert.key,
+          severity: alert.severity,
+          type: alert.type,
         })),
     })
 

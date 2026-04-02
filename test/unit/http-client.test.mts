@@ -630,6 +630,7 @@ describe('HTTP Client - ResponseError Edge Cases', () => {
     })
 
     it('should filter alerts by action when actions parameter provided', () => {
+      // publicPolicy: malware→error, criticalCVE→warn, deprecated→monitor
       const data = {
         artifacts: [
           {
@@ -646,31 +647,28 @@ describe('HTTP Client - ResponseError Edge Cases', () => {
                 type: 'malware',
                 severity: 'high',
                 key: 'alert-1',
-                action: 'block',
               },
               {
-                type: 'issue',
-                severity: 'medium',
+                type: 'criticalCVE',
+                severity: 'high',
                 key: 'alert-2',
-                action: 'warn',
               },
               {
-                type: 'vulnerability',
+                type: 'deprecated',
                 severity: 'high',
                 key: 'alert-3',
-                action: 'block',
               },
             ],
           },
         ],
       }
 
-      const result = reshapeArtifactForPublicPolicy(data, false, 'block')
+      // Filter to only error action (malware in publicPolicy)
+      const result = reshapeArtifactForPublicPolicy(data, false, 'error')
 
       expect(result.artifacts).toBeDefined()
-      expect(result.artifacts?.[0]?.alerts).toHaveLength(2)
+      expect(result.artifacts?.[0]?.alerts).toHaveLength(1)
       expect(result.artifacts?.[0]?.alerts?.[0]?.key).toBe('alert-1')
-      expect(result.artifacts?.[0]?.alerts?.[1]?.key).toBe('alert-3')
     })
 
     it('should handle single artifact with alerts property', () => {
@@ -726,9 +724,10 @@ describe('HTTP Client - ResponseError Edge Cases', () => {
       expect(result.artifacts).toBeDefined()
       const alert = result.artifacts?.[0]?.alerts?.[0]
       expect(alert).toEqual({
-        type: 'malware',
-        severity: 'high',
+        action: 'error',
         key: 'alert-1',
+        severity: 'high',
+        type: 'malware',
       })
       expect(alert).not.toHaveProperty('description')
       expect(alert).not.toHaveProperty('extraData')
