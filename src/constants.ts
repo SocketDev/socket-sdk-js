@@ -52,6 +52,9 @@ export const MAX_STREAM_SIZE = 100 * 1024 * 1024
 // Public blob store URL for patch downloads
 export const SOCKET_PUBLIC_BLOB_STORE_URL = 'https://socketusercontent.com'
 
+// Public firewall API URL for per-package lookups (unauthenticated, fast).
+export const SOCKET_FIREWALL_API_URL = 'https://firewall-api.socket.dev/purl'
+
 // https://github.com/sindresorhus/got/blob/v14.4.6/documentation/2-options.md#agent
 // Valid HTTP agent names for Got-style agent configuration compatibility.
 export const httpAgentNames = new Set(['http', 'https', 'http2'])

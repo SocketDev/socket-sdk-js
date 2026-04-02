@@ -256,6 +256,35 @@ export type SocketSdkGenericResult<T> =
       url?: string | undefined
     }
 
+export type MalwareCheckAlert = {
+  category?: string | undefined
+  fix?: { description: string; type: string } | undefined
+  key: string
+  props?: Record<string, unknown> | undefined
+  severity?: string | undefined
+  type: ALERT_TYPE
+}
+
+export type MalwareCheckPackage = {
+  alerts: MalwareCheckAlert[]
+  name?: string | undefined
+  namespace?: string | undefined
+  score?: MalwareCheckScore | undefined
+  type: string
+  version?: string | undefined
+}
+
+export type MalwareCheckResult = MalwareCheckPackage[]
+
+export type MalwareCheckScore = {
+  license: number
+  maintenance: number
+  overall: number
+  quality: number
+  supplyChain: number
+  vulnerability: number
+}
+
 /**
  * Result from file validation callback.
  * Allows consumers to customize error handling and logging.
