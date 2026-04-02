@@ -257,7 +257,10 @@ export type SocketSdkGenericResult<T> =
     }
 
 export type MalwareCheckAlert = {
+  category?: string | undefined
+  fix?: { description: string; type: string } | undefined
   key: string
+  props?: Record<string, unknown> | undefined
   severity?: string | undefined
   type: ALERT_TYPE
 }

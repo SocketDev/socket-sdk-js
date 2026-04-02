@@ -36,6 +36,7 @@ import {
   SOCKET_API_TOKENS_URL,
   SOCKET_CONTACT_URL,
   SOCKET_DASHBOARD_URL,
+  SOCKET_FIREWALL_API_URL,
   SOCKET_PUBLIC_BLOB_STORE_URL,
 } from './constants'
 import {
@@ -970,16 +971,63 @@ export class SocketSdk {
 
   /**
    * Check packages for malware and security alerts.
-   * Wraps batchPackageFetch with normalized results filtered by policy.
    *
-   * For public tokens, alerts are filtered using the client-side publicPolicy map —
-   * only alerts with action 'error' or 'warn' are included.
-   * For org tokens, alerts are filtered using the server-assigned action.
+   * For public tokens, uses the firewall API (per-package, unauthenticated)
+   * which returns full artifact data including score and alert details.
+   * Alerts are filtered using the client-side publicPolicy map.
+   *
+   * For org tokens, uses the batch PURL API with full org policy.
+   * Alerts are filtered using the server-assigned action.
+   *
+   * Both paths return the same normalized result shape.
    *
    * @param components - Array of package URLs to check
    * @returns Normalized results with policy-filtered alerts per package
    */
   async checkMalware(
+    components: Array<{ purl: string }>,
+  ): Promise<SocketSdkGenericResult<MalwareCheckResult>> {
+    const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
+    if (isPublicToken) {
+      return this.#checkMalwareFirewall(components)
+    }
+    return this.#checkMalwareBatch(components)
+  }
+
+  // Public token path: parallel firewall API requests per PURL.
+  // Returns full artifact data (score, alert props, categories, fix info).
+  async #checkMalwareFirewall(
+    components: Array<{ purl: string }>,
+  ): Promise<SocketSdkGenericResult<MalwareCheckResult>> {
+    const packages: MalwareCheckPackage[] = []
+    const results = await Promise.allSettled(
+      components.map(async ({ purl }) => {
+        const url = `${SOCKET_FIREWALL_API_URL}/${encodeURIComponent(purl)}`
+        const resp = await fetch(url, {
+          signal: AbortSignal.timeout(
+            this.#reqOptions.timeout ?? DEFAULT_HTTP_TIMEOUT,
+          ),
+        })
+        if (!resp.ok) return undefined
+        return (await resp.json()) as Record<string, unknown>
+      }),
+    )
+    for (const settled of results) {
+      if (settled.status === 'rejected' || !settled.value) continue
+      const artifact = settled.value as SocketArtifact
+      packages.push(SocketSdk.#normalizeArtifact(artifact, true))
+    }
+    return {
+      cause: undefined,
+      data: packages,
+      error: undefined,
+      status: 200,
+      success: true,
+    }
+  }
+
+  // Org token path: single batch PURL API request.
+  async #checkMalwareBatch(
     components: Array<{ purl: string }>,
   ): Promise<SocketSdkGenericResult<MalwareCheckResult>> {
     const result = await this.batchPackageFetch(
@@ -995,35 +1043,9 @@ export class SocketSdk {
         success: false,
       }
     }
-    const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
     const packages: MalwareCheckPackage[] = []
     for (const artifact of result.data as SocketArtifact[]) {
-      const alerts: MalwareCheckAlert[] = []
-      if (artifact.alerts) {
-        for (const alert of artifact.alerts) {
-          // Derive action from publicPolicy for public tokens,
-          // use server action for org tokens.
-          const action = isPublicToken
-            ? (publicPolicy.get(alert.type) ?? 'ignore')
-            : (alert.action ?? 'ignore')
-          // Only include alerts the policy considers actionable.
-          if (action === 'error' || action === 'warn') {
-            alerts.push({
-              key: alert.key,
-              severity: alert.severity,
-              type: alert.type,
-            })
-          }
-        }
-      }
-      packages.push({
-        alerts,
-        name: artifact.name,
-        namespace: artifact.namespace,
-        score: artifact.score as MalwareCheckScore | undefined,
-        type: artifact.type,
-        version: artifact.version,
-      })
+      packages.push(SocketSdk.#normalizeArtifact(artifact, false))
     }
     return {
       cause: undefined,
@@ -1031,6 +1053,41 @@ export class SocketSdk {
       error: undefined,
       status: 200,
       success: true,
+    }
+  }
+
+  // Shared normalization for both firewall and batch artifacts.
+  static #normalizeArtifact(
+    artifact: SocketArtifact,
+    isPublicToken: boolean,
+  ): MalwareCheckPackage {
+    const alerts: MalwareCheckAlert[] = []
+    if (artifact.alerts) {
+      for (const alert of artifact.alerts) {
+        const action = isPublicToken
+          ? (publicPolicy.get(alert.type) ?? 'ignore')
+          : (alert.action ?? 'ignore')
+        if (action === 'error' || action === 'warn') {
+          alerts.push({
+            category: alert.category,
+            fix: alert.fix
+              ? { description: alert.fix.description, type: alert.fix.type }
+              : undefined,
+            key: alert.key,
+            props: alert.props,
+            severity: alert.severity,
+            type: alert.type,
+          })
+        }
+      }
+    }
+    return {
+      alerts,
+      name: artifact.name,
+      namespace: artifact.namespace,
+      score: artifact.score as MalwareCheckScore | undefined,
+      type: artifact.type,
+      version: artifact.version,
     }
   }
 
