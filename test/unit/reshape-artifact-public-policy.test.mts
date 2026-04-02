@@ -20,6 +20,7 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
   describe('when user is not authenticated', () => {
     describe('object with artifacts array', () => {
       it('should reshape artifacts array for unauthenticated users', () => {
+        // publicPolicy: malware→error, criticalCVE→warn, deprecated→monitor
         const data = {
           artifacts: [
             {
@@ -34,22 +35,19 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
               extra: 'should-be-removed',
               alerts: [
                 {
-                  type: 'typo',
+                  type: 'criticalCVE',
                   severity: 'high',
                   key: 'alert1',
-                  action: 'warn',
                 },
                 {
                   type: 'malware',
                   severity: 'low',
                   key: 'alert2',
-                  action: 'block',
                 },
                 {
-                  type: 'vuln',
+                  type: 'deprecated',
                   severity: 'medium',
                   key: 'alert3',
-                  action: 'warn',
                 },
               ],
             },
@@ -71,8 +69,18 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
               scorecards: { overall: 8 },
               topLevelAncestors: ['parent'],
               alerts: [
-                { type: 'typo', severity: 'high', key: 'alert1' },
-                { type: 'vuln', severity: 'medium', key: 'alert3' },
+                {
+                  action: 'warn',
+                  key: 'alert1',
+                  severity: 'high',
+                  type: 'criticalCVE',
+                },
+                {
+                  action: 'monitor',
+                  key: 'alert3',
+                  severity: 'medium',
+                  type: 'deprecated',
+                },
               ],
             },
           ],
@@ -81,6 +89,7 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
       })
 
       it('should filter alerts by actions when provided', () => {
+        // publicPolicy: malware→error, criticalCVE→warn, deprecated→monitor
         const data = {
           artifacts: [
             {
@@ -88,20 +97,17 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
               alerts: [
                 {
                   severity: 'high',
-                  action: 'warn',
-                  type: 'typo',
+                  type: 'malware',
                   key: 'alert1',
                 },
                 {
-                  severity: 'medium',
-                  action: 'block',
-                  type: 'malware',
+                  severity: 'high',
+                  type: 'criticalCVE',
                   key: 'alert2',
                 },
                 {
                   severity: 'high',
-                  action: 'ignore',
-                  type: 'vuln',
+                  type: 'deprecated',
                   key: 'alert3',
                 },
               ],
@@ -109,11 +115,16 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
           ],
         }
 
-        const result = reshapeArtifactForPublicPolicy(data, false, 'warn,block')
+        const result = reshapeArtifactForPublicPolicy(data, false, 'error,warn')
 
         expect(result.artifacts?.[0]?.alerts).toEqual([
-          { type: 'typo', severity: 'high', key: 'alert1' },
-          { type: 'malware', severity: 'medium', key: 'alert2' },
+          { action: 'error', key: 'alert1', severity: 'high', type: 'malware' },
+          {
+            action: 'warn',
+            key: 'alert2',
+            severity: 'high',
+            type: 'criticalCVE',
+          },
         ])
       })
 
@@ -149,12 +160,11 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
           topLevelAncestors: ['ancestor'],
           extra: 'should-be-removed',
           alerts: [
-            { type: 'typo', severity: 'high', key: 'alert1', action: 'warn' },
+            { type: 'criticalCVE', severity: 'high', key: 'alert1' },
             {
               type: 'malware',
               severity: 'low',
               key: 'alert2',
-              action: 'block',
             },
           ],
         }
@@ -170,28 +180,40 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
           supplyChainRisk: 0.3,
           scorecards: { overall: 9 },
           topLevelAncestors: ['ancestor'],
-          alerts: [{ type: 'typo', severity: 'high', key: 'alert1' }],
+          alerts: [
+            {
+              action: 'warn',
+              key: 'alert1',
+              severity: 'high',
+              type: 'criticalCVE',
+            },
+          ],
         })
       })
 
       it('should filter single artifact alerts by actions', () => {
+        // publicPolicy: malware→error, criticalCVE→warn
         const data = {
           name: 'test',
           alerts: [
-            { severity: 'high', action: 'warn', type: 'typo', key: 'alert1' },
+            { severity: 'high', type: 'criticalCVE', key: 'alert1' },
             {
-              severity: 'medium',
-              action: 'block',
+              severity: 'critical',
               type: 'malware',
               key: 'alert2',
             },
           ],
         }
 
-        const result = reshapeArtifactForPublicPolicy(data, false, 'block')
+        const result = reshapeArtifactForPublicPolicy(data, false, 'error')
 
         expect(result.alerts).toEqual([
-          { type: 'malware', severity: 'medium', key: 'alert2' },
+          {
+            action: 'error',
+            key: 'alert2',
+            severity: 'critical',
+            type: 'malware',
+          },
         ])
       })
     })
@@ -212,29 +234,52 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
     describe('edge cases with actions parameter', () => {
       it('should handle empty actions string', () => {
         const data = {
-          alerts: [
-            { severity: 'high', action: 'warn', type: 'typo', key: 'alert1' },
-          ],
+          alerts: [{ severity: 'high', type: 'criticalCVE', key: 'alert1' }],
         }
 
         const result = reshapeArtifactForPublicPolicy(data, false, '')
 
         expect(result.alerts).toEqual([
-          { type: 'typo', severity: 'high', key: 'alert1' },
+          {
+            action: 'warn',
+            key: 'alert1',
+            severity: 'high',
+            type: 'criticalCVE',
+          },
         ])
       })
 
       it('should handle undefined actions parameter', () => {
         const data = {
-          alerts: [
-            { severity: 'high', action: 'warn', type: 'typo', key: 'alert1' },
-          ],
+          alerts: [{ severity: 'high', type: 'criticalCVE', key: 'alert1' }],
         }
 
         const result = reshapeArtifactForPublicPolicy(data, false, undefined)
 
         expect(result.alerts).toEqual([
-          { type: 'typo', severity: 'high', key: 'alert1' },
+          {
+            action: 'warn',
+            key: 'alert1',
+            severity: 'high',
+            type: 'criticalCVE',
+          },
+        ])
+      })
+
+      it('should pass alerts with unknown types when no actions filter', () => {
+        const data = {
+          alerts: [{ severity: 'high', type: 'unknownType', key: 'alert1' }],
+        }
+
+        const result = reshapeArtifactForPublicPolicy(data, false)
+
+        expect(result.alerts).toEqual([
+          {
+            action: undefined,
+            key: 'alert1',
+            severity: 'high',
+            type: 'unknownType',
+          },
         ])
       })
     })
