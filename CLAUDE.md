@@ -284,6 +284,36 @@ Do not read source files and assert on their contents (`.toContain('pattern')`).
 - **Package detection**: Use `existsSync()` not `fs.access()`
 - **Test failures**: Check unused nock mocks, ensure cleanup
 
+### Completion Protocol
+
+- **NEVER claim done with something 80% complete** — finish 100% before reporting
+- When a multi-step change doesn't immediately show gains, commit and keep iterating — don't revert
+- If one approach fails, fix forward: analyze why, adjust, rebuild, re-measure — not `git checkout`
+- After EVERY code change: build, test, verify, commit. This is a single atomic unit
+- Reverting is a last resort after exhausting forward fixes — and requires explicit user approval
+
+### File System as State
+
+The file system is working memory. Use it actively:
+
+- Write intermediate results and analysis to files in `.claude/`
+- Use `.claude/` for plans, status tracking, and cross-session context
+- When debugging, save logs and outputs to files for reproducible verification
+- Don't hold large analysis in context — write it down, reference it later
+
+### Self-Improvement
+
+- After ANY correction from the user: log the pattern to memory so the same mistake is never repeated
+- Convert mistakes into strict rules — don't just note them, enforce them
+- After fixing a bug: explain why it happened and whether anything prevents that category of bug in the future
+
+### Context & Edit Safety
+
+- After 10+ messages: re-read any file before editing it — do not trust remembered contents
+- Before every edit: re-read the file. After every edit: re-read to confirm the change applied correctly
+- Tool results over 50K characters are silently truncated — if search returns suspiciously few results, narrow scope and re-run
+- For tasks touching >5 files: use sub-agents with worktree isolation to prevent context decay
+
 ### SDK Notes
 
 - Windows compatibility important - test path handling
