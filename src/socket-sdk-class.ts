@@ -970,13 +970,14 @@ export class SocketSdk {
 
   /**
    * Check packages for malware and security alerts.
-   * Wraps batchPackageFetch with normalized results and policy-derived actions.
+   * Wraps batchPackageFetch with normalized results filtered by policy.
    *
-   * For public tokens, alert actions are derived from the client-side publicPolicy map.
-   * For org tokens, server-assigned alert actions are used as-is.
+   * For public tokens, alerts are filtered using the client-side publicPolicy map —
+   * only alerts with action 'error' or 'warn' are included.
+   * For org tokens, alerts are filtered using the server-assigned action.
    *
    * @param components - Array of package URLs to check
-   * @returns Normalized results with blocked/warned flags per package
+   * @returns Normalized results with policy-filtered alerts per package
    */
   async checkMalware(
     components: Array<{ purl: string }>,
@@ -1000,25 +1001,28 @@ export class SocketSdk {
       const alerts: MalwareCheckAlert[] = []
       if (artifact.alerts) {
         for (const alert of artifact.alerts) {
-          alerts.push({
-            action: isPublicToken
-              ? (publicPolicy.get(alert.type) ?? 'ignore')
-              : ((alert.action ?? 'ignore') as MalwareCheckAlert['action']),
-            key: alert.key,
-            severity: alert.severity,
-            type: alert.type,
-          })
+          // Derive action from publicPolicy for public tokens,
+          // use server action for org tokens.
+          const action = isPublicToken
+            ? (publicPolicy.get(alert.type) ?? 'ignore')
+            : (alert.action ?? 'ignore')
+          // Only include alerts the policy considers actionable.
+          if (action === 'error' || action === 'warn') {
+            alerts.push({
+              key: alert.key,
+              severity: alert.severity,
+              type: alert.type,
+            })
+          }
         }
       }
       packages.push({
         alerts,
-        blocked: alerts.some(a => a.action === 'error'),
         name: artifact.name,
         namespace: artifact.namespace,
         score: artifact.score as MalwareCheckScore | undefined,
         type: artifact.type,
         version: artifact.version,
-        warned: alerts.some(a => a.action === 'warn'),
       })
     }
     return {
