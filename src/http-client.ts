@@ -10,7 +10,10 @@ import { debugLog } from '@socketsecurity/lib/debug'
 import { jsonParse } from '@socketsecurity/lib/json/parse'
 import { perfTimer } from '@socketsecurity/lib/performance'
 
-import { MAX_RESPONSE_SIZE, publicPolicy } from './constants'
+import {
+  MAX_RESPONSE_SIZE,
+  publicPolicy as defaultPublicPolicy,
+} from './constants'
 import { sanitizeHeaders } from './utils/header-sanitization'
 
 import type {
@@ -600,13 +603,19 @@ export function isResponseOk(response: IncomingMessage): boolean {
  */
 export function reshapeArtifactForPublicPolicy<
   T extends Record<string, unknown>,
->(data: T, isAuthenticated: boolean, actions?: string | undefined): T {
+>(
+  data: T,
+  isAuthenticated: boolean,
+  actions?: string | undefined,
+  policy?: Map<string, string> | undefined,
+): T {
   /* c8 ignore start - Public policy artifact reshaping for unauthenticated users, difficult to test edge cases. */
   // If user is not authenticated, provide a different response structure
   // optimized for the public free-tier experience.
   if (!isAuthenticated) {
     // Parse actions parameter for alert filtering.
     const allowedActions = actions?.trim() ? actions.split(',') : undefined
+    const resolvedPolicy = policy ?? defaultPublicPolicy
 
     const reshapeArtifact = (artifact: SocketArtifactWithExtras) => ({
       name: artifact.name,
@@ -621,8 +630,8 @@ export function reshapeArtifactForPublicPolicy<
       // requests.
       alerts: artifact.alerts
         ?.filter((alert: SocketArtifactAlert) => {
-          // Derive action from publicPolicy instead of trusting server value.
-          const action = publicPolicy.get(alert.type)
+          // Derive action from policy instead of trusting server value.
+          const action = resolvedPolicy.get(alert.type)
           // Filter by severity (remove low severity alerts).
           if (alert.severity === 'low') {
             return false
@@ -634,7 +643,7 @@ export function reshapeArtifactForPublicPolicy<
           return true
         })
         .map((alert: SocketArtifactAlert) => ({
-          action: publicPolicy.get(alert.type),
+          action: resolvedPolicy.get(alert.type),
           key: alert.key,
           severity: alert.severity,
           type: alert.type,

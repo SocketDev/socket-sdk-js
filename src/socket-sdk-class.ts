@@ -267,12 +267,13 @@ export class SocketSdk {
           : /* c8 ignore next - Empty line handling in batch streaming response parsing. */ null
         if (isObjectObject(artifact)) {
           yield this.#handleApiSuccess<'batchPackageFetch'>(
-            /* c8 ignore next 7 - Public token artifact reshaping branch for policy compliance. */
+            /* c8 ignore next 8 - Public token artifact reshaping branch for policy compliance. */
             isPublicToken
               ? reshapeArtifactForPublicPolicy(
                   artifact!,
                   false,
                   queryParams?.['actions'] as string,
+                  publicPolicy,
                 )
               : artifact!,
           )
@@ -842,12 +843,13 @@ export class SocketSdk {
           : /* c8 ignore next - Empty line handling in batch parsing. */ null
         if (isObjectObject(artifact)) {
           results.push(
-            /* c8 ignore next 7 - Public token artifact reshaping for policy compliance. */
+            /* c8 ignore next 8 - Public token artifact reshaping for policy compliance. */
             isPublicToken
               ? reshapeArtifactForPublicPolicy(
                   artifact!,
                   false,
                   queryParams?.['actions'] as string,
+                  publicPolicy,
                 )
               : artifact!,
           )
