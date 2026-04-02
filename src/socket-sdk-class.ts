@@ -1015,7 +1015,7 @@ export class SocketSdk {
     for (const settled of results) {
       if (settled.status === 'rejected' || !settled.value) continue
       const artifact = settled.value as SocketArtifact
-      packages.push(SocketSdk.#normalizeArtifact(artifact, true))
+      packages.push(SocketSdk.#normalizeArtifact(artifact, publicPolicy))
     }
     return {
       cause: undefined,
@@ -1045,7 +1045,7 @@ export class SocketSdk {
     }
     const packages: MalwareCheckPackage[] = []
     for (const artifact of result.data as SocketArtifact[]) {
-      packages.push(SocketSdk.#normalizeArtifact(artifact, false))
+      packages.push(SocketSdk.#normalizeArtifact(artifact))
     }
     return {
       cause: undefined,
@@ -1056,16 +1056,18 @@ export class SocketSdk {
     }
   }
 
-  // Shared normalization for both firewall and batch artifacts.
+  // Normalize an artifact into MalwareCheckPackage.
+  // When policy is provided, derive action from the map.
+  // When policy is undefined, use server-assigned alert.action.
   static #normalizeArtifact(
     artifact: SocketArtifact,
-    isPublicToken: boolean,
+    policy?: Map<string, string> | undefined,
   ): MalwareCheckPackage {
     const alerts: MalwareCheckAlert[] = []
     if (artifact.alerts) {
       for (const alert of artifact.alerts) {
-        const action = isPublicToken
-          ? (publicPolicy.get(alert.type) ?? 'ignore')
+        const action = policy
+          ? (policy.get(alert.type) ?? 'ignore')
           : (alert.action ?? 'ignore')
         if (action === 'error' || action === 'warn') {
           alerts.push({
