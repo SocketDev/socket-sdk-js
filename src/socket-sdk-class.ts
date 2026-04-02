@@ -32,6 +32,7 @@ import {
   MAX_HTTP_TIMEOUT,
   MAX_STREAM_SIZE,
   MIN_HTTP_TIMEOUT,
+  publicPolicy,
   SOCKET_API_TOKENS_URL,
   SOCKET_CONTACT_URL,
   SOCKET_DASHBOARD_URL,
@@ -75,6 +76,10 @@ import type {
   FileValidationCallback,
   GetOptions,
   GotOptions,
+  MalwareCheckAlert,
+  MalwareCheckPackage,
+  MalwareCheckResult,
+  MalwareCheckScore,
   PatchViewResponse,
   PostOrgTelemetryPayload,
   PostOrgTelemetryResponse,
@@ -960,6 +965,68 @@ export class SocketSdk {
         // Keep fetching values from this generator.
         continueGen(generator)
       }
+    }
+  }
+
+  /**
+   * Check packages for malware and security alerts.
+   * Wraps batchPackageFetch with normalized results and policy-derived actions.
+   *
+   * For public tokens, alert actions are derived from the client-side publicPolicy map.
+   * For org tokens, server-assigned alert actions are used as-is.
+   *
+   * @param components - Array of package URLs to check
+   * @returns Normalized results with blocked/warned flags per package
+   */
+  async checkMalware(
+    components: Array<{ purl: string }>,
+  ): Promise<SocketSdkGenericResult<MalwareCheckResult>> {
+    const result = await this.batchPackageFetch(
+      { components },
+      { alerts: true, cachedResultsOnly: true },
+    )
+    if (!result.success) {
+      return {
+        cause: result.cause,
+        data: undefined,
+        error: result.error,
+        status: result.status,
+        success: false,
+      }
+    }
+    const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
+    const packages: MalwareCheckPackage[] = []
+    for (const artifact of result.data as SocketArtifact[]) {
+      const alerts: MalwareCheckAlert[] = []
+      if (artifact.alerts) {
+        for (const alert of artifact.alerts) {
+          alerts.push({
+            action: isPublicToken
+              ? (publicPolicy.get(alert.type) ?? 'ignore')
+              : ((alert.action ?? 'ignore') as MalwareCheckAlert['action']),
+            key: alert.key,
+            severity: alert.severity,
+            type: alert.type,
+          })
+        }
+      }
+      packages.push({
+        alerts,
+        blocked: alerts.some(a => a.action === 'error'),
+        name: artifact.name,
+        namespace: artifact.namespace,
+        score: artifact.score as MalwareCheckScore | undefined,
+        type: artifact.type,
+        version: artifact.version,
+        warned: alerts.some(a => a.action === 'warn'),
+      })
+    }
+    return {
+      cause: undefined,
+      data: packages,
+      error: undefined,
+      status: 200,
+      success: true,
     }
   }
 
