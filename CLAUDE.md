@@ -151,6 +151,13 @@ All `logger.error()` and `logger.log()` calls include empty string:
 - **Type imports**: Always `import type`
 - **Nullish values**: Prefer `undefined` over `null` - use `undefined` for absent/missing values
 
+#### HTTP Requests
+
+- **🚨 NEVER use `fetch()`** - use `createGetRequest`/`createRequestWithJson` from `src/http-client.ts`
+  - `fetch()` bypasses the SDK's HTTP stack (retries, timeouts, hooks, agent config)
+  - `fetch()` cannot be intercepted by nock in tests, forcing c8 ignore blocks
+  - For external URLs (e.g., firewall API), pass a different `baseUrl` to `createGetRequest`
+
 #### Working Directory
 
 - **🚨 NEVER use `process.chdir()`** - use `{ cwd }` options and absolute paths instead

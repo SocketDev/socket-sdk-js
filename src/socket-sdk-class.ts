@@ -29,6 +29,7 @@ import {
   DEFAULT_RETRY_DELAY,
   DEFAULT_USER_AGENT,
   httpAgentNames,
+  MAX_FIREWALL_COMPONENTS,
   MAX_HTTP_TIMEOUT,
   MAX_STREAM_SIZE,
   MIN_HTTP_TIMEOUT,
@@ -966,14 +967,13 @@ export class SocketSdk {
   /**
    * Check packages for malware and security alerts.
    *
-   * For public tokens, uses the firewall API (per-package, unauthenticated)
-   * which returns full artifact data including score and alert details.
-   * Alerts are filtered using the client-side publicPolicy map.
+   * For small sets (≤ MAX_FIREWALL_COMPONENTS), uses parallel firewall API
+   * requests which return full artifact data including score and alert details.
    *
-   * For org tokens, uses the batch PURL API with full org policy.
-   * Alerts are filtered using the server-assigned action.
+   * For larger sets, uses the batch PURL API for efficiency.
    *
-   * Both paths return the same normalized result shape.
+   * Both paths normalize alerts through publicPolicy and only return
+   * malware-relevant results.
    *
    * @param components - Array of package URLs to check
    * @returns Normalized results with policy-filtered alerts per package
@@ -981,37 +981,34 @@ export class SocketSdk {
   async checkMalware(
     components: Array<{ purl: string }>,
   ): Promise<SocketSdkGenericResult<MalwareCheckResult>> {
-    const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
-    /* c8 ignore next 3 - c8 ignored: because public token path uses global fetch() to SOCKET_FIREWALL_API_URL which cannot be intercepted by nock or local HTTP servers; tested via the isolated checkMalware test with mocked fetch */
-    if (isPublicToken) {
+    if (components.length <= MAX_FIREWALL_COMPONENTS) {
       return this.#checkMalwareFirewall(components)
     }
     return this.#checkMalwareBatch(components)
   }
 
-  // Public token path: parallel firewall API requests per PURL.
+  // Small-set path: parallel firewall API requests per PURL.
   // Returns full artifact data (score, alert props, categories, fix info).
-  /* c8 ignore start - c8 ignored: because #checkMalwareFirewall uses global fetch() to an external URL (firewall-api.socket.dev) that cannot be intercepted in the main test suite */
   async #checkMalwareFirewall(
     components: Array<{ purl: string }>,
   ): Promise<SocketSdkGenericResult<MalwareCheckResult>> {
     const packages: MalwareCheckPackage[] = []
     const results = await Promise.allSettled(
       components.map(async ({ purl }) => {
-        const url = `${SOCKET_FIREWALL_API_URL}/${encodeURIComponent(purl)}`
-        const resp = await fetch(url, {
-          signal: AbortSignal.timeout(
-            this.#reqOptions.timeout ?? DEFAULT_HTTP_TIMEOUT,
-          ),
-        })
-        if (!resp.ok) return undefined
-        return (await resp.json()) as Record<string, unknown>
+        const urlPath = `/${encodeURIComponent(purl)}`
+        const response = await createGetRequest(
+          SOCKET_FIREWALL_API_URL,
+          urlPath,
+          this.#reqOptions,
+        )
+        if (!isResponseOk(response)) return undefined
+        const json = await getResponseJson(response)
+        return json as unknown as SocketArtifact
       }),
     )
     for (const settled of results) {
       if (settled.status === 'rejected' || !settled.value) continue
-      const artifact = settled.value as SocketArtifact
-      packages.push(SocketSdk.#normalizeArtifact(artifact, publicPolicy))
+      packages.push(SocketSdk.#normalizeArtifact(settled.value, publicPolicy))
     }
     return {
       cause: undefined,
@@ -1021,9 +1018,8 @@ export class SocketSdk {
       success: true,
     }
   }
-  /* c8 ignore stop */
 
-  // Org token path: single batch PURL API request.
+  // Multi-component path: batch PURL API request, normalized to publicPolicy.
   async #checkMalwareBatch(
     components: Array<{ purl: string }>,
   ): Promise<SocketSdkGenericResult<MalwareCheckResult>> {
@@ -1042,7 +1038,7 @@ export class SocketSdk {
     }
     const packages: MalwareCheckPackage[] = []
     for (const artifact of result.data as SocketArtifact[]) {
-      packages.push(SocketSdk.#normalizeArtifact(artifact))
+      packages.push(SocketSdk.#normalizeArtifact(artifact, publicPolicy))
     }
     return {
       cause: undefined,

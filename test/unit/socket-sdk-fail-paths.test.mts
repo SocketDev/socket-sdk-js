@@ -411,14 +411,6 @@ describe('SocketSdk - downloadPatch MAX_PATCH_SIZE', () => {
 })
 
 // ===========================================================================
-// checkMalware — public token firewall path
-// Note: The firewall API URL (SOCKET_FIREWALL_API_URL) is hardcoded and cannot
-// be overridden via options. The public token path is already thoroughly tested
-// in socket-sdk-check-malware.test.mts using nock. This section only tests
-// the graceful degradation when the firewall API is unreachable.
-// ===========================================================================
-
-// ===========================================================================
 // #createQueryErrorResult — non-SyntaxError branch (plain Error)
 // ===========================================================================
 describe('SocketSdk - #createQueryErrorResult non-SyntaxError', () => {
