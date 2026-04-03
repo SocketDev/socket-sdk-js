@@ -41,21 +41,20 @@ export const baseCoverageConfig: CoverageOptions = {
 
 /**
  * Standard coverage thresholds for main test suite.
- * Baseline: 73.04% (after removing problematic tests that timeout in coverage mode)
  */
 export const mainCoverageThresholds = {
-  lines: 73,
-  functions: 90,
-  branches: 55,
-  statements: 73,
+  branches: 82,
+  functions: 98,
+  lines: 93,
+  statements: 93,
 }
 
 /**
  * Relaxed coverage thresholds for isolated tests (lower bar for specialized tests).
  */
 export const isolatedCoverageThresholds = {
-  lines: 35,
+  branches: 49,
   functions: 35,
-  branches: 50,
+  lines: 35,
   statements: 35,
 }

@@ -40,9 +40,9 @@ export default defineConfig({
     pool: 'forks',
     poolOptions: {
       forks: {
-        // Use single fork for coverage, parallel otherwise
-        singleFork: isCoverageEnabled,
-        maxForks: isCoverageEnabled ? 1 : 8,
+        // Each test file gets its own fork for nock isolation.
+        singleFork: false,
+        maxForks: isCoverageEnabled ? 4 : 8,
         minForks: isCoverageEnabled ? 1 : 2,
       },
     },
