@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.5.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.5.0) - 2026-04-03
+
+### Added
+
+- **checkMalware**: New API method for normalized malware detection across public and org tokens
+  - Public tokens use the firewall API with client-side `publicPolicy` filtering
+  - Org tokens use the batch PURL API with full server-assigned org policy
+  - Both paths return the same normalized `MalwareCheckResult` shape
+- New exported types: `MalwareCheckAlert`, `MalwareCheckPackage`, `MalwareCheckResult`, `MalwareCheckScore`
+- New audit log action types: `CreateTicket`, `DisconnectJiraIntegration`, `JiraIntegrationConnected`
+- New `alert-resolution` permission scope (list, create, read, delete)
+- New `workspace` parameter for `createOrgFullScan` package entries
+- New `SocketSBOMScore` schema for supply chain risk score breakdowns with formulas and components
+- New `skillPreExecution` alert type and policy action
+- Full scan `include_scores` and `include_scores_details` query parameters with `scores` ndjson event
+- Batch PURL `timeoutSec` parameter for scan result timeout control
+
 ## [3.4.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.4.1) - 2026-03-12
 
 ### Changed
