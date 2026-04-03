@@ -12,7 +12,7 @@
  *   #executeWithRetry onRetry branches (401/403, 429 with Retry-After),
  *   #getResponseText 50MB size limit,
  *   #getTtlForEndpoint / cache config (number, object with endpoint, default),
- *   #checkMalwareFirewall internals (rejected/undefined settled),
+ *   #checkMalwareBatch normalize with publicPolicy,
  *   downloadOrgFullScanFilesAsTar streaming,
  *   streamFullScan data/error/end handlers,
  *   uploadManifestFiles edge case
@@ -27,6 +27,7 @@ import { PassThrough } from 'node:stream'
 
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
+import { MAX_FIREWALL_COMPONENTS } from '../../src/constants.js'
 import {
   createRequestBodyForFilepaths,
   createUploadRequest,
@@ -641,67 +642,70 @@ describe('SocketSdk - #parseRetryAfter via retry behavior', () => {
 })
 
 // =============================================================================
-// 4e. socket-sdk-class.ts — #checkMalwareFirewall internals (lines 990-1018)
-//     Specifically: rejected promise and resp.ok=false branches
+// 4e. socket-sdk-class.ts — #checkMalwareBatch normalize with publicPolicy
+//     Specifically: alerts with/without fix, ignore actions filtered
 // =============================================================================
 
-describe('SocketSdk - checkMalwareFirewall internals', () => {
+describe('SocketSdk - checkMalware batch normalize with publicPolicy', () => {
+  const artifact = {
+    alerts: [
+      {
+        category: 'supplyChainRisk',
+        fix: { description: 'Remove package', type: 'remove' },
+        key: 'mal-1',
+        props: { note: 'data exfil' },
+        severity: 'critical',
+        type: 'malware',
+      },
+      {
+        // Alert without fix property — criticalCVE is 'warn' in publicPolicy
+        category: 'quality',
+        key: 'cve-1',
+        props: {},
+        severity: 'high',
+        type: 'criticalCVE',
+      },
+      {
+        // deprecated is 'ignore' in publicPolicy — should be filtered out
+        category: 'misc',
+        key: 'dep-1',
+        props: {},
+        severity: 'low',
+        type: 'deprecated',
+      },
+    ],
+    name: 'evil-pkg',
+    namespace: undefined,
+    score: {
+      license: 0.9,
+      maintenance: 0.8,
+      overall: 0.1,
+      quality: 0.7,
+      supplyChain: 0.0,
+      vulnerability: 0.0,
+    },
+    type: 'npm',
+    version: '1.0.0',
+  }
+
   const getBaseUrl = setupLocalHttpServer(
     (req: IncomingMessage, res: ServerResponse) => {
       const url = req.url || ''
 
-      // Batch purl path (org token) — exercises #normalizeArtifact.
+      // Batch purl path — exercises #normalizeArtifact with publicPolicy.
       let body = ''
       req.on('data', (chunk: Buffer) => {
         body += chunk.toString()
       })
       req.on('end', () => {
         if (url.includes('/purl') && req.method === 'POST') {
-          const artifact = {
-            alerts: [
-              {
-                action: 'error',
-                category: 'supplyChainRisk',
-                fix: { description: 'Remove package', type: 'remove' },
-                key: 'mal-1',
-                props: { note: 'data exfil' },
-                severity: 'critical',
-                type: 'malware',
-              },
-              {
-                // Alert without fix property
-                action: 'warn',
-                category: 'quality',
-                key: 'cve-1',
-                props: {},
-                severity: 'high',
-                type: 'criticalCVE',
-              },
-              {
-                // Alert with ignore action — should be filtered out
-                action: 'ignore',
-                category: 'misc',
-                key: 'dep-1',
-                props: {},
-                severity: 'low',
-                type: 'deprecated',
-              },
-            ],
-            name: 'evil-pkg',
-            namespace: undefined,
-            score: {
-              license: 0.9,
-              maintenance: 0.8,
-              overall: 0.1,
-              quality: 0.7,
-              supplyChain: 0.0,
-              vulnerability: 0.0,
-            },
-            type: 'npm',
-            version: '1.0.0',
-          }
+          const parsed = JSON.parse(body)
+          const count = parsed.components?.length ?? 0
+          const lines = Array.from({ length: count }, () =>
+            JSON.stringify(artifact),
+          ).join('\n')
           res.writeHead(200, { 'Content-Type': 'application/x-ndjson' })
-          res.end(`${JSON.stringify(artifact)}\n`)
+          res.end(`${lines}\n`)
         } else {
           res.writeHead(404)
           res.end()
@@ -711,21 +715,23 @@ describe('SocketSdk - checkMalwareFirewall internals', () => {
   )
 
   it('should normalize artifact with fix and without fix, filtering ignore actions', async () => {
-    const client = new SocketSdk('org-api-token', {
+    const count = MAX_FIREWALL_COMPONENTS + 1
+    const client = new SocketSdk('test-api-token', {
       baseUrl: `${getBaseUrl()}/v0/`,
       retries: 0,
     })
 
-    const result = await client.checkMalware([
-      { purl: 'pkg:npm/evil-pkg@1.0.0' },
-    ])
+    const components = Array.from({ length: count }, (_, i) => ({
+      purl: `pkg:npm/evil-pkg@${i + 1}.0.0`,
+    }))
+    const result = await client.checkMalware(components)
 
     expect(result.success).toBe(true)
     if (!result.success) return
-    expect(result.data).toHaveLength(1)
+    expect(result.data).toHaveLength(count)
     const pkg = result.data[0]!
 
-    // Two alerts should remain (error + warn), ignore is filtered
+    // Two alerts should remain (error + warn via publicPolicy), deprecated is filtered
     expect(pkg.alerts).toHaveLength(2)
 
     // First alert has fix

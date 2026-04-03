@@ -12,6 +12,7 @@
 
 import { describe, expect, it, vi } from 'vitest'
 
+import { MAX_FIREWALL_COMPONENTS } from '../../src/constants.js'
 import { SocketSdk } from '../../src/index'
 import { setupLocalHttpServer } from '../utils/local-server-helpers.mts'
 
@@ -696,7 +697,7 @@ describe('SocketSdk - sendApi additional paths', () => {
 })
 
 // ---------------------------------------------------------------------------
-// checkMalware batch path (org token) - additional coverage
+// checkMalware batch path (multiple components) - additional coverage
 // ---------------------------------------------------------------------------
 describe('SocketSdk - checkMalware batch path additional', () => {
   const getBaseUrl = setupLocalHttpServer(
@@ -716,7 +717,7 @@ describe('SocketSdk - checkMalware batch path additional', () => {
             (c: { purl: string }) => c.purl,
           )
 
-          if (purls.length === 1 && purls[0] === 'pkg:npm/nonexistent@0.0.0') {
+          if (purls.includes('pkg:npm/nonexistent@0.0.0')) {
             // Empty response
             res.writeHead(200, { 'Content-Type': 'application/x-ndjson' })
             res.end('\n')
@@ -725,7 +726,6 @@ describe('SocketSdk - checkMalware batch path additional', () => {
             const artifact1 = {
               alerts: [
                 {
-                  action: 'warn',
                   key: 'cve-1',
                   severity: 'high',
                   type: 'criticalCVE',
@@ -755,14 +755,16 @@ describe('SocketSdk - checkMalware batch path additional', () => {
   )
 
   it('should handle empty artifact list from batch API', async () => {
-    const client = new SocketSdk('org-api-token', {
+    const count = MAX_FIREWALL_COMPONENTS + 1
+    const client = new SocketSdk('test-api-token', {
       baseUrl: `${getBaseUrl()}/v0/`,
       retries: 0,
     })
 
-    const result = await client.checkMalware([
-      { purl: 'pkg:npm/nonexistent@0.0.0' },
-    ])
+    const components = Array.from({ length: count }, (_, i) => ({
+      purl: `pkg:npm/nonexistent@0.0.${i}`,
+    }))
+    const result = await client.checkMalware(components)
 
     expect(result.success).toBe(true)
     if (!result.success) return
@@ -770,19 +772,22 @@ describe('SocketSdk - checkMalware batch path additional', () => {
   })
 
   it('should normalize multiple artifacts from batch response', async () => {
-    const client = new SocketSdk('org-api-token', {
+    const count = MAX_FIREWALL_COMPONENTS + 1
+    const client = new SocketSdk('test-api-token', {
       baseUrl: `${getBaseUrl()}/v0/`,
       retries: 0,
     })
 
-    const result = await client.checkMalware([
-      { purl: 'pkg:npm/pkg-a@1.0.0' },
-      { purl: 'pkg:npm/pkg-b@2.0.0' },
-    ])
+    const components = Array.from({ length: count }, (_, i) => ({
+      purl: `pkg:npm/pkg-${String.fromCharCode(97 + i)}@${i + 1}.0.0`,
+    }))
+    const result = await client.checkMalware(components)
 
     expect(result.success).toBe(true)
     if (!result.success) return
+    // Server returns 2 artifacts for non-nonexistent purls
     expect(result.data).toHaveLength(2)
+    // criticalCVE is 'warn' in publicPolicy, so it should be included
     expect(result.data[0]!.alerts).toHaveLength(1)
     expect(result.data[0]!.alerts[0]!.type).toBe('criticalCVE')
     expect(result.data[1]!.alerts).toEqual([])
@@ -802,14 +807,16 @@ describe('SocketSdk - checkMalware batch error forwarding', () => {
   )
 
   it('should forward batchPackageFetch error from checkMalwareBatch', async () => {
+    const count = MAX_FIREWALL_COMPONENTS + 1
     const client = new SocketSdk('test-token', {
       baseUrl: `${getBaseUrl()}/v0/`,
       retries: 0,
     })
 
-    const result = await client.checkMalware([
-      { purl: 'pkg:npm/lodash@4.17.21' },
-    ])
+    const components = Array.from({ length: count }, (_, i) => ({
+      purl: `pkg:npm/lodash@4.17.${i}`,
+    }))
+    const result = await client.checkMalware(components)
 
     expect(result.success).toBe(false)
     if (!result.success) {
