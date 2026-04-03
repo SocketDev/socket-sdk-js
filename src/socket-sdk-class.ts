@@ -241,14 +241,13 @@ export class SocketSdk {
       res = await this.#executeWithRetry(() =>
         this.#createBatchPurlRequest(componentsObj, queryParams),
       )
-      /* c8 ignore start - Error handling for network failures, difficult to test reliably */
+      /* c8 ignore next 4 - c8 ignored: because async generator catch+yield requires the caller to consume the generator during a network failure, which nock cannot simulate in threads pool */
     } catch (e) {
       yield await this.#handleApiError<'batchPackageFetch'>(e)
       return
     }
-    /* c8 ignore stop */
     // Validate response before processing.
-    /* c8 ignore next 3 - Defensive check, response should always be defined after successful request */
+    /* c8 ignore next 3 - c8 ignored: because #executeWithRetry always returns a value or throws; res is never undefined in practice */
     if (!res) {
       throw new Error('Failed to get response from batch PURL request')
     }
@@ -321,16 +320,14 @@ export class SocketSdk {
       const enhancedError = e as SyntaxError & {
         originalResponse?: string | undefined
       }
-      /* c8 ignore next - Defensive empty string fallback for originalResponse. */
       let responseText = enhancedError.originalResponse || ''
 
-      /* c8 ignore next 5 - Empty response text fallback check for JSON parsing errors without originalResponse. */
+      /* c8 ignore next 4 - c8 ignored: because getResponseJson always attaches originalResponse to SyntaxErrors; this regex fallback exists for third-party JSON parsers that may not */
       if (!responseText) {
         const match = e.message.match(/Invalid JSON response:\n([\s\S]*?)\n→/)
         responseText = match?.[1] || ''
       }
 
-      /* c8 ignore next - Defensive empty string fallback when slice returns empty. */
       const preview = responseText.slice(0, 100) || ''
       return {
         cause: `Please report this. JSON.parse threw an error over the following response: \`${preview.trim()}${responseText.length > 100 ? '…' : ''}\``,
@@ -341,7 +338,6 @@ export class SocketSdk {
       }
     }
 
-    /* c8 ignore start - Defensive error stringification fallback branches for edge cases. */
     const errStr = e ? String(e).trim() : ''
     return {
       cause: errStr || UNKNOWN_ERROR,
@@ -350,7 +346,6 @@ export class SocketSdk {
       status: 0,
       success: false,
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -365,7 +360,7 @@ export class SocketSdk {
         error: unknown,
         _delay: number,
       ): boolean | number | undefined => {
-        /* c8 ignore next 3 - Early return for non-ResponseError types in retry logic */
+        /* c8 ignore next 3 - c8 ignored: because all SDK HTTP operations throw ResponseError on failure; non-ResponseError types (e.g. DNS, timeout) use pRetry's default retry behavior */
         if (!(error instanceof ResponseError)) {
           return undefined
         }
@@ -390,7 +385,7 @@ export class SocketSdk {
       onRetryRethrow: true,
       retries: this.#retries,
     })
-    /* c8 ignore next 3 - Defensive check for undefined result from pRetry abort */
+    /* c8 ignore next 3 - c8 ignored: because pRetry always returns a value or throws; undefined is only possible if the abort signal fires between attempts, which requires precise timing */
     if (result === undefined) {
       throw new Error('Request aborted')
     }
@@ -473,7 +468,6 @@ export class SocketSdk {
    * Extract text content from HTTP response stream.
    * Internal method with size limits to prevent memory exhaustion.
    */
-  /* c8 ignore start - unused utility method reserved for future text response handling */
   async #getResponseText(response: IncomingMessage): Promise<string> {
     const chunks: Buffer[] = []
     let size = 0
@@ -488,7 +482,6 @@ export class SocketSdk {
     }
     return Buffer.concat(chunks).toString('utf8')
   }
-  /* c8 ignore stop */
 
   /**
    * Handle API error responses and convert to standardized error result.
@@ -530,7 +523,6 @@ export class SocketSdk {
       } = JSON.parse(bodyStr)
       // Client errors (4xx) should return actionable error messages.
       // Extract both message and details from error response for better context.
-      /* c8 ignore next 8 - Error detail handling for API responses with detailed error messages */
       if (typeof parsed?.error?.message === 'string') {
         body = parsed.error.message
 
@@ -543,11 +535,9 @@ export class SocketSdk {
           body = `${body} - Details: ${detailsStr}`
         }
       }
-      /* c8 ignore start - JSON parse error fallback for malformed API responses */
     } catch {
       body = bodyStr
     }
-    /* c8 ignore stop */
     // Build error message that includes the body content if available.
     /* c8 ignore next - Fallback error message when error.message is undefined */
     let errorMessage =
@@ -560,7 +550,8 @@ export class SocketSdk {
       const statusMessage = error.response?.statusMessage
       if (statusMessage && errorMessage.includes(statusMessage)) {
         errorMessage = errorMessage.replace(statusMessage, trimmedBody)
-      } /* c8 ignore next 3 - edge case where statusMessage is undefined or not in error message. */ else {
+        /* c8 ignore next 2 - c8 ignored: because Node.js http always sets statusMessage; this else branch handles custom servers or proxies that omit it */
+      } else {
         errorMessage = `${errorMessage}: ${trimmedBody}`
       }
     }
@@ -668,6 +659,7 @@ export class SocketSdk {
       return (await getResponseJson(response)) as T
     }
 
+    /* c8 ignore next - c8 ignored: because getApi always passes 'response', 'text', or 'json'; this is the default fallback for responseType='response' */
     return response as T
   }
 
@@ -678,6 +670,7 @@ export class SocketSdk {
   #parseRetryAfter(
     retryAfterValue: string | string[] | undefined,
   ): number | undefined {
+    /* c8 ignore next 3 - c8 ignored: because #parseRetryAfter is only called when retry-after header exists; the undefined check guards against type-level callers */
     if (!retryAfterValue) {
       return undefined
     }
@@ -687,6 +680,7 @@ export class SocketSdk {
       ? retryAfterValue[0]
       : retryAfterValue
 
+    /* c8 ignore next 3 - c8 ignored: because HTTP headers are always strings; empty array[0] returns undefined which is guarded here for safety */
     // Return if value is empty after extracting from array.
     if (!value) {
       return undefined
@@ -753,26 +747,26 @@ export class SocketSdk {
     const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/purl?${queryToSearchParams(queryParams)}`
     let res: IncomingMessage | undefined
     try {
-      const req = getHttpModule(this.#baseUrl)
-        .request(url, {
-          method: 'POST',
-          ...this.#reqOptions,
-        })
-        .end(JSON.stringify(componentsObj))
-      res = await getResponse(req)
+      res = await this.#executeWithRetry(async () => {
+        const req = getHttpModule(this.#baseUrl)
+          .request(url, {
+            method: 'POST',
+            ...this.#reqOptions,
+          })
+          .end(JSON.stringify(componentsObj))
+        const response = await getResponse(req)
 
-      // Throw ResponseError for non-2xx status codes so retry logic works properly.
-      /* c8 ignore next 3 - Error response handling for batch requests, requires API to return errors */
-      if (!isResponseOk(res)) {
-        throw new ResponseError(res, '', url)
-      }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
+        // Throw ResponseError for non-2xx status codes so retry logic works properly.
+        if (!isResponseOk(response)) {
+          throw new ResponseError(response, 'POST Request failed', url)
+        }
+        return response
+      })
     } catch (e) {
       return await this.#handleApiError<'batchPackageFetchByOrg'>(e)
     }
-    /* c8 ignore stop */
     // Validate response before processing.
-    /* c8 ignore next 3 - Defensive check, response should always be defined after successful request */
+    /* c8 ignore next 3 - c8 ignored: because #executeWithRetry always returns a value or throws; res is never undefined in practice */
     if (!res) {
       throw new Error('Failed to get response from batch PURL request')
     }
@@ -817,13 +811,11 @@ export class SocketSdk {
     let res: IncomingMessage | undefined
     try {
       res = await this.#createBatchPurlRequest(componentsObj, queryParams)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'batchPackageFetch'>(e)
     }
-    /* c8 ignore stop */
     // Validate response before processing.
-    /* c8 ignore next 3 - Defensive check, response should always be defined after successful request */
+    /* c8 ignore next 3 - c8 ignored: because #executeWithRetry always returns a value or throws; res is never undefined in practice */
     if (!res) {
       throw new Error('Failed to get response from batch PURL request')
     }
@@ -990,6 +982,7 @@ export class SocketSdk {
     components: Array<{ purl: string }>,
   ): Promise<SocketSdkGenericResult<MalwareCheckResult>> {
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
+    /* c8 ignore next 3 - c8 ignored: because public token path uses global fetch() to SOCKET_FIREWALL_API_URL which cannot be intercepted by nock or local HTTP servers; tested via the isolated checkMalware test with mocked fetch */
     if (isPublicToken) {
       return this.#checkMalwareFirewall(components)
     }
@@ -998,6 +991,7 @@ export class SocketSdk {
 
   // Public token path: parallel firewall API requests per PURL.
   // Returns full artifact data (score, alert props, categories, fix info).
+  /* c8 ignore start - c8 ignored: because #checkMalwareFirewall uses global fetch() to an external URL (firewall-api.socket.dev) that cannot be intercepted in the main test suite */
   async #checkMalwareFirewall(
     components: Array<{ purl: string }>,
   ): Promise<SocketSdkGenericResult<MalwareCheckResult>> {
@@ -1027,6 +1021,7 @@ export class SocketSdk {
       success: true,
     }
   }
+  /* c8 ignore stop */
 
   // Org token path: single batch PURL API request.
   async #checkMalwareBatch(
@@ -1192,11 +1187,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'createDependenciesSnapshot'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'createDependenciesSnapshot'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -1334,7 +1327,6 @@ export class SocketSdk {
         status: 200,
         success: true,
       }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       const errorResult = await this.#handleApiError<'CreateOrgFullScan'>(e)
       return {
@@ -1345,7 +1337,6 @@ export class SocketSdk {
         success: false,
       }
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -1405,11 +1396,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'createOrgDiffScanFromIds'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'createOrgDiffScanFromIds'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -1463,11 +1452,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'CreateOrgFullScanArchive'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'CreateOrgFullScanArchive'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -1506,11 +1493,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'createOrgWebhook'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'createOrgWebhook'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -1582,7 +1567,6 @@ export class SocketSdk {
         status: 200,
         success: true,
       }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       const errorResult = await this.#handleApiError<'createOrgRepo'>(e)
       return {
@@ -1593,7 +1577,6 @@ export class SocketSdk {
         success: false,
       }
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -1645,7 +1628,6 @@ export class SocketSdk {
         status: 201,
         success: true,
       }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       const errorResult = await this.#handleApiError<'createOrgRepoLabel'>(e)
       return {
@@ -1656,7 +1638,6 @@ export class SocketSdk {
         success: false,
       }
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -1705,7 +1686,6 @@ export class SocketSdk {
         status: 200,
         success: true,
       }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       const errorResult = await this.#handleApiError<'deleteOrgFullScan'>(e)
       return {
@@ -1716,7 +1696,6 @@ export class SocketSdk {
         success: false,
       }
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -1741,11 +1720,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'deleteOrgDiffScan'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'deleteOrgDiffScan'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -1774,11 +1751,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'deleteOrgWebhook'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'deleteOrgWebhook'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -1836,7 +1811,6 @@ export class SocketSdk {
         status: 200,
         success: true,
       }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       const errorResult = await this.#handleApiError<'deleteOrgRepo'>(e)
       return {
@@ -1847,7 +1821,6 @@ export class SocketSdk {
         success: false,
       }
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -1896,7 +1869,6 @@ export class SocketSdk {
         status: 200,
         success: true,
       }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       const errorResult = await this.#handleApiError<'deleteOrgRepoLabel'>(e)
       return {
@@ -1907,33 +1879,19 @@ export class SocketSdk {
         success: false,
       }
     }
-    /* c8 ignore stop */
   }
 
   /**
-   * Delete a legacy scan report permanently.
-
-  /**
-   * Download patch file content by hash.
+   * Download full scan files as a tar archive.
    *
-   * Downloads the actual patched file content from the public Socket blob store.
-   * This is used after calling viewPatch() to get the patch metadata.
-   * No authentication is required as patch blobs are publicly accessible.
+   * Streams the full scan file contents to the specified output path as a tar file.
+   * Includes size limit enforcement to prevent excessive disk usage.
    *
-   * @param hash - The blob hash in SSRI (sha256-base64) or hex format
-   * @param options - Optional configuration
-   * @param options.baseUrl - Override blob store URL (for testing)
-   * @returns Promise<string> - The patch file content as UTF-8 string
-   * @throws Error if blob not found (404) or download fails
-   *
-   * @example
-   * ```typescript
-   * const sdk = new SocketSdk('your-api-token')
-   * // First get patch metadata
-   * const patch = await sdk.viewPatch('my-org', 'patch-uuid')
-   * // Then download the actual patched file
-   * const fileContent = await sdk.downloadPatch(patch.files['index.js'].socketBlob)
-   * ```
+   * @param orgSlug - Organization identifier
+   * @param fullScanId - Full scan identifier
+   * @param outputPath - Local file path to write the tar archive
+   * @returns Download result with success/error status
+   * @throws {Error} When server returns 5xx status codes
    */
   async downloadOrgFullScanFilesAsTar(
     orgSlug: string,
@@ -1942,18 +1900,21 @@ export class SocketSdk {
   ): Promise<SocketSdkResult<'downloadOrgFullScanFilesAsTar'>> {
     const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/files.tar`
     try {
-      const req = getHttpModule(this.#baseUrl)
-        .request(url, {
-          method: 'GET',
-          ...this.#reqOptions,
-        })
-        .end()
-      const res = await getResponse(req)
+      const res = await this.#executeWithRetry(async () => {
+        const req = getHttpModule(this.#baseUrl)
+          .request(url, {
+            method: 'GET',
+            ...this.#reqOptions,
+          })
+          .end()
+        const response = await getResponse(req)
 
-      // Check for HTTP error status codes.
-      if (!isResponseOk(res)) {
-        throw new ResponseError(res, '', url)
-      }
+        // Check for HTTP error status codes.
+        if (!isResponseOk(response)) {
+          throw new ResponseError(response, '', url)
+        }
+        return response
+      })
 
       // Stream to file with size limit and error handling.
       const writeStream = createWriteStream(outputPath)
@@ -1961,8 +1922,8 @@ export class SocketSdk {
 
       // Monitor stream size to prevent excessive disk usage.
       res.on('data', (chunk: Buffer) => {
-        /* c8 ignore next 6 - Stream size limit enforcement, difficult to test reliably */
         // Check BEFORE accumulating to prevent exceeding limit
+        /* c8 ignore start - c8 ignored: because MAX_STREAM_SIZE is 100MB; tested via vi.doMock in socket-sdk-stream-limits.test.mts */
         if (bytesWritten + chunk.length > MAX_STREAM_SIZE) {
           const error = new Error(
             `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
@@ -1971,23 +1932,23 @@ export class SocketSdk {
           writeStream.destroy(error)
           return
         }
+        /* c8 ignore stop */
         bytesWritten += chunk.length
       })
 
       res.pipe(writeStream)
-      /* c8 ignore next 4 - Write stream error handler, difficult to test reliably */
+      /* c8 ignore start - c8 ignored: because writeStream errors require OS-level failures (disk full, permissions revoked mid-write) */
       writeStream.on('error', error => {
         res.destroy()
         writeStream.destroy(error)
       })
+      /* c8 ignore stop */
       await events.once(writeStream, 'finish')
 
       return this.#handleApiSuccess<'downloadOrgFullScanFilesAsTar'>(res)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'downloadOrgFullScanFilesAsTar'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -2138,11 +2099,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'exportCDX'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'exportCDX'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -2199,11 +2158,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'exportOpenVEX'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'exportOpenVEX'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -2228,11 +2185,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'exportSPDX'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'exportSPDX'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -2253,27 +2208,17 @@ export class SocketSdk {
 
     const url = `${this.#baseUrl}${urlPath}`
     try {
-      const response = await createGetRequest(this.#baseUrl, urlPath, {
-        ...this.#reqOptions,
-        hooks: this.#hooks,
+      const response = await this.#executeWithRetry(async () => {
+        const res = await createGetRequest(this.#baseUrl, urlPath, {
+          ...this.#reqOptions,
+          hooks: this.#hooks,
+        })
+        // Check for HTTP error status codes first.
+        if (!isResponseOk(res)) {
+          throw new ResponseError(res, '', url)
+        }
+        return res
       })
-      // Check for HTTP error status codes first.
-      if (!isResponseOk(response)) {
-        if (throws) {
-          throw new ResponseError(response, '', url)
-        }
-        const errorResult = await this.#handleApiError<never>(
-          new ResponseError(response, '', url),
-        )
-        return {
-          cause: errorResult.cause,
-          data: undefined,
-          error: errorResult.error,
-          status: errorResult.status,
-          success: false,
-          url: errorResult.url,
-        }
-      }
 
       const data = await this.#handleQueryResponseData<T>(
         response,
@@ -2297,7 +2242,6 @@ export class SocketSdk {
         throw e
       }
 
-      /* c8 ignore start - Defensive fallback: ResponseError in catch block handled in try block (lines 897-910) */
       if (e instanceof ResponseError) {
         // Re-use existing error handling logic from the SDK
         const errorResult = await this.#handleApiError<never>(e)
@@ -2307,11 +2251,10 @@ export class SocketSdk {
           error: errorResult.error,
           status: errorResult.status,
           success: false,
+          url: errorResult.url,
         }
       }
-      /* c8 ignore stop */
 
-      /* c8 ignore next - Fallback error handling for non-ResponseError cases in getApi. */
       return this.#createQueryErrorResult<T>(e)
     }
   }
@@ -2337,11 +2280,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getAPITokens'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getAPITokens'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -2366,11 +2307,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getAuditLogEvents'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getAuditLogEvents'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -2395,11 +2334,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getDiffScanById'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getDiffScanById'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -2445,17 +2382,15 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'GetDiffScanGfm'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'GetDiffScanGfm'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
    * Retrieve the enabled entitlements for an organization.
    *
-   * This method fetches the organization's entitlements and filters for only* the enabled ones, returning their keys. Entitlements represent Socket
+   * This method fetches the organization's entitlements and filters for only the enabled ones, returning their keys. Entitlements represent Socket
    * Products that the organization has access to use.
    */
   async getEnabledEntitlements(orgSlug: string): Promise<string[]> {
@@ -2546,7 +2481,6 @@ export class SocketSdk {
         status: 200,
         success: true,
       }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       const errorResult = await this.#handleApiError<'getOrgFullScan'>(e)
       return {
@@ -2557,7 +2491,6 @@ export class SocketSdk {
         success: false,
       }
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -2608,7 +2541,6 @@ export class SocketSdk {
         status: 200,
         success: true,
       }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       const errorResult =
         await this.#handleApiError<'getOrgFullScanMetadata'>(e)
@@ -2620,7 +2552,6 @@ export class SocketSdk {
         success: false,
       }
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -2645,11 +2576,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getIssuesByNPMPackage'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getIssuesByNPMPackage'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -2702,11 +2631,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'alertFullScans'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'alertFullScans'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -2779,11 +2706,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'alertsList'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'alertsList'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -2807,11 +2732,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrgAnalytics'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgAnalytics'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -2848,15 +2771,14 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'fetch-fixes'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'fetch-fixes'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
-   * Get organization's license policy configuration.* Returns allowed, restricted, and monitored license types.
+   * Get organization's license policy configuration.
+   * Returns allowed, restricted, and monitored license types.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2875,15 +2797,14 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrgLicensePolicy'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgLicensePolicy'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
-   * Get organization's security policy configuration.* Returns alert rules, severity thresholds, and enforcement settings.
+   * Get organization's security policy configuration.
+   * Returns alert rules, severity thresholds, and enforcement settings.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2902,11 +2823,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrgSecurityPolicy'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgSecurityPolicy'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -2933,11 +2852,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrgTelemetryConfig'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgTelemetryConfig'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -2961,11 +2878,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrgTriage'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgTriage'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -2994,11 +2909,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrgWebhook'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgWebhook'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3034,11 +2947,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getOrgWebhooksList'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgWebhooksList'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3061,11 +2972,9 @@ export class SocketSdk {
         'quota',
       )
       return this.#handleApiSuccess<'getQuota'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getQuota'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3090,16 +2999,10 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getRepoAnalytics'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getRepoAnalytics'>(e)
     }
-    /* c8 ignore stop */
   }
-
-  /**
-   * Get detailed results for a legacy scan report.
-  /**
 
   /**
    * Get details for a specific repository.
@@ -3161,7 +3064,6 @@ export class SocketSdk {
         status: 200,
         success: true,
       }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       const errorResult = await this.#handleApiError<'getOrgRepo'>(e)
       return {
@@ -3172,7 +3074,6 @@ export class SocketSdk {
         success: false,
       }
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3223,7 +3124,6 @@ export class SocketSdk {
         status: 200,
         success: true,
       }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       const errorResult = await this.#handleApiError<'getOrgRepoLabel'>(e)
       return {
@@ -3234,7 +3134,6 @@ export class SocketSdk {
         success: false,
       }
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3259,11 +3158,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getScoreByNPMPackage'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getScoreByNPMPackage'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3310,11 +3207,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getSupportedFiles'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getSupportedFiles'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3339,11 +3234,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'getReportSupportedFiles'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getReportSupportedFiles'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3399,7 +3292,6 @@ export class SocketSdk {
         status: 200,
         success: true,
       }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       const errorResult = await this.#handleApiError<'getOrgFullScanList'>(e)
       return {
@@ -3410,7 +3302,6 @@ export class SocketSdk {
         success: false,
       }
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3456,7 +3347,6 @@ export class SocketSdk {
         status: 200,
         success: true,
       }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       const errorResult = await this.#handleApiError<'getOrganizations'>(e)
       return {
@@ -3467,7 +3357,6 @@ export class SocketSdk {
         success: false,
       }
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3491,11 +3380,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'listOrgDiffScans'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'listOrgDiffScans'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3550,7 +3437,6 @@ export class SocketSdk {
         status: 200,
         success: true,
       }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       const errorResult = await this.#handleApiError<'getOrgRepoList'>(e)
       return {
@@ -3561,7 +3447,6 @@ export class SocketSdk {
         success: false,
       }
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3613,7 +3498,6 @@ export class SocketSdk {
         status: 200,
         success: true,
       }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       const errorResult = await this.#handleApiError<'getOrgRepoLabelList'>(e)
       return {
@@ -3624,7 +3508,6 @@ export class SocketSdk {
         success: false,
       }
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3651,11 +3534,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'postAPIToken'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'postAPIToken'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3682,11 +3563,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'postAPITokensRevoke'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'postAPITokensRevoke'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3713,11 +3592,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'postAPITokensRotate'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'postAPITokensRotate'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3745,11 +3622,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'postAPITokenUpdate'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'postAPITokenUpdate'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3786,11 +3661,9 @@ export class SocketSdk {
         status: 200,
         success: true,
       }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
-      return this.#createQueryErrorResult<PostOrgTelemetryResponse>(e)
+      return await this.#handleApiError<never>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3816,11 +3689,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'postSettings'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'postSettings'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3882,11 +3753,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'rescanOrgFullScan'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'rescanOrgFullScan'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3912,11 +3781,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'searchDependencies'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'searchDependencies'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -3937,15 +3804,22 @@ export class SocketSdk {
       throws = true,
     } = { __proto__: null, ...options } as SendOptions
 
+    const url = `${this.#baseUrl}${urlPath}`
     try {
       // Route to appropriate HTTP method handler (POST or PUT).
-      const response = await createRequestWithJson(
-        method,
-        this.#baseUrl,
-        urlPath,
-        body,
-        { ...this.#reqOptions, hooks: this.#hooks },
-      )
+      const response = await this.#executeWithRetry(async () => {
+        const res = await createRequestWithJson(
+          method,
+          this.#baseUrl,
+          urlPath,
+          body,
+          { ...this.#reqOptions, hooks: this.#hooks },
+        )
+        if (!isResponseOk(res)) {
+          throw new ResponseError(res, '', url)
+        }
+        return res
+      })
 
       const data = (await getResponseJson(response)) as T
 
@@ -3966,9 +3840,7 @@ export class SocketSdk {
         throw e
       }
 
-      /* c8 ignore start - Defensive fallback: ResponseError in catch block handled in try block (lines 1686-1695) */
       if (e instanceof ResponseError) {
-        // Re-use existing error handling logic from the SDK
         const errorResult = await this.#handleApiError<never>(e)
         return {
           cause: errorResult.cause,
@@ -3976,20 +3848,11 @@ export class SocketSdk {
           error: errorResult.error,
           status: errorResult.status,
           success: false,
+          url: errorResult.url,
         }
       }
-      /* c8 ignore stop */
 
-      /* c8 ignore start - Defensive error stringification fallback branches for sendApi edge cases. */
-      const errStr = e ? String(e).trim() : ''
-      return {
-        cause: errStr || UNKNOWN_ERROR,
-        data: undefined,
-        error: 'API request failed',
-        status: 0,
-        success: false,
-      }
-      /* c8 ignore stop */
+      return this.#createQueryErrorResult<T>(e)
     }
   }
 
@@ -4037,18 +3900,21 @@ export class SocketSdk {
     } as StreamOrgFullScanOptions
     const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`
     try {
-      const req = getHttpModule(this.#baseUrl)
-        .request(url, {
-          method: 'GET',
-          ...this.#reqOptions,
-        })
-        .end()
-      const res = await getResponse(req)
+      const res = await this.#executeWithRetry(async () => {
+        const req = getHttpModule(this.#baseUrl)
+          .request(url, {
+            method: 'GET',
+            ...this.#reqOptions,
+          })
+          .end()
+        const response = await getResponse(req)
 
-      // Check for HTTP error status codes.
-      if (!isResponseOk(res)) {
-        throw new ResponseError(res, '', url)
-      }
+        // Check for HTTP error status codes.
+        if (!isResponseOk(response)) {
+          throw new ResponseError(response, '', url)
+        }
+        return response
+      })
 
       if (typeof output === 'string') {
         // Stream to file with size limit and error handling.
@@ -4057,8 +3923,8 @@ export class SocketSdk {
 
         // Monitor stream size to prevent excessive disk usage.
         res.on('data', (chunk: Buffer) => {
-          /* c8 ignore next 6 - Stream size limit enforcement, difficult to test reliably */
           // Check BEFORE accumulating to prevent exceeding limit
+          /* c8 ignore start - c8 ignored: because MAX_STREAM_SIZE is 100MB; tested via vi.doMock in socket-sdk-stream-limits.test.mts */
           if (bytesWritten + chunk.length > MAX_STREAM_SIZE) {
             const error = new Error(
               `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
@@ -4067,15 +3933,17 @@ export class SocketSdk {
             writeStream.destroy(error)
             return
           }
+          /* c8 ignore stop */
           bytesWritten += chunk.length
         })
 
         res.pipe(writeStream)
-        /* c8 ignore next 4 - Write stream error handler, difficult to test reliably */
+        /* c8 ignore start - c8 ignored: because writeStream errors require OS-level failures (disk full, permissions revoked mid-write) */
         writeStream.on('error', error => {
           res.destroy()
           writeStream.destroy(error)
         })
+        /* c8 ignore stop */
         await events.once(writeStream, 'finish')
       } else if (output === true) {
         // Stream to stdout with size limit and error handling.
@@ -4083,8 +3951,8 @@ export class SocketSdk {
 
         // Monitor stream size for stdout as well.
         res.on('data', (chunk: Buffer) => {
-          /* c8 ignore next 5 - Stream size limit enforcement, difficult to test reliably */
           // Check BEFORE accumulating to prevent exceeding limit
+          /* c8 ignore start - c8 ignored: because MAX_STREAM_SIZE is 100MB; tested via vi.doMock in socket-sdk-stream-limits.test.mts */
           if (bytesWritten + chunk.length > MAX_STREAM_SIZE) {
             const error = new Error(
               `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
@@ -4092,11 +3960,12 @@ export class SocketSdk {
             res.destroy(error)
             return
           }
+          /* c8 ignore stop */
           bytesWritten += chunk.length
         })
 
+        /* c8 ignore start - c8 ignored: because process.stdout errors require the stdout fd to become unwritable (broken pipe, closed terminal) which cannot be simulated in test */
         // Create error handler with cleanup to prevent listener leak
-        /* c8 ignore next 4 - Stdout error handler, difficult to test reliably */
         const stdoutErrorHandler = (_error: Error) => {
           res.destroy()
           process.stdout.removeListener('error', stdoutErrorHandler)
@@ -4109,19 +3978,17 @@ export class SocketSdk {
         res.on('end', () => {
           process.stdout.removeListener('error', stdoutErrorHandler)
         })
-        /* c8 ignore next 3 - Response error cleanup, difficult to test reliably */
         res.on('error', () => {
           process.stdout.removeListener('error', stdoutErrorHandler)
         })
+        /* c8 ignore stop */
       }
 
       // If output is false or undefined, just return the response without streaming
       return this.#handleApiSuccess<'getOrgFullScan'>(res)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'getOrgFullScan'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -4172,7 +4039,6 @@ export class SocketSdk {
               const data = JSON.parse(trimmed) as ArtifactPatches
               controller.enqueue(data)
             } catch (e) {
-              /* c8 ignore next 2 - JSON parse error in streaming response, requires malformed server data */
               // Log parse errors for debugging invalid NDJSON lines.
               debugLog('streamPatchesFromScan', `Failed to parse line: ${e}`)
             }
@@ -4217,15 +4083,14 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'updateOrgAlertTriage'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'updateOrgAlertTriage'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
-   * Update organization's license policy configuration.* Modifies allowed, restricted, and monitored license types.
+   * Update organization's license policy configuration.
+   * Modifies allowed, restricted, and monitored license types.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -4248,15 +4113,14 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'updateOrgLicensePolicy'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'updateOrgLicensePolicy'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
-   * Update organization's security policy configuration.* Modifies alert rules, severity thresholds, and enforcement settings.
+   * Update organization's security policy configuration.
+   * Modifies alert rules, severity thresholds, and enforcement settings.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -4278,11 +4142,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'updateOrgSecurityPolicy'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'updateOrgSecurityPolicy'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -4313,11 +4175,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'updateOrgTelemetryConfig'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'updateOrgTelemetryConfig'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -4358,11 +4218,9 @@ export class SocketSdk {
           ),
       )
       return this.#handleApiSuccess<'updateOrgWebhook'>(data)
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       return await this.#handleApiError<'updateOrgWebhook'>(e)
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -4427,7 +4285,6 @@ export class SocketSdk {
         status: 200,
         success: true,
       }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       const errorResult = await this.#handleApiError<'updateOrgRepo'>(e)
       return {
@@ -4438,7 +4295,6 @@ export class SocketSdk {
         success: false,
       }
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -4492,7 +4348,6 @@ export class SocketSdk {
         status: 200,
         success: true,
       }
-      /* c8 ignore start - Standard API error handling, tested via public method error cases */
     } catch (e) {
       const errorResult = await this.#handleApiError<'updateOrgRepoLabel'>(e)
       return {
@@ -4503,7 +4358,6 @@ export class SocketSdk {
         success: false,
       }
     }
-    /* c8 ignore stop */
   }
 
   /**
@@ -4622,15 +4476,22 @@ export class SocketSdk {
    * vulnerabilities, description, license, and tier information.
    */
   async viewPatch(orgSlug: string, uuid: string): Promise<PatchViewResponse> {
-    const data = await getResponseJson(
-      await createGetRequest(
-        this.#baseUrl,
-        `orgs/${encodeURIComponent(orgSlug)}/patches/view/${encodeURIComponent(uuid)}`,
-        { ...this.#reqOptions, hooks: this.#hooks },
-      ),
-    )
-
-    return data as PatchViewResponse
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/patches/view/${encodeURIComponent(uuid)}`,
+              { ...this.#reqOptions, hooks: this.#hooks },
+            ),
+          ),
+      )
+      return data as PatchViewResponse
+    } catch (e) {
+      const result = await this.#handleApiError<never>(e)
+      throw new Error(result.error, { cause: result.cause })
+    }
   }
 }
 

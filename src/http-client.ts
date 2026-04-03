@@ -517,77 +517,6 @@ export async function getResponseJson(
 }
 
 /**
- * Create DELETE request with automatic retry logic.
- * Retries on network errors and 5xx responses.
- *
- * @param retries - Number of retry attempts (default: 0, retries disabled)
- * @param retryDelay - Initial delay in ms (default: 100)
- */
-/* c8 ignore start - Retry wrapper depends on withRetry which is already ignored */
-export async function createDeleteRequestWithRetry(
-  baseUrl: string,
-  urlPath: string,
-  options?: RequestOptionsWithHooks | undefined,
-  retries = 0,
-  retryDelay = 100,
-): Promise<IncomingMessage> {
-  return await withRetry(
-    () => createDeleteRequest(baseUrl, urlPath, options),
-    retries,
-    retryDelay,
-  )
-}
-/* c8 ignore stop */
-
-/**
- * Create GET request with automatic retry logic.
- * Retries on network errors and 5xx responses.
- *
- * @param retries - Number of retry attempts (default: 0, retries disabled)
- * @param retryDelay - Initial delay in ms (default: 100)
- */
-/* c8 ignore start - Retry wrapper depends on withRetry which is already ignored */
-export async function createGetRequestWithRetry(
-  baseUrl: string,
-  urlPath: string,
-  options?: RequestOptionsWithHooks | undefined,
-  retries = 0,
-  retryDelay = 100,
-): Promise<IncomingMessage> {
-  return await withRetry(
-    () => createGetRequest(baseUrl, urlPath, options),
-    retries,
-    retryDelay,
-  )
-}
-/* c8 ignore stop */
-
-/**
- * Create request with JSON payload and automatic retry logic.
- * Retries on network errors and 5xx responses.
- *
- * @param retries - Number of retry attempts (default: 0, retries disabled)
- * @param retryDelay - Initial delay in ms (default: 100)
- */
-/* c8 ignore start - Retry wrapper depends on withRetry which is already ignored */
-export async function createRequestWithJsonAndRetry(
-  method: SendMethod,
-  baseUrl: string,
-  urlPath: string,
-  json: unknown,
-  options?: RequestOptionsWithHooks | undefined,
-  retries = 0,
-  retryDelay = 100,
-): Promise<IncomingMessage> {
-  return await withRetry(
-    () => createRequestWithJson(method, baseUrl, urlPath, json, options),
-    retries,
-    retryDelay,
-  )
-}
-/* c8 ignore stop */
-
-/**
  * Check if HTTP response has a successful status code (2xx range).
  * Returns true for status codes between 200-299, false otherwise.
  */
@@ -609,7 +538,6 @@ export function reshapeArtifactForPublicPolicy<
   actions?: string | undefined,
   policy?: Map<string, string> | undefined,
 ): T {
-  /* c8 ignore start - Public policy artifact reshaping for unauthenticated users, difficult to test edge cases. */
   // If user is not authenticated, provide a different response structure
   // optimized for the public free-tier experience.
   if (!isAuthenticated) {
@@ -669,70 +597,4 @@ export function reshapeArtifactForPublicPolicy<
     }
   }
   return data
-  /* c8 ignore stop */
 }
-
-/**
- * Retry helper for HTTP requests with exponential backoff.
- * Wraps any async HTTP function and retries on failure.
- *
- * @param fn - Async function to retry
- * @param retries - Number of retry attempts (default: 0, retries disabled)
- * @param retryDelay - Initial delay in ms (default: 100)
- * @returns Result of the function call
- * @throws {Error} Last error if all retries exhausted
- */
-/* c8 ignore start - Retry logic requires real network failures and timing behavior that's difficult to test reliably */
-export async function withRetry<T>(
-  fn: () => Promise<T>,
-  retries = 0,
-  retryDelay = 100,
-): Promise<T> {
-  let lastError: Error | undefined
-
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    try {
-      // eslint-disable-next-line no-await-in-loop
-      return await fn()
-    } catch (error) {
-      lastError = error as Error
-
-      // Last attempt - throw error with retry context.
-      if (attempt === retries) {
-        const enhancedError = new Error(
-          `Request failed after ${retries + 1} attempts`,
-          { cause: lastError },
-        )
-        throw enhancedError
-      }
-
-      // Check if error is retryable (network errors, 5xx responses).
-      if (error instanceof ResponseError) {
-        const status = error.response.statusCode
-        // Don't retry client errors (4xx).
-        if (status && status >= 400 && status < 500) {
-          throw error
-        }
-        debugLog(
-          'withRetry',
-          `Retrying after ${status} error (attempt ${attempt + 1}/${retries + 1})`,
-        )
-      } else {
-        debugLog(
-          'withRetry',
-          `Retrying after network error (attempt ${attempt + 1}/${retries + 1})`,
-        )
-      }
-
-      // Exponential backoff.
-      const delayMs = retryDelay * 2 ** attempt
-      debugLog('withRetry', `Waiting ${delayMs}ms before retry`)
-      // eslint-disable-next-line no-await-in-loop
-      await new Promise(resolve => setTimeout(resolve, delayMs).unref())
-    }
-  }
-
-  // Fallback error if lastError is somehow undefined.
-  throw lastError || new Error('Request failed after retries')
-}
-/* c8 ignore stop */

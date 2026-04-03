@@ -61,8 +61,6 @@ export type {
   CompactSocketArtifact,
   CompactSocketArtifactAlert,
   CreateDependenciesSnapshotOptions,
-  CreateOrgFullScanOptions,
-  CreateScanFromFilepathsOptions,
   CustomResponseType,
   Entitlement,
   EntitlementsResponse,

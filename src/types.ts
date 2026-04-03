@@ -450,16 +450,6 @@ export type CreateDependenciesSnapshotOptions = {
   queryParams?: QueryParams | undefined
 }
 
-export type CreateOrgFullScanOptions = {
-  pathsRelativeTo?: string | undefined
-  queryParams?: QueryParams | undefined
-}
-
-export type CreateScanFromFilepathsOptions = {
-  issueRules?: Record<string, boolean> | undefined
-  pathsRelativeTo?: string | undefined
-}
-
 export type StreamOrgFullScanOptions = {
   output?: boolean | string | undefined
 }

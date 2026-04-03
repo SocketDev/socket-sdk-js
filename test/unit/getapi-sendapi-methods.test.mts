@@ -393,10 +393,7 @@ describe('getApi and sendApi Methods', () => {
 
       expect(result.success).toBe(false)
       if (!result.success) {
-        expect(result.error).toBe('API request failed')
-        expect(result.cause).toContain(
-          'Socket API returned invalid JSON response',
-        )
+        expect(result.error).toBe('Server returned invalid JSON')
       }
     })
 
