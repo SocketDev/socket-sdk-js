@@ -65,11 +65,10 @@ jobs:
             echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Configure git
+      - uses: SocketDev/socket-registry/.github/actions/setup-git-signing@6096b06b1790f411714c89c40f72aade2eeaab7c # main
         if: steps.check.outputs.has_changes == 'true'
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        with:
+          gpg-private-key: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
 
       - name: Commit and push changes
         if: steps.check.outputs.has_changes == 'true'
@@ -112,6 +111,9 @@ jobs:
           else
             echo "PR #$existing_pr already exists, skipping creation"
           fi
+
+      - uses: SocketDev/socket-registry/.github/actions/cleanup-git-signing@6096b06b1790f411714c89c40f72aade2eeaab7c # main
+        if: always()
 
   validate:
     name: Validate generated SDK
