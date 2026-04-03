@@ -1940,6 +1940,27 @@ export interface components {
         licenseDetails?: components['schemas']['LicenseDetails']
         licenseAttrib?: components['schemas']['SAttrib1_N']
       }
+    /** @description Mapping of supply chain risk alert types to their computed score contributions and formulas used for calculation. This allows for detailed breakdowns of how each alert type impacts the overall supply chain security score, with the ability to include custom formulas and components for each alert type. */
+    SocketSBOMScore: {
+      [key: string]: {
+        value: {
+          /**
+           * @description Score from 0.0 to 1.0 for the scanned repository, computed from supply chain risk alerts using weighted exponential decay per direct dependency
+           * @default 0
+           */
+          result: number
+          /** @description Components used to compute result of the formula */
+          components?: {
+            [key: string]: number
+          }
+          /**
+           * @description Formula used to compute the supply chain security score
+           * @default
+           */
+          formula?: string
+        }
+      }
+    }
     SocketDiffArtifact: components['schemas']['SocketPURL'] & {
       diffType: components['schemas']['SocketDiffArtifactType']
       id?: components['schemas']['SocketId']
@@ -4333,6 +4354,23 @@ export interface components {
         }
       | {
           /** @enum {string} */
+          type?: 'skillPreExecution'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: {
+              /** @default */
+              notes: string
+              /** @default 0 */
+              confidence: number
+              /** @default 0 */
+              severity: number
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
           type?: 'skillPromptInjection'
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
@@ -5522,6 +5560,8 @@ export interface operations {
         cachedResultsOnly?: boolean
         /** @description Include a summary object at the end of the stream with counts of malformed, resolved, and not found PURLs. */
         summary?: boolean
+        /** @description Maximum time in seconds to wait for scan results. PURLs that have not completed processing when the timeout is reached will be returned as errors (when purlErrors is enabled). Omit for no timeout. */
+        timeoutSec?: number
       }
     }
     requestBody?: {
@@ -5926,6 +5966,10 @@ export interface operations {
         include_alert_priority_details?:
           | boolean
           | Array<'component' | 'formula'>
+        /** @description Include scores event in the response. include_scores_details implies this flag */
+        include_scores: boolean
+        /** @description Control which score detail fields to include in the scores event. Set to "true" to include all fields, "false" to exclude all fields, or specify individual fields like "components,formula" to include only those fields. */
+        include_scores_details?: boolean | Array<'components' | 'formula'>
         /** @description Include license details in the response. This can increase the response size significantly. */
         include_license_details: boolean
         /** @description Return cached immutable scan results. When enabled and results are cached, returns the pre-computed scan. When results are not yet cached, returns 202 Accepted and enqueues a background job. */
@@ -5939,10 +5983,16 @@ export interface operations {
       }
     }
     responses: {
-      /** @description Socket issue lists and scores for all packages */
+      /** @description Socket issue lists and scores for all packages, followed by a final scores event */
       200: {
         content: {
-          'application/x-ndjson': components['schemas']['SocketArtifact']
+          'application/x-ndjson':
+            | components['schemas']['SocketArtifact']
+            | {
+                /** @enum {string} */
+                _type: 'scores'
+                value: components['schemas']['SocketSBOMScore']
+              }
         }
       }
       /** @description Scan is being processed. Poll again later to retrieve results. */
@@ -9413,6 +9463,13 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              skillPreExecution?: {
+                /**
+                 * @description The action to take for skillPreExecution issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               skillPromptInjection?: {
                 /**
                  * @description The action to take for skillPromptInjection issues.
@@ -10386,6 +10443,13 @@ export interface operations {
             skillObfuscation?: {
               /**
                * @description The action to take for skillObfuscation issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            skillPreExecution?: {
+              /**
+               * @description The action to take for skillPreExecution issues.
                * @enum {string}
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -11521,6 +11585,13 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              skillPreExecution?: {
+                /**
+                 * @description The action to take for skillPreExecution issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               skillPromptInjection?: {
                 /**
                  * @description The action to take for skillPromptInjection issues.
@@ -12491,6 +12562,13 @@ export interface operations {
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
             }
+            skillPreExecution?: {
+              /**
+               * @description The action to take for skillPreExecution issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
             skillPromptInjection?: {
               /**
                * @description The action to take for skillPromptInjection issues.
@@ -13426,6 +13504,13 @@ export interface operations {
               skillObfuscation?: {
                 /**
                  * @description The action to take for skillObfuscation issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              skillPreExecution?: {
+                /**
+                 * @description The action to take for skillPreExecution issues.
                  * @enum {string}
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -16597,6 +16682,8 @@ export interface operations {
         cachedResultsOnly?: boolean
         /** @description Include a summary object at the end of the stream with counts of malformed, resolved, and not found PURLs. */
         summary?: boolean
+        /** @description Maximum time in seconds to wait for scan results. PURLs that have not completed processing when the timeout is reached will be returned as errors (when purlErrors is enabled). Omit for no timeout, unless a default timeout is configured for the organization. */
+        timeoutSec?: number
       }
       path: {
         /** @description The slug of the organization */
@@ -16687,7 +16774,7 @@ export interface operations {
   'fetch-fixes': {
     parameters: {
       query: {
-        /** @description The slug of the repository to fetch fixes for. Computes fixes based on the latest scan on the default branch */
+        /** @description The slug of the repository to fetch fixes for (e.g. "my-repo" or "my-org/my-repo"). Use the full org/repo path to disambiguate when multiple GitHub orgs share the same repo name. Computes fixes based on the latest scan on the default branch */
         repo_slug?: string
         /** @description The ID of the scan to fetch fixes for */
         full_scan_id?: string

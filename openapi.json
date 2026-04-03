@@ -531,6 +531,50 @@
           }
         ]
       },
+      "SocketSBOMScore": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "",
+          "properties": {
+            "value": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "result": {
+                  "type": "number",
+                  "description": "Score from 0.0 to 1.0 for the scanned repository, computed from supply chain risk alerts using weighted exponential decay per direct dependency",
+                  "default": 0
+                },
+                "components": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number",
+                    "description": "",
+                    "default": 0
+                  },
+                  "properties": {},
+                  "description": "Components used to compute result of the formula"
+                },
+                "formula": {
+                  "type": "string",
+                  "description": "Formula used to compute the supply chain security score",
+                  "default": ""
+                }
+              },
+              "required": [
+                "result"
+              ]
+            }
+          },
+          "required": [
+            "value"
+          ]
+        },
+        "properties": {},
+        "description": "Mapping of supply chain risk alert types to their computed score contributions and formulas used for calculation. This allows for detailed breakdowns of how each alert type impacts the overall supply chain security score, with the ability to include custom formulas and components for each alert type."
+      },
       "SocketDiffArtifact": {
         "allOf": [
           {
@@ -8488,6 +8532,70 @@
               "type": {
                 "type": "string",
                 "enum": [
+                  "skillPreExecution"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "notes": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          },
+                          "severity": {
+                            "type": "number",
+                            "description": "",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "confidence",
+                          "notes",
+                          "severity"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
                   "skillPromptInjection"
                 ]
               },
@@ -11826,6 +11934,17 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "name": "timeoutSec",
+            "in": "query",
+            "required": false,
+            "description": "Maximum time in seconds to wait for scan results. PURLs that have not completed processing when the timeout is reached will be returned as errors (when purlErrors is enabled). Omit for no timeout.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1200
+            }
           }
         ],
         "requestBody": {
@@ -12982,6 +13101,41 @@
             }
           },
           {
+            "name": "include_scores",
+            "in": "query",
+            "required": true,
+            "description": "Include scores event in the response. include_scores_details implies this flag",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "include_scores_details",
+            "in": "query",
+            "required": false,
+            "description": "Control which score detail fields to include in the scores event. Set to \"true\" to include all fields, \"false\" to exclude all fields, or specify individual fields like \"components,formula\" to include only those fields.",
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "boolean",
+                  "default": false
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "components",
+                      "formula"
+                    ]
+                  }
+                }
+              ],
+              "default": false
+            }
+          },
+          {
             "name": "include_license_details",
             "in": "query",
             "required": true,
@@ -13020,11 +13174,34 @@
             "content": {
               "application/x-ndjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/SocketArtifact"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/SocketArtifact"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "_type": {
+                          "type": "string",
+                          "enum": [
+                            "scores"
+                          ]
+                        },
+                        "value": {
+                          "$ref": "#/components/schemas/SocketSBOMScore"
+                        }
+                      },
+                      "required": [
+                        "_type",
+                        "value"
+                      ]
+                    }
+                  ]
                 }
               }
             },
-            "description": "Socket issue lists and scores for all packages"
+            "description": "Socket issue lists and scores for all packages, followed by a final scores event"
           },
           "202": {
             "content": {
@@ -21725,6 +21902,27 @@
                             "action"
                           ]
                         },
+                        "skillPreExecution": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillPreExecution issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "skillPromptInjection": {
                           "type": "object",
                           "additionalProperties": false,
@@ -24575,6 +24773,27 @@
                               "ignore"
                             ],
                             "description": "The action to take for skillObfuscation issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "skillPreExecution": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillPreExecution issues."
                           }
                         },
                         "required": [
@@ -27750,6 +27969,27 @@
                             "action"
                           ]
                         },
+                        "skillPreExecution": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillPreExecution issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "skillPromptInjection": {
                           "type": "object",
                           "additionalProperties": false,
@@ -30609,6 +30849,27 @@
                           "action"
                         ]
                       },
+                      "skillPreExecution": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for skillPreExecution issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
                       "skillPromptInjection": {
                         "type": "object",
                         "additionalProperties": false,
@@ -33415,6 +33676,27 @@
                                 "ignore"
                               ],
                               "description": "The action to take for skillObfuscation issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "skillPreExecution": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for skillPreExecution issues."
                             }
                           },
                           "required": [
@@ -40664,6 +40946,17 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "name": "timeoutSec",
+            "in": "query",
+            "required": false,
+            "description": "Maximum time in seconds to wait for scan results. PURLs that have not completed processing when the timeout is reached will be returned as errors (when purlErrors is enabled). Omit for no timeout, unless a default timeout is configured for the organization.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1200
+            }
           }
         ],
         "requestBody": {
@@ -40740,7 +41033,7 @@
             "name": "repo_slug",
             "in": "query",
             "required": false,
-            "description": "The slug of the repository to fetch fixes for. Computes fixes based on the latest scan on the default branch",
+            "description": "The slug of the repository to fetch fixes for (e.g. \"my-repo\" or \"my-org/my-repo\"). Use the full org/repo path to disambiguate when multiple GitHub orgs share the same repo name. Computes fixes based on the latest scan on the default branch",
             "schema": {
               "type": "string"
             }
