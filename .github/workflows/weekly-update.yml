@@ -212,14 +212,16 @@ jobs:
       - name: Set final status
         id: final
         if: always()
+        env:
+          UPDATE_SUCCESS: ${{ steps.update.outputs.success }}
+          TESTS_RESULT: ${{ steps.tests.outputs.result }}
+          FIX_SUCCESS: ${{ steps.claude.outputs.success }}
         run: |
-          if [ "${{ steps.update.outputs.success }}" != "true" ]; then
+          if [ "$UPDATE_SUCCESS" != "true" ]; then
             echo "success=false" >> $GITHUB_OUTPUT
-          elif [ "${{ steps.tests.outputs.result }}" != "fail" ]; then
-            # Tests passed (or were skipped) — update succeeded without needing fixes
+          elif [ "$TESTS_RESULT" != "fail" ]; then
             echo "success=true" >> $GITHUB_OUTPUT
-          elif [ "${{ steps.claude.outputs.success }}" == "true" ]; then
-            # Tests failed but sonnet fixed them
+          elif [ "$FIX_SUCCESS" = "true" ]; then
             echo "success=true" >> $GITHUB_OUTPUT
           else
             echo "success=false" >> $GITHUB_OUTPUT
