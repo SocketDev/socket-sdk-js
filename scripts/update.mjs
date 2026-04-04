@@ -61,6 +61,7 @@ async function main() {
         '-r',
       ],
       {
+        env: { ...process.env, npm_config_minimum_release_age: '0' },
         shell: WIN32,
         stdio: quiet ? 'pipe' : 'inherit',
       },
