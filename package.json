@@ -48,7 +48,7 @@
     "clean": "node scripts/clean.mjs",
     "cover": "node scripts/cover.mjs",
     "fix": "node scripts/lint.mjs --fix",
-    "format": "oxfmt .",
+    "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "generate-sdk": "node scripts/generate-sdk.mjs",
     "lint": "node scripts/lint.mjs",
