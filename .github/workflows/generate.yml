@@ -50,7 +50,7 @@ jobs:
           persist-credentials: false
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@6096b06b1790f411714c89c40f72aade2eeaab7c # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@da519693b701861bc0f9690a30f50af1a1dcd49c # main
 
       - name: Generate SDK
         # Fetches OpenAPI, generates types/api.d.ts and src/types-strict.ts
@@ -65,7 +65,7 @@ jobs:
             echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-git-signing@6096b06b1790f411714c89c40f72aade2eeaab7c # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-git-signing@da519693b701861bc0f9690a30f50af1a1dcd49c # main
         if: steps.check.outputs.has_changes == 'true'
         with:
           gpg-private-key: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
@@ -112,7 +112,7 @@ jobs:
             echo "PR #$existing_pr already exists, skipping creation"
           fi
 
-      - uses: SocketDev/socket-registry/.github/actions/cleanup-git-signing@6096b06b1790f411714c89c40f72aade2eeaab7c # main
+      - uses: SocketDev/socket-registry/.github/actions/cleanup-git-signing@da519693b701861bc0f9690a30f50af1a1dcd49c # main
         if: always()
 
   validate:
@@ -130,7 +130,7 @@ jobs:
           persist-credentials: false
           ref: automated/open-api
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@6096b06b1790f411714c89c40f72aade2eeaab7c # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@da519693b701861bc0f9690a30f50af1a1dcd49c # main
 
       - name: Build SDK
         run: pnpm run build
