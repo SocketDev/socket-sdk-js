@@ -120,7 +120,6 @@
       "unrs-resolver"
     ],
     "overrides": {
-      "defu": ">=6.1.5",
       "vite": "7.1.12"
     }
   }
