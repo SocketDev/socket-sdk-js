@@ -15,8 +15,8 @@ importers:
         specifier: 1.4.1
         version: 1.4.1
       '@socketsecurity/lib':
-        specifier: 5.11.4
-        version: 5.11.4(typescript@5.9.3)
+        specifier: 5.12.0
+        version: 5.12.0(typescript@5.9.3)
       form-data:
         specifier: 4.0.5
         version: 4.0.5
@@ -1026,8 +1026,8 @@ packages:
     resolution: {integrity: sha512-t/UrOd1DMYXcGuKo2v07WMbuHCMlKBKOriTHu4cn9OIxfj1qWKoF/kpOswGHOWkG5zwj2Ke/2+qLiDugmx5z+A==}
     engines: {node: '>=18.20.4', pnpm: '>=10.25.0'}
 
-  '@socketsecurity/lib@5.11.4':
-    resolution: {integrity: sha512-3/stIFexg45DNhGvpw/U49UFuHYe0ZLS45scuYw83HfWrHmL7h9Mi4m27C3/ihAF6O9uOJSKBsWBIHlTM8Wikg==}
+  '@socketsecurity/lib@5.12.0':
+    resolution: {integrity: sha512-OLTHvVBRpfwpVHzlDFPl5kxJ6xifOVqbPLc8AqFh+tujzeiIG87yvTijxRnA5G4dqaffujkK7jkxM71UQkyK0w==}
     engines: {node: '>=22', pnpm: '>=10.25.0'}
     peerDependencies:
       typescript: '>=5.0.0'
@@ -2641,7 +2641,7 @@ snapshots:
     dependencies:
       picomatch: 4.0.3
 
-  '@socketsecurity/lib@5.11.4(typescript@5.9.3)':
+  '@socketsecurity/lib@5.12.0(typescript@5.9.3)':
     optionalDependencies:
       typescript: 5.9.3
 
