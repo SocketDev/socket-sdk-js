@@ -355,11 +355,7 @@ export class SocketSdk {
           return undefined
         }
         const { status } = error.response
-        // Don't retry authentication/authorization errors - they won't succeed.
-        if (status === 401 || status === 403) {
-          throw error
-        }
-        // Rate limiting (429) will be retried with custom delay if Retry-After header is present.
+        // Rate limiting (429) is always retried; use custom delay from Retry-After if present.
         if (status === 429) {
           const retryAfter = this.#parseRetryAfter(
             error.response.headers['retry-after'],
@@ -367,6 +363,11 @@ export class SocketSdk {
           if (retryAfter !== undefined) {
             return retryAfter
           }
+          return undefined
+        }
+        // Don't retry other client errors (4xx) - they won't succeed on retry.
+        if (status >= 400 && status < 500) {
+          throw error
         }
         return undefined
       },

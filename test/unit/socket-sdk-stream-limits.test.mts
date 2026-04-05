@@ -81,13 +81,11 @@ describe('SocketSdk - Stream size limits', () => {
       true) as typeof process.stdout.write
 
     try {
-      const result = await client.streamFullScan('test-org', 'scan-789', {
-        output: true,
-      })
-      expect(result).toBeDefined()
-      if (!result.success) {
-        expect(result.error).toBeDefined()
-      }
+      await expect(
+        client.streamFullScan('test-org', 'scan-789', {
+          output: true,
+        }),
+      ).rejects.toThrow()
     } finally {
       process.stdout.write = origWrite
     }
