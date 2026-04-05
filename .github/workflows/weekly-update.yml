@@ -24,13 +24,12 @@ jobs:
     outputs:
       has-updates: ${{ steps.check.outputs.has-updates }}
     steps:
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@da519693b701861bc0f9690a30f50af1a1dcd49c # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@6147a08ccc20fcb1f690dcc4650ec745776b3345 # main
 
       - name: Check for npm updates
         id: check
         shell: bash
         run: |
-          alias pnpm="$SFW_BIN pnpm"
           echo "Checking for npm package updates..."
           HAS_UPDATES=false
           NPM_UPDATES=$(pnpm outdated 2>/dev/null || true)
@@ -49,7 +48,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@da519693b701861bc0f9690a30f50af1a1dcd49c # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@6147a08ccc20fcb1f690dcc4650ec745776b3345 # main
 
       - name: Create update branch
         id: branch
@@ -61,7 +60,7 @@ jobs:
           git checkout -b "$BRANCH_NAME"
           echo "branch=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-git-signing@da519693b701861bc0f9690a30f50af1a1dcd49c # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-git-signing@6147a08ccc20fcb1f690dcc4650ec745776b3345 # main
         with:
           gpg-private-key: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
 
@@ -72,13 +71,6 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GITHUB_ACTIONS: 'true'
         run: |
-          if [ -n "$SFW_BIN" ]; then
-            mkdir -p /tmp/sfw-bin
-            printf '#!/bin/bash\nexec "%s" pnpm "$@"\n' "$SFW_BIN" > /tmp/sfw-bin/pnpm
-            chmod +x /tmp/sfw-bin/pnpm
-            export PATH="/tmp/sfw-bin:$PATH"
-          fi
-
           if [ -z "$ANTHROPIC_API_KEY" ]; then
             echo "ANTHROPIC_API_KEY not set - skipping automated update"
             echo "success=false" >> $GITHUB_OUTPUT
@@ -127,13 +119,6 @@ jobs:
         if: steps.update.outputs.success == 'true'
         continue-on-error: true
         run: |
-          if [ -n "$SFW_BIN" ]; then
-            mkdir -p /tmp/sfw-bin
-            printf '#!/bin/bash\nexec "%s" pnpm "$@"\n' "$SFW_BIN" > /tmp/sfw-bin/pnpm
-            chmod +x /tmp/sfw-bin/pnpm
-            export PATH="/tmp/sfw-bin:$PATH"
-          fi
-
           set +e
           pnpm build 2>&1 | tee build-output.log
           BUILD_EXIT=${PIPESTATUS[0]}
@@ -156,13 +141,6 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GITHUB_ACTIONS: 'true'
         run: |
-          if [ -n "$SFW_BIN" ]; then
-            mkdir -p /tmp/sfw-bin
-            printf '#!/bin/bash\nexec "%s" pnpm "$@"\n' "$SFW_BIN" > /tmp/sfw-bin/pnpm
-            chmod +x /tmp/sfw-bin/pnpm
-            export PATH="/tmp/sfw-bin:$PATH"
-          fi
-
           BUILD_LOG=$(cat build-output.log 2>/dev/null || echo "No build output")
           TEST_LOG=$(cat test-output.log 2>/dev/null || echo "No test output")
 
@@ -313,7 +291,7 @@ jobs:
             test-output.log
           retention-days: 7
 
-      - uses: SocketDev/socket-registry/.github/actions/cleanup-git-signing@da519693b701861bc0f9690a30f50af1a1dcd49c # main
+      - uses: SocketDev/socket-registry/.github/actions/cleanup-git-signing@6147a08ccc20fcb1f690dcc4650ec745776b3345 # main
         if: always()
 
   notify:
