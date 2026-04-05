@@ -45,14 +45,14 @@ jobs:
           echo "Sleeping for $delay seconds..."
           sleep $delay
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@da519693b701861bc0f9690a30f50af1a1dcd49c # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@6147a08ccc20fcb1f690dcc4650ec745776b3345 # main
 
       - name: Configure push credentials
         env:
           GH_TOKEN: ${{ github.token }}
         run: git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-git-signing@da519693b701861bc0f9690a30f50af1a1dcd49c # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-git-signing@6147a08ccc20fcb1f690dcc4650ec745776b3345 # main
         with:
           gpg-private-key: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
 
@@ -108,7 +108,7 @@ jobs:
             echo "PR #$existing_pr already exists, skipping creation"
           fi
 
-      - uses: SocketDev/socket-registry/.github/actions/cleanup-git-signing@da519693b701861bc0f9690a30f50af1a1dcd49c # main
+      - uses: SocketDev/socket-registry/.github/actions/cleanup-git-signing@6147a08ccc20fcb1f690dcc4650ec745776b3345 # main
         if: always()
 
   validate:
@@ -121,7 +121,7 @@ jobs:
     outputs:
       has_changes: ${{ steps.check.outputs.has_changes }}
     steps:
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@da519693b701861bc0f9690a30f50af1a1dcd49c # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@6147a08ccc20fcb1f690dcc4650ec745776b3345 # main
         with:
           checkout-ref: automated/open-api
 
