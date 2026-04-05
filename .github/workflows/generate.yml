@@ -45,12 +45,16 @@ jobs:
           echo "Sleeping for $delay seconds..."
           sleep $delay
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-          token: ${{ secrets.GITHUB_TOKEN }}
-
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@da519693b701861bc0f9690a30f50af1a1dcd49c # main
+
+      - name: Configure push credentials
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+
+      - uses: SocketDev/socket-registry/.github/actions/setup-git-signing@da519693b701861bc0f9690a30f50af1a1dcd49c # main
+        with:
+          gpg-private-key: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
 
       - name: Generate SDK
         # Fetches OpenAPI, generates types/api.d.ts and src/types-strict.ts
@@ -65,26 +69,18 @@ jobs:
             echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-git-signing@da519693b701861bc0f9690a30f50af1a1dcd49c # main
-        if: steps.check.outputs.has_changes == 'true'
-        with:
-          gpg-private-key: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
-
       - name: Commit and push changes
         if: steps.check.outputs.has_changes == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
         run: |
           git checkout -b automated/open-api
           git add .
           git commit -m "fix(openapi): sync with openapi definition"
-          git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" automated/open-api -fu
+          git push origin automated/open-api -fu
 
       - name: Create Pull Request
         if: steps.check.outputs.has_changes == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           # Check if PR already exists
           existing_pr=$(gh pr list --head automated/open-api --json number --jq '.[0].number' || echo "")
@@ -94,7 +90,7 @@ jobs:
               --head automated/open-api \
               --base main \
               --title "Sync with OpenAPI definition" \
-              --body "## 🔄 OpenAPI Sync
+              --body "## OpenAPI Sync
 
           The OpenAPI definition in the API has been updated. This PR automatically:
           - Downloads the latest OpenAPI specification
@@ -105,7 +101,7 @@ jobs:
           ### What's Changed
           See the file changes below for specific updates to the API types, strict types, and methods.
 
-          ⚠️ **Please review carefully for any breaking changes in the API.**" \
+          **Please review carefully for any breaking changes in the API.**" \
               --label "dependencies" \
               --label "automated"
           else
@@ -125,12 +121,9 @@ jobs:
     outputs:
       has_changes: ${{ steps.check.outputs.has_changes }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-          ref: automated/open-api
-
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@da519693b701861bc0f9690a30f50af1a1dcd49c # main
+        with:
+          checkout-ref: automated/open-api
 
       - name: Build SDK
         run: pnpm run build
