@@ -4,7 +4,7 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { PromiseQueue } from '../../src/promise-queue'
+import { PromiseQueue } from '@socketsecurity/lib/promise-queue'
 
 describe('PromiseQueue', () => {
   let queue: PromiseQueue
@@ -109,7 +109,7 @@ describe('PromiseQueue', () => {
 
       // Task2 should be rejected
       await expect(task2Promise).rejects.toThrow(
-        'Task dropped: queue at maximum capacity',
+        'Task dropped: queue length exceeded',
       )
 
       // Wait for all running and queued tasks to complete
