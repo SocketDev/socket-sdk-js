@@ -142,6 +142,7 @@ describe('index.ts exports', () => {
       'isResponseOk',
       'reshapeArtifactForPublicPolicy',
       'ResponseError',
+      'wrapIncomingMessage',
       'createRequestBodyForFilepaths',
       'createRequestBodyForJson',
       'createUploadRequest',

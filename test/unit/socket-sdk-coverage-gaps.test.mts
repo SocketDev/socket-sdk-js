@@ -518,7 +518,9 @@ describe('SocketSdk - getApi response type handling', () => {
     const result = (await client.getApi('raw-endpoint', {
       responseType: 'response',
       throws: false,
-    })) as SocketSdkGenericResult<IncomingMessage>
+    })) as SocketSdkGenericResult<
+      import('@socketsecurity/lib/http-request').HttpResponse
+    >
 
     expect(result.success).toBe(true)
     if (!result.success) return
@@ -578,7 +580,10 @@ describe('SocketSdk - getApi response type handling', () => {
 
     const result = await client.getApi('default-endpoint')
     expect(result).toBeDefined()
-    expect((result as IncomingMessage).statusCode).toBe(200)
+    expect(
+      (result as import('@socketsecurity/lib/http-request').HttpResponse)
+        .status,
+    ).toBe(200)
   })
 
   it('should handle large text responses within limit', async () => {

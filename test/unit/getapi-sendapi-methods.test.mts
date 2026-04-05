@@ -7,7 +7,8 @@ import { SocketSdk } from '../../src/index'
 import { setupTestClient } from '../utils/environment.mts'
 
 import type { SocketSdkGenericResult } from '../../src/index'
-import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
+import type { HttpResponse } from '@socketsecurity/lib/http-request'
+import type { IncomingHttpHeaders } from 'node:http'
 
 describe('getApi and sendApi Methods', () => {
   const getClient = setupTestClient('test-api-token', { retries: 0 })
@@ -21,22 +22,22 @@ describe('getApi and sendApi Methods', () => {
       const result = await getClient().getApi('test-endpoint')
 
       expect(result).toBeDefined()
-      expect((result as IncomingMessage).statusCode).toBe(200)
+      expect((result as HttpResponse).status).toBe(200)
     })
 
-    it('should return SocketSdkGenericResult<IncomingMessage> when throws=false', async () => {
+    it('should return SocketSdkGenericResult<HttpResponse> when throws=false', async () => {
       nock('https://api.socket.dev')
         .get('/v0/test-endpoint')
         .reply(200, 'success')
 
       const result = (await getClient().getApi('test-endpoint', {
         throws: false,
-      })) as SocketSdkGenericResult<IncomingMessage>
+      })) as SocketSdkGenericResult<HttpResponse>
 
       expect(result.success).toBe(true)
       if (result.success) {
         expect(result.data).toBeDefined()
-        expect(result.data.statusCode).toBe(200)
+        expect(result.data.status).toBe(200)
       }
     })
 
@@ -47,7 +48,7 @@ describe('getApi and sendApi Methods', () => {
     it('should return error CResult when throws=false and request fails', async () => {
       const result = (await getClient().getApi('nonexistent-endpoint', {
         throws: false,
-      })) as SocketSdkGenericResult<IncomingMessage>
+      })) as SocketSdkGenericResult<HttpResponse>
 
       expect(result.success).toBe(false)
       if (!result.success) {
@@ -65,7 +66,7 @@ describe('getApi and sendApi Methods', () => {
         .reply(200, 'success')
 
       const result = await clientWithSlash.getApi('test-endpoint')
-      expect((result as IncomingMessage).statusCode).toBe(200)
+      expect((result as HttpResponse).status).toBe(200)
     })
 
     it('should handle baseUrl without trailing slash correctly', async () => {
@@ -77,7 +78,7 @@ describe('getApi and sendApi Methods', () => {
         .reply(200, 'success')
 
       const result = await clientWithoutSlash.getApi('test-endpoint')
-      expect((result as IncomingMessage).statusCode).toBe(200)
+      expect((result as HttpResponse).status).toBe(200)
     })
   })
 
@@ -685,12 +686,12 @@ describe('getApi and sendApi Methods', () => {
       const result = (await getClient().getApi('fallback-test', {
         responseType: 'invalid' as any,
         throws: false,
-      })) as SocketSdkGenericResult<IncomingMessage>
+      })) as SocketSdkGenericResult<HttpResponse>
 
       expect(result.success).toBe(true)
       if (result.success) {
         expect(result.data).toBeDefined()
-        expect(result.data.statusCode).toBe(200)
+        expect(result.data.status).toBe(200)
       }
     })
 

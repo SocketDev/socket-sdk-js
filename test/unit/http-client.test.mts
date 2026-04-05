@@ -1,15 +1,8 @@
-/**
- * @fileoverview Comprehensive tests for HTTP client functionality.
- * Tests module selection, request/response handling, error paths, and edge cases.
- */
-
 import http, { createServer } from 'node:http'
 import https from 'node:https'
-import { PassThrough } from 'node:stream'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { MAX_RESPONSE_SIZE } from '../../src/constants.js'
 import {
   ResponseError,
   createDeleteRequest,
@@ -22,7 +15,33 @@ import {
   reshapeArtifactForPublicPolicy,
 } from '../../src/http-client.js'
 
-import type { IncomingMessage, Server } from 'node:http'
+import type { HttpResponse } from '@socketsecurity/lib/http-request'
+import type { Server } from 'node:http'
+
+function mockHttpResponse(
+  overrides: Partial<Omit<HttpResponse, 'body'>> & { body?: Buffer | string },
+): HttpResponse {
+  const body =
+    typeof overrides.body === 'string'
+      ? Buffer.from(overrides.body)
+      : (overrides.body ?? Buffer.alloc(0))
+  const status = overrides.status ?? 200
+  return {
+    arrayBuffer: () =>
+      body.buffer.slice(
+        body.byteOffset,
+        body.byteOffset + body.byteLength,
+      ) as ArrayBuffer,
+    body,
+    headers: overrides.headers ?? {},
+    json: () => JSON.parse(body.toString('utf8')),
+    ok: overrides.ok ?? (status >= 200 && status < 300),
+    status,
+    statusText: overrides.statusText ?? '',
+    text: () => body.toString('utf8'),
+    ...(overrides.rawResponse ? { rawResponse: overrides.rawResponse } : {}),
+  }
+}
 
 // =============================================================================
 // Module Selection Tests
@@ -60,113 +79,23 @@ describe('HTTP Client - Module Selection', () => {
 describe('HTTP Client - Response Body Reading', () => {
   describe('getErrorResponseBody', () => {
     it('should read normal response body successfully', async () => {
-      const mockResponse = new PassThrough() as unknown as IncomingMessage
       const testBody = 'Hello, World!'
-
-      const bodyPromise = getErrorResponseBody(mockResponse)
-
-      // Simulate data chunks
-      mockResponse.emit('data', testBody)
-      mockResponse.emit('end')
-
-      const result = await bodyPromise
+      const response = mockHttpResponse({ body: testBody })
+      const result = await getErrorResponseBody(response)
       expect(result).toBe(testBody)
     })
 
-    it('should accumulate multiple chunks correctly', async () => {
-      const mockResponse = new PassThrough() as unknown as IncomingMessage
-      const chunks = ['Part 1', ' - ', 'Part 2', ' - ', 'Part 3']
-
-      const bodyPromise = getErrorResponseBody(mockResponse)
-
-      // Simulate multiple data chunks
-      for (const chunk of chunks) {
-        mockResponse.emit('data', chunk)
-      }
-      mockResponse.emit('end')
-
-      const result = await bodyPromise
-      expect(result).toBe(chunks.join(''))
+    it('should read empty response body', async () => {
+      const response = mockHttpResponse({ body: '' })
+      const result = await getErrorResponseBody(response)
+      expect(result).toBe('')
     })
 
-    it('should reject when response exceeds size limit', async () => {
-      const mockResponse = new PassThrough() as unknown as IncomingMessage
-      mockResponse.destroy = () => {
-        // Mock destroy method
-        return mockResponse
-      }
-
-      // Create a chunk that exceeds the limit
-      const largeChunk = 'x'.repeat(MAX_RESPONSE_SIZE + 1)
-
-      const bodyPromise = getErrorResponseBody(mockResponse)
-
-      // Simulate oversized data
-      mockResponse.emit('data', largeChunk)
-
-      await expect(bodyPromise).rejects.toThrow(
-        'Response exceeds maximum size limit',
-      )
-    })
-
-    it('should reject when accumulated chunks exceed size limit', async () => {
-      const mockResponse = new PassThrough() as unknown as IncomingMessage
-      mockResponse.destroy = () => {
-        // Mock destroy method
-        return mockResponse
-      }
-
-      // Create chunks that together exceed the limit
-      const chunkSize = Math.floor(MAX_RESPONSE_SIZE / 2) + 1
-      const chunk1 = 'a'.repeat(chunkSize)
-      const chunk2 = 'b'.repeat(chunkSize)
-
-      const bodyPromise = getErrorResponseBody(mockResponse)
-
-      // First chunk should be fine
-      mockResponse.emit('data', chunk1)
-      // Second chunk should trigger the limit
-      mockResponse.emit('data', chunk2)
-
-      await expect(bodyPromise).rejects.toThrow(
-        'Response exceeds maximum size limit',
-      )
-    })
-
-    it('should handle response at exactly the size limit', async () => {
-      const mockResponse = new PassThrough() as unknown as IncomingMessage
-
-      // Create a chunk exactly at the limit
-      const exactSizeChunk = 'x'.repeat(MAX_RESPONSE_SIZE)
-
-      const bodyPromise = getErrorResponseBody(mockResponse)
-
-      mockResponse.emit('data', exactSizeChunk)
-      mockResponse.emit('end')
-
-      const result = await bodyPromise
-      expect(result).toBe(exactSizeChunk)
-    })
-
-    it('should correctly handle multi-byte UTF-8 characters in size calculation', async () => {
-      const mockResponse = new PassThrough() as unknown as IncomingMessage
-      mockResponse.destroy = () => {
-        // Mock destroy method
-        return mockResponse
-      }
-
-      // Create a string with multi-byte characters
-      // Each emoji is 4 bytes in UTF-8
-      const emojiCount = Math.floor(MAX_RESPONSE_SIZE / 4) + 1
-      const largeEmojiString = '😀'.repeat(emojiCount)
-
-      const bodyPromise = getErrorResponseBody(mockResponse)
-
-      mockResponse.emit('data', largeEmojiString)
-
-      await expect(bodyPromise).rejects.toThrow(
-        'Response exceeds maximum size limit',
-      )
+    it('should read large response body', async () => {
+      const largeBody = 'x'.repeat(10000)
+      const response = mockHttpResponse({ body: largeBody })
+      const result = await getErrorResponseBody(response)
+      expect(result).toBe(largeBody)
     })
   })
 })
@@ -180,34 +109,26 @@ describe('HTTP Client - Error Handling', () => {
   let baseUrl: string
 
   beforeAll(async () => {
-    // Create a server that can simulate various error conditions
     server = createServer((req, res) => {
       const url = req.url || ''
 
       if (url.includes('/error-immediate')) {
-        // Immediately close connection without response
         req.socket.destroy()
       } else if (url.includes('/invalid-json')) {
-        // Return invalid JSON to trigger parsing error
         res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end('{ invalid json }')
       } else if (url.includes('/timeout')) {
         // Never respond to trigger timeout
-        // (Don't call res.end())
       } else if (url.includes('/json-null-error')) {
-        // Return null to trigger JSON.parse error path
         res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end('null')
       } else if (url.includes('/empty-response')) {
-        // Return empty response to test empty response handling
         res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end('')
       } else if (url.includes('/non-ok-response')) {
-        // Return non-OK response
         res.writeHead(404, { 'Content-Type': 'application/json' })
         res.end(JSON.stringify({ error: 'Not Found' }))
       } else {
-        // Default success response
         res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end(JSON.stringify({ success: true }))
       }
@@ -231,7 +152,6 @@ describe('HTTP Client - Error Handling', () => {
 
   describe('createGetRequest error handling', () => {
     it('should handle connection errors', async () => {
-      // Try to connect to a port that doesn't exist
       const invalidUrl = 'http://127.0.0.1:1'
       await expect(
         createGetRequest(invalidUrl, '/test', { timeout: 100 }),
@@ -247,7 +167,6 @@ describe('HTTP Client - Error Handling', () => {
 
   describe('createRequestWithJson error handling', () => {
     it('should handle connection errors', async () => {
-      // Try to connect to a port that doesn't exist
       const invalidUrl = 'http://127.0.0.1:1'
       await expect(
         createRequestWithJson(
@@ -280,7 +199,7 @@ describe('HTTP Client - Error Handling', () => {
       const response = await createDeleteRequest(baseUrl, '/test', {
         timeout: 1000,
       })
-      expect(response.statusCode).toBe(200)
+      expect(response.status).toBe(200)
     })
 
     it('should handle connection errors', async () => {
@@ -315,7 +234,7 @@ describe('HTTP Client - Error Handling', () => {
     })
   })
 
-  describe('getResponse timeout handling', () => {
+  describe('timeout handling', () => {
     it('should handle timeout errors with detailed message', async () => {
       await expect(
         createGetRequest(baseUrl, '/timeout', { timeout: 100 }),
@@ -323,7 +242,7 @@ describe('HTTP Client - Error Handling', () => {
     })
   })
 
-  describe('getResponse network error handling', () => {
+  describe('network error handling', () => {
     it('should handle ECONNREFUSED with helpful message', async () => {
       const invalidUrl = 'http://127.0.0.1:1'
       await expect(
@@ -351,7 +270,6 @@ describe('HTTP Client - Error Handling', () => {
     })
 
     it('should handle connection errors during JSON read', async () => {
-      // Try to connect to invalid URL
       const invalidUrl = 'http://127.0.0.1:1'
       await expect(
         (async () => {
@@ -393,7 +311,6 @@ describe('HTTP Client - Error Handling', () => {
 
   describe('Error propagation', () => {
     it('should propagate errors through the stack', async () => {
-      // This tests that errors are properly caught and re-thrown
       const invalidUrl = 'http://127.0.0.1:1'
 
       try {
@@ -447,12 +364,12 @@ describe('HTTP Client - Error Handling', () => {
 describe('HTTP Client - ResponseError Edge Cases', () => {
   describe('ResponseError constructor', () => {
     it('should handle empty message parameter', () => {
-      const mockResponse = {
-        statusCode: 500,
-        statusMessage: 'Internal Server Error',
-      } as IncomingMessage
+      const response = mockHttpResponse({
+        status: 500,
+        statusText: 'Internal Server Error',
+      })
 
-      const error = new ResponseError(mockResponse)
+      const error = new ResponseError(response)
 
       expect(error.message).toContain('Request failed')
       expect(error.message).toContain('500')
@@ -461,76 +378,81 @@ describe('HTTP Client - ResponseError Edge Cases', () => {
     })
 
     it('should handle custom message', () => {
-      const mockResponse = {
-        statusCode: 404,
-        statusMessage: 'Not Found',
-      } as IncomingMessage
+      const response = mockHttpResponse({
+        status: 404,
+        statusText: 'Not Found',
+      })
 
-      const error = new ResponseError(mockResponse, 'Custom message')
+      const error = new ResponseError(response, 'Custom message')
 
       expect(error.message).toContain('Custom message')
       expect(error.message).toContain('404')
     })
 
-    it('should handle missing statusCode', () => {
-      const mockResponse = {
-        statusMessage: 'Error',
-      } as IncomingMessage
+    it('should handle missing status', () => {
+      const response = mockHttpResponse({
+        status: 0,
+        statusText: 'Error',
+      })
 
-      const error = new ResponseError(mockResponse)
+      const error = new ResponseError(response)
 
-      expect(error.message).toContain('unknown')
+      // status 0 is truthy-ish but the message should show it
+      expect(error.message).toContain('0')
     })
 
-    it('should handle missing statusMessage', () => {
-      const mockResponse = {
-        statusCode: 500,
-      } as IncomingMessage
+    it('should handle missing statusText', () => {
+      const response = mockHttpResponse({
+        status: 500,
+        statusText: '',
+      })
 
-      const error = new ResponseError(mockResponse)
+      const error = new ResponseError(response)
 
       expect(error.message).toContain('No status message')
     })
 
     it('should have response property', () => {
-      const mockResponse = {
-        statusCode: 500,
-        statusMessage: 'Error',
-      } as IncomingMessage
+      const response = mockHttpResponse({
+        status: 500,
+        statusText: 'Error',
+      })
 
-      const error = new ResponseError(mockResponse)
+      const error = new ResponseError(response)
 
-      expect(error.response).toBe(mockResponse)
+      expect(error.response).toBe(response)
     })
 
-    it('should handle both missing statusCode and statusMessage', () => {
-      const mockResponse = {} as IncomingMessage
+    it('should handle both missing status and statusText', () => {
+      const response = mockHttpResponse({
+        status: 0,
+        statusText: '',
+      })
 
-      const error = new ResponseError(mockResponse)
+      const error = new ResponseError(response)
 
-      expect(error.message).toContain('unknown')
       expect(error.message).toContain('No status message')
     })
 
     it('should have proper error stack trace', () => {
-      const mockResponse = {
-        statusCode: 500,
-        statusMessage: 'Error',
-      } as IncomingMessage
+      const response = mockHttpResponse({
+        status: 500,
+        statusText: 'Error',
+      })
 
-      const error = new ResponseError(mockResponse)
+      const error = new ResponseError(response)
 
       expect(error.stack).toBeDefined()
       expect(error.stack).toContain('ResponseError')
     })
 
     it('should use provided custom message', () => {
-      const mockResponse = {
-        statusCode: 404,
-        statusMessage: 'Not Found',
-      } as IncomingMessage
+      const response = mockHttpResponse({
+        status: 404,
+        statusText: 'Not Found',
+      })
 
-      const error = new ResponseError(mockResponse, 'Custom operation failed')
+      const error = new ResponseError(response, 'Custom operation failed')
 
       expect(error.message).toContain('Custom operation failed')
       expect(error.message).toContain('404')
@@ -540,47 +462,47 @@ describe('HTTP Client - ResponseError Edge Cases', () => {
 
   describe('isResponseOk', () => {
     it('should return true for 200 OK status', () => {
-      const response = { statusCode: 200 } as IncomingMessage
+      const response = mockHttpResponse({ status: 200, ok: true })
       expect(isResponseOk(response)).toBe(true)
     })
 
     it('should return true for 201 Created status', () => {
-      const response = { statusCode: 201 } as IncomingMessage
+      const response = mockHttpResponse({ status: 201, ok: true })
       expect(isResponseOk(response)).toBe(true)
     })
 
     it('should return true for 299 (edge of 2xx range)', () => {
-      const response = { statusCode: 299 } as IncomingMessage
+      const response = mockHttpResponse({ status: 299, ok: true })
       expect(isResponseOk(response)).toBe(true)
     })
 
     it('should return false for 199 (below 2xx range)', () => {
-      const response = { statusCode: 199 } as IncomingMessage
+      const response = mockHttpResponse({ status: 199, ok: false })
       expect(isResponseOk(response)).toBe(false)
     })
 
     it('should return false for 300 Redirect status', () => {
-      const response = { statusCode: 300 } as IncomingMessage
+      const response = mockHttpResponse({ status: 300, ok: false })
       expect(isResponseOk(response)).toBe(false)
     })
 
     it('should return false for 400 Bad Request status', () => {
-      const response = { statusCode: 400 } as IncomingMessage
+      const response = mockHttpResponse({ status: 400, ok: false })
       expect(isResponseOk(response)).toBe(false)
     })
 
     it('should return false for 404 Not Found status', () => {
-      const response = { statusCode: 404 } as IncomingMessage
+      const response = mockHttpResponse({ status: 404, ok: false })
       expect(isResponseOk(response)).toBe(false)
     })
 
     it('should return false for 500 Server Error status', () => {
-      const response = { statusCode: 500 } as IncomingMessage
+      const response = mockHttpResponse({ status: 500, ok: false })
       expect(isResponseOk(response)).toBe(false)
     })
 
-    it('should return false when statusCode is undefined', () => {
-      const response = {} as IncomingMessage
+    it('should return false when ok is false', () => {
+      const response = mockHttpResponse({ ok: false })
       expect(isResponseOk(response)).toBe(false)
     })
   })
@@ -630,7 +552,6 @@ describe('HTTP Client - ResponseError Edge Cases', () => {
     })
 
     it('should filter alerts by action when actions parameter provided', () => {
-      // publicPolicy: malware→error, criticalCVE→warn, deprecated→monitor
       const data = {
         artifacts: [
           {
@@ -663,7 +584,6 @@ describe('HTTP Client - ResponseError Edge Cases', () => {
         ],
       }
 
-      // Filter to only error action (malware in publicPolicy)
       const result = reshapeArtifactForPublicPolicy(data, false, 'error')
 
       expect(result.artifacts).toBeDefined()

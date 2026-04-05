@@ -1,4 +1,3 @@
-/** @fileoverview File upload utilities for Socket API with multipart form data support. */
 import { createReadStream } from 'node:fs'
 import path from 'node:path'
 import { Readable } from 'node:stream'
@@ -7,20 +6,14 @@ import FormData from 'form-data'
 
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
-import { getHttpModule, getResponse } from './http-client'
+import { getHttpModule, getResponse, wrapIncomingMessage } from './http-client'
 import { sanitizeHeaders } from './utils/header-sanitization'
 
 import type { RequestOptions, RequestOptionsWithHooks } from './types'
+import type { HttpResponse } from '@socketsecurity/lib/http-request'
 import type { ReadStream } from 'node:fs'
-import type { IncomingMessage } from 'node:http'
 import type { RequestOptions as HttpsRequestOptions } from 'node:https'
 
-/**
- * Create multipart form-data body parts for file uploads.
- * Converts file paths to readable streams with proper multipart headers.
- *
- * @throws {Error} When file cannot be read (ENOENT, EACCES, EISDIR, etc.)
- */
 export function createRequestBodyForFilepaths(
   filepaths: string[],
   basePath: string,
@@ -55,10 +48,6 @@ export function createRequestBodyForFilepaths(
   return form
 }
 
-/**
- * Create multipart form-data body part for JSON data.
- * Converts JSON object to readable stream with appropriate headers.
- */
 export function createRequestBodyForJson(
   jsonData: unknown,
   basename = 'data.json',
@@ -76,33 +65,12 @@ export function createRequestBodyForJson(
   return form
 }
 
-/**
- * Create and execute a multipart/form-data upload request using form-data library.
- * Streams large files efficiently with automatic backpressure handling and early server validation.
- *
- * @throws {Error} When network errors occur or stream processing fails
- */
 export async function createUploadRequest(
   baseUrl: string,
   urlPath: string,
   form: FormData,
   options?: RequestOptionsWithHooks | undefined,
-): Promise<IncomingMessage> {
-  // This function constructs and sends a multipart/form-data HTTP POST request
-  // using the battle-tested form-data library. It automatically handles:
-  // - Proper multipart boundaries and Content-Type headers
-  // - Stream backpressure to avoid memory exhaustion
-  // - Correct Content-Disposition headers with UTF-8 support
-
-  // We call `flushHeaders()` early to ensure headers are sent before body transmission
-  // begins. If the server rejects the request (e.g., bad org or auth), it will likely
-  // respond immediately. We listen for that response while still streaming the body.
-  //
-  // This protects against cases where the server closes the connection (EPIPE/ECONNRESET)
-  // mid-stream, which would otherwise cause hard-to-diagnose failures during file upload.
-  //
-  // Example failure this mitigates: `socket scan create --org badorg`
-
+): Promise<HttpResponse> {
   const { hooks, ...rawOpts } = {
     __proto__: null,
     ...options,
@@ -113,7 +81,6 @@ export async function createUploadRequest(
     const url = new URL(urlPath, baseUrl)
     const method = 'POST'
 
-    // Get headers from form-data with proper boundary
     const formHeaders = form.getHeaders()
     const headers = {
       ...(opts as HttpsRequestOptions)?.headers,
@@ -134,21 +101,24 @@ export async function createUploadRequest(
       timeout: opts.timeout,
     })
 
-    // Send headers early to prompt server validation (auth, URL, quota, etc.).
     req.flushHeaders()
 
-    // Concurrently wait for response while we stream body.
     void getResponse(req).then(
-      response => {
+      async msg => {
         hooks?.onResponse?.({
           method,
           url: url.toString(),
           duration: Date.now() - startTime,
-          status: response.statusCode,
-          statusText: response.statusMessage,
-          headers: sanitizeHeaders(response.headers),
+          status: msg.statusCode,
+          statusText: msg.statusMessage,
+          headers: sanitizeHeaders(msg.headers),
         })
-        pass(response)
+        try {
+          pass(await wrapIncomingMessage(msg))
+        } catch (err) {
+          /* c8 ignore next - wrapIncomingMessage stream read error */
+          fail(err)
+        }
       },
       error => {
         hooks?.onResponse?.({
@@ -161,10 +131,8 @@ export async function createUploadRequest(
       },
     )
 
-    // Pipe form data to request - form-data handles all backpressure automatically
     form.pipe(req)
 
-    // Handle form stream errors (request errors already handled by getResponse)
     /* c8 ignore next 1 - form-data error events require stream failures that are difficult to test reliably */
     form.on('error', fail)
   })

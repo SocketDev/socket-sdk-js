@@ -62,7 +62,7 @@ describe('getResponse - timeout handler', () => {
     expect(caught).toBeInstanceOf(Error)
     expect(caught.message).toContain('timed out')
     expect(caught.message).toContain('/hang')
-    expect(caught.message).toContain('Socket API did not respond')
+    expect(caught.message).toContain('did not respond')
   })
 })
 

@@ -1,12 +1,8 @@
-/**
- * @fileoverview HTTP client utilities for Socket API communication.
- * Provides low-level HTTP request handling with proper error management and response parsing.
- */
-
 import http from 'node:http'
 import https from 'node:https'
 
 import { debugLog } from '@socketsecurity/lib/debug'
+import { httpRequest } from '@socketsecurity/lib/http-request'
 import { jsonParse } from '@socketsecurity/lib/json/parse'
 import { perfTimer } from '@socketsecurity/lib/performance'
 
@@ -23,33 +19,18 @@ import type {
   SocketArtifactAlert,
   SocketArtifactWithExtras,
 } from './types'
+import type { HttpResponse } from '@socketsecurity/lib/http-request'
 import type { JsonValue } from '@socketsecurity/lib/json/types'
 import type { ClientRequest, IncomingMessage } from 'node:http'
 
-/**
- * Array of sensitive header names that should be redacted in logs
- */
-
-/**
- * HTTP response error for Socket API requests.
- * Extends Error with response details for debugging failed API calls.
- */
 export class ResponseError extends Error {
-  response: IncomingMessage
+  response: HttpResponse
   url?: string | undefined
 
-  /**
-   * Create a new ResponseError from an HTTP response.
-   * Automatically formats error message with status code and message.
-   */
-  constructor(
-    response: IncomingMessage,
-    message = '',
-    url?: string | undefined,
-  ) {
-    /* c8 ignore next 2 - statusCode and statusMessage may be undefined in edge cases */
-    const statusCode = response.statusCode ?? 'unknown'
-    const statusMessage = response.statusMessage ?? 'No status message'
+  constructor(response: HttpResponse, message = '', url?: string | undefined) {
+    /* c8 ignore next 2 - status and statusText may be undefined in edge cases */
+    const statusCode = response.status ?? 'unknown'
+    const statusMessage = response.statusText || 'No status message'
     super(
       /* c8 ignore next - fallback empty message if not provided */
       `Socket API ${message || 'Request failed'} (${statusCode}): ${statusMessage}`,
@@ -61,17 +42,11 @@ export class ResponseError extends Error {
   }
 }
 
-/**
- * Create and execute an HTTP DELETE request.
- * Returns the response stream for further processing.
- *
- * @throws {Error} When network or timeout errors occur
- */
 export async function createDeleteRequest(
   baseUrl: string,
   urlPath: string,
   options?: RequestOptionsWithHooks | undefined,
-): Promise<IncomingMessage> {
+): Promise<HttpResponse> {
   const startTime = Date.now()
   const url = `${baseUrl}${urlPath}`
   const method = 'DELETE'
@@ -89,20 +64,19 @@ export async function createDeleteRequest(
   })
 
   try {
-    const req = getHttpModule(baseUrl)
-      .request(url, {
-        method,
-        ...opts,
-      })
-      .end()
-    const response = await getResponse(req)
+    const response = await httpRequest(url, {
+      method,
+      headers: opts.headers as Record<string, string>,
+      timeout: opts.timeout,
+      maxResponseSize: MAX_RESPONSE_SIZE,
+    })
 
     hooks?.onResponse?.({
       method,
       url,
       duration: Date.now() - startTime,
-      status: response.statusCode,
-      statusText: response.statusMessage,
+      status: response.status,
+      statusText: response.statusText,
       headers: sanitizeHeaders(response.headers),
     })
 
@@ -119,18 +93,11 @@ export async function createDeleteRequest(
   }
 }
 
-/**
- * Create and execute an HTTP GET request.
- * Returns the response stream for further processing.
- * Performance tracking enabled with DEBUG=perf.
- *
- * @throws {Error} When network or timeout errors occur
- */
 export async function createGetRequest(
   baseUrl: string,
   urlPath: string,
   options?: RequestOptionsWithHooks | undefined,
-): Promise<IncomingMessage> {
+): Promise<HttpResponse> {
   const startTime = Date.now()
   const url = `${baseUrl}${urlPath}`
   const method = 'GET'
@@ -149,21 +116,20 @@ export async function createGetRequest(
   })
 
   try {
-    const req = getHttpModule(baseUrl)
-      .request(url, {
-        method,
-        ...opts,
-      })
-      .end()
-    const response = await getResponse(req)
-    stopTimer({ statusCode: response.statusCode })
+    const response = await httpRequest(url, {
+      method,
+      headers: opts.headers as Record<string, string>,
+      timeout: opts.timeout,
+      maxResponseSize: MAX_RESPONSE_SIZE,
+    })
+    stopTimer({ statusCode: response.status })
 
     hooks?.onResponse?.({
       method,
       url,
       duration: Date.now() - startTime,
-      status: response.statusCode,
-      statusText: response.statusMessage,
+      status: response.status,
+      statusText: response.statusText,
       headers: sanitizeHeaders(response.headers),
     })
 
@@ -182,20 +148,13 @@ export async function createGetRequest(
   }
 }
 
-/**
- * Create and execute an HTTP request with JSON payload.
- * Automatically sets appropriate content headers and serializes the body.
- * Performance tracking enabled with DEBUG=perf.
- *
- * @throws {Error} When network or timeout errors occur
- */
 export async function createRequestWithJson(
   method: SendMethod,
   baseUrl: string,
   urlPath: string,
   json: unknown,
   options?: RequestOptionsWithHooks | undefined,
-): Promise<IncomingMessage> {
+): Promise<HttpResponse> {
   const startTime = Date.now()
   const url = `${baseUrl}${urlPath}`
   const stopTimer = perfTimer(`http:${method.toLowerCase()}`, {
@@ -209,9 +168,8 @@ export async function createRequestWithJson(
   const body = JSON.stringify(json)
   const headers = {
     ...opts.headers,
-    'Content-Length': Buffer.byteLength(body, 'utf8'),
     'Content-Type': 'application/json',
-  }
+  } as Record<string, string>
 
   hooks?.onRequest?.({
     method,
@@ -221,24 +179,21 @@ export async function createRequestWithJson(
   })
 
   try {
-    const req = getHttpModule(baseUrl).request(url, {
+    const response = await httpRequest(url, {
       method,
-      ...opts,
+      body,
       headers,
+      timeout: opts.timeout,
+      maxResponseSize: MAX_RESPONSE_SIZE,
     })
-
-    req.write(body)
-    req.end()
-
-    const response = await getResponse(req)
-    stopTimer({ statusCode: response.statusCode })
+    stopTimer({ statusCode: response.status })
 
     hooks?.onResponse?.({
       method,
       url,
       duration: Date.now() - startTime,
-      status: response.statusCode,
-      statusText: response.statusMessage,
+      status: response.status,
+      statusText: response.statusText,
       headers: sanitizeHeaders(response.headers),
     })
 
@@ -257,68 +212,16 @@ export async function createRequestWithJson(
   }
 }
 
-/**
- * Read the response body from an HTTP error response.
- * Accumulates all chunks into a complete string for error handling.
- * Enforces maximum response size to prevent memory exhaustion.
- *
- * @throws {Error} When stream errors occur during reading
- * @throws {Error} When response exceeds maximum size limit
- */
 export async function getErrorResponseBody(
-  response: IncomingMessage,
+  response: HttpResponse,
 ): Promise<string> {
-  return await new Promise((resolve, reject) => {
-    let body = ''
-    let totalBytes = 0
-
-    response.setEncoding('utf8')
-
-    response.on('data', (chunk: string) => {
-      // Track size in bytes (not characters) for accurate limit enforcement
-      const chunkBytes = Buffer.byteLength(chunk, 'utf8')
-
-      // Check BEFORE accumulating to prevent exceeding limit
-      if (totalBytes + chunkBytes > MAX_RESPONSE_SIZE) {
-        // Destroy the response stream to stop receiving data
-        response.destroy()
-        const projectedSize = totalBytes + chunkBytes
-        const sizeMB = (projectedSize / (1024 * 1024)).toFixed(2)
-        const maxMB = (MAX_RESPONSE_SIZE / (1024 * 1024)).toFixed(2)
-        const message = [
-          `Response exceeds maximum size limit (${sizeMB}MB > ${maxMB}MB)`,
-          '→ The API response is too large to process safely.',
-          '→ Try: Use pagination parameters (limit, offset) to reduce response size.',
-          '→ Try: Request specific fields instead of full objects.',
-          '→ Contact support if you need to process larger responses.',
-        ].join('\n')
-        reject(new Error(message))
-        return
-      }
-
-      totalBytes += chunkBytes
-      body += chunk
-    })
-
-    response.on('end', () => resolve(body))
-    response.on('error', e => reject(e))
-  })
+  return response.text()
 }
 
-/**
- * Get the appropriate HTTP module based on URL protocol.
- * Returns http module for http: URLs, https module for https: URLs.
- */
 export function getHttpModule(url: string): typeof http | typeof https {
   return url.startsWith('https:') ? https : http
 }
 
-/**
- * Wait for and return the HTTP response from a request.
- * Handles timeout and error conditions during request processing.
- *
- * @throws {Error} When request times out or network errors occur
- */
 export async function getResponse(
   req: ClientRequest,
 ): Promise<IncomingMessage> {
@@ -334,7 +237,6 @@ export async function getResponse(
     req.on('timeout', () => {
       timedOut = true
       req.destroy()
-      // Extract request details for better error context.
       const method = (req as any).method || 'REQUEST'
       const path = (req as any).path || 'unknown'
       const timeout = (req as any).timeout || 'configured timeout'
@@ -353,7 +255,6 @@ export async function getResponse(
         const path = (req as any).path || 'unknown'
         let message = `${method} request failed: ${path}`
 
-        // Provide specific guidance based on error code.
         if (err.code === 'ECONNREFUSED') {
           message += [
             '',
@@ -409,16 +310,35 @@ export async function getResponse(
   })
 }
 
-/**
- * Parse HTTP response body as JSON.
- * Validates response status and handles empty responses gracefully.
- * Performance tracking enabled with DEBUG=perf.
- *
- * @throws {ResponseError} When response has non-2xx status code
- * @throws {SyntaxError} When response body contains invalid JSON
- */
+export async function wrapIncomingMessage(
+  msg: IncomingMessage,
+): Promise<HttpResponse> {
+  const chunks: Buffer[] = []
+  for await (const chunk of msg) {
+    chunks.push(chunk as Buffer)
+  }
+  const body = Buffer.concat(chunks)
+  const status = msg.statusCode ?? 0
+  const statusText = msg.statusMessage ?? ''
+  return {
+    arrayBuffer: () =>
+      body.buffer.slice(
+        body.byteOffset,
+        body.byteOffset + body.byteLength,
+      ) as ArrayBuffer,
+    body,
+    headers: msg.headers,
+    json: () => JSON.parse(body.toString('utf8')),
+    ok: status >= 200 && status < 300,
+    rawResponse: msg,
+    status,
+    statusText,
+    text: () => body.toString('utf8'),
+  }
+}
+
 export async function getResponseJson(
-  response: IncomingMessage,
+  response: HttpResponse,
   method?: string | undefined,
   url?: string | undefined,
 ): Promise<JsonValue | undefined> {
@@ -431,9 +351,8 @@ export async function getResponseJson(
         url,
       )
     }
-    const responseBody = await getErrorResponseBody(response)
+    const responseBody = response.text()
 
-    // Handle truly empty responses (not whitespace) as valid empty objects.
     if (responseBody === '') {
       debugLog('API response: empty response treated as {}')
       stopTimer({ success: true })
@@ -448,7 +367,6 @@ export async function getResponseJson(
     } catch (e) {
       stopTimer({ error: true })
       if (e instanceof SyntaxError) {
-        // Attach the original response text for better error reporting.
         const contentType = response.headers['content-type']
         const preview =
           responseBody.length > 200
@@ -460,7 +378,6 @@ export async function getResponseJson(
           `→ Parse error: ${e.message}`,
         ]
 
-        // Add helpful hints based on response characteristics.
         if (contentType && !contentType.includes('application/json')) {
           messageParts.push(
             `→ Unexpected Content-Type: ${contentType} (expected application/json)`,
@@ -471,7 +388,7 @@ export async function getResponseJson(
             '→ Response appears to be HTML, not JSON.',
             '→ This may indicate an API endpoint error or network interception.',
           )
-          /* c8 ignore next 3 - Empty responses are handled before JSON parsing (line 311), making this branch unreachable */
+          /* c8 ignore next 3 - Empty responses are handled before JSON parsing, making this branch unreachable */
         } else if (responseBody.length === 0) {
           messageParts.push('→ Response body is empty when JSON was expected.')
         } else if (
@@ -498,7 +415,6 @@ export async function getResponseJson(
       if (e instanceof Error) {
         throw e
       }
-      // Handle non-Error objects thrown by JSON parsing.
       const unknownError = new Error('Unknown JSON parsing error', {
         cause: e,
       }) as SyntaxError & {
@@ -516,20 +432,10 @@ export async function getResponseJson(
   }
 }
 
-/**
- * Check if HTTP response has a successful status code (2xx range).
- * Returns true for status codes between 200-299, false otherwise.
- */
-export function isResponseOk(response: IncomingMessage): boolean {
-  const { statusCode } = response
-  /* c8 ignore next - Defensive fallback for edge cases where statusCode might be undefined. */
-  return statusCode ? statusCode >= 200 && statusCode < 300 : false
+export function isResponseOk(response: HttpResponse): boolean {
+  return response.ok
 }
 
-/**
- * Transform artifact data based on authentication status.
- * Filters and compacts response data for public/free-tier users.
- */
 export function reshapeArtifactForPublicPolicy<
   T extends Record<string, unknown>,
 >(
@@ -538,10 +444,7 @@ export function reshapeArtifactForPublicPolicy<
   actions?: string | undefined,
   policy?: Map<string, string> | undefined,
 ): T {
-  // If user is not authenticated, provide a different response structure
-  // optimized for the public free-tier experience.
   if (!isAuthenticated) {
-    // Parse actions parameter for alert filtering.
     const allowedActions = actions?.trim() ? actions.split(',') : undefined
     const resolvedPolicy = policy ?? defaultPublicPolicy
 
@@ -554,17 +457,12 @@ export function reshapeArtifactForPublicPolicy<
       supplyChainRisk: artifact.supplyChainRisk,
       scorecards: artifact.scorecards,
       topLevelAncestors: artifact.topLevelAncestors,
-      // Compact the alerts array to reduce response size for non-authenticated
-      // requests.
       alerts: artifact.alerts
         ?.filter((alert: SocketArtifactAlert) => {
-          // Derive action from policy instead of trusting server value.
           const action = resolvedPolicy.get(alert.type)
-          // Filter by severity (remove low severity alerts).
           if (alert.severity === 'low') {
             return false
           }
-          // Filter by actions if specified.
           if (allowedActions && action && !allowedActions.includes(action)) {
             return false
           }
@@ -578,9 +476,7 @@ export function reshapeArtifactForPublicPolicy<
         })),
     })
 
-    // Handle both single artifacts and objects with artifacts arrays.
     if (data['artifacts']) {
-      // Object with artifacts array.
       const artifacts = data['artifacts']
       return {
         ...data,
@@ -590,7 +486,6 @@ export function reshapeArtifactForPublicPolicy<
       }
     }
     if (data['alerts']) {
-      // Single artifact with alerts.
       return reshapeArtifact(
         data as unknown as SocketArtifactWithExtras,
       ) as unknown as T

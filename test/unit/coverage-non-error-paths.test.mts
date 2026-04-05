@@ -18,12 +18,10 @@
  *   uploadManifestFiles edge case
  */
 
-import events from 'node:events'
 import { createServer } from 'node:http'
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { PassThrough } from 'node:stream'
 
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
@@ -89,7 +87,7 @@ describe('file-upload createUploadRequest with hooks', () => {
       hooks,
     })
 
-    expect(response.statusCode).toBe(200)
+    expect(response.status).toBe(200)
     expect(requestCalled).toBe(true)
     expect(responseCalled).toBe(true)
   })
@@ -99,16 +97,26 @@ describe('file-upload createUploadRequest with hooks', () => {
 // 2. http-client.ts — getErrorResponseBody stream error (line 304)
 // =============================================================================
 
-describe('getErrorResponseBody stream error', () => {
-  it('should reject when response emits an error', async () => {
-    const mockResponse = new PassThrough() as unknown as IncomingMessage
+describe('getErrorResponseBody', () => {
+  it('should return the text content of the response', async () => {
+    const body = Buffer.from('error body text')
+    const mockResponse = {
+      arrayBuffer: () =>
+        body.buffer.slice(
+          body.byteOffset,
+          body.byteOffset + body.byteLength,
+        ) as ArrayBuffer,
+      body,
+      headers: {},
+      json: () => JSON.parse(body.toString('utf8')),
+      ok: false,
+      status: 500,
+      statusText: 'Internal Server Error',
+      text: () => body.toString('utf8'),
+    } as import('@socketsecurity/lib/http-request').HttpResponse
 
-    const bodyPromise = getErrorResponseBody(mockResponse)
-
-    // Emit an error on the response stream
-    mockResponse.emit('error', new Error('stream broke'))
-
-    await expect(bodyPromise).rejects.toThrow('stream broke')
+    const result = await getErrorResponseBody(mockResponse)
+    expect(result).toBe('error body text')
   })
 })
 
@@ -166,7 +174,7 @@ describe('getResponseJson enhanced error branches', () => {
     server.close()
   })
 
-  async function getFromPath(urlPath: string): Promise<IncomingMessage> {
+  async function getFromPath(urlPath: string) {
     const { createGetRequest } = await import('../../src/http-client.js')
     return createGetRequest(baseUrl, urlPath, { timeout: 5000 })
   }
@@ -441,7 +449,7 @@ describe('SocketSdk - #getResponseText size limit', () => {
 
     await expect(
       client.getApi('huge-text', { responseType: 'text' }),
-    ).rejects.toThrow('Response body exceeds maximum size limit')
+    ).rejects.toThrow(/Response exceeds maximum size limit/)
   }, 60_000)
 })
 
@@ -851,7 +859,7 @@ describe('SocketSdk - streamFullScan data handlers', () => {
     expect(result.success).toBe(true)
   })
 
-  it('should handle stdout output with end event listener cleanup', async () => {
+  it('should handle stdout output', async () => {
     const client = new SocketSdk('test-token', {
       baseUrl: `${getBaseUrl()}/v0/`,
       retries: 0,
@@ -870,13 +878,8 @@ describe('SocketSdk - streamFullScan data handlers', () => {
         output: true,
       })
 
-      // Wait for piping to complete
-      const stream = result.data as import('node:stream').Readable
-      if (!stream.readableEnded) {
-        await events.once(stream, 'end').catch(() => {})
-      }
-
       expect(result.success).toBe(true)
+      expect(chunks.length).toBeGreaterThan(0)
     } finally {
       process.stdout.write = originalWrite
     }
