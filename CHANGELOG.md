@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.5.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.5.1) - 2026-04-04
+
+### Changed
+
+- Updated `@socketsecurity/lib` to v5.12.0
+- Added `minimumReleaseAgeExclude` for Socket-owned packages in pnpm-workspace.yaml
+
+### Fixed
+
+- Fixed generate SDK workflow GPG commit signing and push authentication
+
 ## [3.5.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.5.0) - 2026-04-03
 
 ### Added
