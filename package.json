@@ -65,7 +65,7 @@
   },
   "dependencies": {
     "@socketregistry/packageurl-js": "1.4.1",
-    "@socketsecurity/lib": "5.11.4",
+    "@socketsecurity/lib": "5.12.0",
     "form-data": "4.0.5"
   },
   "devDependencies": {
@@ -120,6 +120,7 @@
       "unrs-resolver"
     ],
     "overrides": {
+      "defu": ">=6.1.6",
       "vite": "7.1.12"
     }
   }
