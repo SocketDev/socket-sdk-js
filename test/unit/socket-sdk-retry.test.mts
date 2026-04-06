@@ -207,7 +207,7 @@ describeRetry('SocketSdk - Retry Logic', () => {
     it('should not retry on 400 bad request errors', async () => {
       nock('https://api.socket.dev')
         .get('/v0/quota')
-        .reply(400, { error: { message: 'Bad Request' } })
+        .reply(() => [400, { error: { message: 'Bad Request' } }])
 
       const client = new SocketSdk('test-token', {
         retries: 3,
@@ -223,7 +223,7 @@ describeRetry('SocketSdk - Retry Logic', () => {
     it('should not retry on 404 not found errors', async () => {
       nock('https://api.socket.dev')
         .get('/v0/quota')
-        .reply(404, { error: { message: 'Not Found' } })
+        .reply(() => [404, { error: { message: 'Not Found' } }])
 
       const client = new SocketSdk('test-token', {
         retries: 3,
@@ -347,10 +347,19 @@ describeRetry('SocketSdk - Retry Logic', () => {
       expect(attemptCount).toBe(2)
     })
 
-    it('should not retry 429 without Retry-After header', async () => {
+    it('should retry 429 without Retry-After header using default delay', async () => {
+      let attemptCount = 0
+
       nock('https://api.socket.dev')
         .get('/v0/quota')
-        .reply(429, { error: { message: 'Too Many Requests' } })
+        .times(2)
+        .reply(() => {
+          attemptCount++
+          if (attemptCount < 2) {
+            return [429, { error: { message: 'Too Many Requests' } }]
+          }
+          return [200, { quota: 4000 }]
+        })
 
       const client = new SocketSdk('test-token', {
         retries: 3,
@@ -359,20 +368,30 @@ describeRetry('SocketSdk - Retry Logic', () => {
 
       const result = await client.getQuota()
 
-      expect(result.success).toBe(false)
-      expect(result.status).toBe(429)
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.quota).toBe(4000)
+      }
+      expect(attemptCount).toBe(2)
     })
 
-    it('should not retry 429 with invalid Retry-After header', async () => {
+    it('should retry 429 with invalid Retry-After header using default delay', async () => {
+      let attemptCount = 0
+
       nock('https://api.socket.dev')
         .get('/v0/quota')
-        .reply(
-          429,
-          { error: { message: 'Too Many Requests' } },
-          {
-            'Retry-After': 'invalid',
-          },
-        )
+        .times(2)
+        .reply(() => {
+          attemptCount++
+          if (attemptCount < 2) {
+            return [
+              429,
+              { error: { message: 'Too Many Requests' } },
+              { 'Retry-After': 'invalid' },
+            ]
+          }
+          return [200, { quota: 5000 }]
+        })
 
       const client = new SocketSdk('test-token', {
         retries: 3,
@@ -381,21 +400,31 @@ describeRetry('SocketSdk - Retry Logic', () => {
 
       const result = await client.getQuota()
 
-      expect(result.success).toBe(false)
-      expect(result.status).toBe(429)
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.quota).toBe(5000)
+      }
+      expect(attemptCount).toBe(2)
     })
 
-    it('should not retry 429 with past HTTP-date', async () => {
+    it('should retry 429 with past HTTP-date using default delay', async () => {
+      let attemptCount = 0
       const pastDate = new Date(Date.now() - 1000)
+
       nock('https://api.socket.dev')
         .get('/v0/quota')
-        .reply(
-          429,
-          { error: { message: 'Too Many Requests' } },
-          {
-            'Retry-After': pastDate.toUTCString(),
-          },
-        )
+        .times(2)
+        .reply(() => {
+          attemptCount++
+          if (attemptCount < 2) {
+            return [
+              429,
+              { error: { message: 'Too Many Requests' } },
+              { 'Retry-After': pastDate.toUTCString() },
+            ]
+          }
+          return [200, { quota: 6000 }]
+        })
 
       const client = new SocketSdk('test-token', {
         retries: 3,
@@ -404,20 +433,30 @@ describeRetry('SocketSdk - Retry Logic', () => {
 
       const result = await client.getQuota()
 
-      expect(result.success).toBe(false)
-      expect(result.status).toBe(429)
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.quota).toBe(6000)
+      }
+      expect(attemptCount).toBe(2)
     })
 
-    it('should not retry 429 with negative delay-seconds', async () => {
+    it('should retry 429 with negative delay-seconds using default delay', async () => {
+      let attemptCount = 0
+
       nock('https://api.socket.dev')
         .get('/v0/quota')
-        .reply(
-          429,
-          { error: { message: 'Too Many Requests' } },
-          {
-            'Retry-After': '-1',
-          },
-        )
+        .times(2)
+        .reply(() => {
+          attemptCount++
+          if (attemptCount < 2) {
+            return [
+              429,
+              { error: { message: 'Too Many Requests' } },
+              { 'Retry-After': '-1' },
+            ]
+          }
+          return [200, { quota: 7000 }]
+        })
 
       const client = new SocketSdk('test-token', {
         retries: 3,
@@ -426,14 +465,26 @@ describeRetry('SocketSdk - Retry Logic', () => {
 
       const result = await client.getQuota()
 
-      expect(result.success).toBe(false)
-      expect(result.status).toBe(429)
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.quota).toBe(7000)
+      }
+      expect(attemptCount).toBe(2)
     })
 
-    it('should handle 429 with empty Retry-After array', async () => {
+    it('should retry 429 with empty Retry-After array using default delay', async () => {
+      let attemptCount = 0
+
       nock('https://api.socket.dev')
         .get('/v0/quota')
-        .reply(429, { error: { message: 'Too Many Requests' } })
+        .times(2)
+        .reply(() => {
+          attemptCount++
+          if (attemptCount < 2) {
+            return [429, { error: { message: 'Too Many Requests' } }]
+          }
+          return [200, { quota: 8000 }]
+        })
 
       const client = new SocketSdk('test-token', {
         retries: 3,
@@ -442,8 +493,11 @@ describeRetry('SocketSdk - Retry Logic', () => {
 
       const result = await client.getQuota()
 
-      expect(result.success).toBe(false)
-      expect(result.status).toBe(429)
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.quota).toBe(8000)
+      }
+      expect(attemptCount).toBe(2)
     })
 
     it.sequential('should exhaust retries on persistent 429 with Retry-After', async () => {

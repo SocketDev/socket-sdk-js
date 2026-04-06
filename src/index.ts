@@ -29,8 +29,6 @@ export {
   createGetRequest,
   createRequestWithJson,
   getErrorResponseBody,
-  getHttpModule,
-  getResponse,
   getResponseJson,
   isResponseOk,
   ResponseError,

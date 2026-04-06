@@ -309,12 +309,13 @@ describe('SocketSdk - streamPatchesFromScan stream error', () => {
       retries: 0,
     })
 
-    const stream = await client.streamPatchesFromScan('test-org', 'scan-1')
-    const reader = stream.getReader()
-    const chunks: unknown[] = []
-
-    // Read until done or error — the stream should close/error eventually
+    // With buffered httpRequest, a destroyed connection causes an error
+    // during the request itself, before streaming begins.
     try {
+      const stream = await client.streamPatchesFromScan('test-org', 'scan-1')
+      const reader = stream.getReader()
+      const chunks: unknown[] = []
+
       let done = false
       while (!done) {
         const result = await reader.read()
@@ -324,14 +325,12 @@ describe('SocketSdk - streamPatchesFromScan stream error', () => {
           chunks.push(result.value)
         }
       }
-    } catch {
-      // Stream error is expected when connection is destroyed
-    }
 
-    // The stream should complete (or error) without hanging.
-    // We may or may not get chunks depending on timing, but the
-    // important thing is the reader resolves without crashing.
-    expect(chunks).toBeInstanceOf(Array)
+      // If we got here, the partial response was buffered before destruction
+      expect(chunks).toBeInstanceOf(Array)
+    } catch {
+      // Connection destruction during buffering is expected
+    }
   })
 })
 

@@ -9,8 +9,6 @@ describe('index.ts exports', () => {
     expect(typeof sdk.createGetRequest).toBe('function')
     expect(typeof sdk.createRequestWithJson).toBe('function')
     expect(typeof sdk.getErrorResponseBody).toBe('function')
-    expect(typeof sdk.getHttpModule).toBe('function')
-    expect(typeof sdk.getResponse).toBe('function')
     expect(typeof sdk.getResponseJson).toBe('function')
     expect(typeof sdk.isResponseOk).toBe('function')
     expect(typeof sdk.reshapeArtifactForPublicPolicy).toBe('function')
@@ -79,8 +77,6 @@ describe('index.ts exports', () => {
       'createGetRequest',
       'createRequestWithJson',
       'getErrorResponseBody',
-      'getHttpModule',
-      'getResponse',
       'getResponseJson',
       'isResponseOk',
       'reshapeArtifactForPublicPolicy',
@@ -136,8 +132,6 @@ describe('index.ts exports', () => {
       'createGetRequest',
       'createRequestWithJson',
       'getErrorResponseBody',
-      'getHttpModule',
-      'getResponse',
       'getResponseJson',
       'isResponseOk',
       'reshapeArtifactForPublicPolicy',

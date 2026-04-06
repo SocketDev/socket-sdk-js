@@ -2,11 +2,8 @@
  * @fileoverview SocketSdk class implementation for Socket security API client.
  * Provides complete API functionality for vulnerability scanning, analysis, and reporting.
  */
-import events from 'node:events'
-import { createWriteStream } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import readline from 'node:readline'
 
 import { createTtlCache } from '@socketsecurity/lib/cache-with-ttl'
 import { UNKNOWN_ERROR } from '@socketsecurity/lib/constants/core'
@@ -22,6 +19,8 @@ import { urlSearchParamAsBoolean } from '@socketsecurity/lib/url'
 
 const abortSignal = getAbortSignal()
 
+import { httpRequest } from '@socketsecurity/lib/http-request'
+
 import {
   DEFAULT_CACHE_TTL,
   DEFAULT_HTTP_TIMEOUT,
@@ -31,6 +30,7 @@ import {
   httpAgentNames,
   MAX_FIREWALL_COMPONENTS,
   MAX_HTTP_TIMEOUT,
+  MAX_RESPONSE_SIZE,
   MAX_STREAM_SIZE,
   MIN_HTTP_TIMEOUT,
   publicPolicy,
@@ -49,8 +49,6 @@ import {
   createGetRequest,
   createRequestWithJson,
   getErrorResponseBody,
-  getHttpModule,
-  getResponse,
   getResponseJson,
   isResponseOk,
   ResponseError,
@@ -120,7 +118,7 @@ import type {
   StrictErrorResult,
 } from './types-strict'
 import type { TtlCache } from '@socketsecurity/lib/cache-with-ttl'
-import type { IncomingMessage } from 'node:http'
+import type { HttpResponse } from '@socketsecurity/lib/http-request'
 
 /**
  * Socket SDK for programmatic access to Socket.dev security analysis APIs.
@@ -237,7 +235,7 @@ export class SocketSdk {
     componentsObj: { components: Array<{ purl: string }> },
     queryParams?: QueryParams | undefined,
   ): AsyncGenerator<BatchPackageFetchResultType> {
-    let res: IncomingMessage | undefined
+    let res: HttpResponse | undefined
     try {
       res = await this.#executeWithRetry(() =>
         this.#createBatchPurlRequest(componentsObj, queryParams),
@@ -253,34 +251,26 @@ export class SocketSdk {
       throw new Error('Failed to get response from batch PURL request')
     }
     // Parse the newline delimited JSON response.
-    const rli = readline.createInterface({
-      input: res,
-      crlfDelay: Number.POSITIVE_INFINITY,
-      signal: abortSignal,
-    })
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
-    try {
-      for await (const line of rli) {
-        const trimmed = line.trim()
-        const artifact = trimmed
-          ? (jsonParse(line, { throws: false }) as SocketArtifact)
-          : /* c8 ignore next - Empty line handling in batch streaming response parsing. */ null
-        if (isObjectObject(artifact)) {
-          yield this.#handleApiSuccess<'batchPackageFetch'>(
-            /* c8 ignore next 8 - Public token artifact reshaping branch for policy compliance. */
-            isPublicToken
-              ? reshapeArtifactForPublicPolicy(
-                  artifact!,
-                  false,
-                  queryParams?.['actions'] as string,
-                  publicPolicy,
-                )
-              : artifact!,
-          )
-        }
+    const lines = res.text().split('\n')
+    for (const line of lines) {
+      const trimmed = line.trim()
+      const artifact = trimmed
+        ? (jsonParse(line, { throws: false }) as SocketArtifact)
+        : /* c8 ignore next - Empty line handling in batch streaming response parsing. */ null
+      if (isObjectObject(artifact)) {
+        yield this.#handleApiSuccess<'batchPackageFetch'>(
+          /* c8 ignore next 8 - Public token artifact reshaping branch for policy compliance. */
+          isPublicToken
+            ? reshapeArtifactForPublicPolicy(
+                artifact!,
+                false,
+                queryParams?.['actions'] as string,
+                publicPolicy,
+              )
+            : artifact!,
+        )
       }
-    } finally {
-      rli.close()
     }
   }
 
@@ -291,16 +281,15 @@ export class SocketSdk {
   async #createBatchPurlRequest(
     componentsObj: { components: Array<{ purl: string }> },
     queryParams?: QueryParams | undefined,
-  ): Promise<IncomingMessage> {
+  ): Promise<HttpResponse> {
     const url = `${this.#baseUrl}purl?${queryToSearchParams(queryParams)}`
-    // Adds the first 'abort' listener to abortSignal.
-    const req = getHttpModule(this.#baseUrl)
-      .request(url, {
-        method: 'POST',
-        ...this.#reqOptions,
-      })
-      .end(JSON.stringify(componentsObj))
-    const response = await getResponse(req)
+    const response = await httpRequest(url, {
+      method: 'POST',
+      body: JSON.stringify(componentsObj),
+      headers: this.#reqOptions.headers as Record<string, string>,
+      timeout: this.#reqOptions.timeout,
+      maxResponseSize: MAX_RESPONSE_SIZE,
+    })
 
     // Throw ResponseError for non-2xx status codes so retry logic works properly.
     /* c8 ignore next 3 - Error response handling for batch requests, requires API to return errors */
@@ -365,21 +354,20 @@ export class SocketSdk {
         if (!(error instanceof ResponseError)) {
           return undefined
         }
-        const { statusCode } = error.response
-        // Don't retry authentication/authorization errors - they won't succeed.
-        if (statusCode === 401 || statusCode === 403) {
-          throw error
-        }
-        // Rate limiting (429) will be retried with custom delay if Retry-After header is present.
-        if (statusCode === 429) {
+        const { status } = error.response
+        // Rate limiting (429) is always retried; use custom delay from Retry-After if present.
+        if (status === 429) {
           const retryAfter = this.#parseRetryAfter(
             error.response.headers['retry-after'],
           )
           if (retryAfter !== undefined) {
-            // Return custom delay in milliseconds.
-            // Note: Requires @socketsecurity/lib >= 1.0.5 with updated pRetry types.
             return retryAfter
           }
+          return undefined
+        }
+        // Don't retry other client errors (4xx) - they won't succeed on retry.
+        if (status >= 400 && status < 500) {
+          throw error
         }
         return undefined
       },
@@ -466,25 +454,6 @@ export class SocketSdk {
   }
 
   /**
-   * Extract text content from HTTP response stream.
-   * Internal method with size limits to prevent memory exhaustion.
-   */
-  async #getResponseText(response: IncomingMessage): Promise<string> {
-    const chunks: Buffer[] = []
-    let size = 0
-    // 50MB limit to prevent out-of-memory errors from large responses.
-    const MAX = 50 * 1024 * 1024
-    for await (const chunk of response) {
-      size += chunk.length
-      if (size > MAX) {
-        throw new Error('Response body exceeds maximum size limit')
-      }
-      chunks.push(chunk)
-    }
-    return Buffer.concat(chunks).toString('utf8')
-  }
-
-  /**
    * Handle API error responses and convert to standardized error result.
    * Internal error handling with status code analysis and message formatting.
    */
@@ -505,7 +474,7 @@ export class SocketSdk {
         cause: error,
       })
     }
-    const { statusCode } = error.response
+    const { status: statusCode } = error.response
     // Throw server errors (5xx) immediately - these are not recoverable client-side.
     if (statusCode && statusCode >= 500) {
       throw new Error(`Socket API server error (${statusCode})`, {
@@ -548,10 +517,10 @@ export class SocketSdk {
     if (trimmedBody && !errorMessage.includes(trimmedBody)) {
       // Replace generic status message with actual error body if present,
       // otherwise append the body to the error message.
-      const statusMessage = error.response?.statusMessage
+      const statusMessage = error.response?.statusText
       if (statusMessage && errorMessage.includes(statusMessage)) {
         errorMessage = errorMessage.replace(statusMessage, trimmedBody)
-        /* c8 ignore next 2 - c8 ignored: because Node.js http always sets statusMessage; this else branch handles custom servers or proxies that omit it */
+        /* c8 ignore next 2 - c8 ignored: because Node.js http always sets statusText; this else branch handles custom servers or proxies that omit it */
       } else {
         errorMessage = `${errorMessage}: ${trimmedBody}`
       }
@@ -645,7 +614,7 @@ export class SocketSdk {
    * Internal method for processing different response formats (json, text, response).
    */
   async #handleQueryResponseData<T>(
-    response: IncomingMessage,
+    response: HttpResponse,
     responseType: CustomResponseType,
   ): Promise<T> {
     if (responseType === 'response') {
@@ -653,7 +622,7 @@ export class SocketSdk {
     }
 
     if (responseType === 'text') {
-      return (await this.#getResponseText(response)) as T
+      return response.text() as T
     }
 
     if (responseType === 'json') {
@@ -746,16 +715,16 @@ export class SocketSdk {
     queryParams?: QueryParams | undefined,
   ): Promise<SocketSdkResult<'batchPackageFetchByOrg'>> {
     const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/purl?${queryToSearchParams(queryParams)}`
-    let res: IncomingMessage | undefined
+    let res: HttpResponse | undefined
     try {
       res = await this.#executeWithRetry(async () => {
-        const req = getHttpModule(this.#baseUrl)
-          .request(url, {
-            method: 'POST',
-            ...this.#reqOptions,
-          })
-          .end(JSON.stringify(componentsObj))
-        const response = await getResponse(req)
+        const response = await httpRequest(url, {
+          method: 'POST',
+          body: JSON.stringify(componentsObj),
+          headers: this.#reqOptions.headers as Record<string, string>,
+          timeout: this.#reqOptions.timeout,
+          maxResponseSize: MAX_RESPONSE_SIZE,
+        })
 
         // Throw ResponseError for non-2xx status codes so retry logic works properly.
         if (!isResponseOk(response)) {
@@ -772,24 +741,16 @@ export class SocketSdk {
       throw new Error('Failed to get response from batch PURL request')
     }
     // Parse the newline delimited JSON response.
-    const rli = readline.createInterface({
-      input: res,
-      crlfDelay: Number.POSITIVE_INFINITY,
-      signal: abortSignal,
-    })
     const results: SocketArtifact[] = []
-    try {
-      for await (const line of rli) {
-        const trimmed = line.trim()
-        const artifact = trimmed
-          ? (jsonParse(line, { throws: false }) as SocketArtifact)
-          : /* c8 ignore next - Empty line handling in batch parsing. */ null
-        if (isObjectObject(artifact)) {
-          results.push(artifact!)
-        }
+    const lines = res.text().split('\n')
+    for (const line of lines) {
+      const trimmed = line.trim()
+      const artifact = trimmed
+        ? (jsonParse(line, { throws: false }) as SocketArtifact)
+        : /* c8 ignore next - Empty line handling in batch parsing. */ null
+      if (isObjectObject(artifact)) {
+        results.push(artifact!)
       }
-    } finally {
-      rli.close()
     }
     const compact = urlSearchParamAsBoolean(
       getOwn(queryParams, 'compact') as string | null | undefined,
@@ -809,7 +770,7 @@ export class SocketSdk {
     componentsObj: { components: Array<{ purl: string }> },
     queryParams?: QueryParams | undefined,
   ): Promise<BatchPackageFetchResultType> {
-    let res: IncomingMessage | undefined
+    let res: HttpResponse | undefined
     try {
       res = await this.#createBatchPurlRequest(componentsObj, queryParams)
     } catch (e) {
@@ -821,35 +782,27 @@ export class SocketSdk {
       throw new Error('Failed to get response from batch PURL request')
     }
     // Parse the newline delimited JSON response.
-    const rli = readline.createInterface({
-      input: res,
-      crlfDelay: Number.POSITIVE_INFINITY,
-      signal: abortSignal,
-    })
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
     const results: SocketArtifact[] = []
-    try {
-      for await (const line of rli) {
-        const trimmed = line.trim()
-        const artifact = trimmed
-          ? (jsonParse(line, { throws: false }) as SocketArtifact)
-          : /* c8 ignore next - Empty line handling in batch parsing. */ null
-        if (isObjectObject(artifact)) {
-          results.push(
-            /* c8 ignore next 8 - Public token artifact reshaping for policy compliance. */
-            isPublicToken
-              ? reshapeArtifactForPublicPolicy(
-                  artifact!,
-                  false,
-                  queryParams?.['actions'] as string,
-                  publicPolicy,
-                )
-              : artifact!,
-          )
-        }
+    const lines = res.text().split('\n')
+    for (const line of lines) {
+      const trimmed = line.trim()
+      const artifact = trimmed
+        ? (jsonParse(line, { throws: false }) as SocketArtifact)
+        : /* c8 ignore next - Empty line handling in batch parsing. */ null
+      if (isObjectObject(artifact)) {
+        results.push(
+          /* c8 ignore next 8 - Public token artifact reshaping for policy compliance. */
+          isPublicToken
+            ? reshapeArtifactForPublicPolicy(
+                artifact!,
+                false,
+                queryParams?.['actions'] as string,
+                publicPolicy,
+              )
+            : artifact!,
+        )
       }
-    } finally {
-      rli.close()
     }
     const compact = urlSearchParamAsBoolean(
       getOwn(queryParams, 'compact') as string | null | undefined,
@@ -1897,49 +1850,27 @@ export class SocketSdk {
     const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/files.tar`
     try {
       const res = await this.#executeWithRetry(async () => {
-        const req = getHttpModule(this.#baseUrl)
-          .request(url, {
-            method: 'GET',
-            ...this.#reqOptions,
-          })
-          .end()
-        const response = await getResponse(req)
+        const response = await httpRequest(url, {
+          method: 'GET',
+          headers: this.#reqOptions.headers as Record<string, string>,
+          timeout: this.#reqOptions.timeout,
+          stream: true,
+        })
 
-        // Check for HTTP error status codes.
         if (!isResponseOk(response)) {
           throw new ResponseError(response, '', url)
         }
         return response
       })
 
-      // Stream to file with size limit and error handling.
-      const writeStream = createWriteStream(outputPath)
-      let bytesWritten = 0
-
-      // Monitor stream size to prevent excessive disk usage.
-      res.on('data', (chunk: Buffer) => {
-        // Check BEFORE accumulating to prevent exceeding limit
-        /* c8 ignore start - c8 ignored: because MAX_STREAM_SIZE is 100MB; tested via vi.doMock in socket-sdk-stream-limits.test.mts */
-        if (bytesWritten + chunk.length > MAX_STREAM_SIZE) {
-          const error = new Error(
-            `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
-          )
-          res.destroy(error)
-          writeStream.destroy(error)
-          return
-        }
-        /* c8 ignore stop */
-        bytesWritten += chunk.length
+      // Stream response directly to file.
+      const { createWriteStream } = await import('node:fs')
+      await new Promise<void>((resolve, reject) => {
+        const ws = createWriteStream(outputPath)
+        ws.on('error', reject)
+        ws.on('close', resolve)
+        res.rawResponse!.pipe(ws)
       })
-
-      res.pipe(writeStream)
-      /* c8 ignore start - c8 ignored: because writeStream errors require OS-level failures (disk full, permissions revoked mid-write) */
-      writeStream.on('error', error => {
-        res.destroy()
-        writeStream.destroy(error)
-      })
-      /* c8 ignore stop */
-      await events.once(writeStream, 'finish')
 
       return this.#handleApiSuccess<'downloadOrgFullScanFilesAsTar'>(res)
     } catch (e) {
@@ -1973,104 +1904,40 @@ export class SocketSdk {
     hash: string,
     options?: { baseUrl?: string | undefined } | undefined,
   ): Promise<string> {
-    const https = await import('node:https')
-    const http = await import('node:http')
     const blobPath = `/blob/${encodeURIComponent(hash)}`
     const blobBaseUrl = options?.baseUrl || SOCKET_PUBLIC_BLOB_STORE_URL
     const url = `${blobBaseUrl}${blobPath}`
-    const isHttps = url.startsWith('https:')
+    // 50MB limit
+    const MAX_PATCH_SIZE = 50 * 1024 * 1024
 
-    return await new Promise((resolve, reject) => {
-      const client = isHttps ? https : http
-      client
-        .get(url, res => {
-          if (res.statusCode === 404) {
-            const message = [
-              `Blob not found: ${hash}`,
-              `→ URL: ${url}`,
-              '→ The patch file may have expired or the hash is incorrect.',
-              '→ Verify: The blob hash is correct.',
-              '→ Note: Blob URLs may expire after a certain time period.',
-            ].join('\n')
-            reject(new Error(message))
-            return
-          }
-          if (res.statusCode !== 200) {
-            const message = [
-              `Failed to download blob: ${res.statusCode} ${res.statusMessage}`,
-              `→ Hash: ${hash}`,
-              `→ URL: ${url}`,
-              '→ The blob storage service may be temporarily unavailable.',
-              res.statusCode && res.statusCode >= 500
-                ? '→ Try: Retry the download after a short delay.'
-                : '→ Verify: The blob hash and URL are correct.',
-            ].join('\n')
-            reject(new Error(message))
-            return
-          }
-
-          let data = ''
-          let bytesRead = 0
-          // 50MB limit
-          const MAX_PATCH_SIZE = 50 * 1024 * 1024
-
-          res.on('data', chunk => {
-            // Check BEFORE accumulating to prevent exceeding limit
-            if (bytesRead + chunk.length > MAX_PATCH_SIZE) {
-              const error = new Error(
-                [
-                  `Patch file exceeds maximum size of ${MAX_PATCH_SIZE} bytes`,
-                  `→ Current size: ${bytesRead + chunk.length} bytes`,
-                  '→ This may indicate an incorrect hash or corrupted blob.',
-                ].join('\n'),
-              )
-              res.destroy(error)
-              reject(error)
-              return
-            }
-            bytesRead += chunk.length
-            data += chunk.toString('utf8')
-          })
-          res.on('end', () => {
-            resolve(data)
-          })
-          /* c8 ignore next 3 - Response stream error during blob download, difficult to reliably trigger */
-          res.on('error', err => {
-            reject(err)
-          })
-        })
-        .on('error', err => {
-          const nodeErr = err as NodeJS.ErrnoException
-          const message = [
-            `Error downloading blob: ${hash}`,
-            `→ URL: ${url}`,
-            `→ Network error: ${nodeErr.message}`,
-          ]
-
-          // Add specific guidance based on error code.
-          if (nodeErr.code === 'ENOTFOUND') {
-            message.push(
-              '→ DNS lookup failed. Cannot resolve blob storage hostname.',
-              '→ Check: Internet connection and DNS settings.',
-            )
-          } else if (nodeErr.code === 'ECONNREFUSED') {
-            message.push(
-              '→ Connection refused. Blob storage service is unreachable.',
-              '→ Check: Network connectivity and firewall settings.',
-            )
-            /* c8 ignore next 4 - ETIMEDOUT requires non-routable IPs which cause unreliable test timeouts */
-          } else if (nodeErr.code === 'ETIMEDOUT') {
-            message.push(
-              '→ Connection timed out.',
-              '→ Try: Check network connectivity and retry.',
-            )
-          } else if (nodeErr.code) {
-            message.push(`→ Error code: ${nodeErr.code}`)
-          }
-
-          reject(new Error(message.join('\n'), { cause: err }))
-        })
+    const res = await httpRequest(url, {
+      maxResponseSize: MAX_PATCH_SIZE,
     })
+
+    if (res.status === 404) {
+      const message = [
+        `Blob not found: ${hash}`,
+        `→ URL: ${url}`,
+        '→ The patch file may have expired or the hash is incorrect.',
+        '→ Verify: The blob hash is correct.',
+        '→ Note: Blob URLs may expire after a certain time period.',
+      ].join('\n')
+      throw new Error(message)
+    }
+    if (res.status !== 200) {
+      const message = [
+        `Failed to download blob: ${res.status} ${res.statusText}`,
+        `→ Hash: ${hash}`,
+        `→ URL: ${url}`,
+        '→ The blob storage service may be temporarily unavailable.',
+        res.status >= 500
+          ? '→ Try: Retry the download after a short delay.'
+          : '→ Verify: The blob hash and URL are correct.',
+      ].join('\n')
+      throw new Error(message)
+    }
+
+    return res.text()
   }
 
   /**
@@ -2193,7 +2060,7 @@ export class SocketSdk {
    * @param options - Request options including responseType and throws behavior
    * @returns Raw response, parsed data, or SocketSdkGenericResult based on options
    */
-  async getApi<T = IncomingMessage>(
+  async getApi<T = HttpResponse>(
     urlPath: string,
     options?: GetOptions | undefined,
   ): Promise<T | SocketSdkGenericResult<T>> {
@@ -2229,8 +2096,7 @@ export class SocketSdk {
         cause: undefined,
         data,
         error: undefined,
-        /* c8 ignore next - Defensive fallback: response.statusCode is always defined in Node.js http/https */
-        status: response.statusCode ?? 200,
+        status: response.status,
         success: true,
       }
     } catch (e) {
@@ -3827,8 +3693,7 @@ export class SocketSdk {
         cause: undefined,
         data,
         error: undefined,
-        /* c8 ignore next - Defensive fallback: response.statusCode is always defined in Node.js http/https */
-        status: response.statusCode ?? 200,
+        status: response.status,
         success: true,
       }
     } catch (e) {
@@ -3896,16 +3761,16 @@ export class SocketSdk {
     } as StreamOrgFullScanOptions
     const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`
     try {
+      const needsStream = typeof output === 'string' || output === true
       const res = await this.#executeWithRetry(async () => {
-        const req = getHttpModule(this.#baseUrl)
-          .request(url, {
-            method: 'GET',
-            ...this.#reqOptions,
-          })
-          .end()
-        const response = await getResponse(req)
+        const response = await httpRequest(url, {
+          method: 'GET',
+          headers: this.#reqOptions.headers as Record<string, string>,
+          timeout: this.#reqOptions.timeout,
+          stream: needsStream,
+          ...(!needsStream && { maxResponseSize: MAX_STREAM_SIZE }),
+        })
 
-        // Check for HTTP error status codes.
         if (!isResponseOk(response)) {
           throw new ResponseError(response, '', url)
         }
@@ -3913,74 +3778,21 @@ export class SocketSdk {
       })
 
       if (typeof output === 'string') {
-        // Stream to file with size limit and error handling.
-        const writeStream = createWriteStream(output)
-        let bytesWritten = 0
-
-        // Monitor stream size to prevent excessive disk usage.
-        res.on('data', (chunk: Buffer) => {
-          // Check BEFORE accumulating to prevent exceeding limit
-          /* c8 ignore start - c8 ignored: because MAX_STREAM_SIZE is 100MB; tested via vi.doMock in socket-sdk-stream-limits.test.mts */
-          if (bytesWritten + chunk.length > MAX_STREAM_SIZE) {
-            const error = new Error(
-              `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
-            )
-            res.destroy(error)
-            writeStream.destroy(error)
-            return
-          }
-          /* c8 ignore stop */
-          bytesWritten += chunk.length
+        const { createWriteStream } = await import('node:fs')
+        await new Promise<void>((resolve, reject) => {
+          const ws = createWriteStream(output)
+          ws.on('error', reject)
+          ws.on('close', resolve)
+          res.rawResponse!.pipe(ws)
         })
-
-        res.pipe(writeStream)
-        /* c8 ignore start - c8 ignored: because writeStream errors require OS-level failures (disk full, permissions revoked mid-write) */
-        writeStream.on('error', error => {
-          res.destroy()
-          writeStream.destroy(error)
-        })
-        /* c8 ignore stop */
-        await events.once(writeStream, 'finish')
       } else if (output === true) {
-        // Stream to stdout with size limit and error handling.
-        let bytesWritten = 0
-
-        // Monitor stream size for stdout as well.
-        res.on('data', (chunk: Buffer) => {
-          // Check BEFORE accumulating to prevent exceeding limit
-          /* c8 ignore start - c8 ignored: because MAX_STREAM_SIZE is 100MB; tested via vi.doMock in socket-sdk-stream-limits.test.mts */
-          if (bytesWritten + chunk.length > MAX_STREAM_SIZE) {
-            const error = new Error(
-              `Response exceeds maximum stream size of ${MAX_STREAM_SIZE} bytes`,
-            )
-            res.destroy(error)
-            return
-          }
-          /* c8 ignore stop */
-          bytesWritten += chunk.length
+        await new Promise<void>((resolve, reject) => {
+          res.rawResponse!.on('error', reject)
+          res.rawResponse!.on('end', resolve)
+          res.rawResponse!.pipe(process.stdout)
         })
-
-        /* c8 ignore start - c8 ignored: because process.stdout errors require the stdout fd to become unwritable (broken pipe, closed terminal) which cannot be simulated in test */
-        // Create error handler with cleanup to prevent listener leak
-        const stdoutErrorHandler = (_error: Error) => {
-          res.destroy()
-          process.stdout.removeListener('error', stdoutErrorHandler)
-        }
-        process.stdout.on('error', stdoutErrorHandler)
-
-        res.pipe(process.stdout)
-
-        // Clean up listener when response ends to prevent memory leak
-        res.on('end', () => {
-          process.stdout.removeListener('error', stdoutErrorHandler)
-        })
-        res.on('error', () => {
-          process.stdout.removeListener('error', stdoutErrorHandler)
-        })
-        /* c8 ignore stop */
       }
 
-      // If output is false or undefined, just return the response without streaming
       return this.#handleApiSuccess<'getOrgFullScan'>(res)
     } catch (e) {
       return await this.#handleApiError<'getOrgFullScan'>(e)
@@ -4014,42 +3826,24 @@ export class SocketSdk {
       throw new ResponseError(response, 'GET Request failed', url)
     }
 
-    // Use readline for proper line buffering across chunks.
-    // This prevents issues when NDJSON lines are split across multiple network chunks.
-    const rli = readline.createInterface({
-      input: response,
-      crlfDelay: Number.POSITIVE_INFINITY,
-    })
-
-    // Convert the Node.js readable stream to a Web ReadableStream.
+    // Parse the buffered NDJSON response into a ReadableStream.
+    const lines = response.text().split('\n')
     return new ReadableStream<ArtifactPatches>({
-      async start(controller) {
-        try {
-          for await (const line of rli) {
-            const trimmed = line.trim()
-            if (!trimmed) {
-              continue
-            }
-
-            try {
-              const data = JSON.parse(trimmed) as ArtifactPatches
-              controller.enqueue(data)
-            } catch (e) {
-              // Log parse errors for debugging invalid NDJSON lines.
-              debugLog('streamPatchesFromScan', `Failed to parse line: ${e}`)
-            }
+      start(controller) {
+        for (const line of lines) {
+          const trimmed = line.trim()
+          if (!trimmed) {
+            continue
           }
-        } catch (error) {
-          /* c8 ignore next - Streaming error handler, difficult to test reliably. */
-          controller.error(error)
-        } finally {
-          rli.close()
-          controller.close()
+
+          try {
+            const data = JSON.parse(trimmed) as ArtifactPatches
+            controller.enqueue(data)
+          } catch (e) {
+            debugLog('streamPatchesFromScan', `Failed to parse line: ${e}`)
+          }
         }
-      },
-      /* c8 ignore next 3 - Stream cancellation cleanup, difficult to test reliably. */
-      cancel() {
-        rli.close()
+        controller.close()
       },
     })
   }

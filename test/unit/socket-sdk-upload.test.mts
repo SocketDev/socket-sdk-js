@@ -163,7 +163,7 @@ describe('File Upload - createUploadRequest', () => {
       { timeout: 5000 },
     )
 
-    expect(response.statusCode).toBe(200)
+    expect(response.status).toBe(200)
   })
 
   it.skipIf(isCoverageMode)('should call hooks when provided', async () => {
@@ -216,7 +216,7 @@ describe('File Upload - createUploadRequest', () => {
       { timeout: 5000 },
     )
 
-    expect(response.statusCode).toBe(400)
+    expect(response.status).toBe(400)
   })
 
   it.skipIf(isCoverageMode)('should handle JSON body in request', async () => {
@@ -234,7 +234,7 @@ describe('File Upload - createUploadRequest', () => {
       { timeout: 5000 },
     )
 
-    expect(response.statusCode).toBe(200)
+    expect(response.status).toBe(200)
   })
 
   it.skipIf(isCoverageMode)(
@@ -264,7 +264,7 @@ describe('File Upload - createUploadRequest', () => {
         { timeout: 5000 },
       )
 
-      expect(response.statusCode).toBe(200)
+      expect(response.status).toBe(200)
     },
   )
 
@@ -309,12 +309,7 @@ describe('File Upload - createUploadRequest', () => {
         { timeout: 5000 },
       )
 
-      expect(response.statusCode).toBe(401)
-
-      // Consume response body to ensure all streams are properly closed
-      // This is especially important on Windows where file handles must be
-      // released before files can be deleted in afterEach cleanup
-      response.resume()
+      expect(response.status).toBe(401)
     },
   )
 })
