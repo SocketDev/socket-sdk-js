@@ -65,7 +65,7 @@
   },
   "dependencies": {
     "@socketregistry/packageurl-js": "1.4.1",
-    "@socketsecurity/lib": "5.13.0",
+    "@socketsecurity/lib": "5.14.0",
     "form-data": "4.0.5"
   },
   "devDependencies": {
