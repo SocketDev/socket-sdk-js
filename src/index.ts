@@ -29,13 +29,10 @@ export {
   createGetRequest,
   createRequestWithJson,
   getErrorResponseBody,
-  getHttpModule,
-  getResponse,
   getResponseJson,
   isResponseOk,
   ResponseError,
   reshapeArtifactForPublicPolicy,
-  wrapIncomingMessage,
 } from './http-client'
 // Re-export quota utility functions.
 export {

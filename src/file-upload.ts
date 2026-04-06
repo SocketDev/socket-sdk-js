@@ -6,7 +6,9 @@ import FormData from 'form-data'
 
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
-import { getHttpModule, getResponse, wrapIncomingMessage } from './http-client'
+import { readIncomingResponse } from '@socketsecurity/lib/http-request'
+
+import { getHttpModule, getResponse } from './http-client'
 import { sanitizeHeaders } from './utils/header-sanitization'
 
 import type { RequestOptions, RequestOptionsWithHooks } from './types'
@@ -114,9 +116,9 @@ export async function createUploadRequest(
           headers: sanitizeHeaders(msg.headers),
         })
         try {
-          pass(await wrapIncomingMessage(msg))
+          pass(await readIncomingResponse(msg))
         } catch (err) {
-          /* c8 ignore next - wrapIncomingMessage stream read error */
+          /* c8 ignore next - readIncomingResponse stream read error */
           fail(err)
         }
       },

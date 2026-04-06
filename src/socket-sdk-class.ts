@@ -454,14 +454,6 @@ export class SocketSdk {
   }
 
   /**
-   * Extract text content from HTTP response stream.
-   * Internal method with size limits to prevent memory exhaustion.
-   */
-  async #getResponseText(response: HttpResponse): Promise<string> {
-    return response.text()
-  }
-
-  /**
    * Handle API error responses and convert to standardized error result.
    * Internal error handling with status code analysis and message formatting.
    */
@@ -630,7 +622,7 @@ export class SocketSdk {
     }
 
     if (responseType === 'text') {
-      return (await this.#getResponseText(response)) as T
+      return response.text() as T
     }
 
     if (responseType === 'json') {

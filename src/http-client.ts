@@ -310,33 +310,6 @@ export async function getResponse(
   })
 }
 
-export async function wrapIncomingMessage(
-  msg: IncomingMessage,
-): Promise<HttpResponse> {
-  const chunks: Buffer[] = []
-  for await (const chunk of msg) {
-    chunks.push(chunk as Buffer)
-  }
-  const body = Buffer.concat(chunks)
-  const status = msg.statusCode ?? 0
-  const statusText = msg.statusMessage ?? ''
-  return {
-    arrayBuffer: () =>
-      body.buffer.slice(
-        body.byteOffset,
-        body.byteOffset + body.byteLength,
-      ) as ArrayBuffer,
-    body,
-    headers: msg.headers,
-    json: () => JSON.parse(body.toString('utf8')),
-    ok: status >= 200 && status < 300,
-    rawResponse: msg,
-    status,
-    statusText,
-    text: () => body.toString('utf8'),
-  }
-}
-
 export async function getResponseJson(
   response: HttpResponse,
   method?: string | undefined,
