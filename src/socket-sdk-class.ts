@@ -1854,19 +1854,23 @@ export class SocketSdk {
           method: 'GET',
           headers: this.#reqOptions.headers as Record<string, string>,
           timeout: this.#reqOptions.timeout,
-          maxResponseSize: MAX_STREAM_SIZE,
+          stream: true,
         })
 
-        // Check for HTTP error status codes.
         if (!isResponseOk(response)) {
           throw new ResponseError(response, '', url)
         }
         return response
       })
 
-      // Write buffered response body to file.
-      const { writeFile } = await import('node:fs/promises')
-      await writeFile(outputPath, res.body)
+      // Stream response directly to file.
+      const { createWriteStream } = await import('node:fs')
+      await new Promise<void>((resolve, reject) => {
+        const ws = createWriteStream(outputPath)
+        ws.on('error', reject)
+        ws.on('close', resolve)
+        res.rawResponse!.pipe(ws)
+      })
 
       return this.#handleApiSuccess<'downloadOrgFullScanFilesAsTar'>(res)
     } catch (e) {
@@ -3757,15 +3761,16 @@ export class SocketSdk {
     } as StreamOrgFullScanOptions
     const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`
     try {
+      const needsStream = typeof output === 'string' || output === true
       const res = await this.#executeWithRetry(async () => {
         const response = await httpRequest(url, {
           method: 'GET',
           headers: this.#reqOptions.headers as Record<string, string>,
           timeout: this.#reqOptions.timeout,
-          maxResponseSize: MAX_STREAM_SIZE,
+          stream: needsStream,
+          ...(!needsStream && { maxResponseSize: MAX_STREAM_SIZE }),
         })
 
-        // Check for HTTP error status codes.
         if (!isResponseOk(response)) {
           throw new ResponseError(response, '', url)
         }
@@ -3773,15 +3778,21 @@ export class SocketSdk {
       })
 
       if (typeof output === 'string') {
-        // Write buffered response body to file.
-        const { writeFile } = await import('node:fs/promises')
-        await writeFile(output, res.body)
+        const { createWriteStream } = await import('node:fs')
+        await new Promise<void>((resolve, reject) => {
+          const ws = createWriteStream(output)
+          ws.on('error', reject)
+          ws.on('close', resolve)
+          res.rawResponse!.pipe(ws)
+        })
       } else if (output === true) {
-        // Write to stdout.
-        process.stdout.write(res.body)
+        await new Promise<void>((resolve, reject) => {
+          res.rawResponse!.on('error', reject)
+          res.rawResponse!.on('end', resolve)
+          res.rawResponse!.pipe(process.stdout)
+        })
       }
 
-      // If output is false or undefined, just return the response without streaming
       return this.#handleApiSuccess<'getOrgFullScan'>(res)
     } catch (e) {
       return await this.#handleApiError<'getOrgFullScan'>(e)
