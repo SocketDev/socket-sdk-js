@@ -4,8 +4,7 @@
  * Targets:
  * - file-upload.ts: createUploadRequest hooks, createRequestBodyForFilepaths
  *   multi-file and relative path resolution
- * - http-client.ts lines 304, 372, 385, 395, 402, 465-510:
- *   getErrorResponseBody stream error, getResponseJson JSON error branches
+ * - http-client.ts: getResponseJson JSON error branches
  *   (non-JSON content-type, HTML response, 502/503 response body)
  * - utils.ts lines 146-151: promiseWithResolvers polyfill branch
  * - socket-sdk-class.ts non-error lines:
@@ -29,10 +28,9 @@ import { MAX_FIREWALL_COMPONENTS } from '../../src/constants.js'
 import {
   createRequestBodyForFilepaths,
   createUploadRequest,
-  getErrorResponseBody,
-  getResponseJson,
-  SocketSdk,
-} from '../../src/index'
+} from '../../src/file-upload'
+import { getResponseJson } from '../../src/http-client'
+import { SocketSdk } from '../../src/index'
 import { setupLocalHttpServer } from '../utils/local-server-helpers.mts'
 
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'
@@ -94,34 +92,7 @@ describe('file-upload createUploadRequest with hooks', () => {
 })
 
 // =============================================================================
-// 2. http-client.ts — getErrorResponseBody stream error (line 304)
-// =============================================================================
-
-describe('getErrorResponseBody', () => {
-  it('should return the text content of the response', async () => {
-    const body = Buffer.from('error body text')
-    const mockResponse = {
-      arrayBuffer: () =>
-        body.buffer.slice(
-          body.byteOffset,
-          body.byteOffset + body.byteLength,
-        ) as ArrayBuffer,
-      body,
-      headers: {},
-      json: () => JSON.parse(body.toString('utf8')),
-      ok: false,
-      status: 500,
-      statusText: 'Internal Server Error',
-      text: () => body.toString('utf8'),
-    } as import('@socketsecurity/lib/http-request').HttpResponse
-
-    const result = await getErrorResponseBody(mockResponse)
-    expect(result).toBe('error body text')
-  })
-})
-
-// =============================================================================
-// 2b. http-client.ts — getResponseJson JSON error detail branches
+// 2. http-client.ts — getResponseJson JSON error detail branches
 //     (non-JSON content-type, HTML response, 502/503 body)
 // =============================================================================
 

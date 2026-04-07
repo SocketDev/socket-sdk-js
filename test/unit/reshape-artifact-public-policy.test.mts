@@ -128,6 +128,46 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
         ])
       })
 
+      it('should handle actions with exact match (no whitespace trimming)', () => {
+        // actions are split by comma — ' warn' (with space) should NOT match 'warn'
+        const data = {
+          artifacts: [
+            {
+              name: 'test',
+              alerts: [
+                {
+                  severity: 'high',
+                  type: 'malware',
+                  key: 'alert1',
+                },
+                {
+                  severity: 'high',
+                  type: 'criticalCVE',
+                  key: 'alert2',
+                },
+              ],
+            },
+          ],
+        }
+
+        // ' warn' (with leading space) should NOT match the 'warn' action
+        const result = reshapeArtifactForPublicPolicy(
+          data,
+          false,
+          'error, warn',
+        )
+
+        // Only 'error' should match exactly; ' warn' (with space) does not match 'warn'
+        expect(result.artifacts?.[0]?.alerts).toEqual([
+          {
+            action: 'error',
+            key: 'alert1',
+            severity: 'high',
+            type: 'malware',
+          },
+        ])
+      })
+
       it('should handle artifacts with no alerts', () => {
         const data = {
           artifacts: [

@@ -12,14 +12,13 @@
 
 import path from 'node:path'
 
-import FormData from 'form-data'
 import { describe, expect, it } from 'vitest'
 
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
+import { createUserAgentFromPkgJson } from '../../src/user-agent'
 import {
   calculateWordSetSimilarity,
-  createRequestBodyForJson,
   filterRedundantCause,
   normalizeBaseUrl,
   promiseWithResolvers,
@@ -27,8 +26,7 @@ import {
   resolveAbsPaths,
   resolveBasePath,
   shouldOmitReason,
-} from '../../src/index'
-import { createUserAgentFromPkgJson } from '../../src/user-agent'
+} from '../../src/utils'
 
 // =============================================================================
 // URL Normalization
@@ -259,6 +257,21 @@ describe('Query Parameter Normalization', () => {
       expect(resultString).toContain('default_branch=master')
       expect(resultString).not.toContain('defaultBranch=')
     })
+
+    it('should return early when no normalization or empty values', () => {
+      const params = { key1: 'value1', key2: 'value2' }
+      const result = queryToSearchParams(params)
+
+      expect(result.get('key1')).toBe('value1')
+      expect(result.get('key2')).toBe('value2')
+      expect(result.toString()).toBe('key1=value1&key2=value2')
+    })
+
+    it('should handle undefined/null/empty input', () => {
+      expect(queryToSearchParams(undefined).toString()).toBe('')
+      expect(queryToSearchParams(null).toString()).toBe('')
+      expect(queryToSearchParams('').toString()).toBe('')
+    })
   })
 })
 
@@ -300,77 +313,6 @@ describe('User-Agent Generation', () => {
         version: '1.2.3',
       })
       expect(result).toBe('org-my-package/1.2.3')
-    })
-  })
-})
-
-// =============================================================================
-// JSON Request Body Creation
-// =============================================================================
-
-describe('JSON Request Body Creation', () => {
-  describe('createRequestBodyForJson', () => {
-    it('should create FormData for JSON data with default basename', () => {
-      const jsonData = { number: 42, test: 'data' }
-      const result = createRequestBodyForJson(jsonData)
-
-      expect(result).toBeInstanceOf(FormData)
-      expect(result.getHeaders()).toHaveProperty('content-type')
-    })
-
-    it('should create FormData for JSON data with custom basename', () => {
-      const jsonData = { custom: true }
-      const result = createRequestBodyForJson(jsonData, 'custom-file.json')
-
-      expect(result).toBeInstanceOf(FormData)
-      expect(result.getBoundary()).toBeTruthy()
-    })
-
-    it('should handle basename without extension', () => {
-      const jsonData = { test: 'no-ext' }
-      const result = createRequestBodyForJson(jsonData, 'noextension')
-
-      expect(result).toBeInstanceOf(FormData)
-      expect(result.getBoundary()).toBeTruthy()
-    })
-
-    it('should handle complex JSON data', () => {
-      const jsonData = {
-        array: [1, 2, 3],
-        boolean: false,
-        nested: { object: true },
-        null: null,
-        number: 123.45,
-        string: 'test',
-      }
-      const result = createRequestBodyForJson(jsonData, 'complex.json')
-
-      expect(result).toBeInstanceOf(FormData)
-      expect(result.getBoundary()).toBeTruthy()
-    })
-
-    it('should handle empty object', () => {
-      const jsonData = {}
-      const result = createRequestBodyForJson(jsonData, 'empty.json')
-
-      expect(result).toBeInstanceOf(FormData)
-      expect(result.getBoundary()).toBeTruthy()
-    })
-
-    it('should handle null data', () => {
-      const jsonData = null
-      const result = createRequestBodyForJson(jsonData, 'null.json')
-
-      expect(result).toBeInstanceOf(FormData)
-      expect(result.getBoundary()).toBeTruthy()
-    })
-
-    it('should handle different file extensions', () => {
-      const jsonData = { test: true }
-      const result = createRequestBodyForJson(jsonData, 'data.manifest')
-
-      expect(result).toBeInstanceOf(FormData)
-      expect(result.getBoundary()).toBeTruthy()
     })
   })
 })

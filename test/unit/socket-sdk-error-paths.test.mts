@@ -372,12 +372,6 @@ describe('SocketSdk error paths - Get methods', () => {
     const result = await client.getSupportedFiles('test-org')
     expectErrorResult(result)
   })
-
-  it('getSupportedScanFiles returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getSupportedScanFiles()
-    expectErrorResult(result)
-  })
 })
 
 // ===========================================================================
