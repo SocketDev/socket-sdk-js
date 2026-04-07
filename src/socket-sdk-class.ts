@@ -1853,8 +1853,8 @@ export class SocketSdk {
         const response = await httpRequest(url, {
           method: 'GET',
           headers: this.#reqOptions.headers as Record<string, string>,
-          timeout: this.#reqOptions.timeout,
           stream: true,
+          timeout: this.#reqOptions.timeout,
         })
 
         if (!isResponseOk(response)) {
@@ -3766,8 +3766,8 @@ export class SocketSdk {
         const response = await httpRequest(url, {
           method: 'GET',
           headers: this.#reqOptions.headers as Record<string, string>,
-          timeout: this.#reqOptions.timeout,
           stream: needsStream,
+          timeout: this.#reqOptions.timeout,
           ...(!needsStream && { maxResponseSize: MAX_STREAM_SIZE }),
         })
 

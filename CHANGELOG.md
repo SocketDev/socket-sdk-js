@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.0.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.0.0) - 2026-04-06
+
+### Breaking Changes
+
+- **HTTP client refactored**: All HTTP methods (`createGetRequest`, `createDeleteRequest`, `createRequestWithJson`, `createUploadRequest`) now return `HttpResponse` from `@socketsecurity/lib/http-request` instead of Node.js `IncomingMessage`
+- **`ResponseError.response`**: Changed from `IncomingMessage` to `HttpResponse` — access status via `.status`/`.statusText` instead of `.statusCode`/`.statusMessage`
+- **Removed exports**: `getHttpModule` and `getResponse` are no longer exported from the public API
+- **Removed `PromiseQueue`**: The `PromiseQueue` class has been removed entirely
+
+### Changed
+
+- Migrated HTTP internals to `@socketsecurity/lib/http-request` (`httpRequest` + `readIncomingResponse`), reducing code duplication and consolidating response handling
+- Batch PURL NDJSON parsing now uses buffered text split instead of `readline` streaming
+- Retry logic improved: all 4xx client errors now bail immediately (previously only 401/403)
+- Updated `@socketsecurity/lib` from 5.11.4 to 5.15.0
+
+### Fixed
+
+- Security: bumped `vite` override to 7.3.2, added `defu` override >=6.1.6
+
 ## [3.5.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.5.0) - 2026-04-03
 
 ### Added
