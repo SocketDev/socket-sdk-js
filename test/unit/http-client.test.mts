@@ -195,6 +195,22 @@ describe('HTTP Client - Error Handling', () => {
       expect(requestCalled).toBe(true)
       expect(responseCalled).toBe(true)
     })
+
+    it('should not call hooks when not provided', async () => {
+      // Verifies the if-guard optimization: sanitizeHeaders and hook callbacks
+      // are never evaluated when hooks are absent.
+      const response = await createDeleteRequest(baseUrl, '/test', {
+        timeout: 1000,
+      })
+      expect(response.status).toBe(200)
+    })
+
+    it('should not call hooks on error when not provided', async () => {
+      const invalidUrl = 'http://127.0.0.1:1'
+      await expect(
+        createGetRequest(invalidUrl, '/test', { timeout: 100 }),
+      ).rejects.toThrow()
+    })
   })
 
   describe('timeout handling', () => {

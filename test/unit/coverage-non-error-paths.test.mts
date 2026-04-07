@@ -4,8 +4,7 @@
  * Targets:
  * - file-upload.ts: createUploadRequest hooks, createRequestBodyForFilepaths
  *   multi-file and relative path resolution
- * - http-client.ts lines 304, 372, 385, 395, 402, 465-510:
- *   getErrorResponseBody stream error, getResponseJson JSON error branches
+ * - http-client.ts: getResponseJson JSON error branches
  *   (non-JSON content-type, HTML response, 502/503 response body)
  * - utils.ts lines 146-151: promiseWithResolvers polyfill branch
  * - socket-sdk-class.ts non-error lines:

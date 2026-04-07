@@ -257,6 +257,21 @@ describe('Query Parameter Normalization', () => {
       expect(resultString).toContain('default_branch=master')
       expect(resultString).not.toContain('defaultBranch=')
     })
+
+    it('should return early when no normalization or empty values', () => {
+      const params = { key1: 'value1', key2: 'value2' }
+      const result = queryToSearchParams(params)
+
+      expect(result.get('key1')).toBe('value1')
+      expect(result.get('key2')).toBe('value2')
+      expect(result.toString()).toBe('key1=value1&key2=value2')
+    })
+
+    it('should handle undefined/null/empty input', () => {
+      expect(queryToSearchParams(undefined).toString()).toBe('')
+      expect(queryToSearchParams(null).toString()).toBe('')
+      expect(queryToSearchParams('').toString()).toBe('')
+    })
   })
 })
 
