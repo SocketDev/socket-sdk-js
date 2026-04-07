@@ -7,12 +7,14 @@
 import type { components, operations } from '../types/api'
 import type { OpReturnType } from '../types/api-helpers'
 import type { Remap } from '@socketsecurity/lib/objects'
-import type { ClientHttp2Session } from 'http2-wrapper'
 import type {
   Agent as HttpAgent,
   RequestOptions as HttpRequestOptions,
 } from 'node:http'
-import type { ClientSessionRequestOptions } from 'node:http2'
+import type {
+  ClientHttp2Session,
+  ClientSessionRequestOptions,
+} from 'node:http2'
 import type {
   Agent as HttpsAgent,
   RequestOptions as HttpsRequestOptions,

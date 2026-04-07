@@ -14,7 +14,7 @@ describe('getApi and sendApi Methods', () => {
   const getClient = setupTestClient('test-api-token', { retries: 0 })
 
   describe('getApi', () => {
-    it('should return IncomingMessage when throws=true (default)', async () => {
+    it('should return HttpResponse when throws=true (default)', async () => {
       nock('https://api.socket.dev')
         .get('/v0/test-endpoint')
         .reply(200, 'success')

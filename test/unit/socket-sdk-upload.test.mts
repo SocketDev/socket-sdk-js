@@ -19,7 +19,6 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
   createRequestBodyForFilepaths,
-  createRequestBodyForJson,
   createUploadRequest,
 } from '../../src/file-upload'
 import { SocketSdk } from '../../src/index'
@@ -128,9 +127,6 @@ describe('File Upload - createRequestBodyForFilepaths', () => {
   })
 })
 
-// Note: createRequestBodyForJson tests are in test/unit/utils.test.mts
-// to avoid duplication with more comprehensive test coverage there.
-
 describe('File Upload - createUploadRequest', () => {
   let tempDir: string
 
@@ -220,8 +216,15 @@ describe('File Upload - createUploadRequest', () => {
   })
 
   it.skipIf(isCoverageMode)('should handle JSON body in request', async () => {
-    const jsonData = { name: 'test-package', version: '1.0.0' }
-    const jsonPart = createRequestBodyForJson(jsonData, 'package.json')
+    const jsonPart = new FormData()
+    jsonPart.append(
+      'package',
+      JSON.stringify({ name: 'test-package', version: '1.0.0' }),
+      {
+        contentType: 'application/json',
+        filename: 'package.json',
+      },
+    )
 
     nock('https://api.socket.dev')
       .post('/v0/test-json-upload')
