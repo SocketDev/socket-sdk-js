@@ -78,8 +78,6 @@ export async function createUploadRequest(
   }
 
   try {
-    // FormData is a pipeable Stream with getHeaders() for multipart boundary.
-    // httpRequest duck-types getHeaders() to auto-merge Content-Type with boundary.
     const response = await httpRequest(url, {
       method,
       body: form as unknown as Readable,
