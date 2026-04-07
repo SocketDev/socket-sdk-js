@@ -10,9 +10,6 @@ import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
 import type { QueryParams } from './types'
 
-// Re-export user agent function for convenience
-export { createUserAgentFromPkgJson } from './user-agent'
-
 /**
  * Normalize a string to a set of lowercase words (alphanumeric sequences).
  * Extracts word characters and creates a deduplicated set.

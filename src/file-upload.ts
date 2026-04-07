@@ -1,17 +1,19 @@
 import { createReadStream } from 'node:fs'
 import path from 'node:path'
-import { Readable } from 'node:stream'
 
 import FormData from 'form-data'
 
 import { httpRequest } from '@socketsecurity/lib/http-request'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
+import { MAX_RESPONSE_SIZE } from './constants'
+
 import { sanitizeHeaders } from './utils/header-sanitization'
 
 import type { RequestOptions, RequestOptionsWithHooks } from './types'
 import type { HttpResponse } from '@socketsecurity/lib/http-request'
 import type { ReadStream } from 'node:fs'
+import type { Readable } from 'node:stream'
 
 export function createRequestBodyForFilepaths(
   filepaths: string[],
@@ -44,23 +46,6 @@ export function createRequestBodyForFilepaths(
       filename,
     })
   }
-  return form
-}
-
-export function createRequestBodyForJson(
-  jsonData: unknown,
-  basename = 'data.json',
-): FormData {
-  const ext = path.extname(basename)
-  const name = path.basename(basename, ext)
-  const jsonStream = Readable.from(JSON.stringify(jsonData), {
-    highWaterMark: 1024 * 1024,
-  })
-  const form = new FormData()
-  form.append(name, jsonStream, {
-    contentType: 'application/json',
-    filename: basename,
-  })
   return form
 }
 
@@ -97,6 +82,7 @@ export async function createUploadRequest(
       method,
       body: form as unknown as Readable,
       headers,
+      maxResponseSize: MAX_RESPONSE_SIZE,
       timeout: opts.timeout,
     })
 

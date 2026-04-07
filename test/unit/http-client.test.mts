@@ -7,7 +7,6 @@ import {
   createDeleteRequest,
   createGetRequest,
   createRequestWithJson,
-  getErrorResponseBody,
   getResponseJson,
   isResponseOk,
   reshapeArtifactForPublicPolicy,
@@ -46,26 +45,21 @@ function mockHttpResponse(
 // =============================================================================
 
 describe('HTTP Client - Response Body Reading', () => {
-  describe('getErrorResponseBody', () => {
-    it('should read normal response body successfully', async () => {
-      const testBody = 'Hello, World!'
-      const response = mockHttpResponse({ body: testBody })
-      const result = await getErrorResponseBody(response)
-      expect(result).toBe(testBody)
-    })
+  it('should read normal response body successfully', () => {
+    const testBody = 'Hello, World!'
+    const response = mockHttpResponse({ body: testBody })
+    expect(response.text()).toBe(testBody)
+  })
 
-    it('should read empty response body', async () => {
-      const response = mockHttpResponse({ body: '' })
-      const result = await getErrorResponseBody(response)
-      expect(result).toBe('')
-    })
+  it('should read empty response body', () => {
+    const response = mockHttpResponse({ body: '' })
+    expect(response.text()).toBe('')
+  })
 
-    it('should read large response body', async () => {
-      const largeBody = 'x'.repeat(10000)
-      const response = mockHttpResponse({ body: largeBody })
-      const result = await getErrorResponseBody(response)
-      expect(result).toBe(largeBody)
-    })
+  it('should read large response body', () => {
+    const largeBody = 'x'.repeat(10000)
+    const response = mockHttpResponse({ body: largeBody })
+    expect(response.text()).toBe(largeBody)
   })
 })
 

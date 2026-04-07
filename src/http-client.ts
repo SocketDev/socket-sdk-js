@@ -226,12 +226,6 @@ export async function createRequestWithJson(
   }
 }
 
-export async function getErrorResponseBody(
-  response: HttpResponse,
-): Promise<string> {
-  return response.text()
-}
-
 export async function getResponseJson(
   response: HttpResponse,
   method?: string | undefined,
@@ -340,7 +334,9 @@ export function reshapeArtifactForPublicPolicy<
   policy?: Map<string, string> | undefined,
 ): T {
   if (!isAuthenticated) {
-    const allowedActions = actions?.trim() ? actions.split(',') : undefined
+    const allowedActions = actions?.trim()
+      ? new Set(actions.split(','))
+      : undefined
     const resolvedPolicy = policy ?? defaultPublicPolicy
 
     const reshapeArtifact = (artifact: SocketArtifactWithExtras) => ({
@@ -364,7 +360,7 @@ export function reshapeArtifactForPublicPolicy<
           return acc
         }
         const action = resolvedPolicy.get(alert.type)
-        if (allowedActions && action && !allowedActions.includes(action)) {
+        if (allowedActions && action && !allowedActions.has(action)) {
           return acc
         }
         acc.push({

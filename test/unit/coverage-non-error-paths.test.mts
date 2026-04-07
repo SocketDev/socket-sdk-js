@@ -30,7 +30,7 @@ import {
   createRequestBodyForFilepaths,
   createUploadRequest,
 } from '../../src/file-upload'
-import { getErrorResponseBody, getResponseJson } from '../../src/http-client'
+import { getResponseJson } from '../../src/http-client'
 import { SocketSdk } from '../../src/index'
 import { setupLocalHttpServer } from '../utils/local-server-helpers.mts'
 
@@ -93,34 +93,7 @@ describe('file-upload createUploadRequest with hooks', () => {
 })
 
 // =============================================================================
-// 2. http-client.ts — getErrorResponseBody stream error (line 304)
-// =============================================================================
-
-describe('getErrorResponseBody', () => {
-  it('should return the text content of the response', async () => {
-    const body = Buffer.from('error body text')
-    const mockResponse = {
-      arrayBuffer: () =>
-        body.buffer.slice(
-          body.byteOffset,
-          body.byteOffset + body.byteLength,
-        ) as ArrayBuffer,
-      body,
-      headers: {},
-      json: () => JSON.parse(body.toString('utf8')),
-      ok: false,
-      status: 500,
-      statusText: 'Internal Server Error',
-      text: () => body.toString('utf8'),
-    } as import('@socketsecurity/lib/http-request').HttpResponse
-
-    const result = await getErrorResponseBody(mockResponse)
-    expect(result).toBe('error body text')
-  })
-})
-
-// =============================================================================
-// 2b. http-client.ts — getResponseJson JSON error detail branches
+// 2. http-client.ts — getResponseJson JSON error detail branches
 //     (non-JSON content-type, HTML response, 502/503 body)
 // =============================================================================
 
