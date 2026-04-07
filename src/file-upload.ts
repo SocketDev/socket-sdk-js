@@ -4,17 +4,14 @@ import { Readable } from 'node:stream'
 
 import FormData from 'form-data'
 
+import { httpRequest } from '@socketsecurity/lib/http-request'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
-import { readIncomingResponse } from '@socketsecurity/lib/http-request'
-
-import { getHttpModule, getResponse } from './http-client'
 import { sanitizeHeaders } from './utils/header-sanitization'
 
 import type { RequestOptions, RequestOptionsWithHooks } from './types'
 import type { HttpResponse } from '@socketsecurity/lib/http-request'
 import type { ReadStream } from 'node:fs'
-import type { RequestOptions as HttpsRequestOptions } from 'node:https'
 
 export function createRequestBodyForFilepaths(
   filepaths: string[],
@@ -78,64 +75,52 @@ export async function createUploadRequest(
     ...options,
   } as any as RequestOptionsWithHooks
   const opts = { __proto__: null, ...rawOpts } as any as RequestOptions
+  const url = new URL(urlPath, baseUrl).toString()
+  const method = 'POST'
+  const startTime = Date.now()
 
-  return await new Promise((pass, fail) => {
-    const url = new URL(urlPath, baseUrl)
-    const method = 'POST'
+  const headers = {
+    ...(opts.headers as Record<string, string>),
+  }
 
-    const formHeaders = form.getHeaders()
-    const headers = {
-      ...(opts as HttpsRequestOptions)?.headers,
-      ...formHeaders,
-    }
-    const startTime = Date.now()
-
-    const req = getHttpModule(baseUrl).request(url, {
+  if (hooks?.onRequest) {
+    hooks.onRequest({
       method,
-      ...opts,
-      headers,
-    })
-
-    hooks?.onRequest?.({
-      method,
-      url: url.toString(),
+      url,
       headers: sanitizeHeaders(headers),
       timeout: opts.timeout,
     })
+  }
 
-    req.flushHeaders()
+  try {
+    const response = await httpRequest(url, {
+      method,
+      body: form as unknown as Readable,
+      headers,
+      timeout: opts.timeout,
+    })
 
-    void getResponse(req).then(
-      async msg => {
-        hooks?.onResponse?.({
-          method,
-          url: url.toString(),
-          duration: Date.now() - startTime,
-          status: msg.statusCode,
-          statusText: msg.statusMessage,
-          headers: sanitizeHeaders(msg.headers),
-        })
-        try {
-          pass(await readIncomingResponse(msg))
-        } catch (err) {
-          /* c8 ignore next - readIncomingResponse stream read error */
-          fail(err)
-        }
-      },
-      error => {
-        hooks?.onResponse?.({
-          method,
-          url: url.toString(),
-          duration: Date.now() - startTime,
-          error: error as Error,
-        })
-        fail(error)
-      },
-    )
+    if (hooks?.onResponse) {
+      hooks.onResponse({
+        method,
+        url,
+        duration: Date.now() - startTime,
+        status: response.status,
+        statusText: response.statusText,
+        headers: sanitizeHeaders(response.headers),
+      })
+    }
 
-    form.pipe(req)
-
-    /* c8 ignore next 1 - form-data error events require stream failures that are difficult to test reliably */
-    form.on('error', fail)
-  })
+    return response
+  } catch (error) {
+    if (hooks?.onResponse) {
+      hooks.onResponse({
+        method,
+        url,
+        duration: Date.now() - startTime,
+        error: error as Error,
+      })
+    }
+    throw error
+  }
 }

@@ -17,9 +17,10 @@ import { describe, expect, it } from 'vitest'
 
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
+import { createRequestBodyForJson } from '../../src/file-upload'
+import { createUserAgentFromPkgJson } from '../../src/user-agent'
 import {
   calculateWordSetSimilarity,
-  createRequestBodyForJson,
   filterRedundantCause,
   normalizeBaseUrl,
   promiseWithResolvers,
@@ -27,8 +28,7 @@ import {
   resolveAbsPaths,
   resolveBasePath,
   shouldOmitReason,
-} from '../../src/index'
-import { createUserAgentFromPkgJson } from '../../src/user-agent'
+} from '../../src/utils'
 
 // =============================================================================
 // URL Normalization

@@ -12,9 +12,6 @@ importers:
 
   .:
     dependencies:
-      '@socketregistry/packageurl-js':
-        specifier: 1.4.1
-        version: 1.4.1
       '@socketsecurity/lib':
         specifier: 5.15.0
         version: 5.15.0(typescript@5.9.3)
@@ -73,9 +70,6 @@ importers:
       fast-glob:
         specifier: 3.3.3
         version: 3.3.3
-      http2-wrapper:
-        specifier: 2.2.1
-        version: 2.2.1
       husky:
         specifier: 9.1.7
         version: 9.1.7
@@ -1179,10 +1173,6 @@ packages:
     resolution: {integrity: sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==}
     engines: {node: '>=18'}
 
-  '@socketregistry/packageurl-js@1.4.1':
-    resolution: {integrity: sha512-t/UrOd1DMYXcGuKo2v07WMbuHCMlKBKOriTHu4cn9OIxfj1qWKoF/kpOswGHOWkG5zwj2Ke/2+qLiDugmx5z+A==}
-    engines: {node: '>=18.20.4', pnpm: '>=10.25.0'}
-
   '@socketsecurity/lib@5.15.0':
     resolution: {integrity: sha512-+I7+lR0WBCXWgRxMTQx+N70azONVGr68ndi25pz53D6QLdIQ8gfBgOgC34opECXL9lPUqVCMYNr3XFS/bHABIQ==}
     engines: {node: '>=22', pnpm: '>=10.25.0'}
@@ -1579,10 +1569,6 @@ packages:
   html-escaper@2.0.2:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
 
-  http2-wrapper@2.2.1:
-    resolution: {integrity: sha512-V5nVw1PAOgfI3Lmeaj2Exmeg7fenjhRUgz1lPSezy1CuhPYbgQtbQj4jZfEAEMlaL+vupsvhjqCyjzob0yxsmQ==}
-    engines: {node: '>=10.19.0'}
-
   human-signals@2.1.0:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
     engines: {node: '>=10.17.0'}
@@ -1925,9 +1911,6 @@ packages:
   redent@4.0.0:
     resolution: {integrity: sha512-tYkDkVVtYkSVhuQ4zBgfvciymHaeuel+zFKXShfDnFP5SyVEP7qo70Rf1jTOTCx3vGNAbnEi/xFkcfQVMIBWag==}
     engines: {node: '>=12'}
-
-  resolve-alpn@1.2.1:
-    resolution: {integrity: sha512-0a1F4l73/ZFZOakJnQ3FvkJ2+gSTQWz/r2KE5OdDY0TxPm5h4GkqkWWfM47T7HsbnOtcJVEF4epCVy6u7Q3K+g==}
 
   restore-cursor@5.1.0:
     resolution: {integrity: sha512-oMA2dcrw6u0YfxJQXm342bFKX/E4sG9rbTzO9ptUcR/e8A33cHuvStiYOwH7fszkZlZ1z/ta9AAoPk2F4qIOHA==}
@@ -2877,10 +2860,6 @@ snapshots:
 
   '@sindresorhus/merge-streams@2.3.0': {}
 
-  '@socketregistry/packageurl-js@1.4.1':
-    dependencies:
-      picomatch: 4.0.3
-
   '@socketsecurity/lib@5.15.0(typescript@5.9.3)':
     optionalDependencies:
       typescript: 5.9.3
@@ -3319,11 +3298,6 @@ snapshots:
 
   html-escaper@2.0.2: {}
 
-  http2-wrapper@2.2.1:
-    dependencies:
-      quick-lru: 5.1.1
-      resolve-alpn: 1.2.1
-
   human-signals@2.1.0: {}
 
   husky@9.1.7: {}
@@ -3676,8 +3650,6 @@ snapshots:
     dependencies:
       indent-string: 5.0.0
       strip-indent: 4.1.1
-
-  resolve-alpn@1.2.1: {}
 
   restore-cursor@5.1.0:
     dependencies:

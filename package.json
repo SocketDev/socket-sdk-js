@@ -64,7 +64,6 @@
     "update": "node scripts/update.mjs"
   },
   "dependencies": {
-    "@socketregistry/packageurl-js": "1.4.1",
     "@socketsecurity/lib": "5.15.0",
     "form-data": "4.0.5"
   },
@@ -86,7 +85,6 @@
     "dev-null-cli": "2.0.0",
     "esbuild": "0.25.11",
     "fast-glob": "3.3.3",
-    "http2-wrapper": "2.2.1",
     "husky": "9.1.7",
     "magic-string": "0.30.14",
     "nock": "14.0.10",

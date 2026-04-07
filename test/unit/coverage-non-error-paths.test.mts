@@ -29,10 +29,9 @@ import { MAX_FIREWALL_COMPONENTS } from '../../src/constants.js'
 import {
   createRequestBodyForFilepaths,
   createUploadRequest,
-  getErrorResponseBody,
-  getResponseJson,
-  SocketSdk,
-} from '../../src/index'
+} from '../../src/file-upload'
+import { getErrorResponseBody, getResponseJson } from '../../src/http-client'
+import { SocketSdk } from '../../src/index'
 import { setupLocalHttpServer } from '../utils/local-server-helpers.mts'
 
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'

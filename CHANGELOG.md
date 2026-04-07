@@ -10,15 +10,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **HTTP client refactored**: All HTTP methods (`createGetRequest`, `createDeleteRequest`, `createRequestWithJson`, `createUploadRequest`) now return `HttpResponse` from `@socketsecurity/lib/http-request` instead of Node.js `IncomingMessage`
 - **`ResponseError.response`**: Changed from `IncomingMessage` to `HttpResponse` — access status via `.status`/`.statusText` instead of `.statusCode`/`.statusMessage`
-- **Removed exports**: `getHttpModule` and `getResponse` are no longer exported from the public API
+- **Unified HTTP transport**: File uploads now use `httpRequest()` from `@socketsecurity/lib` — eliminated the dual `node:http`/`node:https` + `getResponse()` stack
+- **Trimmed public API surface**: Removed internal helpers from the main entry point:
+  - HTTP functions: `createDeleteRequest`, `createGetRequest`, `createRequestWithJson`, `getErrorResponseBody`, `getResponseJson`, `isResponseOk`, `reshapeArtifactForPublicPolicy`
+  - File upload functions: `createRequestBodyForFilepaths`, `createRequestBodyForJson`, `createUploadRequest`
+  - Utilities: `calculateWordSetSimilarity`, `filterRedundantCause`, `normalizeBaseUrl`, `promiseWithResolvers`, `queryToSearchParams`, `resolveAbsPaths`, `resolveBasePath`, `shouldOmitReason`
+  - Constants: `DEFAULT_USER_AGENT`, `httpAgentNames`, `publicPolicy`
+- **Removed exports**: `getHttpModule` and `getResponse` are fully removed (not just from index)
 - **Removed `PromiseQueue`**: The `PromiseQueue` class has been removed entirely
+- **Removed `getSupportedScanFiles()`**: Deprecated since 2023-01-15 — use `getSupportedFiles()` instead
+- **Removed `http2-wrapper` type dependency**: `Agent` type now uses `ClientHttp2Session` from native `node:http2`
 
 ### Changed
 
-- Migrated HTTP internals to `@socketsecurity/lib/http-request` (`httpRequest` + `readIncomingResponse`), reducing code duplication and consolidating response handling
-- Batch PURL NDJSON parsing now uses buffered text split instead of `readline` streaming
+- Migrated HTTP internals to `@socketsecurity/lib/http-request` (`httpRequest`), reducing code duplication and consolidating response handling
 - Retry logic improved: all 4xx client errors now bail immediately (previously only 401/403)
 - Updated `@socketsecurity/lib` from 5.11.4 to 5.15.0
+
+### Performance
+
+- **NDJSON parsing**: Replaced `.split('\n')` with single-pass linear scan in 4 batch/streaming methods — eliminates intermediate array allocation
+- **URL parameters**: `queryToSearchParams()` avoids double `URLSearchParams` instantiation — returns early when no normalization is needed
+- **Hook overhead**: `sanitizeHeaders()` is now deferred behind `if` guards — arguments are no longer evaluated when hooks are absent
+- **Batch streaming**: `batchPackageStream` generator queue uses `Map` for O(1) lookup/removal instead of `findIndex`+`splice`
+- **Alert processing**: `reshapeArtifactForPublicPolicy` uses single-pass `reduce` instead of `filter`+`map` chain
+
+### Removed
+
+- Runtime dependency `@socketregistry/packageurl-js` (unused)
+- Dev dependency `http2-wrapper` (replaced by native `node:http2` types)
 
 ### Fixed
 

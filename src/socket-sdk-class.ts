@@ -252,24 +252,30 @@ export class SocketSdk {
     }
     // Parse the newline delimited JSON response.
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
-    const lines = res.text().split('\n')
-    for (const line of lines) {
-      const trimmed = line.trim()
-      const artifact = trimmed
-        ? (jsonParse(line, { throws: false }) as SocketArtifact)
-        : /* c8 ignore next - Empty line handling in batch streaming response parsing. */ null
-      if (isObjectObject(artifact)) {
-        yield this.#handleApiSuccess<'batchPackageFetch'>(
-          /* c8 ignore next 8 - Public token artifact reshaping branch for policy compliance. */
-          isPublicToken
-            ? reshapeArtifactForPublicPolicy(
-                artifact!,
-                false,
-                queryParams?.['actions'] as string,
-                publicPolicy,
-              )
-            : artifact!,
-        )
+    const text = res.text()
+    let start = 0
+    for (let i = 0; i <= text.length; i++) {
+      if (i === text.length || text.charCodeAt(i) === 10) {
+        if (i > start) {
+          const line = text.slice(start, i)
+          const artifact = jsonParse(line, {
+            throws: false,
+          }) as SocketArtifact | null
+          if (isObjectObject(artifact)) {
+            yield this.#handleApiSuccess<'batchPackageFetch'>(
+              /* c8 ignore next 8 - Public token artifact reshaping branch for policy compliance. */
+              isPublicToken
+                ? reshapeArtifactForPublicPolicy(
+                    artifact!,
+                    false,
+                    queryParams?.['actions'] as string,
+                    publicPolicy,
+                  )
+                : artifact!,
+            )
+          }
+        }
+        start = i + 1
       }
     }
   }
@@ -742,14 +748,20 @@ export class SocketSdk {
     }
     // Parse the newline delimited JSON response.
     const results: SocketArtifact[] = []
-    const lines = res.text().split('\n')
-    for (const line of lines) {
-      const trimmed = line.trim()
-      const artifact = trimmed
-        ? (jsonParse(line, { throws: false }) as SocketArtifact)
-        : /* c8 ignore next - Empty line handling in batch parsing. */ null
-      if (isObjectObject(artifact)) {
-        results.push(artifact!)
+    const text = res.text()
+    let start = 0
+    for (let i = 0; i <= text.length; i++) {
+      if (i === text.length || text.charCodeAt(i) === 10) {
+        if (i > start) {
+          const line = text.slice(start, i)
+          const artifact = jsonParse(line, {
+            throws: false,
+          }) as SocketArtifact | null
+          if (isObjectObject(artifact)) {
+            results.push(artifact!)
+          }
+        }
+        start = i + 1
       }
     }
     const compact = urlSearchParamAsBoolean(
@@ -784,24 +796,30 @@ export class SocketSdk {
     // Parse the newline delimited JSON response.
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
     const results: SocketArtifact[] = []
-    const lines = res.text().split('\n')
-    for (const line of lines) {
-      const trimmed = line.trim()
-      const artifact = trimmed
-        ? (jsonParse(line, { throws: false }) as SocketArtifact)
-        : /* c8 ignore next - Empty line handling in batch parsing. */ null
-      if (isObjectObject(artifact)) {
-        results.push(
-          /* c8 ignore next 8 - Public token artifact reshaping for policy compliance. */
-          isPublicToken
-            ? reshapeArtifactForPublicPolicy(
-                artifact!,
-                false,
-                queryParams?.['actions'] as string,
-                publicPolicy,
-              )
-            : artifact!,
-        )
+    const text = res.text()
+    let start = 0
+    for (let i = 0; i <= text.length; i++) {
+      if (i === text.length || text.charCodeAt(i) === 10) {
+        if (i > start) {
+          const line = text.slice(start, i)
+          const artifact = jsonParse(line, {
+            throws: false,
+          }) as SocketArtifact | null
+          if (isObjectObject(artifact)) {
+            results.push(
+              /* c8 ignore next 8 - Public token artifact reshaping for policy compliance. */
+              isPublicToken
+                ? reshapeArtifactForPublicPolicy(
+                    artifact!,
+                    false,
+                    queryParams?.['actions'] as string,
+                    publicPolicy,
+                  )
+                : artifact!,
+            )
+          }
+        }
+        start = i + 1
       }
     }
     const compact = urlSearchParamAsBoolean(
@@ -835,10 +853,6 @@ export class SocketSdk {
       generator: AsyncGenerator<BatchPackageFetchResultType>
       iteratorResult: IteratorResult<BatchPackageFetchResultType>
     }
-    type GeneratorEntry = {
-      generator: AsyncGenerator<BatchPackageFetchResultType>
-      promise: Promise<GeneratorStep>
-    }
 
     // The createBatchPurlGenerator method will add 2 'abort' event listeners to
     // abortSignal so we multiply the concurrencyLimit by 2.
@@ -849,16 +863,17 @@ export class SocketSdk {
     /* c8 ignore stop */
     const { components } = componentsObj
     const { length: componentsCount } = components
-    const running: GeneratorEntry[] = []
+    const running = new Map<
+      AsyncGenerator<BatchPackageFetchResultType>,
+      Promise<GeneratorStep>
+    >()
     let index = 0
     const enqueueGen = () => {
       if (index >= componentsCount) {
-        // No more work to do.
         return
       }
       const generator = this.#createBatchPurlGenerator(
         {
-          // Chunk components.
           components: components.slice(index, index + chunkSize),
         },
         queryParams,
@@ -874,10 +889,7 @@ export class SocketSdk {
         reject: rejectFn,
         resolve: resolveFn,
       } = promiseWithResolvers<GeneratorStep>()
-      running.push({
-        generator,
-        promise,
-      })
+      running.set(generator, promise)
       void generator
         .next()
         .then(
@@ -886,23 +898,15 @@ export class SocketSdk {
         )
     }
     // Start initial batch of generators.
-    while (running.length < concurrencyLimit && index < componentsCount) {
+    while (running.size < concurrencyLimit && index < componentsCount) {
       enqueueGen()
     }
-    while (running.length > 0) {
+    while (running.size > 0) {
       // eslint-disable-next-line no-await-in-loop
       const { generator, iteratorResult }: GeneratorStep = await Promise.race(
-        running.map(entry => entry.promise),
+        running.values(),
       )
-      // Remove generator with safe index lookup.
-      const runningIndex = running.findIndex(
-        entry => entry.generator === generator,
-      )
-      /* c8 ignore next 3 - Defensive check for concurrent generator cleanup edge case. */
-      if (runningIndex === -1) {
-        continue
-      }
-      running.splice(runningIndex, 1)
+      running.delete(generator)
       // Yield the value if one is given, even when done:true.
       if (iteratorResult.value) {
         yield iteratorResult.value
@@ -3075,33 +3079,6 @@ export class SocketSdk {
   }
 
   /**
-   * Get list of file types and formats supported for scanning.
-   * Returns supported manifest files, lockfiles, and configuration formats.
-   *
-   * @deprecated Use getSupportedFiles() instead. This endpoint has been deprecated
-   * since 2023-01-15 and now uses the /report/supported endpoint.
-   * @throws {Error} When server returns 5xx status codes
-   */
-  async getSupportedScanFiles(): Promise<
-    SocketSdkResult<'getReportSupportedFiles'>
-  > {
-    try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(this.#baseUrl, 'report/supported', {
-              ...this.#reqOptions,
-              hooks: this.#hooks,
-            }),
-          ),
-      )
-      return this.#handleApiSuccess<'getReportSupportedFiles'>(data)
-    } catch (e) {
-      return await this.#handleApiError<'getReportSupportedFiles'>(e)
-    }
-  }
-
-  /**
    * List all full scans for an organization.
    *
    * Returns paginated list of full scan metadata with guaranteed required fields
@@ -3827,20 +3804,22 @@ export class SocketSdk {
     }
 
     // Parse the buffered NDJSON response into a ReadableStream.
-    const lines = response.text().split('\n')
+    const text = response.text()
     return new ReadableStream<ArtifactPatches>({
       start(controller) {
-        for (const line of lines) {
-          const trimmed = line.trim()
-          if (!trimmed) {
-            continue
-          }
-
-          try {
-            const data = JSON.parse(trimmed) as ArtifactPatches
-            controller.enqueue(data)
-          } catch (e) {
-            debugLog('streamPatchesFromScan', `Failed to parse line: ${e}`)
+        let start = 0
+        for (let i = 0; i <= text.length; i++) {
+          if (i === text.length || text.charCodeAt(i) === 10) {
+            if (i > start) {
+              const line = text.slice(start, i)
+              try {
+                const data = JSON.parse(line) as ArtifactPatches
+                controller.enqueue(data)
+              } catch (e) {
+                debugLog('streamPatchesFromScan', `Failed to parse line: ${e}`)
+              }
+            }
+            start = i + 1
           }
         }
         controller.close()
