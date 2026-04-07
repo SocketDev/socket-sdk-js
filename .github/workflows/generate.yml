@@ -45,14 +45,14 @@ jobs:
           echo "Sleeping for $delay seconds..."
           sleep $delay
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@6147a08ccc20fcb1f690dcc4650ec745776b3345 # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@d425cd0501e354096f35043e1badecc370a2fecf # main
 
       - name: Configure push credentials
         env:
           GH_TOKEN: ${{ github.token }}
         run: git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-git-signing@6147a08ccc20fcb1f690dcc4650ec745776b3345 # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-git-signing@d425cd0501e354096f35043e1badecc370a2fecf # main
         with:
           gpg-private-key: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
 
@@ -108,19 +108,6 @@ jobs:
             echo "PR #$existing_pr already exists, skipping creation"
           fi
 
-      # Pushes made with GITHUB_TOKEN don't trigger other workflows.
-      # Close/reopen the PR to generate a pull_request.reopened event,
-      # which triggers required CI and enterprise audit workflows.
-      - name: Trigger CI checks
-        if: steps.check.outputs.has_changes == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          pr_number=$(gh pr list --head automated/open-api --json number --jq '.[0].number')
-          if [ -n "$pr_number" ]; then
-            gh pr close "$pr_number"
-            gh pr reopen "$pr_number"
-          fi
 
-      - uses: SocketDev/socket-registry/.github/actions/cleanup-git-signing@6147a08ccc20fcb1f690dcc4650ec745776b3345 # main
+      - uses: SocketDev/socket-registry/.github/actions/cleanup-git-signing@d425cd0501e354096f35043e1badecc370a2fecf # main
         if: always()
