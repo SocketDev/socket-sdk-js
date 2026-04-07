@@ -108,38 +108,19 @@ jobs:
             echo "PR #$existing_pr already exists, skipping creation"
           fi
 
+      # Pushes made with GITHUB_TOKEN don't trigger other workflows.
+      # Close/reopen the PR to generate a pull_request.reopened event,
+      # which triggers required CI and enterprise audit workflows.
+      - name: Trigger CI checks
+        if: steps.check.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pr_number=$(gh pr list --head automated/open-api --json number --jq '.[0].number')
+          if [ -n "$pr_number" ]; then
+            gh pr close "$pr_number"
+            gh pr reopen "$pr_number"
+          fi
+
       - uses: SocketDev/socket-registry/.github/actions/cleanup-git-signing@6147a08ccc20fcb1f690dcc4650ec745776b3345 # main
         if: always()
-
-  validate:
-    name: Validate generated SDK
-    needs: fetch_and_update
-    if: needs.fetch_and_update.outputs.has_changes == 'true'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    outputs:
-      has_changes: ${{ steps.check.outputs.has_changes }}
-    steps:
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@6147a08ccc20fcb1f690dcc4650ec745776b3345 # main
-        with:
-          checkout-ref: automated/open-api
-
-      - name: Build SDK
-        run: pnpm run build
-
-      - name: Type check
-        run: pnpm run check
-
-      - name: Lint
-        run: pnpm run lint --all
-
-      - name: Test
-        run: pnpm run test --all
-
-      - name: Check for API breaking changes
-        run: |
-          if git diff origin/main...HEAD --name-only | grep -q 'types/api.d.ts'; then
-            echo "⚠️ API types have changed. Please review for breaking changes."
-            git diff origin/main...HEAD types/api.d.ts | head -100
-          fi
