@@ -20,6 +20,7 @@
 - Docs: Use `docs/` folder, lowercase-with-hyphens.md filenames, pithy writing with visuals
 - Dependencies: After `package.json` edits, run `pnpm install` to update `pnpm-lock.yaml`
 - Backward Compatibility: 🚨 FORBIDDEN to maintain - actively remove when encountered (see canonical CLAUDE.md)
+- 🚨 **NEVER use `npx`, `pnpm dlx`, or `yarn dlx`** — use `pnpm exec <package>` for devDep binaries, or `pnpm run <script>` for package.json scripts. If a tool is needed, add it as a pinned devDependency first.
 
 ---
 
@@ -97,6 +98,15 @@ Socket SDK for JavaScript/TypeScript - Programmatic access to Socket.dev securit
 - **Coverage**: `pnpm run cover`
 
 **Development tip:** Use `pnpm build --watch` for 68% faster rebuilds (9ms vs 27ms).
+
+## Agents & Skills
+
+- `/security-scan` — runs AgentShield + zizmor security audit
+- `/quality-scan` — comprehensive code quality analysis
+- `/quality-loop` — scan and fix iteratively
+- Agents: `code-reviewer`, `security-reviewer`, `refactor-cleaner` (in `.claude/agents/`)
+- Shared subskills in `.claude/skills/_shared/`
+- Pipeline state tracked in `.claude/ops/queue.yaml`
 
 ### Configuration Files
 
