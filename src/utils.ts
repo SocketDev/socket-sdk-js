@@ -10,9 +10,6 @@ import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
 import type { QueryParams } from './types'
 
-// Re-export user agent function for convenience
-export { createUserAgentFromPkgJson } from './user-agent'
-
 /**
  * Normalize a string to a set of lowercase words (alphanumeric sequences).
  * Extracts word characters and creates a deduplicated set.
@@ -168,21 +165,35 @@ export function queryToSearchParams(
   const params = new URLSearchParams(
     init as ConstructorParameters<typeof URLSearchParams>[0],
   )
-  const normalized = { __proto__: null } as unknown as QueryParams
-  const entries: Iterable<[string, string]> = params.entries()
-  for (const entry of entries) {
-    let key: string = entry[0]
-    const value: string = entry[1]
-    if (key === 'defaultBranch') {
-      key = 'default_branch'
-    } else if (key === 'perPage') {
-      key = 'per_page'
+  // Check if normalization is needed before creating a second instance.
+  let needsNormalization = false
+  let hasEmpty = false
+  for (const [key, value] of params) {
+    if (key === 'defaultBranch' || key === 'perPage') {
+      needsNormalization = true
+      break
     }
-    if (value) {
-      normalized[key] = value
+    if (!value) {
+      hasEmpty = true
     }
   }
-  return new URLSearchParams(normalized as unknown as Record<string, string>)
+  if (!needsNormalization && !hasEmpty) {
+    return params
+  }
+  const normalized = new URLSearchParams()
+  for (const [key, value] of params) {
+    if (!value) {
+      continue
+    }
+    if (key === 'defaultBranch') {
+      normalized.set('default_branch', value)
+    } else if (key === 'perPage') {
+      normalized.set('per_page', value)
+    } else {
+      normalized.set(key, value)
+    }
+  }
+  return normalized
 }
 
 /**

@@ -4,22 +4,9 @@ import { describe, expect, it } from 'vitest'
 import * as sdk from '../../src/index'
 
 describe('index.ts exports', () => {
-  it('should export all expected functions from http-client', () => {
-    expect(typeof sdk.createDeleteRequest).toBe('function')
-    expect(typeof sdk.createGetRequest).toBe('function')
-    expect(typeof sdk.createRequestWithJson).toBe('function')
-    expect(typeof sdk.getErrorResponseBody).toBe('function')
-    expect(typeof sdk.getResponseJson).toBe('function')
-    expect(typeof sdk.isResponseOk).toBe('function')
-    expect(typeof sdk.reshapeArtifactForPublicPolicy).toBe('function')
+  it('should export ResponseError class', () => {
     expect(sdk.ResponseError).toBeDefined()
     expect(typeof sdk.ResponseError).toBe('function')
-  })
-
-  it('should export all expected functions from file-upload', () => {
-    expect(typeof sdk.createRequestBodyForFilepaths).toBe('function')
-    expect(typeof sdk.createRequestBodyForJson).toBe('function')
-    expect(typeof sdk.createUploadRequest).toBe('function')
   })
 
   it('should export SocketSdk class', () => {
@@ -31,63 +18,22 @@ describe('index.ts exports', () => {
     expect(typeof sdk.createUserAgentFromPkgJson).toBe('function')
   })
 
-  it('should export all expected utility functions', () => {
-    expect(typeof sdk.calculateWordSetSimilarity).toBe('function')
-    expect(typeof sdk.filterRedundantCause).toBe('function')
-    expect(typeof sdk.normalizeBaseUrl).toBe('function')
-    expect(typeof sdk.promiseWithResolvers).toBe('function')
-    expect(typeof sdk.queryToSearchParams).toBe('function')
-    expect(typeof sdk.resolveAbsPaths).toBe('function')
-    expect(typeof sdk.resolveBasePath).toBe('function')
-    expect(typeof sdk.shouldOmitReason).toBe('function')
-  })
-
-  it('should export all expected constants', () => {
-    expect(typeof sdk.DEFAULT_USER_AGENT).toBe('string')
-    expect(sdk.httpAgentNames).toBeInstanceOf(Set)
-    expect(sdk.publicPolicy).toBeInstanceOf(Map)
-  })
-
-  describe('Constants validation', () => {
-    it('should have valid publicPolicy map with known threat categories', () => {
-      expect(sdk.publicPolicy.size).toBeGreaterThan(0)
-      // Verify known threat categories exist with correct actions
-      expect(sdk.publicPolicy.get('malware')).toBe('error')
-      expect(sdk.publicPolicy.get('criticalCVE')).toBe('warn')
-      expect(sdk.publicPolicy.get('deprecated')).toBe('monitor')
-      expect(sdk.publicPolicy.get('cve')).toBe('ignore')
-    })
-
-    it('should have valid httpAgentNames set', () => {
-      expect(sdk.httpAgentNames.size).toBeGreaterThan(0)
-      expect(sdk.httpAgentNames.has('http')).toBe(true)
-      expect(sdk.httpAgentNames.has('https')).toBe(true)
-    })
-
-    it('should have non-empty DEFAULT_USER_AGENT', () => {
-      expect(sdk.DEFAULT_USER_AGENT.length).toBeGreaterThan(0)
-      expect(sdk.DEFAULT_USER_AGENT).toContain('socketsecurity-sdk')
-    })
+  it('should export all quota utility functions', () => {
+    expect(typeof sdk.calculateTotalQuotaCost).toBe('function')
+    expect(typeof sdk.getAllMethodRequirements).toBe('function')
+    expect(typeof sdk.getMethodRequirements).toBe('function')
+    expect(typeof sdk.getMethodsByPermissions).toBe('function')
+    expect(typeof sdk.getMethodsByQuotaCost).toBe('function')
+    expect(typeof sdk.getQuotaCost).toBe('function')
+    expect(typeof sdk.getQuotaUsageSummary).toBe('function')
+    expect(typeof sdk.getRequiredPermissions).toBe('function')
+    expect(typeof sdk.hasQuotaForMethods).toBe('function')
   })
 
   it('should have a comprehensive export list', () => {
     const expectedExports = [
-      // HTTP client functions
-      'createDeleteRequest',
-      'createGetRequest',
-      'createRequestWithJson',
-      'getErrorResponseBody',
-      'getResponseJson',
-      'isResponseOk',
-      'reshapeArtifactForPublicPolicy',
-      'ResponseError',
-
-      // File upload functions
-      'createRequestBodyForFilepaths',
-      'createRequestBodyForJson',
-      'createUploadRequest',
-
       // Main SDK class
+      'ResponseError',
       'SocketSdk',
 
       // Quota utility functions
@@ -103,21 +49,6 @@ describe('index.ts exports', () => {
 
       // User agent function
       'createUserAgentFromPkgJson',
-
-      // Utility functions
-      'calculateWordSetSimilarity',
-      'filterRedundantCause',
-      'normalizeBaseUrl',
-      'promiseWithResolvers',
-      'queryToSearchParams',
-      'resolveAbsPaths',
-      'resolveBasePath',
-      'shouldOmitReason',
-
-      // Constants
-      'DEFAULT_USER_AGENT',
-      'httpAgentNames',
-      'publicPolicy',
     ]
 
     for (const exportName of expectedExports) {
@@ -128,19 +59,10 @@ describe('index.ts exports', () => {
   it('should not export unexpected functions', () => {
     const sdkKeys = Object.keys(sdk)
     const expectedKeys = new Set([
-      'createDeleteRequest',
-      'createGetRequest',
-      'createRequestWithJson',
-      'getErrorResponseBody',
-      'getResponseJson',
-      'isResponseOk',
-      'reshapeArtifactForPublicPolicy',
       'ResponseError',
-      'createRequestBodyForFilepaths',
-      'createRequestBodyForJson',
-      'createUploadRequest',
       'SocketSdk',
       'calculateTotalQuotaCost',
+      'createUserAgentFromPkgJson',
       'getAllMethodRequirements',
       'getMethodRequirements',
       'getMethodsByPermissions',
@@ -149,18 +71,6 @@ describe('index.ts exports', () => {
       'getQuotaUsageSummary',
       'getRequiredPermissions',
       'hasQuotaForMethods',
-      'createUserAgentFromPkgJson',
-      'calculateWordSetSimilarity',
-      'filterRedundantCause',
-      'normalizeBaseUrl',
-      'promiseWithResolvers',
-      'queryToSearchParams',
-      'resolveAbsPaths',
-      'resolveBasePath',
-      'shouldOmitReason',
-      'DEFAULT_USER_AGENT',
-      'httpAgentNames',
-      'publicPolicy',
     ])
 
     // Check that we don't have unexpected exports (CommonJS build adds 'default')
@@ -168,11 +78,5 @@ describe('index.ts exports', () => {
       key => !expectedKeys.has(key) && key !== 'default',
     )
     expect(unexpectedExports).toEqual([])
-  })
-
-  it('should export word set similarity functions', () => {
-    expect(typeof sdk.calculateWordSetSimilarity).toBe('function')
-    expect(typeof sdk.filterRedundantCause).toBe('function')
-    expect(typeof sdk.shouldOmitReason).toBe('function')
   })
 })

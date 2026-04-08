@@ -1063,11 +1063,6 @@ describe('SocketSdk - API Methods Coverage', () => {
       const result = await client.getSupportedFiles('test-org')
       expect(result.success).toBe(true)
     })
-
-    it('covers getSupportedScanFiles (deprecated)', async () => {
-      const result = await client.getSupportedScanFiles()
-      expect(result.success).toBe(true)
-    })
   })
 
   describe('Entitlements Methods', () => {
