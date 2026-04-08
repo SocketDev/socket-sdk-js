@@ -4,36 +4,8 @@
  */
 
 /* c8 ignore start - Re-export module, no testable logic */
-// Import from our modules.
-import { DEFAULT_USER_AGENT, httpAgentNames, publicPolicy } from './constants'
-import {
-  calculateWordSetSimilarity,
-  filterRedundantCause,
-  normalizeBaseUrl,
-  promiseWithResolvers,
-  queryToSearchParams,
-  resolveAbsPaths,
-  resolveBasePath,
-  shouldOmitReason,
-} from './utils'
-
-// Re-export file upload functions.
-export {
-  createRequestBodyForFilepaths,
-  createRequestBodyForJson,
-  createUploadRequest,
-} from './file-upload'
-// Re-export HTTP client functions.
-export {
-  createDeleteRequest,
-  createGetRequest,
-  createRequestWithJson,
-  getErrorResponseBody,
-  getResponseJson,
-  isResponseOk,
-  ResponseError,
-  reshapeArtifactForPublicPolicy,
-} from './http-client'
+// Re-export HTTP client classes.
+export { ResponseError } from './http-client'
 // Re-export quota utility functions.
 export {
   calculateTotalQuotaCost,
@@ -134,19 +106,4 @@ export type {
 } from './types-strict'
 // Re-export functions from modules.
 export { createUserAgentFromPkgJson } from './user-agent'
-
-// Re-export utility functions.
-export {
-  calculateWordSetSimilarity,
-  filterRedundantCause,
-  normalizeBaseUrl,
-  promiseWithResolvers,
-  queryToSearchParams,
-  resolveAbsPaths,
-  resolveBasePath,
-  shouldOmitReason,
-}
-
-// Re-export constants.
-export { DEFAULT_USER_AGENT, httpAgentNames, publicPolicy }
 /* c8 ignore stop */

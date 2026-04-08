@@ -1,6 +1,3 @@
-import http from 'node:http'
-import https from 'node:https'
-
 import { debugLog } from '@socketsecurity/lib/debug'
 import { httpRequest } from '@socketsecurity/lib/http-request'
 import { jsonParse } from '@socketsecurity/lib/json/parse'
@@ -21,7 +18,6 @@ import type {
 } from './types'
 import type { HttpResponse } from '@socketsecurity/lib/http-request'
 import type { JsonValue } from '@socketsecurity/lib/json/types'
-import type { ClientRequest, IncomingMessage } from 'node:http'
 
 export class ResponseError extends Error {
   response: HttpResponse
@@ -56,12 +52,14 @@ export async function createDeleteRequest(
   } as any as RequestOptionsWithHooks
   const opts = { __proto__: null, ...rawOpts } as any as RequestOptions
 
-  hooks?.onRequest?.({
-    method,
-    url,
-    headers: sanitizeHeaders(opts.headers),
-    timeout: opts.timeout,
-  })
+  if (hooks?.onRequest) {
+    hooks.onRequest({
+      method,
+      url,
+      headers: sanitizeHeaders(opts.headers),
+      timeout: opts.timeout,
+    })
+  }
 
   try {
     const response = await httpRequest(url, {
@@ -71,23 +69,27 @@ export async function createDeleteRequest(
       maxResponseSize: MAX_RESPONSE_SIZE,
     })
 
-    hooks?.onResponse?.({
-      method,
-      url,
-      duration: Date.now() - startTime,
-      status: response.status,
-      statusText: response.statusText,
-      headers: sanitizeHeaders(response.headers),
-    })
+    if (hooks?.onResponse) {
+      hooks.onResponse({
+        method,
+        url,
+        duration: Date.now() - startTime,
+        status: response.status,
+        statusText: response.statusText,
+        headers: sanitizeHeaders(response.headers),
+      })
+    }
 
     return response
   } catch (error) {
-    hooks?.onResponse?.({
-      method,
-      url,
-      duration: Date.now() - startTime,
-      error: error as Error,
-    })
+    if (hooks?.onResponse) {
+      hooks.onResponse({
+        method,
+        url,
+        duration: Date.now() - startTime,
+        error: error as Error,
+      })
+    }
 
     throw error
   }
@@ -108,12 +110,14 @@ export async function createGetRequest(
   } as any as RequestOptionsWithHooks
   const opts = { __proto__: null, ...rawOpts } as any as RequestOptions
 
-  hooks?.onRequest?.({
-    method,
-    url,
-    headers: sanitizeHeaders(opts.headers),
-    timeout: opts.timeout,
-  })
+  if (hooks?.onRequest) {
+    hooks.onRequest({
+      method,
+      url,
+      headers: sanitizeHeaders(opts.headers),
+      timeout: opts.timeout,
+    })
+  }
 
   try {
     const response = await httpRequest(url, {
@@ -124,25 +128,29 @@ export async function createGetRequest(
     })
     stopTimer({ statusCode: response.status })
 
-    hooks?.onResponse?.({
-      method,
-      url,
-      duration: Date.now() - startTime,
-      status: response.status,
-      statusText: response.statusText,
-      headers: sanitizeHeaders(response.headers),
-    })
+    if (hooks?.onResponse) {
+      hooks.onResponse({
+        method,
+        url,
+        duration: Date.now() - startTime,
+        status: response.status,
+        statusText: response.statusText,
+        headers: sanitizeHeaders(response.headers),
+      })
+    }
 
     return response
   } catch (error) {
     stopTimer({ error: true })
 
-    hooks?.onResponse?.({
-      method,
-      url,
-      duration: Date.now() - startTime,
-      error: error as Error,
-    })
+    if (hooks?.onResponse) {
+      hooks.onResponse({
+        method,
+        url,
+        duration: Date.now() - startTime,
+        error: error as Error,
+      })
+    }
 
     throw error
   }
@@ -171,12 +179,14 @@ export async function createRequestWithJson(
     'Content-Type': 'application/json',
   } as Record<string, string>
 
-  hooks?.onRequest?.({
-    method,
-    url,
-    headers: sanitizeHeaders(headers),
-    timeout: opts.timeout,
-  })
+  if (hooks?.onRequest) {
+    hooks.onRequest({
+      method,
+      url,
+      headers: sanitizeHeaders(headers),
+      timeout: opts.timeout,
+    })
+  }
 
   try {
     const response = await httpRequest(url, {
@@ -188,126 +198,32 @@ export async function createRequestWithJson(
     })
     stopTimer({ statusCode: response.status })
 
-    hooks?.onResponse?.({
-      method,
-      url,
-      duration: Date.now() - startTime,
-      status: response.status,
-      statusText: response.statusText,
-      headers: sanitizeHeaders(response.headers),
-    })
+    if (hooks?.onResponse) {
+      hooks.onResponse({
+        method,
+        url,
+        duration: Date.now() - startTime,
+        status: response.status,
+        statusText: response.statusText,
+        headers: sanitizeHeaders(response.headers),
+      })
+    }
 
     return response
   } catch (error) {
     stopTimer({ error: true })
 
-    hooks?.onResponse?.({
-      method,
-      url,
-      duration: Date.now() - startTime,
-      error: error as Error,
-    })
+    if (hooks?.onResponse) {
+      hooks.onResponse({
+        method,
+        url,
+        duration: Date.now() - startTime,
+        error: error as Error,
+      })
+    }
 
     throw error
   }
-}
-
-export async function getErrorResponseBody(
-  response: HttpResponse,
-): Promise<string> {
-  return response.text()
-}
-
-export function getHttpModule(url: string): typeof http | typeof https {
-  return url.startsWith('https:') ? https : http
-}
-
-export async function getResponse(
-  req: ClientRequest,
-): Promise<IncomingMessage> {
-  return await new Promise((resolve, reject) => {
-    let timedOut = false
-    req.on('response', (response: IncomingMessage) => {
-      /* c8 ignore next 3 - Race condition where response arrives after timeout. */
-      if (timedOut) {
-        return
-      }
-      resolve(response)
-    })
-    req.on('timeout', () => {
-      timedOut = true
-      req.destroy()
-      const method = (req as any).method || 'REQUEST'
-      const path = (req as any).path || 'unknown'
-      const timeout = (req as any).timeout || 'configured timeout'
-      const message = [
-        `${method} request timed out after ${timeout}ms: ${path}`,
-        '→ The Socket API did not respond in time.',
-        '→ Try: Increase timeout option or check network connectivity.',
-        '→ If problem persists, Socket API may be experiencing issues.',
-      ].join('\n')
-      reject(new Error(message))
-    })
-    req.on('error', e => {
-      if (!timedOut) {
-        const err = e as NodeJS.ErrnoException
-        const method = (req as any).method || 'REQUEST'
-        const path = (req as any).path || 'unknown'
-        let message = `${method} request failed: ${path}`
-
-        if (err.code === 'ECONNREFUSED') {
-          message += [
-            '',
-            '→ Connection refused. Socket API server is unreachable.',
-            '→ Check: Network connectivity and firewall settings.',
-            '→ Verify: Base URL is correct (default: https://api.socket.dev)',
-          ].join('\n')
-        } else if (err.code === 'ENOTFOUND') {
-          message += [
-            '',
-            '→ DNS lookup failed. Cannot resolve hostname.',
-            '→ Check: Internet connection and DNS settings.',
-            '→ Verify: Base URL hostname is correct.',
-          ].join('\n')
-        } else if (err.code === 'ETIMEDOUT') {
-          message += [
-            '',
-            '→ Connection timed out. Network or server issue.',
-            '→ Try: Check network connectivity and retry.',
-            '→ If using proxy, verify proxy configuration.',
-          ].join('\n')
-        } else if (err.code === 'ECONNRESET') {
-          message += [
-            '',
-            '→ Connection reset by server. Possible network interruption.',
-            '→ Try: Retry the request. Enable retries option if not set.',
-          ].join('\n')
-        } else if (err.code === 'EPIPE') {
-          message += [
-            '',
-            '→ Broken pipe. Server closed connection unexpectedly.',
-            '→ Possible: Authentication issue or server error.',
-            '→ Check: API token is valid and has required permissions.',
-          ].join('\n')
-        } else if (
-          err.code === 'CERT_HAS_EXPIRED' ||
-          err.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE'
-        ) {
-          message += [
-            '',
-            '→ SSL/TLS certificate error.',
-            '→ Check: System time and date are correct.',
-            '→ Try: Update CA certificates on your system.',
-          ].join('\n')
-        } else if (err.code) {
-          message += `\n→ Error code: ${err.code}`
-        }
-
-        const enhancedError = new Error(message, { cause: e })
-        reject(enhancedError)
-      }
-    })
-  })
 }
 
 export async function getResponseJson(
@@ -418,7 +334,9 @@ export function reshapeArtifactForPublicPolicy<
   policy?: Map<string, string> | undefined,
 ): T {
   if (!isAuthenticated) {
-    const allowedActions = actions?.trim() ? actions.split(',') : undefined
+    const allowedActions = actions?.trim()
+      ? new Set(actions.split(','))
+      : undefined
     const resolvedPolicy = policy ?? defaultPublicPolicy
 
     const reshapeArtifact = (artifact: SocketArtifactWithExtras) => ({
@@ -430,23 +348,29 @@ export function reshapeArtifactForPublicPolicy<
       supplyChainRisk: artifact.supplyChainRisk,
       scorecards: artifact.scorecards,
       topLevelAncestors: artifact.topLevelAncestors,
-      alerts: artifact.alerts
-        ?.filter((alert: SocketArtifactAlert) => {
-          const action = resolvedPolicy.get(alert.type)
-          if (alert.severity === 'low') {
-            return false
-          }
-          if (allowedActions && action && !allowedActions.includes(action)) {
-            return false
-          }
-          return true
-        })
-        .map((alert: SocketArtifactAlert) => ({
-          action: resolvedPolicy.get(alert.type),
+      alerts: artifact.alerts?.reduce<
+        Array<{
+          action: string | undefined
+          key: string
+          severity: string | undefined
+          type: string
+        }>
+      >((acc, alert: SocketArtifactAlert) => {
+        if (alert.severity === 'low') {
+          return acc
+        }
+        const action = resolvedPolicy.get(alert.type)
+        if (allowedActions && action && !allowedActions.has(action)) {
+          return acc
+        }
+        acc.push({
+          action,
           key: alert.key,
           severity: alert.severity,
           type: alert.type,
-        })),
+        })
+        return acc
+      }, []),
     })
 
     if (data['artifacts']) {

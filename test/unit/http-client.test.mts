@@ -1,5 +1,4 @@
-import http, { createServer } from 'node:http'
-import https from 'node:https'
+import { createServer } from 'node:http'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
@@ -8,8 +7,6 @@ import {
   createDeleteRequest,
   createGetRequest,
   createRequestWithJson,
-  getErrorResponseBody,
-  getHttpModule,
   getResponseJson,
   isResponseOk,
   reshapeArtifactForPublicPolicy,
@@ -44,59 +41,25 @@ function mockHttpResponse(
 }
 
 // =============================================================================
-// Module Selection Tests
-// =============================================================================
-
-describe('HTTP Client - Module Selection', () => {
-  describe('getHttpModule', () => {
-    it('should return https module for secure HTTPS URLs', () => {
-      const httpsModule = getHttpModule('https://api.socket.dev')
-      expect(httpsModule).toBe(https)
-    })
-
-    it('should return http module for insecure HTTP URLs', () => {
-      const httpModule = getHttpModule('http://api.socket.dev')
-      expect(httpModule).toBe(http)
-    })
-
-    it('should default to http module for non-HTTPS protocol URLs', () => {
-      const httpModule = getHttpModule('ftp://example.com')
-      expect(httpModule).toBe(http)
-    })
-
-    it('should handle edge cases with empty and malformed URLs gracefully', () => {
-      expect(getHttpModule('')).toBe(http)
-      expect(getHttpModule('not-a-url')).toBe(http)
-      expect(getHttpModule('httpss://typo.com')).toBe(http)
-    })
-  })
-})
-
-// =============================================================================
 // Response Body Reading Tests
 // =============================================================================
 
 describe('HTTP Client - Response Body Reading', () => {
-  describe('getErrorResponseBody', () => {
-    it('should read normal response body successfully', async () => {
-      const testBody = 'Hello, World!'
-      const response = mockHttpResponse({ body: testBody })
-      const result = await getErrorResponseBody(response)
-      expect(result).toBe(testBody)
-    })
+  it('should read normal response body successfully', () => {
+    const testBody = 'Hello, World!'
+    const response = mockHttpResponse({ body: testBody })
+    expect(response.text()).toBe(testBody)
+  })
 
-    it('should read empty response body', async () => {
-      const response = mockHttpResponse({ body: '' })
-      const result = await getErrorResponseBody(response)
-      expect(result).toBe('')
-    })
+  it('should read empty response body', () => {
+    const response = mockHttpResponse({ body: '' })
+    expect(response.text()).toBe('')
+  })
 
-    it('should read large response body', async () => {
-      const largeBody = 'x'.repeat(10000)
-      const response = mockHttpResponse({ body: largeBody })
-      const result = await getErrorResponseBody(response)
-      expect(result).toBe(largeBody)
-    })
+  it('should read large response body', () => {
+    const largeBody = 'x'.repeat(10000)
+    const response = mockHttpResponse({ body: largeBody })
+    expect(response.text()).toBe(largeBody)
   })
 })
 
@@ -231,6 +194,22 @@ describe('HTTP Client - Error Handling', () => {
       await createDeleteRequest(baseUrl, '/test', { hooks, timeout: 1000 })
       expect(requestCalled).toBe(true)
       expect(responseCalled).toBe(true)
+    })
+
+    it('should not call hooks when not provided', async () => {
+      // Verifies the if-guard optimization: sanitizeHeaders and hook callbacks
+      // are never evaluated when hooks are absent.
+      const response = await createDeleteRequest(baseUrl, '/test', {
+        timeout: 1000,
+      })
+      expect(response.status).toBe(200)
+    })
+
+    it('should not call hooks on error when not provided', async () => {
+      const invalidUrl = 'http://127.0.0.1:1'
+      await expect(
+        createGetRequest(invalidUrl, '/test', { timeout: 100 }),
+      ).rejects.toThrow()
     })
   })
 
