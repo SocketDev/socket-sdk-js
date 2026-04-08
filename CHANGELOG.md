@@ -27,14 +27,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Retry logic improved: all 4xx client errors now bail immediately (previously only 401/403)
 - New audit log action types: `CreateFirewallCustomRegistry`, `CreateFirewallDeploymentConfig`, `DeleteFirewallCustomRegistry`, `DeleteFirewallDeploymentConfig`, `UpdateFirewallCustomRegistry`, `UpdateFirewallDeploymentConfig`
 
-### Performance
-
-- **NDJSON parsing**: Replaced `.split('\n')` with single-pass linear scan in 4 batch/streaming methods — eliminates intermediate array allocation
-- **URL parameters**: `queryToSearchParams()` avoids double `URLSearchParams` instantiation — returns early when no normalization is needed
-- **Hook overhead**: `sanitizeHeaders()` is now deferred behind `if` guards — arguments are no longer evaluated when hooks are absent
-- **Batch streaming**: `batchPackageStream` generator queue uses `Map` for O(1) lookup/removal instead of `findIndex`+`splice`
-- **Alert processing**: `reshapeArtifactForPublicPolicy` uses single-pass `reduce` instead of `filter`+`map` chain
-
 ## [3.5.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.5.0) - 2026-04-03
 
 ### Added
