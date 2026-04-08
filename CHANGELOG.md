@@ -25,7 +25,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Migrated HTTP internals to `@socketsecurity/lib/http-request` (`httpRequest`), reducing code duplication and consolidating response handling
 - Retry logic improved: all 4xx client errors now bail immediately (previously only 401/403)
-- Updated `@socketsecurity/lib` from 5.11.4 to 5.15.0
 
 ### Performance
 
@@ -34,15 +33,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Hook overhead**: `sanitizeHeaders()` is now deferred behind `if` guards — arguments are no longer evaluated when hooks are absent
 - **Batch streaming**: `batchPackageStream` generator queue uses `Map` for O(1) lookup/removal instead of `findIndex`+`splice`
 - **Alert processing**: `reshapeArtifactForPublicPolicy` uses single-pass `reduce` instead of `filter`+`map` chain
-
-### Removed
-
-- Runtime dependency `@socketregistry/packageurl-js` (unused)
-- Dev dependency `http2-wrapper` (replaced by native `node:http2` types)
-
-### Fixed
-
-- Security: bumped `vite` override to 7.3.2, added `defu` override >=6.1.6
 
 ## [3.5.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.5.0) - 2026-04-03
 
