@@ -110,8 +110,8 @@
     "strict": true
   },
   "engines": {
-    "node": ">=18",
-    "pnpm": ">=10.25.0"
+    "node": ">=18.20.8",
+    "pnpm": ">=10.33.0"
   },
   "packageManager": "pnpm@10.33.0",
   "pnpm": {

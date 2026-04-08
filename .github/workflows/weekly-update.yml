@@ -24,13 +24,12 @@ jobs:
     outputs:
       has-updates: ${{ steps.check.outputs.has-updates }}
     steps:
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@6096b06b1790f411714c89c40f72aade2eeaab7c # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@4edf2e3c3beff7d536e79ce43dfb61abba7cb537 # main
 
       - name: Check for npm updates
         id: check
         shell: bash
         run: |
-          alias pnpm="$SFW_BIN pnpm"
           echo "Checking for npm package updates..."
           HAS_UPDATES=false
           NPM_UPDATES=$(pnpm outdated 2>/dev/null || true)
@@ -49,7 +48,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@6096b06b1790f411714c89c40f72aade2eeaab7c # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@4edf2e3c3beff7d536e79ce43dfb61abba7cb537 # main
 
       - name: Create update branch
         id: branch
@@ -57,15 +56,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           BRANCH_NAME="weekly-update-$(date +%Y%m%d)"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
           git checkout -b "$BRANCH_NAME"
           echo "branch=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
-      - name: Run updating skill with Claude Code
-        id: claude
-        timeout-minutes: 30
+      - uses: SocketDev/socket-registry/.github/actions/setup-git-signing@4edf2e3c3beff7d536e79ce43dfb61abba7cb537 # main
+        with:
+          gpg-private-key: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
+
+      - name: Update dependencies (haiku)
+        id: update
+        timeout-minutes: 10
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GITHUB_ACTIONS: 'true'
@@ -77,10 +78,33 @@ jobs:
           fi
 
           set +e
-          pnpm exec claude --print --dangerously-skip-permissions \
-            --model sonnet \
-            "/updating - Run the updating skill to update all dependencies. Create atomic commits for each update. You are running in CI mode - skip builds and tests. Do not push or create a PR." \
-            2>&1 | tee claude-output.log
+          pnpm exec claude --print \
+            --allowedTools "Bash(pnpm:*)" "Bash(git add:*)" "Bash(git commit:*)" "Bash(git status:*)" "Bash(git diff:*)" "Bash(git log:*)" "Bash(git rev-parse:*)" "Read" "Write" "Edit" "Glob" "Grep" \
+            --model haiku \
+            --max-turns 15 \
+            "$(cat <<'PROMPT'
+          /updating
+
+          <context>
+          You are an automated CI agent in a weekly dependency update workflow.
+          Git is configured with GPG signing. A branch has been created for you.
+          </context>
+
+          <instructions>
+          Update all dependencies to their latest versions.
+          Create one atomic commit per dependency update with a conventional commit message.
+          Leave all changes local — the workflow handles pushing and PR creation.
+          Skip running builds, tests, and type checks — CI runs those separately.
+          </instructions>
+
+          <success_criteria>
+          Each updated dependency has its own commit.
+          The lockfile is consistent with package.json changes.
+          No uncommitted changes remain in the working tree.
+          </success_criteria>
+          PROMPT
+          )" \
+            2>&1 | tee claude-update.log
           CLAUDE_EXIT=${PIPESTATUS[0]}
           set -e
 
@@ -88,6 +112,116 @@ jobs:
             echo "success=true" >> $GITHUB_OUTPUT
           else
             echo "success=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run tests
+        id: tests
+        if: steps.update.outputs.success == 'true'
+        continue-on-error: true
+        run: |
+          set +e
+          pnpm build 2>&1 | tee build-output.log
+          BUILD_EXIT=${PIPESTATUS[0]}
+
+          pnpm test 2>&1 | tee test-output.log
+          TEST_EXIT=${PIPESTATUS[0]}
+          set -e
+
+          if [ "$BUILD_EXIT" -eq 0 ] && [ "$TEST_EXIT" -eq 0 ]; then
+            echo "result=pass" >> $GITHUB_OUTPUT
+          else
+            echo "result=fail" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Fix test failures (sonnet)
+        id: claude
+        if: steps.tests.outputs.result == 'fail'
+        timeout-minutes: 15
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_ACTIONS: 'true'
+        run: |
+          BUILD_LOG=$(cat build-output.log 2>/dev/null || echo "No build output")
+          TEST_LOG=$(cat test-output.log 2>/dev/null || echo "No test output")
+
+          set +e
+          pnpm exec claude --print \
+            --allowedTools "Bash(pnpm:*)" "Bash(git add:*)" "Bash(git commit:*)" "Bash(git status:*)" "Bash(git diff:*)" "Bash(git log:*)" "Bash(git rev-parse:*)" "Read" "Write" "Edit" "Glob" "Grep" \
+            --model sonnet \
+            --max-turns 25 \
+            "$(cat <<PROMPT
+          <context>
+          You are an automated CI agent fixing test failures after a dependency update.
+          Git is configured with GPG signing. Dependencies were already updated and committed.
+          </context>
+
+          <failure_logs>
+          BUILD OUTPUT:
+          ${BUILD_LOG}
+
+          TEST OUTPUT:
+          ${TEST_LOG}
+          </failure_logs>
+
+          <instructions>
+          The dependency updates above caused build or test failures.
+          Analyze the failure logs, identify root causes, and fix them.
+          Create one atomic commit per fix with a conventional commit message.
+          Leave all changes local — the workflow handles pushing and PR creation.
+          </instructions>
+
+          <success_criteria>
+          All build and test failures are resolved.
+          Each fix has its own commit.
+          No uncommitted changes remain in the working tree.
+          </success_criteria>
+          PROMPT
+          )" \
+            2>&1 | tee claude-fix.log
+          CLAUDE_EXIT=${PIPESTATUS[0]}
+          set -e
+
+          if [ "$CLAUDE_EXIT" -eq 0 ]; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set final status
+        id: final
+        if: always()
+        env:
+          UPDATE_SUCCESS: ${{ steps.update.outputs.success }}
+          TESTS_RESULT: ${{ steps.tests.outputs.result }}
+          FIX_SUCCESS: ${{ steps.claude.outputs.success }}
+        run: |
+          if [ "$UPDATE_SUCCESS" != "true" ]; then
+            echo "success=false" >> $GITHUB_OUTPUT
+          elif [ "$TESTS_RESULT" != "fail" ]; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          elif [ "$FIX_SUCCESS" = "true" ]; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Validate changes
+        id: validate
+        if: steps.final.outputs.success == 'true'
+        run: |
+          UNEXPECTED=""
+          for file in $(git diff --name-only origin/main..HEAD); do
+            case "$file" in
+              package.json|*/package.json|pnpm-lock.yaml|*/pnpm-lock.yaml|.npmrc|pnpm-workspace.yaml) ;;
+              src/*|test/*) ;;
+              *) UNEXPECTED="$UNEXPECTED $file" ;;
+            esac
+          done
+          if [ -n "$UNEXPECTED" ]; then
+            echo "::error::Unexpected files modified by Claude:$UNEXPECTED"
+            echo "valid=false" >> $GITHUB_OUTPUT
+          else
+            echo "valid=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Check for changes
@@ -100,13 +234,13 @@ jobs:
           fi
 
       - name: Push branch
-        if: steps.claude.outputs.success == 'true' && steps.changes.outputs.has-changes == 'true'
+        if: steps.final.outputs.success == 'true' && steps.validate.outputs.valid == 'true' && steps.changes.outputs.has-changes == 'true'
         env:
           BRANCH_NAME: ${{ steps.branch.outputs.branch }}
         run: git push origin "$BRANCH_NAME"
 
       - name: Create Pull Request
-        if: steps.claude.outputs.success == 'true' && steps.changes.outputs.has-changes == 'true'
+        if: steps.final.outputs.success == 'true' && steps.validate.outputs.valid == 'true' && steps.changes.outputs.has-changes == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           BRANCH_NAME: ${{ steps.branch.outputs.branch }}
@@ -134,8 +268,23 @@ jobs:
             --head "$BRANCH_NAME" \
             --base main
 
+      # Pushes made with GITHUB_TOKEN don't trigger other workflows.
+      # Close/reopen the PR to generate a pull_request.reopened event,
+      # which triggers required CI and enterprise audit workflows.
+      - name: Trigger CI checks
+        if: steps.final.outputs.success == 'true' && steps.validate.outputs.valid == 'true' && steps.changes.outputs.has-changes == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH_NAME: ${{ steps.branch.outputs.branch }}
+        run: |
+          pr_number=$(gh pr list --head "$BRANCH_NAME" --json number --jq '.[0].number')
+          if [ -n "$pr_number" ]; then
+            gh pr close "$pr_number"
+            gh pr reopen "$pr_number"
+          fi
+
       - name: Add job summary
-        if: steps.claude.outputs.success == 'true' && steps.changes.outputs.has-changes == 'true'
+        if: steps.final.outputs.success == 'true' && steps.validate.outputs.valid == 'true' && steps.changes.outputs.has-changes == 'true'
         env:
           BRANCH_NAME: ${{ steps.branch.outputs.branch }}
         run: |
@@ -150,8 +299,15 @@ jobs:
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: claude-output-${{ github.run_id }}
-          path: claude-output.log
+          path: |
+            claude-update.log
+            claude-fix.log
+            build-output.log
+            test-output.log
           retention-days: 7
+
+      - uses: SocketDev/socket-registry/.github/actions/cleanup-git-signing@4edf2e3c3beff7d536e79ce43dfb61abba7cb537 # main
+        if: always()
 
   notify:
     name: Notify results
