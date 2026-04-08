@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Migrated HTTP internals to `@socketsecurity/lib/http-request` (`httpRequest`), reducing code duplication and consolidating response handling
 - Retry logic improved: all 4xx client errors now bail immediately (previously only 401/403)
+- New audit log action types: `CreateFirewallCustomRegistry`, `CreateFirewallDeploymentConfig`, `DeleteFirewallCustomRegistry`, `DeleteFirewallDeploymentConfig`, `UpdateFirewallCustomRegistry`, `UpdateFirewallDeploymentConfig`
 
 ### Performance
 
