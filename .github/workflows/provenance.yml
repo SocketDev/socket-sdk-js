@@ -16,6 +16,11 @@ on:
         options:
           - '0'
           - '1'
+      publish-without-sfw:
+        description: 'Publish directly to npm, bypassing Socket firewall shims'
+        required: false
+        default: false
+        type: boolean
 
 permissions: {}
 
@@ -25,11 +30,14 @@ jobs:
     permissions:
       contents: write # To create GitHub releases
       id-token: write # For npm trusted publishing via OIDC
-    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@4edf2e3c3beff7d536e79ce43dfb61abba7cb537 # main
+    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@96c2a403934488b2b1d6127e44f65fd2c36c1150 # main
     with:
       debug: ${{ inputs.debug }}
       dist-tag: ${{ inputs.dist-tag }}
       package-name: '@socketsecurity/sdk'
       publish-script: 'publish:ci'
+      publish-without-sfw: ${{ inputs.publish-without-sfw }}
       setup-script: 'ci:validate'
       use-trusted-publishing: true
+    secrets:
+      SOCKET_API_KEY: ${{ secrets.SOCKET_API_KEY }}
