@@ -5,19 +5,12 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  defu: '>=6.1.6'
+  defu: '>=6.1.7'
   vite: 7.3.2
 
 importers:
 
   .:
-    dependencies:
-      '@socketsecurity/lib':
-        specifier: 5.15.0
-        version: 5.15.0(typescript@5.9.3)
-      form-data:
-        specifier: 4.0.5
-        version: 4.0.5
     devDependencies:
       '@anthropic-ai/claude-code':
         specifier: 2.1.92
@@ -40,6 +33,9 @@ importers:
       '@oxlint/migrate':
         specifier: 1.52.0
         version: 1.52.0
+      '@socketsecurity/lib':
+        specifier: 5.18.2
+        version: 5.18.2(typescript@5.9.3)
       '@sveltejs/acorn-typescript':
         specifier: 1.0.8
         version: 1.0.8(acorn@8.15.0)
@@ -73,6 +69,9 @@ importers:
       fast-glob:
         specifier: 3.3.3
         version: 3.3.3
+      form-data:
+        specifier: 4.0.5
+        version: 4.0.5
       husky:
         specifier: 9.1.7
         version: 9.1.7
@@ -1183,9 +1182,9 @@ packages:
     resolution: {integrity: sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==}
     engines: {node: '>=18'}
 
-  '@socketsecurity/lib@5.15.0':
-    resolution: {integrity: sha512-+I7+lR0WBCXWgRxMTQx+N70azONVGr68ndi25pz53D6QLdIQ8gfBgOgC34opECXL9lPUqVCMYNr3XFS/bHABIQ==}
-    engines: {node: '>=22', pnpm: '>=10.25.0'}
+  '@socketsecurity/lib@5.18.2':
+    resolution: {integrity: sha512-h6aGfphQ9jdVjUMGIKJcsIvT6BmzBo0OD20HzeK+6KQJi2HupfCUzIH26vDPxf+aYVmrX0/hKJDYI5sXfTGx9A==}
+    engines: {node: '>=22', pnpm: '>=11.0.0-rc.0'}
     peerDependencies:
       typescript: '>=5.0.0'
     peerDependenciesMeta:
@@ -1433,8 +1432,8 @@ packages:
     resolution: {integrity: sha512-VfxadyCECXgQlkoEAjeghAr5gY3Hf+IKjKb+X8tGVDtveCjN+USwprd2q3QXBR9T1+x2DG0XZF5/w+7HAtSaXA==}
     engines: {node: '>=10'}
 
-  defu@6.1.6:
-    resolution: {integrity: sha512-f8mefEW4WIVg4LckePx3mALjQSPQgFlg9U8yaPdlsbdYcHQyj9n2zL2LJEA52smeYxOvmd/nB7TpMtHGMTHcug==}
+  defu@6.1.7:
+    resolution: {integrity: sha512-7z22QmUWiQ/2d0KkdYmANbRUVABpZ9SNYyH5vx6PZ+nE5bcC0l7uFvEfHlyld/HcGBFTL536ClDt3DEcSlEJAQ==}
 
   del@8.0.1:
     resolution: {integrity: sha512-gPqh0mKTPvaUZGAuHbrBUYKZWBNAeHG7TU3QH5EhVwPMyKvmfJaNXhcD2jTcXsJRRcffuho4vaYweu80dRrMGA==}
@@ -2999,7 +2998,7 @@ snapshots:
 
   '@sindresorhus/merge-streams@2.3.0': {}
 
-  '@socketsecurity/lib@5.15.0(typescript@5.9.3)':
+  '@socketsecurity/lib@5.18.2(typescript@5.9.3)':
     optionalDependencies:
       typescript: 5.9.3
 
@@ -3230,7 +3229,7 @@ snapshots:
 
   decamelize@5.0.1: {}
 
-  defu@6.1.6: {}
+  defu@6.1.7: {}
 
   del@8.0.1:
     dependencies:
@@ -4045,7 +4044,7 @@ snapshots:
   unconfig@7.4.2:
     dependencies:
       '@quansync/fs': 1.0.0
-      defu: 6.1.6
+      defu: 6.1.7
       jiti: 2.6.1
       quansync: 1.0.0
       unconfig-core: 7.4.2
