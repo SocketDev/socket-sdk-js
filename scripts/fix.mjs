@@ -11,9 +11,11 @@
 import { existsSync } from 'node:fs'
 import process from 'node:process'
 
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { spawn } from '@socketsecurity/lib/spawn'
 
 const WIN32 = process.platform === 'win32'
+const logger = getDefaultLogger()
 
 async function run(cmd, args, { label, required = true } = {}) {
   try {
@@ -22,17 +24,17 @@ async function run(cmd, args, { label, required = true } = {}) {
       stdio: 'inherit',
     })
     if (result.code !== 0 && required) {
-      console.error(`${label || cmd} failed (exit ${result.code})`)
+      logger.error(`${label || cmd} failed (exit ${result.code})`)
       return result.code
     }
     if (result.code !== 0) {
       // Non-blocking: log warning and continue.
-      console.warn(`${label || cmd}: exited ${result.code} (non-blocking)`)
+      logger.warn(`${label || cmd}: exited ${result.code} (non-blocking)`)
     }
     return 0
   } catch (e) {
     if (!required) {
-      console.warn(`${label || cmd}: ${e.message} (non-blocking)`)
+      logger.warn(`${label || cmd}: ${e.message} (non-blocking)`)
       return 0
     }
     throw e
@@ -70,6 +72,6 @@ async function main() {
 }
 
 main().catch(e => {
-  console.error(e)
+  logger.error(e)
   process.exitCode = 1
 })
