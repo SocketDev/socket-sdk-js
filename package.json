@@ -47,7 +47,7 @@
     "check": "node scripts/check.mjs",
     "clean": "node scripts/clean.mjs",
     "cover": "node scripts/cover.mjs",
-    "fix": "node scripts/lint.mjs --fix",
+    "fix": "node scripts/fix.mjs",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "generate-sdk": "node scripts/generate-sdk.mjs",
