@@ -15401,6 +15401,7 @@ export interface operations {
           | 'CreateLabel'
           | 'CreateOauthRefreshToken'
           | 'CreateRepoAccessRule'
+          | 'CreateUserWithPassword'
           | 'CreateWebhook'
           | 'CreateTicket'
           | 'DeleteAlertTriage'
@@ -15426,11 +15427,14 @@ export interface operations {
           | 'RemoveMember'
           | 'ResetInvitationLink'
           | 'ResetOrganizationSettingToDefault'
+          | 'RevokeOauthToken'
           | 'RotateOauthRefreshToken'
           | 'RevokeApiToken'
           | 'RotateApiToken'
           | 'SendInvitation'
           | 'SetLabelSettingToDefault'
+          | 'SSOEmailVerificationCompleted'
+          | 'SSOLoginCompleted'
           | 'SyncOrganization'
           | 'TransferOwnership'
           | 'UpdateAlertTriage'
@@ -15449,6 +15453,8 @@ export interface operations {
           | 'UpdateRepoAccessRule'
           | 'UpdateWebhook'
           | 'UpgradeOrganizationPlan'
+          | 'UserSignedIn'
+          | 'UserSignedOut'
         /** @description Number of events per page */
         per_page?: number
         /** @description Page token */
