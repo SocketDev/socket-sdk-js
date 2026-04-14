@@ -38806,6 +38806,7 @@
                 "CreateLabel",
                 "CreateOauthRefreshToken",
                 "CreateRepoAccessRule",
+                "CreateUserWithPassword",
                 "CreateWebhook",
                 "CreateTicket",
                 "DeleteAlertTriage",
@@ -38831,11 +38832,14 @@
                 "RemoveMember",
                 "ResetInvitationLink",
                 "ResetOrganizationSettingToDefault",
+                "RevokeOauthToken",
                 "RotateOauthRefreshToken",
                 "RevokeApiToken",
                 "RotateApiToken",
                 "SendInvitation",
                 "SetLabelSettingToDefault",
+                "SSOEmailVerificationCompleted",
+                "SSOLoginCompleted",
                 "SyncOrganization",
                 "TransferOwnership",
                 "UpdateAlertTriage",
@@ -38853,7 +38857,9 @@
                 "UpdateOrganizationSetting",
                 "UpdateRepoAccessRule",
                 "UpdateWebhook",
-                "UpgradeOrganizationPlan"
+                "UpgradeOrganizationPlan",
+                "UserSignedIn",
+                "UserSignedOut"
               ]
             }
           },
