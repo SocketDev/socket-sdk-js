@@ -1,5 +1,6 @@
 ignoreDependencyScripts: true
 linkWorkspacePackages: false
+resolutionMode: highest
 
 allowBuilds:
   esbuild: true
