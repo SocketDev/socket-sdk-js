@@ -957,10 +957,27 @@ export class SocketSdk {
     const results = await Promise.allSettled(
       components.map(async ({ purl }) => {
         const urlPath = `/${encodeURIComponent(purl)}`
+        // Public endpoint — copy all headers except Authorization
+        // (case-insensitive per RFC 7230 §3.2), keep agent/signal/timeout.
+        const publicHeaders: Record<string, string> = {
+          __proto__: null,
+        } as unknown as Record<string, string>
+        const srcHeaders = this.#reqOptions.headers as
+          | Record<string, string>
+          | undefined
+        if (srcHeaders) {
+          const keys = Object.keys(srcHeaders)
+          for (let i = 0, { length } = keys; i < length; i += 1) {
+            const key = keys[i]!
+            if (key.toLowerCase() !== 'authorization') {
+              publicHeaders[key] = srcHeaders[key]!
+            }
+          }
+        }
         const response = await createGetRequest(
           SOCKET_FIREWALL_API_URL,
           urlPath,
-          this.#reqOptions,
+          { ...this.#reqOptions, headers: publicHeaders },
         )
         if (!isResponseOk(response)) return undefined
         const json = await getResponseJson(response)
