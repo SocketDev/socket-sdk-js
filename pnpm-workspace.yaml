@@ -1,6 +1,6 @@
-ignoreDependencyScripts: true
-linkWorkspacePackages: false
 resolutionMode: highest
+loglevel: error
+trustPolicy: no-downgrade
 
 allowBuilds:
   esbuild: true
