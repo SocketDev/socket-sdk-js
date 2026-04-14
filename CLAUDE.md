@@ -21,6 +21,7 @@
 - Dependencies: After `package.json` edits, run `pnpm install` to update `pnpm-lock.yaml`
 - Backward Compatibility: 🚨 FORBIDDEN to maintain - actively remove when encountered (see canonical CLAUDE.md)
 - 🚨 **NEVER use `npx`, `pnpm dlx`, or `yarn dlx`** — use `pnpm exec <package>` for devDep binaries, or `pnpm run <script>` for package.json scripts. If a tool is needed, add it as a pinned devDependency first.
+- **minimumReleaseAge**: NEVER add packages to `minimumReleaseAgeExclude` in CI. Locally, ASK before adding — the age threshold is a security control.
 
 ---
 

@@ -206,6 +206,56 @@ function createNodeProtocolPlugin() {
   }
 }
 
+/**
+ * Plugin to stub heavy @socketsecurity/lib internals and third-party modules
+ * that are unreachable or safely degradable in the SDK's runtime code paths.
+ *
+ * @socketsecurity/lib stubs:
+ *
+ *   npm-pack.js (2.5MB) — arborist, cacache, pacote, make-fetch-happen,
+ *     semver. Reached via sorts→semver (dead) and cache-with-ttl→cacache
+ *     (degrades gracefully: safeGet returns undefined, in-memory memoization
+ *     still works).
+ *
+ *   pico-pack.js (260KB) — picomatch, fast-glob, del. Reached via
+ *     fs→globs for isDirEmptySync/readDirNames, never called by SDK.
+ *
+ *   globs.js, sorts.js — gateway modules to pico-pack and npm-pack.
+ *
+ * Third-party stubs:
+ *
+ *   mime-db (212KB) — Massive MIME type database bundled via form-data →
+ *     mime-types → mime-db. The SDK only uses 'application/octet-stream'
+ *     (file uploads) and 'application/json' (API calls). Replaced with a
+ *     minimal lookup covering just those types.
+ */
+function createLibStubPlugin() {
+  const libStubPattern =
+    /@socketsecurity\/lib\/dist\/(globs|sorts|external\/(npm-pack|pico-pack))\.js$/
+
+  const mimeDbPattern = /mime-db\/db\.json$/
+
+  return {
+    name: 'stub-unused-internals',
+    setup(build) {
+      // Stub heavy lib modules with empty exports.
+      build.onLoad({ filter: libStubPattern }, () => ({
+        contents: 'module.exports = {}',
+        loader: 'js',
+      }))
+      // Replace 212KB mime-db with minimal lookup for types the SDK uses.
+      build.onLoad({ filter: mimeDbPattern }, () => ({
+        contents: `module.exports = {
+  "application/json": { source: "iana", charset: "UTF-8", compressible: true },
+  "application/octet-stream": { source: "iana", compressible: false },
+  "multipart/form-data": { source: "iana" }
+}`,
+        loader: 'js',
+      }))
+    },
+  }
+}
+
 // Build configuration for ESM output
 export const buildConfig = {
   entryPoints: [`${srcPath}/index.ts`, `${srcPath}/testing.ts`],
@@ -226,9 +276,11 @@ export const buildConfig = {
   logLevel: 'info',
 
   // Use plugins for module resolution and path handling.
-  plugins: [createNodeProtocolPlugin(), createPathShorteningPlugin()].filter(
-    Boolean,
-  ),
+  plugins: [
+    createLibStubPlugin(),
+    createNodeProtocolPlugin(),
+    createPathShorteningPlugin(),
+  ].filter(Boolean),
 
   // External dependencies.
   // All runtime dependencies from package.json are external (not bundled) - consumers must install them.
