@@ -1,10 +1,2 @@
 # Run pre-push security validation.
-SCRIPT_DIR="$(dirname "$0")"
-PRE_PUSH_HOOK="$SCRIPT_DIR/../.git-hooks/pre-push"
-
-if [ ! -f "$PRE_PUSH_HOOK" ]; then
-  printf "\033[0;31m✗ ERROR: .git-hooks/pre-push not found\033[0m\n"
-  printf "Please ensure the repository is properly set up.\n"
-  exit 1
-fi
-"$PRE_PUSH_HOOK" "$@"
+.git-hooks/pre-push "$@"
