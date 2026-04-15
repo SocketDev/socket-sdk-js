@@ -1,3 +1,13 @@
+ignoreDependencyScripts: true
+linkWorkspacePackages: false
+
+allowBuilds:
+  esbuild: true
+
+overrides:
+  defu: '>=6.1.6'
+  vite: 7.3.2
+
 # Wait 7 days (10080 minutes) before installing newly published packages.
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:

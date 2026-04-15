@@ -17,7 +17,7 @@ permissions:
 jobs:
   ci:
     name: Run CI Pipeline
-    uses: SocketDev/socket-registry/.github/workflows/ci.yml@96c2a403934488b2b1d6127e44f65fd2c36c1150 # main
+    uses: SocketDev/socket-registry/.github/workflows/ci.yml@b86b2cb3fefa4ffa6c1a702476f9785f6c3bb887 # main
     with:
       fail-fast: false
       lint-script: 'pnpm run lint --all'
