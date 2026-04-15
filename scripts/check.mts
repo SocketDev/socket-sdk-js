@@ -6,7 +6,7 @@
  * - TypeScript type checking
  *
  * Usage:
- *   node scripts/check.mjs [options]
+ *   node scripts/check.mts [options]
  *
  * Options:
  *   --all      Run on all files (default behavior)
@@ -18,14 +18,14 @@ import process from 'node:process'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { printFooter, printHeader } from '@socketsecurity/lib/stdio/header'
 
-import { runParallel } from './utils/run-command.mjs'
+import { runParallel } from './utils/run-command.mts'
 
 // Initialize logger
 const logger = getDefaultLogger()
 
 const tsConfigPath = '.config/tsconfig.check.json'
 
-async function main() {
+async function main(): Promise<void> {
   try {
     const all = process.argv.includes('--all')
     const staged = process.argv.includes('--staged')
@@ -33,17 +33,17 @@ async function main() {
 
     if (help) {
       logger.log('Check Runner')
-      logger.log('\nUsage: node scripts/check.mjs [options]')
+      logger.log('\nUsage: node scripts/check.mts [options]')
       logger.log('\nOptions:')
       logger.log('  --help, -h     Show this help message')
       logger.log('  --all          Run on all files (default behavior)')
       logger.log('  --staged       Run on staged files only')
       logger.log('\nExamples:')
-      logger.log('  node scripts/check.mjs          # Run on all files')
+      logger.log('  node scripts/check.mts          # Run on all files')
       logger.log(
-        '  node scripts/check.mjs --all    # Run on all files (explicit)',
+        '  node scripts/check.mts --all    # Run on all files (explicit)',
       )
-      logger.log('  node scripts/check.mjs --staged # Run on staged files')
+      logger.log('  node scripts/check.mts --staged # Run on staged files')
       process.exitCode = 0
       return
     }
@@ -68,31 +68,31 @@ async function main() {
         command: 'pnpm',
       },
       {
-        args: ['scripts/validate-no-link-deps.mjs'],
+        args: ['scripts/validate-no-link-deps.mts'],
         command: 'node',
       },
       {
-        args: ['scripts/validate-bundle-deps.mjs'],
+        args: ['scripts/validate-bundle-deps.mts'],
         command: 'node',
       },
       {
-        args: ['scripts/validate-esbuild-minify.mjs'],
+        args: ['scripts/validate-esbuild-minify.mts'],
         command: 'node',
       },
       {
-        args: ['scripts/validate-no-cdn-refs.mjs'],
+        args: ['scripts/validate-no-cdn-refs.mts'],
         command: 'node',
       },
       {
-        args: ['scripts/validate-markdown-filenames.mjs'],
+        args: ['scripts/validate-markdown-filenames.mts'],
         command: 'node',
       },
       {
-        args: ['scripts/validate-file-size.mjs'],
+        args: ['scripts/validate-file-size.mts'],
         command: 'node',
       },
       {
-        args: ['scripts/validate-file-count.mjs'],
+        args: ['scripts/validate-file-count.mts'],
         command: 'node',
       },
     ]
@@ -109,14 +109,14 @@ async function main() {
       logger.success('All checks passed')
       printFooter()
     }
-  } catch (error) {
+  } catch (e) {
     logger.log('')
-    logger.error(`Check failed: ${error.message}`)
+    logger.error(`Check failed: ${e instanceof Error ? e.message : String(e)}`)
     process.exitCode = 1
   }
 }
 
-main().catch(e => {
+main().catch((e: unknown) => {
   logger.error(e)
   process.exitCode = 1
 })

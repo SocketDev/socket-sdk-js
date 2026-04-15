@@ -14,7 +14,7 @@ import openapiTS from 'openapi-typescript'
 
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
-import { getRootPath } from './utils/path-helpers.mjs'
+import { getRootPath } from './utils/path-helpers.mts'
 
 const logger = getDefaultLogger()
 const rootPath = getRootPath(import.meta.url)
@@ -28,7 +28,7 @@ const TSParser = Parser.extend(tsPlugin())
  * Configuration for strict type generation.
  * Maps OpenAPI operations to strict type definitions.
  */
-const STRICT_TYPE_CONFIG = {
+const STRICT_TYPE_CONFIG: Record<string, StrictTypeConfig> = {
   // Create Full Scan Options - from CreateOrgFullScan query params
   createFullScanOptions: {
     operationId: 'CreateOrgFullScan',
@@ -184,12 +184,56 @@ const STRICT_TYPE_CONFIG = {
   },
 }
 
+// Acorn AST nodes use a generic shape; we define a minimal recursive interface
+// since acorn does not export typed AST node interfaces for TypeScript syntax.
+interface AstNode extends Record<string, unknown> {
+  type?: string
+  start?: number | null
+  end?: number | null
+  key?: { name?: string; value?: string | number }
+  body?: AstNode[] | AstNode
+  members?: AstNode[]
+  typeAnnotation?: AstNode
+  typeParameters?: { params?: AstNode[] }
+  elementType?: AstNode
+  id?: { name?: string }
+  declaration?: AstNode
+}
+
+interface TypeProperty {
+  name: string
+  optional: boolean
+  type: string
+}
+
+interface StrictTypeConfig {
+  operationId: string
+  extractType?: string
+  responseCode?: number
+  typeName: string
+  sourcePath?: string[]
+  requiredFields?: string[]
+  requiredParams?: string[]
+  typeOverrides?: Record<string, string>
+  additionalFields?: Array<{ name: string; type: string; optional?: boolean }>
+}
+
 /**
  * Extract properties from a type literal node.
  */
-function extractProperties(node, source, config) {
-  const properties = []
-  const members = node.members || node.body?.body || []
+function extractProperties(
+  node: AstNode,
+  source: string,
+  config: StrictTypeConfig,
+): TypeProperty[] {
+  const properties: TypeProperty[] = []
+  const bodyProp = node.body
+  const innerBody =
+    bodyProp && !Array.isArray(bodyProp)
+      ? (bodyProp as AstNode).body
+      : undefined
+  const members: AstNode[] = (node.members ||
+    (Array.isArray(innerBody) ? innerBody : [])) as AstNode[]
   const requiredFields = new Set(config.requiredFields || [])
   const typeOverrides = config.typeOverrides || {}
 
@@ -222,27 +266,38 @@ function extractProperties(node, source, config) {
 /**
  * Extract query parameters from operation.
  */
-function extractQueryParams(operationsNode, operationId, source, config) {
+function extractQueryParams(
+  operationsNode: AstNode,
+  operationId: string,
+  source: string,
+  config: StrictTypeConfig,
+): TypeProperty[] | undefined {
   const opProp = findProperty(operationsNode, operationId)
   if (!opProp) {
     return undefined
   }
 
   const opType = opProp.typeAnnotation?.typeAnnotation
+  if (!opType) {
+    return undefined
+  }
   const paramsProp = findProperty(opType, 'parameters')
   if (!paramsProp) {
     return undefined
   }
 
   const paramsType = paramsProp.typeAnnotation?.typeAnnotation
+  if (!paramsType) {
+    return undefined
+  }
   const queryProp = findProperty(paramsType, 'query')
   if (!queryProp) {
     return undefined
   }
 
   const queryType = queryProp.typeAnnotation?.typeAnnotation
-  const properties = []
-  const members = queryType?.members || []
+  const properties: TypeProperty[] = []
+  const members: AstNode[] = (queryType?.members || []) as AstNode[]
   const requiredParams = new Set(config.requiredParams || [])
 
   for (const member of members) {
@@ -285,37 +340,49 @@ function extractQueryParams(operationsNode, operationId, source, config) {
  * Extract response type from operation.
  */
 function extractResponseType(
-  operationsNode,
-  operationId,
-  responseCode,
-  sourcePath,
-  source,
-  config,
-) {
+  operationsNode: AstNode,
+  operationId: string,
+  responseCode: number | undefined,
+  sourcePath: string[],
+  source: string,
+  config: StrictTypeConfig,
+): TypeProperty[] | undefined {
   const opProp = findProperty(operationsNode, operationId)
   if (!opProp) {
     return undefined
   }
 
   const opType = opProp.typeAnnotation?.typeAnnotation
+  if (!opType) {
+    return undefined
+  }
   const responsesProp = findProperty(opType, 'responses')
   if (!responsesProp) {
     return undefined
   }
 
   const responsesType = responsesProp.typeAnnotation?.typeAnnotation
+  if (!responsesType || responseCode === undefined) {
+    return undefined
+  }
   const codeProp = findProperty(responsesType, responseCode)
   if (!codeProp) {
     return undefined
   }
 
   const codeType = codeProp.typeAnnotation?.typeAnnotation
+  if (!codeType) {
+    return undefined
+  }
   const contentProp = findProperty(codeType, 'content')
   if (!contentProp) {
     return undefined
   }
 
   const contentType = contentProp.typeAnnotation?.typeAnnotation
+  if (!contentType) {
+    return undefined
+  }
   const jsonProp = findProperty(contentType, 'application/json')
   if (!jsonProp) {
     return undefined
@@ -324,7 +391,7 @@ function extractResponseType(
   let targetType = jsonProp.typeAnnotation?.typeAnnotation
 
   // Navigate to nested path if specified
-  if (sourcePath && sourcePath.length > 0) {
+  if (targetType && sourcePath && sourcePath.length > 0) {
     targetType = navigateToPath(targetType, sourcePath)
   }
 
@@ -338,8 +405,8 @@ function extractResponseType(
 /**
  * Find an export declaration by name in the AST.
  */
-function findExportByName(ast, name) {
-  for (const node of ast.body) {
+function findExportByName(ast: AstNode, name: string): AstNode | undefined {
+  for (const node of (ast.body || []) as AstNode[]) {
     if (
       node.type === 'ExportNamedDeclaration' &&
       node.declaration?.type === 'TSInterfaceDeclaration' &&
@@ -361,9 +428,14 @@ function findExportByName(ast, name) {
 /**
  * Find a property in a type literal or interface body.
  */
-function findProperty(node, propName) {
+function findProperty(
+  node: AstNode,
+  propName: string | number,
+): AstNode | undefined {
   // TSInterfaceBody has .body array, TSTypeLiteral has .members array
-  const members = node.body || node.members || []
+  const members: AstNode[] = ((Array.isArray(node.body)
+    ? node.body
+    : node.members) || []) as AstNode[]
   for (const member of members) {
     if (member.type === 'TSPropertySignature') {
       // Key can be Identifier (name) or Literal (value for numbers/strings)
@@ -379,8 +451,12 @@ function findProperty(node, propName) {
 /**
  * Generate type definition string from properties.
  */
-function generateTypeDefinition(typeName, properties, description) {
-  const lines = []
+function generateTypeDefinition(
+  typeName: string,
+  properties: TypeProperty[],
+  description: string,
+): string {
+  const lines: string[] = []
   lines.push('/**')
   lines.push(` * ${description}`)
   lines.push(' */')
@@ -398,7 +474,7 @@ function generateTypeDefinition(typeName, properties, description) {
 /**
  * Generate wrapper result types.
  */
-function generateWrapperTypes() {
+function generateWrapperTypes(): string {
   return `
 /**
  * Error result type for all SDK operations.
@@ -537,12 +613,12 @@ export type DeleteRepositoryLabelResult = {
 /**
  * Update index.ts to export all generated types.
  */
-async function updateIndexExports() {
+async function updateIndexExports(): Promise<void> {
   const indexPath = path.resolve(rootPath, 'src/index.ts')
   const indexContent = await fs.readFile(indexPath, 'utf8')
 
   // Extract type names from generated types
-  const typeNames = []
+  const typeNames: string[] = []
   for (const config of Object.values(STRICT_TYPE_CONFIG)) {
     typeNames.push(config.typeName)
   }
@@ -590,7 +666,7 @@ async function updateIndexExports() {
 /**
  * Main generation function.
  */
-async function main() {
+async function main(): Promise<void> {
   try {
     logger.log('Generating strict types from OpenAPI schema using AST...')
 
@@ -598,9 +674,10 @@ async function main() {
     logger.log('  Running openapi-typescript...')
     const generatedTS = await openapiTS(openApiPath, {
       transform(schemaObject) {
-        if ('format' in schemaObject && schemaObject.format === 'binary') {
+        if ('format' in schemaObject && schemaObject['format'] === 'binary') {
           return 'never'
         }
+        return undefined
       },
     })
 
@@ -614,10 +691,11 @@ async function main() {
       throw new Error('Could not find operations interface in generated types')
     }
 
-    const operationsNode = operationsDecl.body || operationsDecl.typeAnnotation
+    const operationsNode: AstNode = (operationsDecl.body ||
+      operationsDecl.typeAnnotation) as AstNode
 
     // Step 4: Generate each configured type
-    const generatedTypes = []
+    const generatedTypes: string[] = []
 
     for (const [key, config] of Object.entries(STRICT_TYPE_CONFIG)) {
       if (config.extractType === 'queryParams') {
@@ -689,7 +767,7 @@ async function main() {
  * These types provide better TypeScript DX by marking guaranteed fields as required
  * and only keeping truly optional fields as optional.
  *
- * Generated by: scripts/generate-strict-types.mjs
+ * Generated by: scripts/generate-strict-types.mts
  */
 /* c8 ignore start - Type definitions only, no runtime code to test. */
 
@@ -720,7 +798,8 @@ ${generateWrapperTypes()}
     }
 
     logger.log('Strict type generation complete')
-  } catch (error) {
+  } catch (e) {
+    const error = e instanceof Error ? e : new Error(String(e))
     logger.error('Strict type generation failed:', error.message)
     logger.error(error.stack)
     process.exitCode = 1
@@ -730,13 +809,16 @@ ${generateWrapperTypes()}
 /**
  * Navigate to a nested type following a path.
  */
-function navigateToPath(node, path) {
-  let current = unwrapType(node)
+function navigateToPath(node: AstNode, path: string[]): AstNode | undefined {
+  let current: AstNode | undefined = unwrapType(node)
   for (const segment of path) {
     if (!current) {
       return undefined
     }
     current = unwrapType(current)
+    if (!current) {
+      return undefined
+    }
 
     if (segment === 'Array' && current.type === 'TSArrayType') {
       current = unwrapType(current.elementType)
@@ -780,28 +862,28 @@ function navigateToPath(node, path) {
 /**
  * Parse TypeScript source into AST.
  */
-function parseTypeScript(source) {
+function parseTypeScript(source: string): AstNode {
   return TSParser.parse(source, {
     ecmaVersion: 'latest',
     sourceType: 'module',
     locations: true,
-  })
+  }) as unknown as AstNode
 }
 
 /**
  * Convert AST type node to TypeScript string.
  */
-function typeNodeToString(node, source) {
+function typeNodeToString(node: AstNode | undefined, source: string): string {
   if (!node) {
     return 'unknown'
   }
-  return source.slice(node.start, node.end)
+  return source.slice(node.start!, node.end!)
 }
 
 /**
  * Unwrap parenthesized types to get the inner type.
  */
-function unwrapType(node) {
+function unwrapType(node: AstNode | undefined): AstNode | undefined {
   if (!node) {
     return undefined
   }
@@ -812,7 +894,7 @@ function unwrapType(node) {
   return node
 }
 
-main().catch(e => {
+main().catch((e: unknown) => {
   logger.error(e)
   process.exitCode = 1
 })

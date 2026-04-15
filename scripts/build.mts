@@ -7,6 +7,8 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
+import type { BuildResult, PluginBuild } from 'esbuild'
+
 import { build, context } from 'esbuild'
 
 import { isQuiet } from '@socketsecurity/lib/argv/flags'
@@ -18,8 +20,8 @@ import {
   analyzeMetafile,
   buildConfig,
   watchConfig,
-} from '../.config/esbuild.config.mjs'
-import { runSequence } from './utils/run-command.mjs'
+} from '../.config/esbuild.config.mts'
+import { runSequence } from './utils/run-command.mts'
 
 const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -29,18 +31,33 @@ const rootPath = path.resolve(
 // Initialize logger
 const logger = getDefaultLogger()
 
+interface BuildOptions {
+  analyze?: boolean
+  quiet?: boolean
+  skipClean?: boolean
+  verbose?: boolean
+}
+
+interface BuildSourceResult {
+  exitCode: number
+  buildTime: number
+  result: BuildResult | undefined
+}
+
 /**
  * Build source code with esbuild.
  * Returns { exitCode, buildTime, result } for external logging.
  */
-async function buildSource(options = {}) {
+async function buildSource(
+  options: BuildOptions = {},
+): Promise<BuildSourceResult> {
   const { quiet = false, skipClean = false, verbose = false } = options
 
   // Clean dist directory if needed
   if (!skipClean) {
     const exitCode = await runSequence([
       {
-        args: ['scripts/clean.mjs', '--dist', '--quiet'],
+        args: ['scripts/clean.mts', '--dist', '--quiet'],
         command: 'node',
       },
     ])
@@ -63,10 +80,9 @@ async function buildSource(options = {}) {
     const buildTime = Date.now() - startTime
 
     return { exitCode: 0, buildTime, result }
-  } catch (error) {
+  } catch {
     if (!quiet) {
       logger.error('Source build failed')
-      logger.error(error)
     }
     return { exitCode: 1, buildTime: 0, result: undefined }
   }
@@ -76,18 +92,22 @@ async function buildSource(options = {}) {
  * Build TypeScript declarations.
  * Returns exitCode for external logging.
  */
-async function buildTypes(options = {}) {
+async function buildTypes(options: BuildOptions = {}): Promise<number> {
   const {
     quiet = false,
     skipClean = false,
     verbose: _verbose = false,
   } = options
 
-  const commands = []
+  const commands: Array<{
+    args: string[]
+    command: string
+    options?: Record<string, unknown>
+  }> = []
 
   if (!skipClean) {
     commands.push({
-      args: ['scripts/clean.mjs', '--types', '--quiet'],
+      args: ['scripts/clean.mts', '--types', '--quiet'],
       command: 'node',
     })
   }
@@ -114,7 +134,7 @@ async function buildTypes(options = {}) {
 /**
  * Watch mode for development with incremental builds (68% faster rebuilds).
  */
-async function watchBuild(options = {}) {
+async function watchBuild(options: BuildOptions = {}): Promise<number> {
   const { quiet = false, verbose = false } = options
 
   if (!quiet) {
@@ -136,8 +156,8 @@ async function watchBuild(options = {}) {
         ...(contextConfig.plugins || []),
         {
           name: 'rebuild-logger',
-          setup(build) {
-            build.onEnd(result => {
+          setup(pluginBuild: PluginBuild) {
+            pluginBuild.onEnd(result => {
               if (result.errors.length > 0) {
                 if (!quiet) {
                   logger.error('Rebuild failed')
@@ -168,29 +188,41 @@ async function watchBuild(options = {}) {
     })
 
     // Wait indefinitely
-    await new Promise(() => {})
-  } catch (error) {
+    await new Promise<never>(() => {})
+  } catch (e) {
     if (!quiet) {
-      logger.error('Watch mode failed:', error)
+      logger.error('Watch mode failed:', e)
     }
     return 1
   }
+  return 0
 }
 
 /**
  * Check if build is needed.
  */
-function isBuildNeeded() {
+function isBuildNeeded(): boolean {
   const distPath = path.join(rootPath, 'dist', 'index.js')
   const distTypesPath = path.join(rootPath, 'dist', 'types', 'index.d.ts')
 
   return !existsSync(distPath) || !existsSync(distTypesPath)
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     // Parse arguments
-    const { values } = parseArgs({
+    interface BuildArgs extends Record<string, unknown> {
+      help: boolean
+      src: boolean
+      types: boolean
+      watch: boolean
+      needed: boolean
+      analyze: boolean
+      silent: boolean
+      quiet: boolean
+      verbose: boolean
+    }
+    const { values } = parseArgs<BuildArgs>({
       options: {
         help: {
           type: 'boolean',
@@ -327,7 +359,7 @@ async function main() {
       // Clean all directories first (once)
       exitCode = await runSequence([
         {
-          args: ['scripts/clean.mjs', '--dist', '--types', '--quiet'],
+          args: ['scripts/clean.mts', '--dist', '--types', '--quiet'],
           command: 'node',
         },
       ])
@@ -353,8 +385,10 @@ async function main() {
         }),
         buildTypes({ quiet, verbose, skipClean: true }),
       ])
-      const srcResult =
-        results[0].status === 'fulfilled' ? results[0].value : undefined
+      const srcResult: BuildSourceResult =
+        results[0].status === 'fulfilled'
+          ? results[0].value
+          : { exitCode: 1, buildTime: 0, result: undefined }
       const typesExitCode =
         results[1].status === 'fulfilled' ? results[1].value : 1
 
@@ -394,13 +428,15 @@ async function main() {
     if (exitCode !== 0) {
       process.exitCode = exitCode
     }
-  } catch (error) {
-    logger.error(`Build runner failed: ${error.message}`)
+  } catch (e) {
+    logger.error(
+      `Build runner failed: ${e instanceof Error ? e.message : String(e)}`,
+    )
     process.exitCode = 1
   }
 }
 
-main().catch(e => {
+main().catch((e: unknown) => {
   logger.error(e)
   process.exitCode = 1
 })

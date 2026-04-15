@@ -21,38 +21,48 @@ const WIN32 = process.platform === 'win32'
 
 // Simple inline logger.
 const log = {
-  done: msg => {
+  done: (msg: string) => {
     logger.clearLine()
     logger.substep(msg)
   },
-  error: msg => logger.fail(msg),
-  failed: msg => {
+  error: (msg: string) => logger.fail(msg),
+  failed: (msg: string) => {
     logger.clearLine()
     logger.substep(msg)
   },
-  info: msg => logger.log(msg),
-  progress: msg => logger.progress(msg),
-  step: msg => logger.log(`\n${msg}`),
-  substep: msg => logger.substep(msg),
-  success: msg => logger.success(msg),
-  warn: msg => logger.warn(msg),
+  info: (msg: string) => logger.log(msg),
+  progress: (msg: string) => logger.progress(msg),
+  step: (msg: string) => logger.log(`\n${msg}`),
+  substep: (msg: string) => logger.substep(msg),
+  success: (msg: string) => logger.success(msg),
+  warn: (msg: string) => logger.warn(msg),
 }
 
-function printHeader(title) {
+function printHeader(title: string): void {
   logger.log(`\n${'─'.repeat(60)}`)
   logger.log(`  ${title}`)
   logger.log(`${'─'.repeat(60)}`)
 }
 
-function printFooter(message) {
+function printFooter(message?: string): void {
   logger.log(`\n${'─'.repeat(60)}`)
   if (message) {
     logger.substep(message)
   }
 }
 
-async function runCommand(command, args = [], options = {}) {
-  return new Promise((resolve, reject) => {
+interface PublishCommandResult {
+  exitCode: number
+  stdout: string
+  stderr: string
+}
+
+async function runCommand(
+  command: string,
+  args: string[] = [],
+  options: Record<string, unknown> = {},
+): Promise<number> {
+  return new Promise<number>((resolve, reject) => {
     const child = spawn(command, args, {
       cwd: rootPath,
       stdio: 'inherit',
@@ -60,18 +70,22 @@ async function runCommand(command, args = [], options = {}) {
       ...options,
     })
 
-    child.on('exit', code => {
+    child.on('exit', (code: number | null) => {
       resolve(code || 0)
     })
 
-    child.on('error', error => {
-      reject(error)
+    child.on('error', (e: Error) => {
+      reject(e)
     })
   })
 }
 
-async function runCommandWithOutput(command, args = [], options = {}) {
-  return new Promise((resolve, reject) => {
+async function runCommandWithOutput(
+  command: string,
+  args: string[] = [],
+  options: Record<string, unknown> = {},
+): Promise<PublishCommandResult> {
+  return new Promise<PublishCommandResult>((resolve, reject) => {
     let stdout = ''
     let stderr = ''
 
@@ -82,38 +96,49 @@ async function runCommandWithOutput(command, args = [], options = {}) {
     })
 
     if (child.stdout) {
-      child.stdout.on('data', data => {
+      child.stdout.on('data', (data: Buffer) => {
         stdout += data
       })
     }
 
     if (child.stderr) {
-      child.stderr.on('data', data => {
+      child.stderr.on('data', (data: Buffer) => {
         stderr += data
       })
     }
 
-    child.on('exit', code => {
+    child.on('exit', (code: number | null) => {
       resolve({ exitCode: code || 0, stderr, stdout })
     })
 
-    child.on('error', error => {
-      reject(error)
+    child.on('error', (e: Error) => {
+      reject(e)
     })
   })
+}
+
+interface PublishPackageJson {
+  name: string
+  version: string
+  main?: string
+  types?: string
+  exports?: Record<string, string | Record<string, string>>
+  [key: string]: unknown
 }
 
 /**
  * Read package.json from the project.
  */
-async function readPackageJson(pkgPath = rootPath) {
+async function readPackageJson(
+  pkgPath = rootPath,
+): Promise<PublishPackageJson> {
   const packageJsonPath = path.join(pkgPath, 'package.json')
   const content = await fs.readFile(packageJsonPath, 'utf8')
   try {
     return JSON.parse(content)
   } catch (e) {
     throw new Error(
-      `Failed to parse ${packageJsonPath}: ${e?.message || 'Unknown error'}`,
+      `Failed to parse ${packageJsonPath}: ${e instanceof Error ? e.message : 'Unknown error'}`,
       { cause: e },
     )
   }
@@ -122,7 +147,7 @@ async function readPackageJson(pkgPath = rootPath) {
 /**
  * Get the current version from package.json.
  */
-async function getCurrentVersion(pkgPath = rootPath) {
+async function getCurrentVersion(pkgPath = rootPath): Promise<string> {
   const pkgJson = await readPackageJson(pkgPath)
   return pkgJson.version
 }
@@ -130,7 +155,10 @@ async function getCurrentVersion(pkgPath = rootPath) {
 /**
  * Check if a version exists on npm.
  */
-async function versionExists(packageName, version) {
+async function versionExists(
+  packageName: string,
+  version: string,
+): Promise<boolean> {
   const result = await runCommandWithOutput(
     'npm',
     ['view', `${packageName}@${version}`, 'version'],
@@ -143,7 +171,7 @@ async function versionExists(packageName, version) {
 /**
  * Check if this is the registry package.
  */
-function isRegistryPackage() {
+function isRegistryPackage(): boolean {
   // socket-registry has a registry subdirectory with hundreds of packages.
   return existsSync(path.join(rootPath, 'registry', 'package.json'))
 }
@@ -151,11 +179,11 @@ function isRegistryPackage() {
 /**
  * Validate that build artifacts exist based on package.json exports.
  */
-async function validateBuildArtifacts() {
+async function validateBuildArtifacts(): Promise<boolean> {
   log.step('Validating build artifacts')
 
   const pkgJson = await readPackageJson()
-  const missing = []
+  const missing: string[] = []
 
   // Check exports from package.json.
   if (pkgJson.exports) {
@@ -208,10 +236,18 @@ async function validateBuildArtifacts() {
   return true
 }
 
+interface PublishOptions {
+  access?: string
+  dryRun?: boolean
+  force?: boolean
+  otp?: string
+  tag?: string
+}
+
 /**
  * Publish a single package.
  */
-async function publishPackage(options = {}) {
+async function publishPackage(options: PublishOptions = {}): Promise<boolean> {
   const { access = 'public', dryRun = false, otp, tag = 'latest' } = options
 
   const pkgJson = await readPackageJson()
@@ -265,11 +301,18 @@ async function publishPackage(options = {}) {
   return true
 }
 
+interface PushTagOptions {
+  force?: boolean
+}
+
 /**
  * Push existing git tag if it exists locally but not remotely.
  * Tags should be created with version bump commits, not by this script.
  */
-async function pushExistingTag(version, options = {}) {
+async function pushExistingTag(
+  version: string,
+  options: PushTagOptions = {},
+): Promise<boolean> {
   const { force = false } = options
 
   const tagName = `v${version}`
@@ -319,7 +362,7 @@ async function pushExistingTag(version, options = {}) {
   return true
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     // Parse arguments.
     const { values } = parseArgs({
@@ -357,7 +400,7 @@ async function main() {
     })
 
     // Show help if requested.
-    if (values.help) {
+    if (values['help']) {
       logger.log('\nUsage: pnpm publish [options]')
       logger.log('\nOptions:')
       logger.log('  --help         Show this help message')
@@ -383,22 +426,29 @@ async function main() {
 
     // Validate that build artifacts exist.
     const artifactsExist = await validateBuildArtifacts()
-    if (!artifactsExist && !values.force) {
+    if (!artifactsExist && !values['force']) {
       log.error('Build artifacts missing - run pnpm build first')
       process.exitCode = 1
       return
     }
 
     // Publish.
-    const publishSuccess = await publishPackage({
-      access: values.access,
-      dryRun: values['dry-run'],
-      force: values.force,
-      otp: values.otp,
-      tag: values.tag,
-    })
+    const publishOptions: PublishOptions = {
+      dryRun: !!values['dry-run'],
+      force: !!values['force'],
+    }
+    if (typeof values['access'] === 'string') {
+      publishOptions.access = values['access']
+    }
+    if (typeof values['otp'] === 'string') {
+      publishOptions.otp = values['otp']
+    }
+    if (typeof values['tag'] === 'string') {
+      publishOptions.tag = values['tag']
+    }
+    const publishSuccess = await publishPackage(publishOptions)
 
-    if (!publishSuccess && !values.force) {
+    if (!publishSuccess && !values['force']) {
       log.error('Publish failed')
       process.exitCode = 1
       return
@@ -408,19 +458,21 @@ async function main() {
     // Tags are created by version bump commits, not by this script.
     if (!values['skip-tag'] && !values['dry-run'] && !isRegistryPackage()) {
       await pushExistingTag(version, {
-        force: values.force,
+        force: !!values['force'],
       })
     }
 
     printFooter('Publish completed successfully!')
     process.exitCode = 0
-  } catch (error) {
-    log.error(`Publish runner failed: ${error.message}`)
+  } catch (e) {
+    log.error(
+      `Publish runner failed: ${e instanceof Error ? e.message : String(e)}`,
+    )
     process.exitCode = 1
   }
 }
 
-main().catch(e => {
+main().catch((e: unknown) => {
   logger.error(e)
   process.exitCode = 1
 })

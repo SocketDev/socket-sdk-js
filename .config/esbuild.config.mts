@@ -8,8 +8,12 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
+import type { Comment } from '@babel/types'
+
 import { parse } from '@babel/parser'
 import MagicString from 'magic-string'
+
+import type { BuildResult, Metafile, OnResolveArgs, PluginBuild } from 'esbuild'
 
 import { NODE_MODULES } from '@socketsecurity/lib/paths/dirnames'
 import { envAsBoolean } from '@socketsecurity/lib/env/helpers'
@@ -35,8 +39,8 @@ const externalDependencies = Object.keys(packageJson.dependencies || {})
 function createPathShorteningPlugin() {
   return {
     name: 'shorten-module-paths',
-    setup(build) {
-      build.onEnd(async result => {
+    setup(build: PluginBuild) {
+      build.onEnd(async (result: BuildResult) => {
         if (!result.outputFiles && result.metafile) {
           const outputs = Object.keys(result.metafile.outputs).filter(
             f => f.endsWith('.js') || f.endsWith('.mjs'),
@@ -52,7 +56,7 @@ function createPathShorteningPlugin() {
             const conflictDetector = new Map()
 
             // eslint-disable-next-line unicorn/consistent-function-scoping
-            const shortenPath = longPath => {
+            const shortenPath = (longPath: string): string => {
               if (pathMap.has(longPath)) {
                 return pathMap.get(longPath)
               }
@@ -102,7 +106,7 @@ function createPathShorteningPlugin() {
               })
 
               // Walk through all comments
-              for (const comment of ast.comments || []) {
+              for (const comment of (ast.comments || []) as Comment[]) {
                 if (
                   comment.type === 'CommentLine' &&
                   comment.value.includes(NODE_MODULES)
@@ -110,7 +114,11 @@ function createPathShorteningPlugin() {
                   const originalPath = comment.value.trim()
                   const shortPath = shortenPath(originalPath)
 
-                  if (shortPath !== originalPath) {
+                  if (
+                    shortPath !== originalPath &&
+                    comment.start != null &&
+                    comment.end != null
+                  ) {
                     magicString.overwrite(
                       comment.start,
                       comment.end,
@@ -121,33 +129,36 @@ function createPathShorteningPlugin() {
               }
 
               // Walk through all string literals
-              function walk(node) {
+              function walk(node: unknown) {
                 if (!node || typeof node !== 'object') {
                   return
                 }
+                const n = node as Record<string, unknown>
 
                 if (
-                  node.type === 'StringLiteral' &&
-                  node.value &&
-                  node.value.includes(NODE_MODULES)
+                  n['type'] === 'StringLiteral' &&
+                  typeof n['value'] === 'string' &&
+                  n['value'].includes(NODE_MODULES)
                 ) {
-                  const originalPath = node.value
+                  const originalPath = n['value']
                   const shortPath = shortenPath(originalPath)
+                  const start = n['start']
+                  const end = n['end']
 
-                  if (shortPath !== originalPath) {
-                    magicString.overwrite(
-                      node.start + 1,
-                      node.end - 1,
-                      shortPath,
-                    )
+                  if (
+                    shortPath !== originalPath &&
+                    typeof start === 'number' &&
+                    typeof end === 'number'
+                  ) {
+                    magicString.overwrite(start + 1, end - 1, shortPath)
                   }
                 }
 
-                for (const key of Object.keys(node)) {
+                for (const key of Object.keys(n)) {
                   if (key === 'start' || key === 'end' || key === 'loc') {
                     continue
                   }
-                  const value = node[key]
+                  const value = n[key]
                   if (Array.isArray(value)) {
                     for (const item of value) {
                       walk(item)
@@ -158,12 +169,12 @@ function createPathShorteningPlugin() {
                 }
               }
 
-              walk(ast.program)
+              walk(ast.program as unknown)
               // eslint-disable-next-line no-await-in-loop
               await fs.writeFile(outputPath, magicString.toString(), 'utf8')
-            } catch (error) {
+            } catch (e) {
               logger.error(
-                `Failed to shorten paths in ${outputPath}: ${error.message}`,
+                `Failed to shorten paths in ${outputPath}: ${e instanceof Error ? e.message : String(e)}`,
               )
             }
           }
@@ -181,7 +192,7 @@ function createNodeProtocolPlugin() {
   // Get list of Node.js built-in modules dynamically
   return {
     name: 'node-protocol',
-    setup(build) {
+    setup(build: PluginBuild) {
       for (const builtin of Module.builtinModules) {
         // Skip builtins that already have node: prefix
         if (builtin.startsWith('node:')) {
@@ -193,7 +204,7 @@ function createNodeProtocolPlugin() {
         const escapedBuiltin = builtin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
         build.onResolve(
           { filter: new RegExp(`^${escapedBuiltin}$`) },
-          _args => {
+          (_args: OnResolveArgs) => {
             // Return with node: prefix and mark as external
             return {
               path: `node:${builtin}`,
@@ -237,7 +248,7 @@ function createLibStubPlugin() {
 
   return {
     name: 'stub-unused-internals',
-    setup(build) {
+    setup(build: PluginBuild) {
       // Stub heavy lib modules with empty exports.
       build.onLoad({ filter: libStubPattern }, () => ({
         contents: 'module.exports = {}',
@@ -262,13 +273,13 @@ export const buildConfig = {
   outdir: distPath,
   outbase: srcPath,
   bundle: true,
-  format: 'cjs',
+  format: 'cjs' as const,
   // Target Node.js environment (not browser).
-  platform: 'node',
+  platform: 'node' as const,
   // Target Node.js 18+ features.
   target: 'node18',
   // Enable source maps for coverage (set COVERAGE=true env var)
-  sourcemap: envAsBoolean(process.env.COVERAGE),
+  sourcemap: envAsBoolean(process.env['COVERAGE']),
   minify: false,
   treeShaking: true,
   // For bundle analysis
@@ -292,7 +303,7 @@ export const buildConfig = {
   // Define constants for optimization
   define: {
     'process.env.NODE_ENV': JSON.stringify(
-      process.env.NODE_ENV || 'production',
+      process.env['NODE_ENV'] || 'production',
     ),
   },
 }
@@ -301,15 +312,15 @@ export const buildConfig = {
 export const watchConfig = {
   ...buildConfig,
   minify: false,
-  sourcemap: 'inline',
+  sourcemap: 'inline' as const,
   logLevel: 'debug',
   watch: {
-    onRebuild(error, result) {
+    onRebuild(error: Error | null, result: BuildResult | null) {
       if (error) {
         logger.error(`Watch build failed: ${error}`)
       } else {
         logger.log('Watch build succeeded')
-        if (result.metafile) {
+        if (result?.metafile) {
           const analysis = analyzeMetafile(result.metafile)
           logger.log(analysis)
         }
@@ -321,12 +332,12 @@ export const watchConfig = {
 /**
  * Analyze build output for size information
  */
-function analyzeMetafile(metafile) {
+function analyzeMetafile(metafile: Metafile) {
   const outputs = Object.keys(metafile.outputs)
   let totalSize = 0
 
   const files = outputs.map(file => {
-    const output = metafile.outputs[file]
+    const output = metafile.outputs[file]!
     totalSize += output.bytes
     return {
       name: path.relative(rootPath, file),

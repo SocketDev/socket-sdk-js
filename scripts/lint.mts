@@ -13,7 +13,7 @@ import { getChangedFiles, getStagedFiles } from '@socketsecurity/lib/git'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { printHeader } from '@socketsecurity/lib/stdio/header'
 
-import { runCommandQuiet } from './utils/run-command.mjs'
+import { runCommandQuiet } from './utils/run-command.mts'
 
 // Initialize logger
 const logger = getDefaultLogger()
@@ -42,7 +42,7 @@ const CONFIG_PATTERNS = [
 /**
  * Get oxlint exclude patterns from .oxlintrc.json.
  */
-function getOxlintExcludePatterns() {
+function getOxlintExcludePatterns(): string[] {
   try {
     const oxlintConfigPath = path.join(process.cwd(), '.oxlintrc.json')
     if (!existsSync(oxlintConfigPath)) {
@@ -60,7 +60,7 @@ function getOxlintExcludePatterns() {
 /**
  * Check if a file matches any of the exclude patterns.
  */
-function isExcludedByOxlint(file, excludePatterns) {
+function isExcludedByOxlint(file: string, excludePatterns: string[]): boolean {
   for (const pattern of excludePatterns) {
     // Convert glob pattern to regex-like matching
     // Support **/ for directory wildcards and * for filename wildcards
@@ -83,7 +83,10 @@ function isExcludedByOxlint(file, excludePatterns) {
 /**
  * Check if we should run all linters based on changed files.
  */
-function shouldRunAllLinters(changedFiles) {
+function shouldRunAllLinters(changedFiles: string[]): {
+  runAll: boolean
+  reason?: string
+} {
   for (const file of changedFiles) {
     // Core library files
     if (CORE_FILES.has(file)) {
@@ -104,7 +107,7 @@ function shouldRunAllLinters(changedFiles) {
 /**
  * Filter files to only those that should be linted.
  */
-function filterLintableFiles(files) {
+function filterLintableFiles(files: string[]): string[] {
   // Only include extensions actually supported by oxfmt/oxlint
   const lintableExtensions = new Set([
     '.js',
@@ -133,10 +136,18 @@ function filterLintableFiles(files) {
   })
 }
 
+interface LintOptions {
+  fix?: boolean
+  quiet?: boolean
+}
+
 /**
  * Run linters on specific files.
  */
-async function runLintOnFiles(files, options = {}) {
+async function runLintOnFiles(
+  files: string[],
+  options: LintOptions = {},
+): Promise<number> {
   const { fix = false, quiet = false } = options
 
   if (!files.length) {
@@ -206,7 +217,7 @@ async function runLintOnFiles(files, options = {}) {
 /**
  * Run linters on all files.
  */
-async function runLintOnAll(options = {}) {
+async function runLintOnAll(options: LintOptions = {}): Promise<number> {
   const { fix = false, quiet = false } = options
 
   if (!quiet) {
@@ -261,10 +272,24 @@ async function runLintOnAll(options = {}) {
   return 0
 }
 
+interface GetFilesToLintOptions {
+  all?: boolean
+  changed?: boolean
+  staged?: boolean
+}
+
+interface FilesToLintResult {
+  files: string[] | 'all' | undefined
+  reason?: string | undefined
+  mode: string
+}
+
 /**
  * Get files to lint based on options.
  */
-async function getFilesToLint(options) {
+async function getFilesToLint(
+  options: GetFilesToLintOptions,
+): Promise<FilesToLintResult> {
   const { all, changed, staged } = options
 
   // If --all, return early
@@ -313,7 +338,7 @@ async function getFilesToLint(options) {
   return { files: lintableFiles, reason: undefined, mode }
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     // Parse arguments
     const { positionals, values } = parseArgs({
@@ -352,7 +377,7 @@ async function main() {
     })
 
     // Show help if requested
-    if (values.help) {
+    if (values['help']) {
       logger.log('Lint Runner')
       logger.log('\nUsage: pnpm lint [options] [files...]')
       logger.log('\nOptions:')
@@ -388,7 +413,7 @@ async function main() {
         logger.step('Linting specified files')
       }
       exitCode = await runLintOnFiles(files, {
-        fix: values.fix,
+        fix: !!values['fix'],
         quiet,
       })
     } else {
@@ -398,7 +423,7 @@ async function main() {
       if (files === undefined) {
         if (!quiet) {
           logger.step('Skipping lint')
-          logger.substep(reason)
+          logger.substep(reason ?? 'no reason')
         }
         exitCode = 0
       } else if (files === 'all') {
@@ -406,7 +431,7 @@ async function main() {
           logger.step(`Linting all files (${reason})`)
         }
         exitCode = await runLintOnAll({
-          fix: values.fix,
+          fix: !!values['fix'],
           quiet,
         })
       } else {
@@ -415,7 +440,7 @@ async function main() {
           logger.step(`Linting ${modeText} files`)
         }
         exitCode = await runLintOnFiles(files, {
-          fix: values.fix,
+          fix: !!values['fix'],
           quiet,
         })
       }
@@ -433,13 +458,15 @@ async function main() {
         logger.success('All lint checks passed!')
       }
     }
-  } catch (error) {
-    logger.error(`Lint runner failed: ${error.message}`)
+  } catch (e) {
+    logger.error(
+      `Lint runner failed: ${e instanceof Error ? e.message : String(e)}`,
+    )
     process.exitCode = 1
   }
 }
 
-main().catch(e => {
+main().catch((e: unknown) => {
   logger.error(e)
   process.exitCode = 1
 })

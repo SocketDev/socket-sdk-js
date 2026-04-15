@@ -23,15 +23,28 @@ const rootPath = path.resolve(
 // Initialize logger
 const logger = getDefaultLogger()
 
+interface CleanTask {
+  name: string
+  pattern?: string
+  patterns?: string[]
+}
+
+interface CleanOptions {
+  quiet?: boolean
+}
+
 /**
  * Clean specific directories.
  */
-async function cleanDirectories(tasks, options = {}) {
+async function cleanDirectories(
+  tasks: CleanTask[],
+  options: CleanOptions = {},
+): Promise<number> {
   const { quiet = false } = options
 
   for (const task of tasks) {
     const { name, pattern, patterns } = task
-    const patternsToDelete = patterns || [pattern]
+    const patternsToDelete = patterns || (pattern ? [pattern] : [])
 
     if (!quiet) {
       logger.progress(`Cleaning ${name}`)
@@ -57,10 +70,10 @@ async function cleanDirectories(tasks, options = {}) {
           logger.done(`Cleaned ${name} (already clean)`)
         }
       }
-    } catch (error) {
+    } catch (e) {
       if (!quiet) {
         logger.error(`Failed to clean ${name}`)
-        logger.error(error.message)
+        logger.error(e instanceof Error ? e.message : String(e))
       }
       return 1
     }
@@ -69,7 +82,7 @@ async function cleanDirectories(tasks, options = {}) {
   return 0
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     // Parse arguments
     const { values } = parseArgs({
@@ -116,7 +129,7 @@ async function main() {
     })
 
     // Show help if requested
-    if (values.help) {
+    if (values['help']) {
       logger.log('Clean Runner')
       logger.log('\nUsage: pnpm clean [options]')
       logger.log('\nOptions:')
@@ -145,34 +158,34 @@ async function main() {
 
     // Determine what to clean
     const cleanAll =
-      values.all ||
-      (!values.cache &&
-        !values.coverage &&
-        !values.dist &&
-        !values.types &&
-        !values.modules)
+      values['all'] ||
+      (!values['cache'] &&
+        !values['coverage'] &&
+        !values['dist'] &&
+        !values['types'] &&
+        !values['modules'])
 
     const tasks = []
 
     // Build task list
-    if (cleanAll || values.cache) {
+    if (cleanAll || values['cache']) {
       tasks.push({ name: 'cache', pattern: '**/.cache' })
     }
 
-    if (cleanAll || values.coverage) {
+    if (cleanAll || values['coverage']) {
       tasks.push({ name: 'coverage', pattern: 'coverage' })
     }
 
-    if (cleanAll || values.dist) {
+    if (cleanAll || values['dist']) {
       tasks.push({
         name: 'dist',
         patterns: ['dist', '*.tsbuildinfo', '.tsbuildinfo'],
       })
-    } else if (values.types) {
+    } else if (values['types']) {
       tasks.push({ name: 'dist/types', patterns: ['dist/types'] })
     }
 
-    if (values.modules) {
+    if (values['modules']) {
       tasks.push({ name: 'node_modules', pattern: '**/node_modules' })
     }
 
@@ -205,13 +218,15 @@ async function main() {
         logger.success('Clean completed successfully!')
       }
     }
-  } catch (error) {
-    logger.error(`Clean runner failed: ${error.message}`)
+  } catch (e) {
+    logger.error(
+      `Clean runner failed: ${e instanceof Error ? e.message : String(e)}`,
+    )
     process.exitCode = 1
   }
 }
 
-main().catch(e => {
+main().catch((e: unknown) => {
   logger.error(e)
   process.exitCode = 1
 })

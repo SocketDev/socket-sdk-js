@@ -6,9 +6,9 @@ on:
       - main
     paths:
       - '.github/workflows/generate.yml'
-      - 'scripts/generate-sdk.mjs'
-      - 'scripts/generate-types.mjs'
-      - 'scripts/generate-strict-types.mjs'
+      - 'scripts/generate-sdk.mts'
+      - 'scripts/generate-types.mts'
+      - 'scripts/generate-strict-types.mts'
   schedule:
     # At 07:23 on every day-of-week from Monday through Friday.
     - cron: '23 7 * * 1-5'

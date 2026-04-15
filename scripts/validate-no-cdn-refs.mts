@@ -77,7 +77,7 @@ const TEXT_EXTENSIONS = new Set([
 /**
  * Check if file should be scanned.
  */
-function shouldScanFile(filename) {
+function shouldScanFile(filename: string): boolean {
   const ext = path.extname(filename).toLowerCase()
   return TEXT_EXTENSIONS.has(ext)
 }
@@ -85,7 +85,10 @@ function shouldScanFile(filename) {
 /**
  * Recursively find all text files to scan.
  */
-async function findTextFiles(dir, files = []) {
+async function findTextFiles(
+  dir: string,
+  files: string[] = [],
+): Promise<string[]> {
   try {
     const entries = await fs.readdir(dir, { withFileTypes: true })
 
@@ -111,12 +114,19 @@ async function findTextFiles(dir, files = []) {
   return files
 }
 
+interface CdnViolation {
+  file: string
+  line: number
+  content: string
+  cdnDomain: string
+}
+
 /**
  * Check file contents for CDN references.
  */
-async function checkFileForCdnRefs(filePath) {
+async function checkFileForCdnRefs(filePath: string): Promise<CdnViolation[]> {
   // Skip this validator script itself (it mentions CDN domains by necessity)
-  if (filePath.endsWith('validate-no-cdn-refs.mjs')) {
+  if (filePath.endsWith('validate-no-cdn-refs.mts')) {
     return []
   }
 
@@ -127,25 +137,31 @@ async function checkFileForCdnRefs(filePath) {
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
+      if (!line) {
+        continue
+      }
       const lineNumber = i + 1
 
       for (const pattern of CDN_PATTERNS) {
         if (pattern.test(line)) {
           const match = line.match(pattern)
-          violations.push({
-            file: path.relative(rootPath, filePath),
-            line: lineNumber,
-            content: line.trim(),
-            cdnDomain: match[0],
-          })
+          if (match) {
+            violations.push({
+              file: path.relative(rootPath, filePath),
+              line: lineNumber,
+              content: line.trim(),
+              cdnDomain: match[0],
+            })
+          }
         }
       }
     }
 
     return violations
-  } catch (error) {
+  } catch (e) {
     // Skip files we can't read (likely binary despite extension)
-    if (error.code === 'EISDIR' || error.message.includes('ENOENT')) {
+    const err = e as NodeJS.ErrnoException
+    if (err.code === 'EISDIR' || err.message.includes('ENOENT')) {
       return []
     }
     // For other errors, try to continue
@@ -156,7 +172,7 @@ async function checkFileForCdnRefs(filePath) {
 /**
  * Validate all files for CDN references.
  */
-async function validateNoCdnRefs() {
+async function validateNoCdnRefs(): Promise<CdnViolation[]> {
   const files = await findTextFiles(rootPath)
   const allViolations = []
 
@@ -168,7 +184,7 @@ async function validateNoCdnRefs() {
   return allViolations
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     const violations = await validateNoCdnRefs()
 
@@ -204,13 +220,15 @@ async function main() {
     logger.log('')
 
     process.exitCode = 1
-  } catch (error) {
-    logger.fail(`Validation failed: ${error.message}`)
+  } catch (e) {
+    logger.fail(
+      `Validation failed: ${e instanceof Error ? e.message : String(e)}`,
+    )
     process.exitCode = 1
   }
 }
 
-main().catch(error => {
-  logger.fail(`Unexpected error: ${error.message}`)
+main().catch((e: unknown) => {
+  logger.fail(`Unexpected error: ${e instanceof Error ? e.message : String(e)}`)
   process.exitCode = 1
 })

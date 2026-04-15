@@ -17,7 +17,16 @@ import { spawn } from '@socketsecurity/lib/spawn'
 const WIN32 = process.platform === 'win32'
 const logger = getDefaultLogger()
 
-async function run(cmd, args, { label, required = true } = {}) {
+interface RunOptions {
+  label?: string
+  required?: boolean
+}
+
+async function run(
+  cmd: string,
+  args: string[],
+  { label, required = true }: RunOptions = {},
+): Promise<number> {
   try {
     const result = await spawn(cmd, args, {
       shell: WIN32,
@@ -34,14 +43,16 @@ async function run(cmd, args, { label, required = true } = {}) {
     return 0
   } catch (e) {
     if (!required) {
-      logger.warn(`${label || cmd}: ${e.message} (non-blocking)`)
+      logger.warn(
+        `${label || cmd}: ${e instanceof Error ? e.message : String(e)} (non-blocking)`,
+      )
       return 0
     }
     throw e
   }
 }
 
-async function main() {
+async function main(): Promise<void> {
   // Step 1: Lint fix — delegates to per-package lint scripts.
   const lintExit = await run(
     'pnpm',
@@ -71,7 +82,7 @@ async function main() {
   }
 }
 
-main().catch(e => {
+main().catch((e: unknown) => {
   logger.error(e)
   process.exitCode = 1
 })

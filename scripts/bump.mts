@@ -11,6 +11,8 @@ import process from 'node:process'
 import readline from 'node:readline'
 import { fileURLToPath } from 'node:url'
 
+import type { ReleaseType } from 'semver'
+
 import semver from 'semver'
 
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
@@ -43,7 +45,7 @@ const packagePromptsPath = path.join(
   'prompts.js',
 )
 
-let promptsPath
+let promptsPath: string | undefined
 if (existsSync(localPromptsPath)) {
   promptsPath = localPromptsPath
 } else if (existsSync(packagePromptsPath)) {
@@ -52,11 +54,23 @@ if (existsSync(localPromptsPath)) {
 
 const hasInteractivePrompts = !!promptsPath
 
+interface InteractivePrompts {
+  select: (options: {
+    message: string
+    choices: Array<{ value: string; name: string }>
+  }) => Promise<string>
+  confirm: (options: { message: string; default?: boolean }) => Promise<boolean>
+  input: (options: {
+    message: string
+    validate?: (value: string) => boolean | string
+  }) => Promise<string>
+}
+
 // Conditionally import interactive prompts.
-let prompts
+let prompts: InteractivePrompts | undefined
 if (hasInteractivePrompts) {
   try {
-    prompts = await import(promptsPath)
+    prompts = (await import(promptsPath!)) as InteractivePrompts
   } catch {
     // Fall back to basic prompts if import fails.
   }
@@ -64,30 +78,30 @@ if (hasInteractivePrompts) {
 
 // Simple inline logger.
 const log = {
-  info: msg => logger.log(msg),
-  error: msg => logger.fail(msg),
-  success: msg => logger.success(msg),
-  step: msg => logger.log(`\n${msg}`),
-  substep: msg => logger.substep(msg),
-  progress: msg => logger.progress(msg),
-  done: msg => {
+  info: (msg: string) => logger.log(msg),
+  error: (msg: string) => logger.fail(msg),
+  success: (msg: string) => logger.success(msg),
+  step: (msg: string) => logger.log(`\n${msg}`),
+  substep: (msg: string) => logger.substep(msg),
+  progress: (msg: string) => logger.progress(msg),
+  done: (msg: string) => {
     logger.clearLine()
     logger.substep(msg)
   },
-  failed: msg => {
+  failed: (msg: string) => {
     logger.clearLine()
     logger.substep(msg)
   },
-  warn: msg => logger.warn(msg),
+  warn: (msg: string) => logger.warn(msg),
 }
 
-function printHeader(title) {
+function printHeader(title: string): void {
   logger.log(`\n${'─'.repeat(60)}`)
   logger.log(`  ${title}`)
   logger.log(`${'─'.repeat(60)}`)
 }
 
-function printFooter(message) {
+function printFooter(message?: string): void {
   logger.log(`\n${'─'.repeat(60)}`)
   if (message) {
     logger.substep(message)
@@ -97,7 +111,7 @@ function printFooter(message) {
 /**
  * Create readline interface for user input.
  */
-function createReadline() {
+function createReadline(): readline.Interface {
   return readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -107,11 +121,11 @@ function createReadline() {
 /**
  * Prompt user for input.
  */
-async function prompt(question, defaultValue = '') {
+async function prompt(question: string, defaultValue = ''): Promise<string> {
   const rl = createReadline()
-  return new Promise(resolve => {
+  return new Promise<string>(resolve => {
     const displayDefault = defaultValue ? ` (${defaultValue})` : ''
-    rl.question(`${question}${displayDefault}: `, answer => {
+    rl.question(`${question}${displayDefault}: `, (answer: string) => {
       rl.close()
       resolve(answer.trim() || defaultValue)
     })
@@ -121,7 +135,7 @@ async function prompt(question, defaultValue = '') {
 /**
  * Prompt user for yes/no confirmation.
  */
-async function confirm(question, defaultYes = true) {
+async function confirm(question: string, defaultYes = true): Promise<boolean> {
   const defaultHint = defaultYes ? 'Y/n' : 'y/N'
   const answer = await prompt(
     `${question} [${defaultHint}]`,
@@ -130,8 +144,18 @@ async function confirm(question, defaultYes = true) {
   return answer.toLowerCase().startsWith('y')
 }
 
-async function runCommand(command, args = [], options = {}) {
-  return new Promise((resolve, reject) => {
+interface CommandResult {
+  exitCode: number
+  stdout: string
+  stderr: string
+}
+
+async function runCommand(
+  command: string,
+  args: string[] = [],
+  options: Record<string, unknown> = {},
+): Promise<number> {
+  return new Promise<number>((resolve, reject) => {
     const child = spawn(command, args, {
       stdio: 'inherit',
       cwd: rootPath,
@@ -139,18 +163,22 @@ async function runCommand(command, args = [], options = {}) {
       ...options,
     })
 
-    child.on('exit', code => {
+    child.on('exit', (code: number | null) => {
       resolve(code || 0)
     })
 
-    child.on('error', error => {
-      reject(error)
+    child.on('error', (e: Error) => {
+      reject(e)
     })
   })
 }
 
-async function runCommandWithOutput(command, args = [], options = {}) {
-  return new Promise((resolve, reject) => {
+async function runCommandWithOutput(
+  command: string,
+  args: string[] = [],
+  options: Record<string, unknown> = {},
+): Promise<CommandResult> {
+  return new Promise<CommandResult>((resolve, reject) => {
     let stdout = ''
     let stderr = ''
 
@@ -161,23 +189,23 @@ async function runCommandWithOutput(command, args = [], options = {}) {
     })
 
     if (child.stdout) {
-      child.stdout.on('data', data => {
+      child.stdout.on('data', (data: Buffer) => {
         stdout += data
       })
     }
 
     if (child.stderr) {
-      child.stderr.on('data', data => {
+      child.stderr.on('data', (data: Buffer) => {
         stderr += data
       })
     }
 
-    child.on('exit', code => {
+    child.on('exit', (code: number | null) => {
       resolve({ exitCode: code || 0, stdout, stderr })
     })
 
-    child.on('error', error => {
-      reject(error)
+    child.on('error', (e: Error) => {
+      reject(e)
     })
   })
 }
@@ -185,7 +213,7 @@ async function runCommandWithOutput(command, args = [], options = {}) {
 /**
  * Check if claude-console is available.
  */
-async function checkClaude() {
+async function checkClaude(): Promise<string | false> {
   const checkCommand = WIN32 ? 'where' : 'which'
   const result = await runCommandWithOutput(checkCommand, ['claude-console'])
 
@@ -200,17 +228,23 @@ async function checkClaude() {
   return 'claude-console'
 }
 
+interface BumpPackageJson {
+  name?: string
+  version: string
+  [key: string]: unknown
+}
+
 /**
  * Read package.json from the project.
  */
-async function readPackageJson(pkgPath = rootPath) {
+async function readPackageJson(pkgPath = rootPath): Promise<BumpPackageJson> {
   const packageJsonPath = path.join(pkgPath, 'package.json')
   const content = await fs.readFile(packageJsonPath, 'utf8')
   try {
     return JSON.parse(content)
   } catch (e) {
     throw new Error(
-      `Failed to parse ${packageJsonPath}: ${e?.message || 'Unknown error'}`,
+      `Failed to parse ${packageJsonPath}: ${e instanceof Error ? e.message : 'Unknown error'}`,
       { cause: e },
     )
   }
@@ -219,7 +253,10 @@ async function readPackageJson(pkgPath = rootPath) {
 /**
  * Write package.json to the project.
  */
-async function writePackageJson(pkgJson, pkgPath = rootPath) {
+async function writePackageJson(
+  pkgJson: BumpPackageJson,
+  pkgPath = rootPath,
+): Promise<void> {
   const packageJsonPath = path.join(pkgPath, 'package.json')
   await fs.writeFile(packageJsonPath, `${JSON.stringify(pkgJson, null, 2)}\n`)
 }
@@ -227,7 +264,7 @@ async function writePackageJson(pkgJson, pkgPath = rootPath) {
 /**
  * Get the current version from package.json.
  */
-async function getCurrentVersion(pkgPath = rootPath) {
+async function getCurrentVersion(pkgPath = rootPath): Promise<string> {
   const pkgJson = await readPackageJson(pkgPath)
   return pkgJson.version
 }
@@ -235,7 +272,10 @@ async function getCurrentVersion(pkgPath = rootPath) {
 /**
  * Determine the new version based on bump type.
  */
-function getNewVersion(currentVersion, bumpType) {
+function getNewVersion(
+  currentVersion: string,
+  bumpType: string,
+): string | null {
   // Check if bumpType is a valid semver version.
   if (semver.valid(bumpType)) {
     return bumpType
@@ -257,13 +297,13 @@ function getNewVersion(currentVersion, bumpType) {
     )
   }
 
-  return semver.inc(currentVersion, bumpType)
+  return semver.inc(currentVersion, bumpType as ReleaseType)
 }
 
 /**
  * Check if the working directory is clean.
  */
-async function checkGitStatus() {
+async function checkGitStatus(): Promise<boolean> {
   const result = await runCommandWithOutput('git', ['status', '--porcelain'])
   if (result.stdout.trim()) {
     log.error('Working directory is not clean')
@@ -277,7 +317,7 @@ async function checkGitStatus() {
 /**
  * Check if we're on the main/master branch.
  */
-async function checkGitBranch() {
+async function checkGitBranch(): Promise<boolean> {
   const result = await runCommandWithOutput('git', [
     'rev-parse',
     '--abbrev-ref',
@@ -294,7 +334,7 @@ async function checkGitBranch() {
 /**
  * Get the last few commits for context.
  */
-async function getRecentCommits(count = 20) {
+async function getRecentCommits(count = 20): Promise<string> {
   const result = await runCommandWithOutput('git', [
     'log',
     '--oneline',
@@ -307,14 +347,14 @@ async function getRecentCommits(count = 20) {
 /**
  * Check if this is the registry package.
  */
-function isRegistryPackage() {
+function isRegistryPackage(): boolean {
   return existsSync(path.join(rootPath, 'registry', 'package.json'))
 }
 
 /**
  * Get package name for commit message.
  */
-async function getPackageName() {
+async function getPackageName(): Promise<string> {
   if (isRegistryPackage()) {
     return 'registry package'
   }
@@ -325,7 +365,11 @@ async function getPackageName() {
 /**
  * Generate changelog using Claude.
  */
-async function generateChangelog(claudeCmd, currentVersion, newVersion) {
+async function generateChangelog(
+  claudeCmd: string,
+  currentVersion: string,
+  newVersion: string,
+): Promise<string> {
   log.step('Generating changelog with Claude')
 
   // Get recent commits for context.
@@ -390,7 +434,7 @@ Be concise but informative. Group related changes together.`
 /**
  * Update CHANGELOG.md with new entry.
  */
-async function updateChangelog(changelogEntry) {
+async function updateChangelog(changelogEntry: string): Promise<void> {
   const changelogPath = path.join(rootPath, 'CHANGELOG.md')
 
   let existingContent = ''
@@ -430,7 +474,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
  * Review and refine changelog with user feedback.
  * Uses interactive prompts if available, falls back to basic readline prompts.
  */
-async function reviewChangelog(claudeCmd, changelogEntry, interactive = false) {
+async function reviewChangelog(
+  claudeCmd: string,
+  changelogEntry: string,
+  interactive = false,
+): Promise<string> {
   logger.log(`\n${'━'.repeat(60)}`)
   logger.log('Proposed Changelog Entry:')
   logger.log('━'.repeat(60))
@@ -505,7 +553,10 @@ Provide the refined changelog entry in the same format.`
  * Interactive review using advanced prompts.
  * Provides a better user experience with select menus and structured feedback.
  */
-async function interactiveReviewChangelog(claudeCmd, changelogEntry) {
+async function interactiveReviewChangelog(
+  claudeCmd: string,
+  changelogEntry: string,
+): Promise<string> {
   let currentEntry = changelogEntry
   let regenerateCount = 0
 
@@ -517,7 +568,7 @@ async function interactiveReviewChangelog(claudeCmd, changelogEntry) {
     logger.log(`${'─'.repeat(60)}\n`)
 
     // Offer action choices.
-    const action = await prompts.select({
+    const action = await prompts!.select({
       message: 'What would you like to do?',
       choices: [
         { value: 'accept', name: 'Accept this changelog' },
@@ -539,7 +590,7 @@ async function interactiveReviewChangelog(claudeCmd, changelogEntry) {
     }
 
     if (action === 'cancel') {
-      const confirmCancel = await prompts.confirm({
+      const confirmCancel = await prompts!.confirm({
         message: 'Are you sure you want to cancel the version bump?',
         default: false,
       })
@@ -555,8 +606,8 @@ async function interactiveReviewChangelog(claudeCmd, changelogEntry) {
       )
       const rl = createReadline()
       let manualEntry = ''
-      return new Promise((resolve, reject) => {
-        rl.on('line', line => {
+      return new Promise<string>((resolve, reject) => {
+        rl.on('line', (line: string) => {
           if (line === '' && manualEntry.endsWith('\n')) {
             rl.close()
             resolve(manualEntry.trim())
@@ -587,7 +638,7 @@ ${changelogEntry}
 
 Generate a fresh changelog entry with the same version information but different wording and potentially different emphasis.`
     } else if (action === 'refine') {
-      const feedback = await prompts.input({
+      const feedback = await prompts!.input({
         message: 'Describe what changes you want:',
         validate: value => (value.trim() ? true : 'Please provide feedback'),
       })
@@ -601,7 +652,7 @@ Feedback: ${feedback}
 
 Provide the refined changelog entry.`
     } else if (action === 'add') {
-      const additions = await prompts.input({
+      const additions = await prompts!.input({
         message: 'What information is missing?',
         validate: value =>
           value.trim() ? true : 'Please describe what to add',
@@ -645,7 +696,7 @@ Add technical details, specific file changes, implementation details, and any br
         log.done('Changelog updated')
       } else {
         log.failed('Failed to update changelog')
-        const retry = await prompts.confirm({
+        const retry = await prompts!.confirm({
           message: 'Failed to update. Try again?',
           default: true,
         })
@@ -657,7 +708,7 @@ Add technical details, specific file changes, implementation details, and any br
   }
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     // Parse arguments.
     const { values } = parseArgs({
@@ -701,7 +752,7 @@ async function main() {
     })
 
     // Show help if requested.
-    if (values.help) {
+    if (values['help']) {
       logger.log('\nUsage: pnpm bump [options]')
       logger.log('\nOptions:')
       logger.log('  --help           Show this help message')
@@ -742,11 +793,11 @@ async function main() {
       return
     }
 
-    printHeader('Version Bump', { width: 56, borderChar: '=' })
+    printHeader('Version Bump')
 
     // Handle interactive mode conflicts
     if (values['no-interactive']) {
-      values.interactive = false
+      values['interactive'] = false
     }
 
     // Check git status unless skipped.
@@ -755,7 +806,7 @@ async function main() {
 
       log.progress('Checking git status')
       const gitClean = await checkGitStatus()
-      if (!gitClean && !values.force) {
+      if (!gitClean && !values['force']) {
         log.failed('Git working directory is not clean')
         process.exitCode = 1
         return
@@ -764,7 +815,7 @@ async function main() {
 
       log.progress('Checking git branch')
       const onMainBranch = await checkGitBranch()
-      if (!onMainBranch && !values.force) {
+      if (!onMainBranch && !values['force']) {
         log.failed('Not on main/master branch')
         process.exitCode = 1
         return
@@ -773,7 +824,7 @@ async function main() {
     }
 
     // Check for Claude if not skipping changelog.
-    let claudeCmd
+    let claudeCmd: string | false | undefined
     if (!values['skip-changelog']) {
       log.progress('Checking for Claude CLI')
       claudeCmd = await checkClaude()
@@ -795,7 +846,7 @@ async function main() {
     log.info(`Current version: ${currentVersion}`)
 
     // Calculate new version.
-    const newVersion = getNewVersion(currentVersion, values.bump)
+    const newVersion = getNewVersion(currentVersion, values['bump'] as string)
     if (!newVersion) {
       log.error('Failed to calculate new version')
       process.exitCode = 1
@@ -829,18 +880,18 @@ async function main() {
     // Only warn if explicitly requested via --interactive flag
     const explicitlyRequestedInteractive =
       process.argv.includes('--interactive')
-    if (values.interactive && !hasInteractivePrompts) {
+    if (values['interactive'] && !hasInteractivePrompts) {
       if (explicitlyRequestedInteractive) {
         log.warn('Interactive mode requested but prompts not available')
         log.info(
           'To enable: install @socketsecurity/lib or build local registry',
         )
       }
-      values.interactive = false
+      values['interactive'] = false
     }
 
     // Generate and review changelog.
-    let changelogEntry
+    let changelogEntry: string | undefined
     if (!values['skip-changelog'] && claudeCmd) {
       changelogEntry = await generateChangelog(
         claudeCmd,
@@ -850,7 +901,7 @@ async function main() {
       changelogEntry = await reviewChangelog(
         claudeCmd,
         changelogEntry,
-        values.interactive,
+        !!values['interactive'],
       )
 
       log.progress('Updating CHANGELOG.md')
@@ -905,13 +956,15 @@ async function main() {
     log.substep('2. Create GitHub release if needed')
 
     process.exitCode = 0
-  } catch (error) {
-    log.error(`Version bump failed: ${error.message}`)
+  } catch (e) {
+    log.error(
+      `Version bump failed: ${e instanceof Error ? e.message : String(e)}`,
+    )
     process.exitCode = 1
   }
 }
 
-main().catch(e => {
+main().catch((e: unknown) => {
   logger.error(e)
   process.exitCode = 1
 })

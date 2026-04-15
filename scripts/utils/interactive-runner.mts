@@ -7,20 +7,24 @@ import process from 'node:process'
 
 import { runWithMask } from '@socketsecurity/lib/stdio/mask'
 
+interface RunWithOutputOptions {
+  cwd?: string
+  env?: NodeJS.ProcessEnv
+  message?: string
+  toggleText?: string
+  showOnError?: boolean
+  verbose?: boolean
+}
+
 /**
  * Run a command with interactive output control.
  * Standard experience across all socket-* repos.
- *
- * @param {string} command - Command to run
- * @param {string[]} args - Command arguments
- * @param {object} options - Options
- * @param {string} options.message - Progress message
- * @param {string} options.toggleText - Text after "ctrl+o" (default: "to see output")
- * @param {boolean} options.showOnError - Show output on error (default: true)
- * @param {boolean} options.verbose - Start in verbose mode (default: false)
- * @returns {Promise<number>} Exit code
  */
-export async function runWithOutput(command, args = [], options = {}) {
+export async function runWithOutput(
+  command: string,
+  args: string[] = [],
+  options: RunWithOutputOptions = {},
+): Promise<number> {
   const {
     cwd = process.cwd(),
     env = process.env,
@@ -41,7 +45,11 @@ export async function runWithOutput(command, args = [], options = {}) {
 /**
  * Standard test runner with interactive output.
  */
-export async function runTests(command, args, options = {}) {
+export async function runTests(
+  command: string,
+  args: string[],
+  options: RunWithOutputOptions = {},
+): Promise<number> {
   return runWithOutput(command, args, {
     message: 'Running tests',
     toggleText: 'to see test output',
@@ -52,7 +60,11 @@ export async function runTests(command, args, options = {}) {
 /**
  * Standard lint runner with interactive output.
  */
-export async function runLint(command, args, options = {}) {
+export async function runLint(
+  command: string,
+  args: string[],
+  options: RunWithOutputOptions = {},
+): Promise<number> {
   return runWithOutput(command, args, {
     message: 'Running linter',
     toggleText: 'to see lint results',
@@ -63,7 +75,11 @@ export async function runLint(command, args, options = {}) {
 /**
  * Standard build runner with interactive output.
  */
-export async function runBuild(command, args, options = {}) {
+export async function runBuild(
+  command: string,
+  args: string[],
+  options: RunWithOutputOptions = {},
+): Promise<number> {
   return runWithOutput(command, args, {
     message: 'Building',
     toggleText: 'to see build output',
