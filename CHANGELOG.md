@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.0.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.0.1) - 2026-04-14
+
+### Changed — build
+
+- Bundle `@socketsecurity/lib` and `form-data` into dist output, making the SDK a zero-runtime-dependency package
+- Stub heavy `@socketsecurity/lib` internals (npm-pack.js 2.5MB, pico-pack.js 260KB) and replace `mime-db` (212KB) with a minimal 3-entry lookup
+- dist/index.js: 3,897KB → 712KB (82% reduction)
+
+### Fixed
+
+- Strip `Authorization` header (case-insensitive) from public firewall API endpoint requests
+
 ## [4.0.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.0.0) - 2026-04-06
 
 ### Breaking Changes
