@@ -280,7 +280,7 @@ interface GetFilesToLintOptions {
 
 interface FilesToLintResult {
   files: string[] | 'all' | undefined
-  reason?: string
+  reason?: string | undefined
   mode: string
 }
 
@@ -377,7 +377,7 @@ async function main(): Promise<void> {
     })
 
     // Show help if requested
-    if (values.help) {
+    if (values['help']) {
       logger.log('Lint Runner')
       logger.log('\nUsage: pnpm lint [options] [files...]')
       logger.log('\nOptions:')
@@ -413,7 +413,7 @@ async function main(): Promise<void> {
         logger.step('Linting specified files')
       }
       exitCode = await runLintOnFiles(files, {
-        fix: values.fix,
+        fix: !!values['fix'],
         quiet,
       })
     } else {
@@ -423,7 +423,7 @@ async function main(): Promise<void> {
       if (files === undefined) {
         if (!quiet) {
           logger.step('Skipping lint')
-          logger.substep(reason)
+          logger.substep(reason ?? 'no reason')
         }
         exitCode = 0
       } else if (files === 'all') {
@@ -431,7 +431,7 @@ async function main(): Promise<void> {
           logger.step(`Linting all files (${reason})`)
         }
         exitCode = await runLintOnAll({
-          fix: values.fix,
+          fix: !!values['fix'],
           quiet,
         })
       } else {
@@ -440,7 +440,7 @@ async function main(): Promise<void> {
           logger.step(`Linting ${modeText} files`)
         }
         exitCode = await runLintOnFiles(files, {
-          fix: values.fix,
+          fix: !!values['fix'],
           quiet,
         })
       }

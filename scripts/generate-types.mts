@@ -21,10 +21,11 @@ const typesPath = path.join(rootPath, 'types/api.d.ts')
 async function main(): Promise<void> {
   try {
     const output = await openapiTS(openApiJsonPath, {
-      transform(schemaObject: Record<string, unknown>) {
-        if ('format' in schemaObject && schemaObject.format === 'binary') {
+      transform(schemaObject) {
+        if ('format' in schemaObject && schemaObject['format'] === 'binary') {
           return 'never'
         }
+        return undefined
       },
     })
     await fs.writeFile(typesPath, output, 'utf8')

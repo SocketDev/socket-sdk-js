@@ -216,7 +216,7 @@ async function mergeCoverageFinal(): Promise<AggregateCoverage | undefined> {
     for (const [id, loc] of Object.entries(stmtMap)) {
       const line = loc.start.line
       lineSet.add(line)
-      if (mergedS[id] > 0) {
+      if ((mergedS[id] ?? 0) > 0) {
         coveredLineSet.add(line)
       }
     }
@@ -242,7 +242,7 @@ async function mergeCoverageFinal(): Promise<AggregateCoverage | undefined> {
 /** Parse type-coverage output to extract percentage. */
 function parseTypeCoveragePercent(output: string): number | undefined {
   const match = output.match(/\([\d\s/]+\)\s+([\d.]+)%/)
-  return match ? Number.parseFloat(match[1]) : undefined
+  return match?.[1] ? Number.parseFloat(match[1]) : undefined
 }
 
 function displayCodeCoverage(
@@ -288,7 +288,7 @@ function displayCodeCoverage(
     ? Number.parseFloat(aggregateCoverage.statements)
     : (() => {
         const m = mainOutput.match(/All files\s+\|\s+([\d.]+)\s+\|/)
-        return m ? Number.parseFloat(m[1]) : 0
+        return m?.[1] ? Number.parseFloat(m[1]) : 0
       })()
 
   logger.log(' Coverage Summary')
@@ -438,7 +438,7 @@ try {
     }
 
     displayCodeCoverage(mainOutput, combinedOutput, aggregateCoverage, {
-      showDetail: !values.summary,
+      showDetail: !values['summary'],
       typeCoveragePercent,
     })
   }

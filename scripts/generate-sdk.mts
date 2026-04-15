@@ -15,7 +15,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { parse } from '@babel/parser'
-import { default as traverse } from '@babel/traverse'
+import traverse from '@babel/traverse'
 import * as t from '@babel/types'
 import MagicString from 'magic-string'
 
@@ -167,13 +167,14 @@ async function fixArraySyntax(filePath: string): Promise<void> {
   let skipCount = 0
 
   // Traverse the AST to find array types
-  traverse.default(ast, {
+  // Cast needed due to @babel/types version mismatch between parser and traverse
+  traverse(ast as Parameters<typeof traverse>[0], {
     TSArrayType(path) {
       const node = path.node
       const elementType = node.elementType
 
       // Check if this is a simple type array
-      if (isSimpleType(elementType)) {
+      if (isSimpleType(elementType as unknown as t.Node)) {
         // For simple types (e.g., string[], number[])
         // we keep them as-is
         return
@@ -183,12 +184,12 @@ async function fixArraySyntax(filePath: string): Promise<void> {
       const start = node.start
       const end = node.end
 
-      if (start === null || end === null) {
+      if (start == null || end == null) {
         return
       }
 
       // Check elementType positions before accessing
-      if (elementType.start === null || elementType.end === null) {
+      if (elementType.start == null || elementType.end == null) {
         return
       }
 

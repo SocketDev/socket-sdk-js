@@ -11,6 +11,8 @@ import process from 'node:process'
 import readline from 'node:readline'
 import { fileURLToPath } from 'node:url'
 
+import type { ReleaseType } from 'semver'
+
 import semver from 'semver'
 
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
@@ -295,7 +297,7 @@ function getNewVersion(
     )
   }
 
-  return semver.inc(currentVersion, bumpType)
+  return semver.inc(currentVersion, bumpType as ReleaseType)
 }
 
 /**
@@ -566,7 +568,7 @@ async function interactiveReviewChangelog(
     logger.log(`${'─'.repeat(60)}\n`)
 
     // Offer action choices.
-    const action = await prompts.select({
+    const action = await prompts!.select({
       message: 'What would you like to do?',
       choices: [
         { value: 'accept', name: 'Accept this changelog' },
@@ -588,7 +590,7 @@ async function interactiveReviewChangelog(
     }
 
     if (action === 'cancel') {
-      const confirmCancel = await prompts.confirm({
+      const confirmCancel = await prompts!.confirm({
         message: 'Are you sure you want to cancel the version bump?',
         default: false,
       })
@@ -636,7 +638,7 @@ ${changelogEntry}
 
 Generate a fresh changelog entry with the same version information but different wording and potentially different emphasis.`
     } else if (action === 'refine') {
-      const feedback = await prompts.input({
+      const feedback = await prompts!.input({
         message: 'Describe what changes you want:',
         validate: value => (value.trim() ? true : 'Please provide feedback'),
       })
@@ -650,7 +652,7 @@ Feedback: ${feedback}
 
 Provide the refined changelog entry.`
     } else if (action === 'add') {
-      const additions = await prompts.input({
+      const additions = await prompts!.input({
         message: 'What information is missing?',
         validate: value =>
           value.trim() ? true : 'Please describe what to add',
@@ -694,7 +696,7 @@ Add technical details, specific file changes, implementation details, and any br
         log.done('Changelog updated')
       } else {
         log.failed('Failed to update changelog')
-        const retry = await prompts.confirm({
+        const retry = await prompts!.confirm({
           message: 'Failed to update. Try again?',
           default: true,
         })
@@ -750,7 +752,7 @@ async function main(): Promise<void> {
     })
 
     // Show help if requested.
-    if (values.help) {
+    if (values['help']) {
       logger.log('\nUsage: pnpm bump [options]')
       logger.log('\nOptions:')
       logger.log('  --help           Show this help message')
@@ -791,11 +793,11 @@ async function main(): Promise<void> {
       return
     }
 
-    printHeader('Version Bump', { width: 56, borderChar: '=' })
+    printHeader('Version Bump')
 
     // Handle interactive mode conflicts
     if (values['no-interactive']) {
-      values.interactive = false
+      values['interactive'] = false
     }
 
     // Check git status unless skipped.
@@ -804,7 +806,7 @@ async function main(): Promise<void> {
 
       log.progress('Checking git status')
       const gitClean = await checkGitStatus()
-      if (!gitClean && !values.force) {
+      if (!gitClean && !values['force']) {
         log.failed('Git working directory is not clean')
         process.exitCode = 1
         return
@@ -813,7 +815,7 @@ async function main(): Promise<void> {
 
       log.progress('Checking git branch')
       const onMainBranch = await checkGitBranch()
-      if (!onMainBranch && !values.force) {
+      if (!onMainBranch && !values['force']) {
         log.failed('Not on main/master branch')
         process.exitCode = 1
         return
@@ -844,7 +846,7 @@ async function main(): Promise<void> {
     log.info(`Current version: ${currentVersion}`)
 
     // Calculate new version.
-    const newVersion = getNewVersion(currentVersion, values.bump)
+    const newVersion = getNewVersion(currentVersion, values['bump'] as string)
     if (!newVersion) {
       log.error('Failed to calculate new version')
       process.exitCode = 1
@@ -878,14 +880,14 @@ async function main(): Promise<void> {
     // Only warn if explicitly requested via --interactive flag
     const explicitlyRequestedInteractive =
       process.argv.includes('--interactive')
-    if (values.interactive && !hasInteractivePrompts) {
+    if (values['interactive'] && !hasInteractivePrompts) {
       if (explicitlyRequestedInteractive) {
         log.warn('Interactive mode requested but prompts not available')
         log.info(
           'To enable: install @socketsecurity/lib or build local registry',
         )
       }
-      values.interactive = false
+      values['interactive'] = false
     }
 
     // Generate and review changelog.
@@ -899,7 +901,7 @@ async function main(): Promise<void> {
       changelogEntry = await reviewChangelog(
         claudeCmd,
         changelogEntry,
-        values.interactive,
+        !!values['interactive'],
       )
 
       log.progress('Updating CHANGELOG.md')

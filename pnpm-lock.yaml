@@ -226,6 +226,9 @@ importers:
       '@types/node':
         specifier: 24.9.2
         version: 24.9.2
+      '@types/semver':
+        specifier: ^7.7.1
+        version: 7.7.1
       '@typescript/native-preview':
         specifier: 7.0.0-dev.20260415.1
         version: 7.0.0-dev.20260415.1
@@ -1408,6 +1411,9 @@ packages:
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
+
+  '@types/semver@7.7.1':
+    resolution: {integrity: sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==}
 
   '@typescript/native-preview-darwin-arm64@7.0.0-dev.20260415.1':
     resolution: {integrity: sha512-yGyyDb9bP3XfaIm8VUiaq7xkKwFSxLQ44XGYV78lrne12GhXgZ7Smbf2BVnT5MrTgT5uooMzww85P3I3XNVZng==}
@@ -3215,6 +3221,8 @@ snapshots:
       undici-types: 7.16.0
 
   '@types/normalize-package-data@2.4.4': {}
+
+  '@types/semver@7.7.1': {}
 
   '@typescript/native-preview-darwin-arm64@7.0.0-dev.20260415.1':
     optional: true

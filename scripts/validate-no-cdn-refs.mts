@@ -137,17 +137,22 @@ async function checkFileForCdnRefs(filePath: string): Promise<CdnViolation[]> {
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
+      if (!line) {
+        continue
+      }
       const lineNumber = i + 1
 
       for (const pattern of CDN_PATTERNS) {
         if (pattern.test(line)) {
           const match = line.match(pattern)
-          violations.push({
-            file: path.relative(rootPath, filePath),
-            line: lineNumber,
-            content: line.trim(),
-            cdnDomain: match[0],
-          })
+          if (match) {
+            violations.push({
+              file: path.relative(rootPath, filePath),
+              line: lineNumber,
+              content: line.trim(),
+              cdnDomain: match[0],
+            })
+          }
         }
       }
     }

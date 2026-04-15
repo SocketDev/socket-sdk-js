@@ -94,12 +94,12 @@ export function getTestsToRun(options: TestRunOptions = {}): TestRunResult {
   const { all = false, staged = false } = options
 
   // All mode runs all tests
-  if (all || process.env.FORCE_TEST === '1') {
+  if (all || process.env['FORCE_TEST'] === '1') {
     return { tests: 'all', reason: 'explicit --all flag', mode: 'all' }
   }
 
   // CI always runs all tests
-  if (process.env.CI === 'true') {
+  if (process.env['CI'] === 'true') {
     return { tests: 'all', reason: 'CI environment', mode: 'all' }
   }
 
@@ -112,7 +112,7 @@ export function getTestsToRun(options: TestRunOptions = {}): TestRunResult {
     return { tests: undefined, mode }
   }
 
-  const testFiles = new Set()
+  const testFiles = new Set<string>()
   let runAllTests = false
   let runAllReason = ''
 

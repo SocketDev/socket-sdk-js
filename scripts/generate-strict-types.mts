@@ -28,7 +28,7 @@ const TSParser = Parser.extend(tsPlugin())
  * Configuration for strict type generation.
  * Maps OpenAPI operations to strict type definitions.
  */
-const STRICT_TYPE_CONFIG = {
+const STRICT_TYPE_CONFIG: Record<string, StrictTypeConfig> = {
   // Create Full Scan Options - from CreateOrgFullScan query params
   createFullScanOptions: {
     operationId: 'CreateOrgFullScan',
@@ -278,12 +278,18 @@ function extractQueryParams(
   }
 
   const opType = opProp.typeAnnotation?.typeAnnotation
+  if (!opType) {
+    return undefined
+  }
   const paramsProp = findProperty(opType, 'parameters')
   if (!paramsProp) {
     return undefined
   }
 
   const paramsType = paramsProp.typeAnnotation?.typeAnnotation
+  if (!paramsType) {
+    return undefined
+  }
   const queryProp = findProperty(paramsType, 'query')
   if (!queryProp) {
     return undefined
@@ -347,24 +353,36 @@ function extractResponseType(
   }
 
   const opType = opProp.typeAnnotation?.typeAnnotation
+  if (!opType) {
+    return undefined
+  }
   const responsesProp = findProperty(opType, 'responses')
   if (!responsesProp) {
     return undefined
   }
 
   const responsesType = responsesProp.typeAnnotation?.typeAnnotation
+  if (!responsesType || responseCode === undefined) {
+    return undefined
+  }
   const codeProp = findProperty(responsesType, responseCode)
   if (!codeProp) {
     return undefined
   }
 
   const codeType = codeProp.typeAnnotation?.typeAnnotation
+  if (!codeType) {
+    return undefined
+  }
   const contentProp = findProperty(codeType, 'content')
   if (!contentProp) {
     return undefined
   }
 
   const contentType = contentProp.typeAnnotation?.typeAnnotation
+  if (!contentType) {
+    return undefined
+  }
   const jsonProp = findProperty(contentType, 'application/json')
   if (!jsonProp) {
     return undefined
@@ -373,7 +391,7 @@ function extractResponseType(
   let targetType = jsonProp.typeAnnotation?.typeAnnotation
 
   // Navigate to nested path if specified
-  if (sourcePath && sourcePath.length > 0) {
+  if (targetType && sourcePath && sourcePath.length > 0) {
     targetType = navigateToPath(targetType, sourcePath)
   }
 
@@ -655,10 +673,11 @@ async function main(): Promise<void> {
     // Step 1: Generate TypeScript using openapi-typescript
     logger.log('  Running openapi-typescript...')
     const generatedTS = await openapiTS(openApiPath, {
-      transform(schemaObject: Record<string, unknown>) {
+      transform(schemaObject) {
         if ('format' in schemaObject && schemaObject['format'] === 'binary') {
           return 'never'
         }
+        return undefined
       },
     })
 

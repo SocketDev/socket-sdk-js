@@ -400,7 +400,7 @@ async function main(): Promise<void> {
     })
 
     // Show help if requested.
-    if (values.help) {
+    if (values['help']) {
       logger.log('\nUsage: pnpm publish [options]')
       logger.log('\nOptions:')
       logger.log('  --help         Show this help message')
@@ -426,22 +426,29 @@ async function main(): Promise<void> {
 
     // Validate that build artifacts exist.
     const artifactsExist = await validateBuildArtifacts()
-    if (!artifactsExist && !values.force) {
+    if (!artifactsExist && !values['force']) {
       log.error('Build artifacts missing - run pnpm build first')
       process.exitCode = 1
       return
     }
 
     // Publish.
-    const publishSuccess = await publishPackage({
-      access: values.access,
-      dryRun: values['dry-run'],
-      force: values.force,
-      otp: values.otp,
-      tag: values.tag,
-    })
+    const publishOptions: PublishOptions = {
+      dryRun: !!values['dry-run'],
+      force: !!values['force'],
+    }
+    if (typeof values['access'] === 'string') {
+      publishOptions.access = values['access']
+    }
+    if (typeof values['otp'] === 'string') {
+      publishOptions.otp = values['otp']
+    }
+    if (typeof values['tag'] === 'string') {
+      publishOptions.tag = values['tag']
+    }
+    const publishSuccess = await publishPackage(publishOptions)
 
-    if (!publishSuccess && !values.force) {
+    if (!publishSuccess && !values['force']) {
       log.error('Publish failed')
       process.exitCode = 1
       return
@@ -451,7 +458,7 @@ async function main(): Promise<void> {
     // Tags are created by version bump commits, not by this script.
     if (!values['skip-tag'] && !values['dry-run'] && !isRegistryPackage()) {
       await pushExistingTag(version, {
-        force: values.force,
+        force: !!values['force'],
       })
     }
 

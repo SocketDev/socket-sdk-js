@@ -11,8 +11,6 @@ import type { BuildResult, PluginBuild } from 'esbuild'
 
 import { build, context } from 'esbuild'
 
-import type { FlagValues } from '@socketsecurity/lib/argv/flags'
-
 import { isQuiet } from '@socketsecurity/lib/argv/flags'
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
@@ -197,6 +195,7 @@ async function watchBuild(options: BuildOptions = {}): Promise<number> {
     }
     return 1
   }
+  return 0
 }
 
 /**
@@ -212,7 +211,7 @@ function isBuildNeeded(): boolean {
 async function main(): Promise<void> {
   try {
     // Parse arguments
-    interface BuildArgs {
+    interface BuildArgs extends Record<string, unknown> {
       help: boolean
       src: boolean
       types: boolean
@@ -296,7 +295,7 @@ async function main(): Promise<void> {
       return
     }
 
-    const quiet = isQuiet(values as FlagValues)
+    const quiet = isQuiet(values)
     const verbose = values.verbose
 
     // Check if build is needed

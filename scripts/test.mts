@@ -223,7 +223,7 @@ async function runTests(
   const runAll = all || force
 
   // Get tests to run
-  const testInfo = getTestsToRun({ staged, all: runAll })
+  const testInfo = getTestsToRun({ staged: !!staged, all: !!runAll })
   const { mode, reason, tests: testsToRun } = testInfo
 
   // No tests needed
@@ -268,7 +268,7 @@ async function runTests(
     env: {
       ...process.env,
       NODE_OPTIONS:
-        `${process.env.NODE_OPTIONS || ''} --max-old-space-size=${process.env.CI ? 8192 : 4096} --unhandled-rejections=warn`.trim(),
+        `${process.env['NODE_OPTIONS'] || ''} --max-old-space-size=${process.env['CI'] ? 8192 : 4096} --unhandled-rejections=warn`.trim(),
       VITEST: '1',
     },
     stdio: 'inherit',
@@ -314,7 +314,7 @@ async function runTests(
     let skipUntilBlankLine = false
 
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i]
+      const line = lines[i]!
 
       // Start skipping when we hit the unhandled rejection header
       if (line.includes('⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯')) {
@@ -419,7 +419,7 @@ async function main(): Promise<void> {
     })
 
     // Show help if requested
-    if (values.help) {
+    if (values['help']) {
       logger.log('Test Runner')
       logger.log('\nUsage: pnpm test [options] [-- vitest-args...]')
       logger.log('\nOptions:')
@@ -449,8 +449,8 @@ async function main(): Promise<void> {
     printHeader('Test Runner')
 
     // Handle aliases
-    const skipChecks = values.fast || values.quick
-    const withCoverage = values.cover || values.coverage
+    const skipChecks = values['fast'] || values['quick']
+    const withCoverage = values['cover'] || values['coverage']
 
     let exitCode = 0
     const startTime = performance.now()
@@ -479,7 +479,13 @@ async function main(): Promise<void> {
     // Run tests
     const testStartTime = performance.now()
     exitCode = await runTests(
-      { ...values, coverage: withCoverage },
+      {
+        all: !!values['all'],
+        coverage: !!withCoverage,
+        force: !!values['force'],
+        staged: !!values['staged'],
+        update: !!values['update'],
+      },
       positionals,
     )
     const testEndTime = performance.now()

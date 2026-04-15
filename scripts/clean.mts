@@ -44,7 +44,7 @@ async function cleanDirectories(
 
   for (const task of tasks) {
     const { name, pattern, patterns } = task
-    const patternsToDelete = patterns || [pattern]
+    const patternsToDelete = patterns || (pattern ? [pattern] : [])
 
     if (!quiet) {
       logger.progress(`Cleaning ${name}`)
@@ -129,7 +129,7 @@ async function main(): Promise<void> {
     })
 
     // Show help if requested
-    if (values.help) {
+    if (values['help']) {
       logger.log('Clean Runner')
       logger.log('\nUsage: pnpm clean [options]')
       logger.log('\nOptions:')
@@ -158,34 +158,34 @@ async function main(): Promise<void> {
 
     // Determine what to clean
     const cleanAll =
-      values.all ||
-      (!values.cache &&
-        !values.coverage &&
-        !values.dist &&
-        !values.types &&
-        !values.modules)
+      values['all'] ||
+      (!values['cache'] &&
+        !values['coverage'] &&
+        !values['dist'] &&
+        !values['types'] &&
+        !values['modules'])
 
     const tasks = []
 
     // Build task list
-    if (cleanAll || values.cache) {
+    if (cleanAll || values['cache']) {
       tasks.push({ name: 'cache', pattern: '**/.cache' })
     }
 
-    if (cleanAll || values.coverage) {
+    if (cleanAll || values['coverage']) {
       tasks.push({ name: 'coverage', pattern: 'coverage' })
     }
 
-    if (cleanAll || values.dist) {
+    if (cleanAll || values['dist']) {
       tasks.push({
         name: 'dist',
         patterns: ['dist', '*.tsbuildinfo', '.tsbuildinfo'],
       })
-    } else if (values.types) {
+    } else if (values['types']) {
       tasks.push({ name: 'dist/types', patterns: ['dist/types'] })
     }
 
-    if (values.modules) {
+    if (values['modules']) {
       tasks.push({ name: 'node_modules', pattern: '**/node_modules' })
     }
 

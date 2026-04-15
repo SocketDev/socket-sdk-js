@@ -107,7 +107,7 @@ function isValidPackageSpecifier(specifier: string): boolean {
  */
 async function extractExternalPackages(filePath: string): Promise<Set<string>> {
   const content = await fs.readFile(filePath, 'utf8')
-  const externals = new Set()
+  const externals = new Set<string>()
 
   // Match require('package') or require("package")
   const requirePattern = /require\s*\(\s*['"]([^'"]+)['"]\s*\)/g
@@ -121,6 +121,9 @@ async function extractExternalPackages(filePath: string): Promise<Set<string>> {
   // Extract from require()
   while ((match = requirePattern.exec(content)) !== null) {
     const specifier = match[1]
+    if (!specifier) {
+      continue
+    }
     // Skip internal src/external/ wrapper paths (used by socket-lib pattern)
     if (specifier.includes('/external/')) {
       continue
@@ -133,6 +136,9 @@ async function extractExternalPackages(filePath: string): Promise<Set<string>> {
   // Extract from import statements
   while ((match = importPattern.exec(content)) !== null) {
     const specifier = match[1]
+    if (!specifier) {
+      continue
+    }
     // Skip internal src/external/ wrapper paths (used by socket-lib pattern)
     if (specifier.includes('/external/')) {
       continue
@@ -145,6 +151,9 @@ async function extractExternalPackages(filePath: string): Promise<Set<string>> {
   // Extract from dynamic import()
   while ((match = dynamicImportPattern.exec(content)) !== null) {
     const specifier = match[1]
+    if (!specifier) {
+      continue
+    }
     // Skip internal src/external/ wrapper paths (used by socket-lib pattern)
     if (specifier.includes('/external/')) {
       continue
@@ -162,7 +171,7 @@ async function extractExternalPackages(filePath: string): Promise<Set<string>> {
  */
 async function extractBundledPackages(filePath: string): Promise<Set<string>> {
   const content = await fs.readFile(filePath, 'utf8')
-  const bundled = new Set()
+  const bundled = new Set<string>()
 
   // Match node_modules paths in comments: node_modules/.pnpm/@scope+package@version/...
   // or node_modules/@scope/package/...
@@ -173,6 +182,9 @@ async function extractBundledPackages(filePath: string): Promise<Set<string>> {
   let match: RegExpExecArray | null
   while ((match = nodeModulesPattern.exec(content)) !== null) {
     let packageName = match[1]
+    if (!packageName) {
+      continue
+    }
 
     // Handle pnpm path format: @scope+package -> @scope/package
     if (packageName.includes('+')) {
@@ -339,8 +351,8 @@ async function validateBundleDeps(): Promise<ValidationResult> {
   }
 
   // Collect all external and bundled packages
-  const allExternals = new Set()
-  const allBundled = new Set()
+  const allExternals = new Set<string>()
+  const allBundled = new Set<string>()
 
   for (const file of distFiles) {
     const externals = await extractExternalPackages(file)
