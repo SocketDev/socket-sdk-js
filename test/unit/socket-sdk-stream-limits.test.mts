@@ -77,7 +77,9 @@ describe('SocketSdk - Streaming downloads', () => {
     const chunks: Buffer[] = []
     const origWrite = process.stdout.write
     process.stdout.write = ((chunk: unknown): boolean => {
-      if (Buffer.isBuffer(chunk)) chunks.push(chunk)
+      if (Buffer.isBuffer(chunk)) {
+        chunks.push(chunk)
+      }
       return true
     }) as typeof process.stdout.write
 

@@ -76,7 +76,7 @@
     "@sveltejs/acorn-typescript": "1.0.8",
     "@types/babel__traverse": "7.28.0",
     "@types/node": "24.9.2",
-    "@typescript/native-preview": "7.0.0-dev.20250926.1",
+    "@typescript/native-preview": "7.0.0-dev.20260415.1",
     "@vitest/coverage-v8": "4.0.3",
     "acorn": "8.15.0",
     "del": "8.0.1",
