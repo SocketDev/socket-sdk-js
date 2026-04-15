@@ -18,7 +18,6 @@ import { parseArgs } from '@socketsecurity/lib/argv/parse'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { printFooter, printHeader } from '@socketsecurity/lib/stdio/header'
 
-// @ts-expect-error -- esbuild.config.mjs has no declaration file
 import {
   analyzeMetafile,
   buildConfig,
@@ -60,7 +59,7 @@ async function buildSource(
   if (!skipClean) {
     const exitCode = await runSequence([
       {
-        args: ['scripts/clean.mjs', '--dist', '--quiet'],
+        args: ['scripts/clean.mts', '--dist', '--quiet'],
         command: 'node',
       },
     ])
@@ -110,7 +109,7 @@ async function buildTypes(options: BuildOptions = {}): Promise<number> {
 
   if (!skipClean) {
     commands.push({
-      args: ['scripts/clean.mjs', '--types', '--quiet'],
+      args: ['scripts/clean.mts', '--types', '--quiet'],
       command: 'node',
     })
   }
@@ -361,7 +360,7 @@ async function main(): Promise<void> {
       // Clean all directories first (once)
       exitCode = await runSequence([
         {
-          args: ['scripts/clean.mjs', '--dist', '--types', '--quiet'],
+          args: ['scripts/clean.mts', '--dist', '--types', '--quiet'],
           command: 'node',
         },
       ])

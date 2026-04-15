@@ -7,7 +7,7 @@
  * 3. Generates strict types from OpenAPI
  *
  * Usage:
- *   node scripts/generate-sdk.mjs
+ *   node scripts/generate-sdk.mts
  */
 
 import { promises as fs } from 'node:fs'
@@ -52,7 +52,7 @@ async function fetchOpenApi(): Promise<void> {
 }
 
 async function generateStrictTypes(): Promise<void> {
-  await spawn('node', ['scripts/generate-strict-types.mjs'], {
+  await spawn('node', ['scripts/generate-strict-types.mts'], {
     cwd: rootPath,
     stdio: 'inherit',
   })
@@ -67,7 +67,7 @@ async function generateStrictTypes(): Promise<void> {
 }
 
 async function generateTypes(): Promise<void> {
-  await spawn('node', ['scripts/generate-types.mjs'], {
+  await spawn('node', ['scripts/generate-types.mts'], {
     cwd: rootPath,
     stdio: 'inherit',
   })

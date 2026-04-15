@@ -276,7 +276,7 @@ async function runTests(
 
   // Use interactive runner for interactive Ctrl+O experience when appropriate
   if (process.stdout.isTTY) {
-    const { runTests } = await import('./utils/interactive-runner.mjs')
+    const { runTests } = await import('./utils/interactive-runner.mts')
     return runTests(vitestPath, vitestArgs, {
       env: spawnOptions.env,
       cwd: spawnOptions.cwd,

@@ -337,7 +337,7 @@ logger.log('')
 
 // Rebuild with source maps enabled for coverage
 logger.info('Building with source maps for coverage...')
-const buildResult = await spawn('node', ['scripts/build.mjs'], {
+const buildResult = await spawn('node', ['scripts/build.mts'], {
   cwd: rootPath,
   stdio: 'inherit',
   env: {
