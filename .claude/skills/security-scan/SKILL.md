@@ -1,6 +1,7 @@
 ---
 name: security-scan
 description: Runs a multi-tool security scan — AgentShield for Claude config, zizmor for GitHub Actions, and optionally Socket CLI for dependency scanning. Produces an A-F graded security report.
+user-invocable: true
 ---
 
 # Security Scan
