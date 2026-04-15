@@ -14,7 +14,23 @@ const rootPath = path.resolve(__dirname, '..')
 const libPath = path.join(rootPath, '..', 'socket-lib', 'dist')
 const useLocalLib = existsSync(libPath)
 
-export function resolve(specifier, context, nextResolve) {
+interface ResolveContext {
+  conditions: string[]
+  parentURL?: string
+}
+
+interface ResolveResult {
+  url: string
+  shortCircuit?: boolean
+}
+
+type NextResolve = (specifier: string, context: ResolveContext) => ResolveResult
+
+export function resolve(
+  specifier: string,
+  context: ResolveContext,
+  nextResolve: NextResolve,
+): ResolveResult {
   // Rewrite @socketsecurity/lib imports to local dist if available
   if (useLocalLib && specifier.startsWith('@socketsecurity/lib')) {
     const subpath = specifier.slice('@socketsecurity/lib'.length) || '/index.js'

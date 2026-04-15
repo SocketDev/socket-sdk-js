@@ -17,7 +17,7 @@ import { WIN32 } from '@socketsecurity/lib/constants/platform'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { spawn } from '@socketsecurity/lib/spawn'
 
-async function main() {
+async function main(): Promise<void> {
   const quiet = isQuiet()
   const verbose = isVerbose()
   const logger = getDefaultLogger()
@@ -91,18 +91,20 @@ async function main() {
         logger.log('')
       }
     }
-  } catch (error) {
+  } catch (e) {
     if (!quiet) {
-      logger.fail(`Update failed: ${error.message}`)
+      logger.fail(
+        `Update failed: ${e instanceof Error ? e.message : String(e)}`,
+      )
     }
     if (verbose) {
-      logger.error(error)
+      logger.error(e)
     }
     process.exitCode = 1
   }
 }
 
-main().catch(e => {
+main().catch((e: unknown) => {
   const logger = getDefaultLogger()
   logger.error(e)
   process.exitCode = 1

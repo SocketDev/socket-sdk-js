@@ -19,7 +19,7 @@ import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { spawn } from '@socketsecurity/lib/spawn'
 import { printHeader } from '@socketsecurity/lib/stdio/header'
 
-import { runCommandQuiet } from './utils/run-command.mjs'
+import { runCommandQuiet } from './utils/run-command.mts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
@@ -31,29 +31,45 @@ const logger = getDefaultLogger()
 const ansiRegex = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g')
 
 /** Strip ANSI codes and decorative characters (✧, ︎ variation selector, ⚡) from text. */
-const cleanOutput = text =>
+const cleanOutput = (text: string): string =>
   text
     .replace(ansiRegex, '')
     .replace(/(?:\u2727|\uFE0E|\u26A1)\s*/g, '')
     .trim()
 
+interface SuiteResult {
+  exitCode: number
+  stdout: string
+  stderr: string
+}
+
+interface TestSuitesResult {
+  combined: SuiteResult
+  isolatedResult: SuiteResult
+  mainResult: SuiteResult
+}
+
 /**
  * Run both main and isolated test suites, returning individual and combined
  * results.
  */
-async function runTestSuites(mainArgs, isolatedArgs) {
-  const run = async args => {
+async function runTestSuites(
+  mainArgs: string[],
+  isolatedArgs: string[],
+): Promise<TestSuitesResult> {
+  const run = async (args: string[]): Promise<SuiteResult> => {
     try {
       return await runCommandQuiet('pnpm', args, {
         cwd: rootPath,
         env: { ...process.env, COVERAGE: 'true' },
       })
-    } catch (error) {
+    } catch (e) {
       // Command may throw on non-zero exit, but we still want coverage
+      const err = e as Record<string, unknown>
       return {
         exitCode: 1,
-        stdout: error.stdout || '',
-        stderr: error.stderr || error.message || '',
+        stdout: (err['stdout'] as string) || '',
+        stderr: (err['stderr'] as string) || (err['message'] as string) || '',
       }
     }
   }
@@ -64,7 +80,7 @@ async function runTestSuites(mainArgs, isolatedArgs) {
   const exitCode =
     mainResult.exitCode !== 0 ? mainResult.exitCode : isolatedResult.exitCode
 
-  const combined = {
+  const combined: SuiteResult = {
     exitCode,
     stderr: mainResult.stderr + isolatedResult.stderr,
     stdout: mainResult.stdout + isolatedResult.stdout,
@@ -73,31 +89,57 @@ async function runTestSuites(mainArgs, isolatedArgs) {
   return { combined, isolatedResult, mainResult }
 }
 
+interface CoverageLocation {
+  start: { line: number; column: number }
+  end: { line: number; column: number }
+}
+
+interface CoverageFileFinal {
+  s?: Record<string, number>
+  b?: Record<string, number[]>
+  f?: Record<string, number>
+  statementMap?: Record<string, CoverageLocation>
+}
+
+interface AggregateCoverage {
+  branches: string
+  functions: string
+  lines: string
+  statements: string
+}
+
 /**
  * Merge coverage-final.json from both suites using max-hit-count strategy.
  * Returns aggregate percentages for statements, branches, functions, and lines.
  */
-async function mergeCoverageFinal() {
+async function mergeCoverageFinal(): Promise<AggregateCoverage | undefined> {
   const mainFinalPath = path.join(rootPath, 'coverage/coverage-final.json')
   const isolatedFinalPath = path.join(
     rootPath,
     'coverage-isolated/coverage-final.json',
   )
 
-  let mainFinal = {}
-  let isolatedFinal = {}
+  let mainFinal: Record<string, CoverageFileFinal> = {}
+  let isolatedFinal: Record<string, CoverageFileFinal> = {}
   try {
-    mainFinal = JSON.parse(await fs.readFile(mainFinalPath, 'utf8'))
+    mainFinal = JSON.parse(await fs.readFile(mainFinalPath, 'utf8')) as Record<
+      string,
+      CoverageFileFinal
+    >
   } catch (e) {
-    if (e?.code !== 'ENOENT') {
-      logger.warn(`Failed to read ${mainFinalPath}: ${e?.message}`)
+    const err = e as NodeJS.ErrnoException | null
+    if (err?.code !== 'ENOENT') {
+      logger.warn(`Failed to read ${mainFinalPath}: ${err?.message}`)
     }
   }
   try {
-    isolatedFinal = JSON.parse(await fs.readFile(isolatedFinalPath, 'utf8'))
+    isolatedFinal = JSON.parse(
+      await fs.readFile(isolatedFinalPath, 'utf8'),
+    ) as Record<string, CoverageFileFinal>
   } catch (e) {
-    if (e?.code !== 'ENOENT') {
-      logger.warn(`Failed to read ${isolatedFinalPath}: ${e?.message}`)
+    const err = e as NodeJS.ErrnoException | null
+    if (err?.code !== 'ENOENT') {
+      logger.warn(`Failed to read ${isolatedFinalPath}: ${err?.message}`)
     }
   }
 
@@ -129,7 +171,7 @@ async function mergeCoverageFinal() {
       ...Object.keys(m?.s ?? {}),
       ...Object.keys(iso?.s ?? {}),
     ])
-    const mergedS = {}
+    const mergedS: Record<string, number> = {}
     for (const id of allStmtKeys) {
       mergedS[id] = Math.max(m?.s?.[id] ?? 0, iso?.s?.[id] ?? 0)
     }
@@ -141,7 +183,7 @@ async function mergeCoverageFinal() {
       ...Object.keys(m?.b ?? {}),
       ...Object.keys(iso?.b ?? {}),
     ])
-    const mergedB = {}
+    const mergedB: Record<string, number[]> = {}
     for (const id of allBranchKeys) {
       const mArr = m?.b?.[id] ?? []
       const iArr = iso?.b?.[id] ?? []
@@ -161,7 +203,7 @@ async function mergeCoverageFinal() {
       ...Object.keys(m?.f ?? {}),
       ...Object.keys(iso?.f ?? {}),
     ])
-    const mergedF = {}
+    const mergedF: Record<string, number> = {}
     for (const id of allFnKeys) {
       mergedF[id] = Math.max(m?.f?.[id] ?? 0, iso?.f?.[id] ?? 0)
     }
@@ -182,7 +224,7 @@ async function mergeCoverageFinal() {
     coveredLines += coveredLineSet.size
   }
 
-  const pct = (covered, total) =>
+  const pct = (covered: number, total: number): string =>
     total > 0 ? ((covered / total) * 100).toFixed(2) : '0.00'
 
   return {
@@ -198,17 +240,20 @@ async function mergeCoverageFinal() {
  * aggregate metrics.
  */
 /** Parse type-coverage output to extract percentage. */
-function parseTypeCoveragePercent(output) {
+function parseTypeCoveragePercent(output: string): number | undefined {
   const match = output.match(/\([\d\s/]+\)\s+([\d.]+)%/)
   return match ? Number.parseFloat(match[1]) : undefined
 }
 
 function displayCodeCoverage(
-  mainOutput,
-  combinedOutput,
-  aggregateCoverage,
-  { showDetail, typeCoveragePercent },
-) {
+  mainOutput: string,
+  combinedOutput: string,
+  aggregateCoverage: AggregateCoverage | undefined,
+  {
+    showDetail,
+    typeCoveragePercent,
+  }: { showDetail: boolean; typeCoveragePercent: number | undefined },
+): void {
   // Extract and display test summary from vitest output
   if (showDetail) {
     const testSummaryMatch = combinedOutput.match(
@@ -370,7 +415,7 @@ try {
     const combinedOutput = cleanOutput(combined.stdout + combined.stderr)
 
     // Run type coverage unless --code-only
-    let typeCoveragePercent
+    let typeCoveragePercent: number | undefined
     if (!values['code-only']) {
       const typeCoverageResult = await runCommandQuiet(
         'pnpm',
@@ -383,12 +428,12 @@ try {
       typeCoveragePercent = parseTypeCoveragePercent(typeCoverageOutput)
     }
 
-    let aggregateCoverage
+    let aggregateCoverage: AggregateCoverage | undefined
     try {
       aggregateCoverage = await mergeCoverageFinal()
-    } catch (error) {
+    } catch (e) {
       logger.warn(
-        `Could not compute aggregate coverage: ${error?.message || 'Unknown error'}`,
+        `Could not compute aggregate coverage: ${e instanceof Error ? e.message : 'Unknown error'}`,
       )
     }
 
@@ -409,7 +454,9 @@ try {
   }
 
   process.exitCode = exitCode
-} catch (error) {
-  logger.error(`Coverage script failed: ${error.message}`)
+} catch (e) {
+  logger.error(
+    `Coverage script failed: ${e instanceof Error ? e.message : String(e)}`,
+  )
   process.exitCode = 1
 }

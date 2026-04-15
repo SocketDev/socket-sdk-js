@@ -31,8 +31,8 @@ const BUILTIN_MODULES = new Set([
 /**
  * Find all JavaScript files in dist directory.
  */
-async function findDistFiles(distPath) {
-  const files = []
+async function findDistFiles(distPath: string): Promise<string[]> {
+  const files: string[] = []
 
   try {
     const entries = await fs.readdir(distPath, { withFileTypes: true })
@@ -61,7 +61,7 @@ async function findDistFiles(distPath) {
 /**
  * Check if a string is a valid package specifier.
  */
-function isValidPackageSpecifier(specifier) {
+function isValidPackageSpecifier(specifier: string): boolean {
   // Relative imports
   if (specifier.startsWith('.') || specifier.startsWith('/')) {
     return false
@@ -105,7 +105,7 @@ function isValidPackageSpecifier(specifier) {
 /**
  * Extract external package names from require() and import statements in built files.
  */
-async function extractExternalPackages(filePath) {
+async function extractExternalPackages(filePath: string): Promise<Set<string>> {
   const content = await fs.readFile(filePath, 'utf8')
   const externals = new Set()
 
@@ -116,7 +116,7 @@ async function extractExternalPackages(filePath) {
   // Match dynamic import() calls
   const dynamicImportPattern = /import\s*\(\s*['"]([^'"]+)['"]\s*\)/g
 
-  let match
+  let match: RegExpExecArray | null
 
   // Extract from require()
   while ((match = requirePattern.exec(content)) !== null) {
@@ -160,7 +160,7 @@ async function extractExternalPackages(filePath) {
 /**
  * Extract bundled package names from node_modules paths in comments and code.
  */
-async function extractBundledPackages(filePath) {
+async function extractBundledPackages(filePath: string): Promise<Set<string>> {
   const content = await fs.readFile(filePath, 'utf8')
   const bundled = new Set()
 
@@ -170,7 +170,7 @@ async function extractBundledPackages(filePath) {
   const nodeModulesPattern =
     /node_modules\/(?:\.pnpm\/)?(@[^/]+\+[^@/]+|@[^/]+\/[^/]+|[^/@]+)/g
 
-  let match
+  let match: RegExpExecArray | null
   while ((match = nodeModulesPattern.exec(content)) !== null) {
     let packageName = match[1]
 
@@ -222,7 +222,7 @@ async function extractBundledPackages(filePath) {
 /**
  * Get package name from a module specifier (strip subpaths).
  */
-function getPackageName(specifier) {
+function getPackageName(specifier: string): string | undefined {
   // Relative imports are not packages
   if (specifier.startsWith('.') || specifier.startsWith('/')) {
     return undefined
@@ -272,26 +272,57 @@ function getPackageName(specifier) {
   return parts[0] || undefined
 }
 
+interface PackageJson {
+  name?: string
+  version?: string
+  main?: string
+  types?: string
+  dependencies?: Record<string, string>
+  devDependencies?: Record<string, string>
+  peerDependencies?: Record<string, string>
+  optionalDependencies?: Record<string, string>
+  exports?: Record<string, string | Record<string, string>>
+}
+
 /**
  * Read and parse package.json.
  */
-async function readPackageJson() {
+async function readPackageJson(): Promise<PackageJson> {
   const packageJsonPath = path.join(rootPath, 'package.json')
   const content = await fs.readFile(packageJsonPath, 'utf8')
   try {
     return JSON.parse(content)
   } catch (e) {
     throw new Error(
-      `Failed to parse ${packageJsonPath}: ${e?.message || 'Unknown error'}`,
+      `Failed to parse ${packageJsonPath}: ${e instanceof Error ? e.message : 'Unknown error'}`,
       { cause: e },
     )
   }
 }
 
+interface Violation {
+  type: string
+  package: string
+  message: string
+  fix: string
+}
+
+interface Warning {
+  type: string
+  package: string
+  message: string
+  fix: string
+}
+
+interface ValidationResult {
+  violations: Violation[]
+  warnings: Warning[]
+}
+
 /**
  * Validate bundle dependencies.
  */
-async function validateBundleDeps() {
+async function validateBundleDeps(): Promise<ValidationResult> {
   const distPath = path.join(rootPath, 'dist')
   const pkg = await readPackageJson()
 
@@ -327,8 +358,8 @@ async function validateBundleDeps() {
     }
   }
 
-  const violations = []
-  const warnings = []
+  const violations: Violation[] = []
+  const warnings: Warning[] = []
 
   // Validate external packages are in dependencies or peerDependencies
   for (const packageName of allExternals) {
@@ -368,7 +399,7 @@ async function validateBundleDeps() {
   return { violations, warnings }
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     const { violations, warnings } = await validateBundleDeps()
 
@@ -399,13 +430,16 @@ async function main() {
 
     // Only fail on violations, not warnings
     process.exitCode = violations.length > 0 ? 1 : 0
-  } catch (error) {
-    logger.error('Validation failed:', error.message)
+  } catch (e) {
+    logger.error(
+      'Validation failed:',
+      e instanceof Error ? e.message : String(e),
+    )
     process.exitCode = 1
   }
 }
 
-main().catch(error => {
-  logger.error('Unhandled error in main():', error)
+main().catch((e: unknown) => {
+  logger.error('Unhandled error in main():', e)
   process.exitCode = 1
 })

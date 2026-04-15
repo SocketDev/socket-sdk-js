@@ -19,8 +19,8 @@ const rootPath = path.join(__dirname, '..')
 /**
  * Find all package.json files in the repository.
  */
-async function findPackageJsonFiles(dir) {
-  const files = []
+async function findPackageJsonFiles(dir: string): Promise<string[]> {
+  const files: string[] = []
   const entries = await fs.readdir(dir, { withFileTypes: true })
 
   for (const entry of entries) {
@@ -46,26 +46,36 @@ async function findPackageJsonFiles(dir) {
   return files
 }
 
+interface LinkViolation {
+  file: string
+  field: string
+  package: string
+  value: string
+}
+
 /**
  * Check if a package.json contains link: dependencies.
  */
-async function checkPackageJson(filePath) {
+async function checkPackageJson(filePath: string): Promise<LinkViolation[]> {
   const content = await fs.readFile(filePath, 'utf8')
-  let pkg
+  let pkg: Record<string, Record<string, string> | undefined>
   try {
-    pkg = JSON.parse(content)
+    pkg = JSON.parse(content) as Record<
+      string,
+      Record<string, string> | undefined
+    >
   } catch (e) {
     throw new Error(
-      `Failed to parse ${filePath}: ${e?.message || 'Unknown error'}`,
+      `Failed to parse ${filePath}: ${e instanceof Error ? e.message : 'Unknown error'}`,
       { cause: e },
     )
   }
 
-  const violations = []
+  const violations: LinkViolation[] = []
 
   // Check dependencies.
-  if (pkg.dependencies) {
-    for (const [name, version] of Object.entries(pkg.dependencies)) {
+  if (pkg['dependencies']) {
+    for (const [name, version] of Object.entries(pkg['dependencies'])) {
       if (typeof version === 'string' && version.startsWith('link:')) {
         violations.push({
           file: filePath,
@@ -78,8 +88,8 @@ async function checkPackageJson(filePath) {
   }
 
   // Check devDependencies.
-  if (pkg.devDependencies) {
-    for (const [name, version] of Object.entries(pkg.devDependencies)) {
+  if (pkg['devDependencies']) {
+    for (const [name, version] of Object.entries(pkg['devDependencies'])) {
       if (typeof version === 'string' && version.startsWith('link:')) {
         violations.push({
           file: filePath,
@@ -92,8 +102,8 @@ async function checkPackageJson(filePath) {
   }
 
   // Check peerDependencies.
-  if (pkg.peerDependencies) {
-    for (const [name, version] of Object.entries(pkg.peerDependencies)) {
+  if (pkg['peerDependencies']) {
+    for (const [name, version] of Object.entries(pkg['peerDependencies'])) {
       if (typeof version === 'string' && version.startsWith('link:')) {
         violations.push({
           file: filePath,
@@ -106,8 +116,8 @@ async function checkPackageJson(filePath) {
   }
 
   // Check optionalDependencies.
-  if (pkg.optionalDependencies) {
-    for (const [name, version] of Object.entries(pkg.optionalDependencies)) {
+  if (pkg['optionalDependencies']) {
+    for (const [name, version] of Object.entries(pkg['optionalDependencies'])) {
       if (typeof version === 'string' && version.startsWith('link:')) {
         violations.push({
           file: filePath,
@@ -122,9 +132,9 @@ async function checkPackageJson(filePath) {
   return violations
 }
 
-async function main() {
+async function main(): Promise<void> {
   const packageJsonFiles = await findPackageJsonFiles(rootPath)
-  const allViolations = []
+  const allViolations: LinkViolation[] = []
 
   for (const file of packageJsonFiles) {
     const violations = await checkPackageJson(file)
@@ -159,7 +169,7 @@ async function main() {
   }
 }
 
-main().catch(error => {
-  logger.error('Validation failed:', error)
+main().catch((e: unknown) => {
+  logger.error('Validation failed:', e)
   process.exitCode = 1
 })

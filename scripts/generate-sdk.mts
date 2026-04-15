@@ -23,8 +23,8 @@ import { httpJson } from '@socketsecurity/lib/http-request'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { spawn } from '@socketsecurity/lib/spawn'
 
-import { getRootPath } from './utils/path-helpers.mjs'
-import { runCommand } from './utils/run-command.mjs'
+import { getRootPath } from './utils/path-helpers.mts'
+import { runCommand } from './utils/run-command.mts'
 
 const OPENAPI_URL = 'https://api.socket.dev/v0/openapi'
 
@@ -35,22 +35,23 @@ const typesPath = path.resolve(rootPath, 'types/api.d.ts')
 // Initialize logger
 const logger = getDefaultLogger()
 
-async function fetchOpenApi() {
+async function fetchOpenApi(): Promise<void> {
   try {
     const data = await httpJson(OPENAPI_URL)
     await fs.writeFile(openApiPath, JSON.stringify(data, null, 2), 'utf8')
     logger.log(`Downloaded from ${OPENAPI_URL}`)
-  } catch (error) {
+  } catch (e) {
+    const error = e instanceof Error ? e : new Error(String(e))
     logger.error(`Failed to fetch OpenAPI definition from ${OPENAPI_URL}`)
     logger.error(`Network error: ${error.message}`)
     logger.info(
       'Ensure the API endpoint is accessible and try again. If the issue persists, check your network connection.',
     )
-    throw error
+    throw e
   }
 }
 
-async function generateStrictTypes() {
+async function generateStrictTypes(): Promise<void> {
   await spawn('node', ['scripts/generate-strict-types.mjs'], {
     cwd: rootPath,
     stdio: 'inherit',
@@ -65,7 +66,7 @@ async function generateStrictTypes() {
   }
 }
 
-async function generateTypes() {
+async function generateTypes(): Promise<void> {
   await spawn('node', ['scripts/generate-types.mjs'], {
     cwd: rootPath,
     stdio: 'inherit',
@@ -84,9 +85,8 @@ async function generateTypes() {
 /**
  * Adds SDK v3 method name aliases to the operations interface.
  * These aliases map the new SDK method names to their underlying OpenAPI operation names.
- * @param {string} filePath - The path to the TypeScript file to update
  */
-async function addSdkMethodAliases(filePath) {
+async function addSdkMethodAliases(filePath: string): Promise<void> {
   const content = await fs.readFile(filePath, 'utf8')
 
   // Find the closing brace of the operations interface
@@ -125,9 +125,8 @@ async function addSdkMethodAliases(filePath) {
  * Fixes array syntax to comply with ESLint array-simple rules.
  * Simple types (string, number, boolean) use T[] syntax.
  * Complex types use Array<T> syntax.
- * @param {string} filePath - The path to the TypeScript file to fix
  */
-async function fixArraySyntax(filePath) {
+async function fixArraySyntax(filePath: string): Promise<void> {
   const content = await fs.readFile(filePath, 'utf8')
   const magicString = new MagicString(content)
 
@@ -138,7 +137,7 @@ async function fixArraySyntax(filePath) {
   })
 
   // Helper to determine if a type is simple
-  const isSimpleType = node => {
+  const isSimpleType = (node: t.Node): boolean => {
     // Check for keyword types
     if (
       t.isTSStringKeyword(node) ||
@@ -224,7 +223,7 @@ async function fixArraySyntax(filePath) {
   }
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     logger.group('Generating SDK from OpenAPI…')
 
@@ -242,14 +241,17 @@ async function main() {
 
     logger.groupEnd()
     logger.log('SDK generation complete')
-  } catch (error) {
+  } catch (e) {
     logger.groupEnd()
-    logger.error('SDK generation failed:', error.message)
+    logger.error(
+      'SDK generation failed:',
+      e instanceof Error ? e.message : String(e),
+    )
     process.exitCode = 1
   }
 }
 
-main().catch(e => {
+main().catch((e: unknown) => {
   logger.error(e)
   process.exitCode = 1
 })

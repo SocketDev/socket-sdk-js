@@ -15,17 +15,24 @@ const logger = getDefaultLogger()
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
 
+interface MinifyViolation {
+  config: string
+  value: unknown
+  message: string
+  location: string
+}
+
 /**
  * Validate esbuild configuration has minify: false.
  */
-async function validateEsbuildMinify() {
+async function validateEsbuildMinify(): Promise<MinifyViolation[]> {
   const configPath = path.join(rootPath, '.config/esbuild.config.mjs')
 
   try {
     // Dynamic import of the esbuild config
     const config = await import(configPath)
 
-    const violations = []
+    const violations: MinifyViolation[] = []
 
     // Check buildConfig
     if (config.buildConfig) {
@@ -52,14 +59,16 @@ async function validateEsbuildMinify() {
     }
 
     return violations
-  } catch (error) {
-    logger.error(`Failed to load esbuild config: ${error.message}`)
+  } catch (e) {
+    logger.error(
+      `Failed to load esbuild config: ${e instanceof Error ? e.message : String(e)}`,
+    )
     process.exitCode = 1
     return []
   }
 }
 
-async function main() {
+async function main(): Promise<void> {
   const violations = await validateEsbuildMinify()
 
   if (violations.length === 0) {
@@ -86,7 +95,7 @@ async function main() {
   process.exitCode = 1
 }
 
-main().catch(error => {
-  logger.error('Validation failed:', error)
+main().catch((e: unknown) => {
+  logger.error('Validation failed:', e)
   process.exitCode = 1
 })

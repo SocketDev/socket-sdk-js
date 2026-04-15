@@ -18,14 +18,14 @@ import process from 'node:process'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { printFooter, printHeader } from '@socketsecurity/lib/stdio/header'
 
-import { runParallel } from './utils/run-command.mjs'
+import { runParallel } from './utils/run-command.mts'
 
 // Initialize logger
 const logger = getDefaultLogger()
 
 const tsConfigPath = '.config/tsconfig.check.json'
 
-async function main() {
+async function main(): Promise<void> {
   try {
     const all = process.argv.includes('--all')
     const staged = process.argv.includes('--staged')
@@ -109,14 +109,14 @@ async function main() {
       logger.success('All checks passed')
       printFooter()
     }
-  } catch (error) {
+  } catch (e) {
     logger.log('')
-    logger.error(`Check failed: ${error.message}`)
+    logger.error(`Check failed: ${e instanceof Error ? e.message : String(e)}`)
     process.exitCode = 1
   }
 }
 
-main().catch(e => {
+main().catch((e: unknown) => {
   logger.error(e)
   process.exitCode = 1
 })

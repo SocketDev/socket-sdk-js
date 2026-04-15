@@ -23,10 +23,23 @@ const rootPath = path.resolve(
 // Initialize logger
 const logger = getDefaultLogger()
 
+interface CleanTask {
+  name: string
+  pattern?: string
+  patterns?: string[]
+}
+
+interface CleanOptions {
+  quiet?: boolean
+}
+
 /**
  * Clean specific directories.
  */
-async function cleanDirectories(tasks, options = {}) {
+async function cleanDirectories(
+  tasks: CleanTask[],
+  options: CleanOptions = {},
+): Promise<number> {
   const { quiet = false } = options
 
   for (const task of tasks) {
@@ -57,10 +70,10 @@ async function cleanDirectories(tasks, options = {}) {
           logger.done(`Cleaned ${name} (already clean)`)
         }
       }
-    } catch (error) {
+    } catch (e) {
       if (!quiet) {
         logger.error(`Failed to clean ${name}`)
-        logger.error(error.message)
+        logger.error(e instanceof Error ? e.message : String(e))
       }
       return 1
     }
@@ -69,7 +82,7 @@ async function cleanDirectories(tasks, options = {}) {
   return 0
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     // Parse arguments
     const { values } = parseArgs({
@@ -205,13 +218,15 @@ async function main() {
         logger.success('Clean completed successfully!')
       }
     }
-  } catch (error) {
-    logger.error(`Clean runner failed: ${error.message}`)
+  } catch (e) {
+    logger.error(
+      `Clean runner failed: ${e instanceof Error ? e.message : String(e)}`,
+    )
     process.exitCode = 1
   }
 }
 
-main().catch(e => {
+main().catch((e: unknown) => {
   logger.error(e)
   process.exitCode = 1
 })

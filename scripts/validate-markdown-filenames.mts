@@ -66,7 +66,7 @@ const SKIP_DIRS = new Set([
 /**
  * Check if a filename is in SCREAMING_CASE (all uppercase with optional underscores).
  */
-function isScreamingCase(filename) {
+function isScreamingCase(filename: string): boolean {
   // Remove extension for checking
   const nameWithoutExt = filename.replace(/\.(md|MD)$/, '')
 
@@ -77,7 +77,7 @@ function isScreamingCase(filename) {
 /**
  * Check if a filename is lowercase-with-hyphens.
  */
-function isLowercaseHyphenated(filename) {
+function isLowercaseHyphenated(filename: string): boolean {
   // Remove extension for checking
   const nameWithoutExt = filename.replace(/\.md$/, '')
 
@@ -88,7 +88,10 @@ function isLowercaseHyphenated(filename) {
 /**
  * Recursively find all markdown files.
  */
-async function findMarkdownFiles(dir, files = []) {
+async function findMarkdownFiles(
+  dir: string,
+  files: string[] = [],
+): Promise<string[]> {
   try {
     const entries = await fs.readdir(dir, { withFileTypes: true })
 
@@ -117,7 +120,7 @@ async function findMarkdownFiles(dir, files = []) {
  * Check if file is in an allowed location for SCREAMING_CASE files.
  * SCREAMING_CASE files can only be at: root, docs/, or .claude/ (top level only).
  */
-function isInAllowedLocationForScreamingCase(filePath) {
+function isInAllowedLocationForScreamingCase(filePath: string): boolean {
   const relativePath = path.relative(rootPath, filePath)
   const dir = path.dirname(relativePath)
 
@@ -143,7 +146,7 @@ function isInAllowedLocationForScreamingCase(filePath) {
  * Check if file is in an allowed location for regular markdown files.
  * Regular .md files must be within docs/ or .claude/ directories.
  */
-function isInAllowedLocationForRegularMd(filePath) {
+function isInAllowedLocationForRegularMd(filePath: string): boolean {
   const relativePath = path.relative(rootPath, filePath)
   const dir = path.dirname(relativePath)
 
@@ -160,10 +163,17 @@ function isInAllowedLocationForRegularMd(filePath) {
   return false
 }
 
+interface FilenameViolation {
+  file: string
+  filename: string
+  issue: string
+  suggestion: string
+}
+
 /**
  * Validate a markdown filename.
  */
-function validateFilename(filePath) {
+function validateFilename(filePath: string): FilenameViolation | undefined {
   const filename = path.basename(filePath)
   const nameWithoutExt = filename.replace(/\.(md|MD)$/, '')
   const relativePath = path.relative(rootPath, filePath)
@@ -243,7 +253,7 @@ function validateFilename(filePath) {
 /**
  * Validate all markdown filenames.
  */
-async function validateMarkdownFilenames() {
+async function validateMarkdownFilenames(): Promise<FilenameViolation[]> {
   const files = await findMarkdownFiles(rootPath)
   const violations = []
 
@@ -257,7 +267,7 @@ async function validateMarkdownFilenames() {
   return violations
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     const violations = await validateMarkdownFilenames()
 
@@ -295,13 +305,15 @@ async function main() {
     logger.log('')
 
     process.exitCode = 1
-  } catch (error) {
-    logger.fail(`Validation failed: ${error.message}`)
+  } catch (e) {
+    logger.fail(
+      `Validation failed: ${e instanceof Error ? e.message : String(e)}`,
+    )
     process.exitCode = 1
   }
 }
 
-main().catch(error => {
-  logger.fail(`Validation failed: ${error}`)
+main().catch((e: unknown) => {
+  logger.fail(`Validation failed: ${e}`)
   process.exitCode = 1
 })

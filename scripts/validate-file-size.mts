@@ -43,7 +43,7 @@ const SKIP_DIRS = new Set([
 /**
  * Format bytes to human-readable size.
  */
-function formatBytes(bytes) {
+function formatBytes(bytes: number): string {
   if (bytes === 0) {
     return '0 B'
   }
@@ -56,10 +56,20 @@ function formatBytes(bytes) {
   return `${(bytes / k ** i).toFixed(2)} ${sizes[i]}`
 }
 
+interface FileSizeViolation {
+  file: string
+  size: number
+  formattedSize: string
+  maxSize: string
+}
+
 /**
  * Recursively scan directory for files exceeding size limit.
  */
-async function scanDirectory(dir, violations = []) {
+async function scanDirectory(
+  dir: string,
+  violations: FileSizeViolation[] = [],
+): Promise<FileSizeViolation[]> {
   try {
     const entries = await fs.readdir(dir, { withFileTypes: true })
 
@@ -104,7 +114,7 @@ async function scanDirectory(dir, violations = []) {
 /**
  * Validate file sizes in repository.
  */
-async function validateFileSizes() {
+async function validateFileSizes(): Promise<FileSizeViolation[]> {
   const violations = await scanDirectory(rootPath)
 
   // Sort by size descending (largest first)
@@ -113,7 +123,7 @@ async function validateFileSizes() {
   return violations
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     const violations = await validateFileSizes()
 
@@ -145,13 +155,15 @@ async function main() {
     logger.log('')
 
     process.exitCode = 1
-  } catch (error) {
-    logger.fail(`Validation failed: ${error.message}`)
+  } catch (e) {
+    logger.fail(
+      `Validation failed: ${e instanceof Error ? e.message : String(e)}`,
+    )
     process.exitCode = 1
   }
 }
 
-main().catch(error => {
-  logger.fail(`Validation failed: ${error}`)
+main().catch((e: unknown) => {
+  logger.fail(`Validation failed: ${e}`)
   process.exitCode = 1
 })

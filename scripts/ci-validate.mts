@@ -16,8 +16,11 @@ const logger = getDefaultLogger()
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.resolve(__dirname, '..')
 
-async function runCommand(command, args = []) {
-  return new Promise((resolve, reject) => {
+async function runCommand(
+  command: string,
+  args: string[] = [],
+): Promise<number> {
+  return new Promise<number>((resolve, reject) => {
     const spawnPromise = spawn(command, args, {
       cwd: rootPath,
       stdio: 'inherit',
@@ -25,17 +28,17 @@ async function runCommand(command, args = []) {
 
     const child = spawnPromise.process
 
-    child.on('exit', code => {
+    child.on('exit', (code: number | null) => {
       resolve(code || 0)
     })
 
-    child.on('error', error => {
-      reject(error)
+    child.on('error', (e: Error) => {
+      reject(e)
     })
   })
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     printHeader('CI Validation')
 
@@ -70,13 +73,15 @@ async function main() {
     logger.success('Build completed')
 
     logger.success('CI validation completed successfully!')
-  } catch (error) {
-    logger.error(`CI validation failed: ${error.message}`)
+  } catch (e) {
+    logger.error(
+      `CI validation failed: ${e instanceof Error ? e.message : String(e)}`,
+    )
     process.exitCode = 1
   }
 }
 
-main().catch(error => {
-  logger.error('Unhandled error in main():', error)
+main().catch((e: unknown) => {
+  logger.error('Unhandled error in main():', e)
   process.exitCode = 1
 })
