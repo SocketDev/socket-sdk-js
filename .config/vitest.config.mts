@@ -24,6 +24,10 @@ if (isCoverageEnabled) {
 
 export default defineConfig({
   cacheDir: './.cache/vitest',
+  ssr: {
+    // Don't transpile CJS packages — let Node handle them natively
+    external: ['@babel/traverse'],
+  },
   test: {
     deps: {
       interopDefault: false,
