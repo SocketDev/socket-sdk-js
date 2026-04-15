@@ -15,7 +15,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { parse } from '@babel/parser'
-import traverse from '@babel/traverse'
+import _traverse from '@babel/traverse'
 import * as t from '@babel/types'
 import MagicString from 'magic-string'
 
@@ -25,6 +25,10 @@ import { spawn } from '@socketsecurity/lib/spawn'
 
 import { getRootPath } from './utils/path-helpers.mts'
 import { runCommand } from './utils/run-command.mts'
+
+// CJS interop: @babel/traverse exports { default: fn } from CJS.
+// @ts-expect-error -- runtime CJS has .default, types don't expose it.
+const traverse: typeof _traverse = _traverse.default
 
 const OPENAPI_URL = 'https://api.socket.dev/v0/openapi'
 

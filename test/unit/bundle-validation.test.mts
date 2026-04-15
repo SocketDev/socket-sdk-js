@@ -8,8 +8,12 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { parse } from '@babel/parser'
-import { default as traverse } from '@babel/traverse'
+import _traverse from '@babel/traverse'
 import { describe, expect, it } from 'vitest'
+
+// CJS interop: @babel/traverse exports { default: fn } from CJS.
+// @ts-expect-error -- runtime CJS has .default, types don't expose it.
+const traverse: typeof _traverse = _traverse.default
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const packagePath = path.resolve(__dirname, '../..')
