@@ -979,13 +979,17 @@ export class SocketSdk {
           urlPath,
           { ...this.#reqOptions, headers: publicHeaders },
         )
-        if (!isResponseOk(response)) return undefined
+        if (!isResponseOk(response)) {
+          return undefined
+        }
         const json = await getResponseJson(response)
         return json as unknown as SocketArtifact
       }),
     )
     for (const settled of results) {
-      if (settled.status === 'rejected' || !settled.value) continue
+      if (settled.status === 'rejected' || !settled.value) {
+        continue
+      }
       packages.push(SocketSdk.#normalizeArtifact(settled.value, publicPolicy))
     }
     return {

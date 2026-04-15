@@ -121,7 +121,9 @@ describe('SocketSdk - #handleApiError branches', () => {
     })
     const result = await client.getQuota()
     expect(result.success).toBe(false)
-    if (result.success) return
+    if (result.success) {
+      return
+    }
     expect(result.status).toBe(429)
     expect(result.cause).toContain('Rate limit exceeded')
     expect(result.cause).toContain('Retry after 30 seconds')
@@ -134,7 +136,9 @@ describe('SocketSdk - #handleApiError branches', () => {
     })
     const result = await client.getQuota()
     expect(result.success).toBe(false)
-    if (result.success) return
+    if (result.success) {
+      return
+    }
     expect(result.status).toBe(429)
     expect(result.cause).toContain('Wait before retrying')
   })
@@ -147,7 +151,9 @@ describe('SocketSdk - #handleApiError branches', () => {
     })
     const result = await client.getQuota()
     expect(result.success).toBe(false)
-    if (result.success) return
+    if (result.success) {
+      return
+    }
     expect(result.status).toBe(413)
     expect(result.cause).toContain('Payload too large')
   })
@@ -173,7 +179,9 @@ describe('SocketSdk - #handleApiError branches', () => {
     // and #handleApiError catches it.
     const result = await client.getQuota()
     expect(result.success).toBe(false)
-    if (result.success) return
+    if (result.success) {
+      return
+    }
     expect(result.status).toBe(200)
   })
 
@@ -185,7 +193,9 @@ describe('SocketSdk - #handleApiError branches', () => {
     })
     const result = await client.getQuota()
     expect(result.success).toBe(false)
-    if (result.success) return
+    if (result.success) {
+      return
+    }
     expect(result.status).toBe(400)
     expect(result.error).toContain('Validation failed')
     expect(result.error).toContain('field "name" is required')
@@ -199,7 +209,9 @@ describe('SocketSdk - #handleApiError branches', () => {
     })
     const result = await client.getQuota()
     expect(result.success).toBe(false)
-    if (result.success) return
+    if (result.success) {
+      return
+    }
     expect(result.status).toBe(400)
     expect(result.error).toContain('Validation failed')
     expect(result.error).toContain('"field"')
@@ -213,7 +225,9 @@ describe('SocketSdk - #handleApiError branches', () => {
     })
     const result = await client.getQuota()
     expect(result.success).toBe(false)
-    if (result.success) return
+    if (result.success) {
+      return
+    }
     expect(result.status).toBe(400)
     expect(result.error).toContain('Bad Request: missing parameters')
   })
@@ -527,7 +541,9 @@ describe('SocketSdk - #handleApiError statusMessage edge case', () => {
     })
     const result = await client.getQuota()
     expect(result.success).toBe(false)
-    if (result.success) return
+    if (result.success) {
+      return
+    }
     expect(result.error).toContain('Unique error body text')
   })
 })
