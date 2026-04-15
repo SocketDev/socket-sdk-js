@@ -70,7 +70,6 @@
     "@babel/parser": "7.26.3",
     "@babel/traverse": "7.26.4",
     "@babel/types": "7.26.3",
-    "@dotenvx/dotenvx": "1.54.1",
     "@oxlint/migrate": "1.52.0",
     "@socketsecurity/lib": "5.18.2",
     "@sveltejs/acorn-typescript": "1.0.8",

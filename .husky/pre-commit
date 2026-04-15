@@ -8,12 +8,7 @@ else
 fi
 
 if [ -z "${DISABLE_PRECOMMIT_TEST}" ]; then
-  # Use .env.precommit if it exists, otherwise proceed without it
-  if [ -f ".env.precommit" ]; then
-    pnpm exec dotenvx -q run -f .env.precommit -- pnpm test --staged
-  else
-    pnpm test --staged
-  fi
+  pnpm test --staged
 else
   echo "Skipping testing due to DISABLE_PRECOMMIT_TEST env var"
 fi
