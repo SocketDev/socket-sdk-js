@@ -61,6 +61,7 @@
     "claude": "node scripts/claude.mjs",
     "security": "agentshield scan && { command -v zizmor >/dev/null && zizmor .github/ || echo 'zizmor not installed — run pnpm run setup to install'; }",
     "test": "node scripts/test.mjs",
+    "typecheck": "tsgo --noEmit",
     "type": "tsgo --noEmit -p .config/tsconfig.check.json",
     "update": "node scripts/update.mjs"
   },
