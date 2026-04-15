@@ -706,7 +706,9 @@ describe('SocketSdk - checkMalware batch normalize with publicPolicy', () => {
     const result = await client.checkMalware(components)
 
     expect(result.success).toBe(true)
-    if (!result.success) return
+    if (!result.success) {
+      return
+    }
     expect(result.data).toHaveLength(count)
     const pkg = result.data[0]!
 
@@ -892,7 +894,9 @@ describe('SocketSdk - uploadManifestFiles edge cases', () => {
     ])
 
     expect(result.success).toBe(false)
-    if (result.success) return
+    if (result.success) {
+      return
+    }
     expect(result.error).toBe('No readable manifest files found')
     // The cause should contain truncation for >5 files
     const cause = (result as { cause?: string }).cause ?? ''
@@ -917,7 +921,9 @@ describe('SocketSdk - uploadManifestFiles edge cases', () => {
     ])
 
     expect(result.success).toBe(false)
-    if (result.success) return
+    if (result.success) {
+      return
+    }
     expect(result.error).toBe('Custom validation error')
     // When errorCause is not redundant with errorMessage, it should be included
     const typedResult = result as { cause?: string }
@@ -942,7 +948,9 @@ describe('SocketSdk - uploadManifestFiles edge cases', () => {
     ])
 
     expect(result.success).toBe(false)
-    if (result.success) return
+    if (result.success) {
+      return
+    }
     expect(result.error).toBe('Custom validation error')
     // Redundant cause should be filtered out by filterRedundantCause
     const typedResult = result as { cause?: string }

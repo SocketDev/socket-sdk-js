@@ -88,7 +88,9 @@ describe('SocketSdk - batchOrgPackageFetch', () => {
     })
 
     expect(result.success).toBe(true)
-    if (!result.success) return
+    if (!result.success) {
+      return
+    }
     expect(result.data).toHaveLength(2)
   })
 
@@ -120,7 +122,9 @@ describe('SocketSdk - batchOrgPackageFetch', () => {
     )
 
     expect(result.success).toBe(true)
-    if (!result.success) return
+    if (!result.success) {
+      return
+    }
     // Only the valid artifact line should be parsed
     expect(result.data).toHaveLength(1)
   })
@@ -163,7 +167,9 @@ describe('SocketSdk - searchDependencies', () => {
     const result = await client.searchDependencies({ q: 'lodash' })
 
     expect(result.success).toBe(true)
-    if (!result.success) return
+    if (!result.success) {
+      return
+    }
     expect(result.data).toEqual({
       rows: [{ name: 'lodash', version: '4.17.21' }],
     })
@@ -254,7 +260,9 @@ describe('SocketSdk - File validation callbacks', () => {
       )
 
       expect(result.success).toBe(false)
-      if (result.success) return
+      if (result.success) {
+        return
+      }
       expect(result.error).toBe('Invalid files detected')
       expect(onFileValidation).toHaveBeenCalledOnce()
     })
@@ -278,7 +286,9 @@ describe('SocketSdk - File validation callbacks', () => {
       // With all files invalid and callback continuing, it falls through to
       // the "all files invalid" check and returns an error.
       expect(result.success).toBe(false)
-      if (result.success) return
+      if (result.success) {
+        return
+      }
       expect(result.error).toBe('No readable manifest files found')
     })
 
@@ -298,7 +308,9 @@ describe('SocketSdk - File validation callbacks', () => {
       )
 
       expect(result.success).toBe(false)
-      if (result.success) return
+      if (result.success) {
+        return
+      }
       expect(result.error).toBe('File validation failed')
     })
 
@@ -338,7 +350,9 @@ describe('SocketSdk - File validation callbacks', () => {
       )
 
       expect(result.success).toBe(false)
-      if (result.success) return
+      if (result.success) {
+        return
+      }
       expect(result.error).toBe('Scan file validation failed')
       expect(onFileValidation).toHaveBeenCalledOnce()
       // Verify context includes orgSlug
@@ -365,7 +379,9 @@ describe('SocketSdk - File validation callbacks', () => {
 
       // All files invalid, callback says continue, hits "all files invalid" check
       expect(result.success).toBe(false)
-      if (result.success) return
+      if (result.success) {
+        return
+      }
       expect(result.error).toBe('No readable manifest files found')
     })
 
@@ -404,7 +420,9 @@ describe('SocketSdk - File validation callbacks', () => {
       ])
 
       expect(result.success).toBe(false)
-      if (result.success) return
+      if (result.success) {
+        return
+      }
       expect(result.error).toBe('Upload validation failed')
       expect(onFileValidation).toHaveBeenCalledOnce()
       // Verify context includes orgSlug
@@ -446,7 +464,9 @@ describe('SocketSdk - File validation callbacks', () => {
       ])
 
       expect(result.success).toBe(false)
-      if (result.success) return
+      if (result.success) {
+        return
+      }
       expect(result.error).toBe('File validation failed')
     })
 
@@ -523,7 +543,9 @@ describe('SocketSdk - getApi response type handling', () => {
     >
 
     expect(result.success).toBe(true)
-    if (!result.success) return
+    if (!result.success) {
+      return
+    }
     expect(result.data).toBeDefined()
     expect(result.status).toBe(200)
   })
@@ -567,7 +589,9 @@ describe('SocketSdk - getApi response type handling', () => {
     })) as SocketSdkGenericResult<string>
 
     expect(result.success).toBe(true)
-    if (!result.success) return
+    if (!result.success) {
+      return
+    }
     expect(result.data).toBe('some text data')
     expect(result.status).toBe(200)
   })
@@ -670,7 +694,9 @@ describe('SocketSdk - sendApi additional paths', () => {
     )) as SocketSdkGenericResult<{ id: number; status: string }>
 
     expect(result.success).toBe(true)
-    if (!result.success) return
+    if (!result.success) {
+      return
+    }
     expect(result.data).toEqual({ id: 1, status: 'created' })
     expect(result.status).toBe(200)
   })
@@ -772,7 +798,9 @@ describe('SocketSdk - checkMalware batch path additional', () => {
     const result = await client.checkMalware(components)
 
     expect(result.success).toBe(true)
-    if (!result.success) return
+    if (!result.success) {
+      return
+    }
     expect(result.data).toEqual([])
   })
 
@@ -789,7 +817,9 @@ describe('SocketSdk - checkMalware batch path additional', () => {
     const result = await client.checkMalware(components)
 
     expect(result.success).toBe(true)
-    if (!result.success) return
+    if (!result.success) {
+      return
+    }
     // Server returns 2 artifacts for non-nonexistent purls
     expect(result.data).toHaveLength(2)
     // criticalCVE is 'warn' in publicPolicy, so it should be included
@@ -884,7 +914,9 @@ describe('SocketSdk - additional method coverage', () => {
     const result = await client.exportOpenVEX('test-org', 'vex-123')
 
     expect(result.success).toBe(true)
-    if (!result.success) return
+    if (!result.success) {
+      return
+    }
     expect(result.data).toBeDefined()
   })
 
@@ -897,7 +929,9 @@ describe('SocketSdk - additional method coverage', () => {
     const result = await client.rescanFullScan('test-org', 'scan-123')
 
     expect(result.success).toBe(true)
-    if (!result.success) return
+    if (!result.success) {
+      return
+    }
     expect(result.data).toBeDefined()
   })
 
@@ -923,7 +957,9 @@ describe('SocketSdk - additional method coverage', () => {
     })
 
     expect(result.success).toBe(true)
-    if (!result.success) return
+    if (!result.success) {
+      return
+    }
     expect(result.data).toBeDefined()
   })
 })
