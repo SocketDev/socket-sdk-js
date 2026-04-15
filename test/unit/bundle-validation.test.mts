@@ -8,7 +8,10 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { parse } from '@babel/parser'
-import traverse from '@babel/traverse'
+import _traverse from '@babel/traverse'
+
+// @babel/traverse CJS exports { default: fn } — resolve for both native and vite contexts
+const traverse = typeof _traverse === 'function' ? _traverse : _traverse.default
 import { describe, expect, it } from 'vitest'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
