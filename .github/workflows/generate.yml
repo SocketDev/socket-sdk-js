@@ -32,6 +32,7 @@ jobs:
     name: Sync OpenAPI definition
     runs-on: ubuntu-latest
     permissions:
+      actions: write # To trigger CI workflow via workflow_dispatch
       contents: write # To push generated SDK code
       pull-requests: write # To create PRs for review
     outputs:
@@ -72,7 +73,11 @@ jobs:
       - name: Commit and push changes
         if: steps.check.outputs.has_changes == 'true'
         run: |
-          git checkout -b automated/open-api
+          # Branch from main~1 so the PR is behind main, making the
+          # "Update branch" button available to trigger enterprise checks.
+          git stash
+          git checkout -b automated/open-api HEAD~1
+          git stash pop
           git add .
           git commit -m "fix(openapi): sync with openapi definition"
           git push origin automated/open-api -fu
@@ -109,18 +114,36 @@ jobs:
           fi
 
       # Pushes made with GITHUB_TOKEN don't trigger other workflows.
-      # Close/reopen the PR to generate a pull_request.reopened event,
-      # which triggers required CI and enterprise audit workflows.
+      # Use workflow_dispatch to directly trigger CI on the PR branch.
       - name: Trigger CI checks
         if: steps.check.outputs.has_changes == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+        run: gh workflow run ci.yml --ref automated/open-api
+
+      - name: Add job summary
+        if: steps.check.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          pr_number=$(gh pr list --head automated/open-api --json number --jq '.[0].number')
-          if [ -n "$pr_number" ]; then
-            gh pr close "$pr_number"
-            gh pr reopen "$pr_number"
-          fi
+          pr_number=$(gh pr list --head automated/open-api --json number --jq '.[0].number' || echo "")
+          pr_url="https://github.com/${{ github.repository }}/pull/${pr_number}"
+
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          ## OpenAPI Sync Complete
+
+          **PR:** [#${pr_number}](${pr_url})
+
+          > **Note:** Enterprise required workflows (e.g. Audit GHA Workflows) won't trigger
+          > automatically on bot PRs. Click **"Update branch"** on the PR to trigger them,
+          > or push an empty commit to the branch:
+          >
+          > \`\`\`sh
+          > git fetch origin automated/open-api && git checkout automated/open-api
+          > git commit --allow-empty -m "chore: trigger enterprise checks"
+          > git push origin automated/open-api
+          > \`\`\`
+          EOF
 
       - uses: SocketDev/socket-registry/.github/actions/cleanup-git-signing@bbe46386c0a2bc6baefd02916234956a38e622d5 # main
         if: always()
