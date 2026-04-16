@@ -15,7 +15,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { parse } from '@babel/parser'
-import { default as traverse } from '@babel/traverse'
+import _traverse from '@babel/traverse'
 import * as t from '@babel/types'
 import MagicString from 'magic-string'
 
@@ -25,6 +25,9 @@ import { spawn } from '@socketsecurity/lib/spawn'
 
 import { getRootPath } from './utils/path-helpers.mts'
 import { runCommand } from './utils/run-command.mts'
+
+// CJS/ESM interop: @babel/traverse wraps the function under .default in ESM
+const traverse = ((_traverse as any).default ?? _traverse) as typeof _traverse
 
 const OPENAPI_URL = 'https://api.socket.dev/v0/openapi'
 
