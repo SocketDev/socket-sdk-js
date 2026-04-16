@@ -30,9 +30,6 @@ const isCoverageEnabled =
 export default defineConfig({
   cacheDir: './.cache/vitest',
   test: {
-    deps: {
-      interopDefault: false,
-    },
     globals: false,
     environment: 'node',
     // Only include tests that need isolation
