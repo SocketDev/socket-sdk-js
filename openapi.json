@@ -2875,10 +2875,17 @@
                             "type": "number",
                             "description": "",
                             "default": 0
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "confidence",
+                          "detectedAt",
                           "notes",
                           "severity"
                         ]
@@ -2949,10 +2956,17 @@
                             ],
                             "description": "",
                             "default": "medium"
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "confidence",
+                          "detectedAt",
                           "notes",
                           "risk",
                           "severity"
@@ -3014,10 +3028,17 @@
                             "type": "number",
                             "description": "",
                             "default": 0
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "confidence",
+                          "detectedAt",
                           "notes",
                           "severity"
                         ]
@@ -7290,9 +7311,16 @@
                             "type": "string",
                             "description": "",
                             "default": ""
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
+                          "detectedAt",
                           "id",
                           "note"
                         ]
@@ -7348,9 +7376,16 @@
                             "type": "string",
                             "description": "",
                             "default": ""
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
+                          "detectedAt",
                           "id",
                           "note"
                         ]
@@ -7406,9 +7441,16 @@
                             "type": "string",
                             "description": "",
                             "default": ""
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
+                          "detectedAt",
                           "id",
                           "note"
                         ]
@@ -8184,10 +8226,17 @@
                             "type": "number",
                             "description": "",
                             "default": 0
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "confidence",
+                          "detectedAt",
                           "notes",
                           "severity"
                         ]
@@ -8248,10 +8297,17 @@
                             "type": "number",
                             "description": "",
                             "default": 0
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "confidence",
+                          "detectedAt",
                           "notes",
                           "severity"
                         ]
@@ -8312,10 +8368,17 @@
                             "type": "number",
                             "description": "",
                             "default": 0
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "confidence",
+                          "detectedAt",
                           "notes",
                           "severity"
                         ]
@@ -8376,10 +8439,17 @@
                             "type": "number",
                             "description": "",
                             "default": 0
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "confidence",
+                          "detectedAt",
                           "notes",
                           "severity"
                         ]
@@ -8440,10 +8510,17 @@
                             "type": "number",
                             "description": "",
                             "default": 0
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "confidence",
+                          "detectedAt",
                           "notes",
                           "severity"
                         ]
@@ -8504,10 +8581,17 @@
                             "type": "number",
                             "description": "",
                             "default": 0
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "confidence",
+                          "detectedAt",
                           "notes",
                           "severity"
                         ]
@@ -8568,10 +8652,17 @@
                             "type": "number",
                             "description": "",
                             "default": 0
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "confidence",
+                          "detectedAt",
                           "notes",
                           "severity"
                         ]
@@ -8632,10 +8723,17 @@
                             "type": "number",
                             "description": "",
                             "default": 0
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "confidence",
+                          "detectedAt",
                           "notes",
                           "severity"
                         ]
@@ -8696,10 +8794,17 @@
                             "type": "number",
                             "description": "",
                             "default": 0
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "confidence",
+                          "detectedAt",
                           "notes",
                           "severity"
                         ]
@@ -8760,10 +8865,17 @@
                             "type": "number",
                             "description": "",
                             "default": 0
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "confidence",
+                          "detectedAt",
                           "notes",
                           "severity"
                         ]
@@ -8824,10 +8936,17 @@
                             "type": "number",
                             "description": "",
                             "default": 0
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "confidence",
+                          "detectedAt",
                           "notes",
                           "severity"
                         ]
@@ -8888,10 +9007,17 @@
                             "type": "number",
                             "description": "",
                             "default": 0
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "confidence",
+                          "detectedAt",
                           "notes",
                           "severity"
                         ]
@@ -8952,10 +9078,17 @@
                             "type": "number",
                             "description": "",
                             "default": 0
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "confidence",
+                          "detectedAt",
                           "notes",
                           "severity"
                         ]
@@ -9727,10 +9860,17 @@
                             "type": "string",
                             "description": "",
                             "default": ""
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "confidence",
+                          "detectedAt",
                           "notes"
                         ]
                       },
@@ -10037,10 +10177,17 @@
                             "type": "string",
                             "description": "",
                             "default": ""
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
-                          "alternatePackage"
+                          "alternatePackage",
+                          "detectedAt"
                         ]
                       },
                       "usage": {
@@ -10089,10 +10236,17 @@
                             "type": "string",
                             "description": "",
                             "default": ""
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
-                          "alternatePackage"
+                          "alternatePackage",
+                          "detectedAt"
                         ]
                       },
                       "usage": {
@@ -10433,9 +10587,16 @@
                             ],
                             "description": "",
                             "default": "medium"
+                          },
+                          "detectedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
                           }
                         },
                         "required": [
+                          "detectedAt",
                           "note",
                           "risk"
                         ]
