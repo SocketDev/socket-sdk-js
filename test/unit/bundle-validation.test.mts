@@ -12,11 +12,7 @@ import _traverse from '@babel/traverse'
 import { describe, expect, it } from 'vitest'
 
 // CJS/ESM interop: @babel/traverse wraps the function under .default in ESM
-const traverse = (
-  typeof _traverse === 'function'
-    ? _traverse
-    : (_traverse as unknown as { default: typeof _traverse }).default
-) as typeof _traverse
+const traverse = ((_traverse as any).default ?? _traverse) as typeof _traverse
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const packagePath = path.resolve(__dirname, '../..')
