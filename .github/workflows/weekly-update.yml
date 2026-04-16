@@ -45,6 +45,7 @@ jobs:
     if: needs.check-updates.outputs.has-updates == 'true' && inputs.dry-run != true
     runs-on: ubuntu-latest
     permissions:
+      actions: write
       contents: write
       pull-requests: write
     steps:
@@ -57,7 +58,9 @@ jobs:
         run: |
           BRANCH_NAME="weekly-update-$(date +%Y%m%d)"
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
-          git checkout -b "$BRANCH_NAME"
+          # Branch from HEAD~1 so the PR is behind main, making the
+          # "Update branch" button available to trigger enterprise checks.
+          git checkout -b "$BRANCH_NAME" HEAD~1
           echo "branch=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - uses: SocketDev/socket-registry/.github/actions/setup-git-signing@bbe46386c0a2bc6baefd02916234956a38e622d5 # main
@@ -269,30 +272,41 @@ jobs:
             --base main
 
       # Pushes made with GITHUB_TOKEN don't trigger other workflows.
-      # Close/reopen the PR to generate a pull_request.reopened event,
-      # which triggers required CI and enterprise audit workflows.
+      # Use workflow_dispatch to directly trigger CI on the PR branch.
       - name: Trigger CI checks
         if: steps.final.outputs.success == 'true' && steps.validate.outputs.valid == 'true' && steps.changes.outputs.has-changes == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           BRANCH_NAME: ${{ steps.branch.outputs.branch }}
-        run: |
-          pr_number=$(gh pr list --head "$BRANCH_NAME" --json number --jq '.[0].number')
-          if [ -n "$pr_number" ]; then
-            gh pr close "$pr_number"
-            gh pr reopen "$pr_number"
-          fi
+        run: gh workflow run ci.yml --ref "$BRANCH_NAME"
 
       - name: Add job summary
         if: steps.final.outputs.success == 'true' && steps.validate.outputs.valid == 'true' && steps.changes.outputs.has-changes == 'true'
         env:
+          GH_TOKEN: ${{ github.token }}
           BRANCH_NAME: ${{ steps.branch.outputs.branch }}
         run: |
           COMMIT_COUNT=$(git rev-list --count origin/main..HEAD)
-          echo "## Weekly Update Complete" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Branch:** \`${BRANCH_NAME}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Commits:** ${COMMIT_COUNT}" >> $GITHUB_STEP_SUMMARY
+          pr_number=$(gh pr list --head "$BRANCH_NAME" --json number --jq '.[0].number' || echo "")
+          pr_url="https://github.com/${{ github.repository }}/pull/${pr_number}"
+
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          ## Weekly Update Complete
+
+          **PR:** [#${pr_number}](${pr_url})
+          **Branch:** \`${BRANCH_NAME}\`
+          **Commits:** ${COMMIT_COUNT}
+
+          > **Note:** Enterprise required workflows (e.g. Audit GHA Workflows) won't trigger
+          > automatically on bot PRs. Click **"Update branch"** on the PR to trigger them,
+          > or push an empty commit to the branch:
+          >
+          > \`\`\`sh
+          > git fetch origin ${BRANCH_NAME} && git checkout ${BRANCH_NAME}
+          > git commit --allow-empty -m "chore: trigger enterprise checks"
+          > git push origin ${BRANCH_NAME}
+          > \`\`\`
+          EOF
 
       - name: Upload Claude output
         if: always()
