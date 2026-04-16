@@ -2784,6 +2784,8 @@ export interface components {
               confidence: number
               /** @default 0 */
               severity: number
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -2806,6 +2808,8 @@ export interface components {
                * @enum {string}
                */
               risk: 'low' | 'medium' | 'high'
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -2823,6 +2827,8 @@ export interface components {
               confidence: number
               /** @default 0 */
               severity: number
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4034,6 +4040,8 @@ export interface components {
               id: number
               /** @default */
               note: string
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4049,6 +4057,8 @@ export interface components {
               id: number
               /** @default */
               note: string
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4064,6 +4074,8 @@ export interface components {
               id: number
               /** @default */
               note: string
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4263,6 +4275,8 @@ export interface components {
               confidence: number
               /** @default 0 */
               severity: number
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4280,6 +4294,8 @@ export interface components {
               confidence: number
               /** @default 0 */
               severity: number
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4297,6 +4313,8 @@ export interface components {
               confidence: number
               /** @default 0 */
               severity: number
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4314,6 +4332,8 @@ export interface components {
               confidence: number
               /** @default 0 */
               severity: number
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4331,6 +4351,8 @@ export interface components {
               confidence: number
               /** @default 0 */
               severity: number
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4348,6 +4370,8 @@ export interface components {
               confidence: number
               /** @default 0 */
               severity: number
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4365,6 +4389,8 @@ export interface components {
               confidence: number
               /** @default 0 */
               severity: number
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4382,6 +4408,8 @@ export interface components {
               confidence: number
               /** @default 0 */
               severity: number
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4399,6 +4427,8 @@ export interface components {
               confidence: number
               /** @default 0 */
               severity: number
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4416,6 +4446,8 @@ export interface components {
               confidence: number
               /** @default 0 */
               severity: number
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4433,6 +4465,8 @@ export interface components {
               confidence: number
               /** @default 0 */
               severity: number
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4450,6 +4484,8 @@ export interface components {
               confidence: number
               /** @default 0 */
               severity: number
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4467,6 +4503,8 @@ export interface components {
               confidence: number
               /** @default 0 */
               severity: number
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4653,6 +4691,8 @@ export interface components {
               confidence: number
               /** @default */
               notes: string
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4730,6 +4770,8 @@ export interface components {
             props: {
               /** @default */
               alternatePackage: string
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4743,6 +4785,8 @@ export interface components {
             props: {
               /** @default */
               alternatePackage: string
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4829,6 +4873,8 @@ export interface components {
                * @enum {string}
                */
               risk: 'low' | 'medium' | 'high'
+              /** @default */
+              detectedAt: string | null
             }
             usage?: components['schemas']['SocketUsageRef']
           }
