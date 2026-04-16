@@ -15,7 +15,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { parse } from '@babel/parser'
-import traverse from '@babel/traverse'
+import { default as traverse } from '@babel/traverse'
 import * as t from '@babel/types'
 import MagicString from 'magic-string'
 
