@@ -14,16 +14,13 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ci:
     name: Run CI Pipeline
-    uses: SocketDev/socket-registry/.github/workflows/ci.yml@b86b2cb3fefa4ffa6c1a702476f9785f6c3bb887 # main
+    uses: SocketDev/socket-registry/.github/workflows/ci.yml@bbe46386c0a2bc6baefd02916234956a38e622d5 # main
     with:
-      fail-fast: false
-      lint-script: 'pnpm run lint --all'
-      node-versions: '["24.10.0"]'
-      os-versions: '["ubuntu-latest", "macos-latest", "windows-latest"]'
       test-script: 'pnpm run test --all --skip-build'
-      test-setup-script: 'pnpm run build'
-      type-check-script: 'pnpm run type'
-      type-check-setup-script: 'pnpm run build'
