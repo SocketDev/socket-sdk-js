@@ -236,7 +236,16 @@ async function runTests(
   const vitestCmd = WIN32 ? 'vitest.cmd' : 'vitest'
   const vitestPath = path.join(nodeModulesBinPath, vitestCmd)
 
-  const vitestArgs = ['--config', '.config/vitest.config.mts', 'run']
+  // --passWithNoTests: a scoped run where the changed files don't resolve
+  // to any test file should succeed rather than error with "No test files
+  // found". Keeps pre-commit hooks passing when an edit touches only
+  // non-testable code.
+  const vitestArgs = [
+    '--config',
+    '.config/vitest.config.mts',
+    'run',
+    '--passWithNoTests',
+  ]
 
   // Add coverage if requested
   if (coverage) {
