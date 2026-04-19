@@ -867,10 +867,50 @@ export class SocketSdk {
     /* c8 ignore stop */
     const { components } = componentsObj
     const { length: componentsCount } = components
-    const running = new Map<
-      AsyncGenerator<BatchPackageFetchResultType>,
-      Promise<GeneratorStep>
-    >()
+    // Tracks in-flight generators only for pool-size accounting.
+    // Completed steps and errors flow through the single-waiter queue below,
+    // not through per-generator promises re-raced each iteration — repeated
+    // Promise.race() over the same pool accumulates unreleased .then
+    // handlers on each still-pending arm until the pool drains.
+    // See https://github.com/nodejs/node/issues/17469.
+    const running = new Set<AsyncGenerator<BatchPackageFetchResultType>>()
+    const completed: GeneratorStep[] = []
+    let waiter: {
+      resolve: (step: GeneratorStep) => void
+      reject: (err: unknown) => void
+    } | null = null
+    let pendingError: { err: unknown } | null = null
+    const deliverStep = (step: GeneratorStep) => {
+      if (waiter) {
+        const w = waiter
+        waiter = null
+        w.resolve(step)
+      } else {
+        completed.push(step)
+      }
+    }
+    const deliverError = (err: unknown) => {
+      if (waiter) {
+        const w = waiter
+        waiter = null
+        w.reject(err)
+      } else if (!pendingError) {
+        pendingError = { err }
+      }
+    }
+    const takeStep = (): Promise<GeneratorStep> => {
+      if (pendingError) {
+        const { err } = pendingError
+        pendingError = null
+        return Promise.reject(err)
+      }
+      if (completed.length) {
+        return Promise.resolve(completed.shift()!)
+      }
+      const { promise, resolve, reject } = promiseWithResolvers<GeneratorStep>()
+      waiter = { resolve, reject }
+      return promise
+    }
     let index = 0
     const enqueueGen = () => {
       if (index >= componentsCount) {
@@ -888,17 +928,12 @@ export class SocketSdk {
     const continueGen = (
       generator: AsyncGenerator<BatchPackageFetchResultType>,
     ) => {
-      const {
-        promise,
-        reject: rejectFn,
-        resolve: resolveFn,
-      } = promiseWithResolvers<GeneratorStep>()
-      running.set(generator, promise)
+      running.add(generator)
       void generator
         .next()
         .then(
-          iteratorResult => resolveFn({ generator, iteratorResult }),
-          rejectFn,
+          iteratorResult => deliverStep({ generator, iteratorResult }),
+          deliverError,
         )
     }
     // Start initial batch of generators.
@@ -907,9 +942,7 @@ export class SocketSdk {
     }
     while (running.size > 0) {
       // eslint-disable-next-line no-await-in-loop
-      const { generator, iteratorResult }: GeneratorStep = await Promise.race(
-        running.values(),
-      )
+      const { generator, iteratorResult }: GeneratorStep = await takeStep()
       running.delete(generator)
       // Yield the value if one is given, even when done:true.
       if (iteratorResult.value) {
