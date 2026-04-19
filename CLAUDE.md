@@ -163,7 +163,6 @@ All `logger.error()` and `logger.log()` calls include empty string:
 - **Type safety**: ❌ FORBIDDEN `any`; use `unknown` or specific
 - **Type imports**: Always `import type`
 - **Nullish values**: Prefer `undefined` over `null` - use `undefined` for absent/missing values
-- **Promise.race in loops**: ❌ NEVER re-race the same pool across iterations. Each race attaches fresh `.then` handlers to every arm; long-surviving promises accumulate handler sets ([nodejs/node#17469](https://github.com/nodejs/node/issues/17469)). Fresh-both-arms races (timeout wrappers) are fine. For concurrency limiters like `batchPackageStream`, use a single-waiter queue — each in-flight task's own `.then` delivers into a buffer, the loop awaits a one-shot `promiseWithResolvers` and replaces it per iteration.
 
 #### HTTP Requests
 
