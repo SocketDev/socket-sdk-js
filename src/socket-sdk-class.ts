@@ -875,15 +875,17 @@ export class SocketSdk {
     // See https://github.com/nodejs/node/issues/17469.
     const running = new Set<AsyncGenerator<BatchPackageFetchResultType>>()
     const completed: GeneratorStep[] = []
-    let waiter: {
-      resolve: (step: GeneratorStep) => void
-      reject: (err: unknown) => void
-    } | null = null
-    let pendingError: { err: unknown } | null = null
+    let waiter:
+      | {
+          reject: (err: unknown) => void
+          resolve: (step: GeneratorStep) => void
+        }
+      | undefined
+    let pendingError: { err: unknown } | undefined
     const deliverStep = (step: GeneratorStep) => {
       if (waiter) {
         const w = waiter
-        waiter = null
+        waiter = undefined
         w.resolve(step)
       } else {
         completed.push(step)
@@ -892,7 +894,7 @@ export class SocketSdk {
     const deliverError = (err: unknown) => {
       if (waiter) {
         const w = waiter
-        waiter = null
+        waiter = undefined
         w.reject(err)
       } else if (!pendingError) {
         pendingError = { err }
@@ -901,14 +903,14 @@ export class SocketSdk {
     const takeStep = (): Promise<GeneratorStep> => {
       if (pendingError) {
         const { err } = pendingError
-        pendingError = null
+        pendingError = undefined
         return Promise.reject(err)
       }
       if (completed.length) {
         return Promise.resolve(completed.shift()!)
       }
-      const { promise, resolve, reject } = promiseWithResolvers<GeneratorStep>()
-      waiter = { resolve, reject }
+      const { promise, reject, resolve } = promiseWithResolvers<GeneratorStep>()
+      waiter = { reject, resolve }
       return promise
     }
     let index = 0
