@@ -59,20 +59,25 @@ function getOxlintExcludePatterns(): string[] {
 
 /**
  * Check if a file matches any of the exclude patterns.
+ *
+ * Handles directory patterns (`**\/dist` → matches `dist` and any file inside
+ * it) and file-glob patterns (`**\/*.d.ts` → matches any `.d.ts` file). The
+ * substitution order is deliberate: regex metacharacters in the literal
+ * pattern are escaped first, then `**\/` and `*` are translated in a single
+ * pass via a callback so later substitutions can't corrupt earlier ones.
  */
 function isExcludedByOxlint(file: string, excludePatterns: string[]): boolean {
   for (const pattern of excludePatterns) {
-    // Convert glob pattern to regex-like matching
-    // Support **/ for directory wildcards and * for filename wildcards
+    // Escape regex metacharacters in the literal pattern (dots etc.), then
+    // translate glob tokens in a single pass.
     const regexPattern = pattern
-      // **/ matches any directory
-      .replace(/\*\*\//g, '.*')
-      // * matches any characters except /
-      .replace(/\*/g, '[^/]*')
-      // Escape dots
-      .replace(/\./g, '\\.')
+      .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+      .replace(/\*\*\/|\*/g, m => (m === '*' ? '[^/]*' : '(?:.*/)?'))
 
-    const regex = new RegExp(`^${regexPattern}$`)
+    // Match the pattern as an exact path OR as a directory prefix (pattern
+    // followed by `/`). This makes `**/dist` exclude both `dist` itself and
+    // every descendant.
+    const regex = new RegExp(`^${regexPattern}(?:/|$)`)
     if (regex.test(file)) {
       return true
     }
