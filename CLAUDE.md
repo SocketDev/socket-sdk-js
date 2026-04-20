@@ -81,7 +81,7 @@ Configs live in `.config/`:
 | `.config/tsconfig.base.json`         | Base TS settings                   |
 | `.config/tsconfig.check.json`        | Type checking for `type` command   |
 | `.config/tsconfig.dts.json`          | Declaration file generation        |
-| `.config/esbuild.config.mjs`         | Build orchestration (ESM, node18+) |
+| `.config/esbuild.config.mts`         | Build orchestration (ESM, node18+) |
 | `.oxlintrc.json`                     | oxlint rules                       |
 | `.oxfmtrc.json`                      | oxfmt formatting                   |
 | `.config/vitest.config.mts`          | Main test config                   |
@@ -169,7 +169,7 @@ Also available: `setupTestEnvironment()` (nock only), `createTestClient()` (clie
 ### CI Testing
 
 - 🚨 MANDATORY: `SocketDev/socket-registry/.github/workflows/ci.yml@<full-sha> # main`
-- Custom runner: `scripts/test.mjs` with glob expansion
+- Custom runner: `scripts/test.mts` with glob expansion
 - Memory: auto heap (CI 8GB, local 4GB)
 
 ### Changelog Management
@@ -191,7 +191,7 @@ Also available: `setupTestEnvironment()` (nock only), `createTestClient()` (clie
 - If the user's request is based on a misconception, say so before executing
 - If you spot a bug adjacent to what was asked, flag it: "I also noticed X — want me to fix it?"
 - You are a collaborator, not just an executor
-- Fix warnings when you find them (lint, type-check, build, runtime) — don't leave them for later
+- When a warning (lint, type-check, build, runtime) surfaces in code you're already editing, fix it in the same change — don't leave it for later. For warnings in unrelated files, flag them instead of drive-by fixing.
 
 ### Completion Protocol
 
