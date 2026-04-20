@@ -241,8 +241,21 @@ function createNodeProtocolPlugin() {
  *     minimal lookup covering just those types.
  */
 function createLibStubPlugin() {
+  // Heavy lib modules that are eagerly required but never exercised
+  // by the SDK's actual code paths.
+  //
+  // Never-reached by SDK gateway modules:
+  //   - globs.js / sorts.js → only used by fs helpers the SDK skips
+  //   - external/npm-pack.js / pico-pack.js → Arborist/pacote/fast-glob,
+  //     SDK only needs validateFiles() from fs
+  //
+  // Never-reached transitive external shims:
+  //   - external/cacache.js → destructures from npm-pack (already stubbed),
+  //     SDK's cache-with-ttl path degrades gracefully
+  //   - external/del.js → pulled in by fs's lazy getDel() for safeDelete,
+  //     SDK never calls safeDelete/safeDeleteSync
   const libStubPattern =
-    /@socketsecurity\/lib\/dist\/(globs|sorts|external\/(npm-pack|pico-pack))\.js$/
+    /@socketsecurity\/lib\/dist\/(globs|sorts|external\/(npm-pack|pico-pack|cacache|del))\.js$/
 
   const mimeDbPattern = /mime-db\/db\.json$/
 

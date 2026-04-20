@@ -75,52 +75,56 @@ describe('PromiseQueue', () => {
   })
 
   describe.sequential('Max Queue Length', () => {
-    it('should drop oldest tasks when queue is full', async () => {
+    it('should reject newest submission when queue is full', async () => {
+      // Since @socketsecurity/lib 5.21.0, a bounded PromiseQueue rejects
+      // the NEWEST submission when `maxQueueLength` is exceeded, so
+      // already-enqueued work the caller has committed to awaiting is
+      // preserved. (Prior behavior: dropped the oldest, which discarded
+      // in-flight work.)
       const limitedQueue = new PromiseQueue(1, 2)
       const completed: number[] = []
 
-      // Add first task that will run immediately
+      // Add first task that will run immediately.
       limitedQueue.add(async () => {
         await new Promise(resolve => setTimeout(resolve, 50))
         completed.push(1)
         return 1
       })
 
-      // Give task1 time to start
+      // Give task1 time to start.
       await new Promise(resolve => setTimeout(resolve, 10))
 
-      // Task2 will be queued
-      const task2Promise = limitedQueue.add(async () => {
+      // Task2 will be queued.
+      limitedQueue.add(async () => {
         completed.push(2)
         return 2
       })
 
-      // Task3 will be queued (queue has 2 items: task2, task3)
+      // Task3 will be queued (queue has 2 items: task2, task3).
       limitedQueue.add(async () => {
         completed.push(3)
         return 3
       })
 
-      // Task4 will cause task2 to be dropped (queue is full at maxQueueLength=2)
-      limitedQueue.add(async () => {
+      // Task4 is the newest submission and should be rejected because
+      // the queue is full at maxQueueLength=2.
+      const task4Promise = limitedQueue.add(async () => {
         completed.push(4)
         return 4
       })
 
-      // Task2 should be rejected
-      await expect(task2Promise).rejects.toThrow(
+      await expect(task4Promise).rejects.toThrow(
         'Task dropped: queue length exceeded',
       )
 
-      // Wait for all running and queued tasks to complete
+      // Wait for all running and queued tasks to complete.
       await limitedQueue.onIdle()
 
-      // Only 3 tasks should have completed (task2 was dropped)
+      // Task4 was rejected; task1 + task2 + task3 all ran.
       expect(completed).toContain(1)
-      // Task2 was dropped
-      expect(completed).not.toContain(2)
+      expect(completed).toContain(2)
       expect(completed).toContain(3)
-      expect(completed).toContain(4)
+      expect(completed).not.toContain(4)
       expect(completed.length).toBe(3)
     })
 
