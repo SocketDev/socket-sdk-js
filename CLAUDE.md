@@ -29,10 +29,10 @@ import { getDefaultLogger } from '@socketsecurity/lib/logger'
 const logger = getDefaultLogger()
 
 logger.success(msg) // Green ✓
-logger.fail(msg)    // Red ✗
-logger.warn(msg)    // Yellow ⚠
-logger.info(msg)    // Blue ℹ
-logger.step(msg)    // Cyan →
+logger.fail(msg) // Red ✗
+logger.warn(msg) // Yellow ⚠
+logger.info(msg) // Blue ℹ
+logger.step(msg) // Cyan →
 ```
 
 Emojis allowed sparingly: 📦 💡 🚀 🎉. Prefer text-based symbols for terminal compatibility.
@@ -76,46 +76,51 @@ Features: TypeScript support, API client, package analysis, security scanning, o
 
 Configs live in `.config/`:
 
-| File | Purpose |
-| --- | --- |
-| `tsconfig.json` | Main TS config (extends base) |
-| `.config/tsconfig.base.json` | Base TS settings |
-| `.config/tsconfig.check.json` | Type checking for `type` command |
-| `.config/tsconfig.dts.json` | Declaration file generation |
-| `.config/esbuild.config.mjs` | Build orchestration (ESM, node18+) |
-| `.oxlintrc.json` | oxlint rules |
-| `.oxfmtrc.json` | oxfmt formatting |
-| `.config/vitest.config.mts` | Main test config |
+| File                                 | Purpose                            |
+| ------------------------------------ | ---------------------------------- |
+| `tsconfig.json`                      | Main TS config (extends base)      |
+| `.config/tsconfig.base.json`         | Base TS settings                   |
+| `.config/tsconfig.check.json`        | Type checking for `type` command   |
+| `.config/tsconfig.dts.json`          | Declaration file generation        |
+| `.config/esbuild.config.mjs`         | Build orchestration (ESM, node18+) |
+| `.oxlintrc.json`                     | oxlint rules                       |
+| `.oxfmtrc.json`                      | oxfmt formatting                   |
+| `.config/vitest.config.mts`          | Main test config                   |
 | `.config/vitest.config.isolated.mts` | Isolated tests (for `vi.doMock()`) |
-| `.config/vitest.coverage.config.mts` | Shared coverage thresholds (≥99%) |
-| `.config/isolated-tests.json` | List of tests requiring isolation |
-| `.config/taze.config.mts` | Dependency update policies |
+| `.config/vitest.coverage.config.mts` | Shared coverage thresholds (≥99%)  |
+| `.config/isolated-tests.json`        | List of tests requiring isolation  |
+| `.config/taze.config.mts`            | Dependency update policies         |
 
 ### SDK-Specific Patterns
 
 **Logger calls**: `logger.error()`/`logger.log()` must include empty string: `logger.error('')`, `logger.log('')`.
 
 **File structure**:
+
 - Extensions: `.mts` for TypeScript modules
 - 🚨 MANDATORY `@fileoverview` headers
 - ❌ FORBIDDEN `"use strict"` in `.mjs`/`.mts` (ES modules are strict)
 
 **TypeScript**:
+
 - Semicolons: Use them (unlike other Socket projects)
 - ❌ FORBIDDEN `any`; use `unknown` or specific types
 - Type imports: Always `import type` (separate statements, never inline `type` in value imports)
 - Prefer `undefined` over `null`
 
 **HTTP requests in SDK**:
+
 - 🚨 NEVER use `fetch()` — use `createGetRequest`/`createRequestWithJson` from `src/http-client.ts`
   - `fetch()` bypasses the SDK's HTTP stack (retries, timeouts, hooks, agent config)
   - `fetch()` cannot be intercepted by nock in tests, forcing c8 ignore blocks
   - For external URLs (e.g., firewall API), pass a different `baseUrl` to `createGetRequest`
 
 **Working directory**:
+
 - 🚨 NEVER use `process.chdir()` — pass `{ cwd }` options with absolute paths instead
 
 **Sorting (MANDATORY)**:
+
 - Type properties: required first, then optional; alphabetical within groups
 - Class members: 1) private properties, 2) private methods, 3) public methods (alphabetical)
 - Object properties & destructuring: alphabetical (except semantic ordering)
@@ -123,6 +128,7 @@ Configs live in `.config/`:
 ### Testing
 
 Two vitest configs:
+
 - `.config/vitest.config.mts` — default
 - `.config/vitest.config.isolated.mts` — full process isolation for `vi.doMock()`
 
@@ -145,12 +151,14 @@ describe('My tests', () => {
 Also available: `setupTestEnvironment()` (nock only), `createTestClient()` (client only), `isCoverageMode` (flag).
 
 **Running**:
+
 - All: `pnpm test`
 - Specific: `pnpm test <file>` (glob support)
 - 🚨 **NEVER use `--` before test paths** — runs ALL tests
 - Coverage: `pnpm run cover`
 
 **Best practices**:
+
 - Use `setupTestClient()` + `getClient()` pattern
 - Mock HTTP with nock (cleaned automatically in beforeEach/afterEach)
 - Test success + error paths
