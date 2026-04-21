@@ -270,8 +270,12 @@ async function publishPackage(options: PublishOptions = {}): Promise<boolean> {
   // Prepare publish args.
   const publishArgs = ['publish', '--access', access, '--tag', tag]
 
-  // Add provenance by default (works with trusted publishers).
-  if (!dryRun) {
+  // Add provenance attestation in CI only. `npm publish --provenance`
+  // requires the GitHub Actions OIDC id-token endpoint; running locally
+  // fails with "Provenance generation in GitHub Actions requires
+  // 'id-token: write' permission". Gated so local non-dry-run publishes
+  // (emergency cases) still work.
+  if (!dryRun && process.env['GITHUB_ACTIONS'] === 'true') {
     publishArgs.push('--provenance')
   }
 

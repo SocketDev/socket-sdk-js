@@ -2,11 +2,18 @@ resolutionMode: highest
 loglevel: error
 trustPolicy: no-downgrade
 
+# Register .claude/hooks/* as workspace packages so taze (run via
+# `pnpm run update`) sees and bumps their package.json manifests
+# alongside the root. Keeps hook deps in lockstep with the main tree.
+packages:
+  - .claude/hooks/*
+
 allowBuilds:
+  '@pnpm/exe': true
   esbuild: true
 
 overrides:
-  defu: '>=6.1.6'
+  defu: '>=6.1.7'
   vite: 7.3.2
 
 # Wait 7 days (10080 minutes) before installing newly published packages.
