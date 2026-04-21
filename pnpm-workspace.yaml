@@ -3,6 +3,7 @@ loglevel: error
 trustPolicy: no-downgrade
 
 allowBuilds:
+  '@pnpm/exe': true
   esbuild: true
 
 overrides:
