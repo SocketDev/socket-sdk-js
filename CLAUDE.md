@@ -41,7 +41,16 @@ The umbrella rule: never run a git command that mutates state belonging to a pat
 - 🚨 **NEVER use `npx`, `pnpm dlx`, or `yarn dlx`** — use `pnpm exec <package>` or `pnpm run <script>`. Add tools as pinned devDependencies first.
 - **minimumReleaseAge**: NEVER add packages to `minimumReleaseAgeExclude` in CI. Locally, ASK before adding — the age threshold is a security control.
 - File existence: ALWAYS `existsSync` from `node:fs`. NEVER `fs.access`, `fs.stat`-for-existence, or an async `fileExists` wrapper. Import form: `import { existsSync, promises as fs } from 'node:fs'`.
-- `Promise.race` / `Promise.any`: NEVER pass a long-lived promise (interrupt signal, pool member) into a race inside a loop. Each call re-attaches `.then` handlers to every arm; handlers accumulate on surviving promises until they settle. For concurrency limiters, use a single-waiter "slot available" signal (resolved by each task's `.then`) instead of re-racing `executing[]`. See nodejs/node#17469 and `@watchable/unpromise`. Race with two fresh arms (e.g. one-shot `withTimeout`) is safe.
+- Null-prototype objects: ALWAYS use `{ __proto__: null, ...rest }` for config, return, and internal-state objects. Prevents prototype pollution and accidental inheritance. See `src/socket-sdk-class.ts` and `src/file-upload.ts` for examples.
+- Linear references: NEVER reference Linear issues (e.g. `SOC-123`, `ENG-456`, Linear URLs) in code, code comments, or PR titles/descriptions/review comments. Keep the codebase and PR history tool-agnostic — tracking lives in Linear.
+
+### Promise.race in loops
+
+**NEVER re-race the same pool of promises across loop iterations.** Each call to `Promise.race([A, B, ...])` attaches fresh `.then` handlers to every arm; a promise that survives N iterations accumulates N handler sets. See [nodejs/node#17469](https://github.com/nodejs/node/issues/17469) and `@watchable/unpromise`.
+
+- **Safe**: `Promise.race([fresh1, fresh2])` where both arms are created per call (e.g. one-shot `withTimeout` wrappers).
+- **Leaky**: `Promise.race(pool)` inside a loop where `pool` persists across iterations (the classic concurrency-limiter bug) — also applies to `Promise.any` and long-lived arms like interrupt signals.
+- **Fix**: single-waiter "slot available" signal — each task's `.then` resolves a one-shot `promiseWithResolvers` that the loop awaits, then replaces. No persistent pool, nothing to stack.
 
 ---
 
