@@ -867,23 +867,85 @@ export class SocketSdk {
     /* c8 ignore stop */
     const { components } = componentsObj
     const { length: componentsCount } = components
-    // Tracks in-flight generators only for pool-size accounting.
-    // Completed steps and errors flow through the single-waiter queue below,
-    // not through per-generator promises re-raced each iteration — repeated
-    // Promise.race() over the same pool accumulates unreleased .then
-    // handlers on each still-pending arm until the pool drains.
-    // See https://github.com/nodejs/node/issues/17469.
+    // ─────────────────────────────────────────────────────────────────────
+    // Why this isn't `Promise.race(running.values())` in a loop.
+    //
+    // The old version kept a Map<generator, promise> of every in-flight
+    // generator step, then each iteration did:
+    //
+    //   await Promise.race(running.values())
+    //
+    // That looks fine, but here's the trap: `Promise.race` attaches a
+    // *fresh* pair of `.then(resolve, reject)` handlers to EVERY promise
+    // it's passed — every single time it's called. Those handlers stay
+    // attached until the promise they're on settles. The race itself
+    // settling doesn't detach them from the losers.
+    //
+    // So imagine 10 generators running, and one finishes quickly while
+    // the other 9 are slow. Each loop iteration:
+    //   - race returns (say) generator #3's step
+    //   - we kick off generator #3's next step → new race over 10 promises
+    //   - BUT the 9 slow ones still have handlers from the PREVIOUS race
+    //     hanging off them, plus the 9 new ones we just added
+    //
+    // After N iterations on a long-running generator's promise, that
+    // single promise has ~N dead handler closures queued on it, each
+    // holding references to closure state. For a batch of thousands of
+    // components this adds up to a real memory leak, and the GC can't
+    // help until every last generator in the pool settles.
+    //
+    // See https://github.com/nodejs/node/issues/17469 for the canonical
+    // write-up, and the `@watchable/unpromise` package for the
+    // one-shot-handler pattern we're adopting here.
+    //
+    // The fix: flip the direction. Instead of the main loop repeatedly
+    // racing the pool, each generator's `.then` pushes its result into a
+    // tiny queue (`completed`), and the main loop awaits one promise at
+    // a time via `takeStep()`. Each generator attaches its handlers
+    // exactly ONCE per step — no stacking, nothing to leak.
+    // ─────────────────────────────────────────────────────────────────────
+
+    // `running` is now just a Set for pool-size accounting (how many
+    // generators are still in flight). We no longer store promises here
+    // because we don't race them — see the block comment above.
     const running = new Set<AsyncGenerator<BatchPackageFetchResultType>>()
+
+    // Buffer of steps that finished while the main loop wasn't waiting.
+    // Happens when multiple generators resolve in the same microtask tick:
+    // the first one wakes the waiter, the rest land here until takeStep()
+    // drains them.
     const completed: GeneratorStep[] = []
+
+    // At most ONE waiter at a time, because the main loop awaits one step
+    // per iteration. `undefined` means "nobody is currently awaiting".
+    // When a step arrives and a waiter exists, we hand it the step and
+    // clear the slot. When a step arrives and no waiter exists, we queue
+    // it in `completed` above.
     let waiter:
       | {
           reject: (err: unknown) => void
           resolve: (step: GeneratorStep) => void
         }
       | undefined
+
+    // If a generator rejects while nobody is awaiting, we stash the error
+    // here so the NEXT takeStep() call can surface it. We only keep the
+    // first error (matches the old Promise.race behavior — first rejection
+    // wins, later ones are swallowed). Wrapped in an object so we can
+    // distinguish "no error" (undefined) from "error was literally
+    // undefined" (a `{ err: undefined }` object).
     let pendingError: { err: unknown } | undefined
+
+    // Called from a generator's `.then` success path. Two cases:
+    //   1. The main loop is parked in takeStep() → wake it directly.
+    //   2. The main loop is busy → buffer the step for later.
+    // Either way, `.then` fires exactly once per generator step, so no
+    // handlers pile up on long-lived promises.
     const deliverStep = (step: GeneratorStep) => {
       if (waiter) {
+        // Snapshot + clear before calling resolve, in case resolve
+        // synchronously triggers another deliverStep/takeStep cycle and
+        // we don't want to hand the next step to a stale waiter.
         const w = waiter
         waiter = undefined
         w.resolve(step)
@@ -891,6 +953,10 @@ export class SocketSdk {
         completed.push(step)
       }
     }
+
+    // Mirror of deliverStep for the rejection path. Same snapshot-then-
+    // clear dance. If no waiter and no prior pendingError, remember this
+    // one so the next takeStep() can throw it.
     const deliverError = (err: unknown) => {
       if (waiter) {
         const w = waiter
@@ -900,6 +966,15 @@ export class SocketSdk {
         pendingError = { err }
       }
     }
+
+    // The main loop's only way to wait for progress. Priority:
+    //   1. Surface any stashed error immediately (fail-fast).
+    //   2. Return a buffered step if one is queued (no await needed —
+    //      `Promise.resolve(x)` still yields a microtask, but no new
+    //      handler chains get attached to long-lived promises).
+    //   3. Otherwise register ourselves as THE waiter and park on a
+    //      fresh promise. Because only one slot exists, there's never
+    //      more than one handler outstanding.
     const takeStep = (): Promise<GeneratorStep> => {
       if (pendingError) {
         const { err } = pendingError
@@ -927,6 +1002,11 @@ export class SocketSdk {
       continueGen(generator)
       index += chunkSize
     }
+    // Kick off (or continue) a single generator. The key detail: we
+    // attach `.then` to the `.next()` promise EXACTLY ONCE. That promise
+    // will settle once, our handlers fire once, and nothing else is ever
+    // chained on top of it. This is the whole point of the refactor —
+    // no `Promise.race` loop means no re-attaching handlers every tick.
     const continueGen = (
       generator: AsyncGenerator<BatchPackageFetchResultType>,
     ) => {
