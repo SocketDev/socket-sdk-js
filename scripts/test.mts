@@ -238,6 +238,18 @@ async function runTests(
 
   const vitestArgs = ['--config', '.config/vitest.config.mts', 'run']
 
+  // --passWithNoTests is only safe for scoped runs (specific test files from
+  // the changed-file mapper, or user-supplied positional patterns). In those
+  // cases, "no matching test file" is an expected non-failure — e.g., an edit
+  // touches only non-testable code, or the user points vitest at a file
+  // outside the test globs. For --all/--force runs (and the fallback where
+  // the mapper returns 'all'), an empty test run is a real signal (e.g.,
+  // wholesale test deletion, broken globs) and must surface as failure.
+  const isScopedRun = testsToRun !== 'all' || positionals.length > 0
+  if (isScopedRun) {
+    vitestArgs.push('--passWithNoTests')
+  }
+
   // Add coverage if requested
   if (coverage) {
     vitestArgs.push('--coverage')
