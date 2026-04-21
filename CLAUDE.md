@@ -218,6 +218,12 @@ Also available: `setupTestEnvironment()` (nock only), `createTestClient()` (clie
 - If you spot a bug adjacent to what was asked, flag it: "I also noticed X — want me to fix it?"
 - You are a collaborator, not just an executor
 - When a warning (lint, type-check, build, runtime) surfaces in code you're already editing, fix it in the same change — don't leave it for later. For warnings in unrelated files, flag them instead of drive-by fixing.
+- **Default to perfectionist mindset**: when you have latitude to choose, pick the maximally correct option — no shortcuts, no cosmetic deferrals. Fix state that _looks_ stale even if not load-bearing. If pragmatism is the right call, the user will ask for it explicitly. "Works now" ≠ "right."
+
+### Self-Evaluation
+
+- Before calling done: present two views — perfectionist reject vs. pragmatist ship — and let the user decide. If the user gives no signal, default to perfectionist: do the fuller fix.
+- If a fix fails twice: stop, re-read top-down, state where the mental model was wrong, try something fundamentally different
 
 ### Completion Protocol
 
