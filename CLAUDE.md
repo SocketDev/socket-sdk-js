@@ -2,41 +2,26 @@
 
 🚨 **MANDATORY**: Act as principal-level engineer with deep expertise in TypeScript, Node.js, and SDK development.
 
-## 👤 USER CONTEXT
+## USER CONTEXT
 
-- **Identify users by git credentials**: Extract name from git commit author, GitHub account, or context
-- 🚨 **When identity is verified**: ALWAYS use their actual name - NEVER use "the user" or "user"
-- **Direct communication**: Use "you/your" when speaking directly to the verified user
-- **Discussing their work**: Use their actual name when referencing their commits/contributions
-- **Example**: If git shows "John-David Dalton <jdalton@example.com>", refer to them as "John-David"
-- **Other contributors**: Use their actual names from commit history/context
+- Identify users by git credentials; use their actual name, never "the user"
+- Use "you/your" when speaking directly; use names when referencing contributions
 
 ## 📚 SHARED STANDARDS
 
-**Quick references**:
-
-- Commits: [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) `<type>(<scope>): <description>` — Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `perf` — NO AI attribution
+- Commits: [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) `<type>(<scope>): <description>` — NO AI attribution
 - Scripts: Prefer `pnpm run foo --flag` over `foo:bar` scripts
-- Docs: Use `docs/` folder, lowercase-with-hyphens.md filenames, pithy writing with visuals
-- Dependencies: After `package.json` edits, run `pnpm install` to update `pnpm-lock.yaml`
-- Backward Compatibility: 🚨 FORBIDDEN to maintain - actively remove when encountered (see canonical CLAUDE.md)
-- 🚨 **NEVER use `npx`, `pnpm dlx`, or `yarn dlx`** — use `pnpm exec <package>` for devDep binaries, or `pnpm run <script>` for package.json scripts. If a tool is needed, add it as a pinned devDependency first.
+- Dependencies: After `package.json` edits, run `pnpm install`
+- Backward Compatibility: 🚨 FORBIDDEN to maintain — actively remove when encountered
+- 🚨 **NEVER use `npx`, `pnpm dlx`, or `yarn dlx`** — use `pnpm exec <package>` or `pnpm run <script>`. Add tools as pinned devDependencies first.
 - **minimumReleaseAge**: NEVER add packages to `minimumReleaseAgeExclude` in CI. Locally, ASK before adding — the age threshold is a security control.
 - File existence: ALWAYS `existsSync` from `node:fs`. NEVER `fs.access`, `fs.stat`-for-existence, or an async `fileExists` wrapper. Import form: `import { existsSync, promises as fs } from 'node:fs'`.
 
 ---
 
-## 📝 EMOJI & OUTPUT STYLE
+## EMOJI & OUTPUT STYLE
 
-**Terminal Symbols** (based on `@socketsecurity/lib/logger` LOG_SYMBOLS):
-
-- ✓ Success/checkmark - MUST be green (NOT ✅)
-- ✗ Error/failure - MUST be red (NOT ❌)
-- ⚠ Warning/caution - MUST be yellow (NOT ⚠️)
-- ℹ Info - MUST be blue (NOT ℹ️)
-- → Step/progress - MUST be cyan (NOT ➜ or ▶)
-
-**Usage** (use logger methods, NOT manual color application):
+**Terminal symbols** (from `@socketsecurity/lib/logger` LOG_SYMBOLS): ✓ (green), ✗ (red), ⚠ (yellow), ℹ (blue), → (cyan). Use logger methods, never manually apply colors.
 
 ```javascript
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
@@ -49,26 +34,7 @@ logger.info(msg) // Blue ℹ
 logger.step(msg) // Cyan →
 ```
 
-**Important**:
-
-- Always use logger methods for status symbols
-- Never manually apply colors with yoctocolors-cjs or similar
-- Logger automatically handles colored symbols
-
-**Allowed Emojis** (use sparingly):
-
-- 📦 Packages
-- 💡 Ideas/tips
-- 🚀 Launch/deploy/excitement
-- 🎉 Major success/celebration
-
-**General Philosophy**:
-
-- Prefer colored text-based symbols (✓✗⚠ℹ→) for maximum terminal compatibility
-- Always color-code symbols: green=success, red=error, yellow=warning, blue=info, cyan=step
-- Use emojis sparingly for emphasis and delight
-- Avoid emoji overload - less is more
-- When in doubt, use plain text
+Emojis allowed sparingly: 📦 💡 🚀 🎉. Prefer text-based symbols for terminal compatibility.
 
 ---
 
@@ -76,34 +42,29 @@ logger.step(msg) // Cyan →
 
 ### Architecture
 
-Socket SDK for JavaScript/TypeScript - Programmatic access to Socket.dev security analysis
+Socket SDK for JavaScript/TypeScript — programmatic access to Socket.dev security analysis.
 
-**Core Structure**:
+- `src/index.ts` — entry
+- `src/socket-sdk-class.ts` — SDK class with all API methods
+- `src/http-client.ts` — request/response handling
+- `src/types.ts` — TypeScript definitions
+- `src/utils.ts` — shared utilities
+- `src/constants.ts` — constants
 
-- **Entry**: `src/index.ts`
-- **SDK Class**: `src/socket-sdk-class.ts` - All API methods
-- **HTTP Client**: `src/http-client.ts` - Request/response handling
-- **Types**: `src/types.ts` - TypeScript definitions
-- **Utils**: `src/utils.ts` - Shared utilities
-- **Constants**: `src/constants.ts`
-
-**Features**: Full TypeScript support, API client, package analysis, security scanning, org/repo management, SBOM support, batch operations, file uploads
+Features: TypeScript support, API client, package analysis, security scanning, org/repo management, SBOM, batch operations, file uploads.
 
 ### Commands
 
-- **Build**: `pnpm build` (production build)
-- **Watch**: `pnpm build --watch` (dev mode with 68% faster incremental builds)
+- **Build**: `pnpm build` (`pnpm build --watch` for dev — 68% faster rebuilds)
 - **Test**: `pnpm test`
 - **Type check**: `pnpm run type`
 - **Lint**: `pnpm run lint`
 - **Check all**: `pnpm check`
 - **Coverage**: `pnpm run cover`
 
-**Development tip:** Use `pnpm build --watch` for 68% faster rebuilds (9ms vs 27ms).
-
 ## Agents & Skills
 
-- `/security-scan` — runs AgentShield + zizmor security audit
+- `/security-scan` — AgentShield + zizmor security audit
 - `/quality-scan` — comprehensive code quality analysis
 - `/quality-loop` — scan and fix iteratively
 - Agents: `code-reviewer`, `security-reviewer`, `refactor-cleaner` (in `.claude/agents/`)
@@ -112,229 +73,151 @@ Socket SDK for JavaScript/TypeScript - Programmatic access to Socket.dev securit
 
 ### Configuration Files
 
-All configuration files are organized in `.config/` directory for cleanliness:
+Configs live in `.config/`:
 
-| File                                   | Purpose                                          | When to Modify                              |
-| -------------------------------------- | ------------------------------------------------ | ------------------------------------------- |
-| **tsconfig.json**                      | Main TS config (extends tsconfig.base.json)      | Rarely - only for project-wide TS changes   |
-| **.config/tsconfig.base.json**         | Base TS settings (strict mode, targets)          | Rarely - shared TS configuration            |
-| **.config/tsconfig.check.json**        | Type checking for type command                   | Rarely - only for type-check configuration  |
-| **.config/tsconfig.dts.json**          | Declaration file generation settings             | Rarely - only for type output changes       |
-| **.config/esbuild.config.mjs**         | Build orchestration (ESM output, node18+ target) | When adding new entry points or build steps |
-| **.oxlintrc.json**                     | Linting rules (oxlint configuration)             | When adding new lint rules                  |
-| **.oxfmtrc.json**                      | Code formatting (oxfmt configuration)            | When changing format rules                  |
-| **.config/vitest.config.mts**          | Main test config (default runner)                | When changing test setup or plugins         |
-| **.config/vitest.config.isolated.mts** | Isolated test config (for vi.doMock() tests)     | Never - only for isolated test mode         |
-| **.config/vitest.coverage.config.mts** | Shared coverage thresholds (≥99%)                | When adjusting coverage requirements        |
-| **.config/isolated-tests.json**        | List of tests requiring isolation                | When adding tests that use vi.doMock()      |
-| **.config/taze.config.mts**            | Dependency update tool settings                  | When changing update policies               |
-
-**Why multiple TypeScript configs?**
-
-- `tsconfig.json` - Main config for building the SDK
-- `tsconfig.check.json` - Type checking configuration for type command
-- `tsconfig.dts.json` - Declaration file generation has different output requirements
-
-**Why multiple Vitest configs?**
-
-- `vitest.config.mts` - Standard test mode (default, fastest)
-- `vitest.config.isolated.mts` - Process isolation for tests using `vi.doMock()` (slower)
-- `vitest.coverage.config.mts` - Shared coverage settings to avoid duplication
+| File                                 | Purpose                            |
+| ------------------------------------ | ---------------------------------- |
+| `tsconfig.json`                      | Main TS config (extends base)      |
+| `.config/tsconfig.base.json`         | Base TS settings                   |
+| `.config/tsconfig.check.json`        | Type checking for `type` command   |
+| `.config/tsconfig.dts.json`          | Declaration file generation        |
+| `.config/esbuild.config.mts`         | Build orchestration (ESM, node18+) |
+| `.oxlintrc.json`                     | oxlint rules                       |
+| `.oxfmtrc.json`                      | oxfmt formatting                   |
+| `.config/vitest.config.mts`          | Main test config                   |
+| `.config/vitest.config.isolated.mts` | Isolated tests (for `vi.doMock()`) |
+| `.config/vitest.coverage.config.mts` | Shared coverage thresholds (≥99%)  |
+| `.config/isolated-tests.json`        | List of tests requiring isolation  |
+| `.config/taze.config.mts`            | Dependency update policies         |
 
 ### SDK-Specific Patterns
 
-#### Logger Standardization
+**Logger calls**: `logger.error()`/`logger.log()` must include empty string: `logger.error('')`, `logger.log('')`.
 
-All `logger.error()` and `logger.log()` calls include empty string:
+**File structure**:
 
-- ✅ `logger.error('')`, `logger.log('')`
-- ❌ `logger.error()`, `logger.log()`
+- Extensions: `.mts` for TypeScript modules
+- 🚨 MANDATORY `@fileoverview` headers
+- ❌ FORBIDDEN `"use strict"` in `.mjs`/`.mts` (ES modules are strict)
 
-#### File Structure
+**TypeScript**:
 
-- **Extensions**: `.mts` for TypeScript modules
-- **Module headers**: 🚨 MANDATORY `@fileoverview` headers
-- **"use strict"**: ❌ FORBIDDEN in .mjs/.mts (ES modules are strict)
+- Semicolons: Use them (unlike other Socket projects)
+- ❌ FORBIDDEN `any`; use `unknown` or specific types
+- Type imports: Always `import type` (separate statements, never inline `type` in value imports)
+- Prefer `undefined` over `null`
 
-#### TypeScript Patterns
+**HTTP requests in SDK**:
 
-- **Semicolons**: Use semicolons (unlike other Socket projects)
-- **Type safety**: ❌ FORBIDDEN `any`; use `unknown` or specific
-- **Type imports**: Always `import type`
-- **Nullish values**: Prefer `undefined` over `null` - use `undefined` for absent/missing values
-
-#### HTTP Requests
-
-- **🚨 NEVER use `fetch()`** - use `createGetRequest`/`createRequestWithJson` from `src/http-client.ts`
+- 🚨 NEVER use `fetch()` — use `createGetRequest`/`createRequestWithJson` from `src/http-client.ts`
   - `fetch()` bypasses the SDK's HTTP stack (retries, timeouts, hooks, agent config)
   - `fetch()` cannot be intercepted by nock in tests, forcing c8 ignore blocks
   - For external URLs (e.g., firewall API), pass a different `baseUrl` to `createGetRequest`
 
-#### Working Directory
+**Working directory**:
 
-- **🚨 NEVER use `process.chdir()`** - use `{ cwd }` options and absolute paths instead
-  - Breaks tests, worker threads, and causes race conditions
-  - Always pass `{ cwd: absolutePath }` to spawn/exec/fs operations
+- 🚨 NEVER use `process.chdir()` — pass `{ cwd }` options with absolute paths instead
 
-#### API Method Organization
+**Sorting (MANDATORY)**:
 
-Documentation organized alphabetically within functional categories
-
-#### Comprehensive Sorting (MANDATORY)
-
-- **Type properties**: Required first, then optional; alphabetical within groups
-- **Class members**: 1) Private properties, 2) Private methods, 3) Public methods (all alphabetical)
-- **Object properties**: Alphabetical in literals (except semantic ordering)
-- **Destructuring**: Alphabetical (`const { apiKey, baseUrl, timeout }`)
+- Type properties: required first, then optional; alphabetical within groups
+- Class members: 1) private properties, 2) private methods, 3) public methods (alphabetical)
+- Object properties & destructuring: alphabetical (except semantic ordering)
 
 ### Testing
 
-**Vitest Configuration**: Two configs available:
+Two vitest configs:
 
-- `.config/vitest.config.mts` - Main config (default)
-- `.config/vitest.config.isolated.mts` - Full process isolation for vi.doMock()
+- `.config/vitest.config.mts` — default
+- `.config/vitest.config.isolated.mts` — full process isolation for `vi.doMock()`
 
-#### Test Structure
+**Structure**: `test/` for tests, `test/utils/` for shared helpers. Use descriptive names like `socket-sdk-upload-manifest.test.mts`.
 
-- **Directories**: `test/` - Test files, `test/utils/` - Shared utilities
-- **Naming**: Descriptive names
-  - ✅ `socket-sdk-upload-manifest.test.mts`, `describe('SocketSdk - Upload Manifest')`
-  - ❌ `test1.test.mts`, `describe('tests')`
-- **Consolidated files**: `socket-sdk-api-methods.coverage.test.mts` - Comprehensive API method tests
-
-#### Test Helpers (`test/utils/environment.mts`)
-
-**setupTestClient(token?, options?)** - Combined nock setup + client creation (RECOMMENDED)
+**Helpers** (`test/utils/environment.mts`):
 
 ```typescript
+// Recommended: combined nock setup + client creation
 import { setupTestClient } from './utils/environment.mts'
 
 describe('My tests', () => {
   const getClient = setupTestClient('test-api-token', { retries: 0 })
-
   it('should work', async () => {
     const client = getClient()
-    // ... test code
   })
 })
 ```
 
-**setupTestEnvironment()** - Just nock setup (for custom client creation)
+Also available: `setupTestEnvironment()` (nock only), `createTestClient()` (client only), `isCoverageMode` (flag).
 
-```typescript
-import { setupTestEnvironment, createTestClient } from './utils/environment.mts'
+**Running**:
 
-describe('My tests', () => {
-  setupTestEnvironment()
+- All: `pnpm test`
+- Specific: `pnpm test <file>` (glob support)
+- 🚨 **NEVER use `--` before test paths** — runs ALL tests
+- Coverage: `pnpm run cover`
 
-  it('should work', async () => {
-    const client = createTestClient('custom-token')
-    // ... test code
-  })
-})
-```
+**Best practices**:
 
-**createTestClient(token?, options?)** - Just client creation (no nock setup)
+- Use `setupTestClient()` + `getClient()` pattern
+- Mock HTTP with nock (cleaned automatically in beforeEach/afterEach)
+- Test success + error paths
+- Test cross-platform path handling
+- See `test/unit/getapi-sendapi-methods.test.mts` for examples
 
-```typescript
-const client = createTestClient('test-token', { retries: 0 })
-```
-
-**isCoverageMode** - Flag for coverage detection
-
-```typescript
-if (isCoverageMode) {
-  // Skip tests that don't work well in coverage mode
-}
-```
-
-#### Running Tests
-
-- **All tests**: `pnpm test`
-- **Specific file**: `pnpm test <file>` (glob support)
-- **Coverage**: `pnpm run cover`
-
-#### Best Practices
-
-- **Use setupTestClient()**: Combines nock setup and client creation in one call
-- **Use getClient() pattern**: Access client instance returned by setupTestClient()
-- **Mock HTTP with nock**: All HTTP requests must be mocked
-- **Auto cleanup**: Nock mocks cleaned automatically in beforeEach/afterEach
-- **Test both paths**: Success + error paths for all methods
-- **Cross-platform**: Test path handling on Windows and Unix
-- **Follow patterns**: See `test/unit/getapi-sendapi-methods.test.mts` for examples
-
-### Test Style — Functional Over Source Scanning
-
-**NEVER write source-code-scanning tests**
-
-Do not read source files and assert on their contents (`.toContain('pattern')`). These tests are brittle and break on any refactor.
-
-- Write functional tests that verify **behavior**, not string patterns
-- For modules requiring a built binary: use integration tests
-- For pure logic: use unit tests with real function calls
+**Test style — functional over source scanning**: NEVER read source files and assert on their contents (`.toContain('pattern')`). Write functional behavior tests.
 
 ### CI Testing
 
-- **🚨 MANDATORY**: `SocketDev/socket-registry/.github/workflows/ci.yml@<SHA>` with full SHA
-- **Format**: `@662bbcab1b7533e24ba8e3446cffd8a7e5f7617e # main`
-- **Custom runner**: `scripts/test.mjs` with glob expansion
-- **Memory**: Auto heap size (CI: 8GB, local: 4GB)
+- 🚨 MANDATORY: `SocketDev/socket-registry/.github/workflows/ci.yml@<full-sha> # main`
+- Custom runner: `scripts/test.mts` with glob expansion
+- Memory: auto heap (CI 8GB, local 4GB)
 
 ### Changelog Management
 
-**🚨 MANDATORY**: When creating changelog entries for version bumps:
+🚨 MANDATORY for version bumps:
 
-- **Check OpenAPI updates**: Analyze `types/api.d.ts` changes
-  ```bash
-  git diff v{prev}..HEAD -- types/
-  ```
-- **Document user-facing changes**:
-  - New endpoints (e.g., `/openapi.json`)
-  - Updated parameter descriptions/behavior
-  - New type categories/enum values (e.g., 'dual' threat type)
-  - Breaking changes to API contracts
-- **Focus**: User impact only, not internal infrastructure
-- **Rationale**: OpenAPI changes directly impact SDK users
+- Check OpenAPI updates: `git diff v{prev}..HEAD -- types/`
+- Document user-facing changes: new endpoints, parameter changes, new enum values, breaking contracts
+- Focus on user impact, not internal infrastructure
 
 ### Debugging
 
-- **CI vs Local**: CI uses published npm packages, not local
-- **Package detection**: Use `existsSync()` not `fs.access()`
-- **Test failures**: Check unused nock mocks, ensure cleanup
+- CI uses published npm packages, not local
+- Package detection: use `existsSync()` not `fs.access()`
+- Test failures: check unused nock mocks and cleanup
+
+### Judgment Protocol
+
+- If the user's request is based on a misconception, say so before executing
+- If you spot a bug adjacent to what was asked, flag it: "I also noticed X — want me to fix it?"
+- You are a collaborator, not just an executor
+- When a warning (lint, type-check, build, runtime) surfaces in code you're already editing, fix it in the same change — don't leave it for later. For warnings in unrelated files, flag them instead of drive-by fixing.
 
 ### Completion Protocol
 
-- **NEVER claim done with something 80% complete** — finish 100% before reporting
-- When a multi-step change doesn't immediately show gains, commit and keep iterating — don't revert
-- If one approach fails, fix forward: analyze why, adjust, rebuild, re-measure — not `git checkout`
-- After EVERY code change: build, test, verify, commit. This is a single atomic unit
-- Reverting is a last resort after exhausting forward fixes — and requires explicit user approval
+- **NEVER claim done at 80%** — finish 100% before reporting
+- Fix forward, don't revert; reverting requires explicit user approval
+- After EVERY code change: build, test, verify, commit — one atomic unit
 
 ### File System as State
 
-The file system is working memory. Use it actively:
-
-- Write intermediate results and analysis to files in `.claude/`
-- Use `.claude/` for plans, status tracking, and cross-session context
-- When debugging, save logs and outputs to files for reproducible verification
-- Don't hold large analysis in context — write it down, reference it later
+Use `.claude/` (gitignored) for plans, intermediate analysis, logs, and cross-session context. Don't hold large analysis in context.
 
 ### Self-Improvement
 
-- After ANY correction from the user: log the pattern to memory so the same mistake is never repeated
-- Convert mistakes into strict rules — don't just note them, enforce them
-- After fixing a bug: explain why it happened and whether anything prevents that category of bug in the future
+- After ANY user correction: log the pattern so the mistake isn't repeated
+- Convert mistakes into strict rules
+- After fixing a bug: explain why it happened and what category it represents
 
 ### Context & Edit Safety
 
-- After 10+ messages: re-read any file before editing it — do not trust remembered contents
-- Before every edit: re-read the file. After every edit: re-read to confirm the change applied correctly
-- Tool results over 50K characters are silently truncated — if search returns suspiciously few results, narrow scope and re-run
-- For tasks touching >5 files: use sub-agents with worktree isolation to prevent context decay
+- After 10+ messages: re-read files before editing
+- Before/after every edit: re-read to confirm
+- Tool results over 50K chars are silently truncated — narrow scope and re-run if sparse
+- Tasks touching >5 files: use sub-agents with worktree isolation
 
 ### SDK Notes
 
-- Windows compatibility important - test path handling
-- Use utilities from @socketsecurity/registry where available
+- Windows compatibility matters — test path handling
+- Use utilities from `@socketsecurity/registry` where available
 - Maintain consistency with surrounding code
