@@ -30,7 +30,7 @@ jobs:
     permissions:
       contents: write # To create GitHub releases
       id-token: write # For npm trusted publishing via OIDC
-    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@46132ceb75d2efd44bb0af38504101366f73ca68 # main
+    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@a5923566cd8bcf70aefa1eefacf21f96e328be45 # main
     with:
       debug: ${{ inputs.debug }}
       dist-tag: ${{ inputs.dist-tag }}
@@ -40,4 +40,4 @@ jobs:
       setup-script: 'ci:validate'
       use-trusted-publishing: true
     secrets:
-      SOCKET_API_KEY: ${{ secrets.SOCKET_API_KEY }}
+      SOCKET_API_KEY: ${{ secrets.SOCKET_API_TOKEN }}
