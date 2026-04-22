@@ -97,6 +97,38 @@ Features: TypeScript support, API client, package analysis, security scanning, o
 - **Check all**: `pnpm check`
 - **Coverage**: `pnpm run cover`
 
+## ERROR MESSAGES
+
+An error message is UI. The reader should be able to fix the problem from the message alone, without opening your source.
+
+Every message needs four ingredients, in order:
+
+1. **What** — the rule that was broken (e.g. "must be non-empty"), not the fallout ("invalid").
+2. **Where** — the exact method, argument, field, or URL. Not "somewhere in the request".
+3. **Saw vs. wanted** — the bad value and the allowed shape or set.
+4. **Fix** — one concrete action, in imperative voice (`pass an org slug`, not `the org slug was missing`).
+
+Length depends on the audience:
+
+- **SDK / library API errors** (thrown from the published package to its callers): terse. Callers may `catch` the error and match on the message text, so every word counts and every rewording breaks someone. All four ingredients often fit in one sentence — e.g. `orgSlug is required` covers rule, where (`orgSlug` argument), saw (missing), and implies the fix.
+- **Validator / CLI-ish errors** (verbose, developer-facing): rare in the SDK itself; when they occur (e.g. request body validation), give each ingredient its own words.
+- **Programmatic errors** (internal assertions, invariant checks): terse, rule only. No end user will see it; short keeps the check readable.
+
+Rules for every message:
+
+- Imperative voice for the fix — `pass an org slug`, not `org slug was missing`.
+- Never "invalid" on its own. `invalid orgSlug` is fallout; `orgSlug must be a non-empty string (saw: "")` is a rule.
+- On a collision, name **both** sides, not just the second one found.
+- Suggest, don't auto-correct. Silently fixing state hides the bug next time.
+- Bloat check: if removing a word keeps the information, drop it.
+
+Examples:
+
+- ✗ `throw new Error('invalid argument')` → ✓ `throw new Error('orgSlug is required')`
+- ✗ `throw new Error('request failed')` → ✓ `throw new Error('Socket API rejected the token (401); check SOCKET_API_TOKEN')`
+
+See `docs/references/error-messages.md` for worked examples and anti-patterns.
+
 ## Agents & Skills
 
 - `/security-scan` — AgentShield + zizmor security audit
