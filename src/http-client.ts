@@ -82,17 +82,17 @@ export async function createDeleteRequest(
     }
 
     return response
-  } catch (error) {
+  } catch (e) {
     if (hooks?.onResponse) {
       hooks.onResponse({
         method,
         url,
         duration: Date.now() - startTime,
-        error: error as Error,
+        error: e as Error,
       })
     }
 
-    throw error
+    throw e
   }
 }
 
@@ -141,7 +141,7 @@ export async function createGetRequest(
     }
 
     return response
-  } catch (error) {
+  } catch (e) {
     stopTimer({ error: true })
 
     if (hooks?.onResponse) {
@@ -149,11 +149,11 @@ export async function createGetRequest(
         method,
         url,
         duration: Date.now() - startTime,
-        error: error as Error,
+        error: e as Error,
       })
     }
 
-    throw error
+    throw e
   }
 }
 
@@ -211,7 +211,7 @@ export async function createRequestWithJson(
     }
 
     return response
-  } catch (error) {
+  } catch (e) {
     stopTimer({ error: true })
 
     if (hooks?.onResponse) {
@@ -219,11 +219,11 @@ export async function createRequestWithJson(
         method,
         url,
         duration: Date.now() - startTime,
-        error: error as Error,
+        error: e as Error,
       })
     }
 
-    throw error
+    throw e
   }
 }
 
@@ -316,9 +316,9 @@ export async function getResponseJson(
       throw unknownError
       /* c8 ignore stop */
     }
-  } catch (error) {
+  } catch (e) {
     stopTimer({ error: true })
-    throw error
+    throw e
   }
 }
 

@@ -27,8 +27,8 @@ export function createRequestBodyForFilepaths(
     try {
       stream = createReadStream(absPath, { highWaterMark: 1024 * 1024 })
       /* c8 ignore next 13 - createReadStream throws synchronously only for type validation errors; file system errors (ENOENT, EISDIR) are emitted asynchronously */
-    } catch (error) {
-      const err = error as NodeJS.ErrnoException
+    } catch (e) {
+      const err = e as NodeJS.ErrnoException
       let message = `Failed to read file: ${absPath}`
       if (err.code === 'ENOENT') {
         message += '\n→ File does not exist. Check the file path and try again.'
@@ -39,7 +39,7 @@ export function createRequestBodyForFilepaths(
       } else if (err.code) {
         message += `\n→ Error code: ${err.code}`
       }
-      throw new Error(message, { cause: error })
+      throw new Error(message, { cause: e })
     }
     form.append(relPath, stream, {
       contentType: 'application/octet-stream',
@@ -98,15 +98,15 @@ export async function createUploadRequest(
     }
 
     return response
-  } catch (error) {
+  } catch (e) {
     if (hooks?.onResponse) {
       hooks.onResponse({
         method,
         url,
         duration: Date.now() - startTime,
-        error: error as Error,
+        error: e as Error,
       })
     }
-    throw error
+    throw e
   }
 }
