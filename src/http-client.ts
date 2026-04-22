@@ -1,4 +1,5 @@
 import { debugLog } from '@socketsecurity/lib/debug'
+import { isError } from '@socketsecurity/lib/errors'
 import { httpRequest } from '@socketsecurity/lib/http-request'
 import { jsonParse } from '@socketsecurity/lib/json/parse'
 import { perfTimer } from '@socketsecurity/lib/performance'
@@ -301,7 +302,7 @@ export async function getResponseJson(
         throw enhancedError
       }
       /* c8 ignore start - Error instanceof check and unknown error handling for JSON parsing edge cases. */
-      if (e instanceof Error) {
+      if (isError(e)) {
         throw e
       }
       const unknownError = new Error('Unknown JSON parsing error', {
