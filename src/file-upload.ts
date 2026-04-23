@@ -3,6 +3,7 @@ import path from 'node:path'
 
 import FormData from 'form-data'
 
+import { isErrnoException } from '@socketsecurity/lib/errors'
 import { httpRequest } from '@socketsecurity/lib/http-request'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
@@ -28,16 +29,18 @@ export function createRequestBodyForFilepaths(
       stream = createReadStream(absPath, { highWaterMark: 1024 * 1024 })
       /* c8 ignore next 13 - createReadStream throws synchronously only for type validation errors; file system errors (ENOENT, EISDIR) are emitted asynchronously */
     } catch (e) {
-      const err = e as NodeJS.ErrnoException
       let message = `Failed to read file: ${absPath}`
-      if (err.code === 'ENOENT') {
-        message += '\n→ File does not exist. Check the file path and try again.'
-      } else if (err.code === 'EACCES') {
-        message += `\n→ Permission denied. Run: chmod +r "${absPath}"`
-      } else if (err.code === 'EISDIR') {
-        message += '\n→ Expected a file but found a directory.'
-      } else if (err.code) {
-        message += `\n→ Error code: ${err.code}`
+      if (isErrnoException(e)) {
+        if (e.code === 'ENOENT') {
+          message +=
+            '\n→ File does not exist. Check the file path and try again.'
+        } else if (e.code === 'EACCES') {
+          message += `\n→ Permission denied. Run: chmod +r "${absPath}"`
+        } else if (e.code === 'EISDIR') {
+          message += '\n→ Expected a file but found a directory.'
+        } else if (e.code) {
+          message += `\n→ Error code: ${e.code}`
+        }
       }
       throw new Error(message, { cause: e })
     }
