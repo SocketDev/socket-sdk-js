@@ -79,8 +79,8 @@ importers:
         specifier: 1.52.0
         version: 1.52.0(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)
       '@socketsecurity/lib':
-        specifier: 5.21.0
-        version: 5.21.0(typescript@5.9.3)
+        specifier: 5.24.0
+        version: 5.24.0(typescript@5.9.3)
       '@sveltejs/acorn-typescript':
         specifier: 1.0.8
         version: 1.0.8(acorn@8.15.0)
@@ -1229,6 +1229,15 @@ packages:
 
   '@socketsecurity/lib@5.21.0':
     resolution: {integrity: sha512-cSqdq2kOBSuH3u8rfDhViCrN7IJPqzAvzklUYrEFhohUgJkky0+YYQ/gbSwRehZDGY8mqv+6lKGrt4OKWnNsdQ==}
+    engines: {node: '>=22', pnpm: '>=11.0.0-rc.0'}
+    peerDependencies:
+      typescript: '>=5.0.0'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
+  '@socketsecurity/lib@5.24.0':
+    resolution: {integrity: sha512-4Yar8oo4N12ESoNt/i2PNf08HRABUC0OcfUfwzIF3xjq89E5VMDN+aeOtnn6Oo4Y6u3TiuZRG7NgEBZ83LQ1Lw==}
     engines: {node: '>=22', pnpm: '>=11.0.0-rc.0'}
     peerDependencies:
       typescript: '>=5.0.0'
@@ -2955,6 +2964,10 @@ snapshots:
   '@socketregistry/packageurl-js@1.4.2': {}
 
   '@socketsecurity/lib@5.21.0(typescript@5.9.3)':
+    optionalDependencies:
+      typescript: 5.9.3
+
+  '@socketsecurity/lib@5.24.0(typescript@5.9.3)':
     optionalDependencies:
       typescript: 5.9.3
 
