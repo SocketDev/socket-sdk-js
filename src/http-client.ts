@@ -1,4 +1,5 @@
 import { debugLog } from '@socketsecurity/lib/debug'
+import { isError } from '@socketsecurity/lib/errors'
 import { httpRequest } from '@socketsecurity/lib/http-request'
 import { jsonParse } from '@socketsecurity/lib/json/parse'
 import { perfTimer } from '@socketsecurity/lib/performance'
@@ -81,17 +82,17 @@ export async function createDeleteRequest(
     }
 
     return response
-  } catch (error) {
+  } catch (e) {
     if (hooks?.onResponse) {
       hooks.onResponse({
         method,
         url,
         duration: Date.now() - startTime,
-        error: error as Error,
+        error: e as Error,
       })
     }
 
-    throw error
+    throw e
   }
 }
 
@@ -140,7 +141,7 @@ export async function createGetRequest(
     }
 
     return response
-  } catch (error) {
+  } catch (e) {
     stopTimer({ error: true })
 
     if (hooks?.onResponse) {
@@ -148,11 +149,11 @@ export async function createGetRequest(
         method,
         url,
         duration: Date.now() - startTime,
-        error: error as Error,
+        error: e as Error,
       })
     }
 
-    throw error
+    throw e
   }
 }
 
@@ -210,7 +211,7 @@ export async function createRequestWithJson(
     }
 
     return response
-  } catch (error) {
+  } catch (e) {
     stopTimer({ error: true })
 
     if (hooks?.onResponse) {
@@ -218,11 +219,11 @@ export async function createRequestWithJson(
         method,
         url,
         duration: Date.now() - startTime,
-        error: error as Error,
+        error: e as Error,
       })
     }
 
-    throw error
+    throw e
   }
 }
 
@@ -301,7 +302,7 @@ export async function getResponseJson(
         throw enhancedError
       }
       /* c8 ignore start - Error instanceof check and unknown error handling for JSON parsing edge cases. */
-      if (e instanceof Error) {
+      if (isError(e)) {
         throw e
       }
       const unknownError = new Error('Unknown JSON parsing error', {
@@ -315,9 +316,9 @@ export async function getResponseJson(
       throw unknownError
       /* c8 ignore stop */
     }
-  } catch (error) {
+  } catch (e) {
     stopTimer({ error: true })
-    throw error
+    throw e
   }
 }
 

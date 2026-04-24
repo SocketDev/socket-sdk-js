@@ -12,6 +12,8 @@ import {
   reshapeArtifactForPublicPolicy,
 } from '../../src/http-client.js'
 
+import { isError } from '@socketsecurity/lib/errors'
+
 import type { HttpResponse } from '@socketsecurity/lib/http-request'
 import type { Server } from 'node:http'
 
@@ -295,9 +297,9 @@ describe('HTTP Client - Error Handling', () => {
       try {
         await createGetRequest(invalidUrl, '/test', { timeout: 100 })
         expect.fail('Should have thrown an error')
-      } catch (error) {
-        expect(error).toBeDefined()
-        expect(error instanceof Error).toBe(true)
+      } catch (e) {
+        expect(e).toBeDefined()
+        expect(isError(e)).toBe(true)
       }
     })
 
@@ -315,9 +317,9 @@ describe('HTTP Client - Error Handling', () => {
           },
         )
         expect.fail('Should have thrown an error')
-      } catch (error) {
-        expect(error).toBeDefined()
-        expect(error instanceof Error).toBe(true)
+      } catch (e) {
+        expect(e).toBeDefined()
+        expect(isError(e)).toBe(true)
       }
     })
 
@@ -328,9 +330,9 @@ describe('HTTP Client - Error Handling', () => {
         })
         await getResponseJson(response)
         expect.fail('Should have thrown a JSON parsing error')
-      } catch (error) {
-        expect(error).toBeDefined()
-        expect(error instanceof SyntaxError).toBe(true)
+      } catch (e) {
+        expect(e).toBeDefined()
+        expect(e instanceof SyntaxError).toBe(true)
       }
     })
   })

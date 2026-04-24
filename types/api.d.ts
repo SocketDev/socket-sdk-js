@@ -4264,6 +4264,16 @@ export interface components {
         }
       | {
           /** @enum {string} */
+          type?: 'policy'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: Record<string, never>
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
           type?: 'skillAutonomyAbuse'
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
@@ -5742,6 +5752,7 @@ export interface operations {
       400: components['responses']['SocketBadRequest']
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
       500: components['responses']['SocketInternalServerError']
     }
@@ -6795,6 +6806,7 @@ export interface operations {
       400: components['responses']['SocketBadRequest']
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -6847,6 +6859,7 @@ export interface operations {
       400: components['responses']['SocketBadRequest']
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -6909,6 +6922,7 @@ export interface operations {
       400: components['responses']['SocketBadRequest']
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -9467,6 +9481,13 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              policy?: {
+                /**
+                 * @description The action to take for policy issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               skillAutonomyAbuse?: {
                 /**
                  * @description The action to take for skillAutonomyAbuse issues.
@@ -10447,6 +10468,13 @@ export interface operations {
             unpopularPackage?: {
               /**
                * @description The action to take for unpopularPackage issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            policy?: {
+              /**
+               * @description The action to take for policy issues.
                * @enum {string}
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -11589,6 +11617,13 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              policy?: {
+                /**
+                 * @description The action to take for policy issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               skillAutonomyAbuse?: {
                 /**
                  * @description The action to take for skillAutonomyAbuse issues.
@@ -12566,6 +12601,13 @@ export interface operations {
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
             }
+            policy?: {
+              /**
+               * @description The action to take for policy issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
             skillAutonomyAbuse?: {
               /**
                * @description The action to take for skillAutonomyAbuse issues.
@@ -13508,6 +13550,13 @@ export interface operations {
               unpopularPackage?: {
                 /**
                  * @description The action to take for unpopularPackage issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              policy?: {
+                /**
+                 * @description The action to take for policy issues.
                  * @enum {string}
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -14509,6 +14558,7 @@ export interface operations {
         }
       }
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -14841,6 +14891,7 @@ export interface operations {
       400: components['responses']['SocketBadRequest']
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -15100,6 +15151,7 @@ export interface operations {
       400: components['responses']['SocketBadRequest']
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -15259,6 +15311,7 @@ export interface operations {
       400: components['responses']['SocketBadRequest']
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -15370,6 +15423,7 @@ export interface operations {
       400: components['responses']['SocketBadRequest']
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -15418,6 +15472,7 @@ export interface operations {
       400: components['responses']['SocketBadRequest']
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -15769,6 +15824,7 @@ export interface operations {
       }
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -15967,6 +16023,7 @@ export interface operations {
       }
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -16157,6 +16214,7 @@ export interface operations {
       }
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -16224,6 +16282,7 @@ export interface operations {
       }
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -16275,6 +16334,7 @@ export interface operations {
       }
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -16313,6 +16373,7 @@ export interface operations {
         }
       }
       400: components['responses']['SocketBadRequest']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -17884,6 +17945,7 @@ export interface operations {
       400: components['responses']['SocketBadRequest']
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -17973,6 +18035,7 @@ export interface operations {
       400: components['responses']['SocketBadRequest']
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -18478,6 +18541,7 @@ export interface operations {
         }
       }
       401: components['responses']['SocketUnauthorized']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -18514,6 +18578,7 @@ export interface operations {
         }
       }
       401: components['responses']['SocketUnauthorized']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -18572,6 +18637,7 @@ export interface operations {
       }
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -18749,6 +18815,7 @@ export interface operations {
       400: components['responses']['SocketBadRequest']
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -19010,6 +19077,7 @@ export interface operations {
       400: components['responses']['SocketBadRequest']
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }

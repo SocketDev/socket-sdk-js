@@ -97,6 +97,21 @@ Features: TypeScript support, API client, package analysis, security scanning, o
 - **Check all**: `pnpm check`
 - **Coverage**: `pnpm run cover`
 
+## ERROR MESSAGES
+
+An error message is UI. The reader should be able to fix the problem from the message alone, without opening your source. Every message needs four ingredients, in order:
+
+1. **What** — the rule that was broken, not the fallout (`must be non-empty`, not `invalid`).
+2. **Where** — exact method, argument, field, or URL.
+3. **Saw vs. wanted** — the bad value and the allowed shape or set.
+4. **Fix** — one concrete action, imperative voice (`pass an org slug`, not `the org slug was missing`).
+
+SDK errors are **terse** — callers may `catch` and match on message text, so every word counts. One sentence covering all four is the norm: `throw new Error('orgSlug is required')`.
+
+Prefer the caught-value helpers from `@socketsecurity/lib/errors` (`isError`, `isErrnoException`, `errorMessage`, `errorStack`) over hand-rolled `instanceof Error` / `'code' in e` checks. For allowed-set / conflict lists, use `joinAnd` / `joinOr` from `@socketsecurity/lib/arrays`.
+
+See `docs/references/error-messages.md` for length tiers (validator / programmatic), the full rule list, worked examples, anti-patterns, and helper signatures.
+
 ## Agents & Skills
 
 - `/security-scan` — AgentShield + zizmor security audit
