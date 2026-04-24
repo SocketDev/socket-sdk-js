@@ -52,12 +52,11 @@ desktop.ini
 *.sublime-*
 .idea
 
-# Cache directories
-**/.cache
 .eslintcache
 .tsbuildinfo
 
-# Runtime
+# Runtime (includes node_modules/.cache/ where vitest etc.
+# store scratch dirs — cleared by pnpm install automatically).
 node_modules
 **/node_modules
 

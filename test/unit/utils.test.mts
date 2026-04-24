@@ -97,8 +97,11 @@ describe('Path Resolution', () => {
       const result = resolveAbsPaths(paths)
 
       expect(result).toHaveLength(2)
-      expect(result[0]).toContain('socket-sdk-js/package.json')
-      expect(result[1]).toContain('socket-sdk-js/src/index.ts')
+      /* Suffix-based assertions — matching a specific repo dir
+       * name breaks when the test runs from a git worktree whose
+       * path segment differs from the primary checkout. */
+      expect(result[0]).toMatch(/\/package\.json$/)
+      expect(result[1]).toMatch(/\/src\/index\.ts$/)
       result.forEach(p => expect(path.isAbsolute(p)).toBe(true))
     })
 
