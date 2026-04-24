@@ -28,7 +28,7 @@ const isCoverageEnabled =
   process.argv.some(arg => arg.includes('coverage'))
 
 export default defineConfig({
-  cacheDir: './.cache/vitest',
+  cacheDir: './node_modules/.cache/vitest',
   test: {
     globals: false,
     environment: 'node',
