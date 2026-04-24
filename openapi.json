@@ -8190,6 +8190,49 @@
               "type": {
                 "type": "string",
                 "enum": [
+                  "policy"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {}
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
                   "skillAutonomyAbuse"
                 ]
               },
@@ -12467,6 +12510,9 @@
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
           },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           },
@@ -15374,6 +15420,9 @@
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
           },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
@@ -15470,6 +15519,9 @@
           },
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -15597,6 +15649,9 @@
           },
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -21937,6 +21992,27 @@
                             "action"
                           ]
                         },
+                        "policy": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for policy issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "skillAutonomyAbuse": {
                           "type": "object",
                           "additionalProperties": false,
@@ -24808,6 +24884,27 @@
                               "ignore"
                             ],
                             "description": "The action to take for unpopularPackage issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "policy": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for policy issues."
                           }
                         },
                         "required": [
@@ -28004,6 +28101,27 @@
                             "action"
                           ]
                         },
+                        "policy": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for policy issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "skillAutonomyAbuse": {
                           "type": "object",
                           "additionalProperties": false,
@@ -30884,6 +31002,27 @@
                           "action"
                         ]
                       },
+                      "policy": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for policy issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
                       "skillAutonomyAbuse": {
                         "type": "object",
                         "additionalProperties": false,
@@ -33717,6 +33856,27 @@
                             "action"
                           ]
                         },
+                        "policy": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for policy issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "skillAutonomyAbuse": {
                           "type": "object",
                           "additionalProperties": false,
@@ -35523,6 +35683,9 @@
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
           },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
@@ -36854,6 +37017,9 @@
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
           },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
@@ -37958,6 +38124,9 @@
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
           },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
@@ -38527,6 +38696,9 @@
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
           },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
@@ -38843,6 +39015,9 @@
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
           },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
@@ -38922,6 +39097,9 @@
           },
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -39480,6 +39658,9 @@
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
           },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
@@ -39832,6 +40013,9 @@
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
           },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
@@ -40089,6 +40273,9 @@
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
           },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
@@ -40214,6 +40401,9 @@
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
           },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
@@ -40312,6 +40502,9 @@
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
           },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
@@ -40383,6 +40576,9 @@
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -44360,6 +44556,9 @@
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
           },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
@@ -44584,6 +44783,9 @@
           },
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -45121,6 +45323,9 @@
           "401": {
             "$ref": "#/components/responses/SocketUnauthorized"
           },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
@@ -45210,6 +45415,9 @@
           },
           "401": {
             "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -45369,6 +45577,9 @@
           },
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -45734,6 +45945,9 @@
           },
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -46266,6 +46480,9 @@
           },
           "403": {
             "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
