@@ -10,6 +10,15 @@ packages:
 allowBuilds:
   esbuild: true
 
+# Auto-install missing peer deps (pnpm default). Declared explicitly
+# so a future default flip can't silently change install behavior.
+autoInstallPeers: true
+
+# Run pre/post lifecycle scripts on the workspace root (e.g.
+# prepare -> husky). This is the pnpm default; declared explicitly
+# so a future default flip can't silently disable husky setup.
+enablePrePostScripts: true
+
 # Refuse to run if the pnpm version on PATH differs from the packageManager
 # field in package.json. Our setup action pins pnpm via external-tools.json;
 # any drift should fail fast, not silently auto-download via @pnpm/exe
@@ -28,3 +37,7 @@ minimumReleaseAgeExclude:
   - '@socketbin/*'
   - '@socketregistry/*'
   - '@socketsecurity/*'
+
+# Pin exact versions on `pnpm add`. Catalog and overrides should
+# also be exact pins (5.24.0, not ^5.24.0).
+saveExact: true
