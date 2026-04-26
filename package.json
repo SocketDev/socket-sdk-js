@@ -45,6 +45,7 @@
     "build": "node scripts/build.mts",
     "bump": "node scripts/bump.mts",
     "check": "node scripts/check.mts",
+    "check:paths": "node scripts/check-paths.mts",
     "clean": "node scripts/clean.mts",
     "cover": "node scripts/cover.mts",
     "fix": "node scripts/fix.mts",
