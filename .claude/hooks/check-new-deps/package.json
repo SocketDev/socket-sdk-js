@@ -1,5 +1,5 @@
 {
-  "name": "@socketsecurity/hook-check-new-deps",
+  "name": "hook-check-new-deps",
   "private": true,
   "type": "module",
   "main": "./index.mts",
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@socketregistry/packageurl-js": "1.4.2",
-    "@socketsecurity/lib": "5.21.0",
+    "@socketsecurity/lib": "5.24.0",
     "@socketsecurity/sdk": "4.0.1"
   },
   "devDependencies": {
