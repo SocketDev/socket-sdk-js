@@ -2,7 +2,7 @@
 name: updating
 description: Updates all npm dependencies to their latest versions. Triggers when user asks to "update dependencies", "update packages", or prepare for a release.
 user-invocable: true
-allowed-tools: Bash, Read, Grep, Glob, Edit
+allowed-tools: Read, Edit, Bash(pnpm run:*), Bash(pnpm test:*), Bash(git status:*), Bash(git diff:*), Bash(git add:*), Bash(git commit:*), Bash(git log:*)
 ---
 
 # updating

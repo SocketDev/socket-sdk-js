@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { memoize, once } from '@socketsecurity/lib/memoization'
+import { ErrorCtor } from '@socketsecurity/lib/primordials'
 
 import type { SocketSdkOperations } from './types'
 
@@ -36,14 +37,14 @@ const loadRequirements = once((): Requirements => {
     // Check if the requirements file exists before attempting to read.
     /* c8 ignore next 3 - Error path tested in isolation but memoization prevents coverage in main test run */
     if (!existsSync(requirementsPath)) {
-      throw new Error(`Requirements file not found at: ${requirementsPath}`)
+      throw new ErrorCtor(`Requirements file not found at: ${requirementsPath}`)
     }
 
     const data = readFileSync(requirementsPath, 'utf8')
     return JSON.parse(data) as Requirements
   } catch (e) {
     /* c8 ignore next 2 - Error wrapping tested in isolation but memoization prevents coverage in main test run */
-    throw new Error('Failed to load SDK method requirements', { cause: e })
+    throw new ErrorCtor('Failed to load SDK method requirements', { cause: e })
   }
 })
 
@@ -89,7 +90,7 @@ export const getMethodRequirements = memoize(
     const requirement = reqs.api[methodName as string]
 
     if (!requirement) {
-      throw new Error(`Unknown SDK method: "${String(methodName)}"`)
+      throw new ErrorCtor(`Unknown SDK method: "${String(methodName)}"`)
     }
 
     return {
@@ -149,7 +150,7 @@ export const getQuotaCost = memoize(
     const requirement = reqs.api[methodName as string]
 
     if (!requirement) {
-      throw new Error(`Unknown SDK method: "${String(methodName)}"`)
+      throw new ErrorCtor(`Unknown SDK method: "${String(methodName)}"`)
     }
 
     return requirement.quota
@@ -198,7 +199,7 @@ export const getRequiredPermissions = memoize(
     const requirement = reqs.api[methodName as string]
 
     if (!requirement) {
-      throw new Error(`Unknown SDK method: "${String(methodName)}"`)
+      throw new ErrorCtor(`Unknown SDK method: "${String(methodName)}"`)
     }
 
     return [...requirement.permissions]

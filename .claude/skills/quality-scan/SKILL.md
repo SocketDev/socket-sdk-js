@@ -1,6 +1,7 @@
 ---
 name: quality-scan
 description: Runs comprehensive quality scans across the codebase using specialized agents to identify critical bugs, logic errors, caching issues, and workflow problems. Use when improving code quality, before releases, or investigating issues.
+allowed-tools: Task, Skill, Read, Edit, Grep, Glob, AskUserQuestion, Bash(pnpm run check:*), Bash(pnpm run test:*), Bash(pnpm test:*), Bash(pnpm run fix:*), Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git commit:*), Bash(rg:*), Bash(grep:*), Bash(find:*), Bash(ls:*)
 ---
 
 # quality-scan

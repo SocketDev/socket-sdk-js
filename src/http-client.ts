@@ -3,6 +3,11 @@ import { isError } from '@socketsecurity/lib/errors'
 import { httpRequest } from '@socketsecurity/lib/http-request'
 import { jsonParse } from '@socketsecurity/lib/json/parse'
 import { perfTimer } from '@socketsecurity/lib/performance'
+import {
+  DateNow,
+  SetCtor,
+  StringPrototypeTrim,
+} from '@socketsecurity/lib/primordials'
 
 import {
   MAX_RESPONSE_SIZE,
@@ -44,7 +49,7 @@ export async function createDeleteRequest(
   urlPath: string,
   options?: RequestOptionsWithHooks | undefined,
 ): Promise<HttpResponse> {
-  const startTime = Date.now()
+  const startTime = DateNow()
   const url = `${baseUrl}${urlPath}`
   const method = 'DELETE'
   const { hooks, ...rawOpts } = {
@@ -74,7 +79,7 @@ export async function createDeleteRequest(
       hooks.onResponse({
         method,
         url,
-        duration: Date.now() - startTime,
+        duration: DateNow() - startTime,
         status: response.status,
         statusText: response.statusText,
         headers: sanitizeHeaders(response.headers),
@@ -87,7 +92,7 @@ export async function createDeleteRequest(
       hooks.onResponse({
         method,
         url,
-        duration: Date.now() - startTime,
+        duration: DateNow() - startTime,
         error: e as Error,
       })
     }
@@ -101,7 +106,7 @@ export async function createGetRequest(
   urlPath: string,
   options?: RequestOptionsWithHooks | undefined,
 ): Promise<HttpResponse> {
-  const startTime = Date.now()
+  const startTime = DateNow()
   const url = `${baseUrl}${urlPath}`
   const method = 'GET'
   const stopTimer = perfTimer('http:get', { urlPath })
@@ -133,7 +138,7 @@ export async function createGetRequest(
       hooks.onResponse({
         method,
         url,
-        duration: Date.now() - startTime,
+        duration: DateNow() - startTime,
         status: response.status,
         statusText: response.statusText,
         headers: sanitizeHeaders(response.headers),
@@ -148,7 +153,7 @@ export async function createGetRequest(
       hooks.onResponse({
         method,
         url,
-        duration: Date.now() - startTime,
+        duration: DateNow() - startTime,
         error: e as Error,
       })
     }
@@ -164,7 +169,7 @@ export async function createRequestWithJson(
   json: unknown,
   options?: RequestOptionsWithHooks | undefined,
 ): Promise<HttpResponse> {
-  const startTime = Date.now()
+  const startTime = DateNow()
   const url = `${baseUrl}${urlPath}`
   const stopTimer = perfTimer(`http:${method.toLowerCase()}`, {
     urlPath,
@@ -203,7 +208,7 @@ export async function createRequestWithJson(
       hooks.onResponse({
         method,
         url,
-        duration: Date.now() - startTime,
+        duration: DateNow() - startTime,
         status: response.status,
         statusText: response.statusText,
         headers: sanitizeHeaders(response.headers),
@@ -218,7 +223,7 @@ export async function createRequestWithJson(
       hooks.onResponse({
         method,
         url,
-        duration: Date.now() - startTime,
+        duration: DateNow() - startTime,
         error: e as Error,
       })
     }
@@ -335,9 +340,10 @@ export function reshapeArtifactForPublicPolicy<
   policy?: Map<string, string> | undefined,
 ): T {
   if (!isAuthenticated) {
-    const allowedActions = actions?.trim()
-      ? new Set(actions.split(','))
-      : undefined
+    const allowedActions =
+      actions !== undefined && StringPrototypeTrim(actions)
+        ? new SetCtor(actions.split(','))
+        : undefined
     const resolvedPolicy = policy ?? defaultPublicPolicy
 
     const reshapeArtifact = (artifact: SocketArtifactWithExtras) => ({

@@ -59,6 +59,9 @@ desktop.ini
 # store scratch dirs — cleared by pnpm install automatically).
 node_modules
 **/node_modules
+# Defensive cache ignore — Node compile-cache, corepack, and other
+# tools occasionally drop scratch dirs into a project-local .cache/.
+**/.cache/
 
 # Misc temporary/generated files
 Do
