@@ -7,6 +7,14 @@ import process from 'node:process'
 
 import { memoize } from '@socketsecurity/lib/memoization'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+import {
+  PromiseWithResolvers,
+  SetCtor,
+  StringPrototypeEndsWith,
+  StringPrototypeToLowerCase,
+  StringPrototypeTrim,
+  URLSearchParamsCtor,
+} from '@socketsecurity/lib/primordials'
 
 import type { QueryParams } from './types'
 
@@ -18,8 +26,8 @@ import type { QueryParams } from './types'
  * @returns Set of normalized words
  */
 function normalizeToWordSet(s: string): Set<string> {
-  const words = s.toLowerCase().match(/\w+/g)
-  return new Set(words ?? [])
+  const words = StringPrototypeToLowerCase(s).match(/\w+/g)
+  return new SetCtor(words ?? [])
 }
 
 /**
@@ -97,13 +105,15 @@ export function filterRedundantCause(
   errorCause: string | undefined,
   threshold = 0.6,
 ): string | undefined {
-  if (!errorCause || !errorCause.trim()) {
+  if (!errorCause || !StringPrototypeTrim(errorCause)) {
     return undefined
   }
 
   // Split error message by colons to check each part
   // Example: "Socket API: Request failed (400): Bad Request" -> ["Socket API", "Request failed (400)", "Bad Request"]
-  const messageParts = errorMessage.split(':').map(part => part.trim())
+  const messageParts = errorMessage
+    .split(':')
+    .map(part => StringPrototypeTrim(part))
 
   // Check similarity against each part, finding the maximum similarity
   for (const part of messageParts) {
@@ -122,7 +132,7 @@ export function filterRedundantCause(
  */
 export const normalizeBaseUrl = memoize(
   (baseUrl: string): string => {
-    return baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
+    return StringPrototypeEndsWith(baseUrl, '/') ? baseUrl : `${baseUrl}/`
   },
   { name: 'normalizeBaseUrl' },
 )
@@ -135,8 +145,8 @@ export function promiseWithResolvers<T>(): ReturnType<
   typeof Promise.withResolvers<T>
 > {
   /* c8 ignore next 3 - polyfill for older Node versions without Promise.withResolvers */
-  if (Promise.withResolvers) {
-    return Promise.withResolvers<T>()
+  if (PromiseWithResolvers) {
+    return PromiseWithResolvers() as ReturnType<typeof Promise.withResolvers<T>>
   }
 
   /* c8 ignore next 7 - polyfill implementation for older Node versions */
@@ -162,7 +172,7 @@ export function queryToSearchParams(
     | null
     | undefined,
 ): URLSearchParams {
-  const params = new URLSearchParams(
+  const params = new URLSearchParamsCtor(
     init as ConstructorParameters<typeof URLSearchParams>[0],
   )
   // Check if normalization is needed before creating a second instance.
@@ -180,7 +190,7 @@ export function queryToSearchParams(
   if (!needsNormalization && !hasEmpty) {
     return params
   }
-  const normalized = new URLSearchParams()
+  const normalized = new URLSearchParamsCtor()
   for (const [key, value] of params) {
     if (!value) {
       continue
@@ -245,7 +255,7 @@ export function shouldOmitReason(
   threshold = 0.6,
 ): boolean {
   // Omit empty/whitespace-only reasons
-  if (!reason || !reason.trim()) {
+  if (!reason || !StringPrototypeTrim(reason)) {
     return true
   }
 

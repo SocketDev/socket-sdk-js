@@ -3,6 +3,11 @@
  * Provides functions to redact sensitive header values from logs.
  */
 
+import {
+  ArrayIsArray,
+  StringPrototypeToLowerCase,
+} from '@socketsecurity/lib/primordials'
+
 /**
  * List of sensitive HTTP headers that should be redacted in logs.
  */
@@ -29,7 +34,7 @@ export function sanitizeHeaders(
   }
 
   // Handle readonly string[] case - this shouldn't normally happen for headers.
-  if (Array.isArray(headers)) {
+  if (ArrayIsArray(headers)) {
     return { headers: headers.join(', ') }
   }
 
@@ -37,12 +42,12 @@ export function sanitizeHeaders(
 
   // Plain object iteration works for both HeadersRecord and IncomingHttpHeaders.
   for (const [key, value] of Object.entries(headers)) {
-    const keyLower = key.toLowerCase()
+    const keyLower = StringPrototypeToLowerCase(key)
     if (SENSITIVE_HEADERS.includes(keyLower)) {
       sanitized[key] = '[REDACTED]'
     } else {
       // Handle both string and string[] values.
-      sanitized[key] = Array.isArray(value) ? value.join(', ') : String(value)
+      sanitized[key] = ArrayIsArray(value) ? value.join(', ') : String(value)
     }
   }
 
