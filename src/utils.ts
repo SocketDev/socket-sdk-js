@@ -7,6 +7,13 @@ import process from 'node:process'
 
 import { memoize } from '@socketsecurity/lib/memoization'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+import {
+  PromiseWithResolvers,
+  StringPrototypeEndsWith,
+  StringPrototypeToLowerCase,
+  StringPrototypeTrim,
+  URLSearchParamsCtor,
+} from '@socketsecurity/lib/primordials'
 
 import type { QueryParams } from './types'
 
@@ -18,7 +25,7 @@ import type { QueryParams } from './types'
  * @returns Set of normalized words
  */
 function normalizeToWordSet(s: string): Set<string> {
-  const words = s.toLowerCase().match(/\w+/g)
+  const words = StringPrototypeToLowerCase(s).match(/\w+/g)
   return new Set(words ?? [])
 }
 
@@ -97,7 +104,7 @@ export function filterRedundantCause(
   errorCause: string | undefined,
   threshold = 0.6,
 ): string | undefined {
-  if (!errorCause || !errorCause.trim()) {
+  if (!errorCause || !StringPrototypeTrim(errorCause)) {
     return undefined
   }
 
@@ -122,7 +129,7 @@ export function filterRedundantCause(
  */
 export const normalizeBaseUrl = memoize(
   (baseUrl: string): string => {
-    return baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
+    return StringPrototypeEndsWith(baseUrl, '/') ? baseUrl : `${baseUrl}/`
   },
   { name: 'normalizeBaseUrl' },
 )
@@ -135,8 +142,8 @@ export function promiseWithResolvers<T>(): ReturnType<
   typeof Promise.withResolvers<T>
 > {
   /* c8 ignore next 3 - polyfill for older Node versions without Promise.withResolvers */
-  if (Promise.withResolvers) {
-    return Promise.withResolvers<T>()
+  if (PromiseWithResolvers) {
+    return PromiseWithResolvers<T>()
   }
 
   /* c8 ignore next 7 - polyfill implementation for older Node versions */
@@ -162,8 +169,8 @@ export function queryToSearchParams(
     | null
     | undefined,
 ): URLSearchParams {
-  const params = new URLSearchParams(
-    init as ConstructorParameters<typeof URLSearchParams>[0],
+  const params = new URLSearchParamsCtor(
+    init as ConstructorParameters<typeof URLSearchParamsCtor>[0],
   )
   // Check if normalization is needed before creating a second instance.
   let needsNormalization = false
@@ -245,7 +252,7 @@ export function shouldOmitReason(
   threshold = 0.6,
 ): boolean {
   // Omit empty/whitespace-only reasons
-  if (!reason || !reason.trim()) {
+  if (!reason || !StringPrototypeTrim(reason)) {
     return true
   }
 

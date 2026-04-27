@@ -14,6 +14,12 @@ import { validateFiles } from '@socketsecurity/lib/fs'
 import { jsonParse } from '@socketsecurity/lib/json/parse'
 import { getOwn, isObjectObject } from '@socketsecurity/lib/objects'
 import { pRetry } from '@socketsecurity/lib/promises'
+import {
+  ArrayIsArray,
+  ErrorCtor,
+  StringPrototypeTrim,
+  TypeErrorCtor,
+} from '@socketsecurity/lib/primordials'
 import { setMaxEventTargetListeners } from '@socketsecurity/lib/suppress-warnings'
 import { urlSearchParamAsBoolean } from '@socketsecurity/lib/url'
 
@@ -144,11 +150,11 @@ export class SocketSdk {
     // Input validation for API token.
     const MAX_API_TOKEN_LENGTH = 1024
     if (typeof apiToken !== 'string') {
-      throw new TypeError('"apiToken" is required and must be a string')
+      throw new TypeErrorCtor('"apiToken" is required and must be a string')
     }
-    const trimmedToken = apiToken.trim()
+    const trimmedToken = StringPrototypeTrim(apiToken)
     if (!trimmedToken) {
-      throw new Error('"apiToken" cannot be empty or whitespace-only')
+      throw new ErrorCtor('"apiToken" cannot be empty or whitespace-only')
     }
     if (trimmedToken.length > MAX_API_TOKEN_LENGTH) {
       throw new Error(
@@ -480,7 +486,7 @@ export class SocketSdk {
       }
     }
     if (!(error instanceof ResponseError)) {
-      throw new Error('Unexpected Socket API error', {
+      throw new ErrorCtor('Unexpected Socket API error', {
         cause: error,
       })
     }
@@ -656,7 +662,7 @@ export class SocketSdk {
     }
 
     // Handle array of values (take first).
-    const value = Array.isArray(retryAfterValue)
+    const value = ArrayIsArray(retryAfterValue)
       ? retryAfterValue[0]
       : retryAfterValue
 

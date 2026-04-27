@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { memoize, once } from '@socketsecurity/lib/memoization'
+import { ErrorCtor } from '@socketsecurity/lib/primordials'
 
 import type { SocketSdkOperations } from './types'
 
@@ -43,7 +44,7 @@ const loadRequirements = once((): Requirements => {
     return JSON.parse(data) as Requirements
   } catch (e) {
     /* c8 ignore next 2 - Error wrapping tested in isolation but memoization prevents coverage in main test run */
-    throw new Error('Failed to load SDK method requirements', { cause: e })
+    throw new ErrorCtor('Failed to load SDK method requirements', { cause: e })
   }
 })
 

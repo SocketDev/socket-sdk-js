@@ -2,6 +2,7 @@
  * @fileoverview HTTP header sanitization utilities for secure logging.
  * Provides functions to redact sensitive header values from logs.
  */
+import { ArrayIsArray } from '@socketsecurity/lib/primordials'
 
 /**
  * List of sensitive HTTP headers that should be redacted in logs.
@@ -29,7 +30,7 @@ export function sanitizeHeaders(
   }
 
   // Handle readonly string[] case - this shouldn't normally happen for headers.
-  if (Array.isArray(headers)) {
+  if (ArrayIsArray(headers)) {
     return { headers: headers.join(', ') }
   }
 

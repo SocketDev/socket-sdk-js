@@ -3,6 +3,8 @@
  * Provides default values, HTTP agents, and public policy configurations for API interactions.
  */
 
+import { MapCtor, SetCtor } from '@socketsecurity/lib/primordials'
+
 import rootPkgJson from '../package.json' with { type: 'json' }
 import { createUserAgentFromPkgJson } from './user-agent'
 
@@ -60,10 +62,10 @@ export const SOCKET_FIREWALL_API_URL = 'https://firewall-api.socket.dev/purl'
 
 // https://github.com/sindresorhus/got/blob/v14.4.6/documentation/2-options.md#agent
 // Valid HTTP agent names for Got-style agent configuration compatibility.
-export const httpAgentNames = new Set(['http', 'https', 'http2'])
+export const httpAgentNames = new SetCtor(['http', 'https', 'http2'])
 
 // Public security policy.
-export const publicPolicy = new Map<ALERT_TYPE, ALERT_ACTION>([
+export const publicPolicy = new MapCtor<ALERT_TYPE, ALERT_ACTION>([
   // error (1):
   ['malware', 'error'],
   // warn (7):
