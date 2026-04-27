@@ -126,8 +126,7 @@ const err = (msg: string): void => {
 // Strip range prefixes (^, ~, >=, <=, etc.) so the registry tarball
 // URL gets an exact semver. Applied to BOTH the catalog and the
 // package.json paths so they can never disagree.
-const stripRange = (v: string): string =>
-  v.replace(/^[\^~>=<]+/, '').trim()
+const stripRange = (v: string): string => v.replace(/^[\^~>=<]+/, '').trim()
 
 const readPinnedVersion = (pkgName: string): string => {
   // (1) pnpm-workspace.yaml catalog
@@ -224,9 +223,7 @@ const bootstrapPackage = async (pkgName: string): Promise<void> => {
   // Build the registry tarball URL. The npm registry redirects
   // /<pkg>/-/<basename>-<version>.tgz, but for scoped packages the
   // basename is the unscoped portion.
-  const unscoped = pkgName.startsWith('@')
-    ? pkgName.split('/')[1]!
-    : pkgName
+  const unscoped = pkgName.startsWith('@') ? pkgName.split('/')[1]! : pkgName
   const tarballUrl = `https://registry.npmjs.org/${pkgName}/-/${unscoped}-${version}.tgz`
 
   log(`Fetching ${tarballUrl}`)
@@ -237,11 +234,9 @@ const bootstrapPackage = async (pkgName: string): Promise<void> => {
 
   // Use curl — it's universally available and avoids a dep on a
   // node http client. Follow redirects with -L, fail loudly with -f.
-  const curl = spawnSync(
-    'curl',
-    ['-fsSL', tarballUrl, '-o', tarballPath],
-    { stdio: 'inherit' },
-  )
+  const curl = spawnSync('curl', ['-fsSL', tarballUrl, '-o', tarballPath], {
+    stdio: 'inherit',
+  })
   if (curl.status !== 0) {
     throw new Error(
       `Failed to download ${pkgName}@${version} from ${tarballUrl}.\nVerify the version exists on the npm registry, or check network access.`,
