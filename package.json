@@ -66,6 +66,7 @@
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "2.1.92",
+    "@sinclair/typebox": "0.34.49",
     "@babel/generator": "7.28.5",
     "@babel/parser": "7.26.3",
     "@babel/traverse": "7.26.4",
