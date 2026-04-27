@@ -13,6 +13,12 @@ import { debugLog, isDebugNs } from '@socketsecurity/lib/debug'
 import { validateFiles } from '@socketsecurity/lib/fs'
 import { jsonParse } from '@socketsecurity/lib/json/parse'
 import { getOwn, isObjectObject } from '@socketsecurity/lib/objects'
+import {
+  ArrayIsArray,
+  ErrorCtor,
+  StringPrototypeTrim,
+  TypeErrorCtor,
+} from '@socketsecurity/lib/primordials'
 import { pRetry } from '@socketsecurity/lib/promises'
 import { setMaxEventTargetListeners } from '@socketsecurity/lib/suppress-warnings'
 import { urlSearchParamAsBoolean } from '@socketsecurity/lib/url'
@@ -144,14 +150,14 @@ export class SocketSdk {
     // Input validation for API token.
     const MAX_API_TOKEN_LENGTH = 1024
     if (typeof apiToken !== 'string') {
-      throw new TypeError('"apiToken" is required and must be a string')
+      throw new TypeErrorCtor('"apiToken" is required and must be a string')
     }
-    const trimmedToken = apiToken.trim()
+    const trimmedToken = StringPrototypeTrim(apiToken)
     if (!trimmedToken) {
-      throw new Error('"apiToken" cannot be empty or whitespace-only')
+      throw new ErrorCtor('"apiToken" cannot be empty or whitespace-only')
     }
     if (trimmedToken.length > MAX_API_TOKEN_LENGTH) {
-      throw new Error(
+      throw new ErrorCtor(
         `"apiToken" exceeds maximum length of ${MAX_API_TOKEN_LENGTH} characters`,
       )
     }
@@ -177,7 +183,7 @@ export class SocketSdk {
         timeout < MIN_HTTP_TIMEOUT ||
         timeout > MAX_HTTP_TIMEOUT
       ) {
-        throw new TypeError(
+        throw new TypeErrorCtor(
           `"timeout" must be a number between ${MIN_HTTP_TIMEOUT} and ${MAX_HTTP_TIMEOUT} milliseconds`,
         )
       }
@@ -252,7 +258,7 @@ export class SocketSdk {
     // Validate response before processing.
     /* c8 ignore next 3 - c8 ignored: because #executeWithRetry always returns a value or throws; res is never undefined in practice */
     if (!res) {
-      throw new Error('Failed to get response from batch PURL request')
+      throw new ErrorCtor('Failed to get response from batch PURL request')
     }
     // Parse the newline delimited JSON response.
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
@@ -330,7 +336,7 @@ export class SocketSdk {
 
       const preview = responseText.slice(0, 100) || ''
       return {
-        cause: `Please report this. JSON.parse threw an error over the following response: \`${preview.trim()}${responseText.length > 100 ? '…' : ''}\``,
+        cause: `Please report this. JSON.parse threw an error over the following response: \`${StringPrototypeTrim(preview)}${responseText.length > 100 ? '…' : ''}\``,
         data: undefined,
         error: 'Server returned invalid JSON',
         status: 0,
@@ -338,7 +344,7 @@ export class SocketSdk {
       }
     }
 
-    const errStr = e ? String(e).trim() : ''
+    const errStr = e ? StringPrototypeTrim(String(e)) : ''
     return {
       cause: errStr || UNKNOWN_ERROR,
       data: undefined,
@@ -386,7 +392,7 @@ export class SocketSdk {
     })
     /* c8 ignore next 3 - c8 ignored: because pRetry always returns a value or throws; undefined is only possible if the abort signal fires between attempts, which requires precise timing */
     if (result === undefined) {
-      throw new Error('Request aborted')
+      throw new ErrorCtor('Request aborted')
     }
     return result
   }
@@ -480,14 +486,14 @@ export class SocketSdk {
       }
     }
     if (!(error instanceof ResponseError)) {
-      throw new Error('Unexpected Socket API error', {
+      throw new ErrorCtor('Unexpected Socket API error', {
         cause: error,
       })
     }
     const { status: statusCode } = error.response
     // Throw server errors (5xx) immediately - these are not recoverable client-side.
     if (statusCode && statusCode >= 500) {
-      throw new Error(`Socket API server error (${statusCode})`, {
+      throw new ErrorCtor(`Socket API server error (${statusCode})`, {
         cause: error,
       })
     }
@@ -523,7 +529,8 @@ export class SocketSdk {
     let errorMessage =
       error.message ??
       /* c8 ignore next - fallback for missing error message */ UNKNOWN_ERROR
-    const trimmedBody = body?.trim()
+    const trimmedBody =
+      body !== undefined ? StringPrototypeTrim(body) : undefined
     if (trimmedBody && !errorMessage.includes(trimmedBody)) {
       // Replace generic status message with actual error body if present,
       // otherwise append the body to the error message.
@@ -656,7 +663,7 @@ export class SocketSdk {
     }
 
     // Handle array of values (take first).
-    const value = Array.isArray(retryAfterValue)
+    const value = ArrayIsArray(retryAfterValue)
       ? retryAfterValue[0]
       : retryAfterValue
 
@@ -748,7 +755,7 @@ export class SocketSdk {
     // Validate response before processing.
     /* c8 ignore next 3 - c8 ignored: because #executeWithRetry always returns a value or throws; res is never undefined in practice */
     if (!res) {
-      throw new Error('Failed to get response from batch PURL request')
+      throw new ErrorCtor('Failed to get response from batch PURL request')
     }
     // Parse the newline delimited JSON response.
     const results: SocketArtifact[] = []
@@ -795,7 +802,7 @@ export class SocketSdk {
     // Validate response before processing.
     /* c8 ignore next 3 - c8 ignored: because #executeWithRetry always returns a value or throws; res is never undefined in practice */
     if (!res) {
-      throw new Error('Failed to get response from batch PURL request')
+      throw new ErrorCtor('Failed to get response from batch PURL request')
     }
     // Parse the newline delimited JSON response.
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
@@ -2066,7 +2073,7 @@ export class SocketSdk {
         '→ Verify: The blob hash is correct.',
         '→ Note: Blob URLs may expire after a certain time period.',
       ].join('\n')
-      throw new Error(message)
+      throw new ErrorCtor(message)
     }
     if (res.status !== 200) {
       const message = [
@@ -2078,7 +2085,7 @@ export class SocketSdk {
           ? '→ Try: Retry the download after a short delay.'
           : '→ Verify: The blob hash and URL are correct.',
       ].join('\n')
-      throw new Error(message)
+      throw new ErrorCtor(message)
     }
 
     return res.text()
@@ -4400,7 +4407,7 @@ export class SocketSdk {
       return data as PatchViewResponse
     } catch (e) {
       const result = await this.#handleApiError<never>(e)
-      throw new Error(result.error, { cause: result.cause })
+      throw new ErrorCtor(result.error, { cause: result.cause })
     }
   }
 }

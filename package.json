@@ -71,7 +71,7 @@
     "@babel/traverse": "7.26.4",
     "@babel/types": "7.26.3",
     "@oxlint/migrate": "1.52.0",
-    "@socketsecurity/lib": "5.24.0",
+    "@socketsecurity/lib": "5.25.1",
     "@sveltejs/acorn-typescript": "1.0.8",
     "@types/babel__traverse": "7.28.0",
     "@types/node": "24.9.2",
