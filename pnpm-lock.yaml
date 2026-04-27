@@ -172,6 +172,24 @@ importers:
 
   .claude/hooks/path-guard: {}
 
+  .claude/hooks/private-name-guard:
+    devDependencies:
+      '@types/node':
+        specifier: 24.9.2
+        version: 24.9.2
+
+  .claude/hooks/public-surface-reminder:
+    devDependencies:
+      '@types/node':
+        specifier: 24.9.2
+        version: 24.9.2
+
+  .claude/hooks/release-workflow-guard:
+    devDependencies:
+      '@types/node':
+        specifier: 24.9.2
+        version: 24.9.2
+
   .claude/hooks/token-guard: {}
 
 packages:
