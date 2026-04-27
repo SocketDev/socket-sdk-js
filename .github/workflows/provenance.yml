@@ -25,7 +25,7 @@ jobs:
     permissions:
       contents: write # To create GitHub releases
       id-token: write # For npm trusted publishing via OIDC
-    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@3f2f2c00e9b9dbd78872619e47cb600586b88105 # main
+    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@85a2fc0d33af6304246620365de3e7f053035a8d # main
     with:
       debug: ${{ inputs.debug }}
       dist-tag: ${{ inputs.dist-tag }}
