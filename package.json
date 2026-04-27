@@ -53,6 +53,7 @@
     "generate-sdk": "node scripts/generate-sdk.mts",
     "lint": "node scripts/lint.mts",
     "precommit": "pnpm run check --lint --staged",
+    "preinstall": "node scripts/bootstrap-from-registry.mts",
     "prepare": "husky",
     "ci:validate": "node scripts/ci-validate.mts",
     "prepublishOnly": "echo 'ERROR: Use GitHub Actions workflow for publishing' && exit 1",
