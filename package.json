@@ -45,6 +45,7 @@
     "build": "node scripts/build.mts",
     "bump": "node scripts/bump.mts",
     "check": "node scripts/check.mts",
+    "check:paths": "node scripts/check-paths.mts",
     "clean": "node scripts/clean.mts",
     "cover": "node scripts/cover.mts",
     "fix": "node scripts/fix.mts",
@@ -53,6 +54,7 @@
     "generate-sdk": "node scripts/generate-sdk.mts",
     "lint": "node scripts/lint.mts",
     "precommit": "pnpm run check --lint --staged",
+    "preinstall": "node scripts/bootstrap-from-registry.mts",
     "prepare": "husky",
     "ci:validate": "node scripts/ci-validate.mts",
     "prepublishOnly": "echo 'ERROR: Use GitHub Actions workflow for publishing' && exit 1",
@@ -66,6 +68,7 @@
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "2.1.92",
+    "@sinclair/typebox": "0.34.49",
     "@babel/generator": "7.28.5",
     "@babel/parser": "7.26.3",
     "@babel/traverse": "7.26.4",
