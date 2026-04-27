@@ -36,11 +36,7 @@ const REPO_ROOT = path.resolve(__dirname, '..')
 //      packages) so we don't have to recurse into their dep graph.
 //   2. Be imported by setup.mts or another script that runs BEFORE
 //      pnpm install completes — otherwise normal install handles it.
-const BOOTSTRAP_PACKAGES = [
-  '@sinclair/typebox',
-  '@socketregistry/packageurl-js',
-  '@socketsecurity/lib',
-]
+const BOOTSTRAP_PACKAGES = ['@socketsecurity/lib']
 
 // Socket Firewall API — verifies a package isn't malware before we
 // fetch its tarball directly from the npm registry. Mirrors the
