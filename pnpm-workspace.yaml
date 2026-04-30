@@ -1,6 +1,13 @@
 loglevel: error
 trustPolicy: no-downgrade
 
+# Catalog: shared dependency versions referenced as "catalog:" in
+# package.json. Hooks under .claude/hooks/* declare their deps via
+# `catalog:` so they stay in lockstep with the root workspace.
+catalog:
+  '@socketsecurity/lib': 5.25.1
+  '@types/node': 24.9.2
+
 # Register .claude/hooks/* as workspace packages so taze (run via
 # `pnpm run update`) sees and bumps their package.json manifests
 # alongside the root. Keeps hook deps in lockstep with the main tree.
