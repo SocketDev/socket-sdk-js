@@ -104,6 +104,10 @@ When you encounter a legacy term during unrelated work, fix it inline — don't 
 - **Leaky**: `Promise.race(pool)` inside a loop where `pool` persists across iterations (the classic concurrency-limiter bug) — also applies to `Promise.any` and long-lived arms like interrupt signals.
 - **Fix**: single-waiter "slot available" signal — each task's `.then` resolves a one-shot `promiseWithResolvers` that the loop awaits, then replaces. No persistent pool, nothing to stack.
 
+### Background Bash
+
+Never use `Bash(run_in_background: true)` for test/build commands (`vitest`, `pnpm test`, `pnpm build`, `tsgo`). Backgrounded runs you don't poll get abandoned and leak Node workers. Background mode is for dev servers and long migrations whose results you'll consume. If a run hangs, kill it: `pkill -f "vitest/dist/workers"`.
+
 ---
 
 ## EMOJI & OUTPUT STYLE
