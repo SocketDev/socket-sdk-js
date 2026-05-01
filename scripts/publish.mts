@@ -335,9 +335,23 @@ async function publishPackage(options: PublishOptions = {}): Promise<boolean> {
 
   try {
     // Prepare publish args.
-    const publishArgs = ['publish', '--access', access, '--tag', tag]
+    const publishArgs = [
+      'publish',
+      '--access',
+      access,
+      '--tag',
+      tag,
+      // The staged tmpdir has no git history; --no-git-checks tells
+      // pnpm not to require a clean working tree there.
+      '--no-git-checks',
+      // The staged copy is what we're authorizing to ship; the
+      // prepublishOnly guard in package.json is meant to refuse
+      // *direct* `pnpm publish` runs from the working tree, not
+      // this orchestrated tmpdir publish.
+      '--ignore-scripts',
+    ]
 
-    // Add provenance attestation in CI only. `npm publish
+    // Add provenance attestation in CI only. `pnpm publish
     // --provenance` requires the GitHub Actions OIDC id-token
     // endpoint; running locally fails with "Provenance generation in
     // GitHub Actions requires 'id-token: write' permission". Gated
@@ -356,7 +370,7 @@ async function publishPackage(options: PublishOptions = {}): Promise<boolean> {
 
     // Publish from the staged copy, not the working tree.
     log.progress(dryRun ? 'Running dry-run publish' : 'Publishing to npm')
-    const publishCode = await runCommand('npm', publishArgs, {
+    const publishCode = await runCommand('pnpm', publishArgs, {
       cwd: stageRoot,
     })
 
