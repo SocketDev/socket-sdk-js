@@ -4,6 +4,10 @@
   "description": "SDK for the Socket API client",
   "homepage": "https://github.com/SocketDev/socket-sdk-js",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "author": {
     "name": "Socket Inc",
     "email": "eng@socket.dev",
