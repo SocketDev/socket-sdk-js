@@ -211,8 +211,11 @@ importers:
 
   .claude/hooks/release-workflow-guard:
     devDependencies:
+      '@socketsecurity/lib':
+        specifier: 'catalog:'
+        version: 5.27.0(typescript@5.9.3)
       '@types/node':
-        specifier: 24.9.2
+        specifier: 'catalog:'
         version: 24.9.2
 
   .claude/hooks/stale-process-sweeper: {}
