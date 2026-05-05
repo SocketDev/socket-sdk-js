@@ -1,6 +1,13 @@
 loglevel: error
 trustPolicy: no-downgrade
 
+# Catalog: shared dependency versions referenced as "catalog:" in
+# package.json. Hooks under .claude/hooks/* declare their deps via
+# `catalog:` so they stay in lockstep with the root workspace.
+catalog:
+  '@socketsecurity/lib': 5.25.1
+  '@types/node': 24.9.2
+
 # Register .claude/hooks/* as workspace packages so taze (run via
 # `pnpm run update`) sees and bumps their package.json manifests
 # alongside the root. Keeps hook deps in lockstep with the main tree.
@@ -37,6 +44,15 @@ minimumReleaseAgeExclude:
   - '@socketbin/*'
   - '@socketregistry/*'
   - '@socketsecurity/*'
+
+# Refuse transitive dependencies declared via git/tarball/local-tarball
+# specs — an npm package shouldn't be allowed to drag in a git URL we
+# don't control (bypasses npm registry validation, no provenance, no
+# soak window). Direct git deps are still allowed (the test suite at
+# pnpm/pkg-manager/core/test/install/blockExoticSubdeps.ts confirms
+# this). pnpm's current default is `false`; declared explicitly so a
+# future flip can't silently change install behavior.
+blockExoticSubdeps: true
 
 # Pin exact versions on `pnpm add`. Catalog and overrides should
 # also be exact pins (5.24.0, not ^5.24.0).
