@@ -52,6 +52,15 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@socketsecurity/lib':
+      specifier: 5.25.1
+      version: 5.25.1
+    '@types/node':
+      specifier: 24.9.2
+      version: 24.9.2
+
 overrides:
   defu: '>=6.1.7'
   vite: 7.3.2
@@ -154,6 +163,16 @@ importers:
         specifier: 4.0.3
         version: 4.0.3(@types/node@24.9.2)(jiti@2.6.1)(yaml@2.8.3)
 
+  .claude/hooks/auth-rotation-reminder:
+    dependencies:
+      '@socketsecurity/lib':
+        specifier: 'catalog:'
+        version: 5.25.1(typescript@5.9.3)
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.9.2
+
   .claude/hooks/check-new-deps:
     dependencies:
       '@socketregistry/packageurl-js':
@@ -168,6 +187,12 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 24.9.2
+        version: 24.9.2
+
+  .claude/hooks/logger-guard:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
         version: 24.9.2
 
   .claude/hooks/path-guard: {}
@@ -189,6 +214,8 @@ importers:
       '@types/node':
         specifier: 24.9.2
         version: 24.9.2
+
+  .claude/hooks/stale-process-sweeper: {}
 
   .claude/hooks/token-guard: {}
 
