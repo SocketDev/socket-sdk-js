@@ -32,6 +32,7 @@ import {
   readFileForScan,
   scanAwsKeys,
   scanGitHubTokens,
+  scanLoggerLeaks,
   scanPersonalPaths,
   scanPrivateKeys,
   scanSocketApiKeys,
@@ -251,7 +252,18 @@ const scanFilesInRange = (range: string): number => {
     const pathHits = scanPersonalPaths(text)
     if (pathHits.length > 0) {
       out(red(`✗ BLOCKED: Hardcoded personal path found in: ${file}`))
-      pathHits.slice(0, 3).forEach(h => out(`${h.lineNumber}:${h.line.trim()}`))
+      for (const h of pathHits.slice(0, 3)) {
+        out(`${h.lineNumber}: ${h.line.trim()}`)
+        if (h.suggested && h.suggested !== h.line) {
+          out(`     fix: ${h.suggested.trim()}`)
+        }
+      }
+      out(
+        'Replace with `<user>` / `<USERNAME>` placeholders, an env var ' +
+          '(`$HOME`, `${USER}`), or — for documentation lines that need ' +
+          'the literal username form — append the marker ' +
+          '`# zizmor: documentation-placeholder`.',
+      )
       errors++
     }
 
@@ -280,6 +292,33 @@ const scanFilesInRange = (range: string): number => {
     if (pkHits.length > 0) {
       out(red(`✗ BLOCKED: Private key found in: ${file}`))
       errors++
+    }
+
+    if (
+      !file.startsWith('.claude/hooks/') &&
+      !file.startsWith('.git-hooks/') &&
+      !file.startsWith('scripts/') &&
+      !file.includes('/external/') &&
+      !file.includes('/vendor/') &&
+      !file.includes('/upstream/') &&
+      /\.(m?ts|tsx|cts)$/.test(file)
+    ) {
+      const loggerHits = scanLoggerLeaks(text)
+      if (loggerHits.length > 0) {
+        out(red(`✗ BLOCKED: direct stream write found in: ${file}`))
+        for (const h of loggerHits.slice(0, 3)) {
+          out(`${h.lineNumber}: ${h.line.trim()}`)
+          if (h.suggested && h.suggested !== h.line) {
+            out(`     fix: ${h.suggested.trim()}`)
+          }
+        }
+        out(
+          'Use `getDefaultLogger()` from `@socketsecurity/lib/logger`. ' +
+            'For documentation lines that need the literal call, append ' +
+            'the marker `# socket-hook: allow logger`.',
+        )
+        errors++
+      }
     }
   }
   return errors
