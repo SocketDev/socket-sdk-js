@@ -1171,10 +1171,11 @@ export interface paths {
      * - `value.fixDetails.unfixablePurls`: Array of packages that cannot be fixed, each containing:
      *   - `purl`: Package URL
      *   - `manifestFiles`: Array of manifest files
+     *   - `reasons`: Human-readable explanations of why the package cannot be upgraded. May contain multiple distinct entries when different dependency chains are blocked for different causes (e.g. one chain has no compatible upstream version; another would require a major version bump skipped by `--no-major-updates`).
      *
      * **noFixAvailable**: No fix exists for this vulnerability (no patched version published)
      *
-     * **fixNotApplicable**: A fix exists but cannot be applied due to version constraints
+     * **fixNotApplicable**: A patched version of the vulnerable package exists but cannot be applied. The most common cause is that there is no upgrade path through the dependency tree — for example, given a chain `App → A@1.0.0 → B@1.0.0` where `B < 2.0.0` is vulnerable, if no version of `A` accepts `B@2.0.0` the fix cannot be applied without a manual override (e.g. `pnpm overrides`). Other causes include callers passing `--no-major-updates` when the only patched version is a major bump.
      * - `value.vulnerableArtifacts`: Array of vulnerable packages with their manifest files
      *
      * **errorComputingFix**: An error occurred while computing fixes
@@ -15505,6 +15506,8 @@ export interface operations {
           | 'CreateUserWithPassword'
           | 'CreateWebhook'
           | 'CreateTicket'
+          | 'CoanaCliLegacyModeCutoffUpdated'
+          | 'CoanaCliLegacyModePromoteOrg'
           | 'DeleteAlertTriage'
           | 'DeleteApiToken'
           | 'DeleteFirewallCustomRegistry'
@@ -16864,10 +16867,11 @@ export interface operations {
    * - `value.fixDetails.unfixablePurls`: Array of packages that cannot be fixed, each containing:
    *   - `purl`: Package URL
    *   - `manifestFiles`: Array of manifest files
+   *   - `reasons`: Human-readable explanations of why the package cannot be upgraded. May contain multiple distinct entries when different dependency chains are blocked for different causes (e.g. one chain has no compatible upstream version; another would require a major version bump skipped by `--no-major-updates`).
    *
    * **noFixAvailable**: No fix exists for this vulnerability (no patched version published)
    *
-   * **fixNotApplicable**: A fix exists but cannot be applied due to version constraints
+   * **fixNotApplicable**: A patched version of the vulnerable package exists but cannot be applied. The most common cause is that there is no upgrade path through the dependency tree — for example, given a chain `App → A@1.0.0 → B@1.0.0` where `B < 2.0.0` is vulnerable, if no version of `A` accepts `B@2.0.0` the fix cannot be applied without a manual override (e.g. `pnpm overrides`). Other causes include callers passing `--no-major-updates` when the only patched version is a major bump.
    * - `value.vulnerableArtifacts`: Array of vulnerable packages with their manifest files
    *
    * **errorComputingFix**: An error occurred while computing fixes
