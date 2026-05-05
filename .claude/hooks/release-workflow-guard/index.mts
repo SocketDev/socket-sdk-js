@@ -48,35 +48,103 @@ type ToolInput = {
 // The captured workflow argument is reported back so the user can
 // see what was blocked.
 const GH_WORKFLOW_DISPATCH_RE =
-  /\bgh\s+workflow\s+(?:run|dispatch)\b(?:\s+(?:--repo|--ref|-f|--field)\s+\S+)*\s+(['"]?)([^\s'"]+)\1/
+  /\bgh\s+workflow\s+(?:run|dispatch)\b(?:\s+(?:--repo|--ref|-f|--field)\s+\S+)*\s+(['"]?)([^\s'"]+)\1/g
 
 // `gh api .../actions/workflows/<id>/dispatches` (POST/PUT).
 // The path component implies dispatch — no need to also match -X.
 const GH_API_WORKFLOW_DISPATCH_RE =
-  /\bgh\s+api\b[^|]*?\/actions\/workflows\/([^/\s]+)\/dispatches\b/
+  /\bgh\s+api\b[^|]*?\/actions\/workflows\/([^/\s]+)\/dispatches\b/g
+
+// Walk the command and return a per-position boolean: true means the
+// char at index i sits inside a single- or double-quoted string. We
+// use this to skip matches that fall inside `git commit -m "..."`
+// message bodies, heredocs, etc. — text that the shell will pass as
+// a literal argument value, not execute. Without this, mentioning
+// `gh workflow run` inside a commit message body trips the hook.
+//
+// Limitations: this is not a full POSIX shell parser. Heredocs
+// (<<EOF ... EOF) read as code-mode here, but in practice commit
+// messages via heredoc are quoted by `$(cat <<'EOF' ... EOF)` and
+// the outer `$(...)`/`"..."` wrap puts the body in quoted-mode.
+// `\$` and other escapes inside quotes are honored only in the
+// limited sense of skipping the next char.
+function buildQuoteMask(s: string): boolean[] {
+  const mask = new Array<boolean>(s.length).fill(false)
+  let inSingle = false
+  let inDouble = false
+  for (let i = 0; i < s.length; i += 1) {
+    const c = s[i]
+    if (!inSingle && !inDouble && c === "'") {
+      inSingle = true
+      mask[i] = true
+      continue
+    }
+    if (inSingle && c === "'") {
+      inSingle = false
+      mask[i] = true
+      continue
+    }
+    if (!inSingle && !inDouble && c === '"') {
+      inDouble = true
+      mask[i] = true
+      continue
+    }
+    if (inDouble && c === '"') {
+      inDouble = false
+      mask[i] = true
+      continue
+    }
+    if (inDouble && c === '\\' && i + 1 < s.length) {
+      mask[i] = true
+      mask[i + 1] = true
+      i += 1
+      continue
+    }
+    mask[i] = inSingle || inDouble
+  }
+  return mask
+}
 
 function detectDispatch(command: string): {
   blocked: boolean
   workflow?: string
   shape?: string
 } {
-  const normalized = command.replace(/\s+/g, ' ')
+  // We can't `replace(/\s+/g, ' ')` first because that would offset
+  // the quote mask from the original string. Match against the raw
+  // command and use the mask to filter false-positives.
+  const mask = buildQuoteMask(command)
 
-  const cliMatch = GH_WORKFLOW_DISPATCH_RE.exec(normalized)
-  if (cliMatch) {
-    return {
-      blocked: true,
-      workflow: cliMatch[2],
-      shape: 'gh workflow run/dispatch',
+  // The /g-flag regex is a module-scoped singleton; `.exec()` advances
+  // `lastIndex` and only resets when it returns null at end-of-input.
+  // If our previous call broke out of the loop early (because we found
+  // a quote-masked match), `lastIndex` is left mid-string and the next
+  // `detectDispatch` call would resume from there instead of scanning
+  // the whole command. Reset before each scan to make the regex
+  // stateless from the caller's perspective.
+  GH_WORKFLOW_DISPATCH_RE.lastIndex = 0
+  let cliMatch: RegExpExecArray | null
+  while ((cliMatch = GH_WORKFLOW_DISPATCH_RE.exec(command))) {
+    if (!mask[cliMatch.index]) {
+      return {
+        blocked: true,
+        workflow: cliMatch[2],
+        shape: 'gh workflow run/dispatch',
+      }
     }
   }
 
-  const apiMatch = GH_API_WORKFLOW_DISPATCH_RE.exec(normalized)
-  if (apiMatch) {
-    return {
-      blocked: true,
-      workflow: apiMatch[1],
-      shape: 'gh api .../dispatches',
+  // Same /g-flag reset rationale as above — keep the regex stateless
+  // across calls.
+  GH_API_WORKFLOW_DISPATCH_RE.lastIndex = 0
+  let apiMatch: RegExpExecArray | null
+  while ((apiMatch = GH_API_WORKFLOW_DISPATCH_RE.exec(command))) {
+    if (!mask[apiMatch.index]) {
+      return {
+        blocked: true,
+        workflow: apiMatch[1],
+        shape: 'gh api .../dispatches',
+      }
     }
   }
 

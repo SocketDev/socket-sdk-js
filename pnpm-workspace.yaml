@@ -25,6 +25,10 @@ enablePrePostScripts: true
 # (which in rc.5 leaves a placeholder launcher that errors at runtime).
 pmOnFail: error
 
+catalog:
+  '@socketsecurity/lib': 5.27.0
+  '@types/node': 24.9.2
+
 overrides:
   defu: '>=6.1.7'
   vite: 7.3.2
@@ -37,6 +41,15 @@ minimumReleaseAgeExclude:
   - '@socketbin/*'
   - '@socketregistry/*'
   - '@socketsecurity/*'
+
+# Refuse transitive dependencies declared via git/tarball/local-tarball
+# specs — an npm package shouldn't be allowed to drag in a git URL we
+# don't control (bypasses npm registry validation, no provenance, no
+# soak window). Direct git deps are still allowed (the test suite at
+# pnpm/pkg-manager/core/test/install/blockExoticSubdeps.ts confirms
+# this). pnpm's current default is `false`; declared explicitly so a
+# future flip can't silently change install behavior.
+blockExoticSubdeps: true
 
 # Pin exact versions on `pnpm add`. Catalog and overrides should
 # also be exact pins (5.24.0, not ^5.24.0).
