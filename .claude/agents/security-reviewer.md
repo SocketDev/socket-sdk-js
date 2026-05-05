@@ -1,6 +1,6 @@
 ---
 name: security-reviewer
-description: Reviews findings from AgentShield + zizmor against socket-sdk-js's CLAUDE.md security rules and grades the result A-F. Spawned by the security-scan skill after the static scans run.
+description: Reviews findings from AgentShield + zizmor against the project's CLAUDE.md security rules and grades the result A-F. Spawned by the security-scan skill after the static scans run.
 tools: Read, Grep, Glob, Bash(git:*), Bash(rg:*), Bash(grep:*), Bash(find:*), Bash(ls:*), Bash(pnpm exec agentshield:*), Bash(zizmor:*), Bash(command -v:*), Bash(cat:*), Bash(head:*), Bash(tail:*)
 ---
 
@@ -18,7 +18,7 @@ Apply these rules from CLAUDE.md exactly:
 
 1. **Secrets**: Hardcoded API keys, passwords, tokens, private keys in code or config
 2. **Injection**: Command injection via shell: true or string interpolation in spawn/exec. Path traversal in file operations.
-3. **Dependencies**: npx/dlx usage. Unpinned versions (^ or ~). Missing minimumReleaseAge bypass justification. # zizmor: documentation-checklist
+3. **Dependencies**: npx/dlx usage. Unpinned versions (^ or ~). Missing soak-window bypass justification (pnpm-workspace.yaml `minimumReleaseAgeExclude`). # zizmor: documentation-checklist
 4. **File operations**: fs.rm without safeDelete. process.chdir usage. fetch() usage (must use lib's httpRequest).
 5. **GitHub Actions**: Unpinned action versions (must use full SHA). Secrets outside env blocks. Template injection from untrusted inputs.
 6. **Error handling**: Sensitive data in error messages. Stack traces exposed to users.
