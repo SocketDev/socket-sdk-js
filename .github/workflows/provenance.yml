@@ -43,4 +43,4 @@ jobs:
       setup-script: 'ci:validate'
       use-trusted-publishing: true
     secrets:
-      SOCKET_API_KEY: ${{ secrets.SOCKET_API_TOKEN }}
+      SOCKET_API_TOKEN: ${{ secrets.SOCKET_API_TOKEN }}

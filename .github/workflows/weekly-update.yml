@@ -17,4 +17,4 @@ jobs:
     secrets:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       BOT_GPG_PRIVATE_KEY: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
-      SOCKET_API_KEY: ${{ secrets.SOCKET_API_KEY }}
+      SOCKET_API_TOKEN: ${{ secrets.SOCKET_API_TOKEN || secrets.SOCKET_API_KEY }}
