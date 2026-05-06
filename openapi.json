@@ -7475,6 +7475,49 @@
               "type": {
                 "type": "string",
                 "enum": [
+                  "pendingScan"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {}
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
                   "deprecated"
                 ]
               },
@@ -8126,6 +8169,49 @@
                           "percentageSuspiciousStars",
                           "repository"
                         ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "props"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "notFound"
+                ]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {}
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
@@ -12120,10 +12206,20 @@
             }
           },
           {
+            "name": "poll",
+            "in": "query",
+            "required": false,
+            "description": "When true, wait up to timeoutSec for pending analysis to complete before returning. When false (default), return the current known state immediately, including synthesized pendingScan and notFound alerts when alerts=true unless purlErrors=true keeps legacy not-found errors.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
             "name": "cachedResultsOnly",
             "in": "query",
             "required": false,
-            "description": "Return only cached results, do not attempt to scan new artifacts or rescan stale results.",
+            "description": "Legacy fallback for older clients. Only used when poll is omitted: cachedResultsOnly=true behaves like poll=false, while cachedResultsOnly=false preserves the older blocking behavior.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -12143,7 +12239,7 @@
             "name": "timeoutSec",
             "in": "query",
             "required": false,
-            "description": "Maximum time in seconds to wait for scan results. PURLs that have not completed processing when the timeout is reached will be returned as errors (when purlErrors is enabled). Omit for no timeout.",
+            "description": "Maximum time in seconds to wait for package resolution and, when poll=true, pending analysis. Inputs that have not completed processing when the timeout is reached return pendingScan alerts when alerts=true, or errors when purlErrors=true.",
             "schema": {
               "type": "integer",
               "minimum": 1,
@@ -12173,7 +12269,7 @@
             ]
           }
         ],
-        "description": "**This endpoint is deprecated.** Deprecated since 2026-01-05.\n\nBatch retrieval of package metadata and alerts by PURL strings. Compatible with CycloneDX reports.\n\nPackage URLs (PURLs) are an ecosystem agnostic way to identify packages.\nCycloneDX SBOMs use the purl format to identify components.\nThis endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.\n\n**Note:** This endpoint has a batch size limit (default: 1024 PURLs per request). Requests exceeding this limit will return a 400 Bad Request error.\n\nMore information on purl and CycloneDX:\n\n- [`purl` Spec](https://github.com/package-url/purl-spec)\n- [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)\n\nThis endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).\nActively running analysis will be returned when available on subsequent runs.\n\n## Examples:\n\n### Looking up an npm package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\n### Looking up an PyPi package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    }\n  ]\n}\n```\n\n### Looking up a Maven package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### Batch lookup\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    },\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    },\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- packages:list",
+        "description": "**This endpoint is deprecated.** Deprecated since 2026-01-05.\n\nBatch retrieval of package metadata and alerts by PURL strings. Compatible with CycloneDX reports.\n\nPackage URLs (PURLs) are an ecosystem agnostic way to identify packages.\nCycloneDX SBOMs use the purl format to identify components.\nThis endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.\n\n**Note:** This endpoint has a batch size limit (default: 1024 PURLs per request). Requests exceeding this limit will return a 400 Bad Request error.\n\nMore information on purl and CycloneDX:\n\n- [`purl` Spec](https://github.com/package-url/purl-spec)\n- [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)\n\nThis endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).\nActively running analysis will be returned when available on subsequent runs.\n\nWhen `alerts=true`, Socket may synthesize two alert types to make partial\nresults actionable:\n\n- `pendingScan`: the package is known but analysis has not completed yet\n- `notFound`: Socket could not resolve the package/version metadata\n\nWhen `purlErrors=true`, unresolved `notFound` inputs keep the legacy\n`purlError` stream shape instead of emitting synthetic `notFound`\nartifacts.\n\nUse `poll=false` (default) to fail open and return the current known state\nquickly. Use `poll=true` to fail closed and wait up to `timeoutSec` for\npending analysis before returning.\n\n## Examples:\n\n### Looking up an npm package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\n### Looking up an PyPi package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    }\n  ]\n}\n```\n\n### Looking up a Maven package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### Batch lookup\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    },\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    },\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- packages:list",
         "responses": {
           "200": {
             "content": {
@@ -18432,9 +18528,9 @@
                             "description": "The last update date of the repository",
                             "default": ""
                           },
-                          "slug": {
+                          "html_url": {
                             "type": "string",
-                            "description": "The slug of the repository",
+                            "description": "The URL to the repository dashboard page",
                             "default": ""
                           },
                           "head_full_scan_id": {
@@ -18494,6 +18590,11 @@
                               }
                             ],
                             "nullable": true
+                          },
+                          "slug": {
+                            "type": "string",
+                            "description": "The slug of the repository.",
+                            "default": ""
                           },
                           "name": {
                             "type": "string",
@@ -18591,6 +18692,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "on_duplicate",
+            "in": "query",
+            "required": false,
+            "description": "Set to \"redirect\" to receive a 302 redirect to the existing repo instead of a 409 error when a duplicate slug is detected.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -18602,7 +18712,7 @@
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "The name of the repository",
+                    "description": "The display name of the repository. When provided without a slug, the slug is automatically derived from the name. When omitted, the slug is used as the name. At least one of name or slug must be provided.",
                     "default": ""
                   },
                   "description": {
@@ -18640,6 +18750,11 @@
                   "workspace": {
                     "type": "string",
                     "description": "The workspace of the repository",
+                    "default": ""
+                  },
+                  "slug": {
+                    "type": "string",
+                    "description": "The slug of the repository. If provided, used directly instead of being derived from name. Must only contain ASCII letters, digits, and the characters ., -, and _.",
                     "default": ""
                   }
                 },
@@ -18685,9 +18800,9 @@
                       "description": "The last update date of the repository",
                       "default": ""
                     },
-                    "slug": {
+                    "html_url": {
                       "type": "string",
-                      "description": "The slug of the repository",
+                      "description": "The URL to the repository dashboard page",
                       "default": ""
                     },
                     "head_full_scan_id": {
@@ -18748,6 +18863,11 @@
                       ],
                       "nullable": true
                     },
+                    "slug": {
+                      "type": "string",
+                      "description": "The slug of the repository.",
+                      "default": ""
+                    },
                     "name": {
                       "type": "string",
                       "description": "The name of the repository",
@@ -18797,6 +18917,145 @@
             },
             "description": "Lists repositories for the specified organization. The authenticated user must be a member of the organization."
           },
+          "302": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The ID of the repository",
+                      "default": ""
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "description": "The creation date of the repository",
+                      "default": ""
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "description": "The last update date of the repository",
+                      "default": ""
+                    },
+                    "html_url": {
+                      "type": "string",
+                      "description": "The URL to the repository dashboard page",
+                      "default": ""
+                    },
+                    "head_full_scan_id": {
+                      "type": "string",
+                      "description": "The ID of the head full scan of the repository",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "integration_meta": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "github"
+                              ]
+                            },
+                            "value": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "description": "",
+                              "properties": {
+                                "installation_id": {
+                                  "type": "string",
+                                  "description": "The GitHub installation_id of the active associated Socket GitHub App",
+                                  "default": ""
+                                },
+                                "installation_login": {
+                                  "type": "string",
+                                  "description": "The GitHub login name that the active Socket GitHub App installation is installed to",
+                                  "default": ""
+                                },
+                                "repo_name": {
+                                  "type": "string",
+                                  "description": "The name of the associated GitHub repo.",
+                                  "default": "",
+                                  "nullable": true
+                                },
+                                "repo_id": {
+                                  "type": "string",
+                                  "description": "The id of the associated GitHub repo.",
+                                  "default": "",
+                                  "nullable": true
+                                }
+                              },
+                              "required": [
+                                "installation_id",
+                                "installation_login",
+                                "repo_id",
+                                "repo_name"
+                              ]
+                            }
+                          }
+                        }
+                      ],
+                      "nullable": true
+                    },
+                    "slug": {
+                      "type": "string",
+                      "description": "The slug of the repository.",
+                      "default": ""
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the repository",
+                      "default": ""
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "The description of the repository",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "homepage": {
+                      "type": "string",
+                      "description": "The homepage URL of the repository",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "visibility": {
+                      "type": "string",
+                      "enum": [
+                        "public",
+                        "private"
+                      ],
+                      "description": "The visibility of the repository",
+                      "default": "private"
+                    },
+                    "archived": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "Whether the repository is archived or not"
+                    },
+                    "default_branch": {
+                      "type": "string",
+                      "description": "The default branch of the repository",
+                      "default": "main",
+                      "nullable": true
+                    },
+                    "workspace": {
+                      "type": "string",
+                      "description": "The workspace of the repository",
+                      "default": ""
+                    }
+                  },
+                  "description": ""
+                }
+              }
+            },
+            "description": "Redirects to the existing repository when on_duplicate=redirect is set and a duplicate slug is detected."
+          },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
           },
@@ -18808,6 +19067,9 @@
           },
           "404": {
             "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "409": {
+            "$ref": "#/components/responses/SocketConflict"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -18889,9 +19151,9 @@
                       "description": "The last update date of the repository",
                       "default": ""
                     },
-                    "slug": {
+                    "html_url": {
                       "type": "string",
-                      "description": "The slug of the repository",
+                      "description": "The URL to the repository dashboard page",
                       "default": ""
                     },
                     "head_full_scan_id": {
@@ -18952,6 +19214,11 @@
                       ],
                       "nullable": true
                     },
+                    "slug": {
+                      "type": "string",
+                      "description": "The slug of the repository.",
+                      "default": ""
+                    },
                     "name": {
                       "type": "string",
                       "description": "The name of the repository",
@@ -19007,6 +19274,7 @@
                     "description",
                     "head_full_scan_id",
                     "homepage",
+                    "html_url",
                     "id",
                     "integration_meta",
                     "name",
@@ -19166,9 +19434,9 @@
                       "description": "The last update date of the repository",
                       "default": ""
                     },
-                    "slug": {
+                    "html_url": {
                       "type": "string",
-                      "description": "The slug of the repository",
+                      "description": "The URL to the repository dashboard page",
                       "default": ""
                     },
                     "head_full_scan_id": {
@@ -19228,6 +19496,11 @@
                         }
                       ],
                       "nullable": true
+                    },
+                    "slug": {
+                      "type": "string",
+                      "description": "The slug of the repository.",
+                      "default": ""
                     },
                     "name": {
                       "type": "string",
@@ -21719,6 +21992,27 @@
                             "action"
                           ]
                         },
+                        "pendingScan": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for pendingScan issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "deprecated": {
                           "type": "object",
                           "additionalProperties": false,
@@ -21965,6 +22259,27 @@
                                 "ignore"
                               ],
                               "description": "The action to take for suspiciousStarActivity issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "notFound": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for notFound issues."
                             }
                           },
                           "required": [
@@ -24617,6 +24932,27 @@
                           "action"
                         ]
                       },
+                      "pendingScan": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for pendingScan issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
                       "deprecated": {
                         "type": "object",
                         "additionalProperties": false,
@@ -24863,6 +25199,27 @@
                               "ignore"
                             ],
                             "description": "The action to take for suspiciousStarActivity issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "notFound": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for notFound issues."
                           }
                         },
                         "required": [
@@ -27828,6 +28185,27 @@
                             "action"
                           ]
                         },
+                        "pendingScan": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for pendingScan issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "deprecated": {
                           "type": "object",
                           "additionalProperties": false,
@@ -28074,6 +28452,27 @@
                                 "ignore"
                               ],
                               "description": "The action to take for suspiciousStarActivity issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "notFound": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for notFound issues."
                             }
                           },
                           "required": [
@@ -30729,6 +31128,27 @@
                           "action"
                         ]
                       },
+                      "pendingScan": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for pendingScan issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
                       "deprecated": {
                         "type": "object",
                         "additionalProperties": false,
@@ -30975,6 +31395,27 @@
                               "ignore"
                             ],
                             "description": "The action to take for suspiciousStarActivity issues."
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      },
+                      "notFound": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for notFound issues."
                           }
                         },
                         "required": [
@@ -33583,6 +34024,27 @@
                             "action"
                           ]
                         },
+                        "pendingScan": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for pendingScan issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
                         "deprecated": {
                           "type": "object",
                           "additionalProperties": false,
@@ -33829,6 +34291,27 @@
                                 "ignore"
                               ],
                               "description": "The action to take for suspiciousStarActivity issues."
+                            }
+                          },
+                          "required": [
+                            "action"
+                          ]
+                        },
+                        "notFound": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for notFound issues."
                             }
                           },
                           "required": [
@@ -39149,6 +39632,7 @@
                 "CreateWebhook",
                 "CreateTicket",
                 "CoanaCliLegacyModeCutoffUpdated",
+                "CoanaCliLegacyModeDemoteOrg",
                 "CoanaCliLegacyModePromoteOrg",
                 "DeleteAlertTriage",
                 "DeleteApiToken",
@@ -39164,6 +39648,7 @@
                 "DisassociateLabel",
                 "DisconnectJiraIntegration",
                 "DowngradeOrganizationPlan",
+                "EnqueueAutopatchPrepareJob",
                 "JoinOrganization",
                 "JiraIntegrationConnected",
                 "MemberAdded",
@@ -39178,6 +39663,7 @@
                 "RevokeApiToken",
                 "RotateApiToken",
                 "SendInvitation",
+                "SessionRevokedByUser",
                 "SetLabelSettingToDefault",
                 "SSOEmailVerificationCompleted",
                 "SSOLoginCompleted",
@@ -39190,6 +39676,7 @@
                 "UpdateApiTokenScopes",
                 "UpdateApiTokenVisibility",
                 "UpdateAutopatchCurated",
+                "UpdateAutopatchPrepareConfig",
                 "UpdateFirewallCustomRegistry",
                 "UpdateFirewallDeploymentConfig",
                 "UpdateLabel",
@@ -41299,10 +41786,20 @@
             }
           },
           {
+            "name": "poll",
+            "in": "query",
+            "required": false,
+            "description": "When true, wait up to timeoutSec for pending analysis to complete before returning. When false (default), return the current known state immediately, including synthesized pendingScan and notFound alerts when alerts=true unless purlErrors=true keeps legacy not-found errors.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
             "name": "cachedResultsOnly",
             "in": "query",
             "required": false,
-            "description": "Return only cached results, do not attempt to scan new artifacts or rescan stale results.",
+            "description": "Legacy fallback for older clients. Only used when poll is omitted: cachedResultsOnly=true behaves like poll=false, while cachedResultsOnly=false preserves the older blocking behavior.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -41322,7 +41819,7 @@
             "name": "timeoutSec",
             "in": "query",
             "required": false,
-            "description": "Maximum time in seconds to wait for scan results. PURLs that have not completed processing when the timeout is reached will be returned as errors (when purlErrors is enabled). Omit for no timeout, unless a default timeout is configured for the organization.",
+            "description": "Maximum time in seconds to wait for package resolution and, when poll=true, pending analysis. Inputs that have not completed processing when the timeout is reached return pendingScan alerts when alerts=true, or errors when purlErrors=true.",
             "schema": {
               "type": "integer",
               "minimum": 1,
@@ -41352,7 +41849,7 @@
             ]
           }
         ],
-        "description": "Batch retrieval of package metadata and alerts by PURL strings for a specific organization. Compatible with CycloneDX reports.\n\nPackage URLs (PURLs) are an ecosystem agnostic way to identify packages.\nCycloneDX SBOMs use the purl format to identify components.\nThis endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.\n\n**Note:** This endpoint has a batch size limit (default: 1024 PURLs per request). Requests exceeding this limit will return a 400 Bad Request error.\n\nMore information on purl and CycloneDX:\n\n- [`purl` Spec](https://github.com/package-url/purl-spec)\n- [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)\n\nThis endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).\nActively running analysis will be returned when available on subsequent runs.\n\n## Query Parameters\n\nThis endpoint supports all query parameters from `POST /v0/purl` including: `alerts`, `actions`, `compact`, `fixable`, `licenseattrib`, `licensedetails`, `purlErrors`, `cachedResultsOnly`, and `summary`.\n\nAdditionally, you may provide a `labels` query parameter to apply a repository label's security policies. Pass the label slug as the value (e.g., `?labels=production`). Only one label is currently supported.\n\n## Examples:\n\n### Looking up an npm package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\n### Looking up a PyPi package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    }\n  ]\n}\n```\n\n### Looking up a Maven package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### Batch lookup\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    },\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    },\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### With label and options (query parameters):\n\n```\nPOST /v0/orgs/{org_slug}/purl?labels=production&alerts=true&compact=true\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- packages:list",
+        "description": "Batch retrieval of package metadata and alerts by PURL strings for a specific organization. Compatible with CycloneDX reports.\n\nPackage URLs (PURLs) are an ecosystem agnostic way to identify packages.\nCycloneDX SBOMs use the purl format to identify components.\nThis endpoint supports fetching metadata and alerts for multiple packages at once by passing an array of purl strings, or by passing an entire CycloneDX report.\n\n**Note:** This endpoint has a batch size limit (default: 1024 PURLs per request). Requests exceeding this limit will return a 400 Bad Request error.\n\nMore information on purl and CycloneDX:\n\n- [`purl` Spec](https://github.com/package-url/purl-spec)\n- [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)\n\nThis endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).\nActively running analysis will be returned when available on subsequent runs.\n\nWhen `alerts=true`, Socket may synthesize two alert types to make partial\nresults actionable:\n\n- `pendingScan`: the package is known but analysis has not completed yet\n- `notFound`: Socket could not resolve the package/version metadata\n\nWhen `purlErrors=true`, unresolved `notFound` inputs keep the legacy\n`purlError` stream shape instead of emitting synthetic `notFound`\nartifacts.\n\nUse `poll=false` (default) to fail open and return the current known state\nquickly. Use `poll=true` to fail closed and wait up to `timeoutSec` for\npending analysis before returning.\n\n## Query Parameters\n\nThis endpoint supports all query parameters from `POST /v0/purl` including: `alerts`, `actions`, `compact`, `fixable`, `licenseattrib`, `licensedetails`, `purlErrors`, `poll`, `cachedResultsOnly`, and `summary`.\n\nAdditionally, you may provide a `labels` query parameter to apply a repository label's security policies. Pass the label slug as the value (e.g., `?labels=production`). Only one label is currently supported.\n\n## Examples:\n\n### Looking up an npm package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\n### Looking up a PyPi package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    }\n  ]\n}\n```\n\n### Looking up a Maven package:\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### Batch lookup\n\n```json\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    },\n    {\n      \"purl\": \"pkg:pypi/django@5.0.6\"\n    },\n    {\n      \"purl\": \"pkg:maven/log4j/log4j@1.2.17\"\n    }\n  ]\n}\n```\n\n### With label and options (query parameters):\n\n```\nPOST /v0/orgs/{org_slug}/purl?labels=production&alerts=true&compact=true\n{\n  \"components\": [\n    {\n      \"purl\": \"pkg:npm/express@4.19.2\"\n    }\n  ]\n}\n```\n\nThis endpoint consumes 100 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- packages:list",
         "responses": {
           "200": {
             "content": {
@@ -41388,7 +41885,7 @@
         "tags": [
           "fixes"
         ],
-        "summary": "Fetch fixes for vulnerabilities in a repository or scan",
+        "summary": "Fetch fixes for vulnerabilities in a repository, scan, or uploaded manifest",
         "operationId": "fetch-fixes",
         "parameters": [
           {
@@ -41414,6 +41911,15 @@
             "in": "query",
             "required": false,
             "description": "The ID of the scan to fetch fixes for",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tar_hash",
+            "in": "query",
+            "required": false,
+            "description": "A tarball hash from the upload-manifest-files endpoint. Mutually exclusive with repo_slug and full_scan_id.",
             "schema": {
               "type": "string"
             }
@@ -41466,6 +41972,25 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "name": "include_all_detected_ghsas",
+            "in": "query",
+            "required": false,
+            "description": "Set to include an allDetectedGhsas field listing every GHSA detected in the project, regardless of the vulnerability_ids filter. Useful for CLI clients that request a specific GHSA and want to show the user which GHSAs actually exist when the request has no overlap.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "autofix_run_id",
+            "in": "query",
+            "required": false,
+            "description": "The id of an autofix-or-upgrade-cli-run record (created via /fixes/register-autofix-or-upgrade-cli-run) to associate this computation with. When set, the server records per-GHSA fix-computation telemetry into autofix_compute_vulnerability and updates the run's autofix_run row, mirroring the legacy /v0/fixes/compute-fixes endpoint. The caller must own the run's organization; foreign-org or unknown ids return 404.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "security": [
@@ -41480,7 +42005,7 @@
             ]
           }
         ],
-        "description": "Fetches available fixes for vulnerabilities in a repository or scan.\nRequires either repo_slug or full_scan_id as well as vulnerability_ids to be provided.\nvulnerability_ids can be a comma-separated list of GHSA or CVE IDs, or \"*\" for all vulnerabilities.\n\n## Response Structure\n\nThe response contains a `fixDetails` object where each key is a vulnerability ID (GHSA or CVE) and the value is a discriminated union based on the `type` field.\n\n### Common Fields\n\nAll response variants include:\n- `type`: Discriminator field (one of: \"fixFound\", \"partialFixFound\", \"noFixAvailable\", \"fixNotApplicable\", \"errorComputingFix\")\n- `value`: Object containing the variant-specific data\n\nThe `value` object always contains:\n- `ghsa`: string | null - The GHSA ID\n- `cve`: string | null - The CVE ID (if available)\n- `advisoryDetails`: object | null - Advisory details (only if include_details=true)\n\n### Response Variants\n\n**fixFound**: A complete fix is available for all vulnerable packages\n- `value.fixDetails.fixes`: Array of fix objects, each containing:\n  - `purl`: Package URL to upgrade\n  - `fixedVersion`: Version to upgrade to\n  - `manifestFiles`: Array of manifest files containing the package\n  - `updateType`: \"patch\" | \"minor\" | \"major\" | \"unknown\"\n- `value.fixDetails.responsibleDirectDependencies`: (optional) Map of direct dependencies responsible for the vulnerability\n\n**partialFixFound**: Fixes available for some but not all vulnerable packages\n- Same as fixFound, plus:\n- `value.fixDetails.unfixablePurls`: Array of packages that cannot be fixed, each containing:\n  - `purl`: Package URL\n  - `manifestFiles`: Array of manifest files\n  - `reasons`: Human-readable explanations of why the package cannot be upgraded. May contain multiple distinct entries when different dependency chains are blocked for different causes (e.g. one chain has no compatible upstream version; another would require a major version bump skipped by `--no-major-updates`).\n\n**noFixAvailable**: No fix exists for this vulnerability (no patched version published)\n\n**fixNotApplicable**: A patched version of the vulnerable package exists but cannot be applied. The most common cause is that there is no upgrade path through the dependency tree — for example, given a chain `App → A@1.0.0 → B@1.0.0` where `B < 2.0.0` is vulnerable, if no version of `A` accepts `B@2.0.0` the fix cannot be applied without a manual override (e.g. `pnpm overrides`). Other causes include callers passing `--no-major-updates` when the only patched version is a major bump.\n- `value.vulnerableArtifacts`: Array of vulnerable packages with their manifest files\n\n**errorComputingFix**: An error occurred while computing fixes\n- `value.message`: Error description\n\n### Advisory Details (when include_details=true)\n\n- `title`: string | null\n- `description`: string | null\n- `cwes`: string[] - CWE identifiers\n- `severity`: \"LOW\" | \"MODERATE\" | \"HIGH\" | \"CRITICAL\"\n- `cvssVector`: string | null\n- `publishedAt`: string (ISO date)\n- `kev`: boolean - Whether it's a Known Exploited Vulnerability\n- `epss`: number | null - Exploit Prediction Scoring System score\n- `affectedPurls`: Array of affected packages with version ranges\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- fixes:list",
+        "description": "Fetches available fixes for vulnerabilities in a repository, scan, or uploaded manifest.\nRequires exactly one of repo_slug, full_scan_id, or tar_hash, as well as vulnerability_ids to be provided.\nvulnerability_ids can be a comma-separated list of GHSA or CVE IDs, or \"*\" for all vulnerabilities.\n\n## Response Structure\n\nThe response contains a `fixDetails` object where each key is a vulnerability ID (GHSA or CVE) and the value is a discriminated union based on the `type` field.\n\n### Common Fields\n\nAll response variants include:\n- `type`: Discriminator field (one of: \"fixFound\", \"partialFixFound\", \"noFixAvailable\", \"fixNotApplicable\", \"errorComputingFix\")\n- `value`: Object containing the variant-specific data\n\nThe `value` object always contains:\n- `ghsa`: string | null - The GHSA ID\n- `cve`: string | null - The CVE ID (if available)\n- `advisoryDetails`: object | null - Advisory details (only if include_details=true)\n\n### Response Variants\n\n**fixFound**: A complete fix is available for all vulnerable packages\n- `value.fixDetails.fixes`: Array of fix objects, each containing:\n  - `purl`: Package URL to upgrade\n  - `fixedVersion`: Version to upgrade to\n  - `manifestFiles`: Array of manifest files containing the package\n  - `updateType`: \"patch\" | \"minor\" | \"major\" | \"unknown\"\n- `value.fixDetails.responsibleDirectDependencies`: (optional) Map of direct dependencies responsible for the vulnerability\n\n**partialFixFound**: Fixes available for some but not all vulnerable packages\n- Same as fixFound, plus:\n- `value.fixDetails.unfixablePurls`: Array of packages that cannot be fixed, each containing:\n  - `purl`: Package URL\n  - `manifestFiles`: Array of manifest files\n  - `reasons`: Human-readable explanations of why the package cannot be upgraded. May contain multiple distinct entries when different dependency chains are blocked for different causes (e.g. one chain has no compatible upstream version; another would require a major version bump skipped by `--no-major-updates`).\n\n**noFixAvailable**: No fix exists for this vulnerability (no patched version published)\n\n**fixNotApplicable**: A patched version of the vulnerable package exists but cannot be applied. The most common cause is that there is no upgrade path through the dependency tree — for example, given a chain `App → A@1.0.0 → B@1.0.0` where `B < 2.0.0` is vulnerable, if no version of `A` accepts `B@2.0.0` the fix cannot be applied without a manual override (e.g. `pnpm overrides`). Other causes include callers passing `--no-major-updates` when the only patched version is a major bump.\n- `value.vulnerableArtifacts`: Array of vulnerable packages with their manifest files\n\n**errorComputingFix**: An error occurred while computing fixes\n- `value.message`: Error description\n\n### Advisory Details (when include_details=true)\n\n- `title`: string | null\n- `description`: string | null\n- `cwes`: string[] - CWE identifiers\n- `severity`: \"LOW\" | \"MODERATE\" | \"HIGH\" | \"CRITICAL\"\n- `cvssVector`: string | null\n- `publishedAt`: string (ISO date)\n- `kev`: boolean - Whether it's a Known Exploited Vulnerability\n- `epss`: number | null - Exploit Prediction Scoring System score\n- `affectedPurls`: Array of affected packages with version ranges\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- fixes:list",
         "responses": {
           "200": {
             "content": {
@@ -41488,7 +42013,6 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": false,
-                  "description": "",
                   "properties": {
                     "fixDetails": {
                       "type": "object",
@@ -41499,6 +42023,15 @@
                       },
                       "properties": {},
                       "description": ""
+                    },
+                    "allDetectedGhsas": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "",
+                        "default": "GHSA ID of a vulnerability detected in the project"
+                      },
+                      "description": "All vulnerability GHSA IDs detected in the project, regardless of the vulnerability_ids filter. Only present when include_all_detected_ghsas=true is set."
                     }
                   },
                   "required": [
