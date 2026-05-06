@@ -28,8 +28,8 @@
  *   `--format=json` or `--json` — single JSON object for CI tooling.
  *
  * Sources and learnings:
- *   - file-fork and version-pin semantics: socket-tui (this repo).
- *   - feature-parity three-pillar scoring: socket-sdxgen
+ *   - file-fork and version-pin semantics: stuie (this repo).
+ *   - feature-parity three-pillar scoring: sdxgen
  *     lock-step-features.json (snapshots replace the 20% tolerance).
  *   - lang-parity ports, rejected anti-pattern, per-area summaries, exit
  *     code 2 semantics: ultrathink/acorn/scripts/xlang-harness.mts.

@@ -60,7 +60,7 @@
     "publish": "node scripts/publish.mts",
     "publish:ci": "node scripts/publish.mts --tag ${DIST_TAG:-latest}",
     "claude": "node scripts/claude.mts",
-    "security": "agentshield scan && { command -v zizmor >/dev/null && zizmor .github/ || echo 'zizmor not installed — run pnpm run setup to install'; }",
+    "security": "node scripts/security.mts",
     "test": "node scripts/test.mts",
     "type": "tsgo --noEmit -p .config/tsconfig.check.json",
     "update": "node scripts/update.mts"

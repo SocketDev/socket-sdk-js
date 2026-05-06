@@ -53,6 +53,7 @@ import { homedir } from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
+import { errorMessage } from '@socketsecurity/lib/errors'
 import { safeDelete } from '@socketsecurity/lib/fs'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
@@ -100,7 +101,7 @@ async function checkSnoozes(): Promise<SnoozeStatus> {
       status.cleaned.push(file)
     } catch (e) {
       logger.error(
-        `${PREFIX} safeDelete(${path.basename(file)}) failed (${reason}): ${(e as Error).message}`,
+        `${PREFIX} safeDelete(${path.basename(file)}) failed (${reason}): ${errorMessage(e)}`,
       )
     }
   }
@@ -335,7 +336,7 @@ function main(): void {
   process.stdin.on('end', () => {
     run()
       .catch(e => {
-        logger.error(`${PREFIX} unexpected error: ${(e as Error).message}`)
+        logger.error(`${PREFIX} unexpected error: ${errorMessage(e)}`)
       })
       .finally(() => {
         process.exit(0)
@@ -344,7 +345,7 @@ function main(): void {
   if (process.stdin.readable === false) {
     run()
       .catch(e => {
-        logger.error(`${PREFIX} unexpected error: ${(e as Error).message}`)
+        logger.error(`${PREFIX} unexpected error: ${errorMessage(e)}`)
       })
       .finally(() => {
         process.exit(0)

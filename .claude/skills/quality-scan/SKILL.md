@@ -1,60 +1,84 @@
 ---
 name: quality-scan
-description: Runs comprehensive quality scans across the codebase using specialized agents to identify critical bugs, logic errors, caching issues, and workflow problems. Use when improving code quality, before releases, or investigating issues.
-allowed-tools: Task, Skill, Read, Edit, Grep, Glob, AskUserQuestion, Bash(pnpm run check:*), Bash(pnpm run test:*), Bash(pnpm test:*), Bash(pnpm run fix:*), Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git commit:*), Bash(rg:*), Bash(grep:*), Bash(find:*), Bash(ls:*)
+description: Scans the codebase for bugs, logic errors, caching issues, and workflow problems using specialized agents. Use when preparing for release, investigating quality issues, or running pre-merge checks.
+user-invocable: true
+allowed-tools: Task, Read, Grep, Glob, AskUserQuestion, Bash(pnpm run check:*), Bash(pnpm run test:*), Bash(pnpm test:*), Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(rg:*), Bash(grep:*), Bash(find:*), Bash(ls:*)
 ---
 
 # quality-scan
 
-<task>
-Performs comprehensive quality scans across the codebase, cleaning up junk files
-and spawning specialized agents for targeted analysis. Generates a prioritized
-report with actionable improvement tasks.
-</task>
+Perform comprehensive quality analysis across the codebase using specialized agents. Clean up junk files first, then scan and generate a prioritized report with actionable fixes.
 
-<constraints>
-- Analysis phase is read-only; do not fix issues during scan.
-- Must complete all enabled scans before reporting.
-- Findings prioritized by severity (Critical > High > Medium > Low).
-- All findings must include file:line references and suggested fixes.
-- Run `pnpm test` after each fix iteration.
-- Cap at 5 iterations; stop and report if issues persist.
-</constraints>
+## Scan Types
 
-## Phases
+1. **critical** - Crashes, security vulnerabilities, resource leaks, data corruption
+2. **logic** - Algorithm errors, edge cases, type guards, off-by-one errors
+3. **cache** - Cache staleness, race conditions, invalidation bugs
+4. **workflow** - Build scripts, CI issues, cross-platform compatibility
+5. **workflow-optimization** - CI optimization (build-required conditions on cached builds)
+6. **security** - GitHub Actions workflow security (zizmor scanner)
+7. **documentation** - README accuracy, outdated docs, missing documentation
+8. **patch-format** - Patch file format validation
 
-1. **Validate Environment** — `git status`; follow `_shared/env-check.md`.
-2. **Update Dependencies** — `pnpm run update`; continue even if it fails.
-3. **Install External Tools** — See `_shared/security-tools.md` for zizmor; use `pnpm run setup`.
-4. **Repository Cleanup** — Glob for junk files (SCREAMING_TEXT.md, temp files, editor backups); confirm before deletion.
-5. **Structural Validation** — `pnpm run check`; report errors as Critical findings.
-6. **Determine Scan Scope** — Ask user: all scans, critical only, or custom selection. CI mode runs all automatically.
-7. **Execute Scans** — Spawn agents sequentially via Agent tool using prompts from [reference.md](reference.md). Apply `agents/code-reviewer.md` rules for code scans, `agents/security-reviewer.md` for security scans.
-8. **Aggregate Findings** — Deduplicate across scans, sort by severity then scan type.
-9. **Generate Report** — Summary table by severity + scan type, display to user.
-10. **Fix All Issues** — Apply fixes from Critical to Low; read each file before editing.
-11. **Run Tests** — `pnpm test`; revert and exit iteration on failure.
-12. **Commit Fixes** — Stage and commit with summary of fixed issue counts.
-13. **Iteration Decision** — Zero issues = done; otherwise loop back to Phase 7.
+Agent prompts for each scan type are in `reference.md`.
 
-## Available Scans
+## Process
 
-See [reference.md](reference.md) for detailed agent prompts. Scan types:
+### Phase 1: Validate Environment
 
-- **critical** — Crashes, security vulnerabilities, resource leaks, data corruption
-- **logic** — Algorithm errors, edge cases, type guards, off-by-one errors
-- **cache** — Cache staleness, race conditions, invalidation bugs
-- **workflow** — Build scripts, CI issues, cross-platform compatibility
-- **security** — GitHub Actions workflow security via zizmor + credential exposure
-- **documentation** — README accuracy, outdated docs, missing documentation
+```bash
+git status
+```
 
-## Scan Scope
+Warn about uncommitted changes but continue (scanning is read-only).
 
-Primary: `src/`, `scripts/`, `test/`, `.github/workflows/`
-Excluded: `node_modules/`, `dist/`, `.pnpm-store/`
+### Phase 2: Update Dependencies
 
-## Error Recovery
+```bash
+pnpm run update
+```
 
-- **Scan agent failure**: Log warning, continue remaining scans.
-- **Test failure after fixes**: `git restore .`, report failures, exit iteration.
-- **Git commit failure**: Display error, ask user to resolve.
+Only update the current repository. Continue even if update fails.
+
+### Phase 3: Install zizmor
+
+Install zizmor for GitHub Actions security scanning, respecting the soak window — pnpm-workspace.yaml `minimumReleaseAge` in minutes, default 10080 (= 7 days). Query GitHub releases, find the latest stable release older than the threshold, and install via pipx/uvx. Skip the security scan if no release meets the soak requirement.
+
+### Phase 4: Repository Cleanup
+
+Find and remove junk files (with user confirmation via AskUserQuestion):
+- SCREAMING_TEXT.md files outside `.claude/` and `docs/`
+- Test files in wrong locations
+- Temp files (`.tmp`, `.DS_Store`, `*~`, `*.swp`, `*.bak`)
+- Log files in root/package directories
+
+### Phase 5: Structural Validation
+
+```bash
+node scripts/check-consistency.mjs
+```
+
+Report errors as Critical findings. Warnings are Low findings.
+
+### Phase 6: Determine Scan Scope
+
+Ask user which scans to run using AskUserQuestion (multiSelect). Default: all scans.
+
+### Phase 7: Execute Scans
+
+For each enabled scan type, spawn a Task agent with the corresponding prompt from `reference.md`. Run sequentially in priority order: critical, logic, cache, workflow, then others.
+
+Each agent reports findings as:
+- File: path:line
+- Issue, Severity, Pattern, Trigger, Fix, Impact
+
+### Phase 8: Aggregate and Report
+
+- Deduplicate findings across scan types
+- Sort by severity: Critical > High > Medium > Low
+- Generate markdown report with file:line references, suggested fixes, and coverage metrics
+- Offer to save to `reports/quality-scan-YYYY-MM-DD.md`
+
+### Phase 9: Summary
+
+Report final metrics: dependency updates, structural validation results, cleanup stats, scan counts, and total findings by severity.
