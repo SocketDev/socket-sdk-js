@@ -45,6 +45,7 @@
     "build": "node scripts/build.mts",
     "bump": "node scripts/bump.mts",
     "check": "node scripts/check.mts",
+    "check:paths": "node scripts/check-paths.mts",
     "clean": "node scripts/clean.mts",
     "cover": "node scripts/cover.mts",
     "fix": "node scripts/fix.mts",
@@ -63,7 +64,9 @@
     "security": "node scripts/security.mts",
     "test": "node scripts/test.mts",
     "type": "tsgo --noEmit -p .config/tsconfig.check.json",
-    "update": "node scripts/update.mts"
+    "update": "node scripts/update.mts",
+    "xport": "node scripts/xport.mts",
+    "xport:emit-schema": "node scripts/xport-emit-schema.mts"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "2.1.92",
