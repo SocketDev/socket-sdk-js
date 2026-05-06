@@ -55,8 +55,8 @@ settings:
 catalogs:
   default:
     '@socketsecurity/lib':
-      specifier: 5.27.0
-      version: 5.27.0
+      specifier: 5.28.0
+      version: 5.28.0
     '@types/node':
       specifier: 24.9.2
       version: 24.9.2
@@ -92,7 +92,7 @@ importers:
         version: 0.34.49
       '@socketsecurity/lib':
         specifier: 'catalog:'
-        version: 5.27.0(typescript@5.9.3)
+        version: 5.28.0(typescript@5.9.3)
       '@sveltejs/acorn-typescript':
         specifier: 1.0.8
         version: 1.0.8(acorn@8.15.0)
@@ -167,7 +167,7 @@ importers:
     dependencies:
       '@socketsecurity/lib':
         specifier: 'catalog:'
-        version: 5.27.0(typescript@5.9.3)
+        version: 5.28.0(typescript@5.9.3)
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -180,7 +180,7 @@ importers:
         version: 1.4.2
       '@socketsecurity/lib':
         specifier: 'catalog:'
-        version: 5.27.0(typescript@5.9.3)
+        version: 5.28.0(typescript@5.9.3)
       '@socketsecurity/sdk':
         specifier: 4.0.1
         version: 4.0.1
@@ -213,7 +213,7 @@ importers:
     devDependencies:
       '@socketsecurity/lib':
         specifier: 'catalog:'
-        version: 5.27.0(typescript@5.9.3)
+        version: 5.28.0(typescript@5.9.3)
       '@types/node':
         specifier: 'catalog:'
         version: 24.9.2
@@ -1285,9 +1285,10 @@ packages:
     resolution: {integrity: sha512-yt9UfUzD02wZ7kwb67oe4jxG2D9JtgPqjrK/ans2BovFyeie0w8hvRR0MuOWM4mUt2371oFPp7NB6O5ZjYJmlw==}
     engines: {node: '>=18.20.8', pnpm: '>=11.0.0-rc.0'}
 
-  '@socketsecurity/lib@5.27.0':
-    resolution: {integrity: sha512-RTplAVxQ6VUG3GXw2RcKRveEdkMneO6LbbNDTX1eXtvd6dazypFoXqyeN7KfbFN21/9A4EjgaMgamd0f9Y3cyQ==}
+  '@socketsecurity/lib@5.28.0':
+    resolution: {integrity: sha512-SVVq+ODU3H6KAQXwaANnnq2sNHj+JgHM67R0ww93V8J38upiSUlUR8Mxx3P5mo922B+gY6WNFU0zSJfEOjbKew==}
     engines: {node: '>=22', pnpm: '>=11.0.6'}
+    hasBin: true
     peerDependencies:
       typescript: '>=5.0.0'
     peerDependenciesMeta:
@@ -3014,7 +3015,7 @@ snapshots:
 
   '@socketregistry/packageurl-js@1.4.2': {}
 
-  '@socketsecurity/lib@5.27.0(typescript@5.9.3)':
+  '@socketsecurity/lib@5.28.0(typescript@5.9.3)':
     optionalDependencies:
       typescript: 5.9.3
 
