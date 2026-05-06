@@ -54,7 +54,7 @@ The umbrella rule: never run a git command that mutates state belonging to a pat
 
 ### Programmatic Claude calls
 
-🚨 Workflows / skills / scripts that invoke `claude` CLI or `@anthropic-ai/claude-agent-sdk` MUST set all four lockdown flags: `tools`, `allowedTools`, `disallowedTools`, `permissionMode: 'dontAsk'`. Never `default` mode in headless contexts. Never `bypassPermissions`. See `.claude/skills/programmatic-claude-lockdown/SKILL.md`.
+🚨 Workflows / skills / scripts that invoke `claude` CLI or `@anthropic-ai/claude-agent-sdk` MUST set all four lockdown flags: `tools`, `allowedTools`, `disallowedTools`, `permissionMode: 'dontAsk'`. Never `default` mode in headless contexts. Never `bypassPermissions`. See `.claude/skills/locking-down-programmatic-claude/SKILL.md`.
 
 ### Tooling
 
@@ -114,7 +114,7 @@ Never silently let drift sit. Either reconcile in the same PR or open a follow-u
 - **Edits** — Edit tool, never `sed` / `awk`.
 - **Inclusive language** — see [`docs/references/inclusive-language.md`](docs/references/inclusive-language.md) for the substitution table.
 - **Sorting** — sort alphanumerically (literal byte order, ASCII before letters). Applies to: object property keys (config + return shapes + internal state — `__proto__: null` first); named imports inside a single statement (`import { a, b, c }`); `Set` / `SafeSet` constructor arguments; allowlists / denylists / config arrays / interface members. Position-bearing arrays (where index matters) keep their meaningful order. Full details in [`docs/references/sorting.md`](docs/references/sorting.md). When in doubt, sort.
-- **`Promise.race` / `Promise.any` in loops** — never re-race a pool that survives across iterations (the handlers stack). See `.claude/skills/promise-race-pitfall/SKILL.md`.
+- **`Promise.race` / `Promise.any` in loops** — never re-race a pool that survives across iterations (the handlers stack). See `.claude/skills/plug-leaking-promise-race/SKILL.md`.
 - **`Safe` suffix** — non-throwing wrappers end in `Safe` (`safeDelete`, `safeDeleteSync`, `applySafe`, `weakRefSafe`). Read it as "X, but safe from throwing." The wrapper traps the thrown value internally and returns `undefined` (or the documented fallback). Don't invent alternative suffixes (`Try`, `OrUndefined`, `Maybe`) — pick `Safe`.
 - **`node:smol-*` modules** — feature-detect, then require. From outside socket-btm (socket-lib, socket-cli, anywhere else): `import { isBuiltin } from 'node:module'; if (isBuiltin('node:smol-X')) { const mod = require('node:smol-X') }`. The `node:smol-*` namespace is provided by socket-btm's smol Node binary; on stock Node `isBuiltin` returns false and the require would throw. Wrap the loader in a `/*@__NO_SIDE_EFFECTS__*/` lazy-load that caches the result — see `socket-lib/src/smol/util.ts` and `socket-lib/src/smol/primordial.ts` for canonical shape. **Inside** socket-btm's `additions/source-patched/` JS (the smol binary's own bootstrap code), use `internalBinding('smol_X')` directly — that's the C++-binding access path and it's guaranteed available there.
 
@@ -126,7 +126,7 @@ A path is constructed exactly once. Everywhere else references the constructed v
 - **Across packages**: package B imports package A's `paths.mts` via the workspace `exports` field. Never `path.join(PKG, '..', '<sibling>', 'build', …)`.
 - **Workflows / Dockerfiles / shell** can't `import` TS — construct once, reference by output / `ENV` / variable.
 
-Three-level enforcement: `.claude/hooks/path-guard/` blocks at edit time; `scripts/check-paths.mts` is the whole-repo gate run by `pnpm check`; `/path-guard` is the audit-and-fix skill. Find the canonical owner and import from it.
+Three-level enforcement: `.claude/hooks/path-guard/` blocks at edit time; `scripts/check-paths.mts` is the whole-repo gate run by `pnpm check`; `/guarding-paths` is the audit-and-fix skill. Find the canonical owner and import from it.
 
 ### Background Bash
 
@@ -162,16 +162,16 @@ Full hook spec in [`.claude/hooks/token-guard/README.md`](.claude/hooks/token-gu
 
 ### Agents & skills
 
-- `/security-scan` — AgentShield + zizmor audit
-- `/quality-scan` — quality analysis
+- `/scanning-security` — AgentShield + zizmor audit
+- `/scanning-quality` — quality analysis
 - Shared subskills in `.claude/skills/_shared/`
 
 #### Skill scope: fleet vs partial vs unique
 
 Every skill under `.claude/skills/` falls into one of three tiers — surface this distinction when adding a new skill so it lands in the right place:
 
-- **Fleet skill** — present in every fleet repo, identical contract everywhere. Examples: `path-guard`, `quality-scan`, `security-scan`, `updating`, `programmatic-claude-lockdown`, `promise-race-pitfall`. New fleet skills land in `socket-repo-template/template/.claude/skills/<name>/` and cascade via `node socket-repo-template/scripts/sync-scaffolding.mts --all --fix`. Track them in `SHARED_SKILL_FILES` in the sync manifest.
-- **Partial skill** — present in the subset of repos that need it, identical contract within that subset. Examples: `cursor-bugbot` (every repo with PR review), `updating-xport` (every repo with `xport.json`), `squashing-history` (repos with the squash workflow). Live in each adopting repo's `.claude/skills/<name>/`. When you change one, propagate to the others.
+- **Fleet skill** — present in every fleet repo, identical contract everywhere. Examples: `guarding-paths`, `scanning-quality`, `scanning-security`, `updating`, `locking-down-programmatic-claude`, `plug-leaking-promise-race`. New fleet skills land in `socket-repo-template/template/.claude/skills/<name>/` and cascade via `node socket-repo-template/scripts/sync-scaffolding.mts --all --fix`. Track them in `SHARED_SKILL_FILES` in the sync manifest.
+- **Partial skill** — present in the subset of repos that need it, identical contract within that subset. Examples: `driving-cursor-bugbot` (every repo with PR review), `updating-xport` (every repo with `xport.json`), `squashing-history` (repos with the squash workflow). Live in each adopting repo's `.claude/skills/<name>/`. When you change one, propagate to the others.
 - **Unique skill** — one repo only, bespoke to that repo's domain. Examples: `updating-cdxgen` (sdxgen), `updating-yoga` (socket-btm), `release` (socket-registry). Never canonical-tracked; the host repo owns it end-to-end.
 
 Audit the current classification with `node socket-repo-template/scripts/run-skill-fleet.mts --list-skills`.
@@ -185,9 +185,9 @@ Audit the current classification with `node socket-repo-template/scripts/run-ski
 `scripts/run-skill-fleet.mts` (in `socket-repo-template`) spawns one headless `claude --print` agent per fleet repo, in parallel (concurrency 4 by default), with the four lockdown flags set per the _Programmatic Claude calls_ rule above. Per-skill profile table maps known skills to sensible tool/allow/disallow lists; override with `--tools` / `--allow` / `--disallow`. Per-repo logs land in `.cache/fleet-skill/<timestamp>-<skill>/<repo>.log`. Use `Promise.allSettled` semantics — one repo's failure doesn't abort the rest.
 
 ```bash
-pnpm run fleet-skill updating                     # update every fleet repo
-pnpm run fleet-skill quality-scan --concurrency 2 # slower, more conservative
-pnpm run fleet-skill --list-skills                # classify skills fleet/partial/unique
+pnpm run fleet-skill updating                       # update every fleet repo
+pnpm run fleet-skill scanning-quality --concurrency 2 # slower, more conservative
+pnpm run fleet-skill --list-skills                  # classify skills fleet/partial/unique
 ```
 
 <!-- END FLEET-CANONICAL -->
