@@ -12,6 +12,8 @@
 
 import { describe, expect, it, vi } from 'vitest'
 
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
+
 import { MAX_FIREWALL_COMPONENTS } from '../../src/constants.js'
 import { SocketSdk } from '../../src/index'
 import { setupLocalHttpServer } from '../utils/local-server-helpers.mts'
@@ -315,7 +317,13 @@ describe('SocketSdk - File validation callbacks', () => {
     })
 
     it('should warn and continue when no callback and files are invalid', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const warnSpy = vi
+        .spyOn(getDefaultLogger(), 'warn')
+        .mockImplementation(
+          function (this: ReturnType<typeof getDefaultLogger>) {
+            return this
+          },
+        )
 
       const client = new SocketSdk('test-token', { retries: 0 })
 
@@ -386,7 +394,13 @@ describe('SocketSdk - File validation callbacks', () => {
     })
 
     it('should warn without callback when files are invalid', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const warnSpy = vi
+        .spyOn(getDefaultLogger(), 'warn')
+        .mockImplementation(
+          function (this: ReturnType<typeof getDefaultLogger>) {
+            return this
+          },
+        )
 
       const client = new SocketSdk('test-token', { retries: 0 })
 
@@ -471,7 +485,13 @@ describe('SocketSdk - File validation callbacks', () => {
     })
 
     it('should warn without callback when files are invalid and truncate display for many files', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const warnSpy = vi
+        .spyOn(getDefaultLogger(), 'warn')
+        .mockImplementation(
+          function (this: ReturnType<typeof getDefaultLogger>) {
+            return this
+          },
+        )
 
       const client = new SocketSdk('test-token', { retries: 0 })
 

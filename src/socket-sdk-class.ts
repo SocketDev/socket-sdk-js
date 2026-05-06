@@ -12,6 +12,7 @@ import { SOCKET_PUBLIC_API_TOKEN } from '@socketsecurity/lib/constants/socket'
 import { debugLog, isDebugNs } from '@socketsecurity/lib/debug'
 import { validateFiles } from '@socketsecurity/lib/fs'
 import { jsonParse } from '@socketsecurity/lib/json/parse'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { getOwn, isObjectObject } from '@socketsecurity/lib/objects'
 import {
   ArrayIsArray,
@@ -24,6 +25,7 @@ import { setMaxEventTargetListeners } from '@socketsecurity/lib/suppress-warning
 import { urlSearchParamAsBoolean } from '@socketsecurity/lib/url'
 
 const abortSignal = getAbortSignal()
+const logger = getDefaultLogger()
 
 import { httpRequest } from '@socketsecurity/lib/http-request'
 
@@ -1235,7 +1237,7 @@ export class SocketSdk {
         invalidPaths.length > 3
           ? `\n  ... and ${invalidPaths.length - 3} more`
           : ''
-      console.warn(
+      logger.warn(
         `Warning: ${invalidPaths.length} files skipped (unreadable):\n  - ${samplePaths}${remaining}\n` +
           '→ This may occur with Yarn Berry PnP or pnpm symlinks.\n' +
           '→ Try: Run installation command to ensure files are accessible.',
@@ -1369,7 +1371,7 @@ export class SocketSdk {
         invalidPaths.length > 3
           ? `\n  ... and ${invalidPaths.length - 3} more`
           : ''
-      console.warn(
+      logger.warn(
         `Warning: ${invalidPaths.length} files skipped (unreadable):\n  - ${samplePaths}${remaining}\n` +
           '→ This may occur with Yarn Berry PnP or pnpm symlinks.\n' +
           '→ Try: Run installation command to ensure files are accessible.',
@@ -4324,7 +4326,7 @@ export class SocketSdk {
         invalidPaths.length > 3
           ? `\n  ... and ${invalidPaths.length - 3} more`
           : ''
-      console.warn(
+      logger.warn(
         `Warning: ${invalidPaths.length} files skipped (unreadable):\n  - ${samplePaths}${remaining}\n` +
           '→ This may occur with Yarn Berry PnP or pnpm symlinks.\n' +
           '→ Try: Run installation command to ensure files are accessible.',
