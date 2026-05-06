@@ -26,6 +26,20 @@ export interface paths {
      * This endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).
      * Actively running analysis will be returned when available on subsequent runs.
      *
+     * When `alerts=true`, Socket may synthesize two alert types to make partial
+     * results actionable:
+     *
+     * - `pendingScan`: the package is known but analysis has not completed yet
+     * - `notFound`: Socket could not resolve the package/version metadata
+     *
+     * When `purlErrors=true`, unresolved `notFound` inputs keep the legacy
+     * `purlError` stream shape instead of emitting synthetic `notFound`
+     * artifacts.
+     *
+     * Use `poll=false` (default) to fail open and return the current known state
+     * quickly. Use `poll=true` to fail closed and wait up to `timeoutSec` for
+     * pending analysis before returning.
+     *
      * ## Examples:
      *
      * ### Looking up an npm package:
@@ -1052,9 +1066,23 @@ export interface paths {
      * This endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).
      * Actively running analysis will be returned when available on subsequent runs.
      *
+     * When `alerts=true`, Socket may synthesize two alert types to make partial
+     * results actionable:
+     *
+     * - `pendingScan`: the package is known but analysis has not completed yet
+     * - `notFound`: Socket could not resolve the package/version metadata
+     *
+     * When `purlErrors=true`, unresolved `notFound` inputs keep the legacy
+     * `purlError` stream shape instead of emitting synthetic `notFound`
+     * artifacts.
+     *
+     * Use `poll=false` (default) to fail open and return the current known state
+     * quickly. Use `poll=true` to fail closed and wait up to `timeoutSec` for
+     * pending analysis before returning.
+     *
      * ## Query Parameters
      *
-     * This endpoint supports all query parameters from `POST /v0/purl` including: `alerts`, `actions`, `compact`, `fixable`, `licenseattrib`, `licensedetails`, `purlErrors`, `cachedResultsOnly`, and `summary`.
+     * This endpoint supports all query parameters from `POST /v0/purl` including: `alerts`, `actions`, `compact`, `fixable`, `licenseattrib`, `licensedetails`, `purlErrors`, `poll`, `cachedResultsOnly`, and `summary`.
      *
      * Additionally, you may provide a `labels` query parameter to apply a repository label's security policies. Pass the label slug as the value (e.g., `?labels=production`). Only one label is currently supported.
      *
@@ -1136,9 +1164,9 @@ export interface paths {
   }
   '/orgs/{org_slug}/fixes': {
     /**
-     * Fetch fixes for vulnerabilities in a repository or scan
-     * @description Fetches available fixes for vulnerabilities in a repository or scan.
-     * Requires either repo_slug or full_scan_id as well as vulnerability_ids to be provided.
+     * Fetch fixes for vulnerabilities in a repository, scan, or uploaded manifest
+     * @description Fetches available fixes for vulnerabilities in a repository, scan, or uploaded manifest.
+     * Requires exactly one of repo_slug, full_scan_id, or tar_hash, as well as vulnerability_ids to be provided.
      * vulnerability_ids can be a comma-separated list of GHSA or CVE IDs, or "*" for all vulnerabilities.
      *
      * ## Response Structure
@@ -4083,6 +4111,16 @@ export interface components {
         }
       | {
           /** @enum {string} */
+          type?: 'pendingScan'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: Record<string, never>
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
           type?: 'deprecated'
           value?: components['schemas']['SocketIssueBasics'] & {
             /** @default */
@@ -4250,6 +4288,16 @@ export interface components {
               /** @default */
               repository: string
             }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /** @enum {string} */
+          type?: 'notFound'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /** @default */
+            description: string
+            props: Record<string, never>
             usage?: components['schemas']['SocketUsageRef']
           }
         }
@@ -5535,6 +5583,20 @@ export interface operations {
    * This endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).
    * Actively running analysis will be returned when available on subsequent runs.
    *
+   * When `alerts=true`, Socket may synthesize two alert types to make partial
+   * results actionable:
+   *
+   * - `pendingScan`: the package is known but analysis has not completed yet
+   * - `notFound`: Socket could not resolve the package/version metadata
+   *
+   * When `purlErrors=true`, unresolved `notFound` inputs keep the legacy
+   * `purlError` stream shape instead of emitting synthetic `notFound`
+   * artifacts.
+   *
+   * Use `poll=false` (default) to fail open and return the current known state
+   * quickly. Use `poll=true` to fail closed and wait up to `timeoutSec` for
+   * pending analysis before returning.
+   *
    * ## Examples:
    *
    * ### Looking up an npm package:
@@ -5613,11 +5675,13 @@ export interface operations {
         licensedetails?: boolean
         /** @description Return errors found with handling PURLs as error objects in the stream. */
         purlErrors?: boolean
-        /** @description Return only cached results, do not attempt to scan new artifacts or rescan stale results. */
+        /** @description When true, wait up to timeoutSec for pending analysis to complete before returning. When false (default), return the current known state immediately, including synthesized pendingScan and notFound alerts when alerts=true unless purlErrors=true keeps legacy not-found errors. */
+        poll?: boolean
+        /** @description Legacy fallback for older clients. Only used when poll is omitted: cachedResultsOnly=true behaves like poll=false, while cachedResultsOnly=false preserves the older blocking behavior. */
         cachedResultsOnly?: boolean
         /** @description Include a summary object at the end of the stream with counts of malformed, resolved, and not found PURLs. */
         summary?: boolean
-        /** @description Maximum time in seconds to wait for scan results. PURLs that have not completed processing when the timeout is reached will be returned as errors (when purlErrors is enabled). Omit for no timeout. */
+        /** @description Maximum time in seconds to wait for package resolution and, when poll=true, pending analysis. Inputs that have not completed processing when the timeout is reached return pendingScan alerts when alerts=true, or errors when purlErrors=true. */
         timeoutSec?: number
       }
     }
@@ -7931,10 +7995,10 @@ export interface operations {
                */
               updated_at?: string
               /**
-               * @description The slug of the repository
+               * @description The URL to the repository dashboard page
                * @default
                */
-              slug?: string
+              html_url?: string
               /**
                * @description The ID of the head full scan of the repository
                * @default
@@ -7966,6 +8030,11 @@ export interface operations {
                   repo_id: string | null
                 }
               } | null
+              /**
+               * @description The slug of the repository.
+               * @default
+               */
+              slug?: string
               /**
                * @description The name of the repository
                * @default
@@ -8028,6 +8097,10 @@ export interface operations {
    */
   createOrgRepo: {
     parameters: {
+      query?: {
+        /** @description Set to "redirect" to receive a 302 redirect to the existing repo instead of a 409 error when a duplicate slug is detected. */
+        on_duplicate?: string
+      }
       path: {
         /** @description The slug of the organization */
         org_slug: string
@@ -8037,7 +8110,7 @@ export interface operations {
       content: {
         'application/json': {
           /**
-           * @description The name of the repository
+           * @description The display name of the repository. When provided without a slug, the slug is automatically derived from the name. When omitted, the slug is used as the name. At least one of name or slug must be provided.
            * @default
            */
           name?: string
@@ -8072,6 +8145,11 @@ export interface operations {
            * @default
            */
           workspace?: string
+          /**
+           * @description The slug of the repository. If provided, used directly instead of being derived from name. Must only contain ASCII letters, digits, and the characters ., -, and _.
+           * @default
+           */
+          slug?: string
         }
       }
     }
@@ -8096,10 +8174,10 @@ export interface operations {
              */
             updated_at?: string
             /**
-             * @description The slug of the repository
+             * @description The URL to the repository dashboard page
              * @default
              */
-            slug?: string
+            html_url?: string
             /**
              * @description The ID of the head full scan of the repository
              * @default
@@ -8131,6 +8209,110 @@ export interface operations {
                 repo_id: string | null
               }
             } | null
+            /**
+             * @description The slug of the repository.
+             * @default
+             */
+            slug?: string
+            /**
+             * @description The name of the repository
+             * @default
+             */
+            name?: string
+            /**
+             * @description The description of the repository
+             * @default
+             */
+            description?: string | null
+            /**
+             * @description The homepage URL of the repository
+             * @default
+             */
+            homepage?: string | null
+            /**
+             * @description The visibility of the repository
+             * @default private
+             * @enum {string}
+             */
+            visibility?: 'public' | 'private'
+            /**
+             * @description Whether the repository is archived or not
+             * @default false
+             */
+            archived?: boolean
+            /**
+             * @description The default branch of the repository
+             * @default main
+             */
+            default_branch?: string | null
+            /**
+             * @description The workspace of the repository
+             * @default
+             */
+            workspace?: string
+          }
+        }
+      }
+      /** @description Redirects to the existing repository when on_duplicate=redirect is set and a duplicate slug is detected. */
+      302: {
+        content: {
+          'application/json': {
+            /**
+             * @description The ID of the repository
+             * @default
+             */
+            id?: string
+            /**
+             * @description The creation date of the repository
+             * @default
+             */
+            created_at?: string
+            /**
+             * @description The last update date of the repository
+             * @default
+             */
+            updated_at?: string
+            /**
+             * @description The URL to the repository dashboard page
+             * @default
+             */
+            html_url?: string
+            /**
+             * @description The ID of the head full scan of the repository
+             * @default
+             */
+            head_full_scan_id?: string | null
+            integration_meta?: {
+              /** @enum {string} */
+              type?: 'github'
+              value?: {
+                /**
+                 * @description The GitHub installation_id of the active associated Socket GitHub App
+                 * @default
+                 */
+                installation_id: string
+                /**
+                 * @description The GitHub login name that the active Socket GitHub App installation is installed to
+                 * @default
+                 */
+                installation_login: string
+                /**
+                 * @description The name of the associated GitHub repo.
+                 * @default
+                 */
+                repo_name: string | null
+                /**
+                 * @description The id of the associated GitHub repo.
+                 * @default
+                 */
+                repo_id: string | null
+              }
+            } | null
+            /**
+             * @description The slug of the repository.
+             * @default
+             */
+            slug?: string
             /**
              * @description The name of the repository
              * @default
@@ -8174,6 +8356,7 @@ export interface operations {
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
       404: components['responses']['SocketNotFoundResponse']
+      409: components['responses']['SocketConflict']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -8220,10 +8403,10 @@ export interface operations {
              */
             updated_at: string
             /**
-             * @description The slug of the repository
+             * @description The URL to the repository dashboard page
              * @default
              */
-            slug: string
+            html_url: string
             /**
              * @description The ID of the head full scan of the repository
              * @default
@@ -8255,6 +8438,11 @@ export interface operations {
                 repo_id: string | null
               }
             } | null
+            /**
+             * @description The slug of the repository.
+             * @default
+             */
+            slug: string
             /**
              * @description The name of the repository
              * @default
@@ -8391,10 +8579,10 @@ export interface operations {
              */
             updated_at?: string
             /**
-             * @description The slug of the repository
+             * @description The URL to the repository dashboard page
              * @default
              */
-            slug?: string
+            html_url?: string
             /**
              * @description The ID of the head full scan of the repository
              * @default
@@ -8426,6 +8614,11 @@ export interface operations {
                 repo_id: string | null
               }
             } | null
+            /**
+             * @description The slug of the repository.
+             * @default
+             */
+            slug?: string
             /**
              * @description The name of the repository
              * @default
@@ -9391,6 +9584,13 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              pendingScan?: {
+                /**
+                 * @description The action to take for pendingScan issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               deprecated?: {
                 /**
                  * @description The action to take for deprecated issues.
@@ -9471,6 +9671,13 @@ export interface operations {
               suspiciousStarActivity?: {
                 /**
                  * @description The action to take for suspiciousStarActivity issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              notFound?: {
+                /**
+                 * @description The action to take for notFound issues.
                  * @enum {string}
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -10382,6 +10589,13 @@ export interface operations {
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
             }
+            pendingScan?: {
+              /**
+               * @description The action to take for pendingScan issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
             deprecated?: {
               /**
                * @description The action to take for deprecated issues.
@@ -10462,6 +10676,13 @@ export interface operations {
             suspiciousStarActivity?: {
               /**
                * @description The action to take for suspiciousStarActivity issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            notFound?: {
+              /**
+               * @description The action to take for notFound issues.
                * @enum {string}
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -11527,6 +11748,13 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              pendingScan?: {
+                /**
+                 * @description The action to take for pendingScan issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               deprecated?: {
                 /**
                  * @description The action to take for deprecated issues.
@@ -11607,6 +11835,13 @@ export interface operations {
               suspiciousStarActivity?: {
                 /**
                  * @description The action to take for suspiciousStarActivity issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              notFound?: {
+                /**
+                 * @description The action to take for notFound issues.
                  * @enum {string}
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -12511,6 +12746,13 @@ export interface operations {
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
             }
+            pendingScan?: {
+              /**
+               * @description The action to take for pendingScan issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
             deprecated?: {
               /**
                * @description The action to take for deprecated issues.
@@ -12591,6 +12833,13 @@ export interface operations {
             suspiciousStarActivity?: {
               /**
                * @description The action to take for suspiciousStarActivity issues.
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            notFound?: {
+              /**
+               * @description The action to take for notFound issues.
                * @enum {string}
                */
               action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -13464,6 +13713,13 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              pendingScan?: {
+                /**
+                 * @description The action to take for pendingScan issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               deprecated?: {
                 /**
                  * @description The action to take for deprecated issues.
@@ -13544,6 +13800,13 @@ export interface operations {
               suspiciousStarActivity?: {
                 /**
                  * @description The action to take for suspiciousStarActivity issues.
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              notFound?: {
+                /**
+                 * @description The action to take for notFound issues.
                  * @enum {string}
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
@@ -15507,6 +15770,7 @@ export interface operations {
           | 'CreateWebhook'
           | 'CreateTicket'
           | 'CoanaCliLegacyModeCutoffUpdated'
+          | 'CoanaCliLegacyModeDemoteOrg'
           | 'CoanaCliLegacyModePromoteOrg'
           | 'DeleteAlertTriage'
           | 'DeleteApiToken'
@@ -15522,6 +15786,7 @@ export interface operations {
           | 'DisassociateLabel'
           | 'DisconnectJiraIntegration'
           | 'DowngradeOrganizationPlan'
+          | 'EnqueueAutopatchPrepareJob'
           | 'JoinOrganization'
           | 'JiraIntegrationConnected'
           | 'MemberAdded'
@@ -15536,6 +15801,7 @@ export interface operations {
           | 'RevokeApiToken'
           | 'RotateApiToken'
           | 'SendInvitation'
+          | 'SessionRevokedByUser'
           | 'SetLabelSettingToDefault'
           | 'SSOEmailVerificationCompleted'
           | 'SSOLoginCompleted'
@@ -15548,6 +15814,7 @@ export interface operations {
           | 'UpdateApiTokenScopes'
           | 'UpdateApiTokenVisibility'
           | 'UpdateAutopatchCurated'
+          | 'UpdateAutopatchPrepareConfig'
           | 'UpdateFirewallCustomRegistry'
           | 'UpdateFirewallDeploymentConfig'
           | 'UpdateLabel'
@@ -16701,9 +16968,23 @@ export interface operations {
    * This endpoint returns the latest available alert data for artifacts in the batch (stale while revalidate).
    * Actively running analysis will be returned when available on subsequent runs.
    *
+   * When `alerts=true`, Socket may synthesize two alert types to make partial
+   * results actionable:
+   *
+   * - `pendingScan`: the package is known but analysis has not completed yet
+   * - `notFound`: Socket could not resolve the package/version metadata
+   *
+   * When `purlErrors=true`, unresolved `notFound` inputs keep the legacy
+   * `purlError` stream shape instead of emitting synthetic `notFound`
+   * artifacts.
+   *
+   * Use `poll=false` (default) to fail open and return the current known state
+   * quickly. Use `poll=true` to fail closed and wait up to `timeoutSec` for
+   * pending analysis before returning.
+   *
    * ## Query Parameters
    *
-   * This endpoint supports all query parameters from `POST /v0/purl` including: `alerts`, `actions`, `compact`, `fixable`, `licenseattrib`, `licensedetails`, `purlErrors`, `cachedResultsOnly`, and `summary`.
+   * This endpoint supports all query parameters from `POST /v0/purl` including: `alerts`, `actions`, `compact`, `fixable`, `licenseattrib`, `licensedetails`, `purlErrors`, `poll`, `cachedResultsOnly`, and `summary`.
    *
    * Additionally, you may provide a `labels` query parameter to apply a repository label's security policies. Pass the label slug as the value (e.g., `?labels=production`). Only one label is currently supported.
    *
@@ -16800,11 +17081,13 @@ export interface operations {
         licensedetails?: boolean
         /** @description Return errors found with handling PURLs as error objects in the stream. */
         purlErrors?: boolean
-        /** @description Return only cached results, do not attempt to scan new artifacts or rescan stale results. */
+        /** @description When true, wait up to timeoutSec for pending analysis to complete before returning. When false (default), return the current known state immediately, including synthesized pendingScan and notFound alerts when alerts=true unless purlErrors=true keeps legacy not-found errors. */
+        poll?: boolean
+        /** @description Legacy fallback for older clients. Only used when poll is omitted: cachedResultsOnly=true behaves like poll=false, while cachedResultsOnly=false preserves the older blocking behavior. */
         cachedResultsOnly?: boolean
         /** @description Include a summary object at the end of the stream with counts of malformed, resolved, and not found PURLs. */
         summary?: boolean
-        /** @description Maximum time in seconds to wait for scan results. PURLs that have not completed processing when the timeout is reached will be returned as errors (when purlErrors is enabled). Omit for no timeout, unless a default timeout is configured for the organization. */
+        /** @description Maximum time in seconds to wait for package resolution and, when poll=true, pending analysis. Inputs that have not completed processing when the timeout is reached return pendingScan alerts when alerts=true, or errors when purlErrors=true. */
         timeoutSec?: number
       }
       path: {
@@ -16832,9 +17115,9 @@ export interface operations {
     }
   }
   /**
-   * Fetch fixes for vulnerabilities in a repository or scan
-   * @description Fetches available fixes for vulnerabilities in a repository or scan.
-   * Requires either repo_slug or full_scan_id as well as vulnerability_ids to be provided.
+   * Fetch fixes for vulnerabilities in a repository, scan, or uploaded manifest
+   * @description Fetches available fixes for vulnerabilities in a repository, scan, or uploaded manifest.
+   * Requires exactly one of repo_slug, full_scan_id, or tar_hash, as well as vulnerability_ids to be provided.
    * vulnerability_ids can be a comma-separated list of GHSA or CVE IDs, or "*" for all vulnerabilities.
    *
    * ## Response Structure
@@ -16901,6 +17184,8 @@ export interface operations {
         repo_slug?: string
         /** @description The ID of the scan to fetch fixes for */
         full_scan_id?: string
+        /** @description A tarball hash from the upload-manifest-files endpoint. Mutually exclusive with repo_slug and full_scan_id. */
+        tar_hash?: string
         /** @description Comma-separated list of GHSA or CVE IDs, or "*" for all vulnerabilities */
         vulnerability_ids: string
         /** @description Whether to allow major version updates in fixes */
@@ -16911,6 +17196,10 @@ export interface operations {
         include_details?: boolean
         /** @description Set to include the direct dependencies responsible for introducing the dependency or dependencies with the vulnerability in the response */
         include_responsible_direct_dependencies?: boolean
+        /** @description Set to include an allDetectedGhsas field listing every GHSA detected in the project, regardless of the vulnerability_ids filter. Useful for CLI clients that request a specific GHSA and want to show the user which GHSAs actually exist when the request has no overlap. */
+        include_all_detected_ghsas?: boolean
+        /** @description The id of an autofix-or-upgrade-cli-run record (created via /fixes/register-autofix-or-upgrade-cli-run) to associate this computation with. When set, the server records per-GHSA fix-computation telemetry into autofix_compute_vulnerability and updates the run's autofix_run row, mirroring the legacy /v0/fixes/compute-fixes endpoint. The caller must own the run's organization; foreign-org or unknown ids return 404. */
+        autofix_run_id?: string
       }
       path: {
         /** @description The slug of the organization */
@@ -16925,6 +17214,8 @@ export interface operations {
             fixDetails: {
               [key: string]: Record<string, never>
             }
+            /** @description All vulnerability GHSA IDs detected in the project, regardless of the vulnerability_ids filter. Only present when include_all_detected_ghsas=true is set. */
+            allDetectedGhsas?: string[]
           }
         }
       }
