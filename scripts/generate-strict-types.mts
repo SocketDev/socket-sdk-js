@@ -783,11 +783,12 @@ ${generateWrapperTypes()}
     // Step 7: Update index.ts exports
     await updateIndexExports()
 
-    // Step 8: Format generated files with Biome
+    // Step 8: Format generated files with Biome.
+    // Use `pnpm exec` (CLAUDE.md forbids `npx` / `pnpm dlx`).
     logger.log('  Formatting generated files...')
     const formatResult = spawnSync(
-      'npx',
-      ['@biomejs/biome', 'format', '--write', strictTypesPath],
+      'pnpm',
+      ['exec', 'biome', 'format', '--write', strictTypesPath],
       { cwd: rootPath, encoding: 'utf8' },
     )
     if (formatResult.error) {
