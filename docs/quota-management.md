@@ -1,13 +1,21 @@
 # Quota Management
 
-API methods cost: 0 (free), 10 (standard), or 100 (resource-intensive) units.
+Every Socket API call costs a fixed number of quota units:
 
-## Check Quota
+| Cost | Tier      | What's in it                                                                                  |
+| ---- | --------- | --------------------------------------------------------------------------------------------- |
+| `0`  | Free      | Status and listing methods — `getQuota`, `listOrganizations`, `getEntitlements`, scan CRUD, repo management, triage, labels, exports. |
+| `10` | Standard  | Per-package reads and analytics — `getScoreByNpmPackage`, `getIssuesByNpmPackage`, `getOrgAnalytics`, `getRepoAnalytics`, `getAuditLogEvents`, API-token operations. |
+| `100`| Expensive | Batch and scan creation — `batchPackageFetch`, `batchOrgPackageFetch`, `batchPackageStream`, `createDependenciesSnapshot`, `createScanFromFilepaths`, `searchDependencies`, `uploadManifestFiles`. |
+
+The authoritative per-method table is [`data/api-method-quota-and-permissions.json`](../data/api-method-quota-and-permissions.json).
+
+## Check your quota
 
 ```typescript
 import { SocketSdk } from '@socketsecurity/sdk'
 
-const client = new SocketSdk('your-api-key')
+const client = new SocketSdk('your-api-token')
 const quota = await client.getQuota()
 
 if (quota.success) {
@@ -15,99 +23,49 @@ if (quota.success) {
 }
 ```
 
-## Utilities
+`getQuota()` itself is free.
+
+## Helpers
+
+The SDK exports four helpers for planning quota usage:
 
 ```typescript
 import {
-  getQuotaCost,
   calculateTotalQuotaCost,
-  hasQuotaForMethods,
   getMethodsByQuotaCost,
+  getQuotaCost,
+  hasQuotaForMethods,
 } from '@socketsecurity/sdk'
 
-// Get method cost
-getQuotaCost('batchPackageFetch') // 100
-getQuotaCost('getOrgAnalytics') // 10
-getQuotaCost('getQuota') // 0
+getQuotaCost('batchPackageFetch')         // 100
+getQuotaCost('getQuota')                  // 0
 
-// Calculate total
-const cost = calculateTotalQuotaCost([
-  'batchPackageFetch', // 100
-  'getOrgAnalytics', // 10
-  'getQuota', // 0
-]) // Returns: 110
-
-// Check quota
-const canProceed = hasQuotaForMethods(availableQuota, [
+calculateTotalQuotaCost([                 // 110
   'batchPackageFetch',
-  'createFullScan',
+  'getOrgAnalytics',
 ])
 
-// Methods by cost
-getMethodsByQuotaCost(0) // Free methods
-getMethodsByQuotaCost(10) // Standard methods
-getMethodsByQuotaCost(100) // Expensive methods
+hasQuotaForMethods(50, ['batchPackageFetch'])  // false — needs 100
+
+getMethodsByQuotaCost(0)                  // ['getQuota', 'listOrganizations', …]
 ```
 
-## Examples
+## Pre-flight check
 
-### Pre-flight Check
+Before kicking off an expensive batch, confirm you can afford the whole job:
 
 ```typescript
-const operations = ['batchPackageFetch', 'uploadManifestFiles']
-const required = calculateTotalQuotaCost(operations)
+const planned = ['batchPackageFetch', 'uploadManifestFiles']
+const required = calculateTotalQuotaCost(planned)
 
 const quota = await client.getQuota()
-if (!quota.success || !hasQuotaForMethods(quota.data.quota, operations)) {
-  throw new Error(`Need ${required} units, have ${quota.data.quota}`)
+if (!quota.success || !hasQuotaForMethods(quota.data.quota, planned)) {
+  throw new Error(`Need ${required} units, have ${quota.data?.quota ?? 0}`)
 }
 ```
 
-### Monitor Usage
+## Practical tips
 
-```typescript
-class QuotaTracker {
-  private used = 0
-
-  async track<T>(methodName: string, op: () => Promise<T>): Promise<T> {
-    const cost = getQuotaCost(methodName)
-    const result = await op()
-    this.used += cost
-    console.log(`Used ${this.used} units`)
-    return result
-  }
-}
-```
-
-### Fallback Strategy
-
-```typescript
-const quota = await client.getQuota()
-const batchCost = getQuotaCost('batchPackageFetch')
-
-if (quota.success && quota.data.quota >= batchCost) {
-  await client.batchPackageFetch({ components })
-} else {
-  // Fall back to individual queries
-  for (const pkg of packages) {
-    await client.getScoreByNpmPackage(pkg.name, pkg.version)
-  }
-}
-```
-
-## Cost Reference
-
-For the complete list of API method quota costs, see [data/api-method-quota-and-permissions.json](../data/api-method-quota-and-permissions.json).
-
-**Summary:**
-
-- **Free (0):** 44 methods including `getQuota`, `getOrganizations`, `getEntitlements`, `createFullScan`, `getScan`, `getScanList`, `getOrgSecurityPolicy`, `updateOrgSecurityPolicy`, repo management, triage, labels, diff scans, exports, and more
-- **Standard (10):** `getOrgAnalytics`, `getRepoAnalytics`, `getAuditLogEvents`, `getIssuesByNpmPackage`, `getScoreByNpmPackage`, `getOrgAlertFullScans`, API token operations
-- **Expensive (100):** `batchPackageFetch`, `batchOrgPackageFetch`, `batchPackageStream`, `createDependenciesSnapshot`, `createScanFromFilepaths`, `searchDependencies`, `uploadManifestFiles`
-
-## Best Practices
-
-- Check quota before expensive operations
-- Use batching (100 units for all vs 10 per package)
-- Monitor usage with tracker
-- Implement fallback strategies
+- **Batch instead of looping.** `batchPackageFetch` is 100 units total for any number of packages; calling `getScoreByNpmPackage` in a loop is 10 units *per package*. Past 10 packages, batching is cheaper.
+- **Cache `getQuota()`.** Pass `{ cache: true }` to the SDK constructor — `getQuota` and `listOrganizations` will be cached for 5 minutes by default.
+- **Quota is per-organization, not per-token.** If you hit the limit, all tokens for that org hit it.
