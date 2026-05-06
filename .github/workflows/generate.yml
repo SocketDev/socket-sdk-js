@@ -75,10 +75,24 @@ jobs:
         run: |
           # Branch from main~1 so the PR is behind main, making the
           # "Update branch" button available to trigger enterprise checks.
-          git stash
+          # Carry the generated files across the branch switch via a
+          # detached worktree (CLAUDE.md forbids `git stash` in the
+          # primary checkout — shared store, parallel-Claude rule).
+          tmp_worktree="$(mktemp -d)"
+          git worktree add --detach "$tmp_worktree" HEAD
+          cp openapi.json "$tmp_worktree/openapi.json"
+          cp types/api.d.ts "$tmp_worktree/types/api.d.ts"
+          cp src/types-strict.ts "$tmp_worktree/src/types-strict.ts"
+          cp src/index.ts "$tmp_worktree/src/index.ts"
           git checkout -b automated/open-api HEAD~1
-          git stash pop
-          git add .
+          cp "$tmp_worktree/openapi.json" openapi.json
+          cp "$tmp_worktree/types/api.d.ts" types/api.d.ts
+          cp "$tmp_worktree/src/types-strict.ts" src/types-strict.ts
+          cp "$tmp_worktree/src/index.ts" src/index.ts
+          git worktree remove --force "$tmp_worktree"
+          # Stage only the generated files explicitly — never `git add .`
+          # (sweeps hook side-effects from other sessions).
+          git add openapi.json types/api.d.ts src/types-strict.ts src/index.ts
           git commit -m "fix(openapi): sync with openapi definition"
           git push origin automated/open-api -fu
 
