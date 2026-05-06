@@ -4,7 +4,7 @@
  * Includes interactive mode for reviewing and refining AI-generated changelogs.
  */
 
-import { spawn } from 'node:child_process'
+import { spawn as childSpawn } from 'node:child_process'
 import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
@@ -17,6 +17,7 @@ import semver from 'semver'
 
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { spawn } from '@socketsecurity/lib/spawn'
 
 const logger = getDefaultLogger()
 
@@ -156,7 +157,7 @@ async function runCommand(
   options: Record<string, unknown> = {},
 ): Promise<number> {
   return new Promise<number>((resolve, reject) => {
-    const child = spawn(command, args, {
+    const child = childSpawn(command, args, {
       stdio: 'inherit',
       cwd: rootPath,
       ...(WIN32 && { shell: true }),
@@ -182,7 +183,7 @@ async function runCommandWithOutput(
     let stdout = ''
     let stderr = ''
 
-    const child = spawn(command, args, {
+    const child = childSpawn(command, args, {
       cwd: rootPath,
       ...(WIN32 && { shell: true }),
       ...options,
@@ -208,6 +209,55 @@ async function runCommandWithOutput(
       reject(e)
     })
   })
+}
+
+/**
+ * Run a command and feed `input` to its stdin, then return captured output.
+ * Uses @socketsecurity/lib/spawn so the input is actually delivered (async
+ * `child_process.spawn` ignores the `input` option — only `spawnSync` does).
+ */
+async function runCommandWithInput(
+  command: string,
+  args: string[] = [],
+  input: string,
+): Promise<CommandResult> {
+  try {
+    const handle = spawn(command, args, {
+      cwd: rootPath,
+      stdio: ['pipe', 'pipe', 'pipe'],
+      ...(WIN32 && { shell: true }),
+    })
+    handle.stdin?.end(input)
+    const result = await handle
+    return {
+      exitCode: result.code,
+      stdout:
+        typeof result.stdout === 'string'
+          ? result.stdout
+          : result.stdout.toString(),
+      stderr:
+        typeof result.stderr === 'string'
+          ? result.stderr
+          : result.stderr.toString(),
+    }
+  } catch (e) {
+    const err = e as {
+      code?: number
+      stdout?: string | Buffer
+      stderr?: string | Buffer
+    }
+    return {
+      exitCode: typeof err.code === 'number' ? err.code : 1,
+      stdout:
+        typeof err.stdout === 'string'
+          ? err.stdout
+          : (err.stdout?.toString() ?? ''),
+      stderr:
+        typeof err.stderr === 'string'
+          ? err.stderr
+          : (err.stderr?.toString() ?? ''),
+    }
+  }
 }
 
 /**
@@ -412,10 +462,7 @@ Be concise but informative. Group related changes together.`
   // Call Claude to generate the changelog.
   log.progress('Asking Claude to generate changelog')
 
-  const claudeResult = await runCommandWithOutput(claudeCmd, [], {
-    input: prompt,
-    stdio: ['pipe', 'pipe', 'pipe'],
-  })
+  const claudeResult = await runCommandWithInput(claudeCmd, [], prompt)
 
   // Clean up temp file.
   try {
@@ -519,10 +566,11 @@ ${feedback}
 
 Provide the refined changelog entry in the same format.`
 
-      const refineResult = await runCommandWithOutput(claudeCmd, [], {
-        input: refinePrompt,
-        stdio: ['pipe', 'pipe', 'pipe'],
-      })
+      const refineResult = await runCommandWithInput(
+        claudeCmd,
+        [],
+        refinePrompt,
+      )
 
       if (refineResult.exitCode === 0) {
         changelogEntry = refineResult.stdout.trim()
@@ -686,10 +734,11 @@ Add technical details, specific file changes, implementation details, and any br
     if (feedbackPrompt) {
       log.progress('Updating changelog with Claude')
 
-      const refineResult = await runCommandWithOutput(claudeCmd, [], {
-        input: feedbackPrompt,
-        stdio: ['pipe', 'pipe', 'pipe'],
-      })
+      const refineResult = await runCommandWithInput(
+        claudeCmd,
+        [],
+        feedbackPrompt,
+      )
 
       if (refineResult.exitCode === 0) {
         currentEntry = refineResult.stdout.trim()
