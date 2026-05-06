@@ -19,6 +19,15 @@ on:
 
 permissions: {}
 
+# Serialize publishes per dist-tag. Two concurrent dispatches with the
+# same tag would race on `npm publish` (one wins, the other 409s after
+# the GitHub release is already cut). Don't cancel an in-flight publish
+# — wait for it to finish so the second dispatch can decide whether the
+# version it wanted is still needed.
+concurrency:
+  group: publish-${{ inputs.dist-tag }}
+  cancel-in-progress: false
+
 
 jobs:
   publish:
