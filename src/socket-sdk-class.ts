@@ -2016,14 +2016,13 @@ export class SocketSdk {
         return response
       })
 
-      // Stream response directly to file.
+      // Stream response directly to file. Use pipeline() so errors from the
+      // source response stream propagate (a bare .pipe() leaves the source
+      // without an 'error' listener and crashes the process on network
+      // failure).
       const { createWriteStream } = await import('node:fs')
-      await new Promise<void>((resolve, reject) => {
-        const ws = createWriteStream(outputPath)
-        ws.on('error', reject)
-        ws.on('close', resolve)
-        res.rawResponse!.pipe(ws)
-      })
+      const { pipeline } = await import('node:stream/promises')
+      await pipeline(res.rawResponse!, createWriteStream(outputPath))
 
       return this.#handleApiSuccess<'downloadOrgFullScanFilesAsTar'>(res)
     } catch (e) {
@@ -3905,18 +3904,12 @@ export class SocketSdk {
 
       if (typeof output === 'string') {
         const { createWriteStream } = await import('node:fs')
-        await new Promise<void>((resolve, reject) => {
-          const ws = createWriteStream(output)
-          ws.on('error', reject)
-          ws.on('close', resolve)
-          res.rawResponse!.pipe(ws)
-        })
+        const { pipeline } = await import('node:stream/promises')
+        await pipeline(res.rawResponse!, createWriteStream(output))
       } else if (output === true) {
-        await new Promise<void>((resolve, reject) => {
-          res.rawResponse!.on('error', reject)
-          res.rawResponse!.on('end', resolve)
-          res.rawResponse!.pipe(process.stdout)
-        })
+        const { pipeline } = await import('node:stream/promises')
+        // Pipe to stdout but don't end stdout when the source ends.
+        await pipeline(res.rawResponse!, process.stdout, { end: false })
       }
 
       return this.#handleApiSuccess<'getOrgFullScan'>(res)
