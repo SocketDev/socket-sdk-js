@@ -105,12 +105,25 @@ Streams are the right choice when you don't know how big the response is, or whe
 
 ```typescript
 const client = new SocketSdk('token', {
-  onFileValidation: ({ file, error }) => {
-    // return 'skip' | 'fail' | 'continue'
-    return 'fail' // make any unreadable file abort the upload
+  // (validPaths, invalidPaths, context) => FileValidationResult
+  // Called once per upload, after the SDK splits inputs into readable
+  // and unreadable. Return shouldContinue:false to fail the operation
+  // with your own error message; return shouldContinue:true to upload
+  // the readable subset.
+  onFileValidation: (validPaths, invalidPaths, context) => {
+    if (invalidPaths.length > 0) {
+      return {
+        shouldContinue: false,
+        errorMessage: `Refusing to upload: ${invalidPaths.length} unreadable file(s) for ${context.operation}`,
+        errorCause: invalidPaths.join(', '),
+      }
+    }
+    return { shouldContinue: true }
   },
 })
 ```
+
+`context.operation` is `'createFullScan' | 'createDependenciesSnapshot' | 'uploadManifestFiles'` and includes `orgSlug` when the operation is org-scoped. The callback may be `async`.
 
 ## Quota costs
 
