@@ -72,6 +72,11 @@ function isValidPackageSpecifier(specifier: string): boolean {
     return false
   }
 
+  // Node.js built-in modules (node: prefix is reserved for built-ins)
+  if (specifier.startsWith('node:')) {
+    return false
+  }
+
   // Filter out invalid patterns
   if (
     specifier.includes('${') ||
