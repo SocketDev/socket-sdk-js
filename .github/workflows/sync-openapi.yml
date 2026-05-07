@@ -1,11 +1,23 @@
-name: 🔄 Generate SDK
+name: 🔄 Sync OpenAPI
+
+# Fetches the upstream OpenAPI spec from api.socket.dev and regenerates
+# the SDK types (`api.d.ts`, `types-strict.ts`, `index.ts`) to match.
+# Pushes a PR if anything changed, otherwise no-ops.
+#
+# Trigger model:
+#   - cron Mon-Fri 07:23 UTC — daily drift check.
+#   - push to main on the generator scripts — re-emit when the
+#     generators themselves change (otherwise the existing artifacts
+#     would diverge from what the new generator produces).
+#   - workflow_dispatch — manual trigger for hot-fix flows; `force:
+#     true` skips the unchanged-input shortcut.
 
 on:
   push:
     branches:
       - main
     paths:
-      - '.github/workflows/generate.yml'
+      - '.github/workflows/sync-openapi.yml'
       - 'scripts/generate-sdk.mts'
       - 'scripts/generate-types.mts'
       - 'scripts/generate-strict-types.mts'
