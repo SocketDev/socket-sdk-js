@@ -65,8 +65,8 @@
     "test": "node scripts/test.mts",
     "type": "tsgo --noEmit -p .config/tsconfig.check.json",
     "update": "node scripts/update.mts",
-    "xport": "node scripts/xport.mts",
-    "xport:emit-schema": "node scripts/xport-emit-schema.mts"
+    "lockstep": "node scripts/lockstep.mts",
+    "lockstep:emit-schema": "node scripts/lockstep-emit-schema.mts"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "2.1.92",

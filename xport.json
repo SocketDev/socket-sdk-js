@@ -1,7 +1,0 @@
-{
-  "$schema": "./xport.schema.json",
-  "area": "socket-sdk-js",
-  "description": "Lock-step manifest. socket-sdk-js is a single npm package with no submodule upstreams or sibling language ports — empty rows is the expected state.",
-  "upstreams": {},
-  "rows": []
-}
