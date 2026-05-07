@@ -21,6 +21,6 @@ concurrency:
 jobs:
   ci:
     name: Run CI Pipeline
-    uses: SocketDev/socket-registry/.github/workflows/ci.yml@437c22d2db79a9a94f4bff64ebbbbe1e5170473a # main
+    uses: SocketDev/socket-registry/.github/workflows/ci.yml@91544bee74cc405a9aa6a287831ba25da1a464e3 # main
     with:
       test-script: 'pnpm run test --all --skip-build'
