@@ -167,7 +167,17 @@ async function runLintOnFiles(
   // Build the linter configurations.
   const linters = [
     {
-      args: ['exec', 'oxfmt', ...(fix ? [] : ['--check']), ...files],
+      // --no-error-on-unmatched-pattern: don't error when every staged
+      // file lands in oxfmt's ignorePatterns (e.g. only `.claude/**`
+      // files staged). Tool exits 0 with "No files found" instead of
+      // throwing.
+      args: [
+        'exec',
+        'oxfmt',
+        '--no-error-on-unmatched-pattern',
+        ...(fix ? [] : ['--check']),
+        ...files,
+      ],
       name: 'oxfmt',
       enabled: true,
     },
