@@ -141,6 +141,7 @@ export type RepositoryListItem = {
   description: string | null
   head_full_scan_id: string | null
   homepage: string | null
+  html_url?: string | undefined
   id: string
   integration_meta?:
     | {
@@ -188,6 +189,7 @@ export type RepositoryItem = {
   description: string | null
   head_full_scan_id: string | null
   homepage: string | null
+  html_url?: string | undefined
   id: string
   integration_meta: {
     /** @enum {string} */
