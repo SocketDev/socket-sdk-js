@@ -178,7 +178,7 @@ Never silently let drift sit. Either reconcile in the same PR or open a follow-u
 
 ### Never fork fleet-canonical files locally
 
-🚨 Fleet-canonical files (anything tracked by `socket-repo-template/scripts/sync-scaffolding/manifest.mts`) MUST be edited in `socket-repo-template/template/...` and cascaded out — never branched locally in a downstream fleet repo. If you spot a useful predicate / helper / test / behavior in a fleet-canonical file in a downstream repo that's NOT in the template, that's a bug — lift it up first, then re-cascade. Full canonical-surface list + lifting workflow: [`docs/claude.md/no-local-fork-canonical.md`](docs/claude.md/no-local-fork-canonical.md).
+🚨 Edit fleet-canonical files (anything in the sync manifest) ONLY in `socket-repo-template/template/...` — never in a downstream repo. Spot a missing helper in a downstream copy? Lift it upstream and re-cascade. Enforced by `.claude/hooks/no-fleet-fork-guard/`; bypass: `Allow fleet-fork bypass`. Full canonical-surface list + lifting workflow: [`docs/claude.md/no-local-fork-canonical.md`](docs/claude.md/no-local-fork-canonical.md).
 
 ### Code style
 

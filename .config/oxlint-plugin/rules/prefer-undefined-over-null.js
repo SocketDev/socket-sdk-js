@@ -188,6 +188,9 @@ const rule = {
       if (typeof declStart !== 'number' || typeof litStart !== 'number') {
         return false
       }
+      const sourceCode = context.getSourceCode
+        ? context.getSourceCode()
+        : context.sourceCode
       const text = sourceCode.getText().slice(declStart, litStart)
       // Require `: <typeexpr>... null ... =` — colon (type annotation),
       // literal `null` token, then `=` (initializer separator).
