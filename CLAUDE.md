@@ -137,7 +137,7 @@ The principle: the working tree at end-of-turn should match the user's mental mo
 
 ### Hook bypasses require the canonical phrase
 
-🚨 Reverting tracked changes or bypassing a hook (--no-verify, DISABLE*PRECOMMIT*\*, --no-gpg-sign, force-push) requires the user to type **`Allow <X> bypass`** verbatim in a recent user turn (e.g. `Allow revert bypass`, `Allow no-verify bypass`). Paraphrases don't count. Enforced by `.claude/hooks/no-revert-guard/`. Full phrase table: [`docs/references/bypass-phrases.md`](docs/references/bypass-phrases.md).
+🚨 Reverting tracked changes or bypassing a hook (--no-verify, DISABLE*PRECOMMIT*\*, --no-gpg-sign, force-push) requires the user to type **`Allow <X> bypass`** verbatim in a recent user turn (e.g. `Allow revert bypass`, `Allow no-verify bypass`). Paraphrases don't count. Enforced by `.claude/hooks/no-revert-guard/`. Full phrase table: [`docs/claude.md/bypass-phrases.md`](docs/claude.md/bypass-phrases.md).
 
 ### Variant analysis on every High/Critical finding
 
@@ -176,6 +176,10 @@ How to check:
 
 Never silently let drift sit. Either reconcile in the same PR or open a follow-up PR titled `chore(sync): cascade <thing> from <newer-repo>` and link it.
 
+### Never fork fleet-canonical files locally
+
+🚨 Fleet-canonical files (anything tracked by `socket-repo-template/scripts/sync-scaffolding/manifest.mts`) MUST be edited in `socket-repo-template/template/...` and cascaded out — never branched locally in a downstream fleet repo. If you spot a useful predicate / helper / test / behavior in a fleet-canonical file in a downstream repo that's NOT in the template, that's a bug — lift it up first, then re-cascade. Full canonical-surface list + lifting workflow: [`docs/claude.md/no-local-fork-canonical.md`](docs/claude.md/no-local-fork-canonical.md).
+
 ### Code style
 
 - **Comments** — default to none. Write one only when the WHY is non-obvious to a senior engineer. **When you do write a comment, the audience is a junior dev**: explain the constraint, the hidden invariant, the "why this and not the obvious thing." Don't label it ("for junior devs:", "intuition:", etc.) — just write in that voice. No teacher-tone, no condescension, no flattering the reader.
@@ -189,8 +193,8 @@ Never silently let drift sit. Either reconcile in the same PR or open a follow-u
 - **File deletion** — route every delete through `safeDelete()` / `safeDeleteSync()` from `@socketsecurity/lib/fs`. Never `fs.rm` / `fs.unlink` / `fs.rmdir` / `rm -rf` directly — even for one known file. Prefer the async `safeDelete()` over `safeDeleteSync()` when the surrounding code is already async (test bodies, request handlers, build scripts that await elsewhere) — sync I/O blocks the event loop and there's no benefit when the caller is awaiting anyway. Reserve `safeDeleteSync()` for top-level scripts whose entire flow is sync.
 - **Edits** — Edit tool, never `sed` / `awk`.
 - **Generated reports** — quality scans, security audits, perf snapshots, anything an automated tool emits — write to `.claude/reports/` (naturally gitignored as part of `.claude/*`, no separate rule needed). Never commit reports to a tracked `reports/`, `docs/reports/`, or similarly-named tracked directory: dated reports rot the moment they land and the directory becomes a graveyard. The current state of the repo is the report; tools regenerate findings on demand. If a finding is genuinely worth keeping past one run, fix it or open an issue — don't pickle it as a markdown file.
-- **Inclusive language** — see [`docs/references/inclusive-language.md`](docs/references/inclusive-language.md) for the substitution table.
-- **Sorting** — sort alphanumerically (literal byte order, ASCII before letters). Applies to: object property keys (config + return shapes + internal state — `__proto__: null` first); named imports inside a single statement (`import { a, b, c }`); `Set` / `SafeSet` constructor arguments; allowlists / denylists / config arrays / interface members. Position-bearing arrays (where index matters) keep their meaningful order. Full details in [`docs/references/sorting.md`](docs/references/sorting.md). When in doubt, sort.
+- **Inclusive language** — see [`docs/claude.md/inclusive-language.md`](docs/claude.md/inclusive-language.md) for the substitution table.
+- **Sorting** — sort alphanumerically (literal byte order, ASCII before letters). Applies to: object property keys (config + return shapes + internal state — `__proto__: null` first); named imports inside a single statement (`import { a, b, c }`); `Set` / `SafeSet` constructor arguments; allowlists / denylists / config arrays / interface members. Position-bearing arrays (where index matters) keep their meaningful order. Full details in [`docs/claude.md/sorting.md`](docs/claude.md/sorting.md). When in doubt, sort.
 - **`Promise.race` / `Promise.any` in loops** — never re-race a pool that survives across iterations (the handlers stack). See `.claude/skills/plug-leaking-promise-race/SKILL.md`.
 - **`Safe` suffix** — non-throwing wrappers end in `Safe` (`safeDelete`, `safeDeleteSync`, `applySafe`, `weakRefSafe`). Read it as "X, but safe from throwing." The wrapper traps the thrown value internally and returns `undefined` (or the documented fallback). Don't invent alternative suffixes (`Try`, `OrUndefined`, `Maybe`) — pick `Safe`.
 - **`node:smol-*` modules** — feature-detect, then require. From outside socket-btm (socket-lib, socket-cli, anywhere else): `import { isBuiltin } from 'node:module'; if (isBuiltin('node:smol-X')) { const mod = require('node:smol-X') }`. The `node:smol-*` namespace is provided by socket-btm's smol Node binary; on stock Node `isBuiltin` returns false and the require would throw. Wrap the loader in a `/*@__NO_SIDE_EFFECTS__*/` lazy-load that caches the result — see `socket-lib/src/smol/util.ts` and `socket-lib/src/smol/primordial.ts` for canonical shape. **Inside** socket-btm's `additions/source-patched/` JS (the smol binary's own bootstrap code), use `internalBinding('smol_X')` directly — that's the C++-binding access path and it's guaranteed available there.
@@ -260,7 +264,7 @@ An error message is UI. The reader should fix the problem from the message alone
 3. **Saw vs. wanted** — the bad value and the allowed shape or set.
 4. **Fix** — one imperative action (`rename the key to …`).
 
-Use `isError` / `isErrnoException` / `errorMessage` / `errorStack` from `@socketsecurity/lib/errors` over hand-rolled checks. Use `joinAnd` / `joinOr` from `@socketsecurity/lib/arrays` for allowed-set lists. Full guidance in [`docs/references/error-messages.md`](docs/references/error-messages.md).
+Use `isError` / `isErrnoException` / `errorMessage` / `errorStack` from `@socketsecurity/lib/errors` over hand-rolled checks. Use `joinAnd` / `joinOr` from `@socketsecurity/lib/arrays` for allowed-set lists. Full guidance in [`docs/claude.md/error-messages.md`](docs/claude.md/error-messages.md).
 
 ### Token hygiene
 
@@ -281,7 +285,7 @@ Full hook spec in [`.claude/hooks/token-guard/README.md`](.claude/hooks/token-gu
 - `/scanning-security` — AgentShield + zizmor audit
 - `/scanning-quality` — quality analysis
 - Shared subskills in `.claude/skills/_shared/`
-- **Handing off to another agent** — see [`docs/references/agent-delegation.md`](docs/references/agent-delegation.md) for when to reach for `codex:codex-rescue`, the `delegate` subagent (OpenCode → Fireworks/Synthetic/Kimi), `Explore`, `Plan`, vs. driving the skill CLIs directly. The CLI-subprocess contract used by skills lives in [`_shared/multi-agent-backends.md`](.claude/skills/_shared/multi-agent-backends.md).
+- **Handing off to another agent** — see [`docs/claude.md/agent-delegation.md`](docs/claude.md/agent-delegation.md) for when to reach for `codex:codex-rescue`, the `delegate` subagent (OpenCode → Fireworks/Synthetic/Kimi), `Explore`, `Plan`, vs. driving the skill CLIs directly. The CLI-subprocess contract used by skills lives in [`_shared/multi-agent-backends.md`](.claude/skills/_shared/multi-agent-backends.md).
 
 #### Skill scope: fleet vs partial vs unique
 

@@ -103,6 +103,97 @@ const rule = {
       return ['===', '!==', '==', '!='].includes(parent.operator)
     }
 
+    /**
+     * `expect(x).toBe(null)` / `.toEqual(null)` / `.toStrictEqual(null)` /
+     * `.toMatchObject(null)` — vitest/jest assertion matchers where the
+     * `null` is the SEMANTIC value being asserted. Rewriting to
+     * `undefined` flips the test contract (a passing test that asserted
+     * "x is null" now asserts "x is undefined").
+     *
+     * Also covers chai (`.equal(null)` / `.equals(null)` / `.is(null)` /
+     * `.same(null)`) and node:assert (`assert.equal(_, null)` /
+     * `.deepEqual(_, null)` / `.deepStrictEqual(_, null)` /
+     * `.strictEqual(_, null)`).
+     *
+     * The detection is shape-based, not name-import-based — any call
+     * that ends in `.<assert-method>(null, ...)` qualifies. False
+     * positives (a non-test method named `toBe`) are extremely rare;
+     * the cost is missing a real autofix opportunity, which is a safe
+     * outcome.
+     */
+    const ASSERT_METHODS = new Set([
+      'deepEqual',
+      'deepStrictEqual',
+      'equal',
+      'equals',
+      'is',
+      'notDeepEqual',
+      'notDeepStrictEqual',
+      'notEqual',
+      'notStrictEqual',
+      'same',
+      'strictEqual',
+      'toBe',
+      'toEqual',
+      'toMatchObject',
+      'toStrictEqual',
+    ])
+
+    function isAssertionLibraryArg(node) {
+      const parent = unwrapTsCast(node)
+      if (!parent || parent.type !== 'CallExpression') {
+        return false
+      }
+      const callee = parent.callee
+      if (
+        callee.type !== 'MemberExpression' ||
+        callee.property.type !== 'Identifier'
+      ) {
+        return false
+      }
+      return ASSERT_METHODS.has(callee.property.name)
+    }
+
+    /**
+     * `const x: Foo | null = null` / `let y: Foo | null | undefined = null`
+     * — the developer explicitly opted into null in the variable's
+     * type signature. The dedicated annotation IS the contract;
+     * flipping the value alone leaves the contract intact but
+     * produces dead `undefined` writes against a `| null` slot.
+     *
+     * Faster than the generic `hasNullTypeAnnotation` walk-up
+     * because it short-circuits at the immediate VariableDeclarator
+     * parent. Both predicates are kept — this fast-path covers the
+     * canonical declarator shape; the walk-up handles the broader
+     * Property / Parameter / return-type / TS-cast cases that
+     * declarator-only detection misses.
+     *
+     * Textual scan over `<id>: <annot> = ` rather than AST navigation:
+     * the typeAnnotation field shape varies between oxlint AST and
+     * babel/typescript-eslint AST, so the regex is the most resilient
+     * detector across plugin host versions.
+     */
+    function isNullableTypeInitializer(node) {
+      const parent = node.parent
+      if (!parent || parent.type !== 'VariableDeclarator') {
+        return false
+      }
+      if (parent.init !== node) {
+        return false
+      }
+      const declStart = parent.range
+        ? parent.range[0]
+        : (parent.start ?? parent.id?.range?.[0])
+      const litStart = node.range ? node.range[0] : node.start
+      if (typeof declStart !== 'number' || typeof litStart !== 'number') {
+        return false
+      }
+      const text = sourceCode.getText().slice(declStart, litStart)
+      // Require `: <typeexpr>... null ... =` — colon (type annotation),
+      // literal `null` token, then `=` (initializer separator).
+      return /:[^=]*\bnull\b[^=]*=/.test(text)
+    }
+
     function isJsonStringifyReplacer(node) {
       // JSON.stringify(value, replacer, space) — `replacer` is conventionally null.
       const parent = unwrapTsCast(node)
@@ -275,6 +366,12 @@ const rule = {
           return
         }
         if (isJsonStringifyReplacer(node)) {
+          return
+        }
+        if (isAssertionLibraryArg(node)) {
+          return
+        }
+        if (isNullableTypeInitializer(node)) {
           return
         }
 
