@@ -32,7 +32,7 @@ Before doing anything else:
 [ -f .config/rolldown/lib-stub.mts ] || {
   echo "ERROR: .config/rolldown/lib-stub.mts is missing."
   echo "Cascade it from socket-repo-template:"
-  echo "  cd /Users/<user>/projects/socket-repo-template &&"
+  echo "  cd /Users/<user>/projects/socket-repo-template &&" # socket-hook: allow cross-repo
   echo "  node scripts/sync-scaffolding/main.mts --target <this-repo> --fix"
   exit 1
 }
