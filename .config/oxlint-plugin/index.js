@@ -31,6 +31,7 @@ import preferNodeBuiltinImports from './rules/prefer-node-builtin-imports.js'
 import preferSafeDelete from './rules/prefer-safe-delete.js'
 import preferUndefinedOverNull from './rules/prefer-undefined-over-null.js'
 import socketApiTokenEnv from './rules/socket-api-token-env.js'
+import sortEqualityDisjunctions from './rules/sort-equality-disjunctions.js'
 import sortNamedImports from './rules/sort-named-imports.js'
 import sortRegexAlternations from './rules/sort-regex-alternations.js'
 import sortSetArgs from './rules/sort-set-args.js'
@@ -61,6 +62,7 @@ const plugin = {
     'prefer-safe-delete': preferSafeDelete,
     'prefer-undefined-over-null': preferUndefinedOverNull,
     'socket-api-token-env': socketApiTokenEnv,
+    'sort-equality-disjunctions': sortEqualityDisjunctions,
     'sort-named-imports': sortNamedImports,
     'sort-regex-alternations': sortRegexAlternations,
     'sort-set-args': sortSetArgs,
