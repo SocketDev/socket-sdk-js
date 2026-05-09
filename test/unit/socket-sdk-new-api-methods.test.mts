@@ -275,7 +275,7 @@ describe('Socket SDK - New API Methods (v3.3.0)', () => {
 
     it('should list full scans with date range filter', async () => {
       const mockResponse = {
-        endCursor: null,
+        endCursor: undefined,
         items: [
           {
             fullScanId: 'scan_xyz',

@@ -103,23 +103,23 @@ describe('SocketSdk - API Methods Coverage', () => {
                 // Archive upload endpoint
                 res.end(
                   JSON.stringify({
-                    api_url: null,
+                    api_url: undefined,
                     branch: 'main',
                     commit_hash: 'abc123',
                     commit_message: 'Test commit',
                     committers: [],
                     created_at: '2024-01-01T00:00:00Z',
                     html_report_url: 'https://socket.dev/report/scan-1',
-                    html_url: null,
+                    html_url: undefined,
                     id: 'scan-1',
-                    integration_branch_url: null,
-                    integration_commit_url: null,
-                    integration_pull_request_url: null,
+                    integration_branch_url: undefined,
+                    integration_commit_url: undefined,
+                    integration_pull_request_url: undefined,
                     integration_repo_url: '',
                     integration_type: 'api',
                     organization_id: 'org-1',
                     organization_slug: 'test-org',
-                    pull_request: null,
+                    pull_request: undefined,
                     repo: 'test-repo',
                     repository_id: 'repo-1',
                     repository_slug: 'test-repo',
@@ -215,11 +215,11 @@ describe('SocketSdk - API Methods Coverage', () => {
           // Alerts endpoint
           res.end(
             JSON.stringify({
-              endCursor: null,
+              endCursor: undefined,
               items: [
                 {
                   category: 'vulnerability',
-                  clearedAt: null,
+                  clearedAt: undefined,
                   createdAt: '2024-01-01T00:00:00Z',
                   dashboardUrl: 'https://socket.dev/alerts/alert-1',
                   fix: {
@@ -284,8 +284,8 @@ describe('SocketSdk - API Methods Coverage', () => {
                 created_at: '2024-01-01T00:00:00Z',
                 description: 'Test webhook',
                 events: ['full_scan.completed'],
-                filters: null,
-                headers: null,
+                filters: undefined,
+                headers: undefined,
                 id: 'webhook-1',
                 name: 'test-webhook',
                 secret: 'test-secret',
@@ -299,8 +299,8 @@ describe('SocketSdk - API Methods Coverage', () => {
                 created_at: '2024-01-01T00:00:00Z',
                 description: 'Updated webhook',
                 events: ['full_scan.completed'],
-                filters: null,
-                headers: null,
+                filters: undefined,
+                headers: undefined,
                 id: 'webhook-1',
                 name: 'updated-webhook',
                 secret: 'test-secret',
@@ -317,8 +317,8 @@ describe('SocketSdk - API Methods Coverage', () => {
                 created_at: '2024-01-01T00:00:00Z',
                 description: 'Test webhook',
                 events: ['full_scan.completed'],
-                filters: null,
-                headers: null,
+                filters: undefined,
+                headers: undefined,
                 id: 'webhook-1',
                 name: 'test-webhook',
                 secret: 'test-secret',
@@ -330,14 +330,14 @@ describe('SocketSdk - API Methods Coverage', () => {
             // GET list of webhooks
             res.end(
               JSON.stringify({
-                nextPage: null,
+                nextPage: undefined,
                 results: [
                   {
                     created_at: '2024-01-01T00:00:00Z',
                     description: 'Test webhook',
                     events: ['full_scan.completed'],
-                    filters: null,
-                    headers: null,
+                    filters: undefined,
+                    headers: undefined,
                     id: 'webhook-1',
                     name: 'test-webhook',
                     secret: 'test-secret',

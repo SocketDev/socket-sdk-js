@@ -25,9 +25,9 @@ const CORE_FILES = new Set([
   'src/helpers.ts',
   'src/lang.ts',
   'src/objects.ts',
+  'src/purl-type.ts',
   'src/strings.ts',
   'src/validate.ts',
-  'src/purl-type.ts',
 ])
 
 // Config patterns that trigger a full lint
@@ -115,12 +115,12 @@ function shouldRunAllLinters(changedFiles: string[]): {
 function filterLintableFiles(files: string[]): string[] {
   // Only include extensions actually supported by oxfmt/oxlint
   const lintableExtensions = new Set([
+    '.cjs',
+    '.cts',
     '.js',
     '.mjs',
-    '.cjs',
-    '.ts',
-    '.cts',
     '.mts',
+    '.ts',
   ])
 
   const oxlintExcludePatterns = getOxlintExcludePatterns()

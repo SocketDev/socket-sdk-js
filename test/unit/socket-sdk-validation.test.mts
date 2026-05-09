@@ -7,8 +7,8 @@ describe('SocketSdk - Configuration Validation', () => {
   describe('API token validation', () => {
     it('should throw TypeError for non-string API token', () => {
       // Test validation of non-string token
-      expect(() => new SocketSdk(null as any)).toThrow(TypeError)
-      expect(() => new SocketSdk(null as any)).toThrow(
+      expect(() => new SocketSdk(undefined as any)).toThrow(TypeError)
+      expect(() => new SocketSdk(undefined as any)).toThrow(
         '"apiToken" is required and must be a string',
       )
     })

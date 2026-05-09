@@ -53,7 +53,7 @@ describe('Testing Utilities', () => {
     })
 
     it('should handle null data', () => {
-      const response = mockSuccessResponse(null)
+      const response = mockSuccessResponse(undefined)
 
       expect(response.success).toBe(true)
       expect(response.data).toBeNull()

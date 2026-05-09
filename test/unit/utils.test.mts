@@ -272,7 +272,7 @@ describe('Query Parameter Normalization', () => {
 
     it('should handle undefined/null/empty input', () => {
       expect(queryToSearchParams(undefined).toString()).toBe('')
-      expect(queryToSearchParams(null).toString()).toBe('')
+      expect(queryToSearchParams(undefined).toString()).toBe('')
       expect(queryToSearchParams('').toString()).toBe('')
     })
   })

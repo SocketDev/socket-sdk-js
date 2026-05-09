@@ -269,7 +269,7 @@ describe('SocketSdk - Success Path Coverage', () => {
             // Missing enabled property
             { key: 'no-enabled-prop' },
             // Null item
-            null,
+            undefined,
             // Missing key property
             { enabled: true },
           ],

@@ -36,8 +36,8 @@ const ALLOWED_SCREAMING_CASE = new Set([
   'CITATION',
   'CLAUDE',
   'CODE_OF_CONDUCT',
-  'CONTRIBUTORS',
   'CONTRIBUTING',
+  'CONTRIBUTORS',
   'COPYING',
   'CREDITS',
   'GOVERNANCE',
@@ -52,15 +52,15 @@ const ALLOWED_SCREAMING_CASE = new Set([
 
 // Directories to skip
 const SKIP_DIRS = new Set([
-  'node_modules',
-  '.git',
-  'dist',
-  'build',
   '.cache',
-  'coverage',
+  '.git',
   '.next',
   '.nuxt',
   '.output',
+  'build',
+  'coverage',
+  'dist',
+  'node_modules',
 ])
 
 /**

@@ -20,10 +20,10 @@
 const DELETE_METHODS = new Set([
   'rm',
   'rmSync',
-  'unlink',
-  'unlinkSync',
   'rmdir',
   'rmdirSync',
+  'unlink',
+  'unlinkSync',
 ])
 
 /** @type {import('eslint').Rule.RuleModule} */
@@ -69,7 +69,7 @@ const rule = {
             : obj.type === 'MemberExpression' &&
                 obj.property.type === 'Identifier'
               ? obj.property.name
-              : null
+              : undefined
 
         if (!objName) {
           return

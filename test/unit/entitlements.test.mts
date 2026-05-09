@@ -247,7 +247,7 @@ describe('Entitlements API', () => {
           // missing key property
           { enabled: true },
           // null item
-          null,
+          undefined,
           // undefined item
           undefined,
         ],

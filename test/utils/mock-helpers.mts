@@ -13,7 +13,7 @@ vi.mock('node:fs', async () => {
       if (path.includes('test-package.json')) {
         const stream = new Readable()
         stream.push('{"name": "test-package", "version": "1.0.0"}')
-        stream.push(null)
+        stream.push(undefined)
         return stream
       }
       // For other files, use the actual createReadStream.

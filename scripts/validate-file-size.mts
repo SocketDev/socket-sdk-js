@@ -25,18 +25,18 @@ const MAX_FILE_SIZE = 2 * 1024 * 1024
 
 // Directories to skip
 const SKIP_DIRS = new Set([
-  'node_modules',
-  '.git',
-  'dist',
-  'build',
   '.cache',
-  'coverage',
+  '.git',
   '.next',
   '.nuxt',
   '.output',
   '.turbo',
   '.vercel',
   '.vscode',
+  'build',
+  'coverage',
+  'dist',
+  'node_modules',
   'tmp',
 ])
 
