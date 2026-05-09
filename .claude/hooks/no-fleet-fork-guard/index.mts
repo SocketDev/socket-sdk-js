@@ -53,6 +53,8 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
+import { errorMessage } from '@socketsecurity/lib/errors'
+
 type ToolInput = {
   tool_input?: { file_path?: string } | undefined
   tool_name?: string | undefined
@@ -289,7 +291,7 @@ main().then(
   code => process.exit(code),
   e => {
     process.stderr.write(
-      `no-fleet-fork-guard: hook bug — fail-open. ${e instanceof Error ? e.message : String(e)}\n`,
+      `no-fleet-fork-guard: hook bug — fail-open. ${errorMessage(e)}\n`,
     )
     process.exit(0)
   },

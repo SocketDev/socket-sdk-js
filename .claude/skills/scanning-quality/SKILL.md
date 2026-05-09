@@ -34,6 +34,7 @@ Modular scan types (one file per type under `scans/`, easier to extend than the 
 9. **variant-analysis** — for each High/Critical finding from above, search the rest of the repo for the same shape. See [`scans/variant-analysis.md`](scans/variant-analysis.md).
 10. **insecure-defaults** — fail-open defaults, hardcoded credentials, lazy fallbacks. See [`scans/insecure-defaults.md`](scans/insecure-defaults.md).
 11. **differential** — security-focused diff against a base ref. See [`scans/differential.md`](scans/differential.md).
+12. **bundle-trim** — for repos that ship a built bundle (today: rolldown), identify unused module paths the bundler statically pulled in but the runtime never reaches. Reports candidates; the trim loop itself lives in the [`trimming-bundle`](../trimming-bundle/SKILL.md) skill. See [`scans/bundle-trim.md`](scans/bundle-trim.md).
 
 Adding a new scan type: drop a file under `scans/<name>.md` describing mission, method, output shape, when-to-skip — same shape as the three above. The orchestrator picks them up by directory listing; no edits to this SKILL.md needed beyond appending to the list.
 
