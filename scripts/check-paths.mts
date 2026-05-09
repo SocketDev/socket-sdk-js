@@ -76,6 +76,8 @@ import { fileURLToPath } from 'node:url'
 
 import { parseArgs } from 'node:util'
 
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
+
 import {
   BUILD_ROOT_SEGMENTS,
   KNOWN_SIBLING_PACKAGES,
@@ -83,16 +85,10 @@ import {
   STAGE_SEGMENTS,
 } from '../.claude/hooks/path-guard/segments.mts'
 
-// Plain stderr/stdout output — no @socketsecurity/lib dependency so
-// the gate is self-contained and works in socket-lib itself (which
-// would otherwise import itself).
-const logger = {
-  log: (msg: string) => process.stdout.write(msg + '\n'),
-  error: (msg: string) => process.stderr.write(msg + '\n'),
-  step: (msg: string) => process.stdout.write(`→ ${msg}\n`),
-  success: (msg: string) => process.stdout.write(`✔ ${msg}\n`),
-  substep: (msg: string) => process.stdout.write(`  ${msg}\n`),
-}
+// Use the fleet-canonical logger. socket-sdk-js depends on
+// @socketsecurity/lib, so there's no self-import concern (the
+// "self-contained" carve-out applies only to socket-lib itself).
+const logger = getDefaultLogger()
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -167,12 +163,12 @@ const loadAllowlist = (): AllowlistEntry[] => {
   // for multi-line reasons. Avoids a yaml dep for a gate that has to
   // be self-contained.
   const entries: AllowlistEntry[] = []
-  let current: Partial<AllowlistEntry> | null = undefined
+  let current: Partial<AllowlistEntry> | undefined
   // When set, subsequent more-indented lines fold into this key as a
   // block scalar (literal '|' keeps newlines, folded '>' joins with
   // spaces).
-  let blockKey: string | null = undefined
-  let blockKind: '|' | '>' | null = undefined
+  let blockKey: string | undefined
+  let blockKind: '|' | '>' | undefined
   let blockIndent = 0
   let blockLines: string[] = []
   const flushBlock = () => {
@@ -199,7 +195,7 @@ const loadAllowlist = (): AllowlistEntry[] => {
     const raw = lines[i]!
     const line = raw.replace(/\r$/, '')
     // Block-scalar accumulation takes precedence over normal parsing.
-    if (blockKey !== null) {
+    if (blockKey !== undefined) {
       if (line.trim() === '') {
         // Preserve blank lines inside a literal block; folded blocks
         // turn them into paragraph breaks (kept as separate joins).
@@ -219,7 +215,7 @@ const loadAllowlist = (): AllowlistEntry[] => {
     }
     const tryAssign = (key: string, value: string) => {
       const trimmed = value.trim()
-      if (current === null) {
+      if (current === undefined) {
         return
       }
       if (trimmed === '|' || trimmed === '>') {
@@ -251,7 +247,7 @@ const loadAllowlist = (): AllowlistEntry[] => {
       }
     }
   }
-  if (blockKey !== null) {
+  if (blockKey !== undefined) {
     flushBlock()
   }
   if (current && current.reason) {
@@ -417,7 +413,7 @@ const extractPathCalls = (
     const argsStart = PATH_CALL_RE.lastIndex
     let depth = 1
     let i = argsStart
-    let inString: '"' | "'" | '`' | null = undefined
+    let inString: '"' | "'" | '`' | undefined
     while (i < source.length && depth > 0) {
       const ch = source[i]!
       if (inString) {
