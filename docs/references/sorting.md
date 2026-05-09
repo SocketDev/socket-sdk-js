@@ -10,6 +10,7 @@ Sort lists alphanumerically (literal byte order, ASCII before letters).
 - **Method / function placement** — within a module, sort top-level functions alphabetically. Convention: private functions (lowercase / un-exported) sort first, exported functions second. The `export` keyword is the divider.
 - **Array literals** — when the array is a config list, allowlist, or set-like collection. Position-bearing arrays (e.g. `argv`, anything where index matters semantically) keep their meaningful order.
 - **`Set` constructor arguments** — `new Set([...])` and `new SafeSet([...])` literals. The runtime is order-insensitive, so source order is alphanumeric. Same rationale as Array literals: predictable diffs, no merge conflicts on insertions.
+- **Regex alternation groups** — `(foo|bar|baz)` reads as `(bar|baz|foo)`. Capturing, non-capturing, and named-capture groups all follow the rule. Auto-fixable when every alternative is a simple literal. The exception is order-bearing alternations where the regex engine MUST try one alternative before another (rare; the canonical example is markup parsers where `<!--|-->` would silently mismatch if reordered) — append `// socket-hook: allow regex-alternation-order` on those lines.
 
 ## Default
 

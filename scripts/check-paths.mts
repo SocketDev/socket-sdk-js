@@ -76,8 +76,6 @@ import { fileURLToPath } from 'node:url'
 
 import { parseArgs } from 'node:util'
 
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
-
 import {
   BUILD_ROOT_SEGMENTS,
   KNOWN_SIBLING_PACKAGES,
@@ -85,10 +83,16 @@ import {
   STAGE_SEGMENTS,
 } from '../.claude/hooks/path-guard/segments.mts'
 
-// Use the fleet-canonical logger. socket-sdk-js depends on
-// @socketsecurity/lib, so there's no self-import concern (the
-// "self-contained" carve-out applies only to socket-lib itself).
-const logger = getDefaultLogger()
+// Plain stderr/stdout output — no @socketsecurity/lib dependency so
+// the gate is self-contained and works in socket-lib itself (which
+// would otherwise import itself).
+const logger = {
+  log: (msg: string) => process.stdout.write(msg + '\n'),
+  error: (msg: string) => process.stderr.write(msg + '\n'),
+  step: (msg: string) => process.stdout.write(`→ ${msg}\n`),
+  success: (msg: string) => process.stdout.write(`✔ ${msg}\n`),
+  substep: (msg: string) => process.stdout.write(`  ${msg}\n`),
+}
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -163,12 +167,12 @@ const loadAllowlist = (): AllowlistEntry[] => {
   // for multi-line reasons. Avoids a yaml dep for a gate that has to
   // be self-contained.
   const entries: AllowlistEntry[] = []
-  let current: Partial<AllowlistEntry> | undefined
+  let current: Partial<AllowlistEntry> | null = null
   // When set, subsequent more-indented lines fold into this key as a
   // block scalar (literal '|' keeps newlines, folded '>' joins with
   // spaces).
-  let blockKey: string | undefined
-  let blockKind: '|' | '>' | undefined
+  let blockKey: string | null = null
+  let blockKind: '|' | '>' | null = null
   let blockIndent = 0
   let blockLines: string[] = []
   const flushBlock = () => {
@@ -179,8 +183,8 @@ const loadAllowlist = (): AllowlistEntry[] => {
           : blockLines.join('\n').replace(/\n+$/, '')
       ;(current as any)[blockKey] = value
     }
-    blockKey = undefined
-    blockKind = undefined
+    blockKey = null
+    blockKind = null
     blockLines = []
   }
   const indentOf = (line: string): number => {
@@ -195,7 +199,7 @@ const loadAllowlist = (): AllowlistEntry[] => {
     const raw = lines[i]!
     const line = raw.replace(/\r$/, '')
     // Block-scalar accumulation takes precedence over normal parsing.
-    if (blockKey !== undefined) {
+    if (blockKey !== null) {
       if (line.trim() === '') {
         // Preserve blank lines inside a literal block; folded blocks
         // turn them into paragraph breaks (kept as separate joins).
@@ -215,7 +219,7 @@ const loadAllowlist = (): AllowlistEntry[] => {
     }
     const tryAssign = (key: string, value: string) => {
       const trimmed = value.trim()
-      if (current === undefined) {
+      if (current === null) {
         return
       }
       if (trimmed === '|' || trimmed === '>') {
@@ -247,7 +251,7 @@ const loadAllowlist = (): AllowlistEntry[] => {
       }
     }
   }
-  if (blockKey !== undefined) {
+  if (blockKey !== null) {
     flushBlock()
   }
   if (current && current.reason) {
@@ -329,13 +333,13 @@ const isAllowlisted = (finding: Finding): boolean =>
 // ──────────────────────────────────────────────────────────────────
 
 const SKIP_DIRS = new Set([
-  '.cache',
   '.git',
+  'node_modules',
   'build',
   'dist',
-  'node_modules',
   'out',
   'target',
+  '.cache',
   'upstream',
 ])
 
@@ -413,7 +417,7 @@ const extractPathCalls = (
     const argsStart = PATH_CALL_RE.lastIndex
     let depth = 1
     let i = argsStart
-    let inString: '"' | "'" | '`' | undefined
+    let inString: '"' | "'" | '`' | null = null
     while (i < source.length && depth > 0) {
       const ch = source[i]!
       if (inString) {
@@ -422,7 +426,7 @@ const extractPathCalls = (
           continue
         }
         if (ch === inString) {
-          inString = undefined
+          inString = null
         }
       } else {
         if (ch === '"' || ch === "'" || ch === '`') {

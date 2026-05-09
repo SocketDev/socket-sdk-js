@@ -20,14 +20,14 @@
  * Reporting only.
  */
 
-const RACE_METHODS = new Set(['any', 'race'])
+const RACE_METHODS = new Set(['race', 'any'])
 
 const LOOP_TYPES = new Set([
-  'DoWhileStatement',
-  'ForInStatement',
-  'ForOfStatement',
   'ForStatement',
+  'ForOfStatement',
+  'ForInStatement',
   'WhileStatement',
+  'DoWhileStatement',
 ])
 
 function isInsideLoop(node) {

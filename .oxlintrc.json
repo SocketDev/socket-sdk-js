@@ -14,7 +14,7 @@
     "socket/no-inline-logger": "error",
     "socket/no-promise-race-in-loop": "error",
     "socket/no-status-emoji": "error",
-    "socket/no-todo-comments": "error",
+    "socket/no-placeholders": "error",
     "socket/prefer-exists-sync": "error",
     "socket/prefer-safe-delete": "error",
     "socket/prefer-undefined-over-null": "error",

@@ -23,8 +23,13 @@ const nodeMajor = Number.parseInt(
   10,
 )
 if (nodeMajor < NODE_MIN_MAJOR) {
+  // @socketsecurity/lib requires Node >= 25; the canonical logger
+  // isn't importable here. Use raw process.stderr with ASCII (no
+  // status-emoji glyph) so the no-status-emoji lint rule stays clean
+  // — the lint rule's recommendation (use logger.fail()) doesn't
+  // apply when the entire branch is the logger-unavailable bail.
   process.stderr.write(
-    `\x1b[0;31m✗ Hook requires Node >= ${NODE_MIN_MAJOR}.0.0 (have v${process.versions.node})\x1b[0m\n`,
+    `\x1b[0;31mHook requires Node >= ${NODE_MIN_MAJOR}.0.0 (have v${process.versions.node})\x1b[0m\n`,
   )
   process.stderr.write(
     'Install Node 25+ — these hooks rely on stable .mts type stripping.\n',
@@ -181,14 +186,14 @@ const RULE_ALIASES: { [k: string]: string | undefined } = {
   logger: 'console',
 }
 
-function aliasMatches(marker: string, rule: string): boolean {
+export function aliasMatches(marker: string, rule: string): boolean {
   if (marker === rule) {
     return true
   }
   return RULE_ALIASES[marker] === rule || RULE_ALIASES[rule] === marker
 }
 
-function lineIsSuppressed(line: string, rule?: string): boolean {
+export function lineIsSuppressed(line: string, rule?: string): boolean {
   if (LEGACY_ZIZMOR_MARKER_RE.test(line)) {
     return true
   }
@@ -215,7 +220,7 @@ function lineIsSuppressed(line: string, rule?: string): boolean {
 const COMMENT_LINE_RE = /^\s*(\*|\/\/|#)/
 const JSDOC_TAG_RE = /@(example|param|returns?|see|link)\b/
 
-function isInsideBackticks(line: string, needleRe: RegExp): boolean {
+export function isInsideBackticks(line: string, needleRe: RegExp): boolean {
   // Find every backtick-delimited span on the line and test if the
   // pattern only appears within those spans. Conservative: if any
   // hit is *outside* a span, treat the line as runtime code.
@@ -246,7 +251,7 @@ function isInsideBackticks(line: string, needleRe: RegExp): boolean {
   return true
 }
 
-function looksLikeDocumentation(
+export function looksLikeDocumentation(
   line: string,
   needleRe: RegExp,
   rule?: string,
@@ -279,7 +284,7 @@ export type LineHit = {
 // Replaces the matched real-path username segment with the canonical
 // placeholder form: `<user>` / `<USERNAME>` (matching the platform
 // convention of the surrounding path).
-function suggestPlaceholder(line: string): string {
+export function suggestPlaceholder(line: string): string {
   return line
     .replace(/\/Users\/[^/\s]+\//g, '/Users/<user>/')
     .replace(/\/home\/[^/\s]+\//g, '/home/<user>/')
@@ -405,7 +410,7 @@ const NPX_DLX_RE = /(?<![\w\-:=.])\b(npx|yarn dlx)\b(?![\w\-:=.])/
 // that legitimately need a fetch-and-run command (user-facing
 // instructions where the consumer doesn't have the package pinned),
 // use `pnpm dlx` or its pnpm v11 shorthand `pnx` instead of `npx`.
-function suggestNpxReplacement(line: string): string {
+export function suggestNpxReplacement(line: string): string {
   return line
     .replace(/\byarn dlx\b/g, 'pnpm exec')
     .replace(/\bnpx\b/g, 'pnpm dlx')
@@ -448,7 +453,7 @@ const LOGGER_LEAK_RE =
 // closer to logger.info; process.stderr / console.error → logger.error;
 // console.warn → logger.warn; console.info / console.log → logger.info;
 // console.debug → logger.debug.
-function suggestLoggerReplacement(line: string): string {
+export function suggestLoggerReplacement(line: string): string {
   return line
     .replace(/\bprocess\.stderr\.write\s*\(/g, 'logger.error(')
     .replace(/\bprocess\.stdout\.write\s*\(/g, 'logger.info(')
