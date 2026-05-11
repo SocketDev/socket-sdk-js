@@ -108,6 +108,12 @@ async function main(): Promise<void> {
         args: ['scripts/validate-quota-sync.mts'],
         command: 'node',
       },
+      // Config-path hygiene: every tooling config lives in .config/,
+      // no stale root duplicates. See scripts/validate-config-paths.mts.
+      {
+        args: ['scripts/validate-config-paths.mts'],
+        command: 'node',
+      },
       // API reference doc gate: docs/api.md is generated from source.
       // See scripts/gen-api-docs.mts.
       {

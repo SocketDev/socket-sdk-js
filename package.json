@@ -46,6 +46,7 @@
     "bump": "node scripts/bump.mts",
     "check": "node scripts/check.mts",
     "check:paths": "node scripts/check-paths.mts",
+    "check:config-paths": "node scripts/validate-config-paths.mts",
     "check:quota-sync": "node scripts/validate-quota-sync.mts",
     "clean": "node scripts/clean.mts",
     "cover": "node scripts/cover.mts",

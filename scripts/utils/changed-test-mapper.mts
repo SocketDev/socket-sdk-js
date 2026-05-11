@@ -13,7 +13,9 @@ import {
 } from '@socketsecurity/lib/git'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
-const rootPath = path.resolve(process.cwd())
+import { getRootPath } from './path-helpers.mts'
+
+const rootPath = getRootPath(import.meta.url)
 
 /**
  * Core files that require running all tests when changed.
