@@ -73,11 +73,11 @@ const rule = {
     fixable: 'code',
     messages: {
       fsDefault:
-        '`import fs from \'node:fs\'` — use cherry-pick named imports (e.g. `import { existsSync } from \'node:fs\'`). Per CLAUDE.md.',
+        "`import fs from 'node:fs'` — use cherry-pick named imports (e.g. `import { existsSync } from 'node:fs'`). Per CLAUDE.md.",
       fsNamespace:
-        '`import * as fs from \'node:fs\'` — use cherry-pick named imports. Per CLAUDE.md.',
+        "`import * as fs from 'node:fs'` — use cherry-pick named imports. Per CLAUDE.md.",
       preferDefault:
-        '`import {{names}} from \'{{specifier}}\'` — use a default import and dotted access (`{{local}}.{{first}}`). Per CLAUDE.md.',
+        "`import {{names}} from '{{specifier}}'` — use a default import and dotted access (`{{local}}.{{first}}`). Per CLAUDE.md.",
     },
     schema: [],
   },
@@ -260,9 +260,7 @@ const rule = {
           return
         }
 
-        const named = node.specifiers.filter(
-          s => s.type === 'ImportSpecifier',
-        )
+        const named = node.specifiers.filter(s => s.type === 'ImportSpecifier')
         if (named.length === 0) {
           return
         }
@@ -345,9 +343,7 @@ const rule = {
             //
             // Cheap heuristic: use scope analysis if available.
             const scope = context.getScope ? context.getScope() : undefined
-            const targetNames = new Set(
-              violatingNames.map(s => s.local.name),
-            )
+            const targetNames = new Set(violatingNames.map(s => s.local.name))
 
             if (scope) {
               const visited = new Set()

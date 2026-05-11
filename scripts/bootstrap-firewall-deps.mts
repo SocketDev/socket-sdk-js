@@ -63,6 +63,7 @@ const checkFirewall = async (
   const timer = setTimeout(() => controller.abort(), FIREWALL_TIMEOUT_MS)
   timer.unref?.()
   try {
+    // oxlint-disable-next-line socket/no-fetch-prefer-http-request -- preinstall runs before node_modules exists; lib helpers are unavailable here.
     const res = await fetch(url, {
       headers: {
         'User-Agent': 'socket-bootstrap-firewall-deps/1.0',
@@ -81,6 +82,7 @@ const checkFirewall = async (
     const alerts = data.alerts ?? []
     if (alerts.length > 0) {
       err(
+        // oxlint-disable-next-line socket/no-status-emoji -- bootstrap runs before lib is installed; can't use logger.
         `\n✗ Socket Firewall flagged ${pkgName}@${version} as malware (${alerts.length} alert(s)):`,
       )
       for (const a of alerts.slice(0, 10)) {
@@ -93,6 +95,7 @@ const checkFirewall = async (
       )
       return false
     }
+    // oxlint-disable-next-line socket/no-status-emoji -- bootstrap runs before lib is installed; can't use logger.
     log(`✓ ${pkgName}@${version} cleared by Socket Firewall`)
     return true
   } catch (e) {

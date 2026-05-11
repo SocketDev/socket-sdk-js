@@ -274,6 +274,7 @@ describe('Quota Utils', () => {
       }))
 
       const { getQuotaCost: getQuotaCostMocked } =
+        // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
         await import('../../src/quota-utils')
 
       expect(() => getQuotaCostMocked('someMethod')).toThrow(
@@ -293,6 +294,7 @@ describe('Quota Utils', () => {
       }))
 
       const { getQuotaCost: getQuotaCostMocked } =
+        // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
         await import('../../src/quota-utils')
 
       expect(() => getQuotaCostMocked('someMethod')).toThrow(
@@ -312,6 +314,7 @@ describe('Quota Utils', () => {
       }))
 
       const { getQuotaCost: getQuotaCostMocked } =
+        // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
         await import('../../src/quota-utils')
 
       expect(() => getQuotaCostMocked('someMethod')).toThrow(

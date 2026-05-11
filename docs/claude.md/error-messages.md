@@ -18,17 +18,17 @@ Every message needs, in order:
 Callers may match on the message text, so stability matters. Aim for one
 sentence.
 
-| ✗ / ✓ | Message | Notes |
-| --- | --- | --- |
-| ✗ | `Error: invalid component` | No rule, no saw, no where. |
-| ✗ | `The "name" component of type "npm" failed validation because the provided value "" is empty, which is not allowed because names are required; please provide a non-empty name.` | Restates the rule three times. |
-| ✓ | `npm "name" component is required` | Rule + where + implied saw (missing). Six words. |
-| ✗ | `Error: bad name` | No rule. |
-| ✓ | `name "__proto__" cannot start with an underscore` | Rule, where (`name`), saw (`__proto__`), fix implied. |
-| ✗ | `Error: invalid argument` | No where, no rule, no fix. |
-| ✓ | `orgSlug is required` | Rule + where (`orgSlug`), saw (missing), implies fix. |
-| ✗ | `Error: request failed` | No status, no hint what to check. |
-| ✓ | `Socket API rejected the token (401); check SOCKET_API_TOKEN` | Rule (401), where (token), fix (check env var). |
+| ✗ / ✓ | Message                                                                                                                                                                          | Notes                                                 |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| ✗     | `Error: invalid component`                                                                                                                                                       | No rule, no saw, no where.                            |
+| ✗     | `The "name" component of type "npm" failed validation because the provided value "" is empty, which is not allowed because names are required; please provide a non-empty name.` | Restates the rule three times.                        |
+| ✓     | `npm "name" component is required`                                                                                                                                               | Rule + where + implied saw (missing). Six words.      |
+| ✗     | `Error: bad name`                                                                                                                                                                | No rule.                                              |
+| ✓     | `name "__proto__" cannot start with an underscore`                                                                                                                               | Rule, where (`name`), saw (`__proto__`), fix implied. |
+| ✗     | `Error: invalid argument`                                                                                                                                                        | No where, no rule, no fix.                            |
+| ✓     | `orgSlug is required`                                                                                                                                                            | Rule + where (`orgSlug`), saw (missing), implies fix. |
+| ✗     | `Error: request failed`                                                                                                                                                          | No status, no hint what to check.                     |
+| ✓     | `Socket API rejected the token (401); check SOCKET_API_TOKEN`                                                                                                                    | Rule (401), where (token), fix (check env var).       |
 
 ## Validator / config / build-tool errors (verbose)
 
@@ -46,7 +46,7 @@ Breakdown:
 - **Saw vs. wanted**: saw = missing; wanted = a single-word lowercase filename, with `"parsing"` as a concrete model.
 - **Fix**: `Add … to this part` — imperative, specific.
 
-The trailing `to route /<slug>/part/3 at publish time` is optional. Include a *why* clause only when the rule is non-obvious; skip it for rules the reader already knows (e.g. "names can't start with an underscore").
+The trailing `to route /<slug>/part/3 at publish time` is optional. Include a _why_ clause only when the rule is non-obvious; skip it for rules the reader already knows (e.g. "names can't start with an underscore").
 
 ## Programmatic errors (terse, rule only)
 

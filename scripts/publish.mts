@@ -38,10 +38,135 @@ const log = {
   warn: (msg: string) => logger.warn(msg),
 }
 
-export function printHeader(title: string): void {
-  logger.log(`\n${'─'.repeat(60)}`)
-  logger.log(`  ${title}`)
-  logger.log(`${'─'.repeat(60)}`)
+async function main(): Promise<void> {
+  try {
+    // Parse arguments.
+    const { values } = parseArgs({
+      options: {
+        access: {
+          default: 'public',
+          type: 'string',
+        },
+        'dry-run': {
+          default: false,
+          type: 'boolean',
+        },
+        force: {
+          default: false,
+          type: 'boolean',
+        },
+        help: {
+          default: false,
+          type: 'boolean',
+        },
+        otp: {
+          type: 'string',
+        },
+        'skip-tag': {
+          default: false,
+          type: 'boolean',
+        },
+        tag: {
+          default: 'latest',
+          type: 'string',
+        },
+      },
+      allowPositionals: false,
+      strict: false,
+    })
+
+    // Show help if requested.
+    if (values['help']) {
+      logger.log('\nUsage: pnpm publish [options]')
+      logger.log('\nOptions:')
+      logger.log('  --help         Show this help message')
+      logger.log('  --dry-run      Perform a dry-run without publishing')
+      logger.log('  --force        Force publish even with warnings')
+      logger.log('  --skip-tag     Skip git tag push')
+      logger.log('  --tag <tag>    npm dist-tag (default: latest)')
+      logger.log('  --access <access>  Package access level (default: public)')
+      logger.log('  --otp <otp>    npm one-time password')
+      logger.log('\nExamples:')
+      logger.log('  pnpm publish              # Validate artifacts and publish')
+      logger.log('  pnpm publish --dry-run    # Dry-run to test')
+      logger.log('  pnpm publish --otp 123456 # Publish with OTP')
+      process.exitCode = 0
+      return
+    }
+
+    printHeader('Publish Runner')
+
+    // Get current version.
+    const version = await getCurrentVersion()
+    log.info(`Current version: ${version}`)
+
+    // Validate that build artifacts exist.
+    const artifactsExist = await validateBuildArtifacts()
+    if (!artifactsExist && !values['force']) {
+      log.error('Build artifacts missing - run pnpm build first')
+      process.exitCode = 1
+      return
+    }
+
+    // Publish.
+    const publishOptions: PublishOptions = {
+      dryRun: !!values['dry-run'],
+      force: !!values['force'],
+    }
+    if (typeof values['access'] === 'string') {
+      publishOptions.access = values['access']
+    }
+    if (typeof values['otp'] === 'string') {
+      publishOptions.otp = values['otp']
+    }
+    if (typeof values['tag'] === 'string') {
+      publishOptions.tag = values['tag']
+    }
+    const publishSuccess = await publishPackage(publishOptions)
+
+    if (!publishSuccess && !values['force']) {
+      log.error('Publish failed')
+      process.exitCode = 1
+      return
+    }
+
+    // Push git tag if it exists (but not for registry packages with hundreds of packages).
+    // Tags are created by version bump commits, not by this script.
+    if (!values['skip-tag'] && !values['dry-run'] && !isRegistryPackage()) {
+      await pushExistingTag(version, {
+        force: !!values['force'],
+      })
+    }
+
+    printFooter('Publish completed successfully!')
+    process.exitCode = 0
+  } catch (e) {
+    log.error(
+      `Publish runner failed: ${e instanceof Error ? e.message : String(e)}`,
+    )
+    process.exitCode = 1
+  }
+}
+
+main().catch((e: unknown) => {
+  logger.error(e)
+  process.exitCode = 1
+})
+
+/**
+ * Get the current version from package.json.
+ */
+export async function getCurrentVersion(pkgPath = rootPath): Promise<string> {
+  const pkgJson = await readPackageJson(pkgPath)
+  return pkgJson.version
+}
+
+/**
+ * Check if this is the registry package.
+ */
+export function isRegistryPackage(): boolean {
+  // socket-registry has a registry subdirectory with hundreds of packages.
+  return existsSync(path.join(rootPath, 'registry', 'package.json'))
 }
 
 export function printFooter(message?: string): void {
@@ -57,197 +182,18 @@ interface PublishCommandResult {
   stderr: string
 }
 
-export async function runCommand(
-  command: string,
-  args: string[] = [],
-  options: Record<string, unknown> = {},
-): Promise<number> {
-  return new Promise<number>((resolve, reject) => {
-    const child = spawn(command, args, {
-      cwd: rootPath,
-      stdio: 'inherit',
-      ...(WIN32 && { shell: true }),
-      ...options,
-    })
-
-    child.on('exit', (code: number | null) => {
-      resolve(code || 0)
-    })
-
-    child.on('error', (e: Error) => {
-      reject(e)
-    })
-  })
-}
-
-export async function runCommandWithOutput(
-  command: string,
-  args: string[] = [],
-  options: Record<string, unknown> = {},
-): Promise<PublishCommandResult> {
-  return new Promise<PublishCommandResult>((resolve, reject) => {
-    let stdout = ''
-    let stderr = ''
-
-    const child = spawn(command, args, {
-      cwd: rootPath,
-      ...(WIN32 && { shell: true }),
-      ...options,
-    })
-
-    if (child.stdout) {
-      child.stdout.on('data', (data: Buffer) => {
-        stdout += data
-      })
-    }
-
-    if (child.stderr) {
-      child.stderr.on('data', (data: Buffer) => {
-        stderr += data
-      })
-    }
-
-    child.on('exit', (code: number | null) => {
-      resolve({ exitCode: code || 0, stderr, stdout })
-    })
-
-    child.on('error', (e: Error) => {
-      reject(e)
-    })
-  })
-}
-
-interface PublishPackageJson {
-  name: string
-  version: string
-  main?: string
-  types?: string
-  exports?: Record<string, string | Record<string, string>>
-  [key: string]: unknown
-}
-
-/**
- * Read package.json from the project.
- */
-export async function readPackageJson(
-  pkgPath = rootPath,
-): Promise<PublishPackageJson> {
-  const packageJsonPath = path.join(pkgPath, 'package.json')
-  const content = await fs.readFile(packageJsonPath, 'utf8')
-  try {
-    return JSON.parse(content)
-  } catch (e) {
-    throw new Error(
-      `Failed to parse ${packageJsonPath}: ${e instanceof Error ? e.message : 'Unknown error'}`,
-      { cause: e },
-    )
-  }
-}
-
-/**
- * Get the current version from package.json.
- */
-export async function getCurrentVersion(pkgPath = rootPath): Promise<string> {
-  const pkgJson = await readPackageJson(pkgPath)
-  return pkgJson.version
-}
-
-/**
- * Check if a version exists on npm.
- */
-export async function versionExists(
-  packageName: string,
-  version: string,
-): Promise<boolean> {
-  const result = await runCommandWithOutput(
-    'npm',
-    ['view', `${packageName}@${version}`, 'version'],
-    { stdio: 'pipe' },
-  )
-
-  return result.exitCode === 0
-}
-
-/**
- * Check if this is the registry package.
- */
-export function isRegistryPackage(): boolean {
-  // socket-registry has a registry subdirectory with hundreds of packages.
-  return existsSync(path.join(rootPath, 'registry', 'package.json'))
-}
-
-/**
- * Validate that build artifacts exist based on package.json exports.
- */
-export async function validateBuildArtifacts(): Promise<boolean> {
-  log.step('Validating build artifacts')
-
-  const pkgJson = await readPackageJson()
-  const missing: string[] = []
-
-  // Check exports from package.json.
-  if (pkgJson.exports) {
-    for (const [exportPath, exportValue] of Object.entries(pkgJson.exports)) {
-      // Skip package.json export.
-      if (exportPath === './package.json') {
-        continue
-      }
-
-      // Handle both string and object export values.
-      const files =
-        typeof exportValue === 'string'
-          ? [exportValue]
-          : Object.values(exportValue).filter(v => typeof v === 'string')
-
-      for (const file of files) {
-        const filePath = path.join(rootPath, file)
-        if (!existsSync(filePath)) {
-          missing.push(file)
-        }
-      }
-    }
-  }
-
-  // Check main entry point.
-  if (pkgJson.main) {
-    const mainPath = path.join(rootPath, pkgJson.main)
-    if (!existsSync(mainPath)) {
-      missing.push(pkgJson.main)
-    }
-  }
-
-  // Check types entry point.
-  if (pkgJson.types) {
-    const typesPath = path.join(rootPath, pkgJson.types)
-    if (!existsSync(typesPath)) {
-      missing.push(pkgJson.types)
-    }
-  }
-
-  if (missing.length > 0) {
-    log.error('Missing build artifacts:')
-    for (const file of missing) {
-      logger.substep(`  ${file}`)
-    }
-    return false
-  }
-
-  log.success('Build artifacts validated')
-  return true
-}
-
-interface PublishOptions {
-  access?: string
-  dryRun?: boolean
-  force?: boolean
-  otp?: string
-  tag?: string
+export function printHeader(title: string): void {
+  logger.log(`\n${'─'.repeat(60)}`)
+  logger.log(`  ${title}`)
+  logger.log(`${'─'.repeat(60)}`)
 }
 
 /**
  * Publish a single package.
  */
-export async function publishPackage(options: PublishOptions = {}): Promise<boolean> {
+export async function publishPackage(
+  options: PublishOptions = {},
+): Promise<boolean> {
   const { access = 'public', dryRun = false, otp, tag = 'latest' } = options
 
   const pkgJson = await readPackageJson()
@@ -366,117 +312,173 @@ export async function pushExistingTag(
   return true
 }
 
-async function main(): Promise<void> {
+/**
+ * Read package.json from the project.
+ */
+export async function readPackageJson(
+  pkgPath = rootPath,
+): Promise<PublishPackageJson> {
+  const packageJsonPath = path.join(pkgPath, 'package.json')
+  const content = await fs.readFile(packageJsonPath, 'utf8')
   try {
-    // Parse arguments.
-    const { values } = parseArgs({
-      options: {
-        access: {
-          default: 'public',
-          type: 'string',
-        },
-        'dry-run': {
-          default: false,
-          type: 'boolean',
-        },
-        force: {
-          default: false,
-          type: 'boolean',
-        },
-        help: {
-          default: false,
-          type: 'boolean',
-        },
-        otp: {
-          type: 'string',
-        },
-        'skip-tag': {
-          default: false,
-          type: 'boolean',
-        },
-        tag: {
-          default: 'latest',
-          type: 'string',
-        },
-      },
-      allowPositionals: false,
-      strict: false,
-    })
-
-    // Show help if requested.
-    if (values['help']) {
-      logger.log('\nUsage: pnpm publish [options]')
-      logger.log('\nOptions:')
-      logger.log('  --help         Show this help message')
-      logger.log('  --dry-run      Perform a dry-run without publishing')
-      logger.log('  --force        Force publish even with warnings')
-      logger.log('  --skip-tag     Skip git tag push')
-      logger.log('  --tag <tag>    npm dist-tag (default: latest)')
-      logger.log('  --access <access>  Package access level (default: public)')
-      logger.log('  --otp <otp>    npm one-time password')
-      logger.log('\nExamples:')
-      logger.log('  pnpm publish              # Validate artifacts and publish')
-      logger.log('  pnpm publish --dry-run    # Dry-run to test')
-      logger.log('  pnpm publish --otp 123456 # Publish with OTP')
-      process.exitCode = 0
-      return
-    }
-
-    printHeader('Publish Runner')
-
-    // Get current version.
-    const version = await getCurrentVersion()
-    log.info(`Current version: ${version}`)
-
-    // Validate that build artifacts exist.
-    const artifactsExist = await validateBuildArtifacts()
-    if (!artifactsExist && !values['force']) {
-      log.error('Build artifacts missing - run pnpm build first')
-      process.exitCode = 1
-      return
-    }
-
-    // Publish.
-    const publishOptions: PublishOptions = {
-      dryRun: !!values['dry-run'],
-      force: !!values['force'],
-    }
-    if (typeof values['access'] === 'string') {
-      publishOptions.access = values['access']
-    }
-    if (typeof values['otp'] === 'string') {
-      publishOptions.otp = values['otp']
-    }
-    if (typeof values['tag'] === 'string') {
-      publishOptions.tag = values['tag']
-    }
-    const publishSuccess = await publishPackage(publishOptions)
-
-    if (!publishSuccess && !values['force']) {
-      log.error('Publish failed')
-      process.exitCode = 1
-      return
-    }
-
-    // Push git tag if it exists (but not for registry packages with hundreds of packages).
-    // Tags are created by version bump commits, not by this script.
-    if (!values['skip-tag'] && !values['dry-run'] && !isRegistryPackage()) {
-      await pushExistingTag(version, {
-        force: !!values['force'],
-      })
-    }
-
-    printFooter('Publish completed successfully!')
-    process.exitCode = 0
+    return JSON.parse(content)
   } catch (e) {
-    log.error(
-      `Publish runner failed: ${e instanceof Error ? e.message : String(e)}`,
+    throw new Error(
+      `Failed to parse ${packageJsonPath}: ${e instanceof Error ? e.message : 'Unknown error'}`,
+      { cause: e },
     )
-    process.exitCode = 1
   }
 }
 
-main().catch((e: unknown) => {
-  logger.error(e)
-  process.exitCode = 1
-})
+export async function runCommand(
+  command: string,
+  args: string[] = [],
+  options: Record<string, unknown> = {},
+): Promise<number> {
+  return new Promise<number>((resolve, reject) => {
+    const child = spawn(command, args, {
+      cwd: rootPath,
+      stdio: 'inherit',
+      ...(WIN32 && { shell: true }),
+      ...options,
+    })
+
+    child.on('exit', (code: number | null) => {
+      resolve(code || 0)
+    })
+
+    child.on('error', (e: Error) => {
+      reject(e)
+    })
+  })
+}
+
+export async function runCommandWithOutput(
+  command: string,
+  args: string[] = [],
+  options: Record<string, unknown> = {},
+): Promise<PublishCommandResult> {
+  return new Promise<PublishCommandResult>((resolve, reject) => {
+    let stdout = ''
+    let stderr = ''
+
+    const child = spawn(command, args, {
+      cwd: rootPath,
+      ...(WIN32 && { shell: true }),
+      ...options,
+    })
+
+    if (child.stdout) {
+      child.stdout.on('data', (data: Buffer) => {
+        stdout += data
+      })
+    }
+
+    if (child.stderr) {
+      child.stderr.on('data', (data: Buffer) => {
+        stderr += data
+      })
+    }
+
+    child.on('exit', (code: number | null) => {
+      resolve({ exitCode: code || 0, stderr, stdout })
+    })
+
+    child.on('error', (e: Error) => {
+      reject(e)
+    })
+  })
+}
+
+interface PublishPackageJson {
+  name: string
+  version: string
+  main?: string
+  types?: string
+  exports?: Record<string, string | Record<string, string>>
+  [key: string]: unknown
+}
+
+/**
+ * Validate that build artifacts exist based on package.json exports.
+ */
+export async function validateBuildArtifacts(): Promise<boolean> {
+  log.step('Validating build artifacts')
+
+  const pkgJson = await readPackageJson()
+  const missing: string[] = []
+
+  // Check exports from package.json.
+  if (pkgJson.exports) {
+    for (const [exportPath, exportValue] of Object.entries(pkgJson.exports)) {
+      // Skip package.json export.
+      if (exportPath === './package.json') {
+        continue
+      }
+
+      // Handle both string and object export values.
+      const files =
+        typeof exportValue === 'string'
+          ? [exportValue]
+          : Object.values(exportValue).filter(v => typeof v === 'string')
+
+      for (const file of files) {
+        const filePath = path.join(rootPath, file)
+        if (!existsSync(filePath)) {
+          missing.push(file)
+        }
+      }
+    }
+  }
+
+  // Check main entry point.
+  if (pkgJson.main) {
+    const mainPath = path.join(rootPath, pkgJson.main)
+    if (!existsSync(mainPath)) {
+      missing.push(pkgJson.main)
+    }
+  }
+
+  // Check types entry point.
+  if (pkgJson.types) {
+    const typesPath = path.join(rootPath, pkgJson.types)
+    if (!existsSync(typesPath)) {
+      missing.push(pkgJson.types)
+    }
+  }
+
+  if (missing.length > 0) {
+    log.error('Missing build artifacts:')
+    for (const file of missing) {
+      logger.substep(`  ${file}`)
+    }
+    return false
+  }
+
+  log.success('Build artifacts validated')
+  return true
+}
+
+interface PublishOptions {
+  access?: string
+  dryRun?: boolean
+  force?: boolean
+  otp?: string
+  tag?: string
+}
+
+/**
+ * Check if a version exists on npm.
+ */
+export async function versionExists(
+  packageName: string,
+  version: string,
+): Promise<boolean> {
+  const result = await runCommandWithOutput(
+    'npm',
+    ['view', `${packageName}@${version}`, 'version'],
+    { stdio: 'pipe' },
+  )
+
+  return result.exitCode === 0
+}

@@ -17,7 +17,12 @@ const HOOK = path.join(here, '..', 'pre-push.mts')
 
 const ZERO_SHA = '0000000000000000000000000000000000000000'
 
-export function commit(dir: string, file: string, content: string, msg: string): string {
+export function commit(
+  dir: string,
+  file: string,
+  content: string,
+  msg: string,
+): string {
   writeFileSync(path.join(dir, file), content)
   spawnSync('git', ['add', file], { cwd: dir })
   spawnSync('git', ['commit', '-q', '-m', msg, '--no-verify'], { cwd: dir })

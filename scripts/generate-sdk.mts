@@ -221,7 +221,13 @@ export async function generateTypes(): Promise<void> {
   // Add SDK v3 method name aliases
   await addSdkMethodAliases(typesPath)
   // Format generated types
-  const exitCode = await runCommand('pnpm', ['exec', 'oxfmt', 'types/api.d.ts'])
+  const exitCode = await runCommand('pnpm', [
+    'exec',
+    'oxfmt',
+    '-c',
+    '.config/oxfmtrc.json',
+    'types/api.d.ts',
+  ])
   if (exitCode !== 0) {
     throw new Error(`Formatting types failed with exit code ${exitCode}`)
   }

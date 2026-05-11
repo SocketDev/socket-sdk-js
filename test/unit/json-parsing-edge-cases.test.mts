@@ -6,7 +6,9 @@ vi.mock('@socketsecurity/lib/json/parse', () => ({
   jsonParse: vi.fn(),
 }))
 
+// oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
 const { getResponseJson } = await import('../../src/http-client.js')
+// oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
 const { jsonParse } = await import('@socketsecurity/lib/json/parse')
 const mockJsonParse = vi.mocked(jsonParse)
 

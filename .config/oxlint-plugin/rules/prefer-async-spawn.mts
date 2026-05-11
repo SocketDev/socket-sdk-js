@@ -42,7 +42,10 @@
  *     core APIs. Handled at the .oxlintrc.json ignorePatterns level.
  */
 
-const CHILD_PROCESS_SPECIFIERS = new Set(['child_process', 'node:child_process'])
+const CHILD_PROCESS_SPECIFIERS = new Set([
+  'child_process',
+  'node:child_process',
+])
 
 const LIB_SPECIFIER = '@socketsecurity/lib/spawn'
 
@@ -145,10 +148,7 @@ const rule = {
       // spawnSync` themselves if they really need a name). For the
       // common case (single `spawnSync` import), rewrite to `spawn`
       // and let the call sites get separately handled.
-      return fixer.replaceText(
-        node,
-        `import { spawn } from '${LIB_SPECIFIER}'`,
-      )
+      return fixer.replaceText(node, `import { spawn } from '${LIB_SPECIFIER}'`)
     }
 
     return {

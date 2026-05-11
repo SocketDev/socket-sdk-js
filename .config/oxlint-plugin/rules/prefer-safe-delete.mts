@@ -33,7 +33,14 @@
 
 import { appendImportFixes, summarizeImportTarget } from './_inject-import.mts'
 
-const DELETE_METHODS = new Set(['rm', 'rmSync', 'rmdir', 'rmdirSync', 'unlink', 'unlinkSync'])
+const DELETE_METHODS = new Set([
+  'rm',
+  'rmSync',
+  'rmdir',
+  'rmdirSync',
+  'unlink',
+  'unlinkSync',
+])
 
 const SYNC_METHODS = new Set(['rmSync', 'rmdirSync', 'unlinkSync'])
 

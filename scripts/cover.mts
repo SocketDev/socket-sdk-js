@@ -49,202 +49,6 @@ interface TestSuitesResult {
   mainResult: SuiteResult
 }
 
-/**
- * Run both main and isolated test suites, returning individual and combined
- * results.
- */
-export async function runTestSuites(
-  mainArgs: string[],
-  isolatedArgs: string[],
-): Promise<TestSuitesResult> {
-  const run = async (args: string[]): Promise<SuiteResult> => {
-    try {
-      return await runCommandQuiet('pnpm', args, {
-        cwd: rootPath,
-        env: { ...process.env, COVERAGE: 'true' },
-      })
-    } catch (e) {
-      // Command may throw on non-zero exit, but we still want coverage
-      const err = e as Record<string, unknown>
-      return {
-        exitCode: 1,
-        stdout: (err['stdout'] as string) || '',
-        stderr: (err['stderr'] as string) || (err['message'] as string) || '',
-      }
-    }
-  }
-
-  const mainResult = await run(mainArgs)
-  const isolatedResult = await run(isolatedArgs)
-
-  const exitCode =
-    mainResult.exitCode !== 0 ? mainResult.exitCode : isolatedResult.exitCode
-
-  const combined: SuiteResult = {
-    exitCode,
-    stderr: mainResult.stderr + isolatedResult.stderr,
-    stdout: mainResult.stdout + isolatedResult.stdout,
-  }
-
-  return { combined, isolatedResult, mainResult }
-}
-
-interface CoverageLocation {
-  start: { line: number; column: number }
-  end: { line: number; column: number }
-}
-
-interface CoverageFileFinal {
-  s?: Record<string, number>
-  b?: Record<string, number[]>
-  f?: Record<string, number>
-  statementMap?: Record<string, CoverageLocation>
-}
-
-interface AggregateCoverage {
-  branches: string
-  functions: string
-  lines: string
-  statements: string
-}
-
-/**
- * Merge coverage-final.json from both suites using max-hit-count strategy.
- * Returns aggregate percentages for statements, branches, functions, and lines.
- */
-export async function mergeCoverageFinal(): Promise<AggregateCoverage | undefined> {
-  const mainFinalPath = path.join(rootPath, 'coverage/coverage-final.json')
-  const isolatedFinalPath = path.join(
-    rootPath,
-    'coverage-isolated/coverage-final.json',
-  )
-
-  let mainFinal: Record<string, CoverageFileFinal> = {}
-  let isolatedFinal: Record<string, CoverageFileFinal> = {}
-  try {
-    mainFinal = JSON.parse(await fs.readFile(mainFinalPath, 'utf8')) as Record<
-      string,
-      CoverageFileFinal
-    >
-  } catch (e) {
-    const err = e as NodeJS.ErrnoException | null
-    if (err?.code !== 'ENOENT') {
-      logger.warn(`Failed to read ${mainFinalPath}: ${err?.message}`)
-    }
-  }
-  try {
-    isolatedFinal = JSON.parse(
-      await fs.readFile(isolatedFinalPath, 'utf8'),
-    ) as Record<string, CoverageFileFinal>
-  } catch (e) {
-    const err = e as NodeJS.ErrnoException | null
-    if (err?.code !== 'ENOENT') {
-      logger.warn(`Failed to read ${isolatedFinalPath}: ${err?.message}`)
-    }
-  }
-
-  if (!Object.keys(mainFinal).length && !Object.keys(isolatedFinal).length) {
-    return undefined
-  }
-
-  // Merge: for each file, take max of each counter
-  const allFiles = new Set([
-    ...Object.keys(mainFinal),
-    ...Object.keys(isolatedFinal),
-  ])
-  let totalStatements = 0
-  let coveredStatements = 0
-  let totalBranches = 0
-  let coveredBranches = 0
-  let totalFunctions = 0
-  let coveredFunctions = 0
-  let totalLines = 0
-  let coveredLines = 0
-
-  for (const file of allFiles) {
-    const m = mainFinal[file]
-    const iso = isolatedFinal[file]
-
-    // Merge statement counts (max of both suites) — union of keys
-    const stmtMap = { ...m?.statementMap, ...iso?.statementMap }
-    const allStmtKeys = new Set([
-      ...Object.keys(m?.s ?? {}),
-      ...Object.keys(iso?.s ?? {}),
-    ])
-    const mergedS: Record<string, number> = {}
-    for (const id of allStmtKeys) {
-      mergedS[id] = Math.max(m?.s?.[id] ?? 0, iso?.s?.[id] ?? 0)
-    }
-    totalStatements += allStmtKeys.size
-    coveredStatements += Object.values(mergedS).filter(c => c > 0).length
-
-    // Merge branch counts — union of keys
-    const allBranchKeys = new Set([
-      ...Object.keys(m?.b ?? {}),
-      ...Object.keys(iso?.b ?? {}),
-    ])
-    const mergedB: Record<string, number[]> = {}
-    for (const id of allBranchKeys) {
-      const mArr = m?.b?.[id] ?? []
-      const iArr = iso?.b?.[id] ?? []
-      const len = Math.max(mArr.length, iArr.length)
-      mergedB[id] = Array.from({ length: len }, (_, i) =>
-        Math.max(mArr[i] ?? 0, iArr[i] ?? 0),
-      )
-    }
-    for (const id of allBranchKeys) {
-      const arr = mergedB[id] || []
-      totalBranches += arr.length
-      coveredBranches += arr.filter(c => c > 0).length
-    }
-
-    // Merge function counts — union of keys
-    const allFnKeys = new Set([
-      ...Object.keys(m?.f ?? {}),
-      ...Object.keys(iso?.f ?? {}),
-    ])
-    const mergedF: Record<string, number> = {}
-    for (const id of allFnKeys) {
-      mergedF[id] = Math.max(m?.f?.[id] ?? 0, iso?.f?.[id] ?? 0)
-    }
-    totalFunctions += allFnKeys.size
-    coveredFunctions += Object.values(mergedF).filter(c => c > 0).length
-
-    // Lines: derive from merged statements (each statement maps to a line)
-    const lineSet = new Set()
-    const coveredLineSet = new Set()
-    for (const [id, loc] of Object.entries(stmtMap)) {
-      const line = loc.start.line
-      lineSet.add(line)
-      if ((mergedS[id] ?? 0) > 0) {
-        coveredLineSet.add(line)
-      }
-    }
-    totalLines += lineSet.size
-    coveredLines += coveredLineSet.size
-  }
-
-  const pct = (covered: number, total: number): string =>
-    total > 0 ? ((covered / total) * 100).toFixed(2) : '0.00'
-
-  return {
-    branches: pct(coveredBranches, totalBranches),
-    functions: pct(coveredFunctions, totalFunctions),
-    lines: pct(coveredLines, totalLines),
-    statements: pct(coveredStatements, totalStatements),
-  }
-}
-
-/**
- * Display code coverage results including test summary, v8 report, and
- * aggregate metrics.
- */
-/** Parse type-coverage output to extract percentage. */
-export function parseTypeCoveragePercent(output: string): number | undefined {
-  const match = output.match(/\([\d\s/]+\)\s+([\d.]+)%/)
-  return match?.[1] ? Number.parseFloat(match[1]) : undefined
-}
-
 export function displayCodeCoverage(
   mainOutput: string,
   combinedOutput: string,
@@ -459,4 +263,203 @@ try {
     `Coverage script failed: ${e instanceof Error ? e.message : String(e)}`,
   )
   process.exitCode = 1
+}
+
+/**
+ * Merge coverage-final.json from both suites using max-hit-count strategy.
+ * Returns aggregate percentages for statements, branches, functions, and lines.
+ */
+export async function mergeCoverageFinal(): Promise<
+  AggregateCoverage | undefined
+> {
+  const mainFinalPath = path.join(rootPath, 'coverage/coverage-final.json')
+  const isolatedFinalPath = path.join(
+    rootPath,
+    'coverage-isolated/coverage-final.json',
+  )
+
+  let mainFinal: Record<string, CoverageFileFinal> = {}
+  let isolatedFinal: Record<string, CoverageFileFinal> = {}
+  try {
+    mainFinal = JSON.parse(await fs.readFile(mainFinalPath, 'utf8')) as Record<
+      string,
+      CoverageFileFinal
+    >
+  } catch (e) {
+    const err = e as NodeJS.ErrnoException | null
+    if (err?.code !== 'ENOENT') {
+      logger.warn(`Failed to read ${mainFinalPath}: ${err?.message}`)
+    }
+  }
+  try {
+    isolatedFinal = JSON.parse(
+      await fs.readFile(isolatedFinalPath, 'utf8'),
+    ) as Record<string, CoverageFileFinal>
+  } catch (e) {
+    const err = e as NodeJS.ErrnoException | null
+    if (err?.code !== 'ENOENT') {
+      logger.warn(`Failed to read ${isolatedFinalPath}: ${err?.message}`)
+    }
+  }
+
+  if (!Object.keys(mainFinal).length && !Object.keys(isolatedFinal).length) {
+    return undefined
+  }
+
+  // Merge: for each file, take max of each counter
+  const allFiles = new Set([
+    ...Object.keys(mainFinal),
+    ...Object.keys(isolatedFinal),
+  ])
+  let totalStatements = 0
+  let coveredStatements = 0
+  let totalBranches = 0
+  let coveredBranches = 0
+  let totalFunctions = 0
+  let coveredFunctions = 0
+  let totalLines = 0
+  let coveredLines = 0
+
+  for (const file of allFiles) {
+    const m = mainFinal[file]
+    const iso = isolatedFinal[file]
+
+    // Merge statement counts (max of both suites) — union of keys
+    const stmtMap = { ...m?.statementMap, ...iso?.statementMap }
+    const allStmtKeys = new Set([
+      ...Object.keys(m?.s ?? {}),
+      ...Object.keys(iso?.s ?? {}),
+    ])
+    const mergedS: Record<string, number> = {}
+    for (const id of allStmtKeys) {
+      mergedS[id] = Math.max(m?.s?.[id] ?? 0, iso?.s?.[id] ?? 0)
+    }
+    totalStatements += allStmtKeys.size
+    coveredStatements += Object.values(mergedS).filter(c => c > 0).length
+
+    // Merge branch counts — union of keys
+    const allBranchKeys = new Set([
+      ...Object.keys(m?.b ?? {}),
+      ...Object.keys(iso?.b ?? {}),
+    ])
+    const mergedB: Record<string, number[]> = {}
+    for (const id of allBranchKeys) {
+      const mArr = m?.b?.[id] ?? []
+      const iArr = iso?.b?.[id] ?? []
+      const len = Math.max(mArr.length, iArr.length)
+      mergedB[id] = Array.from({ length: len }, (_, i) =>
+        Math.max(mArr[i] ?? 0, iArr[i] ?? 0),
+      )
+    }
+    for (const id of allBranchKeys) {
+      const arr = mergedB[id] || []
+      totalBranches += arr.length
+      coveredBranches += arr.filter(c => c > 0).length
+    }
+
+    // Merge function counts — union of keys
+    const allFnKeys = new Set([
+      ...Object.keys(m?.f ?? {}),
+      ...Object.keys(iso?.f ?? {}),
+    ])
+    const mergedF: Record<string, number> = {}
+    for (const id of allFnKeys) {
+      mergedF[id] = Math.max(m?.f?.[id] ?? 0, iso?.f?.[id] ?? 0)
+    }
+    totalFunctions += allFnKeys.size
+    coveredFunctions += Object.values(mergedF).filter(c => c > 0).length
+
+    // Lines: derive from merged statements (each statement maps to a line)
+    const lineSet = new Set()
+    const coveredLineSet = new Set()
+    for (const [id, loc] of Object.entries(stmtMap)) {
+      const line = loc.start.line
+      lineSet.add(line)
+      if ((mergedS[id] ?? 0) > 0) {
+        coveredLineSet.add(line)
+      }
+    }
+    totalLines += lineSet.size
+    coveredLines += coveredLineSet.size
+  }
+
+  const pct = (covered: number, total: number): string =>
+    total > 0 ? ((covered / total) * 100).toFixed(2) : '0.00'
+
+  return {
+    branches: pct(coveredBranches, totalBranches),
+    functions: pct(coveredFunctions, totalFunctions),
+    lines: pct(coveredLines, totalLines),
+    statements: pct(coveredStatements, totalStatements),
+  }
+}
+
+/**
+ * Display code coverage results including test summary, v8 report, and
+ * aggregate metrics.
+ */
+/** Parse type-coverage output to extract percentage. */
+
+export function parseTypeCoveragePercent(output: string): number | undefined {
+  const match = output.match(/\([\d\s/]+\)\s+([\d.]+)%/)
+  return match?.[1] ? Number.parseFloat(match[1]) : undefined
+}
+
+/**
+ * Run both main and isolated test suites, returning individual and combined
+ * results.
+ */
+export async function runTestSuites(
+  mainArgs: string[],
+  isolatedArgs: string[],
+): Promise<TestSuitesResult> {
+  const run = async (args: string[]): Promise<SuiteResult> => {
+    try {
+      return await runCommandQuiet('pnpm', args, {
+        cwd: rootPath,
+        env: { ...process.env, COVERAGE: 'true' },
+      })
+    } catch (e) {
+      // Command may throw on non-zero exit, but we still want coverage
+      const err = e as Record<string, unknown>
+      return {
+        exitCode: 1,
+        stdout: (err['stdout'] as string) || '',
+        stderr: (err['stderr'] as string) || (err['message'] as string) || '',
+      }
+    }
+  }
+
+  const mainResult = await run(mainArgs)
+  const isolatedResult = await run(isolatedArgs)
+
+  const exitCode =
+    mainResult.exitCode !== 0 ? mainResult.exitCode : isolatedResult.exitCode
+
+  const combined: SuiteResult = {
+    exitCode,
+    stderr: mainResult.stderr + isolatedResult.stderr,
+    stdout: mainResult.stdout + isolatedResult.stdout,
+  }
+
+  return { combined, isolatedResult, mainResult }
+}
+
+interface CoverageLocation {
+  start: { line: number; column: number }
+  end: { line: number; column: number }
+}
+
+interface CoverageFileFinal {
+  s?: Record<string, number>
+  b?: Record<string, number[]>
+  f?: Record<string, number>
+  statementMap?: Record<string, CoverageLocation>
+}
+
+interface AggregateCoverage {
+  branches: string
+  functions: string
+  lines: string
+  statements: string
 }

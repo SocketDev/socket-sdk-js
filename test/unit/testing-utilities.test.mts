@@ -52,11 +52,11 @@ describe('Testing Utilities', () => {
       expect(Array.isArray(response.data)).toBe(true)
     })
 
-    it('should handle null data', () => {
+    it('should handle undefined data', () => {
       const response = mockSuccessResponse(undefined)
 
       expect(response.success).toBe(true)
-      expect(response.data).toBeNull()
+      expect(response.data).toBeUndefined()
     })
   })
 
@@ -480,6 +480,7 @@ describe('Testing Utilities', () => {
 
   describe('Integration Examples', () => {
     it('should work with vi.fn() for mocking SDK methods', async () => {
+      // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
       const { vi } = await import('vitest')
       const mockMethod = vi
         .fn()
@@ -495,6 +496,7 @@ describe('Testing Utilities', () => {
     })
 
     it('should work with error scenarios', async () => {
+      // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
       const { vi } = await import('vitest')
       const mockMethod = vi
         .fn()
@@ -510,6 +512,7 @@ describe('Testing Utilities', () => {
     })
 
     it('should work with rejected promises', async () => {
+      // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
       const { vi } = await import('vitest')
       const mockMethod = vi
         .fn()

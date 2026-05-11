@@ -12,59 +12,43 @@ import type {
 } from './types'
 
 /**
- * Create a successful SDK response.
+ * Type guard to check if SDK result is an error.
  *
- * @template T - The data type
- * @param data - The response data
- * @param status - HTTP status code (default: 200)
- * @returns A successful SDK result
+ * @param result - SDK result to check
+ * @returns True if result is an error
  *
  * @example
  * ```ts
- * const response = mockSuccessResponse({ id: '123', name: 'test' })
- * expect(response.success).toBe(true)
+ * const result = await sdk.getRepo('org', 'repo')
+ * if (isErrorResult(result)) {
+ *   console.error(result.error) // Type-safe access
+ * }
  * ```
  */
-export function mockSuccessResponse<T>(
-  data: T,
-  status = 200,
-): SocketSdkGenericResult<T> {
-  return {
-    cause: undefined,
-    data,
-    error: undefined,
-    status,
-    success: true,
-  }
+export function isErrorResult<T>(
+  result: SocketSdkGenericResult<T>,
+): result is Extract<SocketSdkGenericResult<T>, { success: false }> {
+  return result.success === false
 }
 
 /**
- * Create an error SDK response.
+ * Type guard to check if SDK result is successful.
  *
- * @template T - The data type (unused in error responses)
- * @param error - The error message
- * @param status - HTTP status code (default: 500)
- * @param cause - Optional error cause
- * @returns An error SDK result
+ * @param result - SDK result to check
+ * @returns True if result is successful
  *
  * @example
  * ```ts
- * const response = mockErrorResponse('Not found', 404)
- * expect(response.success).toBe(false)
+ * const result = await sdk.getRepo('org', 'repo')
+ * if (isSuccessResult(result)) {
+ *   console.log(result.data.name) // Type-safe access
+ * }
  * ```
  */
-export function mockErrorResponse<T>(
-  error: string,
-  status = 500,
-  cause?: string | undefined,
-): SocketSdkGenericResult<T> {
-  return {
-    cause,
-    data: undefined,
-    error,
-    status,
-    success: false,
-  }
+export function isSuccessResult<T>(
+  result: SocketSdkGenericResult<T>,
+): result is Extract<SocketSdkGenericResult<T>, { success: true }> {
+  return result.success === true
 }
 
 /**
@@ -279,53 +263,32 @@ export const fixtures = {
 } as const
 
 /**
- * Mock SDK method result with proper typing.
+ * Create an error SDK response.
  *
- * @template T - The operation type
- * @param success - Whether the operation succeeded
- * @param data - Success data or error details
- * @returns Properly typed SDK result
+ * @template T - The data type (unused in error responses)
+ * @param error - The error message
+ * @param status - HTTP status code (default: 500)
+ * @param cause - Optional error cause
+ * @returns An error SDK result
  *
  * @example
  * ```ts
- * const mockGet = vi.fn().mockResolvedValue(
- *   mockSdkResult<'getRepo'>(true, { id: '123', name: 'repo' })
- * )
+ * const response = mockErrorResponse('Not found', 404)
+ * expect(response.success).toBe(false)
  * ```
  */
-export function mockSdkResult<T extends SocketSdkOperations>(
-  success: true,
-  data: SocketSdkSuccessResult<T>['data'],
-  status?: number | undefined,
-): SocketSdkSuccessResult<T>
-export function mockSdkResult<T extends SocketSdkOperations>(
-  success: false,
+export function mockErrorResponse<T>(
   error: string,
-  status?: number | undefined,
+  status = 500,
   cause?: string | undefined,
-): SocketSdkErrorResult<T>
-export function mockSdkResult<T extends SocketSdkOperations>(
-  success: boolean,
-  dataOrError: unknown,
-  status = success ? 200 : 500,
-  cause?: string | undefined,
-): SocketSdkResult<T> {
-  if (success) {
-    return {
-      cause: undefined,
-      data: dataOrError,
-      error: undefined,
-      status,
-      success: true,
-    } as SocketSdkSuccessResult<T>
-  }
+): SocketSdkGenericResult<T> {
   return {
     cause,
     data: undefined,
-    error: dataOrError as string,
+    error,
     status,
     success: false,
-  } as SocketSdkErrorResult<T>
+  }
 }
 
 /**
@@ -382,41 +345,80 @@ export function mockSdkError(
 }
 
 /**
- * Type guard to check if SDK result is successful.
+ * Mock SDK method result with proper typing.
  *
- * @param result - SDK result to check
- * @returns True if result is successful
+ * @template T - The operation type
+ * @param success - Whether the operation succeeded
+ * @param data - Success data or error details
+ * @returns Properly typed SDK result
  *
  * @example
  * ```ts
- * const result = await sdk.getRepo('org', 'repo')
- * if (isSuccessResult(result)) {
- *   console.log(result.data.name) // Type-safe access
- * }
+ * const mockGet = vi.fn().mockResolvedValue(
+ *   mockSdkResult<'getRepo'>(true, { id: '123', name: 'repo' })
+ * )
  * ```
  */
-export function isSuccessResult<T>(
-  result: SocketSdkGenericResult<T>,
-): result is Extract<SocketSdkGenericResult<T>, { success: true }> {
-  return result.success === true
+export function mockSdkResult<T extends SocketSdkOperations>(
+  success: true,
+  data: SocketSdkSuccessResult<T>['data'],
+  status?: number | undefined,
+): SocketSdkSuccessResult<T>
+
+export function mockSdkResult<T extends SocketSdkOperations>(
+  success: false,
+  error: string,
+  status?: number | undefined,
+  cause?: string | undefined,
+): SocketSdkErrorResult<T>
+
+export function mockSdkResult<T extends SocketSdkOperations>(
+  success: boolean,
+  dataOrError: unknown,
+  status = success ? 200 : 500,
+  cause?: string | undefined,
+): SocketSdkResult<T> {
+  if (success) {
+    return {
+      cause: undefined,
+      data: dataOrError,
+      error: undefined,
+      status,
+      success: true,
+    } as SocketSdkSuccessResult<T>
+  }
+  return {
+    cause,
+    data: undefined,
+    error: dataOrError as string,
+    status,
+    success: false,
+  } as SocketSdkErrorResult<T>
 }
 
 /**
- * Type guard to check if SDK result is an error.
+ * Create a successful SDK response.
  *
- * @param result - SDK result to check
- * @returns True if result is an error
+ * @template T - The data type
+ * @param data - The response data
+ * @param status - HTTP status code (default: 200)
+ * @returns A successful SDK result
  *
  * @example
  * ```ts
- * const result = await sdk.getRepo('org', 'repo')
- * if (isErrorResult(result)) {
- *   console.error(result.error) // Type-safe access
- * }
+ * const response = mockSuccessResponse({ id: '123', name: 'test' })
+ * expect(response.success).toBe(true)
  * ```
  */
-export function isErrorResult<T>(
-  result: SocketSdkGenericResult<T>,
-): result is Extract<SocketSdkGenericResult<T>, { success: false }> {
-  return result.success === false
+export function mockSuccessResponse<T>(
+  data: T,
+  status = 200,
+): SocketSdkGenericResult<T> {
+  return {
+    cause: undefined,
+    data,
+    error: undefined,
+    status,
+    success: true,
+  }
 }

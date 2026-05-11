@@ -74,116 +74,6 @@ const TEXT_EXTENSIONS = new Set([
   '.yml',
 ])
 
-/**
- * Check if file should be scanned.
- */
-export function shouldScanFile(filename: string): boolean {
-  const ext = path.extname(filename).toLowerCase()
-  return TEXT_EXTENSIONS.has(ext)
-}
-
-/**
- * Recursively find all text files to scan.
- */
-export async function findTextFiles(
-  dir: string,
-  files: string[] = [],
-): Promise<string[]> {
-  try {
-    const entries = await fs.readdir(dir, { withFileTypes: true })
-
-    for (const entry of entries) {
-      const fullPath = path.join(dir, entry.name)
-
-      if (entry.isDirectory()) {
-        // Skip certain directories and hidden directories (except .github)
-        if (
-          !SKIP_DIRS.has(entry.name) &&
-          (!entry.name.startsWith('.') || entry.name === '.github')
-        ) {
-          await findTextFiles(fullPath, files)
-        }
-      } else if (entry.isFile() && shouldScanFile(entry.name)) {
-        files.push(fullPath)
-      }
-    }
-  } catch {
-    // Skip directories we can't read
-  }
-
-  return files
-}
-
-interface CdnViolation {
-  file: string
-  line: number
-  content: string
-  cdnDomain: string
-}
-
-/**
- * Check file contents for CDN references.
- */
-export async function checkFileForCdnRefs(filePath: string): Promise<CdnViolation[]> {
-  // Skip this validator script itself (it mentions CDN domains by necessity)
-  if (filePath.endsWith('validate-no-cdn-refs.mts')) {
-    return []
-  }
-
-  try {
-    const content = await fs.readFile(filePath, 'utf8')
-    const lines = content.split('\n')
-    const violations = []
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i]
-      if (!line) {
-        continue
-      }
-      const lineNumber = i + 1
-
-      for (const pattern of CDN_PATTERNS) {
-        if (pattern.test(line)) {
-          const match = line.match(pattern)
-          if (match) {
-            violations.push({
-              file: path.relative(rootPath, filePath),
-              line: lineNumber,
-              content: line.trim(),
-              cdnDomain: match[0],
-            })
-          }
-        }
-      }
-    }
-
-    return violations
-  } catch (e) {
-    // Skip files we can't read (likely binary despite extension)
-    const err = e as NodeJS.ErrnoException
-    if (err.code === 'EISDIR' || err.message.includes('ENOENT')) {
-      return []
-    }
-    // For other errors, try to continue
-    return []
-  }
-}
-
-/**
- * Validate all files for CDN references.
- */
-export async function validateNoCdnRefs(): Promise<CdnViolation[]> {
-  const files = await findTextFiles(rootPath)
-  const allViolations = []
-
-  for (const file of files) {
-    const violations = await checkFileForCdnRefs(file)
-    allViolations.push(...violations)
-  }
-
-  return allViolations
-}
-
 async function main(): Promise<void> {
   try {
     const violations = await validateNoCdnRefs()
@@ -232,3 +122,115 @@ main().catch((e: unknown) => {
   logger.fail(`Unexpected error: ${e instanceof Error ? e.message : String(e)}`)
   process.exitCode = 1
 })
+
+/**
+ * Check file contents for CDN references.
+ */
+export async function checkFileForCdnRefs(
+  filePath: string,
+): Promise<CdnViolation[]> {
+  // Skip this validator script itself (it mentions CDN domains by necessity)
+  if (filePath.endsWith('validate-no-cdn-refs.mts')) {
+    return []
+  }
+
+  try {
+    const content = await fs.readFile(filePath, 'utf8')
+    const lines = content.split('\n')
+    const violations = []
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+      if (!line) {
+        continue
+      }
+      const lineNumber = i + 1
+
+      for (const pattern of CDN_PATTERNS) {
+        if (pattern.test(line)) {
+          const match = line.match(pattern)
+          if (match) {
+            violations.push({
+              file: path.relative(rootPath, filePath),
+              line: lineNumber,
+              content: line.trim(),
+              cdnDomain: match[0],
+            })
+          }
+        }
+      }
+    }
+
+    return violations
+  } catch (e) {
+    // Skip files we can't read (likely binary despite extension)
+    const err = e as NodeJS.ErrnoException
+    if (err.code === 'EISDIR' || err.message.includes('ENOENT')) {
+      return []
+    }
+    // For other errors, try to continue
+    return []
+  }
+}
+
+/**
+ * Recursively find all text files to scan.
+ */
+export async function findTextFiles(
+  dir: string,
+  files: string[] = [],
+): Promise<string[]> {
+  try {
+    const entries = await fs.readdir(dir, { withFileTypes: true })
+
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name)
+
+      if (entry.isDirectory()) {
+        // Skip certain directories and hidden directories (except .github)
+        if (
+          !SKIP_DIRS.has(entry.name) &&
+          (!entry.name.startsWith('.') || entry.name === '.github')
+        ) {
+          await findTextFiles(fullPath, files)
+        }
+      } else if (entry.isFile() && shouldScanFile(entry.name)) {
+        files.push(fullPath)
+      }
+    }
+  } catch {
+    // Skip directories we can't read
+  }
+
+  return files
+}
+
+interface CdnViolation {
+  file: string
+  line: number
+  content: string
+  cdnDomain: string
+}
+
+/**
+ * Check if file should be scanned.
+ */
+export function shouldScanFile(filename: string): boolean {
+  const ext = path.extname(filename).toLowerCase()
+  return TEXT_EXTENSIONS.has(ext)
+}
+
+/**
+ * Validate all files for CDN references.
+ */
+export async function validateNoCdnRefs(): Promise<CdnViolation[]> {
+  const files = await findTextFiles(rootPath)
+  const allViolations = []
+
+  for (const file of files) {
+    const violations = await checkFileForCdnRefs(file)
+    allViolations.push(...violations)
+  }
+
+  return allViolations
+}

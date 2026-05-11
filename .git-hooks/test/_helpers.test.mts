@@ -36,14 +36,8 @@ import {
 // ── containsAiAttribution ─────────────────────────────────────────
 
 test('containsAiAttribution: catches "Generated with Claude"', () => {
-  assert.strictEqual(
-    containsAiAttribution('Generated with Claude Code'),
-    true,
-  )
-  assert.strictEqual(
-    containsAiAttribution('Generated with AI'),
-    true,
-  )
+  assert.strictEqual(containsAiAttribution('Generated with Claude Code'), true)
+  assert.strictEqual(containsAiAttribution('Generated with AI'), true)
 })
 
 test('containsAiAttribution: catches "Co-Authored-By:" tags', () => {
@@ -51,10 +45,7 @@ test('containsAiAttribution: catches "Co-Authored-By:" tags', () => {
     containsAiAttribution('Co-Authored-By: Claude <noreply@anthropic.com>'),
     true,
   )
-  assert.strictEqual(
-    containsAiAttribution('Co-Authored-By: AI'),
-    true,
-  )
+  assert.strictEqual(containsAiAttribution('Co-Authored-By: AI'), true)
 })
 
 test('containsAiAttribution: catches alternative attribution verbs', () => {
@@ -200,10 +191,7 @@ test('lineIsSuppressed: bare marker = blanket allow', () => {
     lineIsSuppressed('console.log("x") // socket-hook: allow', 'console'),
     true,
   )
-  assert.strictEqual(
-    lineIsSuppressed('foo() // socket-hook: allow'),
-    true,
-  )
+  assert.strictEqual(lineIsSuppressed('foo() // socket-hook: allow'), true)
 })
 
 test('lineIsSuppressed: rule-named marker matches the named rule', () => {
@@ -215,10 +203,7 @@ test('lineIsSuppressed: rule-named marker matches the named rule', () => {
     true,
   )
   assert.strictEqual(
-    lineIsSuppressed(
-      'console.log("x") // socket-hook: allow npx',
-      'console',
-    ),
+    lineIsSuppressed('console.log("x") // socket-hook: allow npx', 'console'),
     false,
     'npx marker does NOT suppress console rule',
   )
@@ -325,9 +310,7 @@ test('filterAllowedApiKeys: drops fake-token + env-var-name + .example markers',
     'const example = "this is .example fixture data"',
   ]
   const filtered = filterAllowedApiKeys(lines)
-  assert.deepStrictEqual(filtered, [
-    'const real = "abc123secretvalueabcdef"',
-  ])
+  assert.deepStrictEqual(filtered, ['const real = "abc123secretvalueabcdef"'])
 })
 
 test('filterAllowedApiKeys: retains lines without allowlist hits', () => {
@@ -516,16 +499,12 @@ test('scanPrivateKeys: catches PEM header', () => {
 test('scanSocketApiKeys: catches sktsec_ literal', () => {
   // The line MUST NOT contain the env-var-name shape (`SOCKET_API_TOKEN=`)
   // or it gets allowlisted as a documented env-name reference.
-  const hits = scanSocketApiKeys(
-    'const t = "sktsec_abc123abc123abc123abc123"',
-  )
+  const hits = scanSocketApiKeys('const t = "sktsec_abc123abc123abc123abc123"')
   assert.ok(hits.length >= 1)
 })
 
 test('scanSocketApiKeys: ignores allowlisted fake-token shape', () => {
-  const hits = scanSocketApiKeys(
-    'const t = "socket-test-fake-token-abc"',
-  )
+  const hits = scanSocketApiKeys('const t = "socket-test-fake-token-abc"')
   assert.strictEqual(hits.length, 0)
 })
 
@@ -556,9 +535,6 @@ test('scanCrossRepoPaths: flags absolute /Users/.../projects/<other-repo>', () =
 })
 
 test('scanCrossRepoPaths: allows same-repo relative imports', () => {
-  const hits = scanCrossRepoPaths(
-    'import x from "./foo"',
-    'src/test.ts',
-  )
+  const hits = scanCrossRepoPaths('import x from "./foo"', 'src/test.ts')
   assert.strictEqual(hits.length, 0)
 })

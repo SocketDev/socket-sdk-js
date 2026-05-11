@@ -771,7 +771,7 @@ describe('SocketSdk - API Methods Coverage', () => {
           expect(result.data.items[0].category).toBe('vulnerability')
           expect(result.data.items[0].severity).toBe('high')
         }
-        expect(result.data.endCursor).toBeNull()
+        expect(result.data.endCursor).toBeUndefined()
       }
     })
 
@@ -949,7 +949,7 @@ describe('SocketSdk - API Methods Coverage', () => {
         if (result.data.results[0]) {
           expect(result.data.results[0].id).toBe('webhook-1')
         }
-        expect(result.data.nextPage).toBeNull()
+        expect(result.data.nextPage).toBeUndefined()
       }
     })
 

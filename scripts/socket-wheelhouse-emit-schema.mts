@@ -23,11 +23,7 @@ const rootDir = path.resolve(__dirname, '..')
 // Schema lives in `.config/` next to the per-repo
 // `.config/socket-wheelhouse.json` it describes — the marker's
 // `$schema` ref is `./socket-wheelhouse-schema.json`.
-const outPath = path.join(
-  rootDir,
-  '.config',
-  'socket-wheelhouse-schema.json',
-)
+const outPath = path.join(rootDir, '.config', 'socket-wheelhouse-schema.json')
 
 const enriched = {
   $schema: 'https://json-schema.org/draft/2020-12/schema',
@@ -43,7 +39,7 @@ writeFileSync(outPath, JSON.stringify(enriched, null, 2) + '\n', 'utf8')
 // over the tree) would flag the emitted schema as drifted on every
 // repo that re-emits it. The schema is in IDENTICAL_FILES, so the
 // formatted form is the byte-canonical form fleet-wide.
-await spawn('pnpm', ['exec', 'oxfmt', outPath], {
+await spawn('pnpm', ['exec', 'oxfmt', '-c', '.config/oxfmtrc.json', outPath], {
   cwd: rootDir,
   stdio: 'inherit',
 })

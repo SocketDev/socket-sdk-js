@@ -28,89 +28,124 @@ const BUILTIN_MODULES = new Set([
   ...builtinModules.map(m => `node:${m}`),
 ])
 
-/**
- * Find all JavaScript files in dist directory.
- */
-export async function findDistFiles(distPath: string): Promise<string[]> {
-  const files: string[] = []
-
+async function main(): Promise<void> {
   try {
-    const entries = await fs.readdir(distPath, { withFileTypes: true })
+    const { violations, warnings } = await validateBundleDeps()
 
-    for (const entry of entries) {
-      const fullPath = path.join(distPath, entry.name)
+    if (violations.length === 0 && warnings.length === 0) {
+      logger.success('Bundle dependencies validation passed')
+      process.exitCode = 0
+      return
+    }
 
-      if (entry.isDirectory()) {
-        files.push(...(await findDistFiles(fullPath)))
-      } else if (
-        entry.name.endsWith('.js') ||
-        entry.name.endsWith('.mjs') ||
-        entry.name.endsWith('.cjs')
-      ) {
-        files.push(fullPath)
+    if (violations.length > 0) {
+      logger.fail('Bundle dependencies validation failed\n')
+
+      for (const violation of violations) {
+        logger.error(`  ${violation.message}`)
+        logger.error(`  ${violation.fix}`)
+        logger.error('')
       }
     }
-  } catch {
-    // Directory doesn't exist or can't be read
-    return []
-  }
 
-  return files
+    if (warnings.length > 0) {
+      logger.warn('Warnings:\n')
+
+      for (const warning of warnings) {
+        logger.log(`  ${warning.message}`)
+        logger.log(`  ${warning.fix}\n`)
+      }
+    }
+
+    // Only fail on violations, not warnings
+    process.exitCode = violations.length > 0 ? 1 : 0
+  } catch (e) {
+    logger.error(
+      'Validation failed:',
+      e instanceof Error ? e.message : String(e),
+    )
+    process.exitCode = 1
+  }
 }
 
+main().catch((e: unknown) => {
+  logger.error('Unhandled error in main():', e)
+  process.exitCode = 1
+})
+
 /**
- * Check if a string is a valid package specifier.
+ * Extract bundled package names from node_modules paths in comments and code.
  */
-export function isValidPackageSpecifier(specifier: string): boolean {
-  // Relative imports
-  if (specifier.startsWith('.') || specifier.startsWith('/')) {
-    return false
+export async function extractBundledPackages(
+  filePath: string,
+): Promise<Set<string>> {
+  const content = await fs.readFile(filePath, 'utf8')
+  const bundled = new Set<string>()
+
+  // Match node_modules paths in comments: node_modules/.pnpm/@scope+package@version/...
+  // or node_modules/@scope/package/...
+  // or node_modules/package/...
+  const nodeModulesPattern =
+    /node_modules\/(?:\.pnpm\/)?(@[^/]+\+[^@/]+|@[^/]+\/[^/]+|[^/@]+)/g
+
+  let match: RegExpExecArray | null
+  while ((match = nodeModulesPattern.exec(content)) !== null) {
+    let packageName = match[1]
+    if (!packageName) {
+      continue
+    }
+
+    // Handle pnpm path format: @scope+package -> @scope/package
+    if (packageName.includes('+')) {
+      packageName = packageName.replace('+', '/')
+    }
+
+    // Filter out invalid package names (contains special chars, code fragments, etc.)
+    if (
+      packageName.includes('"') ||
+      packageName.includes("'") ||
+      packageName.includes('`') ||
+      packageName.includes('${') ||
+      packageName.includes('\\') ||
+      packageName.includes(';') ||
+      packageName.includes('\n') ||
+      packageName.includes('function') ||
+      packageName.includes('const') ||
+      packageName.includes('let') ||
+      packageName.includes('var') ||
+      packageName.includes('=') ||
+      packageName.includes('{') ||
+      packageName.includes('}') ||
+      packageName.includes('[') ||
+      packageName.includes(']') ||
+      packageName.includes('(') ||
+      packageName.includes(')') ||
+      // Filter out common false positives (strings that appear in code but aren't packages)
+      packageName === 'bin' ||
+      packageName === '.bin' ||
+      packageName === 'npm' ||
+      packageName === 'node' ||
+      packageName === 'pnpm' ||
+      packageName === 'yarn' ||
+      packageName.length === 0 ||
+      // npm package name max length
+      packageName.length > 214
+    ) {
+      continue
+    }
+
+    bundled.add(packageName)
   }
 
-  // Subpath imports (Node.js internal imports starting with #)
-  if (specifier.startsWith('#')) {
-    return false
-  }
-
-  // Node.js built-in modules (node: prefix is reserved for built-ins)
-  if (specifier.startsWith('node:')) {
-    return false
-  }
-
-  // Filter out invalid patterns
-  if (
-    specifier.includes('${') ||
-    specifier.includes('"}') ||
-    specifier.includes('`') ||
-    specifier === 'true' ||
-    specifier === 'false' ||
-    specifier === 'null' ||
-    specifier === 'undefined' ||
-    specifier === 'name' ||
-    specifier === 'dependencies' ||
-    specifier === 'devDependencies' ||
-    specifier === 'peerDependencies' ||
-    specifier === 'version' ||
-    specifier === 'description' ||
-    specifier.length === 0 ||
-    // Filter out strings that look like code fragments
-    specifier.includes('\n') ||
-    specifier.includes(';') ||
-    specifier.includes('function') ||
-    specifier.includes('const ') ||
-    specifier.includes('let ') ||
-    specifier.includes('var ')
-  ) {
-    return false
-  }
-
-  return true
+  return bundled
 }
 
 /**
  * Extract external package names from require() and import statements in built files.
  */
-export async function extractExternalPackages(filePath: string): Promise<Set<string>> {
+export async function extractExternalPackages(
+  filePath: string,
+): Promise<Set<string>> {
   const content = await fs.readFile(filePath, 'utf8')
   const externals = new Set<string>()
 
@@ -172,68 +207,33 @@ export async function extractExternalPackages(filePath: string): Promise<Set<str
 }
 
 /**
- * Extract bundled package names from node_modules paths in comments and code.
+ * Find all JavaScript files in dist directory.
  */
-export async function extractBundledPackages(filePath: string): Promise<Set<string>> {
-  const content = await fs.readFile(filePath, 'utf8')
-  const bundled = new Set<string>()
+export async function findDistFiles(distPath: string): Promise<string[]> {
+  const files: string[] = []
 
-  // Match node_modules paths in comments: node_modules/.pnpm/@scope+package@version/...
-  // or node_modules/@scope/package/...
-  // or node_modules/package/...
-  const nodeModulesPattern =
-    /node_modules\/(?:\.pnpm\/)?(@[^/]+\+[^@/]+|@[^/]+\/[^/]+|[^/@]+)/g
+  try {
+    const entries = await fs.readdir(distPath, { withFileTypes: true })
 
-  let match: RegExpExecArray | null
-  while ((match = nodeModulesPattern.exec(content)) !== null) {
-    let packageName = match[1]
-    if (!packageName) {
-      continue
+    for (const entry of entries) {
+      const fullPath = path.join(distPath, entry.name)
+
+      if (entry.isDirectory()) {
+        files.push(...(await findDistFiles(fullPath)))
+      } else if (
+        entry.name.endsWith('.js') ||
+        entry.name.endsWith('.mjs') ||
+        entry.name.endsWith('.cjs')
+      ) {
+        files.push(fullPath)
+      }
     }
-
-    // Handle pnpm path format: @scope+package -> @scope/package
-    if (packageName.includes('+')) {
-      packageName = packageName.replace('+', '/')
-    }
-
-    // Filter out invalid package names (contains special chars, code fragments, etc.)
-    if (
-      packageName.includes('"') ||
-      packageName.includes("'") ||
-      packageName.includes('`') ||
-      packageName.includes('${') ||
-      packageName.includes('\\') ||
-      packageName.includes(';') ||
-      packageName.includes('\n') ||
-      packageName.includes('function') ||
-      packageName.includes('const') ||
-      packageName.includes('let') ||
-      packageName.includes('var') ||
-      packageName.includes('=') ||
-      packageName.includes('{') ||
-      packageName.includes('}') ||
-      packageName.includes('[') ||
-      packageName.includes(']') ||
-      packageName.includes('(') ||
-      packageName.includes(')') ||
-      // Filter out common false positives (strings that appear in code but aren't packages)
-      packageName === 'bin' ||
-      packageName === '.bin' ||
-      packageName === 'npm' ||
-      packageName === 'node' ||
-      packageName === 'pnpm' ||
-      packageName === 'yarn' ||
-      packageName.length === 0 ||
-      // npm package name max length
-      packageName.length > 214
-    ) {
-      continue
-    }
-
-    bundled.add(packageName)
+  } catch {
+    // Directory doesn't exist or can't be read
+    return []
   }
 
-  return bundled
+  return files
 }
 
 /**
@@ -299,6 +299,55 @@ interface PackageJson {
   peerDependencies?: Record<string, string>
   optionalDependencies?: Record<string, string>
   exports?: Record<string, string | Record<string, string>>
+}
+
+/**
+ * Check if a string is a valid package specifier.
+ */
+export function isValidPackageSpecifier(specifier: string): boolean {
+  // Relative imports
+  if (specifier.startsWith('.') || specifier.startsWith('/')) {
+    return false
+  }
+
+  // Subpath imports (Node.js internal imports starting with #)
+  if (specifier.startsWith('#')) {
+    return false
+  }
+
+  // Node.js built-in modules (node: prefix is reserved for built-ins)
+  if (specifier.startsWith('node:')) {
+    return false
+  }
+
+  // Filter out invalid patterns
+  if (
+    specifier.includes('${') ||
+    specifier.includes('"}') ||
+    specifier.includes('`') ||
+    specifier === 'true' ||
+    specifier === 'false' ||
+    specifier === 'null' ||
+    specifier === 'undefined' ||
+    specifier === 'name' ||
+    specifier === 'dependencies' ||
+    specifier === 'devDependencies' ||
+    specifier === 'peerDependencies' ||
+    specifier === 'version' ||
+    specifier === 'description' ||
+    specifier.length === 0 ||
+    // Filter out strings that look like code fragments
+    specifier.includes('\n') ||
+    specifier.includes(';') ||
+    specifier.includes('function') ||
+    specifier.includes('const ') ||
+    specifier.includes('let ') ||
+    specifier.includes('var ')
+  ) {
+    return false
+  }
+
+  return true
 }
 
 /**
@@ -415,48 +464,3 @@ export async function validateBundleDeps(): Promise<ValidationResult> {
 
   return { violations, warnings }
 }
-
-async function main(): Promise<void> {
-  try {
-    const { violations, warnings } = await validateBundleDeps()
-
-    if (violations.length === 0 && warnings.length === 0) {
-      logger.success('Bundle dependencies validation passed')
-      process.exitCode = 0
-      return
-    }
-
-    if (violations.length > 0) {
-      logger.fail('Bundle dependencies validation failed\n')
-
-      for (const violation of violations) {
-        logger.error(`  ${violation.message}`)
-        logger.error(`  ${violation.fix}`)
-        logger.error('')
-      }
-    }
-
-    if (warnings.length > 0) {
-      logger.warn('Warnings:\n')
-
-      for (const warning of warnings) {
-        logger.log(`  ${warning.message}`)
-        logger.log(`  ${warning.fix}\n`)
-      }
-    }
-
-    // Only fail on violations, not warnings
-    process.exitCode = violations.length > 0 ? 1 : 0
-  } catch (e) {
-    logger.error(
-      'Validation failed:',
-      e instanceof Error ? e.message : String(e),
-    )
-    process.exitCode = 1
-  }
-}
-
-main().catch((e: unknown) => {
-  logger.error('Unhandled error in main():', e)
-  process.exitCode = 1
-})

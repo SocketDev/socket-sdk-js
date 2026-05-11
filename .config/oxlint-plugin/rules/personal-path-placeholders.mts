@@ -176,9 +176,7 @@ const rule = {
           continue
         }
         const label =
-          re.source.indexOf('Users') !== -1
-            ? '/Users/<user>/'
-            : '/home/<user>/'
+          re.source.indexOf('Users') !== -1 ? '/Users/<user>/' : '/home/<user>/'
         context.report({
           node: textNode,
           messageId: 'realUsername',

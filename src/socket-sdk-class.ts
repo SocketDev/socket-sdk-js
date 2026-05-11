@@ -847,6 +847,8 @@ export class SocketSdk {
    * Stream package analysis data for multiple packages with chunked processing and concurrency control.
    * Returns results as they become available via async generator.
    *
+   * @operationId batchPackageStream
+   * @quota 100 units
    * @throws {Error} When server returns 5xx status codes
    */
   async *batchPackageStream(
@@ -1060,6 +1062,7 @@ export class SocketSdk {
    * Both paths normalize alerts through publicPolicy and only return
    * malware-relevant results.
    *
+   * @operationId none
    * @param components - Array of package URLs to check
    * @returns Normalized results with policy-filtered alerts per package
    */
@@ -1101,7 +1104,10 @@ export class SocketSdk {
         const response = await createGetRequest(
           SOCKET_FIREWALL_API_URL,
           urlPath,
-          { ...this.#reqOptions, headers: publicHeaders },
+          {
+            ...this.#reqOptions,
+            headers: publicHeaders,
+          },
         )
         if (!isResponseOk(response)) {
           return undefined
@@ -2051,6 +2057,8 @@ export class SocketSdk {
    * // Then download the actual patched file
    * const fileContent = await sdk.downloadPatch(patch.files['index.js'].socketBlob)
    * ```
+   *
+   * @operationId none
    */
   async downloadPatch(
     hash: string,
@@ -2208,6 +2216,8 @@ export class SocketSdk {
   /**
    * Execute a raw GET request to any API endpoint with configurable response type.
    * Supports both throwing (default) and non-throwing modes.
+   * @operationId getApi
+   * @quota 0 units
    * @param urlPath - API endpoint path (e.g., 'organizations')
    * @param options - Request options including responseType and throws behavior
    * @returns Raw response, parsed data, or SocketSdkGenericResult based on options
@@ -2407,6 +2417,9 @@ export class SocketSdk {
    *
    * This method fetches the organization's entitlements and filters for only the enabled ones, returning their keys. Entitlements represent Socket
    * Products that the organization has access to use.
+   *
+   * @operationId getEnabledEntitlements
+   * @quota 0 units
    */
   async getEnabledEntitlements(orgSlug: string): Promise<string[]> {
     const data = await this.#executeWithRetry(
@@ -2432,6 +2445,9 @@ export class SocketSdk {
    *
    * This method fetches all entitlements (both enabled and disabled) for
    * an organization, returning the complete list with their status.
+   *
+   * @operationId getEntitlements
+   * @quota 0 units
    */
   async getEntitlements(orgSlug: string): Promise<Entitlement[]> {
     const data = await this.#executeWithRetry(
@@ -2756,6 +2772,7 @@ export class SocketSdk {
    * Fetch available fixes for vulnerabilities in a repository or scan.
    * Returns fix recommendations including version upgrades and update types.
    *
+   * @operationId none
    * @param orgSlug - Organization identifier
    * @param options - Fix query options including repo_slug or full_scan_id, vulnerability IDs, and preferences
    * @returns Fix details for requested vulnerabilities with upgrade recommendations
@@ -3618,6 +3635,7 @@ export class SocketSdk {
    * Post telemetry data for an organization.
    * Sends telemetry events and analytics data for monitoring and analysis.
    *
+   * @operationId none
    * @param orgSlug - Organization identifier
    * @param telemetryData - Telemetry payload containing events and metrics
    * @returns Empty object on successful submission
@@ -3776,6 +3794,8 @@ export class SocketSdk {
   /**
    * Send POST or PUT request with JSON body and return parsed JSON response.
    * Supports both throwing (default) and non-throwing modes.
+   * @operationId sendApi
+   * @quota 0 units
    * @param urlPath - API endpoint path (e.g., 'organizations')
    * @param options - Request options including method, body, and throws behavior
    * @returns Parsed JSON response or SocketSdkGenericResult based on options
@@ -3925,6 +3945,9 @@ export class SocketSdk {
    * Free tier users will only receive free patches.
    *
    * Note: This method returns a ReadableStream for processing large datasets.
+   *
+   * @operationId streamPatchesFromScan
+   * @quota 0 units
    */
   async streamPatchesFromScan(
     orgSlug: string,
@@ -4276,6 +4299,8 @@ export class SocketSdk {
    * Upload manifest files for dependency analysis.
    * Processes package files to create dependency snapshots and security analysis.
    *
+   * @operationId uploadManifestFiles
+   * @quota 100 units
    * @throws {Error} When server returns 5xx status codes
    */
   async uploadManifestFiles(
@@ -4386,6 +4411,9 @@ export class SocketSdk {
    *
    * This method retrieves comprehensive patch details including files,
    * vulnerabilities, description, license, and tier information.
+   *
+   * @operationId viewPatch
+   * @quota 0 units
    */
   async viewPatch(orgSlug: string, uuid: string): Promise<PatchViewResponse> {
     try {

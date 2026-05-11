@@ -41,10 +41,8 @@ const rule = {
       recommended: true,
     },
     messages: {
-      soft:
-        '{{lines}} lines — past the 500-line soft cap. Consider splitting along natural seams (one tool / domain / phase per file). See CLAUDE.md "File size".',
-      hard:
-        '{{lines}} lines — past the 1000-line hard cap. Split this file. See CLAUDE.md "File size".',
+      soft: '{{lines}} lines — past the 500-line soft cap. Consider splitting along natural seams (one tool / domain / phase per file). See CLAUDE.md "File size".',
+      hard: '{{lines}} lines — past the 1000-line hard cap. Split this file. See CLAUDE.md "File size".',
     },
     schema: [],
   },

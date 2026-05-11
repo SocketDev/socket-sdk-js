@@ -56,6 +56,7 @@ const REPORT_ONLY_TERMS = ['master', 'slave']
 const BYPASS_RE = /inclusive-language:\s*external-api/
 
 /** Build a regex matching any legacy stem with word boundaries. */
+
 export function buildDetectorRegex() {
   const stems = [
     ...SUBSTITUTIONS.map(([legacy]) => legacy),
@@ -65,33 +66,6 @@ export function buildDetectorRegex() {
 }
 
 const DETECTOR_RE = buildDetectorRegex()
-
-/**
- * Replace a single hit `match` (e.g. `Whitelist`, `WHITELIST`,
- * `whitelisted`, `whitelistEntry`) with the case-preserving form of
- * the new stem. Returns undefined when there's no autofix-able
- * substitution (master/slave).
- */
-export function rewriteHit(match) {
-  const lower = match.toLowerCase()
-  for (const [legacy, replacement] of SUBSTITUTIONS) {
-    if (!lower.startsWith(legacy)) {
-      continue
-    }
-    const tail = match.slice(legacy.length)
-    const original = match.slice(0, legacy.length)
-    let rebuilt
-    if (original === original.toUpperCase()) {
-      rebuilt = replacement.toUpperCase()
-    } else if (original[0] === original[0].toUpperCase()) {
-      rebuilt = replacement[0].toUpperCase() + replacement.slice(1)
-    } else {
-      rebuilt = replacement
-    }
-    return rebuilt + tail
-  }
-  return undefined
-}
 
 export function findHits(text) {
   const hits = []
@@ -385,3 +359,30 @@ const rule = {
 }
 
 export default rule
+
+/**
+ * Replace a single hit `match` (e.g. `Whitelist`, `WHITELIST`,
+ * `whitelisted`, `whitelistEntry`) with the case-preserving form of
+ * the new stem. Returns undefined when there's no autofix-able
+ * substitution (master/slave).
+ */
+export function rewriteHit(match) {
+  const lower = match.toLowerCase()
+  for (const [legacy, replacement] of SUBSTITUTIONS) {
+    if (!lower.startsWith(legacy)) {
+      continue
+    }
+    const tail = match.slice(legacy.length)
+    const original = match.slice(0, legacy.length)
+    let rebuilt
+    if (original === original.toUpperCase()) {
+      rebuilt = replacement.toUpperCase()
+    } else if (original[0] === original[0].toUpperCase()) {
+      rebuilt = replacement[0].toUpperCase() + replacement.slice(1)
+    } else {
+      rebuilt = replacement
+    }
+    return rebuilt + tail
+  }
+  return undefined
+}

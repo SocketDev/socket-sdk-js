@@ -15,7 +15,9 @@ import { fileURLToPath } from 'node:url'
 const here = path.dirname(fileURLToPath(import.meta.url))
 const HOOK = path.join(here, '..', 'pre-commit.mts')
 
-export async function runHook(cwd: string): Promise<{ code: number; stderr: string }> {
+export async function runHook(
+  cwd: string,
+): Promise<{ code: number; stderr: string }> {
   const child = spawn(process.execPath, [HOOK], {
     cwd,
     stdio: 'pipe',

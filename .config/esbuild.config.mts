@@ -29,6 +29,28 @@ const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'))
 const externalDependencies = Object.keys(packageJson.dependencies || {})
 
 /**
+ * Analyze build output for size information
+ */
+export function analyzeMetafile(metafile: Metafile) {
+  const outputs = Object.keys(metafile.outputs)
+  let totalSize = 0
+
+  const files = outputs.map(file => {
+    const output = metafile.outputs[file]!
+    totalSize += output.bytes
+    return {
+      name: path.relative(rootPath, file),
+      size: `${(output.bytes / 1024).toFixed(2)} KB`,
+    }
+  })
+
+  return {
+    files,
+    totalSize: `${(totalSize / 1024).toFixed(2)} KB`,
+  }
+}
+
+/**
  * Plugin to stub heavy @socketsecurity/lib internals and third-party modules
  * that are unreachable or safely degradable in the SDK's runtime code paths.
  *
@@ -152,27 +174,3 @@ export const watchConfig = {
     },
   },
 }
-
-/**
- * Analyze build output for size information
- */
-function analyzeMetafile(metafile: Metafile) {
-  const outputs = Object.keys(metafile.outputs)
-  let totalSize = 0
-
-  const files = outputs.map(file => {
-    const output = metafile.outputs[file]!
-    totalSize += output.bytes
-    return {
-      name: path.relative(rootPath, file),
-      size: `${(output.bytes / 1024).toFixed(2)} KB`,
-    }
-  })
-
-  return {
-    files,
-    totalSize: `${(totalSize / 1024).toFixed(2)} KB`,
-  }
-}
-
-export { analyzeMetafile }

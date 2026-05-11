@@ -72,6 +72,7 @@ interface InteractivePrompts {
 let prompts: InteractivePrompts | undefined
 if (hasInteractivePrompts) {
   try {
+    // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- lazy-loaded interactive helper; static would force inquirer into preinstall paths.
     prompts = (await import(promptsPath!)) as InteractivePrompts
   } catch {
     // Fall back to basic prompts if import fails.
@@ -95,667 +96,6 @@ const log = {
     logger.substep(msg)
   },
   warn: (msg: string) => logger.warn(msg),
-}
-
-export function printHeader(title: string): void {
-  logger.log(`\n${'─'.repeat(60)}`)
-  logger.log(`  ${title}`)
-  logger.log(`${'─'.repeat(60)}`)
-}
-
-export function printFooter(message?: string): void {
-  logger.log(`\n${'─'.repeat(60)}`)
-  if (message) {
-    logger.substep(message)
-  }
-}
-
-/**
- * Create readline interface for user input.
- */
-export function createReadline(): readline.Interface {
-  return readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  })
-}
-
-/**
- * Prompt user for input.
- */
-export async function prompt(question: string, defaultValue = ''): Promise<string> {
-  const rl = createReadline()
-  return new Promise<string>(resolve => {
-    const displayDefault = defaultValue ? ` (${defaultValue})` : ''
-    rl.question(`${question}${displayDefault}: `, (answer: string) => {
-      rl.close()
-      resolve(answer.trim() || defaultValue)
-    })
-  })
-}
-
-/**
- * Prompt user for yes/no confirmation.
- */
-export async function confirm(question: string, defaultYes = true): Promise<boolean> {
-  const defaultHint = defaultYes ? 'Y/n' : 'y/N'
-  const answer = await prompt(
-    `${question} [${defaultHint}]`,
-    defaultYes ? 'y' : 'n',
-  )
-  return answer.toLowerCase().startsWith('y')
-}
-
-interface CommandResult {
-  exitCode: number
-  stdout: string
-  stderr: string
-}
-
-export async function runCommand(
-  command: string,
-  args: string[] = [],
-  options: Record<string, unknown> = {},
-): Promise<number> {
-  return new Promise<number>((resolve, reject) => {
-    const child = childSpawn(command, args, {
-      stdio: 'inherit',
-      cwd: rootPath,
-      ...(WIN32 && { shell: true }),
-      ...options,
-    })
-
-    child.on('exit', (code: number | null) => {
-      resolve(code || 0)
-    })
-
-    child.on('error', (e: Error) => {
-      reject(e)
-    })
-  })
-}
-
-export async function runCommandWithOutput(
-  command: string,
-  args: string[] = [],
-  options: Record<string, unknown> = {},
-): Promise<CommandResult> {
-  return new Promise<CommandResult>((resolve, reject) => {
-    let stdout = ''
-    let stderr = ''
-
-    const child = childSpawn(command, args, {
-      cwd: rootPath,
-      ...(WIN32 && { shell: true }),
-      ...options,
-    })
-
-    if (child.stdout) {
-      child.stdout.on('data', (data: Buffer) => {
-        stdout += data
-      })
-    }
-
-    if (child.stderr) {
-      child.stderr.on('data', (data: Buffer) => {
-        stderr += data
-      })
-    }
-
-    child.on('exit', (code: number | null) => {
-      resolve({ exitCode: code || 0, stdout, stderr })
-    })
-
-    child.on('error', (e: Error) => {
-      reject(e)
-    })
-  })
-}
-
-/**
- * Run a command and feed `input` to its stdin, then return captured output.
- * Uses @socketsecurity/lib/spawn so the input is actually delivered (async
- * `child_process.spawn` ignores the `input` option — only `spawnSync` does).
- */
-export async function runCommandWithInput(
-  command: string,
-  args: string[] = [],
-  input: string,
-): Promise<CommandResult> {
-  try {
-    const handle = spawn(command, args, {
-      cwd: rootPath,
-      stdio: ['pipe', 'pipe', 'pipe'],
-      ...(WIN32 && { shell: true }),
-    })
-    handle.stdin?.end(input)
-    const result = await handle
-    return {
-      exitCode: result.code,
-      stdout:
-        typeof result.stdout === 'string'
-          ? result.stdout
-          : result.stdout.toString(),
-      stderr:
-        typeof result.stderr === 'string'
-          ? result.stderr
-          : result.stderr.toString(),
-    }
-  } catch (e) {
-    const err = e as {
-      code?: number
-      stdout?: string | Buffer
-      stderr?: string | Buffer
-    }
-    return {
-      exitCode: typeof err.code === 'number' ? err.code : 1,
-      stdout:
-        typeof err.stdout === 'string'
-          ? err.stdout
-          : (err.stdout?.toString() ?? ''),
-      stderr:
-        typeof err.stderr === 'string'
-          ? err.stderr
-          : (err.stderr?.toString() ?? ''),
-    }
-  }
-}
-
-/**
- * Check if claude-console is available.
- */
-export async function checkClaude(): Promise<string | false> {
-  const checkCommand = WIN32 ? 'where' : 'which'
-  const result = await runCommandWithOutput(checkCommand, ['claude-console'])
-
-  if (result.exitCode !== 0) {
-    // Also check common aliases.
-    const aliasResult = await runCommandWithOutput(checkCommand, ['claude'])
-    if (aliasResult.exitCode !== 0) {
-      return false
-    }
-    return 'claude'
-  }
-  return 'claude-console'
-}
-
-interface BumpPackageJson {
-  name?: string
-  version: string
-  [key: string]: unknown
-}
-
-/**
- * Read package.json from the project.
- */
-export async function readPackageJson(pkgPath = rootPath): Promise<BumpPackageJson> {
-  const packageJsonPath = path.join(pkgPath, 'package.json')
-  const content = await fs.readFile(packageJsonPath, 'utf8')
-  try {
-    return JSON.parse(content)
-  } catch (e) {
-    throw new Error(
-      `Failed to parse ${packageJsonPath}: ${e instanceof Error ? e.message : 'Unknown error'}`,
-      { cause: e },
-    )
-  }
-}
-
-/**
- * Write package.json to the project.
- */
-export async function writePackageJson(
-  pkgJson: BumpPackageJson,
-  pkgPath = rootPath,
-): Promise<void> {
-  const packageJsonPath = path.join(pkgPath, 'package.json')
-  await fs.writeFile(packageJsonPath, `${JSON.stringify(pkgJson, null, 2)}\n`)
-}
-
-/**
- * Get the current version from package.json.
- */
-export async function getCurrentVersion(pkgPath = rootPath): Promise<string> {
-  const pkgJson = await readPackageJson(pkgPath)
-  return pkgJson.version
-}
-
-/**
- * Determine the new version based on bump type.
- */
-export function getNewVersion(
-  currentVersion: string,
-  bumpType: string,
-): string | null {
-  // Check if bumpType is a valid semver version.
-  if (semver.valid(bumpType)) {
-    return bumpType
-  }
-
-  // Otherwise treat as release type.
-  const validTypes = [
-    'major',
-    'minor',
-    'patch',
-    'premajor',
-    'preminor',
-    'prepatch',
-    'prerelease',
-  ]
-  if (!validTypes.includes(bumpType)) {
-    throw new Error(
-      `Invalid bump type: ${bumpType}. Must be one of: ${validTypes.join(', ')} or a valid semver version`,
-    )
-  }
-
-  return semver.inc(currentVersion, bumpType as ReleaseType)
-}
-
-/**
- * Check if the working directory is clean.
- */
-export async function checkGitStatus(): Promise<boolean> {
-  const result = await runCommandWithOutput('git', ['status', '--porcelain'])
-  if (result.stdout.trim()) {
-    log.error('Working directory is not clean')
-    log.info('Uncommitted changes:')
-    logger.log(result.stdout)
-    return false
-  }
-  return true
-}
-
-/**
- * Check if we're on the main/master branch.
- */
-export async function checkGitBranch(): Promise<boolean> {
-  const result = await runCommandWithOutput('git', [
-    'rev-parse',
-    '--abbrev-ref',
-    'HEAD',
-  ])
-  const branch = result.stdout.trim()
-  if (branch !== 'main' && branch !== 'master') {
-    log.warn(`Not on main/master branch (current: ${branch})`)
-    return false
-  }
-  return true
-}
-
-/**
- * Get the last few commits for context.
- */
-export async function getRecentCommits(count = 20): Promise<string> {
-  const result = await runCommandWithOutput('git', [
-    'log',
-    '--oneline',
-    '--no-decorate',
-    `-${count}`,
-  ])
-  return result.stdout.trim()
-}
-
-/**
- * Check if this is the registry package.
- */
-export function isRegistryPackage(): boolean {
-  return existsSync(path.join(rootPath, 'registry', 'package.json'))
-}
-
-/**
- * Get package name for commit message.
- */
-export async function getPackageName(): Promise<string> {
-  if (isRegistryPackage()) {
-    return 'registry package'
-  }
-  const pkgJson = await readPackageJson()
-  return pkgJson.name || 'package'
-}
-
-/**
- * Generate changelog using Claude.
- */
-export async function generateChangelog(
-  claudeCmd: string,
-  currentVersion: string,
-  newVersion: string,
-): Promise<string> {
-  log.step('Generating changelog with Claude')
-
-  // Get recent commits for context.
-  const recentCommits = await getRecentCommits()
-  const packageName = await getPackageName()
-
-  // Create a temporary file with the prompt.
-  const promptPath = path.join(rootPath, '.claude-bump-prompt.tmp')
-  const prompt = `Generate a changelog entry for ${packageName} version ${newVersion}.
-
-Current version: ${currentVersion}
-New version: ${newVersion}
-
-Recent commits since last release:
-${recentCommits}
-
-Generate a changelog entry following the Keep a Changelog format (https://keepachangelog.com/).
-Include only the entry for this version, not the entire file.
-Format it like this:
-
-## [${newVersion}] - ${new Date().toISOString().split('T')[0]}
-
-### Added
-- New features
-
-### Changed
-- Changes in existing functionality
-
-### Fixed
-- Bug fixes
-
-### Removed
-- Removed features
-
-Only include sections that have actual changes. Focus on user-facing changes.
-Be concise but informative. Group related changes together.`
-
-  await fs.writeFile(promptPath, prompt)
-
-  // Call Claude to generate the changelog.
-  log.progress('Asking Claude to generate changelog')
-
-  const claudeResult = await runCommandWithInput(claudeCmd, [], prompt)
-
-  // Clean up temp file.
-  try {
-    await safeDelete(promptPath)
-  } catch {}
-
-  if (claudeResult.exitCode !== 0) {
-    log.failed('Claude failed to generate changelog')
-    throw new Error('Claude failed to generate changelog')
-  }
-
-  log.done('Changelog generated')
-  return claudeResult.stdout.trim()
-}
-
-/**
- * Update CHANGELOG.md with new entry.
- */
-export async function updateChangelog(changelogEntry: string): Promise<void> {
-  const changelogPath = path.join(rootPath, 'CHANGELOG.md')
-
-  let existingContent = ''
-  if (existsSync(changelogPath)) {
-    existingContent = await fs.readFile(changelogPath, 'utf8')
-  } else {
-    // Create new changelog with header.
-    existingContent = `# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/),
-and this project adheres to [Semantic Versioning](https://semver.org/).
-
-`
-  }
-
-  // Insert new entry after the header but before existing entries.
-  const headerEnd = existingContent.indexOf('\n## ')
-  if (headerEnd > 0) {
-    // Insert before first version entry.
-    existingContent =
-      existingContent.slice(0, headerEnd) +
-      '\n' +
-      changelogEntry +
-      '\n' +
-      existingContent.slice(headerEnd)
-  } else {
-    // Append to end.
-    existingContent += `\n${changelogEntry}\n`
-  }
-
-  await fs.writeFile(changelogPath, existingContent)
-}
-
-/**
- * Review and refine changelog with user feedback.
- * Uses interactive prompts if available, falls back to basic readline prompts.
- */
-export async function reviewChangelog(
-  claudeCmd: string,
-  changelogEntry: string,
-  interactive = false,
-): Promise<string> {
-  logger.log(`\n${'━'.repeat(60)}`)
-  logger.log('Proposed Changelog Entry:')
-  logger.log('━'.repeat(60))
-  logger.log(changelogEntry)
-  logger.log(`${'━'.repeat(60)}\n`)
-
-  // Use interactive prompts if available and requested.
-  if (interactive && prompts) {
-    return await interactiveReviewChangelog(claudeCmd, changelogEntry)
-  }
-
-  // Fall back to basic prompts.
-  while (true) {
-    const response = await prompt('Accept this changelog? (yes/no/edit)', 'yes')
-
-    if (response.toLowerCase().startsWith('y')) {
-      return changelogEntry
-    }
-
-    if (response.toLowerCase() === 'edit') {
-      const feedback = await prompt(
-        'Provide feedback for Claude to refine the changelog',
-      )
-
-      if (!feedback) {
-        continue
-      }
-
-      log.progress('Refining changelog with Claude')
-
-      const refinePrompt = `Please refine this changelog entry based on the following feedback:
-
-Current changelog entry:
-${changelogEntry}
-
-Feedback:
-${feedback}
-
-Provide the refined changelog entry in the same format.`
-
-      const refineResult = await runCommandWithInput(
-        claudeCmd,
-        [],
-        refinePrompt,
-      )
-
-      if (refineResult.exitCode === 0) {
-        changelogEntry = refineResult.stdout.trim()
-        log.done('Changelog refined')
-
-        logger.log(`\n${'━'.repeat(60)}`)
-        logger.log('Refined Changelog Entry:')
-        logger.log('━'.repeat(60))
-        logger.log(changelogEntry)
-        logger.log(`${'━'.repeat(60)}\n`)
-      } else {
-        log.failed('Failed to refine changelog')
-      }
-    } else if (response.toLowerCase() === 'no') {
-      // Allow manual editing.
-      const manualEntry = await prompt(
-        'Enter changelog manually (or press Enter to cancel)',
-      )
-      if (manualEntry) {
-        return manualEntry
-      }
-      throw new Error('Changelog generation cancelled')
-    }
-  }
-}
-
-/**
- * Interactive review using advanced prompts.
- * Provides a better user experience with select menus and structured feedback.
- */
-export async function interactiveReviewChangelog(
-  claudeCmd: string,
-  changelogEntry: string,
-): Promise<string> {
-  let currentEntry = changelogEntry
-  let regenerateCount = 0
-
-  while (true) {
-    // Show the current changelog.
-    logger.log('\nCurrent Changelog Entry:')
-    logger.log('─'.repeat(60))
-    logger.log(currentEntry)
-    logger.log(`${'─'.repeat(60)}\n`)
-
-    // Offer action choices.
-    const action = await prompts!.select({
-      message: 'What would you like to do?',
-      choices: [
-        { value: 'accept', name: 'Accept this changelog' },
-        {
-          value: 'regenerate',
-          name: 'Regenerate entirely (fresh perspective)',
-        },
-        { value: 'refine', name: 'Refine with specific feedback' },
-        { value: 'add', name: 'Add missing information' },
-        { value: 'simplify', name: 'Simplify and make more concise' },
-        { value: 'technical', name: 'Make more technical/detailed' },
-        { value: 'manual', name: 'Write manually' },
-        { value: 'cancel', name: 'Cancel' },
-      ],
-    })
-
-    if (action === 'accept') {
-      return currentEntry
-    }
-
-    if (action === 'cancel') {
-      const confirmCancel = await prompts!.confirm({
-        message: 'Are you sure you want to cancel the version bump?',
-        default: false,
-      })
-      if (confirmCancel) {
-        throw new Error('Version bump cancelled by user')
-      }
-      continue
-    }
-
-    if (action === 'manual') {
-      logger.log(
-        '\nEnter the changelog manually (paste and press Enter twice when done):',
-      )
-      const rl = createReadline()
-      let manualEntry = ''
-      return new Promise<string>((resolve, reject) => {
-        rl.on('line', (line: string) => {
-          if (line === '' && manualEntry.endsWith('\n')) {
-            rl.close()
-            resolve(manualEntry.trim())
-          } else {
-            manualEntry += `${line}\n`
-          }
-        })
-        rl.on('close', () => {
-          if (manualEntry.trim()) {
-            resolve(manualEntry.trim())
-          } else {
-            reject(new Error('No manual entry provided'))
-          }
-        })
-      })
-    }
-
-    // Handle AI-based refinements.
-    let feedbackPrompt = ''
-
-    if (action === 'regenerate') {
-      regenerateCount++
-      feedbackPrompt = `Generate a completely different changelog entry. This is attempt #${regenerateCount + 1}.
-Try a different perspective or focus on different aspects of the changes.
-
-Original entry for reference:
-${changelogEntry}
-
-Generate a fresh changelog entry with the same version information but different wording and potentially different emphasis.`
-    } else if (action === 'refine') {
-      const feedback = await prompts!.input({
-        message: 'Describe what changes you want:',
-        validate: value => (value.trim() ? true : 'Please provide feedback'),
-      })
-
-      feedbackPrompt = `Refine this changelog based on the feedback:
-
-Current entry:
-${currentEntry}
-
-Feedback: ${feedback}
-
-Provide the refined changelog entry.`
-    } else if (action === 'add') {
-      const additions = await prompts!.input({
-        message: 'What information is missing?',
-        validate: value =>
-          value.trim() ? true : 'Please describe what to add',
-      })
-
-      feedbackPrompt = `Add the following information to the changelog:
-
-Current entry:
-${currentEntry}
-
-Information to add: ${additions}
-
-Provide the updated changelog with the new information integrated appropriately.`
-    } else if (action === 'simplify') {
-      feedbackPrompt = `Simplify and make this changelog more concise:
-
-Current entry:
-${currentEntry}
-
-Make it shorter and clearer, focusing only on the most important changes. Remove any redundancy or overly technical details that aren't essential for users.`
-    } else if (action === 'technical') {
-      feedbackPrompt = `Make this changelog more technical and detailed:
-
-Current entry:
-${currentEntry}
-
-Add technical details, specific file changes, implementation details, and any breaking changes or migration notes. Be more precise about what changed internally.`
-    }
-
-    // Send to Claude for refinement.
-    if (feedbackPrompt) {
-      log.progress('Updating changelog with Claude')
-
-      const refineResult = await runCommandWithInput(
-        claudeCmd,
-        [],
-        feedbackPrompt,
-      )
-
-      if (refineResult.exitCode === 0) {
-        currentEntry = refineResult.stdout.trim()
-        log.done('Changelog updated')
-      } else {
-        log.failed('Failed to update changelog')
-        const retry = await prompts!.confirm({
-          message: 'Failed to update. Try again?',
-          default: true,
-        })
-        if (!retry) {
-          return currentEntry
-        }
-      }
-    }
-  }
 }
 
 async function main(): Promise<void> {
@@ -834,6 +174,7 @@ async function main(): Promise<void> {
       logger.log('  - Clean git working directory')
       logger.log('  - Main/master branch (unless --force)')
       if (hasInteractivePrompts) {
+        // oxlint-disable-next-line socket/no-status-emoji -- inline status indicator in help text, not a log prefix.
         logger.log('\nInteractive mode: Available ✓ (default)')
       } else {
         logger.log('\nInteractive mode: Not available')
@@ -1018,3 +359,672 @@ main().catch((e: unknown) => {
   logger.error(e)
   process.exitCode = 1
 })
+
+/**
+ * Check if claude-console is available.
+ */
+export async function checkClaude(): Promise<string | false> {
+  const checkCommand = WIN32 ? 'where' : 'which'
+  const result = await runCommandWithOutput(checkCommand, ['claude-console'])
+
+  if (result.exitCode !== 0) {
+    // Also check common aliases.
+    const aliasResult = await runCommandWithOutput(checkCommand, ['claude'])
+    if (aliasResult.exitCode !== 0) {
+      return false
+    }
+    return 'claude'
+  }
+  return 'claude-console'
+}
+
+interface BumpPackageJson {
+  name?: string
+  version: string
+  [key: string]: unknown
+}
+
+/**
+ * Check if we're on the main/master branch.
+ */
+export async function checkGitBranch(): Promise<boolean> {
+  const result = await runCommandWithOutput('git', [
+    'rev-parse',
+    '--abbrev-ref',
+    'HEAD',
+  ])
+  const branch = result.stdout.trim()
+  if (branch !== 'main' && branch !== 'master') {
+    log.warn(`Not on main/master branch (current: ${branch})`)
+    return false
+  }
+  return true
+}
+
+/**
+ * Check if the working directory is clean.
+ */
+export async function checkGitStatus(): Promise<boolean> {
+  const result = await runCommandWithOutput('git', ['status', '--porcelain'])
+  if (result.stdout.trim()) {
+    log.error('Working directory is not clean')
+    log.info('Uncommitted changes:')
+    logger.log(result.stdout)
+    return false
+  }
+  return true
+}
+
+/**
+ * Prompt user for yes/no confirmation.
+ */
+export async function confirm(
+  question: string,
+  defaultYes = true,
+): Promise<boolean> {
+  const defaultHint = defaultYes ? 'Y/n' : 'y/N'
+  const answer = await prompt(
+    `${question} [${defaultHint}]`,
+    defaultYes ? 'y' : 'n',
+  )
+  return answer.toLowerCase().startsWith('y')
+}
+
+interface CommandResult {
+  exitCode: number
+  stdout: string
+  stderr: string
+}
+
+/**
+ * Create readline interface for user input.
+ */
+export function createReadline(): readline.Interface {
+  return readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  })
+}
+
+/**
+ * Generate changelog using Claude.
+ */
+export async function generateChangelog(
+  claudeCmd: string,
+  currentVersion: string,
+  newVersion: string,
+): Promise<string> {
+  log.step('Generating changelog with Claude')
+
+  // Get recent commits for context.
+  const recentCommits = await getRecentCommits()
+  const packageName = await getPackageName()
+
+  // Create a temporary file with the prompt.
+  const promptPath = path.join(rootPath, '.claude-bump-prompt.tmp')
+  const prompt = `Generate a changelog entry for ${packageName} version ${newVersion}.
+
+Current version: ${currentVersion}
+New version: ${newVersion}
+
+Recent commits since last release:
+${recentCommits}
+
+Generate a changelog entry following the Keep a Changelog format (https://keepachangelog.com/).
+Include only the entry for this version, not the entire file.
+Format it like this:
+
+## [${newVersion}] - ${new Date().toISOString().split('T')[0]}
+
+### Added
+- New features
+
+### Changed
+- Changes in existing functionality
+
+### Fixed
+- Bug fixes
+
+### Removed
+- Removed features
+
+Only include sections that have actual changes. Focus on user-facing changes.
+Be concise but informative. Group related changes together.`
+
+  await fs.writeFile(promptPath, prompt)
+
+  // Call Claude to generate the changelog.
+  log.progress('Asking Claude to generate changelog')
+
+  const claudeResult = await runCommandWithInput(claudeCmd, [], prompt)
+
+  // Clean up temp file.
+  try {
+    await safeDelete(promptPath)
+  } catch {}
+
+  if (claudeResult.exitCode !== 0) {
+    log.failed('Claude failed to generate changelog')
+    throw new Error('Claude failed to generate changelog')
+  }
+
+  log.done('Changelog generated')
+  return claudeResult.stdout.trim()
+}
+
+/**
+ * Get the current version from package.json.
+ */
+export async function getCurrentVersion(pkgPath = rootPath): Promise<string> {
+  const pkgJson = await readPackageJson(pkgPath)
+  return pkgJson.version
+}
+
+/**
+ * Determine the new version based on bump type.
+ */
+export function getNewVersion(
+  currentVersion: string,
+  bumpType: string,
+): string | null {
+  // Check if bumpType is a valid semver version.
+  if (semver.valid(bumpType)) {
+    return bumpType
+  }
+
+  // Otherwise treat as release type.
+  const validTypes = [
+    'major',
+    'minor',
+    'patch',
+    'premajor',
+    'preminor',
+    'prepatch',
+    'prerelease',
+  ]
+  if (!validTypes.includes(bumpType)) {
+    throw new Error(
+      `Invalid bump type: ${bumpType}. Must be one of: ${validTypes.join(', ')} or a valid semver version`,
+    )
+  }
+
+  return semver.inc(currentVersion, bumpType as ReleaseType)
+}
+
+/**
+ * Get package name for commit message.
+ */
+export async function getPackageName(): Promise<string> {
+  if (isRegistryPackage()) {
+    return 'registry package'
+  }
+  const pkgJson = await readPackageJson()
+  return pkgJson.name || 'package'
+}
+
+/**
+ * Get the last few commits for context.
+ */
+export async function getRecentCommits(count = 20): Promise<string> {
+  const result = await runCommandWithOutput('git', [
+    'log',
+    '--oneline',
+    '--no-decorate',
+    `-${count}`,
+  ])
+  return result.stdout.trim()
+}
+
+/**
+ * Interactive review using advanced prompts.
+ * Provides a better user experience with select menus and structured feedback.
+ */
+export async function interactiveReviewChangelog(
+  claudeCmd: string,
+  changelogEntry: string,
+): Promise<string> {
+  let currentEntry = changelogEntry
+  let regenerateCount = 0
+
+  while (true) {
+    // Show the current changelog.
+    logger.log('\nCurrent Changelog Entry:')
+    logger.log('─'.repeat(60))
+    logger.log(currentEntry)
+    logger.log(`${'─'.repeat(60)}\n`)
+
+    // Offer action choices.
+    const action = await prompts!.select({
+      message: 'What would you like to do?',
+      choices: [
+        { value: 'accept', name: 'Accept this changelog' },
+        {
+          value: 'regenerate',
+          name: 'Regenerate entirely (fresh perspective)',
+        },
+        { value: 'refine', name: 'Refine with specific feedback' },
+        { value: 'add', name: 'Add missing information' },
+        { value: 'simplify', name: 'Simplify and make more concise' },
+        { value: 'technical', name: 'Make more technical/detailed' },
+        { value: 'manual', name: 'Write manually' },
+        { value: 'cancel', name: 'Cancel' },
+      ],
+    })
+
+    if (action === 'accept') {
+      return currentEntry
+    }
+
+    if (action === 'cancel') {
+      const confirmCancel = await prompts!.confirm({
+        message: 'Are you sure you want to cancel the version bump?',
+        default: false,
+      })
+      if (confirmCancel) {
+        throw new Error('Version bump cancelled by user')
+      }
+      continue
+    }
+
+    if (action === 'manual') {
+      logger.log(
+        '\nEnter the changelog manually (paste and press Enter twice when done):',
+      )
+      const rl = createReadline()
+      let manualEntry = ''
+      return new Promise<string>((resolve, reject) => {
+        rl.on('line', (line: string) => {
+          if (line === '' && manualEntry.endsWith('\n')) {
+            rl.close()
+            resolve(manualEntry.trim())
+          } else {
+            manualEntry += `${line}\n`
+          }
+        })
+        rl.on('close', () => {
+          if (manualEntry.trim()) {
+            resolve(manualEntry.trim())
+          } else {
+            reject(new Error('No manual entry provided'))
+          }
+        })
+      })
+    }
+
+    // Handle AI-based refinements.
+    let feedbackPrompt = ''
+
+    if (action === 'regenerate') {
+      regenerateCount++
+      feedbackPrompt = `Generate a completely different changelog entry. This is attempt #${regenerateCount + 1}.
+Try a different perspective or focus on different aspects of the changes.
+
+Original entry for reference:
+${changelogEntry}
+
+Generate a fresh changelog entry with the same version information but different wording and potentially different emphasis.`
+    } else if (action === 'refine') {
+      const feedback = await prompts!.input({
+        message: 'Describe what changes you want:',
+        validate: value => (value.trim() ? true : 'Please provide feedback'),
+      })
+
+      feedbackPrompt = `Refine this changelog based on the feedback:
+
+Current entry:
+${currentEntry}
+
+Feedback: ${feedback}
+
+Provide the refined changelog entry.`
+    } else if (action === 'add') {
+      const additions = await prompts!.input({
+        message: 'What information is missing?',
+        validate: value =>
+          value.trim() ? true : 'Please describe what to add',
+      })
+
+      feedbackPrompt = `Add the following information to the changelog:
+
+Current entry:
+${currentEntry}
+
+Information to add: ${additions}
+
+Provide the updated changelog with the new information integrated appropriately.`
+    } else if (action === 'simplify') {
+      feedbackPrompt = `Simplify and make this changelog more concise:
+
+Current entry:
+${currentEntry}
+
+Make it shorter and clearer, focusing only on the most important changes. Remove any redundancy or overly technical details that aren't essential for users.`
+    } else if (action === 'technical') {
+      feedbackPrompt = `Make this changelog more technical and detailed:
+
+Current entry:
+${currentEntry}
+
+Add technical details, specific file changes, implementation details, and any breaking changes or migration notes. Be more precise about what changed internally.`
+    }
+
+    // Send to Claude for refinement.
+    if (feedbackPrompt) {
+      log.progress('Updating changelog with Claude')
+
+      const refineResult = await runCommandWithInput(
+        claudeCmd,
+        [],
+        feedbackPrompt,
+      )
+
+      if (refineResult.exitCode === 0) {
+        currentEntry = refineResult.stdout.trim()
+        log.done('Changelog updated')
+      } else {
+        log.failed('Failed to update changelog')
+        const retry = await prompts!.confirm({
+          message: 'Failed to update. Try again?',
+          default: true,
+        })
+        if (!retry) {
+          return currentEntry
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Check if this is the registry package.
+ */
+export function isRegistryPackage(): boolean {
+  return existsSync(path.join(rootPath, 'registry', 'package.json'))
+}
+
+export function printFooter(message?: string): void {
+  logger.log(`\n${'─'.repeat(60)}`)
+  if (message) {
+    logger.substep(message)
+  }
+}
+
+export function printHeader(title: string): void {
+  logger.log(`\n${'─'.repeat(60)}`)
+  logger.log(`  ${title}`)
+  logger.log(`${'─'.repeat(60)}`)
+}
+
+/**
+ * Prompt user for input.
+ */
+export async function prompt(
+  question: string,
+  defaultValue = '',
+): Promise<string> {
+  const rl = createReadline()
+  return new Promise<string>(resolve => {
+    const displayDefault = defaultValue ? ` (${defaultValue})` : ''
+    rl.question(`${question}${displayDefault}: `, (answer: string) => {
+      rl.close()
+      resolve(answer.trim() || defaultValue)
+    })
+  })
+}
+
+/**
+ * Read package.json from the project.
+ */
+export async function readPackageJson(
+  pkgPath = rootPath,
+): Promise<BumpPackageJson> {
+  const packageJsonPath = path.join(pkgPath, 'package.json')
+  const content = await fs.readFile(packageJsonPath, 'utf8')
+  try {
+    return JSON.parse(content)
+  } catch (e) {
+    throw new Error(
+      `Failed to parse ${packageJsonPath}: ${e instanceof Error ? e.message : 'Unknown error'}`,
+      { cause: e },
+    )
+  }
+}
+
+/**
+ * Review and refine changelog with user feedback.
+ * Uses interactive prompts if available, falls back to basic readline prompts.
+ */
+export async function reviewChangelog(
+  claudeCmd: string,
+  changelogEntry: string,
+  interactive = false,
+): Promise<string> {
+  logger.log(`\n${'━'.repeat(60)}`)
+  logger.log('Proposed Changelog Entry:')
+  logger.log('━'.repeat(60))
+  logger.log(changelogEntry)
+  logger.log(`${'━'.repeat(60)}\n`)
+
+  // Use interactive prompts if available and requested.
+  if (interactive && prompts) {
+    return await interactiveReviewChangelog(claudeCmd, changelogEntry)
+  }
+
+  // Fall back to basic prompts.
+  while (true) {
+    const response = await prompt('Accept this changelog? (yes/no/edit)', 'yes')
+
+    if (response.toLowerCase().startsWith('y')) {
+      return changelogEntry
+    }
+
+    if (response.toLowerCase() === 'edit') {
+      const feedback = await prompt(
+        'Provide feedback for Claude to refine the changelog',
+      )
+
+      if (!feedback) {
+        continue
+      }
+
+      log.progress('Refining changelog with Claude')
+
+      const refinePrompt = `Please refine this changelog entry based on the following feedback:
+
+Current changelog entry:
+${changelogEntry}
+
+Feedback:
+${feedback}
+
+Provide the refined changelog entry in the same format.`
+
+      const refineResult = await runCommandWithInput(
+        claudeCmd,
+        [],
+        refinePrompt,
+      )
+
+      if (refineResult.exitCode === 0) {
+        changelogEntry = refineResult.stdout.trim()
+        log.done('Changelog refined')
+
+        logger.log(`\n${'━'.repeat(60)}`)
+        logger.log('Refined Changelog Entry:')
+        logger.log('━'.repeat(60))
+        logger.log(changelogEntry)
+        logger.log(`${'━'.repeat(60)}\n`)
+      } else {
+        log.failed('Failed to refine changelog')
+      }
+    } else if (response.toLowerCase() === 'no') {
+      // Allow manual editing.
+      const manualEntry = await prompt(
+        'Enter changelog manually (or press Enter to cancel)',
+      )
+      if (manualEntry) {
+        return manualEntry
+      }
+      throw new Error('Changelog generation cancelled')
+    }
+  }
+}
+
+export async function runCommand(
+  command: string,
+  args: string[] = [],
+  options: Record<string, unknown> = {},
+): Promise<number> {
+  return new Promise<number>((resolve, reject) => {
+    const child = childSpawn(command, args, {
+      stdio: 'inherit',
+      cwd: rootPath,
+      ...(WIN32 && { shell: true }),
+      ...options,
+    })
+
+    child.on('exit', (code: number | null) => {
+      resolve(code || 0)
+    })
+
+    child.on('error', (e: Error) => {
+      reject(e)
+    })
+  })
+}
+
+/**
+ * Run a command and feed `input` to its stdin, then return captured output.
+ * Uses @socketsecurity/lib/spawn so the input is actually delivered (async
+ * `child_process.spawn` ignores the `input` option — only `spawnSync` does).
+ */
+export async function runCommandWithInput(
+  command: string,
+  args: string[] = [],
+  input: string,
+): Promise<CommandResult> {
+  try {
+    const handle = spawn(command, args, {
+      cwd: rootPath,
+      stdio: ['pipe', 'pipe', 'pipe'],
+      ...(WIN32 && { shell: true }),
+    })
+    handle.stdin?.end(input)
+    const result = await handle
+    return {
+      exitCode: result.code,
+      stdout:
+        typeof result.stdout === 'string'
+          ? result.stdout
+          : result.stdout.toString(),
+      stderr:
+        typeof result.stderr === 'string'
+          ? result.stderr
+          : result.stderr.toString(),
+    }
+  } catch (e) {
+    const err = e as {
+      code?: number
+      stdout?: string | Buffer
+      stderr?: string | Buffer
+    }
+    return {
+      exitCode: typeof err.code === 'number' ? err.code : 1,
+      stdout:
+        typeof err.stdout === 'string'
+          ? err.stdout
+          : (err.stdout?.toString() ?? ''),
+      stderr:
+        typeof err.stderr === 'string'
+          ? err.stderr
+          : (err.stderr?.toString() ?? ''),
+    }
+  }
+}
+
+export async function runCommandWithOutput(
+  command: string,
+  args: string[] = [],
+  options: Record<string, unknown> = {},
+): Promise<CommandResult> {
+  return new Promise<CommandResult>((resolve, reject) => {
+    let stdout = ''
+    let stderr = ''
+
+    const child = childSpawn(command, args, {
+      cwd: rootPath,
+      ...(WIN32 && { shell: true }),
+      ...options,
+    })
+
+    if (child.stdout) {
+      child.stdout.on('data', (data: Buffer) => {
+        stdout += data
+      })
+    }
+
+    if (child.stderr) {
+      child.stderr.on('data', (data: Buffer) => {
+        stderr += data
+      })
+    }
+
+    child.on('exit', (code: number | null) => {
+      resolve({ exitCode: code || 0, stdout, stderr })
+    })
+
+    child.on('error', (e: Error) => {
+      reject(e)
+    })
+  })
+}
+
+/**
+ * Update CHANGELOG.md with new entry.
+ */
+export async function updateChangelog(changelogEntry: string): Promise<void> {
+  const changelogPath = path.join(rootPath, 'CHANGELOG.md')
+
+  let existingContent = ''
+  if (existsSync(changelogPath)) {
+    existingContent = await fs.readFile(changelogPath, 'utf8')
+  } else {
+    // Create new changelog with header.
+    existingContent = `# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/),
+and this project adheres to [Semantic Versioning](https://semver.org/).
+
+`
+  }
+
+  // Insert new entry after the header but before existing entries.
+  const headerEnd = existingContent.indexOf('\n## ')
+  if (headerEnd > 0) {
+    // Insert before first version entry.
+    existingContent =
+      existingContent.slice(0, headerEnd) +
+      '\n' +
+      changelogEntry +
+      '\n' +
+      existingContent.slice(headerEnd)
+  } else {
+    // Append to end.
+    existingContent += `\n${changelogEntry}\n`
+  }
+
+  await fs.writeFile(changelogPath, existingContent)
+}
+
+/**
+ * Write package.json to the project.
+ */
+export async function writePackageJson(
+  pkgJson: BumpPackageJson,
+  pkgPath = rootPath,
+): Promise<void> {
+  const packageJsonPath = path.join(pkgPath, 'package.json')
+  await fs.writeFile(packageJsonPath, `${JSON.stringify(pkgJson, null, 2)}\n`)
+}

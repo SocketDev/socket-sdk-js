@@ -234,7 +234,9 @@ const rule = {
             // The leaf's right node is what we rewrite.
             // BinaryExpression.right's range covers just the literal.
             const rawTarget = sourceCode.getText(targetRight)
-            fixes.push(fixer.replaceText(asEqualityClause(leaf).right, rawTarget))
+            fixes.push(
+              fixer.replaceText(asEqualityClause(leaf).right, rawTarget),
+            )
           }
           return fixes
         },

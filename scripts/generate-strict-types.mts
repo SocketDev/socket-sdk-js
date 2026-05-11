@@ -405,7 +405,10 @@ export function extractResponseType(
 /**
  * Find an export declaration by name in the AST.
  */
-export function findExportByName(ast: AstNode, name: string): AstNode | undefined {
+export function findExportByName(
+  ast: AstNode,
+  name: string,
+): AstNode | undefined {
   for (const node of (ast.body || []) as AstNode[]) {
     if (
       node.type === 'ExportNamedDeclaration' &&
@@ -613,7 +616,10 @@ export type DeleteRepositoryLabelResult = {
 /**
  * Navigate to a nested type following a path.
  */
-export function navigateToPath(node: AstNode, path: string[]): AstNode | undefined {
+export function navigateToPath(
+  node: AstNode,
+  path: string[],
+): AstNode | undefined {
   let current: AstNode | undefined = unwrapType(node)
   for (const segment of path) {
     if (!current) {
@@ -677,7 +683,10 @@ export function parseTypeScript(source: string): AstNode {
 /**
  * Convert AST type node to TypeScript string.
  */
-export function typeNodeToString(node: AstNode | undefined, source: string): string {
+export function typeNodeToString(
+  node: AstNode | undefined,
+  source: string,
+): string {
   if (!node) {
     return 'unknown'
   }

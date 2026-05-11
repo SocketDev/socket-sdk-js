@@ -19,18 +19,6 @@ import {
 import type { QueryParams } from './types'
 
 /**
- * Normalize a string to a set of lowercase words (alphanumeric sequences).
- * Extracts word characters and creates a deduplicated set.
- *
- * @param s - String to normalize
- * @returns Set of normalized words
- */
-export function normalizeToWordSet(s: string): Set<string> {
-  const words = StringPrototypeToLowerCase(s).match(/\w+/g)
-  return new SetCtor(words ?? [])
-}
-
-/**
  * Calculate Jaccard similarity coefficient between two strings based on word sets.
  * Returns a value between 0 (no overlap) and 1 (identical word sets).
  *
@@ -136,6 +124,18 @@ export const normalizeBaseUrl = memoize(
   },
   { name: 'normalizeBaseUrl' },
 )
+
+/**
+ * Normalize a string to a set of lowercase words (alphanumeric sequences).
+ * Extracts word characters and creates a deduplicated set.
+ *
+ * @param s - String to normalize
+ * @returns Set of normalized words
+ */
+export function normalizeToWordSet(s: string): Set<string> {
+  const words = StringPrototypeToLowerCase(s).match(/\w+/g)
+  return new SetCtor(words ?? [])
+}
 
 /**
  * Create a promise with externally accessible resolve/reject functions.

@@ -63,27 +63,56 @@ const SKIP_DIRS = new Set([
   'node_modules',
 ])
 
-/**
- * Check if a filename is in SCREAMING_CASE (all uppercase with optional underscores).
- */
-export function isScreamingCase(filename: string): boolean {
-  // Remove extension for checking
-  const nameWithoutExt = filename.replace(/\.(md|MD)$/, '')
+async function main(): Promise<void> {
+  try {
+    const violations = await validateMarkdownFilenames()
 
-  // Check if it contains any lowercase letters
-  return /^[A-Z0-9_]+$/.test(nameWithoutExt) && /[A-Z]/.test(nameWithoutExt)
+    if (violations.length === 0) {
+      logger.success('All markdown filenames follow conventions')
+      process.exitCode = 0
+      return
+    }
+
+    logger.fail('Markdown filename violations found')
+    logger.log('')
+    logger.log('Special files (allowed anywhere):')
+    logger.log('  README.md, LICENSE')
+    logger.log('')
+    logger.log('Allowed SCREAMING_CASE files (root, docs/, or .claude/ only):')
+    logger.log('  AUTHORS.md, CHANGELOG.md, CITATION.md, CLAUDE.md,')
+    logger.log('  CODE_OF_CONDUCT.md, CONTRIBUTORS.md, CONTRIBUTING.md,')
+    logger.log('  COPYING, CREDITS.md, GOVERNANCE.md, MAINTAINERS.md,')
+    logger.log('  NOTICE.md, SECURITY.md, SUPPORT.md, TRADEMARK.md')
+    logger.log('')
+    logger.log('All other .md files must:')
+    logger.log('  - Be lowercase-with-hyphens')
+    logger.log('  - Be in docs/ or .claude/ directories (any depth)')
+    logger.log('')
+
+    for (const violation of violations) {
+      logger.log(`  ${violation.file}`)
+      logger.log(`    Issue: ${violation.issue}`)
+      logger.log(`    Current: ${violation.filename}`)
+      logger.log(`    Suggested: ${violation.suggestion}`)
+      logger.log('')
+    }
+
+    logger.log('Rename files to follow conventions.')
+    logger.log('')
+
+    process.exitCode = 1
+  } catch (e) {
+    logger.fail(
+      `Validation failed: ${e instanceof Error ? e.message : String(e)}`,
+    )
+    process.exitCode = 1
+  }
 }
 
-/**
- * Check if a filename is lowercase-with-hyphens.
- */
-export function isLowercaseHyphenated(filename: string): boolean {
-  // Remove extension for checking
-  const nameWithoutExt = filename.replace(/\.md$/, '')
-
-  // Must be lowercase letters, numbers, and hyphens only
-  return /^[a-z0-9]+(-[a-z0-9]+)*$/.test(nameWithoutExt)
-}
+main().catch((e: unknown) => {
+  logger.fail(`Validation failed: ${e}`)
+  process.exitCode = 1
+})
 
 /**
  * Recursively find all markdown files.
@@ -117,32 +146,6 @@ export async function findMarkdownFiles(
 }
 
 /**
- * Check if file is in an allowed location for SCREAMING_CASE files.
- * SCREAMING_CASE files can only be at: root, docs/, or .claude/ (top level only).
- */
-export function isInAllowedLocationForScreamingCase(filePath: string): boolean {
-  const relativePath = path.relative(rootPath, filePath)
-  const dir = path.dirname(relativePath)
-
-  // Allow at root level
-  if (dir === '.') {
-    return true
-  }
-
-  // Allow in docs/ folder (but not subdirectories)
-  if (dir === 'docs') {
-    return true
-  }
-
-  // Allow in .claude/ folder (but not subdirectories)
-  if (dir === '.claude') {
-    return true
-  }
-
-  return false
-}
-
-/**
  * Check if file is in an allowed location for regular markdown files.
  * Regular .md files must be within docs/ or .claude/ directories.
  */
@@ -171,9 +174,59 @@ interface FilenameViolation {
 }
 
 /**
+ * Check if file is in an allowed location for SCREAMING_CASE files.
+ * SCREAMING_CASE files can only be at: root, docs/, or .claude/ (top level only).
+ */
+export function isInAllowedLocationForScreamingCase(filePath: string): boolean {
+  const relativePath = path.relative(rootPath, filePath)
+  const dir = path.dirname(relativePath)
+
+  // Allow at root level
+  if (dir === '.') {
+    return true
+  }
+
+  // Allow in docs/ folder (but not subdirectories)
+  if (dir === 'docs') {
+    return true
+  }
+
+  // Allow in .claude/ folder (but not subdirectories)
+  if (dir === '.claude') {
+    return true
+  }
+
+  return false
+}
+
+/**
+ * Check if a filename is lowercase-with-hyphens.
+ */
+export function isLowercaseHyphenated(filename: string): boolean {
+  // Remove extension for checking
+  const nameWithoutExt = filename.replace(/\.md$/, '')
+
+  // Must be lowercase letters, numbers, and hyphens only
+  return /^[a-z0-9]+(-[a-z0-9]+)*$/.test(nameWithoutExt)
+}
+
+/**
+ * Check if a filename is in SCREAMING_CASE (all uppercase with optional underscores).
+ */
+export function isScreamingCase(filename: string): boolean {
+  // Remove extension for checking
+  const nameWithoutExt = filename.replace(/\.(md|MD)$/, '')
+
+  // Check if it contains any lowercase letters
+  return /^[A-Z0-9_]+$/.test(nameWithoutExt) && /[A-Z]/.test(nameWithoutExt)
+}
+
+/**
  * Validate a markdown filename.
  */
-export function validateFilename(filePath: string): FilenameViolation | undefined {
+export function validateFilename(
+  filePath: string,
+): FilenameViolation | undefined {
   const filename = path.basename(filePath)
   const nameWithoutExt = filename.replace(/\.(md|MD)$/, '')
   const relativePath = path.relative(rootPath, filePath)
@@ -253,7 +306,9 @@ export function validateFilename(filePath: string): FilenameViolation | undefine
 /**
  * Validate all markdown filenames.
  */
-export async function validateMarkdownFilenames(): Promise<FilenameViolation[]> {
+export async function validateMarkdownFilenames(): Promise<
+  FilenameViolation[]
+> {
   const files = await findMarkdownFiles(rootPath)
   const violations = []
 
@@ -266,54 +321,3 @@ export async function validateMarkdownFilenames(): Promise<FilenameViolation[]> 
 
   return violations
 }
-
-async function main(): Promise<void> {
-  try {
-    const violations = await validateMarkdownFilenames()
-
-    if (violations.length === 0) {
-      logger.success('All markdown filenames follow conventions')
-      process.exitCode = 0
-      return
-    }
-
-    logger.fail('Markdown filename violations found')
-    logger.log('')
-    logger.log('Special files (allowed anywhere):')
-    logger.log('  README.md, LICENSE')
-    logger.log('')
-    logger.log('Allowed SCREAMING_CASE files (root, docs/, or .claude/ only):')
-    logger.log('  AUTHORS.md, CHANGELOG.md, CITATION.md, CLAUDE.md,')
-    logger.log('  CODE_OF_CONDUCT.md, CONTRIBUTORS.md, CONTRIBUTING.md,')
-    logger.log('  COPYING, CREDITS.md, GOVERNANCE.md, MAINTAINERS.md,')
-    logger.log('  NOTICE.md, SECURITY.md, SUPPORT.md, TRADEMARK.md')
-    logger.log('')
-    logger.log('All other .md files must:')
-    logger.log('  - Be lowercase-with-hyphens')
-    logger.log('  - Be in docs/ or .claude/ directories (any depth)')
-    logger.log('')
-
-    for (const violation of violations) {
-      logger.log(`  ${violation.file}`)
-      logger.log(`    Issue: ${violation.issue}`)
-      logger.log(`    Current: ${violation.filename}`)
-      logger.log(`    Suggested: ${violation.suggestion}`)
-      logger.log('')
-    }
-
-    logger.log('Rename files to follow conventions.')
-    logger.log('')
-
-    process.exitCode = 1
-  } catch (e) {
-    logger.fail(
-      `Validation failed: ${e instanceof Error ? e.message : String(e)}`,
-    )
-    process.exitCode = 1
-  }
-}
-
-main().catch((e: unknown) => {
-  logger.fail(`Validation failed: ${e}`)
-  process.exitCode = 1
-})

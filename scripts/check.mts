@@ -102,6 +102,18 @@ async function main(): Promise<void> {
         args: ['scripts/check-paths.mts', '--quiet'],
         command: 'node',
       },
+      // Quota sync gate: JSDoc @quota tags must agree with
+      // data/api-method-quota-and-permissions.json. See scripts/validate-quota-sync.mts.
+      {
+        args: ['scripts/validate-quota-sync.mts'],
+        command: 'node',
+      },
+      // API reference doc gate: docs/api-reference.md is generated from source.
+      // See scripts/generate-api-reference.mts.
+      {
+        args: ['scripts/generate-api-reference.mts', '--check'],
+        command: 'node',
+      },
     ]
 
     const exitCodes = await runParallel(checks)

@@ -30,6 +30,7 @@ export async function validateEsbuildMinify(): Promise<MinifyViolation[]> {
 
   try {
     // Dynamic import of the esbuild config
+    // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- dynamic import of generated esbuild config.
     const config = await import(configPath)
 
     const violations: MinifyViolation[] = []

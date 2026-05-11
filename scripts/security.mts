@@ -42,7 +42,10 @@ export async function hasExecutable(name: string): Promise<boolean> {
   return Boolean(await which(name))
 }
 
-export async function runTool(command: string, args: string[]): Promise<number> {
+export async function runTool(
+  command: string,
+  args: string[],
+): Promise<number> {
   try {
     const result = await spawn(command, args, {
       stdio: 'inherit',

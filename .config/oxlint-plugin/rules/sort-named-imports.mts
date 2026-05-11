@@ -68,9 +68,7 @@ const rule = {
     return {
       ImportDeclaration(node) {
         // Pull only the named-imports (skip default + namespace).
-        const named = node.specifiers.filter(
-          s => s.type === 'ImportSpecifier',
-        )
+        const named = node.specifiers.filter(s => s.type === 'ImportSpecifier')
         if (named.length < 2) {
           return
         }
