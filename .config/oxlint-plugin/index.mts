@@ -8,8 +8,8 @@
  * inherits oxlint's AST + sourcemap + fix-application machinery, and
  * keeps the rule set discoverable via `oxlint --rules`.
  *
- * Wiring: `.oxlintrc.json` adds this plugin via `jsPlugins:
- * ["./.config/oxlint-plugin/index.js"]` and enables rules under the
+ * Wiring: `.config/oxlintrc.json` adds this plugin via `jsPlugins:
+ * ["./oxlint-plugin/index.mts"]` and enables rules under the
  * `socket/` namespace.
  */
 

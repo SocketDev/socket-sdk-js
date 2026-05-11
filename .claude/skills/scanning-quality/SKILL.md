@@ -12,7 +12,7 @@ Quality analysis across the codebase using specialized Task agents. Cleans up ju
 ## Modes
 
 - **Default (interactive)** — `AskUserQuestion` is used to confirm cleanup deletions and to pick scan scope.
-- **Non-interactive** — `/scanning-quality non-interactive` (or any of the aliases below) skips every `AskUserQuestion` and applies safe defaults: scan scope = all types, cleanup = leave junk files in place (don't delete without confirmation), report-save = yes (`reports/scanning-quality-YYYY-MM-DD.md`). Use this when running headlessly (e.g. `pnpm run fleet-skill scanning-quality`, CI cron, programmatic Claude). The four-flag programmatic-Claude lockdown rule already strips `AskUserQuestion`, so headless runs default to non-interactive automatically — but call it out explicitly so future readers understand the contract.
+- **Non-interactive** — `/scanning-quality non-interactive` (or any of the aliases below) skips every `AskUserQuestion` and applies safe defaults: scan scope = all types, cleanup = leave junk files in place (don't delete without confirmation), report-save = yes (`reports/scanning-quality-YYYY-MM-DD.md`). Use this when running headlessly (CI cron, programmatic Claude, any non-TTY driver). The four-flag programmatic-Claude lockdown rule already strips `AskUserQuestion`, so headless runs default to non-interactive automatically — but call it out explicitly so future readers understand the contract.
 
 Detect non-interactive mode via any of: `--non-interactive` argument, `non-interactive` argument, `SCANNING_QUALITY_NONINTERACTIVE=1` env var, or absence of `AskUserQuestion` in the available tool surface.
 

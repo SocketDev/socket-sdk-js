@@ -43,13 +43,13 @@
  */
 
 const CHILD_PROCESS_SPECIFIERS = new Set([
-  'child_process',
   'node:child_process',
+  'child_process',
 ])
 
 const LIB_SPECIFIER = '@socketsecurity/lib/spawn'
 
-const BANNED_NAMES = new Set(['spawn', 'spawnSync'])
+const BANNED_NAMES = new Set(['spawnSync', 'spawn'])
 
 const BYPASS_RE = /prefer-async-spawn:\s*sync-required/
 
@@ -131,7 +131,7 @@ const rule = {
           BANNED_NAMES.has(s.imported.name),
       )
       if (banned.length === 0) {
-        return undefined
+        return null
       }
       const others = node.specifiers.filter(
         s =>
@@ -142,7 +142,7 @@ const rule = {
       if (others.length > 0) {
         // Mixed line — leave it alone; a partial rewrite could lose
         // the non-banned import.
-        return undefined
+        return null
       }
       // The lib re-exports `spawn` (and the user can wire `as
       // spawnSync` themselves if they really need a name). For the

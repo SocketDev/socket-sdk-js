@@ -103,7 +103,7 @@ test('Edit on a canonical path outside a fleet repo passes', async () => {
   // Tmp dir without CLAUDE.md → the walk-up never finds a fleet root.
   const dir = mkdtempSync(path.join(tmpdir(), 'non-fleet-'))
   try {
-    const file = path.join(dir, '.config/oxlint-plugin/rules/foo.js')
+    const file = path.join(dir, '.config/oxlint-plugin/rules/foo.mts')
     mkdirSync(path.dirname(file), { recursive: true })
     writeFileSync(file, '// content\n')
     const result = await runHook({
@@ -121,7 +121,7 @@ test('Edit on .config/oxlint-plugin/rules/* in a fleet repo is BLOCKED', async (
   try {
     const file = makeCanonicalFile(
       repo,
-      '.config/oxlint-plugin/rules/example.js',
+      '.config/oxlint-plugin/rules/example.mts',
     )
     const result = await runHook({
       tool_input: { file_path: file, new_string: 'x' },
@@ -184,7 +184,7 @@ test('Write tool also blocked, not just Edit', async () => {
   try {
     const file = makeCanonicalFile(
       repo,
-      '.config/oxlint-plugin/rules/new-rule.js',
+      '.config/oxlint-plugin/rules/new-rule.mts',
     )
     const result = await runHook({
       tool_input: { file_path: file, content: 'export default {}' },
@@ -201,7 +201,7 @@ test('MultiEdit tool also blocked', async () => {
   try {
     const file = makeCanonicalFile(
       repo,
-      '.config/oxlint-plugin/rules/foo.js',
+      '.config/oxlint-plugin/rules/foo.mts',
     )
     const result = await runHook({
       tool_input: { file_path: file, edits: [] },
@@ -218,7 +218,7 @@ test('repo without FLEET-CANONICAL marker passes through', async () => {
   // sees CLAUDE.md but no marker, so the path doesn't qualify.
   const repo = makeFakeFleetRepo({ hasFleetCanonical: false })
   try {
-    const file = makeCanonicalFile(repo, '.config/oxlint-plugin/rules/x.js')
+    const file = makeCanonicalFile(repo, '.config/oxlint-plugin/rules/x.mts')
     const result = await runHook({
       tool_input: { file_path: file, new_string: 'x' },
       tool_name: 'Edit',

@@ -26,7 +26,7 @@
 
 const SCRIPT_ENTRY_NAMES = new Set(['main'])
 
-export function declVisibility(node) {
+function declVisibility(node) {
   // ExportNamedDeclaration wrapping a FunctionDeclaration.
   if (
     node.type === 'ExportNamedDeclaration' &&
@@ -50,13 +50,27 @@ export function declVisibility(node) {
 }
 
 /**
+ * Compute the sort key for a function entry. Private functions sort
+ * before exports; within each group, alphanumerical by name. The
+ * script entrypoint (`main`) is pinned to the end regardless of group.
+ */
+function sortKey(entry) {
+  if (entry.isEntrypoint) {
+    // '~' (0x7E) is the highest printable ASCII char, so this sort key
+    // pins the entrypoint to the end of any group.
+    return '~~entrypoint'
+  }
+  return `${entry.visibility === 'private' ? '0' : '1'}${entry.name}`
+}
+
+/**
  * Locate the byte-range start of a function entry, including any
  * leading JSDoc / line-comment block that's contiguous with it (a
  * block separated by a blank line is treated as a free-standing
  * comment and stays put). Falls back to the node's own start when
  * there are no leading comments.
  */
-export function leadingCommentStart(sourceCode, node) {
+function leadingCommentStart(sourceCode, node) {
   const comments = sourceCode.getCommentsBefore
     ? sourceCode.getCommentsBefore(node)
     : []
@@ -82,27 +96,13 @@ export function leadingCommentStart(sourceCode, node) {
 }
 
 /**
- * Compute the sort key for a function entry. Private functions sort
- * before exports; within each group, alphanumerical by name. The
- * script entrypoint (`main`) is pinned to the end regardless of group.
- */
-export function sortKey(entry) {
-  if (entry.isEntrypoint) {
-    // '~' (0x7E) is the highest printable ASCII char, so this sort key
-    // pins the entrypoint to the end of any group.
-    return '~~entrypoint'
-  }
-  return `${entry.visibility === 'private' ? '0' : '1'}${entry.name}`
-}
-
-/**
  * Locate the byte-range end of a function entry, including any
  * trailing comment that's contiguous (no blank line between) and
  * exclusive of the next function. Useful for capturing
  * c8-ignore-stop markers that pair with a start above the function
  * — those need to travel with the function when reordered.
  */
-export function trailingCommentEnd(sourceCode, node, nextNodeStart) {
+function trailingCommentEnd(sourceCode, node, nextNodeStart) {
   const tokenText = sourceCode.text
   const comments = sourceCode.getCommentsAfter
     ? sourceCode.getCommentsAfter(node)
@@ -156,8 +156,8 @@ const rule = {
         // First pass: collect entries + detect violations.
         const entries = []
         let lastVisibilityRank = -1
-        let lastNameInGroup = undefined
-        let currentVisibility = undefined
+        let lastNameInGroup = null
+        let currentVisibility = null
         const violations = []
 
         // First find the next program-body node after each function, so

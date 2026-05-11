@@ -193,6 +193,33 @@ export function aliasMatches(marker: string, rule: string): boolean {
   return RULE_ALIASES[marker] === rule || RULE_ALIASES[rule] === marker
 }
 
+export function lineIsSuppressed(line: string, rule?: string): boolean {
+  if (LEGACY_ZIZMOR_MARKER_RE.test(line)) {
+    return true
+  }
+  const m = line.match(SOCKET_HOOK_MARKER_RE)
+  if (!m) {
+    return false
+  }
+  // No rule named on the marker → blanket allow.
+  if (!m[1]) {
+    return true
+  }
+  // Marker named a specific rule → suppress when the names match
+  // directly OR through an alias.
+  return rule === undefined || aliasMatches(m[1], rule)
+}
+
+// Heuristic context flags: lines that look like "this is a doc example"
+// rather than a real call leaked into runtime code.
+//   - Comment lines (start with `*`, `//`, `#`).
+//   - Lines that contain a JSDoc tag like @example / @param / @returns
+//     (multi-line JSDoc bodies use leading ` * ` which we already match).
+//   - Lines whose entire interesting content sits inside a backtick span
+//     (markdown / template-literal example).
+const COMMENT_LINE_RE = /^\s*(\*|\/\/|#)/
+const JSDOC_TAG_RE = /@(example|param|returns?|see|link)\b/
+
 export function isInsideBackticks(line: string, needleRe: RegExp): boolean {
   // Find every backtick-delimited span on the line and test if the
   // pattern only appears within those spans. Conservative: if any
@@ -223,33 +250,6 @@ export function isInsideBackticks(line: string, needleRe: RegExp): boolean {
   }
   return true
 }
-
-export function lineIsSuppressed(line: string, rule?: string): boolean {
-  if (LEGACY_ZIZMOR_MARKER_RE.test(line)) {
-    return true
-  }
-  const m = line.match(SOCKET_HOOK_MARKER_RE)
-  if (!m) {
-    return false
-  }
-  // No rule named on the marker → blanket allow.
-  if (!m[1]) {
-    return true
-  }
-  // Marker named a specific rule → suppress when the names match
-  // directly OR through an alias.
-  return rule === undefined || aliasMatches(m[1], rule)
-}
-
-// Heuristic context flags: lines that look like "this is a doc example"
-// rather than a real call leaked into runtime code.
-//   - Comment lines (start with `*`, `//`, `#`).
-//   - Lines that contain a JSDoc tag like @example / @param / @returns
-//     (multi-line JSDoc bodies use leading ` * ` which we already match).
-//   - Lines whose entire interesting content sits inside a backtick span
-//     (markdown / template-literal example).
-const COMMENT_LINE_RE = /^\s*(\*|\/\/|#)/
-const JSDOC_TAG_RE = /@(example|param|returns?|see|link)\b/
 
 export function looksLikeDocumentation(
   line: string,
@@ -291,8 +291,7 @@ export type LineHit = {
 //   skipDocs.rule — when set, calls looksLikeDocumentation() with the
 //     same regex + this rule name and skips lines that match.
 //   suggest — produces the per-line `suggested` rewrite shown to users.
-
-export function scanLines(
+function scanLines(
   text: string,
   pattern: RegExp,
   options: {
@@ -330,7 +329,118 @@ export function scanLines(
 // Replaces the matched real-path username segment with the canonical
 // placeholder form: `<user>` / `<USERNAME>` (matching the platform
 // convention of the surrounding path).
+export function suggestPlaceholder(line: string): string {
+  return line
+    .replace(/\/Users\/[^/\s]+\//g, '/Users/<user>/')
+    .replace(/\/home\/[^/\s]+\//g, '/home/<user>/')
+    .replace(/C:\\Users\\[^\\]+\\/g, 'C:\\Users\\<USERNAME>\\')
+}
 
+// Returns lines that contain a real personal path (excludes lines that
+// are pure placeholders or look like documentation examples). Each hit
+// carries a `suggested` rewrite when the scanner can offer one — the
+// caller surfaces it to the user as the fix recipe.
+export const scanPersonalPaths = (text: string): LineHit[] =>
+  scanLines(text, PERSONAL_PATH_RE, {
+    filter: line => {
+      // Pure-placeholder lines (no real path remains after stripping
+      // every `<...>` placeholder) are documentation, not leaks.
+      if (!PERSONAL_PATH_PLACEHOLDER_RE.test(line)) {
+        return false
+      }
+      const stripped = line.replace(
+        new RegExp(PERSONAL_PATH_PLACEHOLDER_RE, 'g'),
+        '',
+      )
+      return !PERSONAL_PATH_RE.test(stripped)
+    },
+    skipDocs: { rule: 'personal-path' },
+    suggest: suggestPlaceholder,
+  })
+
+// ── Secret scanners ────────────────────────────────────────────────
+
+const SOCKET_API_KEY_RE = /sktsec_[a-zA-Z0-9_-]+/
+const AWS_KEY_RE = /(aws_access_key|aws_secret|\bAKIA[0-9A-Z]{16}\b)/i
+const GITHUB_TOKEN_RE = /gh[ps]_[a-zA-Z0-9]{36}/
+const PRIVATE_KEY_RE = /-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----/
+
+export const scanSocketApiKeys = (text: string): LineHit[] =>
+  scanLines(text, SOCKET_API_KEY_RE, { filter: isAllowedApiKey })
+
+export const scanAwsKeys = (text: string): LineHit[] =>
+  scanLines(text, AWS_KEY_RE)
+
+export const scanGitHubTokens = (text: string): LineHit[] =>
+  scanLines(text, GITHUB_TOKEN_RE)
+
+export const scanPrivateKeys = (text: string): LineHit[] =>
+  scanLines(text, PRIVATE_KEY_RE)
+
+// ── npx/dlx scanner ────────────────────────────────────────────────
+//
+// Match `npx` / `yarn dlx` only when the token sits at a command
+// position — preceded by start-of-line / whitespace / shell separator
+// (`&&`, `||`, `;`, `|`, `(`, backtick), or directly after a PowerShell
+// `& ` invoke. Exclude JSON-key, env-value, and identifier suffix
+// contexts where `npx` shows up as an embedded substring:
+//   - `"socket-npx": …`            (bin-name suffix)
+//   - `"dev:npx": "…SOCKET_CLI_MODE=npx node …"` (script key + env value)
+//   - `cmd-npx-helper`             (identifier interior)
+// The negative lookbehind catches hyphen / colon / equals / underscore /
+// dot prefixes; the negative lookahead catches the same followed forms
+// (`npx-helper`, `npx:foo`).
+//
+// **Allowed:** `pnpm dlx` / `pnpm exec` / `pn dlx` / `pn exec` / `pnx`
+// (the pnpm v11 shorthands for `pnpm dlx`). `pnpm dlx` is the
+// fleet-canonical fetch-and-run form for documentation lines that
+// describe ad-hoc CLI usage (where the consumer doesn't have the
+// package pinned in their workspace). `pnx` is the v11 shorthand and
+// is equally allowed.
+
+const NPX_DLX_RE = /(?<![\w\-:=.])\b(npx|yarn dlx)\b(?![\w\-:=.])/
+
+// Suggest the canonical replacement for a runtime npx/dlx call.
+// Documentation contexts (comments, JSDoc) are exempt via
+// looksLikeDocumentation(); we only ever land here for code lines, where
+// the right swap is `pnpm exec` (since `pnpm` is the fleet's package
+// manager) or `pnpm run` for script entries. For documentation lines
+// All dlx-style invocations rewrite to `pnpm exec`. This matches the
+// `socket/no-npx-dlx` oxlint rule's autofix and the CLAUDE.md tooling
+// rule (NEVER use npx / pnpm dlx / yarn dlx — use pnpm exec). Keep
+// the alternation ordered longest-prefix-first so `pnpm dlx` matches
+// before any future `pnpm`-anchored rule could shadow it.
+export function suggestNpxReplacement(line: string): string {
+  return line
+    .replace(/\bpnpm dlx\b/g, 'pnpm exec')
+    .replace(/\byarn dlx\b/g, 'pnpm exec')
+    .replace(/\bpnx\b/g, 'pnpm exec')
+    .replace(/\bnpx\b/g, 'pnpm exec')
+}
+
+export const scanNpxDlx = (text: string): LineHit[] =>
+  scanLines(text, NPX_DLX_RE, {
+    skipDocs: { rule: 'npx' },
+    suggest: suggestNpxReplacement,
+  })
+
+// ── Logger leak scanner ────────────────────────────────────────────
+//
+// The fleet rule: source code uses `getDefaultLogger()` from
+// `@socketsecurity/lib/logger`. Direct calls to `process.stderr.write`,
+// `process.stdout.write`, `console.log`, `console.error`, `console.warn`,
+// `console.info`, `console.debug` are blocked. Doc-context lines are
+// exempt; lines carrying `// socket-hook: allow console` (or `#` in
+// non-TS files) are exempt too. Legacy `allow logger` is accepted as
+// an alias for one deprecation cycle.
+
+const LOGGER_LEAK_RE =
+  /\b(process\.std(?:err|out)\.write|console\.(?:log|error|warn|info|debug))\s*\(/
+
+// Map each direct call to its lib-logger equivalent. process.stdout is
+// closer to logger.info; process.stderr / console.error → logger.error;
+// console.warn → logger.warn; console.info / console.log → logger.info;
+// console.debug → logger.debug.
 export function suggestLoggerReplacement(line: string): string {
   return line
     .replace(/\bprocess\.stderr\.write\s*\(/g, 'logger.error(')
@@ -607,117 +717,3 @@ export const gitLines = (...args: string[]): string[] => {
   const out = git(...args)
   return out ? out.split('\n') : []
 }
-
-export function suggestNpxReplacement(line: string): string {
-  return line
-    .replace(/\bpnpm dlx\b/g, 'pnpm exec')
-    .replace(/\byarn dlx\b/g, 'pnpm exec')
-    .replace(/\bpnx\b/g, 'pnpm exec')
-    .replace(/\bnpx\b/g, 'pnpm exec')
-}
-
-export const scanNpxDlx = (text: string): LineHit[] =>
-  scanLines(text, NPX_DLX_RE, {
-    skipDocs: { rule: 'npx' },
-    suggest: suggestNpxReplacement,
-  })
-
-// ── Logger leak scanner ────────────────────────────────────────────
-//
-// The fleet rule: source code uses `getDefaultLogger()` from
-// `@socketsecurity/lib/logger`. Direct calls to `process.stderr.write`,
-// `process.stdout.write`, `console.log`, `console.error`, `console.warn`,
-// `console.info`, `console.debug` are blocked. Doc-context lines are
-// exempt; lines carrying `// socket-hook: allow console` (or `#` in
-// non-TS files) are exempt too. Legacy `allow logger` is accepted as
-// an alias for one deprecation cycle.
-
-const LOGGER_LEAK_RE =
-  /\b(process\.std(?:err|out)\.write|console\.(?:log|error|warn|info|debug))\s*\(/
-
-// Map each direct call to its lib-logger equivalent. process.stdout is
-// closer to logger.info; process.stderr / console.error → logger.error;
-// console.warn → logger.warn; console.info / console.log → logger.info;
-// console.debug → logger.debug.
-
-export function suggestPlaceholder(line: string): string {
-  return line
-    .replace(/\/Users\/[^/\s]+\//g, '/Users/<user>/')
-    .replace(/\/home\/[^/\s]+\//g, '/home/<user>/')
-    .replace(/C:\\Users\\[^\\]+\\/g, 'C:\\Users\\<USERNAME>\\')
-}
-
-// Returns lines that contain a real personal path (excludes lines that
-// are pure placeholders or look like documentation examples). Each hit
-// carries a `suggested` rewrite when the scanner can offer one — the
-// caller surfaces it to the user as the fix recipe.
-export const scanPersonalPaths = (text: string): LineHit[] =>
-  scanLines(text, PERSONAL_PATH_RE, {
-    filter: line => {
-      // Pure-placeholder lines (no real path remains after stripping
-      // every `<...>` placeholder) are documentation, not leaks.
-      if (!PERSONAL_PATH_PLACEHOLDER_RE.test(line)) {
-        return false
-      }
-      const stripped = line.replace(
-        new RegExp(PERSONAL_PATH_PLACEHOLDER_RE, 'g'),
-        '',
-      )
-      return !PERSONAL_PATH_RE.test(stripped)
-    },
-    skipDocs: { rule: 'personal-path' },
-    suggest: suggestPlaceholder,
-  })
-
-// ── Secret scanners ────────────────────────────────────────────────
-
-const SOCKET_API_KEY_RE = /sktsec_[a-zA-Z0-9_-]+/
-const AWS_KEY_RE = /(aws_access_key|aws_secret|\bAKIA[0-9A-Z]{16}\b)/i
-const GITHUB_TOKEN_RE = /gh[ps]_[a-zA-Z0-9]{36}/
-const PRIVATE_KEY_RE = /-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----/
-
-export const scanSocketApiKeys = (text: string): LineHit[] =>
-  scanLines(text, SOCKET_API_KEY_RE, { filter: isAllowedApiKey })
-
-export const scanAwsKeys = (text: string): LineHit[] =>
-  scanLines(text, AWS_KEY_RE)
-
-export const scanGitHubTokens = (text: string): LineHit[] =>
-  scanLines(text, GITHUB_TOKEN_RE)
-
-export const scanPrivateKeys = (text: string): LineHit[] =>
-  scanLines(text, PRIVATE_KEY_RE)
-
-// ── npx/dlx scanner ────────────────────────────────────────────────
-//
-// Match `npx` / `yarn dlx` only when the token sits at a command
-// position — preceded by start-of-line / whitespace / shell separator
-// (`&&`, `||`, `;`, `|`, `(`, backtick), or directly after a PowerShell
-// `& ` invoke. Exclude JSON-key, env-value, and identifier suffix
-// contexts where `npx` shows up as an embedded substring:
-//   - `"socket-npx": …`            (bin-name suffix)
-//   - `"dev:npx": "…SOCKET_CLI_MODE=npx node …"` (script key + env value)
-//   - `cmd-npx-helper`             (identifier interior)
-// The negative lookbehind catches hyphen / colon / equals / underscore /
-// dot prefixes; the negative lookahead catches the same followed forms
-// (`npx-helper`, `npx:foo`).
-//
-// **Allowed:** `pnpm dlx` / `pnpm exec` / `pn dlx` / `pn exec` / `pnx`
-// (the pnpm v11 shorthands for `pnpm dlx`). `pnpm dlx` is the
-// fleet-canonical fetch-and-run form for documentation lines that
-// describe ad-hoc CLI usage (where the consumer doesn't have the
-// package pinned in their workspace). `pnx` is the v11 shorthand and
-// is equally allowed.
-
-const NPX_DLX_RE = /(?<![\w\-:=.])\b(npx|yarn dlx)\b(?![\w\-:=.])/
-
-// Suggest the canonical replacement for a runtime npx/dlx call.
-// Documentation contexts (comments, JSDoc) are exempt via
-// looksLikeDocumentation(); we only ever land here for code lines, where
-// the right swap is `pnpm exec` (since `pnpm` is the fleet's package
-// manager) or `pnpm run` for script entries. For documentation lines
-// All dlx-style invocations rewrite to `pnpm exec`. This matches the
-// `socket/no-npx-dlx` oxlint rule's autofix and the CLAUDE.md tooling
-// rule (NEVER use npx / pnpm dlx / yarn dlx — use pnpm exec). Keep
-// the alternation ordered longest-prefix-first so `pnpm dlx` matches
-// before any future `pnpm`-anchored rule could shadow it.
