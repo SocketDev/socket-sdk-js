@@ -25,12 +25,11 @@ interface MinifyViolation {
 /**
  * Validate esbuild configuration has minify: false.
  */
-export async function validateEsbuildMinify(): Promise<MinifyViolation[]> {
+async function validateEsbuildMinify(): Promise<MinifyViolation[]> {
   const configPath = path.join(rootPath, '.config/esbuild.config.mts')
 
   try {
     // Dynamic import of the esbuild config
-    // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- dynamic import of generated esbuild config.
     const config = await import(configPath)
 
     const violations: MinifyViolation[] = []

@@ -36,6 +36,7 @@ const SKIP_DIRS = new Set([
   'build',
   'coverage',
   'dist',
+  'external',
   'node_modules',
   'tmp',
 ])
@@ -43,7 +44,7 @@ const SKIP_DIRS = new Set([
 /**
  * Format bytes to human-readable size.
  */
-export function formatBytes(bytes: number): string {
+function formatBytes(bytes: number): string {
   if (bytes === 0) {
     return '0 B'
   }
@@ -66,7 +67,7 @@ interface FileSizeViolation {
 /**
  * Recursively scan directory for files exceeding size limit.
  */
-export async function scanDirectory(
+async function scanDirectory(
   dir: string,
   violations: FileSizeViolation[] = [],
 ): Promise<FileSizeViolation[]> {
@@ -89,7 +90,7 @@ export async function scanDirectory(
         }
       } else if (entry.isFile()) {
         try {
-          // oxlint-disable-next-line socket/prefer-exists-sync -- need stats.size, not just existence.
+          // oxlint-disable-next-line socket/prefer-exists-sync -- need stats.size for the size threshold check; this IS the file-size validator.
           const stats = await fs.stat(fullPath)
           if (stats.size > MAX_FILE_SIZE) {
             const relativePath = path.relative(rootPath, fullPath)
@@ -115,7 +116,7 @@ export async function scanDirectory(
 /**
  * Validate file sizes in repository.
  */
-export async function validateFileSizes(): Promise<FileSizeViolation[]> {
+async function validateFileSizes(): Promise<FileSizeViolation[]> {
   const violations = await scanDirectory(rootPath)
 
   // Sort by size descending (largest first)
