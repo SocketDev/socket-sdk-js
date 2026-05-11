@@ -143,6 +143,18 @@ const WORKFLOW_GH_RELEASE_RE =
 // from disk, so we conservatively block it.
 const GH_REPO_FLAG_RE = /\s--repo\s+\S*?\/([^\s/]+)/
 
+// Inline `cd <path> && …` parser. Captures the destination path so
+// the search-roots resolver can include it. Claude Code's Bash tool
+// invokes PreToolUse hooks with cwd = the session's project dir
+// (not the cwd the chained command will switch to), so without this
+// parse the hook can't locate a workflow YAML that lives in the
+// sibling clone the user is targeting via `cd`. The path may be
+// quoted ("..." or '...'); strip the quotes for the resolver.
+const INLINE_CD_RE = /(?:^|[;&])\s*cd\s+(?:'([^']+)'|"([^"]+)"|(\S+))\s*&&/
+// (Use a single capture in the consumer by checking groups 1..3 — the
+// regex syntax requires three alternation groups; the resolver picks
+// the first non-undefined.)
+
 type DispatchResult = {
   // When `blocked` is false, populated with the reason the dispatch
   // was allowed through. Surfaced in the hook's "allowed" log line so
@@ -261,7 +273,13 @@ function workflowDeclaresDryRunInput(
 // Resolve the workflow file's search roots based on the command's
 // --repo flag. Used by both bypasses (dry-run + GH-release-only).
 //   - same-repo (no --repo, or --repo names the current project):
-//     just the current project dir.
+//     the current project dir, plus `process.cwd()` when it differs.
+//     The cwd fallback covers the cross-session case where one Claude
+//     session has CLAUDE_PROJECT_DIR pointing at repo A, but the user
+//     `cd`-ed into sibling repo B before invoking `gh workflow run`
+//     against a workflow that lives in B. Without the cwd fallback
+//     the hook would block the bypass because A's YAML doesn't
+//     declare the dry-run input that B's does.
 //   - cross-repo (--repo names a different project): just the sibling
 //     clone at <parent-of-project-dir>/<name>. The current project is
 //     intentionally excluded so a same-named workflow in the current
@@ -290,10 +308,47 @@ function resolveSearchRoots(command: string): string[] {
     projectDir = process.cwd()
   }
   const repoMatch = GH_REPO_FLAG_RE.exec(command)
-  if (!repoMatch || path.basename(projectDir) === repoMatch[1]!) {
-    return [projectDir]
+  if (repoMatch && path.basename(projectDir) !== repoMatch[1]!) {
+    // Cross-repo dispatch: only look in the sibling clone. Excluding
+    // projectDir keeps a same-name workflow in the current checkout
+    // from false-positiving the verification.
+    return [path.join(path.dirname(projectDir), repoMatch[1]!)]
   }
-  return [path.join(path.dirname(projectDir), repoMatch[1]!)]
+  // Same-repo (no --repo, or --repo names the current project): add
+  // process.cwd() when it differs from projectDir AND any inline
+  // `cd <path> &&` prefix in the command itself. Claude Code's Bash
+  // tool runs PreToolUse hooks with cwd = the session's project dir,
+  // not the cwd that the chained command will switch to — so the
+  // inline-cd parsing is the only way for the hook to find the
+  // workflow YAML when the user types `cd ../sibling && gh workflow
+  // run ...` from a session pinned to a different project.
+  const roots: string[] = [projectDir]
+  const cwd = process.cwd()
+  if (cwd !== projectDir && existsSync(path.join(cwd, '.github', 'workflows'))) {
+    roots.push(cwd)
+  }
+  const inlineCd = INLINE_CD_RE.exec(command)
+  if (inlineCd) {
+    // `cd path && gh workflow run ...` — resolve path relative to
+    // projectDir (most common: a sibling clone). Absolute paths are
+    // honored as-is; `~` is left literal because the hook can't
+    // expand the user's $HOME safely. The capture-group pick handles
+    // single-quoted / double-quoted / bare forms via three
+    // alternation groups in INLINE_CD_RE.
+    const cdPath = inlineCd[1] ?? inlineCd[2] ?? inlineCd[3]
+    if (cdPath) {
+      const resolved = path.isAbsolute(cdPath)
+        ? cdPath
+        : path.resolve(projectDir, cdPath)
+      if (
+        !roots.includes(resolved) &&
+        existsSync(path.join(resolved, '.github', 'workflows'))
+      ) {
+        roots.push(resolved)
+      }
+    }
+  }
+  return roots
 }
 
 function isVerifiableDryRun(
