@@ -29,8 +29,9 @@ import {
   createRequestBodyForFilepaths,
   createUploadRequest,
 } from '../../src/file-upload'
-import { getResponseJson } from '../../src/http-client'
+import { createGetRequest, getResponseJson } from '../../src/http-client'
 import { SocketSdk } from '../../src/index'
+import { promiseWithResolvers } from '../../src/utils.js'
 import { setupLocalHttpServer } from '../utils/local-server-helpers.mts'
 
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'
@@ -146,8 +147,6 @@ describe('getResponseJson enhanced error branches', () => {
   })
 
   async function getFromPath(urlPath: string) {
-    // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
-    const { createGetRequest } = await import('../../src/http-client.js')
     return createGetRequest(baseUrl, urlPath, { timeout: 5000 })
   }
 
@@ -223,10 +222,9 @@ describe('promiseWithResolvers polyfill branch', () => {
       // @ts-expect-error - Deliberately removing for polyfill test
       Promise.withResolvers = undefined
 
-      // Re-import to get the polyfill-using version
-      // Since the function checks at call time, just call it directly
-      // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
-      const { promiseWithResolvers } = await import('../../src/utils.js')
+      // promiseWithResolvers checks Promise.withResolvers at call time,
+      // so the statically-imported function exercises the polyfill branch
+      // once we null out the global above.
       const { promise, resolve } = promiseWithResolvers<number>()
       resolve(42)
       const result = await promise
@@ -242,8 +240,6 @@ describe('promiseWithResolvers polyfill branch', () => {
       // @ts-expect-error - Deliberately removing for polyfill test
       Promise.withResolvers = undefined
 
-      // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
-      const { promiseWithResolvers } = await import('../../src/utils.js')
       const { promise, reject } = promiseWithResolvers<string>()
       reject(new Error('test rejection'))
       await expect(promise).rejects.toThrow('test rejection')

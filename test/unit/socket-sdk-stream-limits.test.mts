@@ -5,12 +5,8 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-// oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
-const { SocketSdk } = await import('../../src/socket-sdk-class.js')
-
-const { setupLocalHttpServer } =
-  // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
-  await import('../utils/local-server-helpers.mts')
+import { SocketSdk } from '../../src/socket-sdk-class.js'
+import { setupLocalHttpServer } from '../utils/local-server-helpers.mts'
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
 

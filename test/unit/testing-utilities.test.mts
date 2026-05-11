@@ -3,7 +3,7 @@
  * Validates mock factories, response builders, and test helpers.
  */
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import {
   fixtures,
@@ -480,8 +480,6 @@ describe('Testing Utilities', () => {
 
   describe('Integration Examples', () => {
     it('should work with vi.fn() for mocking SDK methods', async () => {
-      // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
-      const { vi } = await import('vitest')
       const mockMethod = vi
         .fn()
         .mockResolvedValue(mockSuccessResponse(repositoryFixtures.basic, 200))
@@ -496,8 +494,6 @@ describe('Testing Utilities', () => {
     })
 
     it('should work with error scenarios', async () => {
-      // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
-      const { vi } = await import('vitest')
       const mockMethod = vi
         .fn()
         .mockResolvedValue(mockErrorResponse('Not found', 404))
@@ -512,8 +508,6 @@ describe('Testing Utilities', () => {
     })
 
     it('should work with rejected promises', async () => {
-      // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
-      const { vi } = await import('vitest')
       const mockMethod = vi
         .fn()
         .mockRejectedValue(mockSdkError('TIMEOUT', { message: 'Timed out' }))
