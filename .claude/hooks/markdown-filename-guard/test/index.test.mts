@@ -77,6 +77,41 @@ test('CLAUDE.md at root is allowed', async () => {
   assert.strictEqual(result.code, 0)
 })
 
+test('CLAUDE.md under socket-wheelhouse/template/ is allowed (template-as-root carve-out)', async () => {
+  const result = await runHook({
+    tool_input: {
+      content: '# CLAUDE.md',
+      file_path: '/Users/x/projects/socket-wheelhouse/template/CLAUDE.md',
+    },
+    tool_name: 'Edit',
+  })
+  assert.strictEqual(result.code, 0)
+})
+
+test('CLAUDE.md under template/docs/ is allowed (template-as-root + docs/)', async () => {
+  const result = await runHook({
+    tool_input: {
+      content: '# CLAUDE.md',
+      file_path: '/Users/x/projects/socket-wheelhouse/template/docs/CLAUDE.md',
+    },
+    tool_name: 'Edit',
+  })
+  assert.strictEqual(result.code, 0)
+})
+
+test('CLAUDE.md deeper under template/ (template/packages/foo/) is still blocked', async () => {
+  const result = await runHook({
+    tool_input: {
+      content: '# CLAUDE.md',
+      file_path:
+        '/Users/x/projects/socket-wheelhouse/template/packages/foo/CLAUDE.md',
+    },
+    tool_name: 'Edit',
+  })
+  assert.strictEqual(result.code, 2)
+  assert.match(result.stderr, /SCREAMING_CASE/)
+})
+
 test('CONTRIBUTING.md at root is allowed', async () => {
   const result = await runHook({
     tool_input: {

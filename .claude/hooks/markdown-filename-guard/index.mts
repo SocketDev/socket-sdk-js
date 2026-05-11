@@ -83,11 +83,27 @@ function readStdin(): Promise<string> {
  * Strip a leading repo-absolute prefix (anything up through and
  * including a `<repo-name>/` segment) so we get the in-repo relative
  * path. Falls back to the input if no recognizable prefix.
+ *
+ * Special case: socket-wheelhouse keeps the fleet-canonical doc tree
+ * under `template/`, which acts as the "repo root" from the fleet
+ * perspective. Strip that extra prefix so doc-location rules apply
+ * the same way as in a downstream repo (where the docs live at
+ * actual root). Without this carve-out, every SCREAMING_CASE doc
+ * in `template/` (CLAUDE.md, README.md at template root) would trip
+ * the SCREAMING_CASE-only-at-repo-root rule.
  */
 function toRepoRelative(filePath: string): string {
   // PreToolUse passes absolute paths. Strip up through `/projects/<repo>/`.
   const m = filePath.match(/\/projects\/[^/]+\/(.+)$/)
-  return m ? m[1]! : filePath
+  if (!m) {
+    return filePath
+  }
+  let rel = m[1]!
+  // socket-wheelhouse: treat template/ as the effective repo root.
+  if (rel.startsWith('template/')) {
+    rel = rel.slice('template/'.length)
+  }
+  return rel
 }
 
 function isScreamingCase(nameWithoutExt: string): boolean {
