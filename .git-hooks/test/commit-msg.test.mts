@@ -18,7 +18,7 @@ const HOOK = path.join(here, '..', 'commit-msg.mts')
 
 type Result = { code: number; stderr: string }
 
-async function runHook(commitMsg: string): Promise<{
+export async function runHook(commitMsg: string): Promise<{
   result: Result
   rewrittenMessage: string
 }> {
