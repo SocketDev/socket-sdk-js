@@ -291,7 +291,7 @@ export type LineHit = {
 //   skipDocs.rule — when set, calls looksLikeDocumentation() with the
 //     same regex + this rule name and skips lines that match.
 //   suggest — produces the per-line `suggested` rewrite shown to users.
-export function scanLines(
+function scanLines(
   text: string,
   pattern: RegExp,
   options: {

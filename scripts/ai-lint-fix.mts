@@ -1,3 +1,5 @@
+/* oxlint-disable socket/inclusive-language -- AI-fix orchestrator documents the rules it handles, including the legacy terms each rule scans for. */
+
 /**
  * @fileoverview AI-assisted lint fix step.
  *
@@ -142,7 +144,7 @@ async function runLintJson(
     'exec',
     'oxlint',
     '--format=json',
-    '--config=.oxlintrc.json',
+    '--config=.config/oxlintrc.json',
     ...passthrough.filter(a => a !== '--all'),
   ]
   if (!passthrough.includes('--all') && !passthrough.includes('--staged')) {
@@ -380,7 +382,7 @@ async function main(): Promise<void> {
   if (process.env['SKIP_AI_FIX'] === '1') {
     return
   }
-  if (!existsSync('.oxlintrc.json')) {
+  if (!existsSync('.config/oxlintrc.json')) {
     return
   }
 
