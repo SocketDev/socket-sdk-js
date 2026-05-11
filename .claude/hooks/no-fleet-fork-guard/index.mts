@@ -4,14 +4,14 @@
 // Blocks Edit/Write tool calls that target a fleet-canonical file
 // path inside a downstream fleet repo. The fleet rule
 // ("Never fork fleet-canonical files locally") says these files
-// MUST be edited in socket-repo-template/template/... and cascaded
+// MUST be edited in socket-wheelhouse/template/... and cascaded
 // out via sync-scaffolding — never branched locally in a downstream
 // repo. Local forks turn into "drift to preserve" hacks that block
 // fleet-wide improvements from reaching the forked repo.
 //
 // The hook detects a fleet-canonical edit by:
 //   1. Resolving the absolute file path of the Edit/Write target.
-//   2. Checking if the path is INSIDE socket-repo-template/template/
+//   2. Checking if the path is INSIDE socket-wheelhouse/template/
 //      → allow (this IS the canonical home).
 //   3. Otherwise, checking if the path matches a fleet-canonical
 //      surface prefix:
@@ -86,16 +86,16 @@ const BYPASS_PHRASE = 'Allow fleet-fork bypass'
 // the no-revert-guard hook's window.
 const BYPASS_LOOKBACK_USER_TURNS = 8
 
-// File-path tokens that identify the socket-repo-template canonical
+// File-path tokens that identify the socket-wheelhouse canonical
 // home. If the resolved absolute path contains one of these, we're
 // editing the source of truth — allow.
 //
-// `socket-repo-template/template/` covers the standard checkout shape
-// (e.g. /Users/<user>/projects/socket-repo-template/template/...).
+// `socket-wheelhouse/template/` covers the standard checkout shape
+// (e.g. /Users/<user>/projects/socket-wheelhouse/template/...).
 // `repo-template/template/` covers any rename / mirror / fork that
 // keeps the trailing component.
 const TEMPLATE_PATH_TOKENS = [
-  '/socket-repo-template/template/',
+  '/socket-wheelhouse/template/',
   '/repo-template/template/',
 ]
 
@@ -267,12 +267,12 @@ async function main(): Promise<number> {
       `Repo:  ${path.basename(repoRoot)}`,
       ``,
       `Fleet-canonical files (anything tracked by`,
-      `socket-repo-template/scripts/sync-scaffolding/manifest.mts) MUST`,
-      `be edited in socket-repo-template/template/${relToRepo} and`,
+      `socket-wheelhouse/scripts/sync-scaffolding/manifest.mts) MUST`,
+      `be edited in socket-wheelhouse/template/${relToRepo} and`,
       `cascaded out — never branched locally in a downstream fleet repo.`,
       ``,
       `Fix path:`,
-      `  1. Edit socket-repo-template/template/${relToRepo}`,
+      `  1. Edit socket-wheelhouse/template/${relToRepo}`,
       `  2. Commit + push template`,
       `  3. Cascade with: node scripts/sync-scaffolding/main.mts \\`,
       `       --target ${repoRoot} --fix`,

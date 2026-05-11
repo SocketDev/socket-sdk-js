@@ -275,15 +275,15 @@ test('bypass phrase variants do NOT count', async () => {
   }
 })
 
-test('paths under socket-repo-template/template/ always pass', async () => {
+test('paths under socket-wheelhouse/template/ always pass', async () => {
   // Even if Claude tries to spell out a path that would otherwise
-  // match a canonical prefix, anything under .../socket-repo-template/
+  // match a canonical prefix, anything under .../socket-wheelhouse/
   // template/ is allowed since that IS the canonical home.
   const repo = mkdtempSync(path.join(tmpdir(), 'fake-srt-'))
   try {
     const file = path.join(
       repo,
-      'socket-repo-template/template/.git-hooks/_helpers.mts',
+      'socket-wheelhouse/template/.git-hooks/_helpers.mts',
     )
     mkdirSync(path.dirname(file), { recursive: true })
     writeFileSync(file, '// canonical home\n')

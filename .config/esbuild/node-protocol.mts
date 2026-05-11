@@ -5,7 +5,7 @@
  * `require('node:fs')` and stops it from leaking into the bundle as a
  * bundled module reference.
  *
- * Source: lifted from socket-sdk-js. Fleet-canonical via socket-repo-template.
+ * Source: lifted from socket-sdk-js. Fleet-canonical via socket-wheelhouse.
  */
 
 import Module from 'node:module'

@@ -1,6 +1,6 @@
 # Never fork fleet-canonical files locally
 
-Fleet-canonical files (anything tracked by `socket-repo-template/scripts/sync-scaffolding/manifest.mts`) MUST be edited in `socket-repo-template/template/...` and cascaded out — never branched locally in a downstream fleet repo.
+Fleet-canonical files (anything tracked by `socket-wheelhouse/scripts/sync-scaffolding/manifest.mts`) MUST be edited in `socket-wheelhouse/template/...` and cascaded out — never branched locally in a downstream fleet repo.
 
 ## Canonical surfaces
 
@@ -15,13 +15,13 @@ These directories and files cascade fleet-wide. They are **not** repo-local:
 - `.husky/` — Husky entry shims
 - Anything else listed in the sync manifest
 
-If unsure, check `socket-repo-template/scripts/sync-scaffolding/manifest.mts`. Tracked = canonical.
+If unsure, check `socket-wheelhouse/scripts/sync-scaffolding/manifest.mts`. Tracked = canonical.
 
 ## How to apply
 
 If a downstream repo needs a behavior change in one of these files:
 
-1. Edit the file in `socket-repo-template/template/...`.
+1. Edit the file in `socket-wheelhouse/template/...`.
 2. Commit the template change.
 3. Run `node scripts/sync-scaffolding/main.mts --target <downstream-repo> --fix` to cascade.
 

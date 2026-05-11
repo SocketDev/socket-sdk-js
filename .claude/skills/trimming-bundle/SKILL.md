@@ -24,15 +24,15 @@ Iteratively stub heavyweight modules that the bundler statically pulls in but th
 
 ## Required: rolldown/lib-stub.mts
 
-🚨 This skill **REQUIRES** `.config/rolldown/lib-stub.mts` to be present and to export `createLibStubPlugin`. The file is fleet-canonical (cascades from `socket-repo-template/template/.config/rolldown/lib-stub.mts` via sync-scaffolding) and must NOT be edited locally per the no-fleet-fork rule.
+🚨 This skill **REQUIRES** `.config/rolldown/lib-stub.mts` to be present and to export `createLibStubPlugin`. The file is fleet-canonical (cascades from `socket-wheelhouse/template/.config/rolldown/lib-stub.mts` via sync-scaffolding) and must NOT be edited locally per the no-fleet-fork rule.
 
 Before doing anything else:
 
 ```bash
 [ -f .config/rolldown/lib-stub.mts ] || {
   echo "ERROR: .config/rolldown/lib-stub.mts is missing."
-  echo "Cascade it from socket-repo-template:"
-  echo "  cd /Users/<user>/projects/socket-repo-template &&" # socket-hook: allow cross-repo
+  echo "Cascade it from socket-wheelhouse:"
+  echo "  cd /Users/<user>/projects/socket-wheelhouse &&" # socket-hook: allow cross-repo
   echo "  node scripts/sync-scaffolding/main.mts --target <this-repo> --fix"
   exit 1
 }

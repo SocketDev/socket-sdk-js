@@ -9,7 +9,7 @@
  * replacement would corrupt JS in edge cases (paths inside template
  * literals, JSDoc, etc.).
  *
- * Source: lifted from socket-sdk-js. Fleet-canonical via socket-repo-template.
+ * Source: lifted from socket-sdk-js. Fleet-canonical via socket-wheelhouse.
  */
 
 import { promises as fs } from 'node:fs'

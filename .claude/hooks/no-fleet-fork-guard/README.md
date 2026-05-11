@@ -6,7 +6,7 @@ PreToolUse Edit/Write hook that blocks edits to fleet-canonical files inside dow
 
 The fleet rule "Never fork fleet-canonical files locally" (CLAUDE.md fleet block, full reference at [`docs/claude.md/no-local-fork-canonical.md`](../../../docs/claude.md/no-local-fork-canonical.md)).
 
-Fleet-canonical surfaces (anything tracked by `socket-repo-template/scripts/sync-scaffolding/manifest.mts`):
+Fleet-canonical surfaces (anything tracked by `socket-wheelhouse/scripts/sync-scaffolding/manifest.mts`):
 
 - `.config/oxlint-plugin/` — oxlint plugin index + rules
 - `.git-hooks/` — commit-msg / pre-commit / pre-push hooks + helpers
@@ -15,14 +15,14 @@ Fleet-canonical surfaces (anything tracked by `socket-repo-template/scripts/sync
 - `docs/claude.md/` — CLAUDE.md offshoot references
 - `.husky/` — Husky entry shims
 
-When Claude tries to Edit/Write a file under one of these prefixes in a fleet member (any repo with `CLAUDE.md` containing the `BEGIN FLEET-CANONICAL` marker, except `socket-repo-template/template/`), the hook exits 2 with a stderr message that:
+When Claude tries to Edit/Write a file under one of these prefixes in a fleet member (any repo with `CLAUDE.md` containing the `BEGIN FLEET-CANONICAL` marker, except `socket-wheelhouse/template/`), the hook exits 2 with a stderr message that:
 
 1. States the rule.
-2. Names the canonical file path inside `socket-repo-template/template/...`.
+2. Names the canonical file path inside `socket-wheelhouse/template/...`.
 3. Provides the exact `sync-scaffolding` command to cascade.
 4. Documents the bypass phrase.
 
-Edits inside `socket-repo-template/template/` are ALLOWED — that IS the canonical home.
+Edits inside `socket-wheelhouse/template/` are ALLOWED — that IS the canonical home.
 
 ## Bypass
 
@@ -41,7 +41,7 @@ The hook catches the failure mode where Claude reaches for a "quick fix" in a do
 For each Edit/Write/MultiEdit call:
 
 1. Resolve `tool_input.file_path` to an absolute path.
-2. Check if the path contains `/socket-repo-template/template/` — if yes, allow.
+2. Check if the path contains `/socket-wheelhouse/template/` — if yes, allow.
 3. Walk up directories looking for a fleet repo root: `package.json` AND `CLAUDE.md` containing the `BEGIN FLEET-CANONICAL` marker.
 4. If no fleet repo root is found (the file is outside any fleet repo), allow.
 5. Compute the file path relative to the repo root.
