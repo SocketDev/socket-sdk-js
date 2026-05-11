@@ -201,6 +201,12 @@ importers:
         specifier: 'catalog:'
         version: 24.9.2
 
+  .claude/hooks/excuse-detector:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.9.2
+
   .claude/hooks/gitmodules-comment-guard: {}
 
   .claude/hooks/logger-guard:
