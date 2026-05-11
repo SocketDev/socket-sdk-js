@@ -77,7 +77,7 @@ const TEXT_EXTENSIONS = new Set([
 /**
  * Check if file should be scanned.
  */
-function shouldScanFile(filename: string): boolean {
+export function shouldScanFile(filename: string): boolean {
   const ext = path.extname(filename).toLowerCase()
   return TEXT_EXTENSIONS.has(ext)
 }
@@ -85,7 +85,7 @@ function shouldScanFile(filename: string): boolean {
 /**
  * Recursively find all text files to scan.
  */
-async function findTextFiles(
+export async function findTextFiles(
   dir: string,
   files: string[] = [],
 ): Promise<string[]> {
@@ -124,7 +124,7 @@ interface CdnViolation {
 /**
  * Check file contents for CDN references.
  */
-async function checkFileForCdnRefs(filePath: string): Promise<CdnViolation[]> {
+export async function checkFileForCdnRefs(filePath: string): Promise<CdnViolation[]> {
   // Skip this validator script itself (it mentions CDN domains by necessity)
   if (filePath.endsWith('validate-no-cdn-refs.mts')) {
     return []
@@ -172,7 +172,7 @@ async function checkFileForCdnRefs(filePath: string): Promise<CdnViolation[]> {
 /**
  * Validate all files for CDN references.
  */
-async function validateNoCdnRefs(): Promise<CdnViolation[]> {
+export async function validateNoCdnRefs(): Promise<CdnViolation[]> {
   const files = await findTextFiles(rootPath)
   const allViolations = []
 

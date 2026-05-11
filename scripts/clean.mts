@@ -36,7 +36,7 @@ interface CleanOptions {
 /**
  * Clean specific directories.
  */
-async function cleanDirectories(
+export async function cleanDirectories(
   tasks: CleanTask[],
   options: CleanOptions = {},
 ): Promise<number> {

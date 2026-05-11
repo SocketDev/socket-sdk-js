@@ -17,69 +17,6 @@ import type {
 } from 'node:http'
 
 /**
- * Sets up a local HTTP server for testing.
- *
- * The server will be started on a random available port before all tests
- * and automatically cleaned up after all tests complete.
- *
- * @param handler - Request handler for the server
- * @returns Function that returns the server's base URL
- *
- * @example
- * ```typescript
- * const getBaseUrl = setupLocalHttpServer((req, res) => {
- *   if (req.url === '/test') {
- *     res.writeHead(200, { 'Content-Type': 'application/json' })
- *     res.end(JSON.stringify({ data: 'test' }))
- *   } else {
- *     res.writeHead(404)
- *     res.end()
- *   }
- * })
- *
- * it('should work', async () => {
- *   const client = new SocketSdk('token', { baseUrl: getBaseUrl() })
- *   // ... test logic
- * })
- * ```
- */
-export function setupLocalHttpServer(handler: RequestListener): () => string {
-  let server: Server
-  let baseUrl: string
-
-  beforeAll(async () => {
-    server = createServer(handler)
-
-    await new Promise<void>(resolve => {
-      server.listen(0, () => {
-        const address = server.address()
-        if (address && typeof address === 'object') {
-          const { port } = address
-          baseUrl = `http://127.0.0.1:${port}`
-          resolve()
-        }
-      })
-    })
-  })
-
-  afterAll(async () => {
-    if (server) {
-      await new Promise<void>((resolve, reject) => {
-        server.close(err => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve()
-          }
-        })
-      })
-    }
-  })
-
-  return () => baseUrl
-}
-
-/**
  * Creates a simple request handler that routes based on URL patterns.
  *
  * @param routes - Map of URL patterns to handlers
@@ -152,4 +89,67 @@ export function jsonResponse(
     res.writeHead(statusCode, { 'Content-Type': 'application/json' })
     res.end(JSON.stringify(body))
   }
+}
+
+/**
+ * Sets up a local HTTP server for testing.
+ *
+ * The server will be started on a random available port before all tests
+ * and automatically cleaned up after all tests complete.
+ *
+ * @param handler - Request handler for the server
+ * @returns Function that returns the server's base URL
+ *
+ * @example
+ * ```typescript
+ * const getBaseUrl = setupLocalHttpServer((req, res) => {
+ *   if (req.url === '/test') {
+ *     res.writeHead(200, { 'Content-Type': 'application/json' })
+ *     res.end(JSON.stringify({ data: 'test' }))
+ *   } else {
+ *     res.writeHead(404)
+ *     res.end()
+ *   }
+ * })
+ *
+ * it('should work', async () => {
+ *   const client = new SocketSdk('token', { baseUrl: getBaseUrl() })
+ *   // ... test logic
+ * })
+ * ```
+ */
+export function setupLocalHttpServer(handler: RequestListener): () => string {
+  let server: Server
+  let baseUrl: string
+
+  beforeAll(async () => {
+    server = createServer(handler)
+
+    await new Promise<void>(resolve => {
+      server.listen(0, () => {
+        const address = server.address()
+        if (address && typeof address === 'object') {
+          const { port } = address
+          baseUrl = `http://127.0.0.1:${port}`
+          resolve()
+        }
+      })
+    })
+  })
+
+  afterAll(async () => {
+    if (server) {
+      await new Promise<void>((resolve, reject) => {
+        server.close(err => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve()
+          }
+        })
+      })
+    }
+  })
+
+  return () => baseUrl
 }

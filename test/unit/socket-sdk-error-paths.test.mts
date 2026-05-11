@@ -43,7 +43,7 @@ const getBaseUrl = setupLocalHttpServer(
   },
 )
 
-function createClient(): SocketSdk {
+export function createClient(): SocketSdk {
   return new SocketSdk('test-token', {
     baseUrl: `${getBaseUrl()}/v0/`,
     retries: 0,
@@ -53,7 +53,7 @@ function createClient(): SocketSdk {
 // ---------------------------------------------------------------------------
 // Helper: assert an error result from methods that return { success: false }.
 // ---------------------------------------------------------------------------
-function expectErrorResult(result: {
+export function expectErrorResult(result: {
   status?: number
   success: boolean
 }): void {

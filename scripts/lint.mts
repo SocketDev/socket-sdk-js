@@ -42,7 +42,7 @@ const CONFIG_PATTERNS = [
 /**
  * Get oxlint exclude patterns from .oxlintrc.json.
  */
-function getOxlintExcludePatterns(): string[] {
+export function getOxlintExcludePatterns(): string[] {
   try {
     const oxlintConfigPath = path.join(process.cwd(), '.oxlintrc.json')
     if (!existsSync(oxlintConfigPath)) {
@@ -66,7 +66,7 @@ function getOxlintExcludePatterns(): string[] {
  * pattern are escaped first, then `**\/` and `*` are translated in a single
  * pass via a callback so later substitutions can't corrupt earlier ones.
  */
-function isExcludedByOxlint(file: string, excludePatterns: string[]): boolean {
+export function isExcludedByOxlint(file: string, excludePatterns: string[]): boolean {
   for (const pattern of excludePatterns) {
     // Escape regex metacharacters in the literal pattern (dots etc.), then
     // translate glob tokens in a single pass.
@@ -88,7 +88,7 @@ function isExcludedByOxlint(file: string, excludePatterns: string[]): boolean {
 /**
  * Check if we should run all linters based on changed files.
  */
-function shouldRunAllLinters(changedFiles: string[]): {
+export function shouldRunAllLinters(changedFiles: string[]): {
   runAll: boolean
   reason?: string
 } {
@@ -112,7 +112,7 @@ function shouldRunAllLinters(changedFiles: string[]): {
 /**
  * Filter files to only those that should be linted.
  */
-function filterLintableFiles(files: string[]): string[] {
+export function filterLintableFiles(files: string[]): string[] {
   // Only include extensions actually supported by oxfmt/oxlint
   const lintableExtensions = new Set([
     '.cjs',
@@ -149,7 +149,7 @@ interface LintOptions {
 /**
  * Run linters on specific files.
  */
-async function runLintOnFiles(
+export async function runLintOnFiles(
   files: string[],
   options: LintOptions = {},
 ): Promise<number> {
@@ -232,7 +232,7 @@ async function runLintOnFiles(
 /**
  * Run linters on all files.
  */
-async function runLintOnAll(options: LintOptions = {}): Promise<number> {
+export async function runLintOnAll(options: LintOptions = {}): Promise<number> {
   const { fix = false, quiet = false } = options
 
   if (!quiet) {
@@ -302,7 +302,7 @@ interface FilesToLintResult {
 /**
  * Get files to lint based on options.
  */
-async function getFilesToLint(
+export async function getFilesToLint(
   options: GetFilesToLintOptions,
 ): Promise<FilesToLintResult> {
   const { all, changed, staged } = options

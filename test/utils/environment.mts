@@ -11,38 +11,6 @@ import { SocketSdk } from '../../src/index'
 // This is set in vitest.config.mts when coverage is enabled
 export const isCoverageMode = process.env['COVERAGE'] === 'true'
 
-export function setupTestEnvironment() {
-  beforeEach(() => {
-    nock.restore()
-    nock.cleanAll()
-    nock.activate()
-    nock.disableNetConnect()
-
-    // In coverage mode (singleThread: true), be extra aggressive about cleanup
-    // to prevent nock mock state bleeding between tests
-    if (isCoverageMode) {
-      nock.abortPendingRequests()
-      // Clear any lingering interceptors
-      nock.cleanAll()
-    }
-  })
-
-  afterEach(() => {
-    // In coverage mode, be aggressive about cleanup to prevent state bleeding
-    if (isCoverageMode) {
-      nock.abortPendingRequests()
-    }
-
-    // Skip strict pending mock checks in coverage mode
-    // The singleThread execution can cause timing issues with nock.isDone()
-    if (!isCoverageMode && !nock.isDone()) {
-      throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
-    }
-    nock.cleanAll()
-    nock.restore()
-  })
-}
-
 /**
  * Create a test client with a standard token.
  *
@@ -63,6 +31,39 @@ export function createTestClient(
   options?: ConstructorParameters<typeof SocketSdk>[1] | undefined,
 ): SocketSdk {
   return new SocketSdk(token, { ...FAST_TEST_CONFIG, ...options })
+}
+
+/**
+ * Setup nock environment with standard beforeEach/afterEach hooks.
+ * Handles nock activation, cleanup, and pending mock detection.
+ */
+export function setupNockEnvironment() {
+  beforeEach(() => {
+    nock.restore()
+    nock.cleanAll()
+    nock.activate()
+    nock.disableNetConnect()
+
+    // In coverage mode, be extra aggressive about cleanup
+    if (isCoverageMode) {
+      nock.abortPendingRequests()
+      nock.cleanAll()
+    }
+  })
+
+  afterEach(() => {
+    // In coverage mode, be aggressive about cleanup
+    if (isCoverageMode) {
+      nock.abortPendingRequests()
+    }
+
+    // Skip strict pending mock checks in coverage mode
+    if (!isCoverageMode && !nock.isDone()) {
+      throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
+    }
+    nock.cleanAll()
+    nock.restore()
+  })
 }
 
 /**
@@ -100,31 +101,30 @@ export function setupTestClient(
   return () => client
 }
 
-/**
- * Setup nock environment with standard beforeEach/afterEach hooks.
- * Handles nock activation, cleanup, and pending mock detection.
- */
-export function setupNockEnvironment() {
+export function setupTestEnvironment() {
   beforeEach(() => {
     nock.restore()
     nock.cleanAll()
     nock.activate()
     nock.disableNetConnect()
 
-    // In coverage mode, be extra aggressive about cleanup
+    // In coverage mode (singleThread: true), be extra aggressive about cleanup
+    // to prevent nock mock state bleeding between tests
     if (isCoverageMode) {
       nock.abortPendingRequests()
+      // Clear any lingering interceptors
       nock.cleanAll()
     }
   })
 
   afterEach(() => {
-    // In coverage mode, be aggressive about cleanup
+    // In coverage mode, be aggressive about cleanup to prevent state bleeding
     if (isCoverageMode) {
       nock.abortPendingRequests()
     }
 
     // Skip strict pending mock checks in coverage mode
+    // The singleThread execution can cause timing issues with nock.isDone()
     if (!isCoverageMode && !nock.isDone()) {
       throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
     }

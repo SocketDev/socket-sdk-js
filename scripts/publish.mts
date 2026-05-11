@@ -38,13 +38,13 @@ const log = {
   warn: (msg: string) => logger.warn(msg),
 }
 
-function printHeader(title: string): void {
+export function printHeader(title: string): void {
   logger.log(`\n${'─'.repeat(60)}`)
   logger.log(`  ${title}`)
   logger.log(`${'─'.repeat(60)}`)
 }
 
-function printFooter(message?: string): void {
+export function printFooter(message?: string): void {
   logger.log(`\n${'─'.repeat(60)}`)
   if (message) {
     logger.substep(message)
@@ -57,7 +57,7 @@ interface PublishCommandResult {
   stderr: string
 }
 
-async function runCommand(
+export async function runCommand(
   command: string,
   args: string[] = [],
   options: Record<string, unknown> = {},
@@ -80,7 +80,7 @@ async function runCommand(
   })
 }
 
-async function runCommandWithOutput(
+export async function runCommandWithOutput(
   command: string,
   args: string[] = [],
   options: Record<string, unknown> = {},
@@ -129,7 +129,7 @@ interface PublishPackageJson {
 /**
  * Read package.json from the project.
  */
-async function readPackageJson(
+export async function readPackageJson(
   pkgPath = rootPath,
 ): Promise<PublishPackageJson> {
   const packageJsonPath = path.join(pkgPath, 'package.json')
@@ -147,7 +147,7 @@ async function readPackageJson(
 /**
  * Get the current version from package.json.
  */
-async function getCurrentVersion(pkgPath = rootPath): Promise<string> {
+export async function getCurrentVersion(pkgPath = rootPath): Promise<string> {
   const pkgJson = await readPackageJson(pkgPath)
   return pkgJson.version
 }
@@ -155,7 +155,7 @@ async function getCurrentVersion(pkgPath = rootPath): Promise<string> {
 /**
  * Check if a version exists on npm.
  */
-async function versionExists(
+export async function versionExists(
   packageName: string,
   version: string,
 ): Promise<boolean> {
@@ -171,7 +171,7 @@ async function versionExists(
 /**
  * Check if this is the registry package.
  */
-function isRegistryPackage(): boolean {
+export function isRegistryPackage(): boolean {
   // socket-registry has a registry subdirectory with hundreds of packages.
   return existsSync(path.join(rootPath, 'registry', 'package.json'))
 }
@@ -179,7 +179,7 @@ function isRegistryPackage(): boolean {
 /**
  * Validate that build artifacts exist based on package.json exports.
  */
-async function validateBuildArtifacts(): Promise<boolean> {
+export async function validateBuildArtifacts(): Promise<boolean> {
   log.step('Validating build artifacts')
 
   const pkgJson = await readPackageJson()
@@ -247,7 +247,7 @@ interface PublishOptions {
 /**
  * Publish a single package.
  */
-async function publishPackage(options: PublishOptions = {}): Promise<boolean> {
+export async function publishPackage(options: PublishOptions = {}): Promise<boolean> {
   const { access = 'public', dryRun = false, otp, tag = 'latest' } = options
 
   const pkgJson = await readPackageJson()
@@ -313,7 +313,7 @@ interface PushTagOptions {
  * Push existing git tag if it exists locally but not remotely.
  * Tags should be created with version bump commits, not by this script.
  */
-async function pushExistingTag(
+export async function pushExistingTag(
   version: string,
   options: PushTagOptions = {},
 ): Promise<boolean> {

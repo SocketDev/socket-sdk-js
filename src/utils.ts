@@ -25,7 +25,7 @@ import type { QueryParams } from './types'
  * @param s - String to normalize
  * @returns Set of normalized words
  */
-function normalizeToWordSet(s: string): Set<string> {
+export function normalizeToWordSet(s: string): Set<string> {
   const words = StringPrototypeToLowerCase(s).match(/\w+/g)
   return new SetCtor(words ?? [])
 }

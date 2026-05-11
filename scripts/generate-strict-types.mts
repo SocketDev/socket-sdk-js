@@ -221,7 +221,7 @@ interface StrictTypeConfig {
 /**
  * Extract properties from a type literal node.
  */
-function extractProperties(
+export function extractProperties(
   node: AstNode,
   source: string,
   config: StrictTypeConfig,
@@ -266,7 +266,7 @@ function extractProperties(
 /**
  * Extract query parameters from operation.
  */
-function extractQueryParams(
+export function extractQueryParams(
   operationsNode: AstNode,
   operationId: string,
   source: string,
@@ -339,7 +339,7 @@ function extractQueryParams(
 /**
  * Extract response type from operation.
  */
-function extractResponseType(
+export function extractResponseType(
   operationsNode: AstNode,
   operationId: string,
   responseCode: number | undefined,
@@ -405,7 +405,7 @@ function extractResponseType(
 /**
  * Find an export declaration by name in the AST.
  */
-function findExportByName(ast: AstNode, name: string): AstNode | undefined {
+export function findExportByName(ast: AstNode, name: string): AstNode | undefined {
   for (const node of (ast.body || []) as AstNode[]) {
     if (
       node.type === 'ExportNamedDeclaration' &&
@@ -428,7 +428,7 @@ function findExportByName(ast: AstNode, name: string): AstNode | undefined {
 /**
  * Find a property in a type literal or interface body.
  */
-function findProperty(
+export function findProperty(
   node: AstNode,
   propName: string | number,
 ): AstNode | undefined {
@@ -451,7 +451,7 @@ function findProperty(
 /**
  * Generate type definition string from properties.
  */
-function generateTypeDefinition(
+export function generateTypeDefinition(
   typeName: string,
   properties: TypeProperty[],
   description: string,
@@ -474,7 +474,7 @@ function generateTypeDefinition(
 /**
  * Generate wrapper result types.
  */
-function generateWrapperTypes(): string {
+export function generateWrapperTypes(): string {
   return `
 /**
  * Error result type for all SDK operations.
@@ -611,9 +611,97 @@ export type DeleteRepositoryLabelResult = {
 }
 
 /**
+ * Navigate to a nested type following a path.
+ */
+export function navigateToPath(node: AstNode, path: string[]): AstNode | undefined {
+  let current: AstNode | undefined = unwrapType(node)
+  for (const segment of path) {
+    if (!current) {
+      return undefined
+    }
+    current = unwrapType(current)
+    if (!current) {
+      return undefined
+    }
+
+    if (segment === 'Array' && current.type === 'TSArrayType') {
+      current = unwrapType(current.elementType)
+      continue
+    }
+    if (segment === 'items' && current.type === 'TSTypeLiteral') {
+      // Already at the array element type
+      continue
+    }
+    if (segment === 'Record' && current.type === 'TSTypeReference') {
+      // For Record<string, T>, get T
+      if (current.typeParameters?.params?.[1]) {
+        current = unwrapType(current.typeParameters.params[1])
+        continue
+      }
+    }
+    if (segment === 'Record' && current.type === 'TSTypeLiteral') {
+      // For { [key: string]: T }, get T via index signature
+      const indexSig = current.members?.find(m => m.type === 'TSIndexSignature')
+      if (indexSig?.typeAnnotation?.typeAnnotation) {
+        current = unwrapType(indexSig.typeAnnotation.typeAnnotation)
+        continue
+      }
+    }
+    if (segment === 'value') {
+      // Already navigated via Record
+      continue
+    }
+
+    // Navigate to property
+    const prop = findProperty(current, segment)
+    if (prop?.typeAnnotation?.typeAnnotation) {
+      current = unwrapType(prop.typeAnnotation.typeAnnotation)
+    } else {
+      return undefined
+    }
+  }
+  return current
+}
+
+/**
+ * Parse TypeScript source into AST.
+ */
+export function parseTypeScript(source: string): AstNode {
+  return TSParser.parse(source, {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    locations: true,
+  }) as unknown as AstNode
+}
+
+/**
+ * Convert AST type node to TypeScript string.
+ */
+export function typeNodeToString(node: AstNode | undefined, source: string): string {
+  if (!node) {
+    return 'unknown'
+  }
+  return source.slice(node.start!, node.end!)
+}
+
+/**
+ * Unwrap parenthesized types to get the inner type.
+ */
+export function unwrapType(node: AstNode | undefined): AstNode | undefined {
+  if (!node) {
+    return undefined
+  }
+  // Unwrap parenthesized types: (T) -> T
+  if (node.type === 'TSParenthesizedType') {
+    return unwrapType(node.typeAnnotation)
+  }
+  return node
+}
+
+/**
  * Update index.ts to export all generated types.
  */
-async function updateIndexExports(): Promise<void> {
+export async function updateIndexExports(): Promise<void> {
   const indexPath = path.resolve(rootPath, 'src/index.ts')
   const indexContent = await fs.readFile(indexPath, 'utf8')
 
@@ -805,94 +893,6 @@ ${generateWrapperTypes()}
     logger.error(error.stack)
     process.exitCode = 1
   }
-}
-
-/**
- * Navigate to a nested type following a path.
- */
-function navigateToPath(node: AstNode, path: string[]): AstNode | undefined {
-  let current: AstNode | undefined = unwrapType(node)
-  for (const segment of path) {
-    if (!current) {
-      return undefined
-    }
-    current = unwrapType(current)
-    if (!current) {
-      return undefined
-    }
-
-    if (segment === 'Array' && current.type === 'TSArrayType') {
-      current = unwrapType(current.elementType)
-      continue
-    }
-    if (segment === 'items' && current.type === 'TSTypeLiteral') {
-      // Already at the array element type
-      continue
-    }
-    if (segment === 'Record' && current.type === 'TSTypeReference') {
-      // For Record<string, T>, get T
-      if (current.typeParameters?.params?.[1]) {
-        current = unwrapType(current.typeParameters.params[1])
-        continue
-      }
-    }
-    if (segment === 'Record' && current.type === 'TSTypeLiteral') {
-      // For { [key: string]: T }, get T via index signature
-      const indexSig = current.members?.find(m => m.type === 'TSIndexSignature')
-      if (indexSig?.typeAnnotation?.typeAnnotation) {
-        current = unwrapType(indexSig.typeAnnotation.typeAnnotation)
-        continue
-      }
-    }
-    if (segment === 'value') {
-      // Already navigated via Record
-      continue
-    }
-
-    // Navigate to property
-    const prop = findProperty(current, segment)
-    if (prop?.typeAnnotation?.typeAnnotation) {
-      current = unwrapType(prop.typeAnnotation.typeAnnotation)
-    } else {
-      return undefined
-    }
-  }
-  return current
-}
-
-/**
- * Parse TypeScript source into AST.
- */
-function parseTypeScript(source: string): AstNode {
-  return TSParser.parse(source, {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    locations: true,
-  }) as unknown as AstNode
-}
-
-/**
- * Convert AST type node to TypeScript string.
- */
-function typeNodeToString(node: AstNode | undefined, source: string): string {
-  if (!node) {
-    return 'unknown'
-  }
-  return source.slice(node.start!, node.end!)
-}
-
-/**
- * Unwrap parenthesized types to get the inner type.
- */
-function unwrapType(node: AstNode | undefined): AstNode | undefined {
-  if (!node) {
-    return undefined
-  }
-  // Unwrap parenthesized types: (T) -> T
-  if (node.type === 'TSParenthesizedType') {
-    return unwrapType(node.typeAnnotation)
-  }
-  return node
 }
 
 main().catch((e: unknown) => {

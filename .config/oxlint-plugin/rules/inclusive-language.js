@@ -56,7 +56,7 @@ const REPORT_ONLY_TERMS = ['master', 'slave']
 const BYPASS_RE = /inclusive-language:\s*external-api/
 
 /** Build a regex matching any legacy stem with word boundaries. */
-function buildDetectorRegex() {
+export function buildDetectorRegex() {
   const stems = [
     ...SUBSTITUTIONS.map(([legacy]) => legacy),
     ...REPORT_ONLY_TERMS,
@@ -72,7 +72,7 @@ const DETECTOR_RE = buildDetectorRegex()
  * the new stem. Returns undefined when there's no autofix-able
  * substitution (master/slave).
  */
-function rewriteHit(match) {
+export function rewriteHit(match) {
   const lower = match.toLowerCase()
   for (const [legacy, replacement] of SUBSTITUTIONS) {
     if (!lower.startsWith(legacy)) {
@@ -93,7 +93,7 @@ function rewriteHit(match) {
   return undefined
 }
 
-function findHits(text) {
+export function findHits(text) {
   const hits = []
   DETECTOR_RE.lastIndex = 0
   let m

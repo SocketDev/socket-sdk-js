@@ -31,15 +31,7 @@ const SOCKET_HOOK_MARKER_RE =
 
 const SIMPLE_ALT_ELEMENT_RE = /^[\w\-:./]+$/
 
-function isLineMarkered(line) {
-  const m = line.match(SOCKET_HOOK_MARKER_RE)
-  if (!m) {
-    return false
-  }
-  return !m[1] || m[1] === 'regex-alternation-order'
-}
-
-/**
+export /**
  * Find every alternation group in a regex pattern. Returns
  * `{ start, end, prefix, alternatives, suffix }` for each group.
  * Walks the pattern character by character to handle nested groups +
@@ -133,19 +125,27 @@ function findAlternationGroups(pattern) {
   return groups
 }
 
+export function isLineMarkered(line) {
+  const m = line.match(SOCKET_HOOK_MARKER_RE)
+  if (!m) {
+    return false
+  }
+  return !m[1] || m[1] === 'regex-alternation-order'
+}
+
 /**
  * Sort an alternation in alphanumeric order. Returns null if any
  * element isn't a simple literal (caller should report-only).
  */
-function sortAlternativesIfSimple(pattern, group) {
+export function sortAlternativesIfSimple(pattern, group) {
   const alts = group.altsRanges.map(r => pattern.slice(r.start, r.end))
   const allSimple = alts.every(a => SIMPLE_ALT_ELEMENT_RE.test(a))
   if (!allSimple) {
-    return null
+    return undefined
   }
   const sorted = [...alts].sort()
   if (alts.every((a, i) => a === sorted[i])) {
-    return null
+    return undefined
   }
   return { actual: alts, sorted }
 }

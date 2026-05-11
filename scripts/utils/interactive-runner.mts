@@ -17,6 +17,51 @@ interface RunWithOutputOptions {
 }
 
 /**
+ * Standard build runner with interactive output.
+ */
+export async function runBuild(
+  command: string,
+  args: string[],
+  options: RunWithOutputOptions = {},
+): Promise<number> {
+  return runWithOutput(command, args, {
+    message: 'Building',
+    toggleText: 'to see build output',
+    ...options,
+  })
+}
+
+/**
+ * Standard lint runner with interactive output.
+ */
+export async function runLint(
+  command: string,
+  args: string[],
+  options: RunWithOutputOptions = {},
+): Promise<number> {
+  return runWithOutput(command, args, {
+    message: 'Running linter',
+    toggleText: 'to see lint results',
+    ...options,
+  })
+}
+
+/**
+ * Standard test runner with interactive output.
+ */
+export async function runTests(
+  command: string,
+  args: string[],
+  options: RunWithOutputOptions = {},
+): Promise<number> {
+  return runWithOutput(command, args, {
+    message: 'Running tests',
+    toggleText: 'to see test output',
+    ...options,
+  })
+}
+
+/**
  * Run a command with interactive output control.
  * Standard experience across all socket-* repos.
  */
@@ -39,50 +84,5 @@ export async function runWithOutput(
     message,
     showOutput: verbose,
     toggleText,
-  })
-}
-
-/**
- * Standard test runner with interactive output.
- */
-export async function runTests(
-  command: string,
-  args: string[],
-  options: RunWithOutputOptions = {},
-): Promise<number> {
-  return runWithOutput(command, args, {
-    message: 'Running tests',
-    toggleText: 'to see test output',
-    ...options,
-  })
-}
-
-/**
- * Standard lint runner with interactive output.
- */
-export async function runLint(
-  command: string,
-  args: string[],
-  options: RunWithOutputOptions = {},
-): Promise<number> {
-  return runWithOutput(command, args, {
-    message: 'Running linter',
-    toggleText: 'to see lint results',
-    ...options,
-  })
-}
-
-/**
- * Standard build runner with interactive output.
- */
-export async function runBuild(
-  command: string,
-  args: string[],
-  options: RunWithOutputOptions = {},
-): Promise<number> {
-  return runWithOutput(command, args, {
-    message: 'Building',
-    toggleText: 'to see build output',
-    ...options,
   })
 }

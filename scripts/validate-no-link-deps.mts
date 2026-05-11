@@ -19,7 +19,7 @@ const rootPath = path.join(__dirname, '..')
 /**
  * Find all package.json files in the repository.
  */
-async function findPackageJsonFiles(dir: string): Promise<string[]> {
+export async function findPackageJsonFiles(dir: string): Promise<string[]> {
   const files: string[] = []
   const entries = await fs.readdir(dir, { withFileTypes: true })
 
@@ -56,7 +56,7 @@ interface LinkViolation {
 /**
  * Check if a package.json contains link: dependencies.
  */
-async function checkPackageJson(filePath: string): Promise<LinkViolation[]> {
+export async function checkPackageJson(filePath: string): Promise<LinkViolation[]> {
   const content = await fs.readFile(filePath, 'utf8')
   let pkg: Record<string, Record<string, string> | undefined>
   try {

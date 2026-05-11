@@ -18,6 +18,7 @@ import semver from 'semver'
 import { parseArgs } from '@socketsecurity/lib/argv/parse'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { spawn } from '@socketsecurity/lib/spawn'
+import { safeDelete } from '@socketsecurity/lib/fs'
 
 const logger = getDefaultLogger()
 
@@ -96,13 +97,13 @@ const log = {
   warn: (msg: string) => logger.warn(msg),
 }
 
-function printHeader(title: string): void {
+export function printHeader(title: string): void {
   logger.log(`\n${'─'.repeat(60)}`)
   logger.log(`  ${title}`)
   logger.log(`${'─'.repeat(60)}`)
 }
 
-function printFooter(message?: string): void {
+export function printFooter(message?: string): void {
   logger.log(`\n${'─'.repeat(60)}`)
   if (message) {
     logger.substep(message)
@@ -112,7 +113,7 @@ function printFooter(message?: string): void {
 /**
  * Create readline interface for user input.
  */
-function createReadline(): readline.Interface {
+export function createReadline(): readline.Interface {
   return readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -122,7 +123,7 @@ function createReadline(): readline.Interface {
 /**
  * Prompt user for input.
  */
-async function prompt(question: string, defaultValue = ''): Promise<string> {
+export async function prompt(question: string, defaultValue = ''): Promise<string> {
   const rl = createReadline()
   return new Promise<string>(resolve => {
     const displayDefault = defaultValue ? ` (${defaultValue})` : ''
@@ -136,7 +137,7 @@ async function prompt(question: string, defaultValue = ''): Promise<string> {
 /**
  * Prompt user for yes/no confirmation.
  */
-async function confirm(question: string, defaultYes = true): Promise<boolean> {
+export async function confirm(question: string, defaultYes = true): Promise<boolean> {
   const defaultHint = defaultYes ? 'Y/n' : 'y/N'
   const answer = await prompt(
     `${question} [${defaultHint}]`,
@@ -151,7 +152,7 @@ interface CommandResult {
   stderr: string
 }
 
-async function runCommand(
+export async function runCommand(
   command: string,
   args: string[] = [],
   options: Record<string, unknown> = {},
@@ -174,7 +175,7 @@ async function runCommand(
   })
 }
 
-async function runCommandWithOutput(
+export async function runCommandWithOutput(
   command: string,
   args: string[] = [],
   options: Record<string, unknown> = {},
@@ -216,7 +217,7 @@ async function runCommandWithOutput(
  * Uses @socketsecurity/lib/spawn so the input is actually delivered (async
  * `child_process.spawn` ignores the `input` option — only `spawnSync` does).
  */
-async function runCommandWithInput(
+export async function runCommandWithInput(
   command: string,
   args: string[] = [],
   input: string,
@@ -263,7 +264,7 @@ async function runCommandWithInput(
 /**
  * Check if claude-console is available.
  */
-async function checkClaude(): Promise<string | false> {
+export async function checkClaude(): Promise<string | false> {
   const checkCommand = WIN32 ? 'where' : 'which'
   const result = await runCommandWithOutput(checkCommand, ['claude-console'])
 
@@ -287,7 +288,7 @@ interface BumpPackageJson {
 /**
  * Read package.json from the project.
  */
-async function readPackageJson(pkgPath = rootPath): Promise<BumpPackageJson> {
+export async function readPackageJson(pkgPath = rootPath): Promise<BumpPackageJson> {
   const packageJsonPath = path.join(pkgPath, 'package.json')
   const content = await fs.readFile(packageJsonPath, 'utf8')
   try {
@@ -303,7 +304,7 @@ async function readPackageJson(pkgPath = rootPath): Promise<BumpPackageJson> {
 /**
  * Write package.json to the project.
  */
-async function writePackageJson(
+export async function writePackageJson(
   pkgJson: BumpPackageJson,
   pkgPath = rootPath,
 ): Promise<void> {
@@ -314,7 +315,7 @@ async function writePackageJson(
 /**
  * Get the current version from package.json.
  */
-async function getCurrentVersion(pkgPath = rootPath): Promise<string> {
+export async function getCurrentVersion(pkgPath = rootPath): Promise<string> {
   const pkgJson = await readPackageJson(pkgPath)
   return pkgJson.version
 }
@@ -322,7 +323,7 @@ async function getCurrentVersion(pkgPath = rootPath): Promise<string> {
 /**
  * Determine the new version based on bump type.
  */
-function getNewVersion(
+export function getNewVersion(
   currentVersion: string,
   bumpType: string,
 ): string | null {
@@ -353,7 +354,7 @@ function getNewVersion(
 /**
  * Check if the working directory is clean.
  */
-async function checkGitStatus(): Promise<boolean> {
+export async function checkGitStatus(): Promise<boolean> {
   const result = await runCommandWithOutput('git', ['status', '--porcelain'])
   if (result.stdout.trim()) {
     log.error('Working directory is not clean')
@@ -367,7 +368,7 @@ async function checkGitStatus(): Promise<boolean> {
 /**
  * Check if we're on the main/master branch.
  */
-async function checkGitBranch(): Promise<boolean> {
+export async function checkGitBranch(): Promise<boolean> {
   const result = await runCommandWithOutput('git', [
     'rev-parse',
     '--abbrev-ref',
@@ -384,7 +385,7 @@ async function checkGitBranch(): Promise<boolean> {
 /**
  * Get the last few commits for context.
  */
-async function getRecentCommits(count = 20): Promise<string> {
+export async function getRecentCommits(count = 20): Promise<string> {
   const result = await runCommandWithOutput('git', [
     'log',
     '--oneline',
@@ -397,14 +398,14 @@ async function getRecentCommits(count = 20): Promise<string> {
 /**
  * Check if this is the registry package.
  */
-function isRegistryPackage(): boolean {
+export function isRegistryPackage(): boolean {
   return existsSync(path.join(rootPath, 'registry', 'package.json'))
 }
 
 /**
  * Get package name for commit message.
  */
-async function getPackageName(): Promise<string> {
+export async function getPackageName(): Promise<string> {
   if (isRegistryPackage()) {
     return 'registry package'
   }
@@ -415,7 +416,7 @@ async function getPackageName(): Promise<string> {
 /**
  * Generate changelog using Claude.
  */
-async function generateChangelog(
+export async function generateChangelog(
   claudeCmd: string,
   currentVersion: string,
   newVersion: string,
@@ -466,7 +467,7 @@ Be concise but informative. Group related changes together.`
 
   // Clean up temp file.
   try {
-    await fs.unlink(promptPath)
+    await safeDelete(promptPath)
   } catch {}
 
   if (claudeResult.exitCode !== 0) {
@@ -481,7 +482,7 @@ Be concise but informative. Group related changes together.`
 /**
  * Update CHANGELOG.md with new entry.
  */
-async function updateChangelog(changelogEntry: string): Promise<void> {
+export async function updateChangelog(changelogEntry: string): Promise<void> {
   const changelogPath = path.join(rootPath, 'CHANGELOG.md')
 
   let existingContent = ''
@@ -521,7 +522,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
  * Review and refine changelog with user feedback.
  * Uses interactive prompts if available, falls back to basic readline prompts.
  */
-async function reviewChangelog(
+export async function reviewChangelog(
   claudeCmd: string,
   changelogEntry: string,
   interactive = false,
@@ -601,7 +602,7 @@ Provide the refined changelog entry in the same format.`
  * Interactive review using advanced prompts.
  * Provides a better user experience with select menus and structured feedback.
  */
-async function interactiveReviewChangelog(
+export async function interactiveReviewChangelog(
   claudeCmd: string,
   changelogEntry: string,
 ): Promise<string> {

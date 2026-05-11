@@ -135,7 +135,7 @@ const rule = {
           if (next === value) {
             // Defensive — if our replace-all became a no-op, don't
             // ship an empty fix.
-            return null
+            return undefined
           }
           // Preserve the original quote style.
           const raw = sourceCode.getText(node)

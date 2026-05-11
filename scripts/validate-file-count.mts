@@ -34,7 +34,7 @@ interface FileCountViolation {
 /**
  * Check if too many files are staged for commit.
  */
-async function validateStagedFileCount(): Promise<
+export async function validateStagedFileCount(): Promise<
   FileCountViolation | undefined
 > {
   try {

@@ -25,7 +25,7 @@ interface MinifyViolation {
 /**
  * Validate esbuild configuration has minify: false.
  */
-async function validateEsbuildMinify(): Promise<MinifyViolation[]> {
+export async function validateEsbuildMinify(): Promise<MinifyViolation[]> {
   const configPath = path.join(rootPath, '.config/esbuild.config.mts')
 
   try {

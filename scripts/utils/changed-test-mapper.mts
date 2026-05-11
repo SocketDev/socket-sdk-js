@@ -43,51 +43,6 @@ interface TestRunOptions {
 }
 
 /**
- * Map source files to their corresponding test files.
- */
-function mapSourceToTests(filepath: string): string[] {
-  const normalized = normalizePath(filepath)
-
-  // Skip non-code files
-  const ext = path.extname(normalized)
-  const codeExtensions = ['.js', '.mjs', '.cjs', '.ts', '.cts', '.mts', '.json']
-  if (!codeExtensions.includes(ext)) {
-    return []
-  }
-
-  // Core utilities affect all tests
-  if (CORE_FILES.some(f => normalized.includes(f))) {
-    return ['all']
-  }
-
-  // Map specific files to their test files
-  const basename = path.basename(normalized, path.extname(normalized))
-  const testFile = `test/${basename}.test.mts`
-
-  // Check if corresponding test exists
-  if (existsSync(path.join(rootPath, testFile))) {
-    return [testFile]
-  }
-
-  // Special mappings
-  if (normalized.includes('src/package-url.ts')) {
-    return ['test/package-url.test.mts', 'test/integration.test.mts']
-  }
-  if (normalized.includes('src/package-url-builder.ts')) {
-    return ['test/package-url-builder.test.mts', 'test/integration.test.mts']
-  }
-  if (normalized.includes('src/url-converter.ts')) {
-    return ['test/url-converter.test.mts']
-  }
-  if (normalized.includes('src/result.ts')) {
-    return ['test/result.test.mts']
-  }
-
-  // If no specific mapping, run all tests to be safe
-  return ['all']
-}
-
-/**
  * Get affected test files to run based on changed files.
  */
 export function getTestsToRun(options: TestRunOptions = {}): TestRunResult {
@@ -179,4 +134,49 @@ export function getTestsToRun(options: TestRunOptions = {}): TestRunResult {
   }
 
   return { tests: Array.from(testFiles), mode }
+}
+
+/**
+ * Map source files to their corresponding test files.
+ */
+export function mapSourceToTests(filepath: string): string[] {
+  const normalized = normalizePath(filepath)
+
+  // Skip non-code files
+  const ext = path.extname(normalized)
+  const codeExtensions = ['.js', '.mjs', '.cjs', '.ts', '.cts', '.mts', '.json']
+  if (!codeExtensions.includes(ext)) {
+    return []
+  }
+
+  // Core utilities affect all tests
+  if (CORE_FILES.some(f => normalized.includes(f))) {
+    return ['all']
+  }
+
+  // Map specific files to their test files
+  const basename = path.basename(normalized, path.extname(normalized))
+  const testFile = `test/${basename}.test.mts`
+
+  // Check if corresponding test exists
+  if (existsSync(path.join(rootPath, testFile))) {
+    return [testFile]
+  }
+
+  // Special mappings
+  if (normalized.includes('src/package-url.ts')) {
+    return ['test/package-url.test.mts', 'test/integration.test.mts']
+  }
+  if (normalized.includes('src/package-url-builder.ts')) {
+    return ['test/package-url-builder.test.mts', 'test/integration.test.mts']
+  }
+  if (normalized.includes('src/url-converter.ts')) {
+    return ['test/url-converter.test.mts']
+  }
+  if (normalized.includes('src/result.ts')) {
+    return ['test/result.test.mts']
+  }
+
+  // If no specific mapping, run all tests to be safe
+  return ['all']
 }

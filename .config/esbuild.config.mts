@@ -51,7 +51,7 @@ const externalDependencies = Object.keys(packageJson.dependencies || {})
  *     (file uploads) and 'application/json' (API calls). Replaced with a
  *     minimal lookup covering just those types.
  */
-function createLibStubPlugin() {
+export function createLibStubPlugin() {
   // Heavy lib modules that are eagerly required but never exercised
   // by the SDK's actual code paths.
   //

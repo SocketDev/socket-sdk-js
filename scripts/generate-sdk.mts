@@ -38,54 +38,7 @@ const typesPath = path.resolve(rootPath, 'types/api.d.ts')
 // Initialize logger
 const logger = getDefaultLogger()
 
-async function fetchOpenApi(): Promise<void> {
-  try {
-    const data = await httpJson(OPENAPI_URL)
-    await fs.writeFile(openApiPath, JSON.stringify(data, null, 2), 'utf8')
-    logger.log(`Downloaded from ${OPENAPI_URL}`)
-  } catch (e) {
-    const error = e instanceof Error ? e : new Error(String(e))
-    logger.error(`Failed to fetch OpenAPI definition from ${OPENAPI_URL}`)
-    logger.error(`Network error: ${error.message}`)
-    logger.info(
-      'Ensure the API endpoint is accessible and try again. If the issue persists, check your network connection.',
-    )
-    throw e
-  }
-}
-
-async function generateStrictTypes(): Promise<void> {
-  await spawn('node', ['scripts/generate-strict-types.mts'], {
-    cwd: rootPath,
-    stdio: 'inherit',
-  })
-  const exitCode = await runCommand('pnpm', [
-    'exec',
-    'oxfmt',
-    'src/types-strict.ts',
-  ])
-  if (exitCode !== 0) {
-    throw new Error(`Formatting strict types failed with exit code ${exitCode}`)
-  }
-}
-
-async function generateTypes(): Promise<void> {
-  await spawn('node', ['scripts/generate-types.mts'], {
-    cwd: rootPath,
-    stdio: 'inherit',
-  })
-  // Fix array syntax after writing to disk
-  await fixArraySyntax(typesPath)
-  // Add SDK v3 method name aliases
-  await addSdkMethodAliases(typesPath)
-  // Format generated types
-  const exitCode = await runCommand('pnpm', ['exec', 'oxfmt', 'types/api.d.ts'])
-  if (exitCode !== 0) {
-    throw new Error(`Formatting types failed with exit code ${exitCode}`)
-  }
-}
-
-/**
+export /**
  * Adds SDK v3 method name aliases to the operations interface.
  * These aliases map the new SDK method names to their underlying OpenAPI operation names.
  */
@@ -124,12 +77,28 @@ async function addSdkMethodAliases(filePath: string): Promise<void> {
   logger.log('Added SDK v3 method name aliases')
 }
 
+export async function fetchOpenApi(): Promise<void> {
+  try {
+    const data = await httpJson(OPENAPI_URL)
+    await fs.writeFile(openApiPath, JSON.stringify(data, null, 2), 'utf8')
+    logger.log(`Downloaded from ${OPENAPI_URL}`)
+  } catch (e) {
+    const error = e instanceof Error ? e : new Error(String(e))
+    logger.error(`Failed to fetch OpenAPI definition from ${OPENAPI_URL}`)
+    logger.error(`Network error: ${error.message}`)
+    logger.info(
+      'Ensure the API endpoint is accessible and try again. If the issue persists, check your network connection.',
+    )
+    throw e
+  }
+}
+
 /**
  * Fixes array syntax to comply with ESLint array-simple rules.
  * Simple types (string, number, boolean) use T[] syntax.
  * Complex types use Array<T> syntax.
  */
-async function fixArraySyntax(filePath: string): Promise<void> {
+export async function fixArraySyntax(filePath: string): Promise<void> {
   const content = await fs.readFile(filePath, 'utf8')
   const magicString = new MagicString(content)
 
@@ -224,6 +193,37 @@ async function fixArraySyntax(filePath: string): Promise<void> {
     )
 
     await fs.writeFile(filePath, transformed, 'utf8')
+  }
+}
+
+export async function generateStrictTypes(): Promise<void> {
+  await spawn('node', ['scripts/generate-strict-types.mts'], {
+    cwd: rootPath,
+    stdio: 'inherit',
+  })
+  const exitCode = await runCommand('pnpm', [
+    'exec',
+    'oxfmt',
+    'src/types-strict.ts',
+  ])
+  if (exitCode !== 0) {
+    throw new Error(`Formatting strict types failed with exit code ${exitCode}`)
+  }
+}
+
+export async function generateTypes(): Promise<void> {
+  await spawn('node', ['scripts/generate-types.mts'], {
+    cwd: rootPath,
+    stdio: 'inherit',
+  })
+  // Fix array syntax after writing to disk
+  await fixArraySyntax(typesPath)
+  // Add SDK v3 method name aliases
+  await addSdkMethodAliases(typesPath)
+  // Format generated types
+  const exitCode = await runCommand('pnpm', ['exec', 'oxfmt', 'types/api.d.ts'])
+  if (exitCode !== 0) {
+    throw new Error(`Formatting types failed with exit code ${exitCode}`)
   }
 }
 

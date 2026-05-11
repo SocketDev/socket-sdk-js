@@ -49,7 +49,7 @@ interface BuildSourceResult {
  * Build source code with esbuild.
  * Returns { exitCode, buildTime, result } for external logging.
  */
-async function buildSource(
+export async function buildSource(
   options: BuildOptions = {},
 ): Promise<BuildSourceResult> {
   const { quiet = false, skipClean = false, verbose = false } = options
@@ -93,7 +93,7 @@ async function buildSource(
  * Build TypeScript declarations.
  * Returns exitCode for external logging.
  */
-async function buildTypes(options: BuildOptions = {}): Promise<number> {
+export async function buildTypes(options: BuildOptions = {}): Promise<number> {
   const {
     quiet = false,
     skipClean = false,
@@ -133,9 +133,19 @@ async function buildTypes(options: BuildOptions = {}): Promise<number> {
 }
 
 /**
+ * Check if build is needed.
+ */
+export function isBuildNeeded(): boolean {
+  const distPath = path.join(rootPath, 'dist', 'index.js')
+  const distTypesPath = path.join(rootPath, 'dist', 'types', 'index.d.ts')
+
+  return !existsSync(distPath) || !existsSync(distTypesPath)
+}
+
+/**
  * Watch mode for development with incremental builds (68% faster rebuilds).
  */
-async function watchBuild(options: BuildOptions = {}): Promise<number> {
+export async function watchBuild(options: BuildOptions = {}): Promise<number> {
   const { quiet = false, verbose = false } = options
 
   if (!quiet) {
@@ -197,16 +207,6 @@ async function watchBuild(options: BuildOptions = {}): Promise<number> {
     return 1
   }
   return 0
-}
-
-/**
- * Check if build is needed.
- */
-function isBuildNeeded(): boolean {
-  const distPath = path.join(rootPath, 'dist', 'index.js')
-  const distTypesPath = path.join(rootPath, 'dist', 'types', 'index.d.ts')
-
-  return !existsSync(distPath) || !existsSync(distTypesPath)
 }
 
 async function main(): Promise<void> {

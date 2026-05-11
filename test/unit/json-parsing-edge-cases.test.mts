@@ -10,7 +10,7 @@ const { getResponseJson } = await import('../../src/http-client.js')
 const { jsonParse } = await import('@socketsecurity/lib/json/parse')
 const mockJsonParse = vi.mocked(jsonParse)
 
-function mockHttpResponse(bodyText: string, ok = true): HttpResponse {
+export function mockHttpResponse(bodyText: string, ok = true): HttpResponse {
   const body = Buffer.from(bodyText)
   return {
     arrayBuffer: () =>

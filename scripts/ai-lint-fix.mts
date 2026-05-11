@@ -203,7 +203,8 @@ function bucketFindings(files: OxlintFile[]): Map<string, OxlintMessage[]> {
  * inside a `<rules>` block. Claude sees only the rules that fired in
  * the current file, so noise stays low.
  */
-const RULE_GUIDANCE: Readonly<Record<string, string>> = {
+const RULE_GUIDANCE = {
+  // oxlint-disable-next-line socket/prefer-undefined-over-null -- null-prototype object literal.
   __proto__: null,
   'socket/inclusive-language':
     'Replace `master`/`slave` with the contextually correct term: `main` (branch), `primary`/`controller` (process), `replica`/`worker`/`secondary`/`follower` (subordinate). Read the surrounding code to pick the right one. Do not autofix when an external API field name forces the legacy term — leave a `// inclusive-language: external-api` comment instead.',
@@ -223,9 +224,9 @@ const RULE_GUIDANCE: Readonly<Record<string, string>> = {
     'Implement the placeholder. If the work is too large, do NOT delete the marker — leave the file unchanged and explain in your final reply.',
   'socket/no-fetch-prefer-http-request':
     'Replace `fetch(url, opts)` with the right helper from `@socketsecurity/lib/http-request`: `httpJson` when the caller calls `.json()` on the response, `httpText` when it calls `.text()`, `httpRequest` for raw access. Add the named import.',
-}
+} as unknown as Readonly<Record<string, string>>
 
-function renderFindings(findings: OxlintMessage[], rel: string): string {
+function renderFindings(findings: OxlintMessage[], _rel: string): string {
   return findings
     .map(
       f =>
@@ -306,7 +307,7 @@ ${rulesBlock}
 }
 
 async function runClaudeFix(
-  filePath: string,
+  _filePath: string,
   prompt: string,
   cwd: string,
 ): Promise<{ exitCode: number; stdout: string; stderr: string }> {
@@ -378,7 +379,7 @@ async function main(): Promise<void> {
   if (args.noAi) {
     return
   }
-  if (process.env.SKIP_AI_FIX === '1') {
+  if (process.env['SKIP_AI_FIX'] === '1') {
     return
   }
   if (!existsSync('.oxlintrc.json')) {

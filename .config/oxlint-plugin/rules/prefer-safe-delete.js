@@ -33,16 +33,9 @@
 
 import { appendImportFixes, summarizeImportTarget } from './_inject-import.js'
 
-const DELETE_METHODS = new Set([
-  'rm',
-  'rmSync',
-  'unlink',
-  'unlinkSync',
-  'rmdir',
-  'rmdirSync',
-])
+const DELETE_METHODS = new Set(['rm', 'rmSync', 'rmdir', 'rmdirSync', 'unlink', 'unlinkSync'])
 
-const SYNC_METHODS = new Set(['rmSync', 'unlinkSync', 'rmdirSync'])
+const SYNC_METHODS = new Set(['rmSync', 'rmdirSync', 'unlinkSync'])
 
 /** @type {import('eslint').Rule.RuleModule} */
 const rule = {

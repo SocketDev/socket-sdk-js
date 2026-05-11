@@ -17,7 +17,7 @@ import { isError } from '@socketsecurity/lib/errors'
 import type { HttpResponse } from '@socketsecurity/lib/http-request'
 import type { Server } from 'node:http'
 
-function mockHttpResponse(
+export function mockHttpResponse(
   overrides: Partial<Omit<HttpResponse, 'body'>> & { body?: Buffer | string },
 ): HttpResponse {
   const body =

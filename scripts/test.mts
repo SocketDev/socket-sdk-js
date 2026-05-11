@@ -81,7 +81,7 @@ interface CommandOutput {
   stderr: string
 }
 
-async function runCommand(
+export async function runCommand(
   command: string,
   args: string[] = [],
   options: Record<string, unknown> = {},
@@ -107,7 +107,7 @@ async function runCommand(
   })
 }
 
-async function runCommandWithOutput(
+export async function runCommandWithOutput(
   command: string,
   args: string[] = [],
   options: Record<string, unknown> = {},
@@ -147,7 +147,7 @@ async function runCommandWithOutput(
   })
 }
 
-async function runCheck(): Promise<number> {
+export async function runCheck(): Promise<number> {
   logger.step('Running checks')
 
   // Run fix (auto-format) quietly since it has its own output
@@ -198,7 +198,7 @@ async function runCheck(): Promise<number> {
   return exitCode
 }
 
-async function runBuild(): Promise<number> {
+export async function runBuild(): Promise<number> {
   const distIndexPath = path.join(rootPath, 'dist', 'index.js')
   if (!existsSync(distIndexPath)) {
     logger.step('Building project')
@@ -215,7 +215,7 @@ interface TestOptions {
   update?: boolean
 }
 
-async function runTests(
+export async function runTests(
   options: TestOptions,
   positionals: string[] = [],
 ): Promise<number> {

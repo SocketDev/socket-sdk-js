@@ -139,7 +139,7 @@ type Report =
 // Generic helpers.
 // ---------------------------------------------------------------------------
 
-function readManifest(manifestPath: string): Manifest {
+export function readManifest(manifestPath: string): Manifest {
   if (!existsSync(manifestPath)) {
     logger.error(`lockstep: manifest not found at ${manifestPath}`)
     process.exit(1)
@@ -169,7 +169,7 @@ function readManifest(manifestPath: string): Manifest {
  * flattened view. Each sub-manifest contributes its rows; the top-level
  * upstreams/sites maps are merged (top-level wins on conflict).
  */
-function loadManifestTree(rootManifestPath: string): {
+export function loadManifestTree(rootManifestPath: string): {
   areas: Array<{ area: string; manifest: Manifest }>
   merged: Manifest
 } {
@@ -223,7 +223,7 @@ function loadManifestTree(rootManifestPath: string): {
   }
 }
 
-function gitIn(submoduleDir: string, args: string[]): string {
+export function gitIn(submoduleDir: string, args: string[]): string {
   const result = spawnSync('git', ['-C', submoduleDir, ...args], {
     stdio: ['ignore', 'pipe', 'pipe'],
     stdioString: true,
@@ -239,7 +239,7 @@ function gitIn(submoduleDir: string, args: string[]): string {
   return String(result.stdout)
 }
 
-function shaIsReachable(submoduleDir: string, sha: string): boolean {
+export function shaIsReachable(submoduleDir: string, sha: string): boolean {
   try {
     gitIn(submoduleDir, ['cat-file', '-e', sha])
     return true
@@ -248,7 +248,7 @@ function shaIsReachable(submoduleDir: string, sha: string): boolean {
   }
 }
 
-function driftCommitsSince(
+export function driftCommitsSince(
   submoduleDir: string,
   sha: string,
   pathInRepo: string,
@@ -280,7 +280,7 @@ function driftCommitsSince(
   }
 }
 
-function resolveUpstream(
+export function resolveUpstream(
   manifest: Manifest,
   alias: string,
   messages: string[],
@@ -289,12 +289,12 @@ function resolveUpstream(
   if (!upstream) {
     const known = Object.keys(manifest.upstreams ?? {}).join(', ') || '(none)'
     messages.push(`unknown upstream alias '${alias}' (known: ${known})`)
-    return null
+    return undefined
   }
   return upstream
 }
 
-function walkDirFiles(dir: string, extRe: RegExp): string[] {
+export function walkDirFiles(dir: string, extRe: RegExp): string[] {
   const files: string[] = []
   if (!existsSync(dir)) {
     return files
@@ -329,7 +329,7 @@ function walkDirFiles(dir: string, extRe: RegExp): string[] {
   return files
 }
 
-function countPatternHits(files: string[], patterns: string[]): number {
+export function countPatternHits(files: string[], patterns: string[]): number {
   if (patterns.length === 0) {
     return 0
   }
@@ -368,7 +368,7 @@ function countPatternHits(files: string[], patterns: string[]): number {
 // Kind checkers.
 // ---------------------------------------------------------------------------
 
-function checkFileFork(
+export function checkFileFork(
   row: FileForkRow,
   manifest: Manifest,
   area: string,
@@ -429,7 +429,7 @@ function checkFileFork(
   return base
 }
 
-function checkVersionPin(
+export function checkVersionPin(
   row: VersionPinRow,
   manifest: Manifest,
   area: string,
@@ -444,9 +444,9 @@ function checkVersionPin(
     messages,
     upstream: row.upstream,
     pinned_sha: row.pinned_sha,
-    pinned_tag: row.pinned_tag ?? null,
+    pinned_tag: row.pinned_tag ?? undefined,
     upgrade_policy: row.upgrade_policy,
-    head_sha: null,
+    head_sha: undefined,
     drift_count: 0,
   }
   if (!upstream) {
@@ -532,7 +532,7 @@ function checkVersionPin(
   return base
 }
 
-function checkFeatureParity(
+export function checkFeatureParity(
   row: FeatureParityRow,
   _manifest: Manifest,
   area: string,
@@ -620,7 +620,7 @@ function checkFeatureParity(
   return base
 }
 
-function checkSpecConformance(
+export function checkSpecConformance(
   row: SpecConformanceRow,
   manifest: Manifest,
   area: string,
@@ -636,7 +636,7 @@ function checkSpecConformance(
     upstream: row.upstream,
     local_impl: row.local_impl,
     spec_version: row.spec_version,
-    spec_path: row.spec_path ?? null,
+    spec_path: row.spec_path ?? undefined,
   }
   if (!upstream) {
     base.severity = 'error'
@@ -659,7 +659,7 @@ function checkSpecConformance(
   return base
 }
 
-function checkLangParity(
+export function checkLangParity(
   row: LangParityRow,
   manifest: Manifest,
   area: string,
@@ -726,7 +726,7 @@ function checkLangParity(
  * already covers per-row shape, enum values, id pattern, and required
  * fields — this is the referential-integrity layer on top.
  */
-function checkCrossRowConsistency(
+export function checkCrossRowConsistency(
   rowsWithArea: Array<{ row: Row; area: string }>,
   merged: Manifest,
 ): string[] {
@@ -782,7 +782,7 @@ function checkCrossRowConsistency(
 // Dispatcher.
 // ---------------------------------------------------------------------------
 
-function evaluate(
+export function evaluate(
   rowsWithArea: Array<{ row: Row; area: string }>,
   merged: Manifest,
 ): Report[] {
@@ -837,7 +837,7 @@ interface AreaSummary {
   error: number
 }
 
-function summarize(reports: Report[]): AreaSummary[] {
+export function summarize(reports: Report[]): AreaSummary[] {
   const byArea = new Map<string, AreaSummary>()
   for (const r of reports) {
     let s = byArea.get(r.area)
@@ -855,7 +855,7 @@ function summarize(reports: Report[]): AreaSummary[] {
 // Output.
 // ---------------------------------------------------------------------------
 
-function emitHuman(reports: Report[], summaries: AreaSummary[]): number {
+export function emitHuman(reports: Report[], summaries: AreaSummary[]): number {
   logger.info(
     `lockstep — ${reports.length} row(s) across ${summaries.length} area(s)`,
   )

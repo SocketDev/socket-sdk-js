@@ -8,25 +8,22 @@ import { expect } from 'vitest'
 import type { SocketSdkGenericResult } from '../../src/index'
 
 /**
- * Assert that an SDK result is a successful response.
+ * Assert that an SDK result is an error with Socket API format.
  *
  * @param result - The SDK result to check
- * @param statusCode - Expected HTTP status code (default: 200)
+ * @param statusCode - Expected HTTP status code
  *
  * @example
  * ```ts
- * const res = await client.getRepo('org', 'repo')
- * assertSuccess(res)
+ * const res = await client.getRepo('org', 'invalid')
+ * assertApiError(res, 404)
  * ```
  */
-export function assertSuccess<T>(
+export function assertApiError<T>(
   result: SocketSdkGenericResult<T>,
-  statusCode = 200,
-): asserts result is Extract<SocketSdkGenericResult<T>, { success: true }> {
-  expect(result.success).toBe(true)
-  expect(result.status).toBe(statusCode)
-  expect(result.error).toBeUndefined()
-  expect(result.data).toBeDefined()
+  statusCode: number,
+): asserts result is Extract<SocketSdkGenericResult<T>, { success: false }> {
+  assertError(result, statusCode, `Socket API Request failed (${statusCode})`)
 }
 
 /**
@@ -58,20 +55,23 @@ export function assertError<T>(
 }
 
 /**
- * Assert that an SDK result is an error with Socket API format.
+ * Assert that an SDK result is a successful response.
  *
  * @param result - The SDK result to check
- * @param statusCode - Expected HTTP status code
+ * @param statusCode - Expected HTTP status code (default: 200)
  *
  * @example
  * ```ts
- * const res = await client.getRepo('org', 'invalid')
- * assertApiError(res, 404)
+ * const res = await client.getRepo('org', 'repo')
+ * assertSuccess(res)
  * ```
  */
-export function assertApiError<T>(
+export function assertSuccess<T>(
   result: SocketSdkGenericResult<T>,
-  statusCode: number,
-): asserts result is Extract<SocketSdkGenericResult<T>, { success: false }> {
-  assertError(result, statusCode, `Socket API Request failed (${statusCode})`)
+  statusCode = 200,
+): asserts result is Extract<SocketSdkGenericResult<T>, { success: true }> {
+  expect(result.success).toBe(true)
+  expect(result.status).toBe(statusCode)
+  expect(result.error).toBeUndefined()
+  expect(result.data).toBeDefined()
 }

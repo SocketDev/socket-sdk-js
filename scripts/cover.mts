@@ -53,7 +53,7 @@ interface TestSuitesResult {
  * Run both main and isolated test suites, returning individual and combined
  * results.
  */
-async function runTestSuites(
+export async function runTestSuites(
   mainArgs: string[],
   isolatedArgs: string[],
 ): Promise<TestSuitesResult> {
@@ -112,7 +112,7 @@ interface AggregateCoverage {
  * Merge coverage-final.json from both suites using max-hit-count strategy.
  * Returns aggregate percentages for statements, branches, functions, and lines.
  */
-async function mergeCoverageFinal(): Promise<AggregateCoverage | undefined> {
+export async function mergeCoverageFinal(): Promise<AggregateCoverage | undefined> {
   const mainFinalPath = path.join(rootPath, 'coverage/coverage-final.json')
   const isolatedFinalPath = path.join(
     rootPath,
@@ -240,12 +240,12 @@ async function mergeCoverageFinal(): Promise<AggregateCoverage | undefined> {
  * aggregate metrics.
  */
 /** Parse type-coverage output to extract percentage. */
-function parseTypeCoveragePercent(output: string): number | undefined {
+export function parseTypeCoveragePercent(output: string): number | undefined {
   const match = output.match(/\([\d\s/]+\)\s+([\d.]+)%/)
   return match?.[1] ? Number.parseFloat(match[1]) : undefined
 }
 
-function displayCodeCoverage(
+export function displayCodeCoverage(
   mainOutput: string,
   combinedOutput: string,
   aggregateCoverage: AggregateCoverage | undefined,
