@@ -215,6 +215,12 @@ importers:
         specifier: 'catalog:'
         version: 24.9.2
 
+  .claude/hooks/no-experimental-strip-types-guard:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.9.2
+
   .claude/hooks/no-fleet-fork-guard:
     dependencies:
       '@socketsecurity/lib':
