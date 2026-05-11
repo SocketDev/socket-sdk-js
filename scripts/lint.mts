@@ -35,7 +35,7 @@ const CONFIG_PATTERNS = [
   '.config/**',
   'scripts/utils/**',
   'pnpm-lock.yaml',
-  'tsconfig*.json',
+  
   'eslint.config.*',
 ]
 
@@ -186,7 +186,7 @@ export async function runLintOnFiles(
         'exec',
         'oxlint',
         '--config',
-        '.oxlintrc.json',
+      
         ...(fix ? ['--fix'] : []),
         ...files,
       ],
@@ -249,7 +249,7 @@ export async function runLintOnAll(options: LintOptions = {}): Promise<number> {
         'exec',
         'oxlint',
         '--config',
-        '.oxlintrc.json',
+      
         ...(fix ? ['--fix'] : []),
         '.',
       ],
