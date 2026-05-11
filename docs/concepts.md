@@ -2,7 +2,7 @@
 
 The Socket SDK is a TypeScript client for the Socket.dev REST API. You construct one client, call methods on it, and get back a typed result object.
 
-This page explains the SDK's runtime model — construction, result shape, pagination, file uploads, quota, escape hatches, and the errors you'll actually hit. For the **per-method list** (signatures, quota costs, grouping by domain), see [API Reference](./api-reference.md). For endpoint-level details (URL paths, request bodies, raw response shapes), see <https://docs.socket.dev/reference/>.
+This page explains the SDK's runtime model — construction, result shape, pagination, file uploads, quota, escape hatches, and the errors you'll actually hit. For the **per-method list** (signatures, quota costs, grouping by domain), see [API Reference](./api.md). For endpoint-level details (URL paths, request bodies, raw response shapes), see <https://docs.socket.dev/reference/>.
 
 ## Creating a client
 

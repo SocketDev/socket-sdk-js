@@ -51,7 +51,7 @@ const batchResult = await client.batchPackageFetch({
 
 | Guide                                              | Description                         |
 | -------------------------------------------------- | ----------------------------------- |
-| **[API Reference](./docs/api-reference.md)**       | Complete API method documentation   |
+| **[API Reference](./docs/api.md)**                 | Complete API method documentation   |
 | **[Quota Management](./docs/quota-management.md)** | Cost tiers (0/10/100) and utilities |
 
 ## License

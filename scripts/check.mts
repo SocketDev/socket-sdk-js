@@ -108,10 +108,10 @@ async function main(): Promise<void> {
         args: ['scripts/validate-quota-sync.mts'],
         command: 'node',
       },
-      // API reference doc gate: docs/api-reference.md is generated from source.
-      // See scripts/generate-api-reference.mts.
+      // API reference doc gate: docs/api.md is generated from source.
+      // See scripts/gen-api-docs.mts.
       {
-        args: ['scripts/generate-api-reference.mts', '--check'],
+        args: ['scripts/gen-api-docs.mts', '--check'],
         command: 'node',
       },
     ]
