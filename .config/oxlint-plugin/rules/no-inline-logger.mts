@@ -1,10 +1,15 @@
 /**
- * @fileoverview Ban `console.log` / `console.error` / `console.warn`
- * / `console.info` / `console.debug` / `console.trace`. The fleet uses
- * `getDefaultLogger()` from `@socketsecurity/lib/logger` — those
- * methods emit theme-aware coloring + canonical symbols.
+ * @fileoverview Ban inline `getDefaultLogger().<method>(...)`. The
+ * logger must be hoisted at the top of the file:
+ *   const logger = getDefaultLogger()
+ *   ...
+ *   logger.success('...')
  *
- * Autofix: rewrites `console.<method>(...)` → `logger.<loggerMethod>(...)`
+ * Inline `getDefaultLogger().success(...)` re-resolves the logger on
+ * every call and reads inconsistently. The hoisted form is the
+ * fleet-canonical pattern.
+ *
+ * Autofix: rewrites `getDefaultLogger().<method>` → `logger.<method>`
  * AND inserts the missing pieces in one go:
  *
  *   1. `import { getDefaultLogger } from '@socketsecurity/lib/logger'`
@@ -13,21 +18,12 @@
  *   2. `const logger = getDefaultLogger()` — appended after the import
  *      block (so `logger` is hoisted at module scope).
  *
- * Each `console.<method>(...)` call site emits its own fix
- * independently. ESLint's autofixer dedupes overlapping inserts (the
- * import line + hoist), so the visit order is irrelevant.
+ * Each inline call site emits its own fix independently. ESLint's
+ * autofixer dedupes overlapping inserts, so multiple violations in the
+ * same file collapse the import + hoist into a single insertion.
  */
 
-import { appendImportFixes, summarizeImportTarget } from './_inject-import.js'
-
-const CONSOLE_TO_LOGGER = {
-  debug: 'log',
-  error: 'fail',
-  info: 'info',
-  log: 'log',
-  trace: 'log',
-  warn: 'warn',
-}
+import { appendImportFixes, summarizeImportTarget } from './_inject-import.mts'
 
 const LOGGER_IMPORT_LINE =
   "import { getDefaultLogger } from '@socketsecurity/lib/logger'"
@@ -39,14 +35,14 @@ const rule = {
     type: 'problem',
     docs: {
       description:
-        'Ban console.* calls; use logger from @socketsecurity/lib/logger.',
+        'Hoist getDefaultLogger() to a const at the top of the file; do not call it inline.',
       category: 'Best Practices',
       recommended: true,
     },
     fixable: 'code',
     messages: {
-      banned:
-        'console.{{method}}() — use logger.{{loggerMethod}}() from @socketsecurity/lib/logger.',
+      inline:
+        'getDefaultLogger() must be hoisted: add `const logger = getDefaultLogger()` near the top of the file and use `logger.{{method}}(...)`.',
     },
     schema: [],
   },
@@ -73,26 +69,16 @@ const rule = {
 
     return {
       MemberExpression(node) {
-        if (
-          node.object.type !== 'Identifier' ||
-          node.object.name !== 'console' ||
-          node.property.type !== 'Identifier'
-        ) {
+        // Match: getDefaultLogger().<method>
+        if (node.property.type !== 'Identifier') {
           return
         }
-        const method = node.property.name
-        const loggerMethod = CONSOLE_TO_LOGGER[method]
-        if (!loggerMethod) {
-          return
-        }
-
-        // Only flag when console.<method> is the callee of a call
-        // (skip e.g. `typeof console.log` or destructuring).
-        const parent = node.parent
+        const obj = node.object
         if (
-          !parent ||
-          parent.type !== 'CallExpression' ||
-          parent.callee !== node
+          obj.type !== 'CallExpression' ||
+          obj.callee.type !== 'Identifier' ||
+          obj.callee.name !== 'getDefaultLogger' ||
+          obj.arguments.length !== 0
         ) {
           return
         }
@@ -101,11 +87,14 @@ const rule = {
 
         context.report({
           node,
-          messageId: 'banned',
-          data: { method, loggerMethod },
+          messageId: 'inline',
+          data: { method: node.property.name },
           fix(fixer) {
+            // Replace `getDefaultLogger()` (the CallExpression) with
+            // `logger`. Leaves `.method(...)` intact, so the result is
+            // `logger.method(...)`.
             return [
-              fixer.replaceText(node, `logger.${loggerMethod}`),
+              fixer.replaceText(obj, 'logger'),
               ...appendImportFixes(
                 s,
                 fixer,

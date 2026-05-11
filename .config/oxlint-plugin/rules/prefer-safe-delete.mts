@@ -31,7 +31,7 @@
  * (`.claude/hooks/path-guard/`) — this rule covers the JavaScript side.
  */
 
-import { appendImportFixes, summarizeImportTarget } from './_inject-import.js'
+import { appendImportFixes, summarizeImportTarget } from './_inject-import.mts'
 
 const DELETE_METHODS = new Set(['rm', 'rmSync', 'rmdir', 'rmdirSync', 'unlink', 'unlinkSync'])
 

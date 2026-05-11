@@ -2,8 +2,8 @@
   "name": "socket-oxlint-plugin",
   "private": true,
   "type": "module",
-  "main": "./index.js",
+  "main": "./index.mts",
   "exports": {
-    ".": "./index.js"
+    ".": "./index.mts"
   }
 }

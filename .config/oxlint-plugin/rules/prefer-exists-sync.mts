@@ -30,7 +30,7 @@
  *     scripts/ai-lint-fix.mts.
  */
 
-import { appendImportFixes, summarizeImportTarget } from './_inject-import.js'
+import { appendImportFixes, summarizeImportTarget } from './_inject-import.mts'
 
 const ACCESS_METHODS = new Set(['access', 'accessSync'])
 const STAT_METHODS = new Set(['lstat', 'lstatSync', 'stat', 'statSync'])
