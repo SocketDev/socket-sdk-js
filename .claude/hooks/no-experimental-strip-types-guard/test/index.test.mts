@@ -107,6 +107,48 @@ test('does not match an unrelated string containing experimental', async () => {
   assert.strictEqual(result.code, 0)
 })
 
+test('does not match flag mentioned inside a single-quoted string', async () => {
+  const result = await runHook({
+    tool_input: {
+      command: "echo 'tip: drop --experimental-strip-types from your script'",
+    },
+    tool_name: 'Bash',
+  })
+  assert.strictEqual(result.code, 0)
+})
+
+test('does not match flag mentioned inside a double-quoted string', async () => {
+  const result = await runHook({
+    tool_input: {
+      command: 'echo "tip: drop --experimental-strip-types from your script"',
+    },
+    tool_name: 'Bash',
+  })
+  assert.strictEqual(result.code, 0)
+})
+
+test('does not match flag mentioned inside a heredoc body', async () => {
+  const result = await runHook({
+    tool_input: {
+      command:
+        "git commit -m \"$(cat <<'EOF'\nthe --experimental-strip-types flag is dead\nEOF\n)\"",
+    },
+    tool_name: 'Bash',
+  })
+  assert.strictEqual(result.code, 0)
+})
+
+test('still blocks flag passed as a real arg even when other quoted args mention it', async () => {
+  const result = await runHook({
+    tool_input: {
+      command:
+        "echo 'reminder' && node --experimental-strip-types foo.ts",
+    },
+    tool_name: 'Bash',
+  })
+  assert.strictEqual(result.code, 2)
+})
+
 test('fails open on malformed payload', async () => {
   const child = spawn(process.execPath, [HOOK], { stdio: 'pipe' })
   child.stdin.end('not valid json')

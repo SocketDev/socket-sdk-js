@@ -75,6 +75,8 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
+import { buildQuoteMask } from '../_shared/bash-quote-mask.mts'
+
 type ToolInput = {
   tool_input?:
     | {
@@ -140,56 +142,6 @@ const WORKFLOW_GH_RELEASE_RE =
 // repo other than the current $CLAUDE_PROJECT_DIR can't be verified
 // from disk, so we conservatively block it.
 const GH_REPO_FLAG_RE = /\s--repo\s+\S*?\/([^\s/]+)/
-
-// Walk the command and return a per-position boolean: true means the
-// char at index i sits inside a single- or double-quoted string. We
-// use this to skip matches that fall inside `git commit -m "..."`
-// message bodies, heredocs, etc. — text that the shell will pass as
-// a literal argument value, not execute. Without this, mentioning
-// `gh workflow run` inside a commit message body trips the hook.
-//
-// Limitations: this is not a full POSIX shell parser. Heredocs
-// (<<EOF ... EOF) read as code-mode here, but in practice commit
-// messages via heredoc are quoted by `$(cat <<'EOF' ... EOF)` and
-// the outer `$(...)`/`"..."` wrap puts the body in quoted-mode.
-// `\$` and other escapes inside quotes are honored only in the
-// limited sense of skipping the next char.
-function buildQuoteMask(s: string): boolean[] {
-  const mask = new Array<boolean>(s.length).fill(false)
-  let inSingle = false
-  let inDouble = false
-  for (let i = 0; i < s.length; i += 1) {
-    const c = s[i]
-    if (!inSingle && !inDouble && c === "'") {
-      inSingle = true
-      mask[i] = true
-      continue
-    }
-    if (inSingle && c === "'") {
-      inSingle = false
-      mask[i] = true
-      continue
-    }
-    if (!inSingle && !inDouble && c === '"') {
-      inDouble = true
-      mask[i] = true
-      continue
-    }
-    if (inDouble && c === '"') {
-      inDouble = false
-      mask[i] = true
-      continue
-    }
-    if (inDouble && c === '\\' && i + 1 < s.length) {
-      mask[i] = true
-      mask[i + 1] = true
-      i += 1
-      continue
-    }
-    mask[i] = inSingle || inDouble
-  }
-  return mask
-}
 
 type DispatchResult = {
   // When `blocked` is false, populated with the reason the dispatch
@@ -315,56 +267,33 @@ function workflowDeclaresDryRunInput(
 //     intentionally excluded so a same-named workflow in the current
 //     checkout can't false-positive a cross-repo dispatch.
 function resolveSearchRoots(command: string): string[] {
-  // Resolution: collect every plausible project root (env + script
-  // derivation + cwd), dedupe, and return the list. Downstream
-  // consumers (workflowDeclaresDryRunInput / classifyWorkflow) iterate
-  // and fall through, so multiple candidates is strictly safer than
-  // picking a single one — the env var can point at the *parent* of
-  // the actual checkout when Claude Code resolves a different repo
-  // than the one whose hook is running.
-  const candidates: string[] = []
-  const envDir = process.env['CLAUDE_PROJECT_DIR']
-  if (envDir) {
-    candidates.push(envDir)
-  }
-  // process.argv[1] is the absolute path of this hook script when
-  // invoked via `node <path>`. Walk up to the repo root:
-  // .claude/hooks/release-workflow-guard/index.mts → ../../../ = repo
-  const scriptPath = process.argv[1]
-  if (scriptPath) {
-    const candidate = path.resolve(scriptPath, '..', '..', '..', '..')
-    if (existsSync(path.join(candidate, '.github', 'workflows'))) {
-      candidates.push(candidate)
+  // Resolution order: $CLAUDE_PROJECT_DIR (Claude Code sets this when
+  // it remembers to) → derive from this hook script's path (the hook
+  // lives at <project>/.claude/hooks/release-workflow-guard/index.mts,
+  // so go three levels up from __dirname) → $PWD as last resort.
+  // The script-path derivation is the most robust because it doesn't
+  // depend on the runner exporting env vars correctly.
+  let projectDir = process.env['CLAUDE_PROJECT_DIR']
+  if (!projectDir) {
+    // process.argv[1] is the absolute path of this hook script when
+    // invoked via `node <path>`. Walk up to the repo root.
+    const scriptPath = process.argv[1]
+    if (scriptPath) {
+      // .claude/hooks/release-workflow-guard/index.mts → ../../../ = repo
+      const candidate = path.resolve(scriptPath, '..', '..', '..', '..')
+      if (existsSync(path.join(candidate, '.github', 'workflows'))) {
+        projectDir = candidate
+      }
     }
   }
-  candidates.push(process.cwd())
-  // Dedupe while preserving order.
-  const seen = new Set<string>()
-  const unique: string[] = []
-  for (const c of candidates) {
-    if (!seen.has(c)) {
-      seen.add(c)
-      unique.push(c)
-    }
+  if (!projectDir) {
+    projectDir = process.cwd()
   }
   const repoMatch = GH_REPO_FLAG_RE.exec(command)
-  if (!repoMatch) {
-    return unique
+  if (!repoMatch || path.basename(projectDir) === repoMatch[1]!) {
+    return [projectDir]
   }
-  // Cross-repo dispatch: redirect every candidate to its sibling clone
-  // of the same name. If none of them have a sibling matching, the
-  // empty list naturally blocks (workflowDeclaresDryRunInput returns
-  // false → bypass denied → block-the-default).
-  const repoName = repoMatch[1]!
-  const redirected: string[] = []
-  for (const c of unique) {
-    if (path.basename(c) === repoName) {
-      redirected.push(c)
-    } else {
-      redirected.push(path.join(path.dirname(c), repoName))
-    }
-  }
-  return redirected
+  return [path.join(path.dirname(projectDir), repoMatch[1]!)]
 }
 
 function isVerifiableDryRun(

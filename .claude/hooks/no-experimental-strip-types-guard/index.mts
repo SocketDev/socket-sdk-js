@@ -23,6 +23,8 @@
 
 import process from 'node:process'
 
+import { containsOutsideQuotes } from '../_shared/bash-quote-mask.mts'
+
 interface ToolInput {
   readonly tool_input?: { readonly command?: string } | undefined
   readonly tool_name?: string | undefined
@@ -46,7 +48,22 @@ process.stdin.on('end', () => {
     process.exit(0)
   }
   const command = payload.tool_input?.command ?? ''
-  if (!/--experimental-strip-types\b/.test(command)) {
+
+  // Check for the flag at a position the shell would actually execute
+  // (outside quoted strings and outside heredoc bodies). This skips
+  // false positives from `echo "tip: ..."` reminders and
+  // `git commit -m "$(cat <<EOF ... EOF)"` message bodies.
+  //
+  // NODE_OPTIONS is a special case: even when the flag sits inside
+  // quotes after `NODE_OPTIONS=`, Node parses the value as args at
+  // startup, so it's a real invocation. Match it separately.
+  const flagPattern = /--experimental-strip-types\b/
+  const nodeOptionsPattern =
+    /NODE_OPTIONS\s*=\s*['"]?[^'"]*--experimental-strip-types\b/
+  if (
+    !containsOutsideQuotes(command, flagPattern) &&
+    !nodeOptionsPattern.test(command)
+  ) {
     process.exit(0)
   }
 
