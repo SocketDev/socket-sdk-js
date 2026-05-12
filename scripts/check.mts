@@ -24,7 +24,7 @@ import { runParallel } from './utils/run-command.mts'
 // Initialize logger
 const logger = getDefaultLogger()
 
-const tsConfigPath = '.config/tsconfig.check.json'
+const tsConfigPath = 'tsconfig.check.json'
 
 async function main(): Promise<void> {
   try {

@@ -49,7 +49,7 @@ const nodeModulesBinPath = path.join(rootPath, 'node_modules', '.bin')
 const logger = getDefaultLogger()
 const spinner = getDefaultSpinner()
 
-const tsConfigPath = '.config/tsconfig.check.json'
+const tsConfigPath = 'tsconfig.check.json'
 
 // Track running processes for cleanup
 const runningProcesses = new Set<import('node:child_process').ChildProcess>()

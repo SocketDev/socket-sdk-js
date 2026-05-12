@@ -67,7 +67,7 @@
     "claude": "node scripts/claude.mts",
     "security": "node scripts/security.mts",
     "test": "node scripts/test.mts",
-    "type": "tsgo --noEmit -p .config/tsconfig.check.json",
+    "type": "tsgo --noEmit -p tsconfig.check.json",
     "update": "node scripts/update.mts",
     "lockstep": "node scripts/lockstep.mts",
     "lockstep:emit-schema": "node scripts/lockstep-emit-schema.mts"

@@ -11,14 +11,15 @@
  *   - linter / formatter dotfiles whose tools require root
  *     placement (.oxlintrc.json, .oxfmtrc.json, .npmrc, .gitignore,
  *     .gitattributes, .node-version)
- *   - tsconfig.json (TypeScript's project root anchor — extends
- *     from .config/tsconfig.base.json)
+ *   - concrete tsconfigs (tsconfig.json, tsconfig.check.json,
+ *     tsconfig.dts.json) — TypeScript / tsgo / IDE discovery
+ *     anchors. They extend from .config/tsconfig.base.json.
  *
  * Everything else (taze.config.mts, vitest.config*.mts,
- * tsconfig.base.json, tsconfig.check.json, tsconfig.dts.json,
- * esbuild.config.mts, lockstep.json, socket-wheelhouse.json, etc.)
- * lives in `.config/`. A copy at root is drift — usually a
- * half-finished move that left a stale file behind.
+ * tsconfig.base.json, esbuild.config.mts, lockstep.json,
+ * socket-wheelhouse.json, etc.) lives in `.config/`. A copy at
+ * root is drift — usually a half-finished move that left a stale
+ * file behind.
  *
  * Exit codes:
  *   0 — clean
@@ -50,9 +51,6 @@ const CONFIG_BASENAMES: readonly string[] = [
   'socket-wheelhouse.json',
   'taze.config.mts',
   'tsconfig.base.json',
-  'tsconfig.check.json',
-  'tsconfig.check.local.json',
-  'tsconfig.dts.json',
   'vitest.config.isolated.mts',
   'vitest.config.mts',
   'vitest.coverage.config.mts',

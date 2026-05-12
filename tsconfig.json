@@ -1,3 +1,14 @@
 {
-  "extends": "./.config/tsconfig.json"
+  "extends": "./.config/tsconfig.base.json",
+  "compilerOptions": {
+    "declarationMap": false,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "sourceMap": false
+  },
+  "include": ["./src/**/*.ts"]
 }
