@@ -1,3 +1,4 @@
+/* max-file-lines: legitimate — failure-path coverage suite */
 /**
  * @fileoverview Failure path tests for SocketSdk class methods.
  *
@@ -12,7 +13,7 @@
  * Uses setupLocalHttpServer for real HTTP interactions.
  */
 
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
@@ -494,7 +495,7 @@ describe('SocketSdk - writeStream error handler', () => {
     // Use a path where the parent directory does not exist.
     // The writeStream error is not a ResponseError, so handleApiError re-throws.
     const unwritablePath = path.join(
-      tmpdir(),
+      os.tmpdir(),
       'nonexistent-dir-sdk-test-12345',
       'output.tar',
     )

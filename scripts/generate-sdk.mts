@@ -123,7 +123,7 @@ export async function fixArraySyntax(filePath: string): Promise<void> {
     if (t.isTSTypeReference(node)) {
       if (t.isIdentifier(node.typeName)) {
         const name = node.typeName.name
-        return name === 'string' || name === 'number' || name === 'boolean'
+        return name === 'boolean' || name === 'number' || name === 'string'
       }
     }
 

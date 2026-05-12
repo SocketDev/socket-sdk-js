@@ -3,8 +3,8 @@
  * Validates that new strict types properly reflect API responses.
  */
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import os from 'node:os'
+import path from 'node:path'
 
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
@@ -149,8 +149,8 @@ describe.sequential('Strict Types - v3.0', () => {
       }
 
       // Create temporary directory and test file
-      const tempDir = mkdtempSync(join(tmpdir(), 'socket-sdk-test-'))
-      const testFile = join(tempDir, 'package.json')
+      const tempDir = mkdtempSync(path.join(os.tmpdir(), 'socket-sdk-test-'))
+      const testFile = path.join(tempDir, 'package.json')
       writeFileSync(
         testFile,
         JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
@@ -268,13 +268,15 @@ describe.sequential('Strict Types - v3.0', () => {
 
         expect(typedResult.data.organizations).toHaveLength(2)
 
-        typedResult.data.organizations.forEach(org => {
+        const orgs = typedResult.data.organizations
+        for (let i = 0, { length } = orgs; i < length; i += 1) {
+          const org = orgs[i]!
           // All fields should be present and correctly typed
           expect(typeof org.id).toBe('string')
           expect(typeof org.name).toBe('string')
           expect(typeof org.slug).toBe('string')
           expect(typeof org.plan).toBe('string')
-        })
+        }
 
         // Specific value checks
         const firstOrg = typedResult.data.organizations[0]

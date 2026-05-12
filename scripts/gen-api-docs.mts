@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* max-file-lines: legitimate — single-pass docs generator (extract, group, render) */
 /**
  * @fileoverview Generates docs/api.md from src/socket-sdk-class.ts and
  * data/api-method-quota-and-permissions.json. The doc is a one-line-per-method
@@ -291,7 +292,8 @@ export function extractMethods(): MethodInfo[] {
     let sawCloseParen = false
     while (sigEnd < lines.length) {
       const line = lines[sigEnd]!
-      for (const ch of line) {
+      for (let i = 0, { length } = line; i < length; i += 1) {
+        const ch = line[i]!
         if (ch === '(') {
           parenDepth++
         } else if (ch === ')') {
@@ -367,12 +369,14 @@ export function extractMethods(): MethodInfo[] {
     let quota: number | undefined
     let permissions: string[] = []
     if (operationId) {
-      let entry = data.api[operationId]
+      let entry = data.api[operationId]!
       if (!entry) {
         const lower = operationId.toLowerCase()
-        for (const [key, value] of Object.entries(data.api)) {
-          if (key.toLowerCase() === lower) {
-            entry = value
+        const apiEntries = Object.entries(data.api)
+        for (let j = 0, { length: jlen } = apiEntries; j < jlen; j += 1) {
+          const pair = apiEntries[j]!
+          if (pair[0].toLowerCase() === lower) {
+            entry = pair[1]
             break
           }
         }
@@ -426,7 +430,8 @@ export function render(methods: MethodInfo[]): string {
   sections.push('')
   sections.push('## Contents')
   sections.push('')
-  for (const group of GROUPS) {
+  for (let i = 0, { length } = GROUPS; i < length; i += 1) {
+    const group = GROUPS[i]!
     const anchor = group.title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
@@ -434,9 +439,11 @@ export function render(methods: MethodInfo[]): string {
     sections.push(`- [${group.title}](#${anchor})`)
   }
   const inGroups = new Set<string>()
-  for (const g of GROUPS) {
-    for (const n of g.methods) {
-      inGroups.add(n)
+  for (let i = 0, { length } = GROUPS; i < length; i += 1) {
+    const g = GROUPS[i]!
+    const methodNames = g.methods
+    for (let j = 0, { length: jlen } = methodNames; j < jlen; j += 1) {
+      inGroups.add(methodNames[j]!)
     }
   }
   const otherMethods = methods.filter(m => !inGroups.has(m.name))
@@ -445,13 +452,15 @@ export function render(methods: MethodInfo[]): string {
   }
   sections.push('')
 
-  for (const group of GROUPS) {
+  for (let i = 0, { length } = GROUPS; i < length; i += 1) {
+    const group = GROUPS[i]!
     sections.push(`## ${group.title}`)
     sections.push('')
     sections.push(group.description)
     sections.push('')
-    for (const methodName of group.methods) {
-      const m = byName.get(methodName)
+    const methodNames = group.methods
+    for (let j = 0, { length: jlen } = methodNames; j < jlen; j += 1) {
+      const m = byName.get(methodNames[j]!)
       if (!m) {
         continue
       }
@@ -466,7 +475,8 @@ export function render(methods: MethodInfo[]): string {
       'Methods not yet placed into a domain group. Add them to `GROUPS` in `scripts/gen-api-docs.mts`.',
     )
     sections.push('')
-    for (const m of otherMethods) {
+    for (let i = 0, { length } = otherMethods; i < length; i += 1) {
+      const m = otherMethods[i]!
       sections.push(renderMethod(m))
     }
   }

@@ -1,6 +1,7 @@
+/* max-file-lines: legitimate — batch-API behavior tests, single feature */
 /** @fileoverview Tests for batch package fetch and streaming operations. */
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import * as path from 'node:path'
 
 import nock from 'nock'
@@ -349,7 +350,7 @@ describe('SocketSdk - Batch Operations', () => {
 
     beforeEach(() => {
       // Create a temporary directory for test files
-      tempDir = mkdtempSync(path.join(tmpdir(), 'socket-sdk-test-'))
+      tempDir = mkdtempSync(path.join(os.tmpdir(), 'socket-sdk-test-'))
 
       // Create test manifest files
       packageJsonPath = path.join(tempDir, 'package.json')

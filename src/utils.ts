@@ -48,10 +48,13 @@ export function calculateWordSetSimilarity(str1: string, str2: string): number {
     return 0
   }
 
-  // Calculate intersection size
+  // Calculate intersection size. Materialize set1 to an array so the
+  // length is hoistable per prefer-cached-for-loop; Set iterators
+  // allocate per-iteration.
   let intersectionSize = 0
-  for (const word of set1) {
-    if (set2.has(word)) {
+  const set1Arr = [...set1]
+  for (let i = 0, { length } = set1Arr; i < length; i += 1) {
+    if (set2.has(set1Arr[i]!)) {
       intersectionSize++
     }
   }
@@ -104,7 +107,8 @@ export function filterRedundantCause(
     .map(part => StringPrototypeTrim(part))
 
   // Check similarity against each part, finding the maximum similarity
-  for (const part of messageParts) {
+  for (let i = 0, { length } = messageParts; i < length; i += 1) {
+    const part = messageParts[i]!
     if (part && shouldOmitReason(part, errorCause, threshold)) {
       return undefined
     }
@@ -176,14 +180,19 @@ export function queryToSearchParams(
     init as ConstructorParameters<typeof URLSearchParams>[0],
   )
   // Check if normalization is needed before creating a second instance.
+  // Materialize entries so length is hoistable (URLSearchParams iterator
+  // would allocate per-iteration).
+  const entries = [...params]
   let needsNormalization = false
   let hasEmpty = false
-  for (const [key, value] of params) {
+  for (let i = 0, { length } = entries; i < length; i += 1) {
+    const pair = entries[i]!
+    const key = pair[0]
     if (key === 'defaultBranch' || key === 'perPage') {
       needsNormalization = true
       break
     }
-    if (!value) {
+    if (!pair[1]) {
       hasEmpty = true
     }
   }
@@ -191,7 +200,10 @@ export function queryToSearchParams(
     return params
   }
   const normalized = new URLSearchParamsCtor()
-  for (const [key, value] of params) {
+  for (let i = 0, { length } = entries; i < length; i += 1) {
+    const pair = entries[i]!
+    const key = pair[0]
+    const value = pair[1]
     if (!value) {
       continue
     }

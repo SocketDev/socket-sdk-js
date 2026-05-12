@@ -21,7 +21,8 @@ export function createRequestBodyForFilepaths(
   basePath: string,
 ): FormData {
   const form = new FormData()
-  for (const absPath of filepaths) {
+  for (let i = 0, { length } = filepaths; i < length; i += 1) {
+    const absPath = filepaths[i]!
     const relPath = normalizePath(path.relative(basePath, absPath))
     const filename = path.basename(absPath)
     let stream: ReadStream

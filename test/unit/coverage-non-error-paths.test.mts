@@ -1,3 +1,4 @@
+/* max-file-lines: legitimate — coverage suite mirroring source layout */
 /**
  * @fileoverview Tests covering non-error-path gaps across several source files.
  *

@@ -1,8 +1,10 @@
+/* max-file-lines: legitimate — test orchestrator (pre-build, worker pool, signals, reporter) */
 /**
  * @fileoverview Unified test runner that provides a smooth, single-script experience.
  * Combines check, build, and test steps with clean, consistent output.
  */
 
+// oxlint-disable-next-line socket/prefer-async-spawn -- needs the ChildProcess stream API (.stdout/.stderr/.on('exit')) for signal forwarding and live test reporter wiring; lib/spawn's Promise shape doesn't expose these.
 import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
@@ -60,10 +62,12 @@ const removeExitHandler = onExit(
       spinner.stop()
     } catch {}
 
-    // Kill all running processes
-    for (const child of runningProcesses) {
+    // Kill all running processes. Materialize the Set so its size is
+    // hoistable (Set iterator allocates per-iteration).
+    const children = [...runningProcesses]
+    for (let i = 0, { length } = children; i < length; i += 1) {
       try {
-        child.kill('SIGTERM')
+        children[i]!.kill('SIGTERM')
       } catch {}
     }
 
@@ -426,7 +430,9 @@ export async function runTests(
   } else {
     const modeText = mode === 'staged' ? 'staged' : 'changed'
     logger.step(`Running tests for ${modeText} files:`)
-    testsToRun.forEach(test => logger.substep(test))
+    for (let i = 0, { length } = testsToRun; i < length; i += 1) {
+      logger.substep(testsToRun[i]!)
+    }
     vitestArgs.push(...testsToRun)
   }
 

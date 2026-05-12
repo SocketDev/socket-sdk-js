@@ -1,3 +1,4 @@
+/* max-file-lines: legitimate — tests for the testing utilities module */
 /**
  * @fileoverview Tests for SDK testing utilities.
  * Validates mock factories, response builders, and test helpers.

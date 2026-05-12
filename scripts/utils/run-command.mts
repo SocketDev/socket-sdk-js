@@ -142,8 +142,13 @@ export async function runPnpmScript(
  * Run multiple commands in sequence, stopping on first failure.
  */
 export async function runSequence(commands: CommandSpec[]): Promise<number> {
-  for (const { args = [], command, options = {} } of commands) {
-    const exitCode = await runCommand(command, args, options)
+  for (let i = 0, { length } = commands; i < length; i += 1) {
+    const spec = commands[i]!
+    const exitCode = await runCommand(
+      spec.command,
+      spec.args ?? [],
+      spec.options ?? {},
+    )
     if (exitCode !== 0) {
       return exitCode
     }

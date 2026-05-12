@@ -1,6 +1,6 @@
 /** @fileoverview Tests for streaming behavior in SocketSdk download/stream methods. */
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -25,7 +25,7 @@ describe('SocketSdk - Streaming downloads', () => {
   )
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(path.join(tmpdir(), 'sdk-stream-test-'))
+    tmpDir = mkdtempSync(path.join(os.tmpdir(), 'sdk-stream-test-'))
   })
 
   afterEach(() => {

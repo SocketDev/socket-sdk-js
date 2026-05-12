@@ -27,6 +27,7 @@ const isCoverageEnabled =
   process.env.npm_lifecycle_event?.includes('coverage') ||
   process.argv.some(arg => arg.includes('coverage'))
 
+// oxlint-disable-next-line socket/no-default-export -- vitest config loader requires the default export.
 export default defineConfig({
   cacheDir: './node_modules/.cache/vitest',
   test: {

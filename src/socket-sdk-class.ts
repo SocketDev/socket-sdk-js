@@ -1,3 +1,4 @@
+/* max-file-lines: legitimate — SDK surface class, one method per API endpoint */
 /**
  * @fileoverview SocketSdk class implementation for Socket security API client.
  * Provides complete API functionality for vulnerability scanning, analysis, and reporting.
@@ -35,29 +36,29 @@ import {
   DEFAULT_RETRIES,
   DEFAULT_RETRY_DELAY,
   DEFAULT_USER_AGENT,
-  httpAgentNames,
   MAX_FIREWALL_COMPONENTS,
   MAX_HTTP_TIMEOUT,
   MAX_RESPONSE_SIZE,
   MIN_HTTP_TIMEOUT,
-  publicPolicy,
   SOCKET_API_TOKENS_URL,
   SOCKET_CONTACT_URL,
   SOCKET_DASHBOARD_URL,
   SOCKET_FIREWALL_API_URL,
   SOCKET_PUBLIC_BLOB_STORE_URL,
+  httpAgentNames,
+  publicPolicy,
 } from './constants'
 import {
   createRequestBodyForFilepaths,
   createUploadRequest,
 } from './file-upload'
 import {
+  ResponseError,
   createDeleteRequest,
   createGetRequest,
   createRequestWithJson,
   getResponseJson,
   isResponseOk,
-  ResponseError,
   reshapeArtifactForPublicPolicy,
 } from './http-client'
 import {
@@ -1116,7 +1117,8 @@ export class SocketSdk {
         return json as unknown as SocketArtifact
       }),
     )
-    for (const settled of results) {
+    for (let i = 0, { length } = results; i < length; i += 1) {
+      const settled = results[i]!
       if (settled.status === 'rejected' || !settled.value) {
         continue
       }
@@ -1149,8 +1151,9 @@ export class SocketSdk {
       }
     }
     const packages: MalwareCheckPackage[] = []
-    for (const artifact of result.data as SocketArtifact[]) {
-      packages.push(SocketSdk.#normalizeArtifact(artifact, publicPolicy))
+    const artifacts = result.data as SocketArtifact[]
+    for (let i = 0, { length } = artifacts; i < length; i += 1) {
+      packages.push(SocketSdk.#normalizeArtifact(artifacts[i]!, publicPolicy))
     }
     return {
       cause: undefined,
@@ -1170,7 +1173,9 @@ export class SocketSdk {
   ): MalwareCheckPackage {
     const alerts: MalwareCheckAlert[] = []
     if (artifact.alerts) {
-      for (const alert of artifact.alerts) {
+      const artifactAlerts = artifact.alerts
+      for (let i = 0, { length } = artifactAlerts; i < length; i += 1) {
+        const alert = artifactAlerts[i]!
         const action = policy
           ? (policy.get(alert.type) ?? 'ignore')
           : (alert.action ?? 'ignore')

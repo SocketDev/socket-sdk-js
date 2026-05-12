@@ -1,3 +1,4 @@
+/* max-file-lines: legitimate — method-by-method coverage, 1:1 mapping */
 /**
  * @fileoverview Coverage tests for Socket SDK API methods using local HTTP server.
  *
@@ -37,9 +38,9 @@ describe('SocketSdk - API Methods Coverage', () => {
 
       // Consume request body for POST/PUT/PATCH requests
       if (
+        req.method === 'PATCH' ||
         req.method === 'POST' ||
-        req.method === 'PUT' ||
-        req.method === 'PATCH'
+        req.method === 'PUT'
       ) {
         let _body = ''
         req.on('data', chunk => {
@@ -88,7 +89,7 @@ describe('SocketSdk - API Methods Coverage', () => {
           if (url.includes('/repos')) {
             if (req.method === 'DELETE') {
               res.end(JSON.stringify({ success: true }))
-            } else if (req.method === 'PUT' || req.method === 'POST') {
+            } else if (req.method === 'POST' || req.method === 'PUT') {
               res.end(
                 JSON.stringify({ data: { id: 'repo-1', name: 'test-repo' } }),
               )
@@ -153,7 +154,7 @@ describe('SocketSdk - API Methods Coverage', () => {
           } else if (url.includes('/labels')) {
             if (req.method === 'DELETE') {
               res.end(JSON.stringify({ success: true }))
-            } else if (req.method === 'PUT' || req.method === 'POST') {
+            } else if (req.method === 'POST' || req.method === 'PUT') {
               res.end(JSON.stringify({ data: { id: 'label-1', name: 'test' } }))
             } else {
               res.end(JSON.stringify({ data: [] }))

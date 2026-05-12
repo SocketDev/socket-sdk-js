@@ -1,8 +1,10 @@
+/* max-file-lines: legitimate — AST-walking codegen pipeline for strict-typed SDK surface */
 /**
  * @fileoverview Generates strict TypeScript types from OpenAPI schema using AST.
  * Uses openapi-typescript to generate types, then acorn + acorn-typescript to
  * parse and transform them into strict versions with required fields properly marked.
  */
+// oxlint-disable-next-line socket/prefer-async-spawn -- single one-shot oxfmt invocation; sync API keeps this codegen pipeline strictly serial.
 import { spawnSync } from 'node:child_process'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
@@ -237,7 +239,8 @@ export function extractProperties(
   const requiredFields = new Set(config.requiredFields || [])
   const typeOverrides = config.typeOverrides || {}
 
-  for (const member of members) {
+  for (let i = 0, { length } = members; i < length; i += 1) {
+    const member = members[i]!
     if (member.type === 'TSPropertySignature' && member.key?.name) {
       const name = member.key.name
       const isRequired = requiredFields.has(name)
@@ -300,7 +303,8 @@ export function extractQueryParams(
   const members: AstNode[] = (queryType?.members || []) as AstNode[]
   const requiredParams = new Set(config.requiredParams || [])
 
-  for (const member of members) {
+  for (let i = 0, { length } = members; i < length; i += 1) {
+    const member = members[i]!
     if (member.type === 'TSPropertySignature' && member.key?.name) {
       const name = member.key.name
       const isRequired = requiredParams.has(name)
@@ -322,7 +326,9 @@ export function extractQueryParams(
 
   // Add additional fields from config
   if (config.additionalFields) {
-    for (const field of config.additionalFields) {
+    const additional = config.additionalFields
+    for (let i = 0, { length } = additional; i < length; i += 1) {
+      const field = additional[i]!
       properties.push({
         name: field.name,
         optional: field.optional !== false,
@@ -409,7 +415,9 @@ export function findExportByName(
   ast: AstNode,
   name: string,
 ): AstNode | undefined {
-  for (const node of (ast.body || []) as AstNode[]) {
+  const body = (ast.body || []) as AstNode[]
+  for (let i = 0, { length } = body; i < length; i += 1) {
+    const node = body[i]!
     if (
       node.type === 'ExportNamedDeclaration' &&
       node.declaration?.type === 'TSInterfaceDeclaration' &&
@@ -439,7 +447,8 @@ export function findProperty(
   const members: AstNode[] = ((Array.isArray(node.body)
     ? node.body
     : node.members) || []) as AstNode[]
-  for (const member of members) {
+  for (let i = 0, { length } = members; i < length; i += 1) {
+    const member = members[i]!
     if (member.type === 'TSPropertySignature') {
       // Key can be Identifier (name) or Literal (value for numbers/strings)
       const keyName = member.key?.name ?? member.key?.value
@@ -465,7 +474,8 @@ export function generateTypeDefinition(
   lines.push(' */')
   lines.push(`export type ${typeName} = {`)
 
-  for (const prop of properties) {
+  for (let i = 0, { length } = properties; i < length; i += 1) {
+    const prop = properties[i]!
     const opt = prop.optional ? '?' : ''
     lines.push(`  ${prop.name}${opt}: ${prop.type}`)
   }
@@ -621,7 +631,8 @@ export function navigateToPath(
   path: string[],
 ): AstNode | undefined {
   let current: AstNode | undefined = unwrapType(node)
-  for (const segment of path) {
+  for (let i = 0, { length } = path; i < length; i += 1) {
+    const segment = path[i]!
     if (!current) {
       return undefined
     }
@@ -716,8 +727,9 @@ export async function updateIndexExports(): Promise<void> {
 
   // Extract type names from generated types
   const typeNames: string[] = []
-  for (const config of Object.values(STRICT_TYPE_CONFIG)) {
-    typeNames.push(config.typeName)
+  const configs = Object.values(STRICT_TYPE_CONFIG)
+  for (let i = 0, { length } = configs; i < length; i += 1) {
+    typeNames.push(configs[i]!.typeName)
   }
 
   // Also add wrapper types
@@ -794,7 +806,11 @@ async function main(): Promise<void> {
     // Step 4: Generate each configured type
     const generatedTypes: string[] = []
 
-    for (const [key, config] of Object.entries(STRICT_TYPE_CONFIG)) {
+    const configEntries = Object.entries(STRICT_TYPE_CONFIG)
+    for (let i = 0, { length } = configEntries; i < length; i += 1) {
+      const entry = configEntries[i]!
+      const key = entry[0]
+      const config = entry[1]
       if (config.extractType === 'queryParams') {
         // Extract query parameters
         const properties = extractQueryParams(

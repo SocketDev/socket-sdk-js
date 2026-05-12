@@ -31,11 +31,12 @@ const logger = getDefaultLogger()
 const ansiRegex = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g')
 
 /** Strip ANSI codes and decorative characters (✧, ︎ variation selector, ⚡) from text. */
-const cleanOutput = (text: string): string =>
-  text
+export function cleanOutput(text: string): string {
+  return text
     .replace(ansiRegex, '')
-    .replace(/(?:\u2727|\uFE0E|\u26A1)\s*/g, '')
+    .replace(/(?:\u26A1|\u2727|\uFE0E)\s*/g, '')
     .trim()
+}
 
 interface SuiteResult {
   exitCode: number
@@ -307,10 +308,9 @@ export async function mergeCoverageFinal(): Promise<
   }
 
   // Merge: for each file, take max of each counter
-  const allFiles = new Set([
-    ...Object.keys(mainFinal),
-    ...Object.keys(isolatedFinal),
-  ])
+  const allFiles = [
+    ...new Set([...Object.keys(mainFinal), ...Object.keys(isolatedFinal)]),
+  ]
   let totalStatements = 0
   let coveredStatements = 0
   let totalBranches = 0
@@ -320,59 +320,65 @@ export async function mergeCoverageFinal(): Promise<
   let totalLines = 0
   let coveredLines = 0
 
-  for (const file of allFiles) {
+  for (let fi = 0, { length: flen } = allFiles; fi < flen; fi += 1) {
+    const file = allFiles[fi]!
     const m = mainFinal[file]
     const iso = isolatedFinal[file]
 
     // Merge statement counts (max of both suites) — union of keys
     const stmtMap = { ...m?.statementMap, ...iso?.statementMap }
-    const allStmtKeys = new Set([
-      ...Object.keys(m?.s ?? {}),
-      ...Object.keys(iso?.s ?? {}),
-    ])
+    const allStmtKeys = [
+      ...new Set([...Object.keys(m?.s ?? {}), ...Object.keys(iso?.s ?? {})]),
+    ]
     const mergedS: Record<string, number> = {}
-    for (const id of allStmtKeys) {
+    for (let i = 0, { length } = allStmtKeys; i < length; i += 1) {
+      const id = allStmtKeys[i]!
       mergedS[id] = Math.max(m?.s?.[id] ?? 0, iso?.s?.[id] ?? 0)
     }
-    totalStatements += allStmtKeys.size
+    totalStatements += allStmtKeys.length
     coveredStatements += Object.values(mergedS).filter(c => c > 0).length
 
     // Merge branch counts — union of keys
-    const allBranchKeys = new Set([
-      ...Object.keys(m?.b ?? {}),
-      ...Object.keys(iso?.b ?? {}),
-    ])
+    const allBranchKeys = [
+      ...new Set([...Object.keys(m?.b ?? {}), ...Object.keys(iso?.b ?? {})]),
+    ]
     const mergedB: Record<string, number[]> = {}
-    for (const id of allBranchKeys) {
+    for (let i = 0, { length } = allBranchKeys; i < length; i += 1) {
+      const id = allBranchKeys[i]!
       const mArr = m?.b?.[id] ?? []
       const iArr = iso?.b?.[id] ?? []
       const len = Math.max(mArr.length, iArr.length)
-      mergedB[id] = Array.from({ length: len }, (_, i) =>
-        Math.max(mArr[i] ?? 0, iArr[i] ?? 0),
+      mergedB[id] = Array.from({ length: len }, (_, j) =>
+        Math.max(mArr[j] ?? 0, iArr[j] ?? 0),
       )
     }
-    for (const id of allBranchKeys) {
+    for (let i = 0, { length } = allBranchKeys; i < length; i += 1) {
+      const id = allBranchKeys[i]!
       const arr = mergedB[id] || []
       totalBranches += arr.length
       coveredBranches += arr.filter(c => c > 0).length
     }
 
     // Merge function counts — union of keys
-    const allFnKeys = new Set([
-      ...Object.keys(m?.f ?? {}),
-      ...Object.keys(iso?.f ?? {}),
-    ])
+    const allFnKeys = [
+      ...new Set([...Object.keys(m?.f ?? {}), ...Object.keys(iso?.f ?? {})]),
+    ]
     const mergedF: Record<string, number> = {}
-    for (const id of allFnKeys) {
+    for (let i = 0, { length } = allFnKeys; i < length; i += 1) {
+      const id = allFnKeys[i]!
       mergedF[id] = Math.max(m?.f?.[id] ?? 0, iso?.f?.[id] ?? 0)
     }
-    totalFunctions += allFnKeys.size
+    totalFunctions += allFnKeys.length
     coveredFunctions += Object.values(mergedF).filter(c => c > 0).length
 
     // Lines: derive from merged statements (each statement maps to a line)
     const lineSet = new Set()
     const coveredLineSet = new Set()
-    for (const [id, loc] of Object.entries(stmtMap)) {
+    const stmtEntries = Object.entries(stmtMap)
+    for (let i = 0, { length } = stmtEntries; i < length; i += 1) {
+      const entry = stmtEntries[i]!
+      const id = entry[0]
+      const loc = entry[1]
       const line = loc.start.line
       lineSet.add(line)
       if ((mergedS[id] ?? 0) > 0) {
@@ -383,8 +389,9 @@ export async function mergeCoverageFinal(): Promise<
     coveredLines += coveredLineSet.size
   }
 
-  const pct = (covered: number, total: number): string =>
-    total > 0 ? ((covered / total) * 100).toFixed(2) : '0.00'
+  function pct(covered: number, total: number): string {
+    return total > 0 ? ((covered / total) * 100).toFixed(2) : '0.00'
+  }
 
   return {
     branches: pct(coveredBranches, totalBranches),

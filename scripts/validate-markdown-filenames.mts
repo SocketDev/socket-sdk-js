@@ -89,7 +89,8 @@ async function main(): Promise<void> {
     logger.log('  - Be in docs/ or .claude/ directories (any depth)')
     logger.log('')
 
-    for (const violation of violations) {
+    for (let i = 0, { length } = violations; i < length; i += 1) {
+      const violation = violations[i]!
       logger.log(`  ${violation.file}`)
       logger.log(`    Issue: ${violation.issue}`)
       logger.log(`    Current: ${violation.filename}`)
@@ -124,7 +125,8 @@ export async function findMarkdownFiles(
   try {
     const entries = await fs.readdir(dir, { withFileTypes: true })
 
-    for (const entry of entries) {
+    for (let i = 0, { length } = entries; i < length; i += 1) {
+      const entry = entries[i]!
       const fullPath = path.join(dir, entry.name)
 
       if (entry.isDirectory()) {
@@ -215,7 +217,7 @@ export function isLowercaseHyphenated(filename: string): boolean {
  */
 export function isScreamingCase(filename: string): boolean {
   // Remove extension for checking
-  const nameWithoutExt = filename.replace(/\.(md|MD)$/, '')
+  const nameWithoutExt = filename.replace(/\.(MD|md)$/, '')
 
   // Check if it contains any lowercase letters
   return /^[A-Z0-9_]+$/.test(nameWithoutExt) && /[A-Z]/.test(nameWithoutExt)
@@ -228,12 +230,12 @@ export function validateFilename(
   filePath: string,
 ): FilenameViolation | undefined {
   const filename = path.basename(filePath)
-  const nameWithoutExt = filename.replace(/\.(md|MD)$/, '')
+  const nameWithoutExt = filename.replace(/\.(MD|md)$/, '')
   const relativePath = path.relative(rootPath, filePath)
 
   // README.md and LICENSE are special - allowed anywhere
   // Valid - allowed in any location
-  if (nameWithoutExt === 'README' || nameWithoutExt === 'LICENSE') {
+  if (nameWithoutExt === 'LICENSE' || nameWithoutExt === 'README') {
     return undefined
   }
 
@@ -312,7 +314,8 @@ export async function validateMarkdownFilenames(): Promise<
   const files = await findMarkdownFiles(rootPath)
   const violations = []
 
-  for (const file of files) {
+  for (let i = 0, { length } = files; i < length; i += 1) {
+    const file = files[i]!
     const violation = validateFilename(file)
     if (violation) {
       violations.push(violation)

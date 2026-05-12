@@ -1,6 +1,6 @@
 /** @fileoverview Quota utility functions for Socket SDK method cost lookup. */
 import { existsSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import path from 'node:path'
 
 import { memoize, once } from '@socketsecurity/lib/memoization'
 import { ErrorCtor } from '@socketsecurity/lib/primordials'
@@ -27,7 +27,7 @@ const loadRequirements = once((): Requirements => {
     // When compiled, __dirname will point to dist/ directory.
     // In source, __dirname points to src/ directory.
     // api-method-quota-and-permissions.json is in the data directory at the project root.
-    const requirementsPath = join(
+    const requirementsPath = path.join(
       __dirname,
       '..',
       'data',
@@ -69,12 +69,16 @@ export function getAllMethodRequirements(): Record<string, ApiRequirement> {
   const reqs = loadRequirements()
   const result: Record<string, ApiRequirement> = {}
 
-  Object.entries(reqs.api).forEach(([methodName, requirement]) => {
+  const entries = Object.entries(reqs.api)
+  for (let i = 0, { length } = entries; i < length; i += 1) {
+    const entry = entries[i]!
+    const methodName = entry[0]
+    const requirement = entry[1]
     result[methodName] = {
       permissions: [...requirement.permissions],
       quota: requirement.quota,
     }
-  })
+  }
 
   return result
 }
@@ -168,7 +172,11 @@ export const getQuotaUsageSummary = memoize(
     const reqs = loadRequirements()
     const summary: Record<string, string[]> = {}
 
-    Object.entries(reqs.api).forEach(([methodName, requirement]) => {
+    const entries = Object.entries(reqs.api)
+    for (let i = 0, { length } = entries; i < length; i += 1) {
+      const entry = entries[i]!
+      const methodName = entry[0]
+      const requirement = entry[1]
       const costKey = `${requirement.quota} units`
 
       if (!summary[costKey]) {
@@ -176,12 +184,13 @@ export const getQuotaUsageSummary = memoize(
       }
 
       summary[costKey].push(methodName)
-    })
+    }
 
     // Sort methods within each cost level
-    Object.keys(summary).forEach(costKey => {
-      summary[costKey]?.sort()
-    })
+    const keys = Object.keys(summary)
+    for (let i = 0, { length } = keys; i < length; i += 1) {
+      summary[keys[i]!]?.sort()
+    }
 
     return summary
   },

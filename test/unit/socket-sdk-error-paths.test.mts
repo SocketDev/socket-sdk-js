@@ -1,3 +1,4 @@
+/* max-file-lines: legitimate — error-path coverage suite */
 /**
  * @fileoverview Error path tests for SocketSdk class methods.
  *

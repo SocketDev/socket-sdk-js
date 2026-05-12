@@ -41,7 +41,11 @@ export function sanitizeHeaders(
   const sanitized: Record<string, string> = {}
 
   // Plain object iteration works for both HeadersRecord and IncomingHttpHeaders.
-  for (const [key, value] of Object.entries(headers)) {
+  const entries = Object.entries(headers)
+  for (let i = 0, { length } = entries; i < length; i += 1) {
+    const entry = entries[i]!
+    const key = entry[0]
+    const value = entry[1]
     const keyLower = StringPrototypeToLowerCase(key)
     if (SENSITIVE_HEADERS.includes(keyLower)) {
       sanitized[key] = '[REDACTED]'

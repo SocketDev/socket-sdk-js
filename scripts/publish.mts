@@ -4,6 +4,7 @@
  * Build and checks should be run separately (e.g., via ci:validate).
  */
 
+// oxlint-disable-next-line socket/prefer-async-spawn -- needs ChildProcess stream API (.on('exit'), .stdout/.stderr) for live npm publish output forwarding; lib/spawn returns a Promise.
 import { spawn } from 'node:child_process'
 import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
@@ -410,7 +411,11 @@ export async function validateBuildArtifacts(): Promise<boolean> {
 
   // Check exports from package.json.
   if (pkgJson.exports) {
-    for (const [exportPath, exportValue] of Object.entries(pkgJson.exports)) {
+    const exportEntries = Object.entries(pkgJson.exports)
+    for (let i = 0, { length } = exportEntries; i < length; i += 1) {
+      const entry = exportEntries[i]!
+      const exportPath = entry[0]
+      const exportValue = entry[1]
       // Skip package.json export.
       if (exportPath === './package.json') {
         continue
@@ -422,7 +427,8 @@ export async function validateBuildArtifacts(): Promise<boolean> {
           ? [exportValue]
           : Object.values(exportValue).filter(v => typeof v === 'string')
 
-      for (const file of files) {
+      for (let j = 0, { length: jlen } = files; j < jlen; j += 1) {
+        const file = files[j]!
         const filePath = path.join(rootPath, file)
         if (!existsSync(filePath)) {
           missing.push(file)
@@ -449,8 +455,8 @@ export async function validateBuildArtifacts(): Promise<boolean> {
 
   if (missing.length > 0) {
     log.error('Missing build artifacts:')
-    for (const file of missing) {
-      logger.substep(`  ${file}`)
+    for (let i = 0, { length } = missing; i < length; i += 1) {
+      logger.substep(`  ${missing[i]!}`)
     }
     return false
   }

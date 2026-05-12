@@ -96,7 +96,8 @@ async function main(): Promise<void> {
 
     // Show first 20 files, then summary if more
     const filesToShow = violation.files.slice(0, 20)
-    for (const file of filesToShow) {
+    for (let i = 0, { length } = filesToShow; i < length; i += 1) {
+      const file = filesToShow[i]!
       logger.log(`  ${file}`)
     }
 

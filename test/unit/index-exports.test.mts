@@ -51,7 +51,8 @@ describe('index.ts exports', () => {
       'createUserAgentFromPkgJson',
     ]
 
-    for (const exportName of expectedExports) {
+    for (let i = 0, { length } = expectedExports; i < length; i += 1) {
+      const exportName = expectedExports[i]!
       expect(sdk).toHaveProperty(exportName)
     }
   })

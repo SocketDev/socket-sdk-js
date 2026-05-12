@@ -88,7 +88,7 @@ export function createLibStubPlugin() {
   //   - external/del.js → pulled in by fs's lazy getDel() for safeDelete,
   //     SDK never calls safeDelete/safeDeleteSync
   const libStubPattern =
-    /@socketsecurity\/lib\/dist\/(globs|sorts|external\/(npm-pack|pico-pack|cacache|del))\.js$/
+    /@socketsecurity\/lib\/dist\/(external\/(cacache|del|npm-pack|pico-pack)|globs|sorts)\.js$/
 
   const mimeDbPattern = /mime-db\/db\.json$/
 

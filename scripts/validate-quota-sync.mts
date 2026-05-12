@@ -83,7 +83,8 @@ function main(): void {
   const errors: string[] = []
   const warnings: string[] = []
 
-  for (const m of methods) {
+  for (let i = 0, { length } = methods; i < length; i += 1) {
+    const m = methods[i]!
     if (!m.operationId && !m.hadOperationIdNone) {
       errors.push(
         `${m.name}: no operation ID. Add a JSDoc \`@operationId <id>\` tag (or \`@operationId none\` if intentional).`,
@@ -135,7 +136,8 @@ function main(): void {
   if (warnings.length > 0) {
     logger.log('')
     logger.warn(`Quota-sync warnings (${warnings.length}):`)
-    for (const w of warnings) {
+    for (let i = 0, { length } = warnings; i < length; i += 1) {
+      const w = warnings[i]!
       logger.warn(`  ${w}`)
     }
   }
@@ -143,7 +145,8 @@ function main(): void {
   if (errors.length > 0) {
     logger.log('')
     logger.error(`Quota-sync errors (${errors.length}):`)
-    for (const e of errors) {
+    for (let i = 0, { length } = errors; i < length; i += 1) {
+      const e = errors[i]!
       logger.error(`  ${e}`)
     }
     if (!warnOnly) {
@@ -257,9 +260,13 @@ export function resolveDataEntry(
     return { entry: data.api[opId]!, key: opId }
   }
   const lower = opId.toLowerCase()
-  for (const [key, entry] of Object.entries(data.api)) {
+  const entries = Object.entries(data.api)
+  for (let i = 0, { length } = entries; i < length; i += 1) {
+    const entry = entries[i]!
+    const key = entry[0]
+    const value = entry[1]
     if (key.toLowerCase() === lower) {
-      return { entry, key }
+      return { entry: value, key }
     }
   }
   return undefined

@@ -20,7 +20,8 @@ async function main(): Promise<void> {
   const packageJsonFiles = await findPackageJsonFiles(rootPath)
   const allViolations: LinkViolation[] = []
 
-  for (const file of packageJsonFiles) {
+  for (let i = 0, { length } = packageJsonFiles; i < length; i += 1) {
+    const file = packageJsonFiles[i]!
     const violations = await checkPackageJson(file)
     allViolations.push(...violations)
   }
@@ -33,7 +34,8 @@ async function main(): Promise<void> {
     )
     logger.error('')
 
-    for (const violation of allViolations) {
+    for (let i = 0, { length } = allViolations; i < length; i += 1) {
+      const violation = allViolations[i]!
       const relativePath = path.relative(rootPath, violation.file)
       logger.error(`  ${relativePath}`)
       logger.error(
@@ -80,55 +82,29 @@ export async function checkPackageJson(
 
   const violations: LinkViolation[] = []
 
-  // Check dependencies.
-  if (pkg['dependencies']) {
-    for (const [name, version] of Object.entries(pkg['dependencies'])) {
-      if (typeof version === 'string' && version.startsWith('link:')) {
-        violations.push({
-          file: filePath,
-          field: 'dependencies',
-          package: name,
-          value: version,
-        })
-      }
+  // Check each dependency field. Cache entries arrays to avoid
+  // per-iteration iterator allocation (prefer-cached-for-loop).
+  const fields = [
+    'dependencies',
+    'devDependencies',
+    'peerDependencies',
+    'optionalDependencies',
+  ] as const
+  for (let f = 0, { length: flen } = fields; f < flen; f += 1) {
+    const field = fields[f]!
+    const deps = pkg[field]
+    if (!deps) {
+      continue
     }
-  }
-
-  // Check devDependencies.
-  if (pkg['devDependencies']) {
-    for (const [name, version] of Object.entries(pkg['devDependencies'])) {
+    const entries = Object.entries(deps)
+    for (let i = 0, { length } = entries; i < length; i += 1) {
+      const entry = entries[i]!
+      const name = entry[0]
+      const version = entry[1]
       if (typeof version === 'string' && version.startsWith('link:')) {
         violations.push({
           file: filePath,
-          field: 'devDependencies',
-          package: name,
-          value: version,
-        })
-      }
-    }
-  }
-
-  // Check peerDependencies.
-  if (pkg['peerDependencies']) {
-    for (const [name, version] of Object.entries(pkg['peerDependencies'])) {
-      if (typeof version === 'string' && version.startsWith('link:')) {
-        violations.push({
-          file: filePath,
-          field: 'peerDependencies',
-          package: name,
-          value: version,
-        })
-      }
-    }
-  }
-
-  // Check optionalDependencies.
-  if (pkg['optionalDependencies']) {
-    for (const [name, version] of Object.entries(pkg['optionalDependencies'])) {
-      if (typeof version === 'string' && version.startsWith('link:')) {
-        violations.push({
-          file: filePath,
-          field: 'optionalDependencies',
+          field,
           package: name,
           value: version,
         })
@@ -146,15 +122,16 @@ export async function findPackageJsonFiles(dir: string): Promise<string[]> {
   const files: string[] = []
   const entries = await fs.readdir(dir, { withFileTypes: true })
 
-  for (const entry of entries) {
+  for (let i = 0, { length } = entries; i < length; i += 1) {
+    const entry = entries[i]!
     const fullPath = path.join(dir, entry.name)
 
     // Skip node_modules, .git, and build directories.
     if (
-      entry.name === 'node_modules' ||
       entry.name === '.git' ||
       entry.name === 'build' ||
-      entry.name === 'dist'
+      entry.name === 'dist' ||
+      entry.name === 'node_modules'
     ) {
       continue
     }

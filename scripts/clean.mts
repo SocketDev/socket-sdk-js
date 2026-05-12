@@ -42,7 +42,8 @@ export async function cleanDirectories(
 ): Promise<number> {
   const { quiet = false } = options
 
-  for (const task of tasks) {
+  for (let i = 0, { length } = tasks; i < length; i += 1) {
+    const task = tasks[i]!
     const { name, pattern, patterns } = task
     const patternsToDelete = patterns || (pattern ? [pattern] : [])
 

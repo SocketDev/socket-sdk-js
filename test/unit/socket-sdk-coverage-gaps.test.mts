@@ -1,3 +1,4 @@
+/* max-file-lines: legitimate — gap-filling coverage suite */
 /**
  * @fileoverview Coverage gap tests for SocketSdk class methods.
  *

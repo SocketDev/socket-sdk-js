@@ -18,10 +18,11 @@
  * single source of truth.
  */
 
+// oxlint-disable-next-line socket/prefer-async-spawn -- bootstrap entry point: must run synchronously before any async setup so node_modules is hydrated for the rest of the pipeline.
 import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs'
 
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 
 import path from 'node:path'
 import process from 'node:process'
@@ -53,139 +54,6 @@ interface FirewallAlert {
   key?: string
 }
 
-const checkFirewall = async (
-  pkgName: string,
-  version: string,
-): Promise<boolean> => {
-  const purl = `pkg:npm/${pkgName}@${version}`
-  const url = `${FIREWALL_API_URL}/${encodeURIComponent(purl)}`
-  const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), FIREWALL_TIMEOUT_MS)
-  timer.unref?.()
-  try {
-    // oxlint-disable-next-line socket/no-fetch-prefer-http-request -- preinstall runs before node_modules exists; lib helpers are unavailable here.
-    const res = await fetch(url, {
-      headers: {
-        'User-Agent': 'socket-bootstrap-firewall-deps/1.0',
-        Accept: 'application/json',
-      },
-      signal: controller.signal,
-    })
-    clearTimeout(timer)
-    if (!res.ok) {
-      err(
-        `firewall-api: HTTP ${res.status} for ${purl} — proceeding anyway (non-fatal)`,
-      )
-      return true
-    }
-    const data = (await res.json()) as { alerts?: FirewallAlert[] }
-    const alerts = data.alerts ?? []
-    if (alerts.length > 0) {
-      err(
-        // oxlint-disable-next-line socket/no-status-emoji -- bootstrap runs before lib is installed; can't use logger.
-        `\n✗ Socket Firewall flagged ${pkgName}@${version} as malware (${alerts.length} alert(s)):`,
-      )
-      for (const a of alerts.slice(0, 10)) {
-        err(
-          `    ${a.type ?? a.key ?? 'malware'}${a.severity ? ` (${a.severity})` : ''}`,
-        )
-      }
-      err(
-        '\nFix: bump the pinned version in pnpm-workspace.yaml or package.json to a known-good release.',
-      )
-      return false
-    }
-    // oxlint-disable-next-line socket/no-status-emoji -- bootstrap runs before lib is installed; can't use logger.
-    log(`✓ ${pkgName}@${version} cleared by Socket Firewall`)
-    return true
-  } catch (e) {
-    clearTimeout(timer)
-    err(
-      `firewall-api: ${e instanceof Error ? e.message : String(e)} — proceeding anyway (non-fatal)`,
-    )
-    return true
-  }
-}
-
-const log = (msg: string): void => {
-  process.stdout.write(`[bootstrap] ${msg}\n`)
-}
-
-const err = (msg: string): void => {
-  process.stderr.write(`[bootstrap] ${msg}\n`)
-}
-
-/**
- * Read the pinned version of a package, checking (in order):
- *   1. `pnpm-workspace.yaml` `catalog:` entries
- *   2. Root `package.json` `dependencies` / `devDependencies` (skip
- *      "catalog:" / "workspace:" / "*" / "" — those need (1)).
- *
- * Avoids a dep on a YAML parser by hand-parsing the catalog block —
- * this script must itself be zero-dep so it can run before
- * `pnpm install` brings any tooling in.
- */
-
-// Strip range prefixes (^, ~, >=, <=, etc.) so the registry tarball
-// URL gets an exact semver. Applied to BOTH the catalog and the
-// package.json paths so they can never disagree.
-const stripRange = (v: string): string => v.replace(/^[\^~>=<]+/, '').trim()
-
-const readPinnedVersion = (pkgName: string): string => {
-  // (1) pnpm-workspace.yaml catalog
-  const wsPath = path.join(REPO_ROOT, 'pnpm-workspace.yaml')
-  if (existsSync(wsPath)) {
-    const content = readFileSync(wsPath, 'utf8')
-    const lines = content.split('\n')
-    let inCatalog = false
-    for (const rawLine of lines) {
-      const line = rawLine.replace(/\r$/, '')
-      if (/^catalog:\s*$/.test(line)) {
-        inCatalog = true
-        continue
-      }
-      if (inCatalog) {
-        // Leave the catalog block on the next top-level key (no
-        // leading whitespace, ends with ':').
-        if (/^\S.*:\s*$/.test(line)) {
-          inCatalog = false
-          continue
-        }
-        const m = line.match(
-          /^\s+['"]?([@A-Za-z0-9_/-]+)['"]?\s*:\s*['"]?([^'"\s]+)['"]?\s*$/,
-        )
-        if (m && m[1] === pkgName) {
-          return stripRange(m[2]!)
-        }
-      }
-    }
-  }
-
-  // (2) Root package.json dependencies / devDependencies
-  const pkgJsonPath = path.join(REPO_ROOT, 'package.json')
-  if (existsSync(pkgJsonPath)) {
-    const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8'))
-    for (const field of ['dependencies', 'devDependencies'] as const) {
-      const deps = pkg[field]
-      if (deps && typeof deps[pkgName] === 'string') {
-        const v: string = deps[pkgName]
-        if (
-          v !== '' &&
-          v !== '*' &&
-          !v.startsWith('catalog:') &&
-          !v.startsWith('workspace:')
-        ) {
-          return stripRange(v)
-        }
-      }
-    }
-  }
-
-  throw new Error(
-    `Pinned version not found for ${pkgName}. Add it to pnpm-workspace.yaml \`catalog:\` or root package.json dependencies.`,
-  )
-}
-
 /**
  * Download a npm registry tarball for `<pkg>@<version>` and extract
  * it into `node_modules/<pkg>/`. Skips if the destination already
@@ -193,7 +61,7 @@ const readPinnedVersion = (pkgName: string): string => {
  * version against firewall-api.socket.dev before downloading; refuses
  * to install if the firewall returned any alerts.
  */
-const bootstrapPackage = async (pkgName: string): Promise<void> => {
+export async function bootstrapPackage(pkgName: string): Promise<void> {
   const version = readPinnedVersion(pkgName)
   const dest = path.join(REPO_ROOT, 'node_modules', pkgName)
   const destPkgJson = path.join(dest, 'package.json')
@@ -231,7 +99,7 @@ const bootstrapPackage = async (pkgName: string): Promise<void> => {
 
   log(`Fetching ${tarballUrl}`)
   const tarballPath = path.join(
-    tmpdir(),
+    os.tmpdir(),
     `socket-bootstrap-${unscoped}-${version}.tgz`,
   )
 
@@ -266,12 +134,146 @@ const bootstrapPackage = async (pkgName: string): Promise<void> => {
   log(`${pkgName}@${version} → node_modules/${pkgName}`)
 }
 
-const main = async (): Promise<number> => {
+export async function checkFirewall(
+  pkgName: string,
+  version: string,
+): Promise<boolean> {
+  const purl = `pkg:npm/${pkgName}@${version}`
+  const url = `${FIREWALL_API_URL}/${encodeURIComponent(purl)}`
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), FIREWALL_TIMEOUT_MS)
+  timer.unref?.()
+  try {
+    // oxlint-disable-next-line socket/no-fetch-prefer-http-request -- preinstall runs before node_modules exists; lib helpers are unavailable here.
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'socket-bootstrap-firewall-deps/1.0',
+        Accept: 'application/json',
+      },
+      signal: controller.signal,
+    })
+    clearTimeout(timer)
+    if (!res.ok) {
+      err(
+        `firewall-api: HTTP ${res.status} for ${purl} — proceeding anyway (non-fatal)`,
+      )
+      return true
+    }
+    const data = (await res.json()) as { alerts?: FirewallAlert[] }
+    const alerts = data.alerts ?? []
+    if (alerts.length > 0) {
+      err(
+        // oxlint-disable-next-line socket/no-status-emoji -- bootstrap runs before lib is installed; can't use logger.
+        `\n✗ Socket Firewall flagged ${pkgName}@${version} as malware (${alerts.length} alert(s)):`,
+      )
+      const topAlerts = alerts.slice(0, 10)
+      for (let i = 0, { length } = topAlerts; i < length; i += 1) {
+        const a = topAlerts[i]!
+        err(
+          `    ${a.type ?? a.key ?? 'malware'}${a.severity ? ` (${a.severity})` : ''}`,
+        )
+      }
+      err(
+        '\nFix: bump the pinned version in pnpm-workspace.yaml or package.json to a known-good release.',
+      )
+      return false
+    }
+    // oxlint-disable-next-line socket/no-status-emoji -- bootstrap runs before lib is installed; can't use logger.
+    log(`✓ ${pkgName}@${version} cleared by Socket Firewall`)
+    return true
+  } catch (e) {
+    clearTimeout(timer)
+    err(
+      `firewall-api: ${e instanceof Error ? e.message : String(e)} — proceeding anyway (non-fatal)`,
+    )
+    return true
+  }
+}
+
+export function err(msg: string): void {
+  process.stderr.write(`[bootstrap] ${msg}\n`)
+}
+
+export function log(msg: string): void {
+  process.stdout.write(`[bootstrap] ${msg}\n`)
+}
+
+/**
+ * Read the pinned version of a package, checking (in order):
+ *   1. `pnpm-workspace.yaml` `catalog:` entries
+ *   2. Root `package.json` `dependencies` / `devDependencies` (skip
+ *      "catalog:" / "workspace:" / "*" / "" — those need (1)).
+ *
+ * Avoids a dep on a YAML parser by hand-parsing the catalog block —
+ * this script must itself be zero-dep so it can run before
+ * `pnpm install` brings any tooling in.
+ */
+
+export function readPinnedVersion(pkgName: string): string {
+  // (1) pnpm-workspace.yaml catalog
+  const wsPath = path.join(REPO_ROOT, 'pnpm-workspace.yaml')
+  if (existsSync(wsPath)) {
+    const content = readFileSync(wsPath, 'utf8')
+    const lines = content.split('\n')
+    let inCatalog = false
+    for (let i = 0, { length } = lines; i < length; i += 1) {
+      const line = lines[i]!.replace(/\r$/, '')
+      if (/^catalog:\s*$/.test(line)) {
+        inCatalog = true
+        continue
+      }
+      if (inCatalog) {
+        // Leave the catalog block on the next top-level key (no
+        // leading whitespace, ends with ':').
+        if (/^\S.*:\s*$/.test(line)) {
+          inCatalog = false
+          continue
+        }
+        const m = line.match(
+          /^\s+['"]?([@A-Za-z0-9_/-]+)['"]?\s*:\s*['"]?([^'"\s]+)['"]?\s*$/,
+        )
+        if (m && m[1] === pkgName) {
+          return stripRange(m[2]!)
+        }
+      }
+    }
+  }
+
+  // (2) Root package.json dependencies / devDependencies
+  const pkgJsonPath = path.join(REPO_ROOT, 'package.json')
+  if (existsSync(pkgJsonPath)) {
+    const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8'))
+    const fields = ['dependencies', 'devDependencies'] as const
+    for (let i = 0, { length } = fields; i < length; i += 1) {
+      const field = fields[i]!
+      const deps = pkg[field]
+      if (deps && typeof deps[pkgName] === 'string') {
+        const v: string = deps[pkgName]
+        if (
+          v !== '' &&
+          v !== '*' &&
+          !v.startsWith('catalog:') &&
+          !v.startsWith('workspace:')
+        ) {
+          return stripRange(v)
+        }
+      }
+    }
+  }
+
+  throw new Error(
+    `Pinned version not found for ${pkgName}. Add it to pnpm-workspace.yaml \`catalog:\` or root package.json dependencies.`,
+  )
+}
+
+export async function main(): Promise<number> {
   log(
     `Bootstrapping ${BOOTSTRAP_PACKAGES.length} package(s) from npm registry...`,
   )
-  for (const pkg of BOOTSTRAP_PACKAGES) {
+  for (let i = 0, { length } = BOOTSTRAP_PACKAGES; i < length; i += 1) {
+    const pkg = BOOTSTRAP_PACKAGES[i]!
     try {
+      // eslint-disable-next-line no-await-in-loop
       await bootstrapPackage(pkg)
     } catch (e) {
       err(
@@ -282,6 +284,13 @@ const main = async (): Promise<number> => {
   }
   log('Bootstrap complete.')
   return 0
+}
+
+// Strip range prefixes (^, ~, >=, <=, etc.) so the registry tarball
+// URL gets an exact semver. Applied to BOTH the catalog and the
+// package.json paths so they can never disagree.
+export function stripRange(v: string): string {
+  return v.replace(/^[\^~>=<]+/, '').trim()
 }
 
 main().then(code => process.exit(code))

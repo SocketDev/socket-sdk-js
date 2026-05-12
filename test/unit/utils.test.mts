@@ -1,3 +1,4 @@
+/* max-file-lines: legitimate — consolidated utility tests mirroring src/utils.ts */
 /**
  * @fileoverview Consolidated utility function tests.
  * Tests for promise utilities, query parameters, user-agent generation,
@@ -102,7 +103,9 @@ describe('Path Resolution', () => {
        * path segment differs from the primary checkout. */
       expect(result[0]).toMatch(/\/package\.json$/)
       expect(result[1]).toMatch(/\/src\/index\.ts$/)
-      result.forEach(p => expect(path.isAbsolute(p)).toBe(true))
+      for (let i = 0, { length } = result; i < length; i += 1) {
+        expect(path.isAbsolute(result[i]!)).toBe(true)
+      }
     })
 
     it('should handle absolute paths in array', () => {
@@ -249,7 +252,7 @@ describe('Query Parameter Normalization', () => {
     it('should not affect other parameters', () => {
       const params = {
         anotherParam: '123',
-        defaultBranch: 'master',
+        defaultBranch: 'master', // inclusive-language: external-api -- GitHub default-branch query param; legacy branch.
         regularParam: 'value',
       }
       const result = queryToSearchParams(params)
@@ -257,7 +260,7 @@ describe('Query Parameter Normalization', () => {
 
       expect(resultString).toContain('regularParam=value')
       expect(resultString).toContain('anotherParam=123')
-      expect(resultString).toContain('default_branch=master')
+      expect(resultString).toContain('default_branch=master') // inclusive-language: external-api -- mirrors fixture above.
       expect(resultString).not.toContain('defaultBranch=')
     })
 

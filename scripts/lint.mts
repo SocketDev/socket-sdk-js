@@ -1,3 +1,4 @@
+/* max-file-lines: legitimate — lint orchestration (flag parse, file selection, oxlint+oxfmt drivers, staged plumbing) */
 /**
  * @fileoverview Unified lint runner with flag-based configuration.
  * Provides smart linting that can target affected files or lint everything.
@@ -296,7 +297,8 @@ export function isExcludedByOxlint(
   file: string,
   excludePatterns: string[],
 ): boolean {
-  for (const pattern of excludePatterns) {
+  for (let i = 0, { length } = excludePatterns; i < length; i += 1) {
+    const pattern = excludePatterns[i]!
     // Escape regex metacharacters in the literal pattern (dots etc.), then
     // translate glob tokens in a single pass.
     const regexPattern = pattern
@@ -349,8 +351,9 @@ export async function runLintOnAll(options: LintOptions = {}): Promise<number> {
     },
   ]
 
-  for (const { args } of linters) {
-    const result = await runCommandQuiet('pnpm', args)
+  for (let i = 0, { length } = linters; i < length; i += 1) {
+    const linter = linters[i]!
+    const result = await runCommandQuiet('pnpm', linter.args)
 
     if (result.exitCode !== 0) {
       // When fixing, non-zero exit codes are normal if fixes were applied.
@@ -442,12 +445,13 @@ export async function runLintOnFiles(
     },
   ]
 
-  for (const { args, enabled } of linters) {
-    if (!enabled) {
+  for (let i = 0, { length } = linters; i < length; i += 1) {
+    const linter = linters[i]!
+    if (!linter.enabled) {
       continue
     }
 
-    const result = await runCommandQuiet('pnpm', args)
+    const result = await runCommandQuiet('pnpm', linter.args)
 
     if (result.exitCode !== 0) {
       // When fixing, non-zero exit codes are normal if fixes were applied.
@@ -483,14 +487,16 @@ export function shouldRunAllLinters(changedFiles: string[]): {
   runAll: boolean
   reason?: string
 } {
-  for (const file of changedFiles) {
+  for (let i = 0, { length } = changedFiles; i < length; i += 1) {
+    const file = changedFiles[i]!
     // Core library files
     if (CORE_FILES.has(file)) {
       return { runAll: true, reason: 'core files changed' }
     }
 
     // Config or infrastructure files
-    for (const pattern of CONFIG_PATTERNS) {
+    for (let i = 0, { length } = CONFIG_PATTERNS; i < length; i += 1) {
+      const pattern = CONFIG_PATTERNS[i]!
       if (file.includes(pattern.replace('**', ''))) {
         return { runAll: true, reason: 'config files changed' }
       }

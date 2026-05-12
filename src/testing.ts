@@ -123,7 +123,7 @@ export const repositoryFixtures = {
     id: 'repo_456',
     name: 'old-repo',
     archived: true,
-    default_branch: 'master',
+    default_branch: 'master', // inclusive-language: external-api -- GitHub repo.default_branch field; legacy archived repo fixture.
   },
   /**
    * Repository with full details.

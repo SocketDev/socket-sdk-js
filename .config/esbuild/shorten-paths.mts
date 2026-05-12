@@ -36,7 +36,8 @@ export function createPathShorteningPlugin() {
             f => f.endsWith('.js') || f.endsWith('.mjs'),
           )
 
-          for (const outputPath of outputs) {
+          for (let i = 0, { length } = outputs; i < length; i += 1) {
+            const outputPath = outputs[i]!
             // eslint-disable-next-line no-await-in-loop
             const content = await fs.readFile(outputPath, 'utf8')
             const magicString = new MagicString(content)
@@ -95,7 +96,13 @@ export function createPathShorteningPlugin() {
                 plugins: [],
               })
 
-              for (const comment of (ast.comments || []) as Comment[]) {
+              const comments = (ast.comments || []) as Comment[]
+              for (
+                let ci = 0, { length: clen } = comments;
+                ci < clen;
+                ci += 1
+              ) {
+                const comment = comments[ci]!
                 if (
                   comment.type === 'CommentLine' &&
                   comment.value.includes(NODE_MODULES)
@@ -142,13 +149,16 @@ export function createPathShorteningPlugin() {
                   }
                 }
 
-                for (const key of Object.keys(n)) {
-                  if (key === 'start' || key === 'end' || key === 'loc') {
+                const keys = Object.keys(n)
+                for (let ki = 0, { length: klen } = keys; ki < klen; ki += 1) {
+                  const key = keys[ki]!
+                  if (key === 'end' || key === 'loc' || key === 'start') {
                     continue
                   }
-                  const value = n[key]
+                  const value = n[key]!
                   if (Array.isArray(value)) {
-                    for (const item of value) {
+                    for (let i = 0, { length } = value; i < length; i += 1) {
+                      const item = value[i]!
                       walk(item)
                     }
                   } else {

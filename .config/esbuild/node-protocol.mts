@@ -16,7 +16,9 @@ export function createNodeProtocolPlugin() {
   return {
     name: 'node-protocol',
     setup(build: PluginBuild) {
-      for (const builtin of Module.builtinModules) {
+      const builtins = Module.builtinModules
+      for (let i = 0, { length } = builtins; i < length; i += 1) {
+        const builtin = builtins[i]!
         // Skip builtins that already carry the node: prefix.
         if (builtin.startsWith('node:')) {
           continue

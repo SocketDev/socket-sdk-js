@@ -187,10 +187,12 @@ describe('Quota Utils', () => {
     it('should have sorted method names within each cost level', () => {
       const summary = getQuotaUsageSummary()
 
-      Object.values(summary).forEach(methods => {
+      const methodsList = Object.values(summary)
+      for (let i = 0, { length } = methodsList; i < length; i += 1) {
+        const methods = methodsList[i]!
         const sorted = [...methods].sort()
         expect(methods).toEqual(sorted)
-      })
+      }
     })
   })
 

@@ -75,7 +75,8 @@ export async function checkBundledDependencies(content: string): Promise<{
   // Check if we have runtime dependencies.
   if (Object.keys(dependencies).length === 0) {
     // No runtime dependencies - check that Socket packages aren't bundled.
-    for (const pattern of socketPackagePatterns) {
+    for (let i = 0, { length } = socketPackagePatterns; i < length; i += 1) {
+      const pattern = socketPackagePatterns[i]!
       const hasExternalImport = Array.from(importSources).some(source =>
         pattern.test(source),
       )
@@ -114,7 +115,9 @@ export async function checkBundledDependencies(content: string): Promise<{
     }
   } else {
     // We have runtime dependencies - check that they remain external.
-    for (const dep of Object.keys(dependencies)) {
+    const depKeys = Object.keys(dependencies)
+    for (let di = 0, { length: dlen } = depKeys; di < dlen; di += 1) {
+      const dep = depKeys[di]!
       // Check for exact match or subpath imports (e.g., '@socketsecurity/lib/path')
       const hasExternalImport = Array.from(importSources).some(
         source => source === dep || source.startsWith(`${dep}/`),
@@ -169,13 +172,14 @@ export function hasAbsolutePaths(content: string): {
   // Match absolute paths but exclude URLs and node: protocol.
   const patterns = [
     // Match require('/abs/path') or require('C:\\path').
-    /require\(["'](?:\/[^"'\n]+|[A-Z]:\\[^"'\n]+)["']\)/g,
+    /require\(["'](?:[A-Z]:\\[^"'\n]+|\/[^"'\n]+)["']\)/g,
     // Match import from '/abs/path'.
-    /import\s+.*?from\s+["'](?:\/[^"'\n]+|[A-Z]:\\[^"'\n]+)["']/g,
+    /import\s+.*?from\s+["'](?:[A-Z]:\\[^"'\n]+|\/[^"'\n]+)["']/g,
   ]
 
   const matches: string[] = []
-  for (const pattern of patterns) {
+  for (let i = 0, { length } = patterns; i < length; i += 1) {
+    const pattern = patterns[i]!
     const found = content.match(pattern)
     if (found) {
       matches.push(...found)
@@ -197,8 +201,9 @@ describe('Bundle validation', () => {
 
     if (result.hasIssue) {
       logger.fail('Found absolute paths in bundle:')
-      for (const match of result.matches) {
-        logger.fail(`  - ${match}`)
+      const matches = result.matches
+      for (let i = 0, { length } = matches; i < length; i += 1) {
+        logger.fail(`  - ${matches[i]!}`)
       }
     }
 
@@ -215,8 +220,9 @@ describe('Bundle validation', () => {
 
     if (!result.hasNoBundledDeps) {
       logger.fail('Found bundled dependencies (should be external):')
-      for (const dep of result.bundledDeps) {
-        logger.fail(`  - ${dep}`)
+      const deps = result.bundledDeps
+      for (let i = 0, { length } = deps; i < length; i += 1) {
+        logger.fail(`  - ${deps[i]!}`)
       }
     }
 

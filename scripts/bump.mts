@@ -1,9 +1,11 @@
+/* max-file-lines: legitimate — multi-phase bump tool (changelog parse, AI rewrite, interactive review, tag), one cohesive script */
 /**
  * @fileoverview Version bump script with AI-powered changelog generation.
  * Creates version bump commits with package.json, lockfile, and changelog updates.
  * Includes interactive mode for reviewing and refining AI-generated changelogs.
  */
 
+// oxlint-disable-next-line socket/prefer-async-spawn -- needs the ChildProcess stream API for interactive prompts/TTY relay; lib/spawn returns a Promise without .stdin/.stdout handles.
 import { spawn as childSpawn } from 'node:child_process'
 import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
@@ -172,7 +174,7 @@ async function main(): Promise<void> {
       logger.log('\nRequires:')
       logger.log('  - claude-console (or claude) CLI tool installed')
       logger.log('  - Clean git working directory')
-      logger.log('  - Main/master branch (unless --force)')
+      logger.log('  - On the repository default branch (unless --force)')
       if (hasInteractivePrompts) {
         // oxlint-disable-next-line socket/no-status-emoji -- inline status indicator in help text, not a log prefix.
         logger.log('\nInteractive mode: Available ✓ (default)')
@@ -207,11 +209,11 @@ async function main(): Promise<void> {
       log.progress('Checking git branch')
       const onMainBranch = await checkGitBranch()
       if (!onMainBranch && !values['force']) {
-        log.failed('Not on main/master branch')
+        log.failed('Not on the repository default branch')
         process.exitCode = 1
         return
       }
-      log.done('On main/master branch')
+      log.done('On the repository default branch')
     }
 
     // Check for Claude if not skipping changelog.
@@ -385,17 +387,43 @@ interface BumpPackageJson {
 }
 
 /**
- * Check if we're on the main/master branch.
+ * Check if we're on the repository default branch. Resolves the
+ * default branch from origin/HEAD (preferred) and falls back to the
+ * legacy short name in case the remote has no HEAD ref set, per
+ * CLAUDE.md "Default branch fallback".
  */
 export async function checkGitBranch(): Promise<boolean> {
-  const result = await runCommandWithOutput('git', [
+  const currentResult = await runCommandWithOutput('git', [
     'rev-parse',
     '--abbrev-ref',
     'HEAD',
   ])
-  const branch = result.stdout.trim()
-  if (branch !== 'main' && branch !== 'master') {
-    log.warn(`Not on main/master branch (current: ${branch})`)
+  const branch = currentResult.stdout.trim()
+  // Resolve the canonical default branch via origin/HEAD.
+  const headRef = await runCommandWithOutput('git', [
+    'symbolic-ref',
+    '--quiet',
+    'refs/remotes/origin/HEAD',
+  ])
+  let defaultBranch = headRef.stdout
+    .trim()
+    .replace(/^refs\/remotes\/origin\//, '')
+  if (!defaultBranch) {
+    defaultBranch = 'main'
+    const fallbackCheck = await runCommandWithOutput('git', [
+      'show-ref',
+      '--verify',
+      '--quiet',
+      'refs/remotes/origin/master', // inclusive-language: external-api -- git branch ref; legacy fleet repos.
+    ])
+    if (fallbackCheck.exitCode === 0) {
+      defaultBranch = 'master' // inclusive-language: external-api -- git branch name; legacy fleet repos.
+    }
+  }
+  if (branch !== defaultBranch) {
+    log.warn(
+      `Not on the repository default branch '${defaultBranch}' (current: ${branch})`,
+    )
     return false
   }
   return true

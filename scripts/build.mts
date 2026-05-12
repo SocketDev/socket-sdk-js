@@ -344,7 +344,9 @@ async function main(): Promise<void> {
         if (values.analyze && result?.metafile) {
           const analysis = analyzeMetafile(result.metafile)
           logger.info('Build output:')
-          for (const file of analysis.files) {
+          const analysisFiles = analysis.files
+          for (let i = 0, { length } = analysisFiles; i < length; i += 1) {
+            const file = analysisFiles[i]!
             logger.substep(`${file.name}: ${file.size}`)
           }
           logger.step(`Total bundle size: ${analysis.totalSize}`)
@@ -401,7 +403,9 @@ async function main(): Promise<void> {
           if (values.analyze && srcResult.result?.metafile) {
             const analysis = analyzeMetafile(srcResult.result.metafile)
             logger.info('Build output:')
-            for (const file of analysis.files) {
+            const analysisFiles = analysis.files
+            for (let i = 0, { length } = analysisFiles; i < length; i += 1) {
+              const file = analysisFiles[i]!
               logger.substep(`${file.name}: ${file.size}`)
             }
             logger.step(`Total bundle size: ${analysis.totalSize}`)
