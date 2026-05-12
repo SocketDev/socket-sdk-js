@@ -11,15 +11,24 @@
  *   - linter / formatter dotfiles whose tools require root
  *     placement (.oxlintrc.json, .oxfmtrc.json, .npmrc, .gitignore,
  *     .gitattributes, .node-version)
- *   - concrete tsconfigs (tsconfig.json, tsconfig.check.json,
- *     tsconfig.dts.json) — TypeScript / tsgo / IDE discovery
- *     anchors. They extend from .config/tsconfig.base.json.
+ *   - tsconfig.json (TypeScript's project root anchor — extends
+ *     from .config/tsconfig.base.json)
  *
  * Everything else (taze.config.mts, vitest.config*.mts,
  * tsconfig.base.json, esbuild.config.mts, lockstep.json,
- * socket-wheelhouse.json, etc.) lives in `.config/`. A copy at
- * root is drift — usually a half-finished move that left a stale
- * file behind.
+ * socket-wheelhouse.json, etc.) lives in `.config/`. A copy at root
+ * is drift — usually a half-finished move that left a stale file
+ * behind.
+ *
+ * `tsconfig.base.json` is the abstract compiler-options layer
+ * (fleet-canonical, byte-identical across the fleet) and stays in
+ * `.config/`. *Concrete* tsconfigs (`tsconfig.json`,
+ * `tsconfig.check.json`, `tsconfig.dts.json`, etc. — anything with
+ * `include`/`exclude`/`files`) live at the package root: at repo root
+ * for single-package repos, at each `packages/<pkg>/` for monorepos.
+ * tsc discovers `tsconfig.json` at cwd natively; keeping the concrete
+ * elsewhere breaks IDE language-server discovery and forces every
+ * caller to pass `-p <path>` explicitly.
  *
  * Exit codes:
  *   0 — clean
@@ -65,6 +74,21 @@ const ROOT_DOT_PAIRS: ReadonlyArray<readonly [string, string]> = [
   ['.oxfmtrc.json', 'oxfmtrc.json'],
 ]
 
+// Concrete tsconfig basenames — these must NOT live in `.config/`.
+// They have `include`/`exclude` and belong at the package root so tsc
+// + IDE can discover them natively. The abstract layer
+// (`tsconfig.base.json`) stays in `.config/` and is in
+// `CONFIG_BASENAMES` above.
+const CONCRETE_TSCONFIG_BASENAMES: readonly string[] = [
+  'tsconfig.json',
+  'tsconfig.check.json',
+  'tsconfig.check.local.json',
+  'tsconfig.dts.json',
+  'tsconfig.test.json',
+  'tsconfig.build.json',
+  'tsconfig.declaration.json',
+]
+
 function main(): void {
   const findings: string[] = []
 
@@ -94,9 +118,24 @@ function main(): void {
     }
   }
 
+  // Concrete tsconfigs must NOT live in `.config/`. They belong at the
+  // repo root (single-package) or each `packages/<pkg>/` (monorepo).
+  // tsc + IDE discover them natively at cwd; burying them in `.config/`
+  // breaks language-server lookups and forces explicit `-p <path>`.
+  for (const basename of CONCRETE_TSCONFIG_BASENAMES) {
+    const configCopy = path.join(configPath, basename)
+    if (existsSync(configCopy)) {
+      findings.push(
+        `Concrete tsconfig in .config/: .config/${basename} should live at the package root, not in .config/. Move it (single-package: repo root; monorepo: packages/<pkg>/).`,
+      )
+    }
+  }
+
   if (findings.length === 0) {
+    const total =
+      CONFIG_BASENAMES.length + CONCRETE_TSCONFIG_BASENAMES.length
     logger.success(
-      `Config-path hygiene OK — ${CONFIG_BASENAMES.length} basenames checked, no root duplicates.`,
+      `Config-path hygiene OK — ${total} basenames checked, no drift.`,
     )
     return
   }
