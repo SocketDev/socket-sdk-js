@@ -261,8 +261,8 @@ function referencesThis(node) {
       continue
     }
     for (let i = 0, { length } = STRUCTURAL_KEYS; i < length; i += 1) {
-      const k = STRUCTURAL_KEYS[i]!
-      if (item[k] !== undefined) {
+      const k = STRUCTURAL_KEYS[i]
+      if (k && item[k] !== undefined) {
         queue.push(item[k])
       }
     }

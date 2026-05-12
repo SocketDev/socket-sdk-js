@@ -1,12 +1,7 @@
 {
   "compilerOptions": {
-    // The following options are not supported by @typescript/native-preview.
-    // They are either ignored or throw an unknown option error:
-    //"importsNotUsedAsValues": "remove",
-    "allowImportingTsExtensions": false,
     "allowJs": false,
     "composite": false,
-    "declaration": true,
     "declarationMap": false,
     "erasableSyntaxOnly": true,
     "esModuleInterop": true,
@@ -24,7 +19,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "resolveJsonModule": true,
-    "rewriteRelativeImportExtensions": true,
     "skipLibCheck": true,
     "sourceMap": false,
     "strict": true,

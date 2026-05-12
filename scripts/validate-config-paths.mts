@@ -12,7 +12,7 @@
  *     placement (.oxlintrc.json, .oxfmtrc.json, .npmrc, .gitignore,
  *     .gitattributes, .node-version)
  *   - tsconfig.json (TypeScript's project root anchor — extends
- *     from .config/tsconfig.base.json or .config/tsconfig.json)
+ *     from .config/tsconfig.base.json)
  *
  * Everything else (taze.config.mts, vitest.config*.mts,
  * tsconfig.base.json, tsconfig.check.json, tsconfig.dts.json,
