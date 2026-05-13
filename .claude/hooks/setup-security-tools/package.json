@@ -1,0 +1,11 @@
+{
+  "name": "hook-setup-security-tools",
+  "private": true,
+  "type": "module",
+  "main": "./index.mts",
+  "dependencies": {
+    "@sinclair/typebox": "catalog:",
+    "@socketregistry/packageurl-js-stable": "npm:@socketregistry/packageurl-js@1.4.2",
+    "@socketsecurity/lib-stable": "npm:@socketsecurity/lib@5.28.0"
+  }
+}

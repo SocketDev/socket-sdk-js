@@ -2,8 +2,9 @@
 // Claude Code PreToolUse hook — no-revert-guard.
 //
 // Blocks Bash commands that would revert tracked changes, bypass the
-// git/husky hook chain, or otherwise destroy work in flight, unless
-// the conversation has authorized the bypass via the canonical phrase
+// git-hook chain (.git-hooks/ wired in via `core.hooksPath`), or
+// otherwise destroy work in flight, unless the conversation has
+// authorized the bypass via the canonical phrase
 // `Allow <X> bypass` (case-sensitive, exact match).
 //
 // The bypass-phrase contract:
@@ -35,8 +36,9 @@
 //
 // Fails open on hook bugs (exit 0 + stderr log).
 
-import { existsSync, readFileSync } from 'node:fs'
 import process from 'node:process'
+
+import { bypassPhrasePresent, readStdin } from '../_shared/transcript.mts'
 
 type ToolInput = {
   tool_input?: { command?: string } | undefined
@@ -65,7 +67,7 @@ const CHECKS: readonly GuardCheck[] = [
   },
   {
     bypassPhrase: 'Allow no-verify bypass',
-    label: 'git --no-verify (skips husky hooks)',
+    label: 'git --no-verify (skips .git-hooks/ chain)',
     pattern: /(?:^|\s)--no-verify\b/,
   },
   {
@@ -75,12 +77,12 @@ const CHECKS: readonly GuardCheck[] = [
   },
   {
     bypassPhrase: 'Allow lint bypass',
-    label: 'DISABLE_PRECOMMIT_LINT=1 (skips lint step in husky)',
+    label: 'DISABLE_PRECOMMIT_LINT=1 (skips lint step in pre-commit hook)',
     pattern: /\bDISABLE_PRECOMMIT_LINT\s*=\s*[1-9]/,
   },
   {
     bypassPhrase: 'Allow test bypass',
-    label: 'DISABLE_PRECOMMIT_TEST=1 (skips test step in husky)',
+    label: 'DISABLE_PRECOMMIT_TEST=1 (skips test step in pre-commit hook)',
     pattern: /\bDISABLE_PRECOMMIT_TEST\s*=\s*[1-9]/,
   },
   {
@@ -115,98 +117,46 @@ const CHECKS: readonly GuardCheck[] = [
       /(?:^|[\s;&|(`])git\s+stash(?:\s+(?:push|save|--keep-index|--patch|-[a-z]+)|\s*$|\s+[^a-z])/,
   },
   {
+    // Bash file-write surfaces agents reach for when an Edit/Write
+    // hook blocks them. Catches the "go around" pattern: agent tries
+    // Edit, gets blocked by markdown-filename-guard / path-guard /
+    // no-fleet-fork-guard / etc., then switches to `python3 -c`
+    // (or `sed -i` / heredoc / printf >) to write the same content
+    // via Bash where the Edit-layer hooks don't fire.
+    //
+    // The contract: when an Edit/Write hook blocks, the path forward
+    // is (a) move the file to a canonical location, (b) refactor the
+    // change so the rule no longer triggers, or (c) get the canonical
+    // bypass phrase for the original hook. Switching tools to dodge
+    // the hook is not a path.
+    //
+    // Observed 2026-05-12: agent used `python3 -c '...write(...)'`
+    // to rename a markdown file after markdown-filename-guard blocked
+    // Edit on it.
+    //
+    // Patterns matched:
+    //   - python -c '...' with open(...,'w') or .write_text(
+    //   - sed -i (in-place edit)
+    //   - heredoc redirected to file (cat << EOF > file)
+    //   - tee writing to a non-tmp file
+    //   - dd of=<file>
+    //
+    // Carve-outs intentionally NOT matched: plain `>` / `>>` (too
+    // broad — every build/log/test invocation uses these), `mv` / `cp`
+    // (file moves, not content writes), tools that write their own
+    // output (`tsc`, `pnpm build`, etc. — they don't use Bash write
+    // primitives directly).
+    bypassPhrase: 'Allow bash-write bypass',
+    label: 'Bash file-write (likely dodging an Edit/Write hook)',
+    pattern:
+      /(?:^|[\s;&|(`])(?:python3?\s+-c\b.*(?:open\([^)]*['"]w['"]?|\.write_text\(|\.write\([^)]*\)\s*$)|sed\s+-i\b|cat\s+<<-?\s*['"]?[A-Z_]+['"]?\b[^|;`]*>\s*[^/]|tee\s+(?!-)\S*\.(?:m?[jt]sx?|json|md|ya?ml|toml|sh|py|rs|go|css)\b|\bdd\s+[^|;`]*\bof=)/,
+  },
+  {
     bypassPhrase: 'Allow force-push bypass',
     label: 'git push --force / -f',
     pattern: /(?:^|[\s;&|(`])git\s+push\b[^;&|()`]*\s(?:--force\b|-f\b)/,
   },
 ]
-
-function readStdin(): Promise<string> {
-  return new Promise(resolve => {
-    let buf = ''
-    process.stdin.setEncoding('utf8')
-    process.stdin.on('data', chunk => {
-      buf += chunk
-    })
-    process.stdin.on('end', () => resolve(buf))
-  })
-}
-
-/**
- * Read user-text content from the transcript JSONL. Each line is a
- * JSON event; user messages have `role: "user"` (or
- * `type: "user"`/`message.role: "user"` depending on the harness
- * version). Concatenate all user-text content into a single string
- * for phrase matching.
- *
- * Fails silently to empty string on parse errors so the hook stays
- * fail-open per the contract.
- */
-function readUserTurns(transcriptPath: string | undefined): string {
-  if (!transcriptPath || !existsSync(transcriptPath)) {
-    return ''
-  }
-  let raw: string
-  try {
-    raw = readFileSync(transcriptPath, 'utf8')
-  } catch {
-    return ''
-  }
-  const out: string[] = []
-  for (const line of raw.split('\n')) {
-    if (!line) {
-      continue
-    }
-    let evt: unknown
-    try {
-      evt = JSON.parse(line)
-    } catch {
-      continue
-    }
-    if (!evt || typeof evt !== 'object') {
-      continue
-    }
-    const e = evt as Record<string, unknown>
-    // Variants seen across harness versions:
-    //   { role: 'user', content: '...' }
-    //   { type: 'user', message: { content: '...' } }
-    //   { type: 'user', message: { content: [{ type: 'text', text: '...' }] } }
-    const role =
-      typeof e['role'] === 'string'
-        ? e['role']
-        : typeof e['type'] === 'string'
-          ? e['type']
-          : undefined
-    if (role !== 'user') {
-      continue
-    }
-    const message = e['message']
-    let content: unknown =
-      e['content'] ??
-      (message && typeof message === 'object'
-        ? (message as Record<string, unknown>)['content']
-        : undefined)
-    if (typeof content === 'string') {
-      out.push(content)
-      continue
-    }
-    if (Array.isArray(content)) {
-      for (const block of content) {
-        if (block && typeof block === 'object') {
-          const b = block as Record<string, unknown>
-          if (typeof b['text'] === 'string') {
-            out.push(b['text'] as string)
-          } else if (typeof b['content'] === 'string') {
-            out.push(b['content'] as string)
-          }
-        } else if (typeof block === 'string') {
-          out.push(block)
-        }
-      }
-    }
-  }
-  return out.join('\n')
-}
 
 function emitBlock(
   command: string,
@@ -268,8 +218,7 @@ async function main(): Promise<void> {
 
   // Look for the canonical bypass phrase in user turns. The match is
   // case-sensitive and substring-based — a paraphrase doesn't count.
-  const userText = readUserTurns(payload.transcript_path)
-  if (userText.includes(triggered.check.bypassPhrase)) {
+  if (bypassPhrasePresent(payload.transcript_path, triggered.check.bypassPhrase)) {
     return
   }
 

@@ -20,7 +20,6 @@
 //        - .claude/hooks/
 //        - .claude/skills/_shared/
 //        - docs/claude.md/
-//        - .husky/
 //      → block.
 //
 // The bypass phrase: `Allow fleet-fork bypass`. Reading the recent
@@ -53,7 +52,12 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import { errorMessage } from '@socketsecurity/lib/errors'
+import { errorMessage } from '@socketsecurity/lib-stable/errors'
+
+import {
+  bypassPhrasePresent,
+  readStdin,
+} from '../_shared/transcript.mts'
 
 type ToolInput = {
   tool_input?: { file_path?: string } | undefined
@@ -70,7 +74,6 @@ const CANONICAL_PREFIXES = [
   '.claude/hooks/',
   '.claude/skills/_shared/',
   'docs/claude.md/',
-  '.husky/',
 ]
 
 // Fleet-canonical individual files (not under one of the prefix
@@ -98,69 +101,6 @@ const TEMPLATE_PATH_TOKENS = [
   '/socket-wheelhouse/template/',
   '/repo-template/template/',
 ]
-
-function readStdin(): Promise<string> {
-  return new Promise(resolve => {
-    let buf = ''
-    process.stdin.setEncoding('utf8')
-    process.stdin.on('data', chunk => {
-      buf += chunk
-    })
-    process.stdin.on('end', () => resolve(buf))
-  })
-}
-
-/**
- * Walk the recent user turns in the transcript, looking for an exact
- * occurrence of the bypass phrase. Returns true if found within the
- * last BYPASS_LOOKBACK_USER_TURNS user-turn entries.
- */
-function bypassPhrasePresent(transcriptPath: string | undefined): boolean {
-  if (!transcriptPath || !existsSync(transcriptPath)) {
-    return false
-  }
-  let raw: string
-  try {
-    raw = readFileSync(transcriptPath, 'utf8')
-  } catch {
-    return false
-  }
-  const lines = raw.split('\n').filter(Boolean)
-  let userTurns = 0
-  for (let i = lines.length - 1; i >= 0; i--) {
-    const line = lines[i]!
-    let entry: { type?: string; message?: { role?: string; content?: unknown } }
-    try {
-      entry = JSON.parse(line)
-    } catch {
-      continue
-    }
-    if (entry.type !== 'user' || entry.message?.role !== 'user') {
-      continue
-    }
-    userTurns++
-    const content = entry.message?.content
-    const text =
-      typeof content === 'string'
-        ? content
-        : Array.isArray(content)
-          ? content
-              .map(c =>
-                typeof c === 'object' && c && 'text' in c
-                  ? String((c as { text: unknown }).text)
-                  : '',
-              )
-              .join('\n')
-          : ''
-    if (text.includes(BYPASS_PHRASE)) {
-      return true
-    }
-    if (userTurns >= BYPASS_LOOKBACK_USER_TURNS) {
-      break
-    }
-  }
-  return false
-}
 
 /**
  * Find the fleet repo root for an absolute file path by walking up
@@ -255,7 +195,13 @@ async function main(): Promise<number> {
   }
 
   // Bypass-phrase check.
-  if (bypassPhrasePresent(payload.transcript_path)) {
+  if (
+    bypassPhrasePresent(
+      payload.transcript_path,
+      BYPASS_PHRASE,
+      BYPASS_LOOKBACK_USER_TURNS,
+    )
+  ) {
     return 0
   }
 
@@ -274,7 +220,7 @@ async function main(): Promise<number> {
       `Fix path:`,
       `  1. Edit socket-wheelhouse/template/${relToRepo}`,
       `  2. Commit + push template`,
-      `  3. Cascade with: node scripts/sync-scaffolding/main.mts \\`,
+      `  3. Cascade with: node scripts/sync-scaffolding/cli.mts \\`,
       `       --target ${repoRoot} --fix`,
       ``,
       `If you genuinely need to bypass (e.g. emergency hotfix that`,
