@@ -59,7 +59,7 @@
     "lint": "node scripts/lint.mts",
     "precommit": "pnpm run check --lint --staged",
     "preinstall": "node scripts/bootstrap-firewall-deps.mts",
-    "prepare": "husky",
+    "prepare": "node scripts/install-git-hooks.mts",
     "ci:validate": "node scripts/ci-validate.mts",
     "prepublishOnly": "echo 'ERROR: Use GitHub Actions workflow for publishing' && exit 1",
     "publish": "node scripts/publish.mts",
