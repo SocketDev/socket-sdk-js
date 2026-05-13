@@ -30,8 +30,21 @@ pmOnFail: error
 
 catalog:
   '@sinclair/typebox': 0.34.49
+  '@socketregistry/packageurl-js': 1.4.2
+  '@socketregistry/packageurl-js-stable': npm:@socketregistry/packageurl-js@1.4.2
   '@socketsecurity/lib': 5.28.0
+  '@socketsecurity/lib-stable': npm:@socketsecurity/lib@5.28.0
+  '@socketsecurity/registry': 2.0.2
+  '@socketsecurity/sdk': 4.0.1
+  '@socketsecurity/sdk-stable': npm:@socketsecurity/sdk@4.0.1
+  '@types/mdast': 4.0.4
   '@types/node': 24.9.2
+  '@typescript/native-preview': 7.0.0-dev.20260415.1
+  'ecc-agentshield': 1.4.0
+  'mdast-util-from-markdown': 2.0.3
+  'micromark': 4.0.2
+  'oxfmt': 0.37.0
+  'oxlint': 1.52.0
 
 overrides:
   defu: '>=6.1.7'

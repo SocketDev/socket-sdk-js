@@ -60,6 +60,9 @@ catalogs:
     '@socketsecurity/lib':
       specifier: 5.28.0
       version: 5.28.0
+    '@socketsecurity/lib-stable':
+      specifier: npm:@socketsecurity/lib@5.28.0
+      version: 5.28.0
     '@types/node':
       specifier: 24.9.2
       version: 24.9.2
@@ -302,6 +305,16 @@ importers:
         version: 24.9.2
 
   .claude/hooks/no-experimental-strip-types-guard:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.9.2
+
+  .claude/hooks/no-external-issue-ref-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@5.28.0(typescript@5.9.3)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
