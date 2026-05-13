@@ -19,7 +19,9 @@ import type { HttpResponse } from '@socketsecurity/lib/http-request'
 import type { Server } from 'node:http'
 
 export function mockHttpResponse(
-  overrides: Partial<Omit<HttpResponse, 'body'>> & { body?: Buffer | string },
+  overrides: Partial<Omit<HttpResponse, 'body'>> & {
+    body?: Buffer | string | undefined
+  },
 ): HttpResponse {
   const body =
     typeof overrides.body === 'string'

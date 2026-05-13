@@ -253,7 +253,7 @@ export async function publishPackage(
 }
 
 interface PushTagOptions {
-  force?: boolean
+  force?: boolean | undefined
 }
 
 /**
@@ -394,9 +394,9 @@ export async function runCommandWithOutput(
 interface PublishPackageJson {
   name: string
   version: string
-  main?: string
-  types?: string
-  exports?: Record<string, string | Record<string, string>>
+  main?: string | undefined
+  types?: string | undefined
+  exports?: Record<string, string | Record<string, string>> | undefined
   [key: string]: unknown
 }
 
@@ -466,11 +466,11 @@ export async function validateBuildArtifacts(): Promise<boolean> {
 }
 
 interface PublishOptions {
-  access?: string
-  dryRun?: boolean
-  force?: boolean
-  otp?: string
-  tag?: string
+  access?: string | undefined
+  dryRun?: boolean | undefined
+  force?: boolean | undefined
+  otp?: string | undefined
+  tag?: string | undefined
 }
 
 /**

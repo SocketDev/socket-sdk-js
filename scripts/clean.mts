@@ -25,12 +25,12 @@ const logger = getDefaultLogger()
 
 interface CleanTask {
   name: string
-  pattern?: string
-  patterns?: string[]
+  pattern?: string | undefined
+  patterns?: string[] | undefined
 }
 
 interface CleanOptions {
-  quiet?: boolean
+  quiet?: boolean | undefined
 }
 
 /**

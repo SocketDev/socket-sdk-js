@@ -49,9 +49,9 @@ const FIREWALL_API_URL = 'https://firewall-api.socket.dev/purl'
 const FIREWALL_TIMEOUT_MS = 10_000
 
 interface FirewallAlert {
-  severity?: string
-  type?: string
-  key?: string
+  severity?: string | undefined
+  type?: string | undefined
+  key?: string | undefined
 }
 
 /**
@@ -159,7 +159,7 @@ export async function checkFirewall(
       )
       return true
     }
-    const data = (await res.json()) as { alerts?: FirewallAlert[] }
+    const data = (await res.json()) as { alerts?: FirewallAlert[] | undefined }
     const alerts = data.alerts ?? []
     if (alerts.length > 0) {
       err(

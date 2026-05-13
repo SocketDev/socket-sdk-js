@@ -443,7 +443,11 @@ describe('SocketSdk - #createQueryErrorResult non-SyntaxError', () => {
     })
     const result = (await client.getApi('anything', {
       throws: false,
-    })) as { cause?: unknown; error?: string; success: boolean }
+    })) as {
+      cause?: unknown | undefined
+      error?: string | undefined
+      success: boolean
+    }
 
     expect(result.success).toBe(false)
     if (!result.success) {
@@ -460,7 +464,7 @@ describe('SocketSdk - #createQueryErrorResult non-SyntaxError', () => {
     const result = (await client.sendApi('anything', {
       body: {},
       throws: false,
-    })) as { error?: string; success: boolean }
+    })) as { error?: string | undefined; success: boolean }
 
     expect(result.success).toBe(false)
     if (!result.success) {

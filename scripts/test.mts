@@ -251,11 +251,11 @@ export async function runBuild(): Promise<number> {
 }
 
 interface TestOptions {
-  all?: boolean
-  coverage?: boolean
-  force?: boolean
-  staged?: boolean
-  update?: boolean
+  all?: boolean | undefined
+  coverage?: boolean | undefined
+  force?: boolean | undefined
+  staged?: boolean | undefined
+  update?: boolean | undefined
 }
 
 export async function runCheck(): Promise<number> {

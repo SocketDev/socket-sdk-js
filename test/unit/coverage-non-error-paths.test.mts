@@ -203,7 +203,7 @@ describe('getResponseJson enhanced error branches', () => {
       await getResponseJson(response)
       expect.fail('Should have thrown')
     } catch (e) {
-      const err = e as Error & { originalResponse?: string }
+      const err = e as Error & { originalResponse?: string | undefined }
       expect(err.message).toContain('...')
       // originalResponse should contain the full body
       expect(err.originalResponse?.length).toBe(300)
@@ -899,7 +899,7 @@ describe('SocketSdk - uploadManifestFiles edge cases', () => {
     }
     expect(result.error).toBe('No readable manifest files found')
     // The cause should contain truncation for >5 files
-    const cause = (result as { cause?: string }).cause ?? ''
+    const cause = (result as { cause?: string | undefined }).cause ?? ''
     expect(cause).toContain('... and 2 more')
     expect(cause).toContain('Yarn Berry')
   })
@@ -926,7 +926,7 @@ describe('SocketSdk - uploadManifestFiles edge cases', () => {
     }
     expect(result.error).toBe('Custom validation error')
     // When errorCause is not redundant with errorMessage, it should be included
-    const typedResult = result as { cause?: string }
+    const typedResult = result as { cause?: string | undefined }
     expect(typedResult.cause).toBe('Custom detailed cause')
   })
 
@@ -953,7 +953,7 @@ describe('SocketSdk - uploadManifestFiles edge cases', () => {
     }
     expect(result.error).toBe('Custom validation error')
     // Redundant cause should be filtered out by filterRedundantCause
-    const typedResult = result as { cause?: string }
+    const typedResult = result as { cause?: string | undefined }
     expect(typedResult.cause).toBeUndefined()
   })
 })

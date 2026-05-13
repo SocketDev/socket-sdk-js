@@ -16,12 +16,12 @@ const useLocalLib = existsSync(libPath)
 
 interface ResolveContext {
   conditions: string[]
-  parentURL?: string
+  parentURL?: string | undefined
 }
 
 interface ResolveResult {
   url: string
-  shortCircuit?: boolean
+  shortCircuit?: boolean | undefined
 }
 
 type NextResolve = (specifier: string, context: ResolveContext) => ResolveResult

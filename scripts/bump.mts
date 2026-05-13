@@ -63,10 +63,13 @@ interface InteractivePrompts {
     message: string
     choices: Array<{ value: string; name: string }>
   }) => Promise<string>
-  confirm: (options: { message: string; default?: boolean }) => Promise<boolean>
+  confirm: (options: {
+    message: string
+    default?: boolean | undefined
+  }) => Promise<boolean>
   input: (options: {
     message: string
-    validate?: (value: string) => boolean | string
+    validate?: (value: string) => boolean | string | undefined
   }) => Promise<string>
 }
 
@@ -381,7 +384,7 @@ export async function checkClaude(): Promise<string | false> {
 }
 
 interface BumpPackageJson {
-  name?: string
+  name?: string | undefined
   version: string
   [key: string]: unknown
 }
@@ -952,9 +955,9 @@ export async function runCommandWithInput(
     }
   } catch (e) {
     const err = e as {
-      code?: number
-      stdout?: string | Buffer
-      stderr?: string | Buffer
+      code?: number | undefined
+      stdout?: string | Buffer | undefined
+      stderr?: string | Buffer | undefined
     }
     return {
       exitCode: typeof err.code === 'number' ? err.code : 1,

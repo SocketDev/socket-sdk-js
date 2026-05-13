@@ -55,7 +55,7 @@ export function createClient(): SocketSdk {
 // Helper: assert an error result from methods that return { success: false }.
 // ---------------------------------------------------------------------------
 export function expectErrorResult(result: {
-  status?: number
+  status?: number | undefined
   success: boolean
 }): void {
   expect(result.success).toBe(false)

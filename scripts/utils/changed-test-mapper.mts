@@ -35,13 +35,13 @@ const CORE_FILES: string[] = [
 
 interface TestRunResult {
   tests: string[] | 'all' | undefined
-  reason?: string
-  mode?: string
+  reason?: string | undefined
+  mode?: string | undefined
 }
 
 interface TestRunOptions {
-  staged?: boolean
-  all?: boolean
+  staged?: boolean | undefined
+  all?: boolean | undefined
 }
 
 /**

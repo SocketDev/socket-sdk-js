@@ -189,17 +189,19 @@ const STRICT_TYPE_CONFIG: Record<string, StrictTypeConfig> = {
 // Acorn AST nodes use a generic shape; we define a minimal recursive interface
 // since acorn does not export typed AST node interfaces for TypeScript syntax.
 interface AstNode extends Record<string, unknown> {
-  type?: string
-  start?: number | null
-  end?: number | null
-  key?: { name?: string; value?: string | number }
-  body?: AstNode[] | AstNode
-  members?: AstNode[]
-  typeAnnotation?: AstNode
-  typeParameters?: { params?: AstNode[] }
-  elementType?: AstNode
-  id?: { name?: string }
-  declaration?: AstNode
+  type?: string | undefined
+  start?: number | null | undefined
+  end?: number | null | undefined
+  key?:
+    | { name?: string | undefined; value?: string | number | undefined }
+    | undefined
+  body?: AstNode[] | AstNode | undefined
+  members?: AstNode[] | undefined
+  typeAnnotation?: AstNode | undefined
+  typeParameters?: { params?: AstNode[] | undefined } | undefined
+  elementType?: AstNode | undefined
+  id?: { name?: string | undefined } | undefined
+  declaration?: AstNode | undefined
 }
 
 interface TypeProperty {
@@ -210,14 +212,16 @@ interface TypeProperty {
 
 interface StrictTypeConfig {
   operationId: string
-  extractType?: string
-  responseCode?: number
+  extractType?: string | undefined
+  responseCode?: number | undefined
   typeName: string
-  sourcePath?: string[]
-  requiredFields?: string[]
-  requiredParams?: string[]
-  typeOverrides?: Record<string, string>
-  additionalFields?: Array<{ name: string; type: string; optional?: boolean }>
+  sourcePath?: string[] | undefined
+  requiredFields?: string[] | undefined
+  requiredParams?: string[] | undefined
+  typeOverrides?: Record<string, string> | undefined
+  additionalFields?:
+    | Array<{ name: string; type: string; optional?: boolean | undefined }>
+    | undefined
 }
 
 /**

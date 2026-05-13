@@ -3,7 +3,6 @@ trustPolicy: no-downgrade
 trustPolicyExclude:
   - 'compromise@14.15.0'
 
-
 # Register .claude/hooks/* as workspace packages so taze (run via
 # `pnpm run update`) sees and bumps their package.json manifests
 # alongside the root. Keeps hook deps in lockstep with the main tree.

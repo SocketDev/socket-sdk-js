@@ -99,6 +99,9 @@ importers:
       '@socketsecurity/lib':
         specifier: 'catalog:'
         version: 5.28.0(typescript@5.9.3)
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@5.28.0(typescript@5.9.3)'
       '@sveltejs/acorn-typescript':
         specifier: 1.0.8
         version: 1.0.8(acorn@8.15.0)

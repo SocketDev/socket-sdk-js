@@ -12,8 +12,8 @@ const logger = getDefaultLogger()
 
 interface CommandSpec {
   command: string
-  args?: string[]
-  options?: SpawnOptions
+  args?: string[] | undefined
+  options?: SpawnOptions | undefined
 }
 
 interface QuietResult {

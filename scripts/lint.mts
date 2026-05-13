@@ -211,8 +211,8 @@ export function filterLintableFiles(files: string[]): string[] {
 }
 
 interface LintOptions {
-  fix?: boolean
-  quiet?: boolean
+  fix?: boolean | undefined
+  quiet?: boolean | undefined
 }
 
 /**
@@ -383,9 +383,9 @@ export async function runLintOnAll(options: LintOptions = {}): Promise<number> {
 }
 
 interface GetFilesToLintOptions {
-  all?: boolean
-  changed?: boolean
-  staged?: boolean
+  all?: boolean | undefined
+  changed?: boolean | undefined
+  staged?: boolean | undefined
 }
 
 interface FilesToLintResult {
@@ -485,7 +485,7 @@ export async function runLintOnFiles(
  */
 export function shouldRunAllLinters(changedFiles: string[]): {
   runAll: boolean
-  reason?: string
+  reason?: string | undefined
 } {
   for (let i = 0, { length } = changedFiles; i < length; i += 1) {
     const file = changedFiles[i]!

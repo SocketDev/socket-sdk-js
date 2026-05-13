@@ -33,10 +33,10 @@ const rootPath = path.resolve(
 const logger = getDefaultLogger()
 
 interface BuildOptions {
-  analyze?: boolean
-  quiet?: boolean
-  skipClean?: boolean
-  verbose?: boolean
+  analyze?: boolean | undefined
+  quiet?: boolean | undefined
+  skipClean?: boolean | undefined
+  verbose?: boolean | undefined
 }
 
 interface BuildSourceResult {
@@ -103,7 +103,7 @@ export async function buildTypes(options: BuildOptions = {}): Promise<number> {
   const commands: Array<{
     args: string[]
     command: string
-    options?: Record<string, unknown>
+    options?: Record<string, unknown> | undefined
   }> = []
 
   if (!skipClean) {

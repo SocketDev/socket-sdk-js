@@ -38,7 +38,7 @@ export type EntitlementsResponse = {
 export type PatchFile = {
   afterHash?: string | undefined
   beforeHash?: string | undefined
-  socketBlob?: string | null
+  socketBlob?: string | null | undefined
 }
 
 export type Vulnerability = {
@@ -52,8 +52,8 @@ export type SecurityAlert = {
   description: string
   severity: string
   summary: string
-  cveId?: string | null
-  ghsaId?: string | null
+  cveId?: string | null | undefined
+  ghsaId?: string | null | undefined
 }
 
 export type PatchRecord = {

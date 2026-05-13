@@ -293,15 +293,15 @@ export function getPackageName(specifier: string): string | undefined {
 }
 
 interface PackageJson {
-  name?: string
-  version?: string
-  main?: string
-  types?: string
-  dependencies?: Record<string, string>
-  devDependencies?: Record<string, string>
-  peerDependencies?: Record<string, string>
-  optionalDependencies?: Record<string, string>
-  exports?: Record<string, string | Record<string, string>>
+  name?: string | undefined
+  version?: string | undefined
+  main?: string | undefined
+  types?: string | undefined
+  dependencies?: Record<string, string> | undefined
+  devDependencies?: Record<string, string> | undefined
+  peerDependencies?: Record<string, string> | undefined
+  optionalDependencies?: Record<string, string> | undefined
+  exports?: Record<string, string | Record<string, string>> | undefined
 }
 
 /**

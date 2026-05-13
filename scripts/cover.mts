@@ -458,10 +458,10 @@ interface CoverageLocation {
 }
 
 interface CoverageFileFinal {
-  s?: Record<string, number>
-  b?: Record<string, number[]>
-  f?: Record<string, number>
-  statementMap?: Record<string, CoverageLocation>
+  s?: Record<string, number> | undefined
+  b?: Record<string, number[]> | undefined
+  f?: Record<string, number> | undefined
+  statementMap?: Record<string, CoverageLocation> | undefined
 }
 
 interface AggregateCoverage {
