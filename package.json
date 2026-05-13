@@ -94,7 +94,6 @@
     "esbuild": "0.25.11",
     "fast-glob": "3.3.3",
     "form-data": "4.0.5",
-    "husky": "9.1.7",
     "magic-string": "0.30.14",
     "nock": "14.0.10",
     "openapi-typescript": "6.7.6",
