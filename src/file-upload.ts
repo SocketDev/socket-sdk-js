@@ -3,16 +3,16 @@ import path from 'node:path'
 
 import FormData from 'form-data'
 
-import { isErrnoException } from '@socketsecurity/lib/errors'
-import { httpRequest } from '@socketsecurity/lib/http-request'
-import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+import { isErrnoException } from '@socketsecurity/lib-stable/errors'
+import { httpRequest } from '@socketsecurity/lib-stable/http-request'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { MAX_RESPONSE_SIZE } from './constants'
 
 import { sanitizeHeaders } from './utils/header-sanitization'
 
 import type { RequestOptions, RequestOptionsWithHooks } from './types'
-import type { HttpResponse } from '@socketsecurity/lib/http-request'
+import type { HttpResponse } from '@socketsecurity/lib-stable/http-request'
 import type { ReadStream } from 'node:fs'
 import type { Readable } from 'node:stream'
 

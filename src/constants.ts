@@ -3,7 +3,7 @@
  * Provides default values, HTTP agents, and public policy configurations for API interactions.
  */
 
-import { MapCtor, SetCtor } from '@socketsecurity/lib/primordials'
+import { MapCtor, SetCtor } from '@socketsecurity/lib-stable/primordials'
 
 import rootPkgJson from '../package.json' with { type: 'json' }
 import { createUserAgentFromPkgJson } from './user-agent'
@@ -15,7 +15,7 @@ export {
   SOCKET_API_TOKENS_URL,
   SOCKET_CONTACT_URL,
   SOCKET_DASHBOARD_URL,
-} from '@socketsecurity/lib/constants/socket'
+} from '@socketsecurity/lib-stable/constants/socket'
 
 export const DEFAULT_USER_AGENT = createUserAgentFromPkgJson(rootPkgJson)
 

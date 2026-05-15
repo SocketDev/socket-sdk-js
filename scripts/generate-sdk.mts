@@ -19,9 +19,9 @@ import _traverse from '@babel/traverse'
 import * as t from '@babel/types'
 import MagicString from 'magic-string'
 
-import { httpJson } from '@socketsecurity/lib/http-request'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { spawn } from '@socketsecurity/lib/spawn'
+import { httpJson } from '@socketsecurity/lib-stable/http-request'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { spawn } from '@socketsecurity/lib-stable/spawn'
 
 import { getRootPath } from './utils/path-helpers.mts'
 import { runCommand } from './utils/run-command.mts'

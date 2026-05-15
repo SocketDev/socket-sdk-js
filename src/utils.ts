@@ -5,8 +5,8 @@
 import path from 'node:path'
 import process from 'node:process'
 
-import { memoize } from '@socketsecurity/lib/memoization'
-import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+import { memoize } from '@socketsecurity/lib-stable/memoization'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import {
   PromiseWithResolvers,
   SetCtor,
@@ -14,7 +14,7 @@ import {
   StringPrototypeToLowerCase,
   StringPrototypeTrim,
   URLSearchParamsCtor,
-} from '@socketsecurity/lib/primordials'
+} from '@socketsecurity/lib-stable/primordials'
 
 import type { QueryParams } from './types'
 

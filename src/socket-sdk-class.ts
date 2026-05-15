@@ -6,29 +6,29 @@
 import path from 'node:path'
 import process from 'node:process'
 
-import { createTtlCache } from '@socketsecurity/lib/cache-with-ttl'
-import { UNKNOWN_ERROR } from '@socketsecurity/lib/constants/core'
-import { getAbortSignal } from '@socketsecurity/lib/constants/process'
-import { SOCKET_PUBLIC_API_TOKEN } from '@socketsecurity/lib/constants/socket'
-import { debugLog, isDebugNs } from '@socketsecurity/lib/debug'
-import { validateFiles } from '@socketsecurity/lib/fs'
-import { jsonParse } from '@socketsecurity/lib/json/parse'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { getOwn, isObjectObject } from '@socketsecurity/lib/objects'
+import { createTtlCache } from '@socketsecurity/lib-stable/cache-with-ttl'
+import { UNKNOWN_ERROR } from '@socketsecurity/lib-stable/constants/core'
+import { getAbortSignal } from '@socketsecurity/lib-stable/constants/process'
+import { SOCKET_PUBLIC_API_TOKEN } from '@socketsecurity/lib-stable/constants/socket'
+import { debugLog, isDebugNs } from '@socketsecurity/lib-stable/debug'
+import { validateFiles } from '@socketsecurity/lib-stable/fs'
+import { jsonParse } from '@socketsecurity/lib-stable/json/parse'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { getOwn, isObjectObject } from '@socketsecurity/lib-stable/objects'
 import {
   ArrayIsArray,
   ErrorCtor,
   StringPrototypeTrim,
   TypeErrorCtor,
-} from '@socketsecurity/lib/primordials'
-import { pRetry } from '@socketsecurity/lib/promises'
-import { setMaxEventTargetListeners } from '@socketsecurity/lib/suppress-warnings'
-import { urlSearchParamAsBoolean } from '@socketsecurity/lib/url'
+} from '@socketsecurity/lib-stable/primordials'
+import { pRetry } from '@socketsecurity/lib-stable/promises'
+import { setMaxEventTargetListeners } from '@socketsecurity/lib-stable/suppress-warnings'
+import { urlSearchParamAsBoolean } from '@socketsecurity/lib-stable/url'
 
 const abortSignal = getAbortSignal()
 const logger = getDefaultLogger()
 
-import { httpRequest } from '@socketsecurity/lib/http-request'
+import { httpRequest } from '@socketsecurity/lib-stable/http-request'
 
 import {
   DEFAULT_CACHE_TTL,
@@ -125,8 +125,8 @@ import type {
   RepositoryResult,
   StrictErrorResult,
 } from './types-strict'
-import type { TtlCache } from '@socketsecurity/lib/cache-with-ttl'
-import type { HttpResponse } from '@socketsecurity/lib/http-request'
+import type { TtlCache } from '@socketsecurity/lib-stable/cache-with-ttl'
+import type { HttpResponse } from '@socketsecurity/lib-stable/http-request'
 
 /**
  * Socket SDK for programmatic access to Socket.dev security analysis APIs.

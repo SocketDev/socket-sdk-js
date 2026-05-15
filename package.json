@@ -80,7 +80,6 @@
     "@babel/types": "7.26.3",
     "@oxlint/migrate": "1.52.0",
     "@sinclair/typebox": "0.34.49",
-    "@socketsecurity/lib": "catalog:",
     "@socketsecurity/lib-stable": "catalog:",
     "@sveltejs/acorn-typescript": "1.0.8",
     "@types/babel__traverse": "7.28.0",

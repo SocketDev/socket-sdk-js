@@ -15,7 +15,7 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { createUserAgentFromPkgJson } from '../../src/user-agent'
 import {

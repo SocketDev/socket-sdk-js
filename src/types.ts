@@ -6,7 +6,7 @@
 
 import type { components, operations } from '../types/api'
 import type { OpReturnType } from '../types/api-helpers'
-import type { Remap } from '@socketsecurity/lib/objects'
+import type { Remap } from '@socketsecurity/lib-stable/objects'
 import type {
   Agent as HttpAgent,
   RequestOptions as HttpRequestOptions,

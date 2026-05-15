@@ -11,8 +11,8 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import { parseArgs } from '@socketsecurity/lib/argv/parse'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 
 const logger = getDefaultLogger()
 

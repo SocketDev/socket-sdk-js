@@ -1,13 +1,13 @@
-import { debugLog } from '@socketsecurity/lib/debug'
-import { isError } from '@socketsecurity/lib/errors'
-import { httpRequest } from '@socketsecurity/lib/http-request'
-import { jsonParse } from '@socketsecurity/lib/json/parse'
-import { perfTimer } from '@socketsecurity/lib/performance'
+import { debugLog } from '@socketsecurity/lib-stable/debug'
+import { isError } from '@socketsecurity/lib-stable/errors'
+import { httpRequest } from '@socketsecurity/lib-stable/http-request'
+import { jsonParse } from '@socketsecurity/lib-stable/json/parse'
+import { perfTimer } from '@socketsecurity/lib-stable/performance'
 import {
   DateNow,
   SetCtor,
   StringPrototypeTrim,
-} from '@socketsecurity/lib/primordials'
+} from '@socketsecurity/lib-stable/primordials'
 
 import {
   MAX_RESPONSE_SIZE,
@@ -22,8 +22,8 @@ import type {
   SocketArtifactAlert,
   SocketArtifactWithExtras,
 } from './types'
-import type { HttpResponse } from '@socketsecurity/lib/http-request'
-import type { JsonValue } from '@socketsecurity/lib/json/types'
+import type { HttpResponse } from '@socketsecurity/lib-stable/http-request'
+import type { JsonValue } from '@socketsecurity/lib-stable/json/types'
 
 export class ResponseError extends Error {
   response: HttpResponse

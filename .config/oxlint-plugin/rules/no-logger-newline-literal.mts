@@ -141,8 +141,8 @@ const UNAMBIGUOUS_EMOJI = {
   '⛔': 'warn',
   '‼': 'warn',
   // info
-  'ℹ': 'info',
-  'ℹ️': 'info',
+  ℹ: 'info',
+  ℹ️: 'info',
 }
 
 // ANCHORED — match only at the start of the string, followed by
