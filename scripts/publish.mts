@@ -78,8 +78,10 @@ async function main(): Promise<void> {
 
     // Show help if requested.
     if (values['help']) {
-      logger.log('\nUsage: pnpm publish [options]')
-      logger.log('\nOptions:')
+      logger.log('')
+      logger.log('Usage: pnpm publish [options]')
+      logger.log('')
+      logger.log('Options:')
       logger.log('  --help         Show this help message')
       logger.log('  --dry-run      Perform a dry-run without publishing')
       logger.log('  --force        Force publish even with warnings')
@@ -87,7 +89,8 @@ async function main(): Promise<void> {
       logger.log('  --tag <tag>    npm dist-tag (default: latest)')
       logger.log('  --access <access>  Package access level (default: public)')
       logger.log('  --otp <otp>    npm one-time password')
-      logger.log('\nExamples:')
+      logger.log('')
+      logger.log('Examples:')
       logger.log('  pnpm publish              # Validate artifacts and publish')
       logger.log('  pnpm publish --dry-run    # Dry-run to test')
       logger.log('  pnpm publish --otp 123456 # Publish with OTP')
@@ -171,7 +174,8 @@ export function isRegistryPackage(): boolean {
 }
 
 export function printFooter(message?: string): void {
-  logger.log(`\n${'─'.repeat(60)}`)
+  logger.log('')
+  logger.log(`${'─'.repeat(60)}`)
   if (message) {
     logger.substep(message)
   }
@@ -184,7 +188,8 @@ interface PublishCommandResult {
 }
 
 export function printHeader(title: string): void {
-  logger.log(`\n${'─'.repeat(60)}`)
+  logger.log('')
+  logger.log(`${'─'.repeat(60)}`)
   logger.log(`  ${title}`)
   logger.log(`${'─'.repeat(60)}`)
 }

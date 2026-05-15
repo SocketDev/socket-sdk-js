@@ -269,8 +269,10 @@ async function main(): Promise<void> {
     // Show help if requested
     if (values.help) {
       logger.log('Build Runner')
-      logger.log('\nUsage: pnpm build [options]')
-      logger.log('\nOptions:')
+      logger.log('')
+      logger.log('Usage: pnpm build [options]')
+      logger.log('')
+      logger.log('Options:')
       logger.log('  --help       Show this help message')
       logger.log('  --src        Build source code only')
       logger.log('  --types      Build TypeScript declarations only')
@@ -281,7 +283,8 @@ async function main(): Promise<void> {
       logger.log('  --analyze    Show bundle size analysis')
       logger.log('  --quiet, --silent  Suppress progress messages')
       logger.log('  --verbose    Show detailed build output')
-      logger.log('\nExamples:')
+      logger.log('')
+      logger.log('Examples:')
       logger.log('  pnpm build              # Full build (source + types)')
       logger.log('  pnpm build --src        # Build source only')
       logger.log('  pnpm build --types      # Build types only')
@@ -289,9 +292,8 @@ async function main(): Promise<void> {
         '  pnpm build --watch      # Watch mode with incremental builds',
       )
       logger.log('  pnpm build --analyze    # Build with size analysis')
-      logger.log(
-        '\nNote: Watch mode uses esbuild context API for 68% faster rebuilds',
-      )
+      logger.log('')
+      logger.log('Note: Watch mode uses esbuild context API for 68% faster rebuilds')
       process.exitCode = 0
       return
     }

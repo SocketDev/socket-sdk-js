@@ -39,7 +39,8 @@ async function main(): Promise<void> {
     }
 
     if (violations.length > 0) {
-      logger.fail('Bundle dependencies validation failed\n')
+      logger.fail('Bundle dependencies validation failed')
+      logger.error('')
 
       for (let i = 0, { length } = violations; i < length; i += 1) {
         const violation = violations[i]!
@@ -50,12 +51,14 @@ async function main(): Promise<void> {
     }
 
     if (warnings.length > 0) {
-      logger.warn('Warnings:\n')
+      logger.warn('Warnings:')
+      logger.error('')
 
       for (let i = 0, { length } = warnings; i < length; i += 1) {
         const warning = warnings[i]!
         logger.log(`  ${warning.message}`)
-        logger.log(`  ${warning.fix}\n`)
+        logger.log(`  ${warning.fix}`)
+        logger.log('')
       }
     }
 

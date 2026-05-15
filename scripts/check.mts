@@ -34,12 +34,15 @@ async function main(): Promise<void> {
 
     if (help) {
       logger.log('Check Runner')
-      logger.log('\nUsage: node scripts/check.mts [options]')
-      logger.log('\nOptions:')
+      logger.log('')
+      logger.log('Usage: node scripts/check.mts [options]')
+      logger.log('')
+      logger.log('Options:')
       logger.log('  --help, -h     Show this help message')
       logger.log('  --all          Run on all files (default behavior)')
       logger.log('  --staged       Run on staged files only')
-      logger.log('\nExamples:')
+      logger.log('')
+      logger.log('Examples:')
       logger.log('  node scripts/check.mts          # Run on all files')
       logger.log(
         '  node scripts/check.mts --all    # Run on all files (explicit)',

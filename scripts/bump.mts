@@ -148,8 +148,10 @@ async function main(): Promise<void> {
 
     // Show help if requested.
     if (values['help']) {
-      logger.log('\nUsage: pnpm bump [options]')
-      logger.log('\nOptions:')
+      logger.log('')
+      logger.log('Usage: pnpm bump [options]')
+      logger.log('')
+      logger.log('Options:')
       logger.log('  --help           Show this help message')
       logger.log('  --bump <type>    Version bump type (default: patch)')
       logger.log(
@@ -164,7 +166,8 @@ async function main(): Promise<void> {
       logger.log('  --skip-checks    Skip git status/branch checks')
       logger.log('  --no-push        Do not push changes to remote')
       logger.log('  --force          Force bump even with warnings')
-      logger.log('\nExamples:')
+      logger.log('')
+      logger.log('Examples:')
       logger.log(
         '  pnpm bump                    # Bump patch (interactive by default)',
       )
@@ -174,15 +177,18 @@ async function main(): Promise<void> {
       logger.log(
         '  pnpm bump --skip-changelog   # Skip AI changelog generation',
       )
-      logger.log('\nRequires:')
+      logger.log('')
+      logger.log('Requires:')
       logger.log('  - claude-console (or claude) CLI tool installed')
       logger.log('  - Clean git working directory')
       logger.log('  - On the repository default branch (unless --force)')
       if (hasInteractivePrompts) {
         // oxlint-disable-next-line socket/no-status-emoji -- inline status indicator in help text, not a log prefix.
-        logger.log('\nInteractive mode: Available ✓ (default)')
+        logger.error('')
+        logger.success('Interactive mode: Available ✓ (default)')
       } else {
-        logger.log('\nInteractive mode: Not available')
+        logger.log('')
+        logger.log('Interactive mode: Not available')
         logger.log('  (install @socketsecurity/lib or build local registry)')
       }
       process.exitCode = 0
@@ -619,10 +625,12 @@ export async function interactiveReviewChangelog(
 
   while (true) {
     // Show the current changelog.
-    logger.log('\nCurrent Changelog Entry:')
+    logger.log('')
+    logger.log('Current Changelog Entry:')
     logger.log('─'.repeat(60))
     logger.log(currentEntry)
-    logger.log(`${'─'.repeat(60)}\n`)
+    logger.log(`${'─'.repeat(60)}`)
+    logger.log('')
 
     // Offer action choices.
     const action = await prompts!.select({
@@ -658,9 +666,8 @@ export async function interactiveReviewChangelog(
     }
 
     if (action === 'manual') {
-      logger.log(
-        '\nEnter the changelog manually (paste and press Enter twice when done):',
-      )
+      logger.log('')
+      logger.log('Enter the changelog manually (paste and press Enter twice when done):')
       const rl = createReadline()
       let manualEntry = ''
       return new Promise<string>((resolve, reject) => {
@@ -774,14 +781,16 @@ export function isRegistryPackage(): boolean {
 }
 
 export function printFooter(message?: string): void {
-  logger.log(`\n${'─'.repeat(60)}`)
+  logger.log('')
+  logger.log(`${'─'.repeat(60)}`)
   if (message) {
     logger.substep(message)
   }
 }
 
 export function printHeader(title: string): void {
-  logger.log(`\n${'─'.repeat(60)}`)
+  logger.log('')
+  logger.log(`${'─'.repeat(60)}`)
   logger.log(`  ${title}`)
   logger.log(`${'─'.repeat(60)}`)
 }
@@ -830,11 +839,13 @@ export async function reviewChangelog(
   changelogEntry: string,
   interactive = false,
 ): Promise<string> {
-  logger.log(`\n${'━'.repeat(60)}`)
+  logger.log('')
+  logger.log(`${'━'.repeat(60)}`)
   logger.log('Proposed Changelog Entry:')
   logger.log('━'.repeat(60))
   logger.log(changelogEntry)
-  logger.log(`${'━'.repeat(60)}\n`)
+  logger.log(`${'━'.repeat(60)}`)
+  logger.log('')
 
   // Use interactive prompts if available and requested.
   if (interactive && prompts) {
@@ -880,11 +891,13 @@ Provide the refined changelog entry in the same format.`
         changelogEntry = refineResult.stdout.trim()
         log.done('Changelog refined')
 
-        logger.log(`\n${'━'.repeat(60)}`)
+        logger.log('')
+        logger.log(`${'━'.repeat(60)}`)
         logger.log('Refined Changelog Entry:')
         logger.log('━'.repeat(60))
         logger.log(changelogEntry)
-        logger.log(`${'━'.repeat(60)}\n`)
+        logger.log(`${'━'.repeat(60)}`)
+        logger.log('')
       } else {
         log.failed('Failed to refine changelog')
       }
