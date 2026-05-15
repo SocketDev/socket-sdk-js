@@ -58,14 +58,13 @@ jobs:
           echo "Sleeping for $delay seconds..."
           sleep $delay
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@75964f14e0682ae4aa846119e2fc9a710d970056 # main
-
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@75964f14e0682ae4aa846119e2fc9a710d970056 # main (2026-05-15)
       - name: Configure push credentials
         env:
           GH_TOKEN: ${{ github.token }}
         run: git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-git-signing@75964f14e0682ae4aa846119e2fc9a710d970056 # main
+      - uses: SocketDev/socket-registry/.github/actions/setup-git-signing@75964f14e0682ae4aa846119e2fc9a710d970056 # main (2026-05-15)
         with:
           gpg-private-key: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
 
@@ -171,5 +170,5 @@ jobs:
           > \`\`\`
           EOF
 
-      - uses: SocketDev/socket-registry/.github/actions/cleanup-git-signing@75964f14e0682ae4aa846119e2fc9a710d970056 # main
+      - uses: SocketDev/socket-registry/.github/actions/cleanup-git-signing@75964f14e0682ae4aa846119e2fc9a710d970056 # main (2026-05-15)
         if: always()
