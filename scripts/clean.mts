@@ -173,6 +173,7 @@ async function main(): Promise<void> {
 
     // Build task list
     if (cleanAll || values['cache']) {
+      // oxlint-disable-next-line socket/prefer-node-modules-dot-cache -- deletion-target glob, not a cache location.
       tasks.push({ name: 'cache', pattern: '**/.cache' })
     }
 

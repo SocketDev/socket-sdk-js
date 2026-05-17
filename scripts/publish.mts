@@ -33,7 +33,10 @@ const log = {
   },
   info: (msg: string) => logger.log(msg),
   progress: (msg: string) => logger.progress(msg),
-  step: (msg: string) => logger.log(`\n${msg}`),
+  step: (msg: string) => {
+    logger.log('')
+    logger.log(msg)
+  },
   substep: (msg: string) => logger.substep(msg),
   success: (msg: string) => logger.success(msg),
   warn: (msg: string) => logger.warn(msg),

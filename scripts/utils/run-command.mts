@@ -2,10 +2,7 @@
 
 import process from 'node:process'
 
-import type {
-  SpawnOptions,
-  SpawnSyncOptions,
-} from '@socketsecurity/lib/spawn'
+import type { SpawnOptions, SpawnSyncOptions } from '@socketsecurity/lib/spawn'
 
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { spawn, spawnSync } from '@socketsecurity/lib/spawn'

@@ -293,7 +293,9 @@ async function main(): Promise<void> {
       )
       logger.log('  pnpm build --analyze    # Build with size analysis')
       logger.log('')
-      logger.log('Note: Watch mode uses esbuild context API for 68% faster rebuilds')
+      logger.log(
+        'Note: Watch mode uses esbuild context API for 68% faster rebuilds',
+      )
       process.exitCode = 0
       return
     }

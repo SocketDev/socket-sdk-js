@@ -78,6 +78,7 @@ export function createPathShorteningPlugin() {
                 const existingPath = conflictDetector.get(shortPath)
                 if (existingPath !== longPath) {
                   logger.warn(
+                    // oxlint-disable-next-line socket/no-logger-newline-literal -- multi-line diagnostic: pairing the short/long path with its conflict origin requires inline newlines for readability.
                     `Path conflict detected:\n  "${shortPath}"\n  Maps to: "${existingPath}"\n  Also from: "${longPath}"\n  Keeping original paths to avoid conflict.`,
                   )
                   shortPath = longPath

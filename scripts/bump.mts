@@ -89,7 +89,10 @@ const log = {
   info: (msg: string) => logger.log(msg),
   error: (msg: string) => logger.fail(msg),
   success: (msg: string) => logger.success(msg),
-  step: (msg: string) => logger.log(`\n${msg}`),
+  step: (msg: string) => {
+    logger.log('')
+    logger.log(msg)
+  },
   substep: (msg: string) => logger.substep(msg),
   progress: (msg: string) => logger.progress(msg),
   done: (msg: string) => {
@@ -183,8 +186,8 @@ async function main(): Promise<void> {
       logger.log('  - Clean git working directory')
       logger.log('  - On the repository default branch (unless --force)')
       if (hasInteractivePrompts) {
-        // oxlint-disable-next-line socket/no-status-emoji -- inline status indicator in help text, not a log prefix.
         logger.error('')
+        // oxlint-disable-next-line socket/no-status-emoji -- inline status indicator in help text, not a log prefix.
         logger.success('Interactive mode: Available ✓ (default)')
       } else {
         logger.log('')
@@ -667,7 +670,9 @@ export async function interactiveReviewChangelog(
 
     if (action === 'manual') {
       logger.log('')
-      logger.log('Enter the changelog manually (paste and press Enter twice when done):')
+      logger.log(
+        'Enter the changelog manually (paste and press Enter twice when done):',
+      )
       const rl = createReadline()
       let manualEntry = ''
       return new Promise<string>((resolve, reject) => {
