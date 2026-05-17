@@ -5,7 +5,7 @@
 
 import process from 'node:process'
 
-import { runWithMask } from '@socketsecurity/lib-stable/stdio/mask'
+import { runWithMask } from '@socketsecurity/lib/stdio/mask'
 
 interface RunWithOutputOptions {
   cwd?: string | undefined

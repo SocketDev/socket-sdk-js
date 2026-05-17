@@ -18,7 +18,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import loggerPkg from '@socketsecurity/lib-stable/logger'
+import loggerPkg from '@socketsecurity/lib/logger'
 
 const logger = loggerPkg.getDefaultLogger()
 

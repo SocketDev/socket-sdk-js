@@ -2,6 +2,7 @@ loglevel: error
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - 'compromise@14.15.0'
+  - 'undici@5.29.0'
 
 # Register .claude/hooks/* as workspace packages so taze (run via
 # `pnpm run update`) sees and bumps their package.json manifests
@@ -21,6 +22,19 @@ autoInstallPeers: true
 # so a future default flip can't silently disable husky setup.
 enablePrePostScripts: true
 
+# Force every consumer of Socket's own packages to resolve through the
+# catalog-pinned published versions. The `catalog:` form rewrites
+# `workspace:*`, `^x.y.z`, and bare-version specs alike to the version
+# in the default `catalog:` block above. This defeats accidental
+# local-checkout resolution when a sibling repo is on disk.
+overrides:
+  '@socketregistry/packageurl-js': 'catalog:'
+  '@socketsecurity/lib': 'catalog:'
+  '@socketsecurity/registry': 'catalog:'
+  '@socketsecurity/sdk': 'catalog:'
+  'defu': '>=6.1.7'
+  'vite': '7.3.2'
+
 # Refuse to run if the pnpm version on PATH differs from the packageManager
 # field in package.json. Our setup action pins pnpm via external-tools.json;
 # any drift should fail fast, not silently auto-download via @pnpm/exe
@@ -29,10 +43,10 @@ pmOnFail: error
 
 catalog:
   '@sinclair/typebox': 0.34.49
-  '@socketregistry/packageurl-js-stable': npm:@socketregistry/packageurl-js@1.4.2
-  '@socketsecurity/lib-stable': npm:@socketsecurity/lib@5.28.0
-  '@socketsecurity/registry-stable': npm:@socketsecurity/registry@2.0.2
-  '@socketsecurity/sdk-stable': npm:@socketsecurity/sdk@4.0.1
+  '@socketregistry/packageurl-js': 1.4.2
+  '@socketsecurity/lib': 5.28.0
+  '@socketsecurity/registry': 2.0.2
+  '@socketsecurity/sdk': 4.0.1
   '@types/mdast': 4.0.4
   '@types/node': 24.9.2
   '@typescript/native-preview': 7.0.0-dev.20260415.1
@@ -45,10 +59,6 @@ catalog:
   'oxlint': 1.52.0
   'taze': 19.9.2
   'vitest': 4.1.6
-
-overrides:
-  defu: '>=6.1.7'
-  vite: 7.3.2
 
 # Wait 7 days (10080 minutes) before installing newly published packages.
 minimumReleaseAge: 10080

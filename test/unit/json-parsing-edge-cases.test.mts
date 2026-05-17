@@ -1,9 +1,9 @@
-import { jsonParse } from '@socketsecurity/lib-stable/json/parse'
+import { jsonParse } from '@socketsecurity/lib/json/parse'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getResponseJson } from '../../src/http-client.js'
 
-import type { HttpResponse } from '@socketsecurity/lib-stable/http-request'
+import type { HttpResponse } from '@socketsecurity/lib/http-request'
 
 vi.mock('@socketsecurity/lib/json/parse', () => ({
   jsonParse: vi.fn(),

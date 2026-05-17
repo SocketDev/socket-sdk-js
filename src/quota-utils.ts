@@ -2,8 +2,8 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
-import { memoize, once } from '@socketsecurity/lib-stable/memoization'
-import { ErrorCtor } from '@socketsecurity/lib-stable/primordials'
+import { memoize, once } from '@socketsecurity/lib/memoization'
+import { ErrorCtor } from '@socketsecurity/lib/primordials'
 
 import type { SocketSdkOperations } from './types'
 

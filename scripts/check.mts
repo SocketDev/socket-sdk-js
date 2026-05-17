@@ -15,9 +15,9 @@
 
 import process from 'node:process'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
-import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
-import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { printFooter } from '@socketsecurity/lib/stdio/footer'
+import { printHeader } from '@socketsecurity/lib/stdio/header'
 
 import { runParallel } from './utils/run-command.mts'
 

@@ -13,7 +13,7 @@
 
 import { describe, expect, it, vi } from 'vitest'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 import { MAX_FIREWALL_COMPONENTS } from '../../src/constants.js'
 import { SocketSdk } from '../../src/index'
@@ -560,7 +560,7 @@ describe('SocketSdk - getApi response type handling', () => {
       responseType: 'response',
       throws: false,
     })) as SocketSdkGenericResult<
-      import('@socketsecurity/lib-stable/http-request').HttpResponse
+      import('@socketsecurity/lib/http-request').HttpResponse
     >
 
     expect(result.success).toBe(true)
@@ -626,7 +626,7 @@ describe('SocketSdk - getApi response type handling', () => {
     const result = await client.getApi('default-endpoint')
     expect(result).toBeDefined()
     expect(
-      (result as import('@socketsecurity/lib-stable/http-request').HttpResponse)
+      (result as import('@socketsecurity/lib/http-request').HttpResponse)
         .status,
     ).toBe(200)
   })

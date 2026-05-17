@@ -6,7 +6,7 @@
 import {
   ArrayIsArray,
   StringPrototypeToLowerCase,
-} from '@socketsecurity/lib-stable/primordials'
+} from '@socketsecurity/lib/primordials'
 
 /**
  * List of sensitive HTTP headers that should be redacted in logs.

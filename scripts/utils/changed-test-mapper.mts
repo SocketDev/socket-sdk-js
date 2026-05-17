@@ -10,8 +10,8 @@ import process from 'node:process'
 import {
   getChangedFilesSync,
   getStagedFilesSync,
-} from '@socketsecurity/lib-stable/git'
-import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
+} from '@socketsecurity/lib/git'
+import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
 import { getRootPath } from './path-helpers.mts'
 

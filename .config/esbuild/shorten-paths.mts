@@ -21,8 +21,8 @@ import MagicString from 'magic-string'
 
 import type { BuildResult, PluginBuild } from 'esbuild'
 
-import { NODE_MODULES } from '@socketsecurity/lib-stable/paths/dirnames'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { NODE_MODULES } from '@socketsecurity/lib/paths/dirnames'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 const logger = getDefaultLogger()
 

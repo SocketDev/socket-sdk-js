@@ -8,7 +8,7 @@ import process from 'node:process'
 
 import openapiTS from 'openapi-typescript'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 import { getRootPath } from './utils/path-helpers.mts'
 
