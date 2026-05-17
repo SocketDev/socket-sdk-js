@@ -1,5 +1,5 @@
 {
-  "name": "hook-public-surface-reminder",
+  "name": "hook-overeager-staging-guard",
   "private": true,
   "type": "module",
   "main": "./index.mts",
@@ -8,5 +8,8 @@
   },
   "devDependencies": {
     "@types/node": "catalog:"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mts"
   }
 }
