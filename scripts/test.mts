@@ -11,11 +11,11 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import { parseArgs } from '@socketsecurity/lib/argv/parse'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { onExit } from '@socketsecurity/lib/signal-exit'
-import { getDefaultSpinner } from '@socketsecurity/lib/spinner'
-import { printHeader } from '@socketsecurity/lib/stdio/header'
+import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { onExit } from '@socketsecurity/lib-stable/signal-exit'
+import { getDefaultSpinner } from '@socketsecurity/lib-stable/spinner'
+import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import { getTestsToRun } from './utils/changed-test-mapper.mts'
 
@@ -458,7 +458,7 @@ export async function runTests(
 
   // Use interactive runner for interactive Ctrl+O experience when appropriate.
   // Dynamic import is intentional: ./utils/interactive-runner.mts imports
-  // @socketsecurity/lib/stdio/mask, which is only available in newer lib
+  // @socketsecurity/lib-stable/stdio/mask, which is only available in newer lib
   // versions. Loading it eagerly would crash non-TTY runs (CI, pre-commit) on
   // older lib versions; gating behind the isTTY check keeps it lazy.
   if (process.stdout.isTTY) {

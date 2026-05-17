@@ -70,7 +70,8 @@
     "type": "tsgo --noEmit -p tsconfig.check.json",
     "update": "node scripts/update.mts",
     "lockstep": "node scripts/lockstep.mts",
-    "lockstep:emit-schema": "node scripts/lockstep-emit-schema.mts"
+    "lockstep:emit-schema": "node scripts/lockstep-emit-schema.mts",
+    "setup-security-tools": "node .claude/hooks/setup-security-tools/install.mts"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "2.1.92",
@@ -81,6 +82,10 @@
     "@oxlint/migrate": "1.52.0",
     "@sinclair/typebox": "0.34.49",
     "@socketsecurity/lib": "catalog:",
+    "@socketsecurity/lib-stable": "catalog:",
+    "@socketsecurity/registry-stable": "catalog:",
+    "@socketsecurity/sdk-stable": "catalog:",
+    "@socketregistry/packageurl-js-stable": "catalog:",
     "@sveltejs/acorn-typescript": "1.0.8",
     "@types/babel__traverse": "7.28.0",
     "@types/node": "24.9.2",
@@ -119,5 +124,5 @@
     "node": ">=18.20.8",
     "pnpm": ">=11.0.8"
   },
-  "packageManager": "pnpm@11.1.2"
+  "packageManager": "pnpm@11.0.8"
 }

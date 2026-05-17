@@ -3,7 +3,7 @@
  * before `pnpm install` runs, with Socket Firewall verification on each
  * pinned tarball before extraction.
  *
- * Why: setup.mts (and downstream tooling) imports `@socketsecurity/lib`
+ * Why: setup.mts (and downstream tooling) imports `@socketsecurity/lib-stable`
  * and other zero-dep Socket helpers at module-load time. On a fresh
  * clone, `pnpm install` itself runs scripts that import these — but
  * pnpm install hasn't completed yet, so the imports fail with
@@ -37,7 +37,7 @@ const REPO_ROOT = path.resolve(__dirname, '..')
 //      packages) so we don't have to recurse into their dep graph.
 //   2. Be imported by setup.mts or another script that runs BEFORE
 //      pnpm install completes — otherwise normal install handles it.
-const BOOTSTRAP_PACKAGES = ['@socketsecurity/lib']
+const BOOTSTRAP_PACKAGES = ['@socketsecurity/lib-stable']
 
 // Socket Firewall API — verifies a package isn't malware before we
 // fetch its tarball directly from the npm registry. Mirrors the

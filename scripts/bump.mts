@@ -17,10 +17,10 @@ import type { ReleaseType } from 'semver'
 
 import semver from 'semver'
 
-import { parseArgs } from '@socketsecurity/lib/argv/parse'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { spawn } from '@socketsecurity/lib/spawn'
-import { safeDelete } from '@socketsecurity/lib/fs'
+import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { spawn } from '@socketsecurity/lib-stable/spawn'
+import { safeDelete } from '@socketsecurity/lib-stable/fs'
 
 const logger = getDefaultLogger()
 
@@ -192,7 +192,7 @@ async function main(): Promise<void> {
       } else {
         logger.log('')
         logger.log('Interactive mode: Not available')
-        logger.log('  (install @socketsecurity/lib or build local registry)')
+        logger.log('  (install @socketsecurity/lib-stable or build local registry)')
       }
       process.exitCode = 0
       return
@@ -289,7 +289,7 @@ async function main(): Promise<void> {
       if (explicitlyRequestedInteractive) {
         log.warn('Interactive mode requested but prompts not available')
         log.info(
-          'To enable: install @socketsecurity/lib or build local registry',
+          'To enable: install @socketsecurity/lib-stable or build local registry',
         )
       }
       values['interactive'] = false
@@ -944,7 +944,7 @@ export async function runCommand(
 
 /**
  * Run a command and feed `input` to its stdin, then return captured output.
- * Uses @socketsecurity/lib/spawn so the input is actually delivered (async
+ * Uses @socketsecurity/lib-stable/spawn so the input is actually delivered (async
  * `child_process.spawn` ignores the `input` option — only `spawnSync` does).
  */
 export async function runCommandWithInput(

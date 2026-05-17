@@ -1,5 +1,5 @@
 /**
- * @fileoverview Node.js loader to alias @socketsecurity/lib to local socket-lib build when available.
+ * @fileoverview Node.js loader to alias @socketsecurity/lib-stable to local socket-lib build when available.
  * This allows scripts to use the latest local version during development.
  */
 
@@ -31,10 +31,10 @@ export function resolve(
   context: ResolveContext,
   nextResolve: NextResolve,
 ): ResolveResult {
-  // Rewrite @socketsecurity/lib imports to local dist if available
-  if (useLocalLib && specifier.startsWith('@socketsecurity/lib')) {
-    const subpath = specifier.slice('@socketsecurity/lib'.length) || '/index.js'
-    // Map @socketsecurity/lib to ../socket-lib/dist/
+  // Rewrite @socketsecurity/lib-stable imports to local dist if available
+  if (useLocalLib && specifier.startsWith('@socketsecurity/lib-stable')) {
+    const subpath = specifier.slice('@socketsecurity/lib-stable'.length) || '/index.js'
+    // Map @socketsecurity/lib-stable to ../socket-lib/dist/
     const localPath = path.join(
       libPath,
       subpath.startsWith('/') ? subpath.slice(1) : subpath,

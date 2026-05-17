@@ -9,8 +9,8 @@ import { fileURLToPath } from 'node:url'
 
 import type { BuildResult, Metafile, PluginBuild } from 'esbuild'
 
-import { envAsBoolean } from '@socketsecurity/lib/env/helpers'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { envAsBoolean } from '@socketsecurity/lib-stable/env/helpers'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 
 import { createNodeProtocolPlugin } from './esbuild/node-protocol.mts'
 import { createPathShorteningPlugin } from './esbuild/shorten-paths.mts'
@@ -51,10 +51,10 @@ export function analyzeMetafile(metafile: Metafile) {
 }
 
 /**
- * Plugin to stub heavy @socketsecurity/lib internals and third-party modules
+ * Plugin to stub heavy @socketsecurity/lib-stable internals and third-party modules
  * that are unreachable or safely degradable in the SDK's runtime code paths.
  *
- * @socketsecurity/lib stubs:
+ * @socketsecurity/lib-stable stubs:
  *
  *   npm-pack.js (2.5MB) — arborist, cacache, pacote, make-fetch-happen,
  *     semver. Reached via sorts→semver (dead) and cache-with-ttl→cacache
