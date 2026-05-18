@@ -112,56 +112,20 @@ describe('socket/no-logger-newline-literal', () => {
       valid: [],
       invalid: [
         // success variants
-        {
-          code: 'logger.log("✓ ok\\n")\n',
-          errors: [{ messageId: 'trailingNewline' }],
-        },
-        {
-          code: 'logger.log("✔ ok\\n")\n',
-          errors: [{ messageId: 'trailingNewline' }],
-        },
-        {
-          code: 'logger.log("✅ ok\\n")\n',
-          errors: [{ messageId: 'trailingNewline' }],
-        },
-        {
-          code: 'logger.log("√ ok\\n")\n',
-          errors: [{ messageId: 'trailingNewline' }],
-        },
+        { code: 'logger.log("✓ ok\\n")\n', errors: [{ messageId: 'trailingNewline' }] },
+        { code: 'logger.log("✔ ok\\n")\n', errors: [{ messageId: 'trailingNewline' }] },
+        { code: 'logger.log("✅ ok\\n")\n', errors: [{ messageId: 'trailingNewline' }] },
+        { code: 'logger.log("√ ok\\n")\n', errors: [{ messageId: 'trailingNewline' }] },
         // fail variants
-        {
-          code: 'logger.log("✗ fail\\n")\n',
-          errors: [{ messageId: 'trailingNewline' }],
-        },
-        {
-          code: 'logger.log("❌ fail\\n")\n',
-          errors: [{ messageId: 'trailingNewline' }],
-        },
-        {
-          code: 'logger.log("✖ fail\\n")\n',
-          errors: [{ messageId: 'trailingNewline' }],
-        },
-        {
-          code: 'logger.log("× fail\\n")\n',
-          errors: [{ messageId: 'trailingNewline' }],
-        },
+        { code: 'logger.log("✗ fail\\n")\n', errors: [{ messageId: 'trailingNewline' }] },
+        { code: 'logger.log("❌ fail\\n")\n', errors: [{ messageId: 'trailingNewline' }] },
+        { code: 'logger.log("✖ fail\\n")\n', errors: [{ messageId: 'trailingNewline' }] },
+        { code: 'logger.log("× fail\\n")\n', errors: [{ messageId: 'trailingNewline' }] },
         // warn variants
-        {
-          code: 'logger.log("⚠ warn\\n")\n',
-          errors: [{ messageId: 'trailingNewline' }],
-        },
-        {
-          code: 'logger.log("🚨 warn\\n")\n',
-          errors: [{ messageId: 'trailingNewline' }],
-        },
-        {
-          code: 'logger.log("❗ warn\\n")\n',
-          errors: [{ messageId: 'trailingNewline' }],
-        },
-        {
-          code: 'logger.log("‼ warn\\n")\n',
-          errors: [{ messageId: 'trailingNewline' }],
-        },
+        { code: 'logger.log("⚠ warn\\n")\n', errors: [{ messageId: 'trailingNewline' }] },
+        { code: 'logger.log("🚨 warn\\n")\n', errors: [{ messageId: 'trailingNewline' }] },
+        { code: 'logger.log("❗ warn\\n")\n', errors: [{ messageId: 'trailingNewline' }] },
+        { code: 'logger.log("‼ warn\\n")\n', errors: [{ messageId: 'trailingNewline' }] },
       ],
     })
   })
@@ -171,18 +135,27 @@ describe('socket/no-logger-newline-literal', () => {
       valid: [
         // `>` in middle = not a status symbol
         {
-          name: '> mid-string is fine',
-          code: 'logger.log("a > b\\n")\n',
+          name: '> mid-string is fine (no trailing newline)',
+          // The `>` mid-string isn't a status symbol; this case only
+          // verifies that. The trailing `\n` shape is covered by a
+          // separate invalid case.
+          code: 'logger.log("a > b")\n',
         },
         // `i` in middle of a word
         {
-          name: 'i in word is fine',
-          code: 'logger.log("indexing items\\n")\n',
+          name: 'i in word is fine (no trailing newline)',
+          // The `i` letter mid-word isn't a status-glyph prefix; this
+          // case only verifies that. Trailing-newline shape is
+          // covered by its own invalid case.
+          code: 'logger.log("indexing items")\n',
         },
         // `@` in middle (package ref)
         {
-          name: '@ in package ref is fine',
-          code: 'logger.log("scope @ name\\n")\n',
+          name: '@ in package ref is fine (no trailing newline)',
+          // The `@` mid-string isn't a status-glyph prefix; this case
+          // only verifies that. Trailing-newline shape is covered by
+          // its own invalid case.
+          code: 'logger.log("scope @ name")\n',
         },
       ],
       invalid: [
