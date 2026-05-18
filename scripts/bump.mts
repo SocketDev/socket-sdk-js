@@ -192,7 +192,9 @@ async function main(): Promise<void> {
       } else {
         logger.log('')
         logger.log('Interactive mode: Not available')
-        logger.log('  (install @socketsecurity/lib-stable or build local registry)')
+        logger.log(
+          '  (install @socketsecurity/lib-stable or build local registry)',
+        )
       }
       process.exitCode = 0
       return

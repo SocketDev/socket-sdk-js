@@ -33,7 +33,8 @@ export function resolve(
 ): ResolveResult {
   // Rewrite @socketsecurity/lib-stable imports to local dist if available
   if (useLocalLib && specifier.startsWith('@socketsecurity/lib-stable')) {
-    const subpath = specifier.slice('@socketsecurity/lib-stable'.length) || '/index.js'
+    const subpath =
+      specifier.slice('@socketsecurity/lib-stable'.length) || '/index.js'
     // Map @socketsecurity/lib-stable to ../socket-lib/dist/
     const localPath = path.join(
       libPath,
