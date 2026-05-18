@@ -57,15 +57,15 @@ catalog:
   '@socketsecurity/sdk-stable': 'npm:@socketsecurity/sdk@4.0.1'
   '@types/mdast': 4.0.4
   '@types/node': 24.9.2
-  '@typescript/native-preview': 7.0.0-dev.20260415.1
+  '@typescript/native-preview': 7.0.0-dev.20260510.1
   '@vitest/coverage-v8': 4.1.6
   '@vitest/ui': 4.1.6
   'ecc-agentshield': 1.4.0
   'mdast-util-from-markdown': 2.0.3
   'micromark': 4.0.2
-  'oxfmt': 0.37.0
-  'oxlint': 1.52.0
-  'taze': 19.9.2
+  'oxfmt': 0.48.0
+  'oxlint': 1.63.0
+  'taze': 19.11.0
   'vitest': 4.1.6
 
 # Wait 7 days (10080 minutes) before installing newly published packages.

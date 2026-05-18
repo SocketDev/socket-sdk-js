@@ -122,7 +122,7 @@
   },
   "engines": {
     "node": ">=18.20.8",
-    "pnpm": ">=11.0.8"
+    "pnpm": ">=11.1.2"
   },
   "packageManager": "pnpm@11.1.2"
 }
