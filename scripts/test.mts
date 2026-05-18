@@ -456,22 +456,7 @@ export async function runTests(
     stdio: 'inherit',
   }
 
-  // Use interactive runner for interactive Ctrl+O experience when appropriate.
-  // Dynamic import is intentional: ./utils/interactive-runner.mts imports
-  // @socketsecurity/lib-stable/stdio/mask, which is only available in newer lib
-  // versions. Loading it eagerly would crash non-TTY runs (CI, pre-commit) on
-  // older lib versions; gating behind the isTTY check keeps it lazy.
-  if (process.stdout.isTTY) {
-    // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle
-    const { runTests } = await import('./utils/interactive-runner.mts')
-    return runTests(vitestPath, vitestArgs, {
-      env: spawnOptions.env,
-      cwd: spawnOptions.cwd,
-      verbose: false,
-    })
-  }
-
-  // Fallback to execution with output capture to handle worker termination errors
+  // Capture output so vitest worker-termination noise can be filtered below.
   const result = await runCommandWithOutput(vitestPath, vitestArgs, {
     ...spawnOptions,
     stdio: ['inherit', 'pipe', 'pipe'],
