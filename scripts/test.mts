@@ -6,6 +6,7 @@
 
 // oxlint-disable-next-line socket/prefer-async-spawn -- needs the ChildProcess stream API (.stdout/.stderr/.on('exit')) for signal forwarding and live test reporter wiring; lib/spawn's Promise shape doesn't expose these.
 import { spawn } from 'node:child_process'
+import type { ChildProcess } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
@@ -52,7 +53,7 @@ const spinner = getDefaultSpinner()
 const tsConfigPath = 'tsconfig.check.json'
 
 // Track running processes for cleanup
-const runningProcesses = new Set<import('node:child_process').ChildProcess>()
+const runningProcesses = new Set<ChildProcess>()
 
 // Setup exit handler
 const removeExitHandler = onExit(

@@ -19,6 +19,7 @@ import { MAX_FIREWALL_COMPONENTS } from '../../src/constants.js'
 import { SocketSdk } from '../../src/index'
 import { setupLocalHttpServer } from '../utils/local-server-helpers.mts'
 
+import type { HttpResponse } from '@socketsecurity/lib/http-request'
 import type { SocketSdkGenericResult } from '../../src/index'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
@@ -559,9 +560,7 @@ describe('SocketSdk - getApi response type handling', () => {
     const result = (await client.getApi('raw-endpoint', {
       responseType: 'response',
       throws: false,
-    })) as SocketSdkGenericResult<
-      import('@socketsecurity/lib/http-request').HttpResponse
-    >
+    })) as SocketSdkGenericResult<HttpResponse>
 
     expect(result.success).toBe(true)
     if (!result.success) {
@@ -625,10 +624,7 @@ describe('SocketSdk - getApi response type handling', () => {
 
     const result = await client.getApi('default-endpoint')
     expect(result).toBeDefined()
-    expect(
-      (result as import('@socketsecurity/lib/http-request').HttpResponse)
-        .status,
-    ).toBe(200)
+    expect((result as HttpResponse).status).toBe(200)
   })
 
   it('should handle large text responses within limit', async () => {
