@@ -1,4 +1,3 @@
-/* oxlint-disable socket/sort-source-methods -- ordered as path resolution flow (resolver → primary roots → derived constants → helpers); alphabetizing would scatter the flow. */
 /**
  * @file Canonical path constants + resolvers for this package. Mantra: 1 path,
  *   1 reference. Every path the scripts in this directory need — config files,
@@ -158,6 +157,7 @@ export interface LoadedSocketWheelhouseConfig {
  * file exists. When both exist, emits a stderr warning + returns the primary
  * location.
  */
+// oxlint-disable-next-line socket/sort-source-methods -- ordered as path resolution flow (resolver → primary roots → derived constants → helpers); alphabetizing would scatter the flow.
 export function findSocketWheelhouseConfig(
   repoRoot: string = REPO_ROOT,
 ): SocketWheelhouseConfigLocation | undefined {
@@ -188,6 +188,7 @@ export function findSocketWheelhouseConfig(
  * unparseable / non-object root — every failure shape collapses to "no config"
  * since downstream audits should fail-open when the config is unavailable.
  */
+// oxlint-disable-next-line socket/sort-source-methods -- ordered as path resolution flow (resolver → primary roots → derived constants → helpers); alphabetizing would scatter the flow.
 export function loadSocketWheelhouseConfig(
   repoRoot: string = REPO_ROOT,
 ): LoadedSocketWheelhouseConfig | undefined {
