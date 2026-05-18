@@ -35,6 +35,7 @@
     "socket/export-top-level-functions": "error",
     "socket/inclusive-language": "error",
     "socket/max-file-lines": "error",
+    "socket/no-cached-for-on-iterable": "error",
     "socket/no-console-prefer-logger": "error",
     "socket/no-default-export": "error",
     "socket/no-dynamic-import-outside-bundle": "error",
