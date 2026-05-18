@@ -1,7 +1,7 @@
 /**
- * @fileoverview Tests for SDK configuration and initialization.
- * Validates that the SDK properly handles different configuration options,
- * user agents, base URLs, and authentication setups.
+ * @file Tests for SDK configuration and initialization. Validates that the SDK
+ *   properly handles different configuration options, user agents, base URLs,
+ *   and authentication setups.
  */
 
 import { describe, expect, it } from 'vitest'

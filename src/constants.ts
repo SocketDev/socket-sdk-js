@@ -1,6 +1,7 @@
 /**
- * @fileoverview Configuration constants and enums for the Socket SDK.
- * Provides default values, HTTP agents, and public policy configurations for API interactions.
+ * @file Configuration constants and enums for the Socket SDK. Provides default
+ *   values, HTTP agents, and public policy configurations for API
+ *   interactions.
  */
 
 import { MapCtor, SetCtor } from '@socketsecurity/lib/primordials'

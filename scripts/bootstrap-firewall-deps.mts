@@ -1,21 +1,17 @@
 /**
- * @fileoverview Bootstrap zero-dep Socket packages into node_modules/
- * before `pnpm install` runs, with Socket Firewall verification on each
- * pinned tarball before extraction.
- *
- * Why: setup.mts (and downstream tooling) imports `@socketsecurity/lib-stable`
- * and other zero-dep Socket helpers at module-load time. On a fresh
- * clone, `pnpm install` itself runs scripts that import these — but
- * pnpm install hasn't completed yet, so the imports fail with
- * `ERR_MODULE_NOT_FOUND`. Bootstrap solves this by fetching the
- * pinned tarball from the npm registry, running it through Socket
- * Firewall (refuse-on-alert), and extracting the verified tarball
- * into node_modules/<scope>/<name>/. Subsequent pnpm install will
- * see the directory and either keep it (if version matches) or
- * replace it with the workspace-resolved version.
- *
- * Pinned versions come from `pnpm-workspace.yaml`'s `catalog:` —
- * single source of truth.
+ * @file Bootstrap zero-dep Socket packages into node_modules/ before `pnpm
+ *   install` runs, with Socket Firewall verification on each pinned tarball
+ *   before extraction. Why: setup.mts (and downstream tooling) imports
+ *   `@socketsecurity/lib-stable` and other zero-dep Socket helpers at
+ *   module-load time. On a fresh clone, `pnpm install` itself runs scripts that
+ *   import these — but pnpm install hasn't completed yet, so the imports fail
+ *   with `ERR_MODULE_NOT_FOUND`. Bootstrap solves this by fetching the pinned
+ *   tarball from the npm registry, running it through Socket Firewall
+ *   (refuse-on-alert), and extracting the verified tarball into
+ *   node_modules/<scope>/<name>/. Subsequent pnpm install will see the
+ *   directory and either keep it (if version matches) or replace it with the
+ *   workspace-resolved version. Pinned versions come from
+ *   `pnpm-workspace.yaml`'s `catalog:` — single source of truth.
  */
 
 // oxlint-disable-next-line socket/prefer-async-spawn -- bootstrap entry point: must run synchronously before any async setup so node_modules is hydrated for the rest of the pipeline.
@@ -55,11 +51,11 @@ interface FirewallAlert {
 }
 
 /**
- * Download a npm registry tarball for `<pkg>@<version>` and extract
- * it into `node_modules/<pkg>/`. Skips if the destination already
- * has a package.json with the matching version. Firewall-checks the
- * version against firewall-api.socket.dev before downloading; refuses
- * to install if the firewall returned any alerts.
+ * Download a npm registry tarball for `<pkg>@<version>` and extract it into
+ * `node_modules/<pkg>/`. Skips if the destination already has a package.json
+ * with the matching version. Firewall-checks the version against
+ * firewall-api.socket.dev before downloading; refuses to install if the
+ * firewall returned any alerts.
  */
 export async function bootstrapPackage(pkgName: string): Promise<void> {
   const version = readPinnedVersion(pkgName)
@@ -200,13 +196,14 @@ export function log(msg: string): void {
 
 /**
  * Read the pinned version of a package, checking (in order):
- *   1. `pnpm-workspace.yaml` `catalog:` entries
- *   2. Root `package.json` `dependencies` / `devDependencies` (skip
- *      "catalog:" / "workspace:" / "*" / "" — those need (1)).
  *
- * Avoids a dep on a YAML parser by hand-parsing the catalog block —
- * this script must itself be zero-dep so it can run before
- * `pnpm install` brings any tooling in.
+ * 1. `pnpm-workspace.yaml` `catalog:` entries
+ * 2. Root `package.json` `dependencies` / `devDependencies` (skip "catalog:" /
+ *    "workspace:" / "*" / "" — those need (1)).
+ *
+ * Avoids a dep on a YAML parser by hand-parsing the catalog block — this script
+ * must itself be zero-dep so it can run before `pnpm install` brings any
+ * tooling in.
  */
 
 export function readPinnedVersion(pkgName: string): string {

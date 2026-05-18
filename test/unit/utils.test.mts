@@ -1,14 +1,13 @@
 /* max-file-lines: legitimate — consolidated utility tests mirroring src/utils.ts */
 /**
- * @fileoverview Consolidated utility function tests.
- * Tests for promise utilities, query parameters, user-agent generation,
- * and JSON request body creation.
+ * @file Consolidated utility function tests. Tests for promise utilities, query
+ *   parameters, user-agent generation, and JSON request body creation.
+ *   Consolidates:
  *
- * Consolidates:
- * - promise-with-resolvers.test.mts
- * - query-params-normalization.test.mts
- * - user-agent.test.mts
- * - create-request-body-json.test.mts
+ *   - promise-with-resolvers.test.mts
+ *   - query-params-normalization.test.mts
+ *   - user-agent.test.mts
+ *   - create-request-body-json.test.mts
  */
 
 import path from 'node:path'

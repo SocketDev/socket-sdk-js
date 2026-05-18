@@ -1,21 +1,19 @@
 /* max-file-lines: legitimate — coverage suite mirroring source layout */
 /**
- * @fileoverview Tests covering non-error-path gaps across several source files.
+ * @file Tests covering non-error-path gaps across several source files.
+ *   Targets:
  *
- * Targets:
- * - file-upload.ts: createUploadRequest hooks, createRequestBodyForFilepaths
- *   multi-file and relative path resolution
- * - http-client.ts: getResponseJson JSON error branches
- *   (non-JSON content-type, HTML response, 502/503 response body)
- * - utils.ts lines 146-151: promiseWithResolvers polyfill branch
- * - socket-sdk-class.ts non-error lines:
- *   #executeWithRetry onRetry branches (401/403, 429 with Retry-After),
- *   #getResponseText 50MB size limit,
- *   #getTtlForEndpoint / cache config (number, object with endpoint, default),
- *   #checkMalwareBatch normalize with publicPolicy,
- *   downloadOrgFullScanFilesAsTar streaming,
- *   streamFullScan data/error/end handlers,
- *   uploadManifestFiles edge case
+ *   - file-upload.ts: createUploadRequest hooks, createRequestBodyForFilepaths
+ *     multi-file and relative path resolution
+ *   - http-client.ts: getResponseJson JSON error branches (non-JSON content-type,
+ *     HTML response, 502/503 response body)
+ *   - utils.ts lines 146-151: promiseWithResolvers polyfill branch
+ *   - socket-sdk-class.ts non-error lines: #executeWithRetry onRetry branches
+ *     (401/403, 429 with Retry-After), #getResponseText 50MB size limit,
+ *     #getTtlForEndpoint / cache config (number, object with endpoint,
+ *     default), #checkMalwareBatch normalize with publicPolicy,
+ *     downloadOrgFullScanFilesAsTar streaming, streamFullScan data/error/end
+ *     handlers, uploadManifestFiles edge case
  */
 
 import { createServer } from 'node:http'

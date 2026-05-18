@@ -1,6 +1,6 @@
 /**
- * @fileoverview Main entry point for the Socket SDK.
- * Provides the SocketSdk class and utility functions for Socket security analysis API interactions.
+ * @file Main entry point for the Socket SDK. Provides the SocketSdk class and
+ *   utility functions for Socket security analysis API interactions.
  */
 
 /* c8 ignore start - Re-export module, no testable logic */

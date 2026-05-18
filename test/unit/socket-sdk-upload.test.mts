@@ -1,10 +1,9 @@
 /**
- * @fileoverview Consolidated tests for file upload functionality.
- * Tests file-upload utilities and SDK upload methods.
+ * @file Consolidated tests for file upload functionality. Tests file-upload
+ *   utilities and SDK upload methods. Consolidates:
  *
- * Consolidates:
- * - file-upload-errors.test.mts
- * - socket-sdk-upload-simple.test.mts
+ *   - file-upload-errors.test.mts
+ *   - socket-sdk-upload-simple.test.mts
  */
 
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'

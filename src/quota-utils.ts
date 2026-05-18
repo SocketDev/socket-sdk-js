@@ -1,4 +1,6 @@
-/** @fileoverview Quota utility functions for Socket SDK method cost lookup. */
+/**
+ * @file Quota utility functions for Socket SDK method cost lookup.
+ */
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
@@ -17,9 +19,9 @@ interface Requirements {
 }
 
 /**
- * Load api-method-quota-and-permissions.json data with caching.
- * Internal function for lazy loading quota requirements.
- * Uses once() memoization to ensure file is only read once.
+ * Load api-method-quota-and-permissions.json data with caching. Internal
+ * function for lazy loading quota requirements. Uses once() memoization to
+ * ensure file is only read once.
  */
 const loadRequirements = once((): Requirements => {
   try {
@@ -49,8 +51,8 @@ const loadRequirements = once((): Requirements => {
 })
 
 /**
- * Calculate total quota cost for multiple SDK method calls.
- * Returns sum of quota units for all specified methods.
+ * Calculate total quota cost for multiple SDK method calls. Returns sum of
+ * quota units for all specified methods.
  */
 export function calculateTotalQuotaCost(
   methodNames: Array<SocketSdkOperations | string>,
@@ -61,9 +63,9 @@ export function calculateTotalQuotaCost(
 }
 
 /**
- * Get all available SDK methods with their requirements.
- * Returns complete mapping of methods to quota and permissions.
- * Creates a fresh deep copy each time to prevent external mutations.
+ * Get all available SDK methods with their requirements. Returns complete
+ * mapping of methods to quota and permissions. Creates a fresh deep copy each
+ * time to prevent external mutations.
  */
 export function getAllMethodRequirements(): Record<string, ApiRequirement> {
   const reqs = loadRequirements()
@@ -84,9 +86,9 @@ export function getAllMethodRequirements(): Record<string, ApiRequirement> {
 }
 
 /**
- * Get complete requirement information for a SDK method.
- * Returns both quota cost and required permissions.
- * Memoized to avoid repeated lookups for the same method.
+ * Get complete requirement information for a SDK method. Returns both quota
+ * cost and required permissions. Memoized to avoid repeated lookups for the
+ * same method.
  */
 export const getMethodRequirements = memoize(
   (methodName: SocketSdkOperations | string): ApiRequirement => {
@@ -106,9 +108,9 @@ export const getMethodRequirements = memoize(
 )
 
 /**
- * Get all methods that require specific permissions.
- * Returns methods that need any of the specified permissions.
- * Memoized since the same permission queries are often repeated.
+ * Get all methods that require specific permissions. Returns methods that need
+ * any of the specified permissions. Memoized since the same permission queries
+ * are often repeated.
  */
 export const getMethodsByPermissions = memoize(
   (permissions: string[]): string[] => {
@@ -127,9 +129,9 @@ export const getMethodsByPermissions = memoize(
 )
 
 /**
- * Get all methods that consume a specific quota amount.
- * Useful for finding high-cost or free operations.
- * Memoized to cache results for commonly queried quota costs.
+ * Get all methods that consume a specific quota amount. Useful for finding
+ * high-cost or free operations. Memoized to cache results for commonly queried
+ * quota costs.
  */
 export const getMethodsByQuotaCost = memoize(
   (quotaCost: number): string[] => {
@@ -144,9 +146,8 @@ export const getMethodsByQuotaCost = memoize(
 )
 
 /**
- * Get quota cost for a specific SDK method.
- * Returns the number of quota units consumed by the method.
- * Memoized since quota costs are frequently queried.
+ * Get quota cost for a specific SDK method. Returns the number of quota units
+ * consumed by the method. Memoized since quota costs are frequently queried.
  */
 export const getQuotaCost = memoize(
   (methodName: SocketSdkOperations | string): number => {
@@ -163,9 +164,9 @@ export const getQuotaCost = memoize(
 )
 
 /**
- * Get quota usage summary grouped by cost levels.
- * Returns methods categorized by their quota consumption.
- * Memoized since the summary structure is immutable after load.
+ * Get quota usage summary grouped by cost levels. Returns methods categorized
+ * by their quota consumption. Memoized since the summary structure is immutable
+ * after load.
  */
 export const getQuotaUsageSummary = memoize(
   (): Record<string, string[]> => {
@@ -198,9 +199,9 @@ export const getQuotaUsageSummary = memoize(
 )
 
 /**
- * Get required permissions for a specific SDK method.
- * Returns array of permission strings needed to call the method.
- * Memoized to cache permission lookups per method.
+ * Get required permissions for a specific SDK method. Returns array of
+ * permission strings needed to call the method. Memoized to cache permission
+ * lookups per method.
  */
 export const getRequiredPermissions = memoize(
   (methodName: SocketSdkOperations | string): string[] => {
@@ -217,8 +218,8 @@ export const getRequiredPermissions = memoize(
 )
 
 /**
- * Check if user has sufficient quota for method calls.
- * Returns true if available quota covers the total cost.
+ * Check if user has sufficient quota for method calls. Returns true if
+ * available quota covers the total cost.
  */
 export function hasQuotaForMethods(
   availableQuota: number,

@@ -1,6 +1,6 @@
 /**
- * @fileoverview Tests for v3.0 strict type system.
- * Validates that new strict types properly reflect API responses.
+ * @file Tests for v3.0 strict type system. Validates that new strict types
+ *   properly reflect API responses.
  */
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'

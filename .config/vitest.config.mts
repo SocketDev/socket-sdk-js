@@ -1,6 +1,6 @@
 /**
- * @fileoverview Vitest configuration for Socket SDK test suite.
- * Configures test environment, coverage, and module resolution.
+ * @file Vitest configuration for Socket SDK test suite. Configures test
+ *   environment, coverage, and module resolution.
  */
 import process from 'node:process'
 

@@ -1,6 +1,7 @@
 /* max-file-lines: legitimate — retry-behavior tests */
 /**
- * @fileoverview Tests for SocketSdk retry logic
+ * @file Tests for SocketSdk retry logic
+ *
  * @vitest-environment node
  */
 

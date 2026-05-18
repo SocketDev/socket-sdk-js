@@ -1,7 +1,7 @@
 /* max-file-lines: legitimate — tests for the testing utilities module */
 /**
- * @fileoverview Tests for SDK testing utilities.
- * Validates mock factories, response builders, and test helpers.
+ * @file Tests for SDK testing utilities. Validates mock factories, response
+ *   builders, and test helpers.
  */
 
 import { describe, expect, it, vi } from 'vitest'

@@ -1,4 +1,6 @@
-/** @fileoverview Vitest setup file for test utilities. */
+/**
+ * @file Vitest setup file for test utilities.
+ */
 
 import process from 'node:process'
 

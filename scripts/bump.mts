@@ -1,8 +1,9 @@
 /* max-file-lines: legitimate — multi-phase bump tool (changelog parse, AI rewrite, interactive review, tag), one cohesive script */
 /**
- * @fileoverview Version bump script with AI-powered changelog generation.
- * Creates version bump commits with package.json, lockfile, and changelog updates.
- * Includes interactive mode for reviewing and refining AI-generated changelogs.
+ * @file Version bump script with AI-powered changelog generation. Creates
+ *   version bump commits with package.json, lockfile, and changelog updates.
+ *   Includes interactive mode for reviewing and refining AI-generated
+ *   changelogs.
  */
 
 // oxlint-disable-next-line socket/prefer-async-spawn -- needs the ChildProcess stream API for interactive prompts/TTY relay; lib/spawn returns a Promise without .stdin/.stdout handles.
@@ -401,10 +402,9 @@ interface BumpPackageJson {
 }
 
 /**
- * Check if we're on the repository default branch. Resolves the
- * default branch from origin/HEAD (preferred) and falls back to the
- * legacy short name in case the remote has no HEAD ref set, per
- * CLAUDE.md "Default branch fallback".
+ * Check if we're on the repository default branch. Resolves the default branch
+ * from origin/HEAD (preferred) and falls back to the legacy short name in case
+ * the remote has no HEAD ref set, per CLAUDE.md "Default branch fallback".
  */
 export async function checkGitBranch(): Promise<boolean> {
   const currentResult = await runCommandWithOutput('git', [
@@ -618,8 +618,8 @@ export async function getRecentCommits(count = 20): Promise<string> {
 }
 
 /**
- * Interactive review using advanced prompts.
- * Provides a better user experience with select menus and structured feedback.
+ * Interactive review using advanced prompts. Provides a better user experience
+ * with select menus and structured feedback.
  */
 export async function interactiveReviewChangelog(
   claudeCmd: string,
@@ -838,8 +838,8 @@ export async function readPackageJson(
 }
 
 /**
- * Review and refine changelog with user feedback.
- * Uses interactive prompts if available, falls back to basic readline prompts.
+ * Review and refine changelog with user feedback. Uses interactive prompts if
+ * available, falls back to basic readline prompts.
  */
 export async function reviewChangelog(
   claudeCmd: string,
@@ -946,8 +946,9 @@ export async function runCommand(
 
 /**
  * Run a command and feed `input` to its stdin, then return captured output.
- * Uses @socketsecurity/lib-stable/spawn so the input is actually delivered (async
- * `child_process.spawn` ignores the `input` option — only `spawnSync` does).
+ * Uses @socketsecurity/lib-stable/spawn so the input is actually delivered
+ * (async `child_process.spawn` ignores the `input` option — only `spawnSync`
+ * does).
  */
 export async function runCommandWithInput(
   command: string,

@@ -1,7 +1,7 @@
 /* max-file-lines: legitimate — test orchestrator (pre-build, worker pool, signals, reporter) */
 /**
- * @fileoverview Unified test runner that provides a smooth, single-script experience.
- * Combines check, build, and test steps with clean, consistent output.
+ * @file Unified test runner that provides a smooth, single-script experience.
+ *   Combines check, build, and test steps with clean, consistent output.
  */
 
 // oxlint-disable-next-line socket/prefer-async-spawn -- needs the ChildProcess stream API (.stdout/.stderr/.on('exit')) for signal forwarding and live test reporter wiring; lib/spawn's Promise shape doesn't expose these.

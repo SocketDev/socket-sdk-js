@@ -1,11 +1,9 @@
 /**
- * @fileoverview esbuild plugin: rewrite bare Node.js builtin imports to
- * use the `node:` protocol prefix and mark them external. Catches the
- * shape where a dependency does `require('fs')` instead of
- * `require('node:fs')` and stops it from leaking into the bundle as a
- * bundled module reference.
- *
- * Source: lifted from socket-sdk-js. Fleet-canonical via socket-wheelhouse.
+ * @file Esbuild plugin: rewrite bare Node.js builtin imports to use the `node:`
+ *   protocol prefix and mark them external. Catches the shape where a
+ *   dependency does `require('fs')` instead of `require('node:fs')` and stops
+ *   it from leaking into the bundle as a bundled module reference. Source:
+ *   lifted from socket-sdk-js. Fleet-canonical via socket-wheelhouse.
  */
 
 import Module from 'node:module'

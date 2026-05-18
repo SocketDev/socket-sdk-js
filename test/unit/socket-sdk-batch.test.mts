@@ -1,5 +1,7 @@
 /* max-file-lines: legitimate — batch-API behavior tests, single feature */
-/** @fileoverview Tests for batch package fetch and streaming operations. */
+/**
+ * @file Tests for batch package fetch and streaming operations.
+ */
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import * as path from 'node:path'

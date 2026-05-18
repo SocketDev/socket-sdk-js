@@ -1,5 +1,5 @@
 /**
- * @fileoverview esbuild configuration for fast builds with smaller bundles
+ * @file Esbuild configuration for fast builds with smaller bundles
  */
 
 import { promises as fs } from 'node:fs'
@@ -29,7 +29,7 @@ const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'))
 const externalDependencies = Object.keys(packageJson.dependencies || {})
 
 /**
- * Analyze build output for size information
+ * Analyze build output for size information.
  */
 export function analyzeMetafile(metafile: Metafile) {
   const outputs = Object.keys(metafile.outputs)
@@ -51,8 +51,9 @@ export function analyzeMetafile(metafile: Metafile) {
 }
 
 /**
- * Plugin to stub heavy @socketsecurity/lib-stable internals and third-party modules
- * that are unreachable or safely degradable in the SDK's runtime code paths.
+ * Plugin to stub heavy @socketsecurity/lib-stable internals and third-party
+ * modules that are unreachable or safely degradable in the SDK's runtime code
+ * paths.
  *
  * @socketsecurity/lib-stable stubs:
  *

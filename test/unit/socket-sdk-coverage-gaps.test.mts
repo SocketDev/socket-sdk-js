@@ -1,14 +1,14 @@
 /* max-file-lines: legitimate — gap-filling coverage suite */
 /**
- * @fileoverview Coverage gap tests for SocketSdk class methods.
+ * @file Coverage gap tests for SocketSdk class methods. Targets uncovered lines
+ *   in socket-sdk-class.ts including:
  *
- * Targets uncovered lines in socket-sdk-class.ts including:
- * - batchOrgPackageFetch success and NDJSON parsing (local HTTP server)
- * - searchDependencies success path
- * - viewPatch success path
- * - File validation callback paths for createDependenciesSnapshot,
- *   createFullScan, and uploadManifestFiles
- * - getApi/sendApi with various response types and throws modes
+ *   - batchOrgPackageFetch success and NDJSON parsing (local HTTP server)
+ *   - searchDependencies success path
+ *   - viewPatch success path
+ *   - File validation callback paths for createDependenciesSnapshot,
+ *     createFullScan, and uploadManifestFiles
+ *   - getApi/sendApi with various response types and throws modes
  */
 
 import { describe, expect, it, vi } from 'vitest'

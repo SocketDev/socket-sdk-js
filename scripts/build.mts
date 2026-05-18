@@ -1,5 +1,5 @@
 /**
- * @fileoverview Fast build runner using esbuild for smaller bundles and faster builds.
+ * @file Fast build runner using esbuild for smaller bundles and faster builds.
  */
 
 import { existsSync } from 'node:fs'
@@ -46,8 +46,8 @@ interface BuildSourceResult {
 }
 
 /**
- * Build source code with esbuild.
- * Returns { exitCode, buildTime, result } for external logging.
+ * Build source code with esbuild. Returns { exitCode, buildTime, result } for
+ * external logging.
  */
 export async function buildSource(
   options: BuildOptions = {},
@@ -90,8 +90,7 @@ export async function buildSource(
 }
 
 /**
- * Build TypeScript declarations.
- * Returns exitCode for external logging.
+ * Build TypeScript declarations. Returns exitCode for external logging.
  */
 export async function buildTypes(options: BuildOptions = {}): Promise<number> {
   const {

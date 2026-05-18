@@ -1,5 +1,5 @@
 /**
- * @fileoverview Tests for header sanitization utilities.
+ * @file Tests for header sanitization utilities.
  */
 
 import { describe, expect, it } from 'vitest'

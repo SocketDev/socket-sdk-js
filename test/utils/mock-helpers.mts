@@ -1,4 +1,6 @@
-/** @fileoverview Mock utilities for test setup. */
+/**
+ * @file Mock utilities for test setup.
+ */
 import { Readable } from 'node:stream'
 
 import { vi } from 'vitest'

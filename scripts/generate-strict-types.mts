@@ -1,8 +1,9 @@
 /* max-file-lines: legitimate — AST-walking codegen pipeline for strict-typed SDK surface */
 /**
- * @fileoverview Generates strict TypeScript types from OpenAPI schema using AST.
- * Uses openapi-typescript to generate types, then acorn + acorn-typescript to
- * parse and transform them into strict versions with required fields properly marked.
+ * @file Generates strict TypeScript types from OpenAPI schema using AST. Uses
+ *   openapi-typescript to generate types, then acorn + acorn-typescript to
+ *   parse and transform them into strict versions with required fields properly
+ *   marked.
  */
 // oxlint-disable-next-line socket/prefer-async-spawn -- single one-shot oxfmt invocation; sync API keeps this codegen pipeline strictly serial.
 import { spawnSync } from 'node:child_process'
@@ -27,8 +28,8 @@ const strictTypesPath = path.resolve(rootPath, 'src/types-strict.ts')
 const TSParser = Parser.extend(tsPlugin())
 
 /**
- * Configuration for strict type generation.
- * Maps OpenAPI operations to strict type definitions.
+ * Configuration for strict type generation. Maps OpenAPI operations to strict
+ * type definitions.
  */
 const STRICT_TYPE_CONFIG: Record<string, StrictTypeConfig> = {
   // Create Full Scan Options - from CreateOrgFullScan query params

@@ -38,7 +38,6 @@ concurrency:
 
 permissions: {}
 
-
 jobs:
   fetch_and_update:
     name: Sync OpenAPI definition

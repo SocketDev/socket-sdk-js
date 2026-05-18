@@ -1,6 +1,6 @@
 /**
- * @fileoverview TypeScript type generation script for Socket API.
- * Generates type definitions from OpenAPI schema for Socket SDK.
+ * @file TypeScript type generation script for Socket API. Generates type
+ *   definitions from OpenAPI schema for Socket SDK.
  */
 import { promises as fs } from 'node:fs'
 import path from 'node:path'

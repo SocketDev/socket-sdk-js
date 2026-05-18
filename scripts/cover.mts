@@ -1,12 +1,9 @@
 #!/usr/bin/env node
 /**
- * @fileoverview Coverage script that runs tests with coverage reporting.
- * Masks test output and shows only the coverage summary.
- *
- * Options:
- *   --code-only  Run only code coverage (skip type coverage)
- *   --type-only  Run only type coverage (skip code coverage)
- *   --summary    Show only coverage summary (hide detailed output)
+ * @file Coverage script that runs tests with coverage reporting. Masks test
+ *   output and shows only the coverage summary. Options: --code-only Run only
+ *   code coverage (skip type coverage) --type-only Run only type coverage (skip
+ *   code coverage) --summary Show only coverage summary (hide detailed output)
  */
 
 import fs from 'node:fs/promises'
@@ -30,7 +27,10 @@ const logger = getDefaultLogger()
 // ANSI escape regex for stripping color codes
 const ansiRegex = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g')
 
-/** Strip ANSI codes and decorative characters (✧, ︎ variation selector, ⚡) from text. */
+/**
+ * Strip ANSI codes and decorative characters (✧, ︎ variation selector, ⚡) from
+ * text.
+ */
 export function cleanOutput(text: string): string {
   return text
     .replace(ansiRegex, '')
@@ -268,7 +268,8 @@ try {
 
 /**
  * Merge coverage-final.json from both suites using max-hit-count strategy.
- * Returns aggregate percentages for statements, branches, functions, and lines.
+ * Returns aggregate percentages for statements, branches, functions, and
+ * lines.
  */
 export async function mergeCoverageFinal(): Promise<
   AggregateCoverage | undefined
@@ -405,7 +406,9 @@ export async function mergeCoverageFinal(): Promise<
  * Display code coverage results including test summary, v8 report, and
  * aggregate metrics.
  */
-/** Parse type-coverage output to extract percentage. */
+/**
+ * Parse type-coverage output to extract percentage.
+ */
 
 export function parseTypeCoveragePercent(output: string): number | undefined {
   const match = output.match(/\([\d\s/]+\)\s+([\d.]+)%/)

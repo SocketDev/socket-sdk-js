@@ -1,4 +1,6 @@
-/** @fileoverview Tests for quota utility functions. */
+/**
+ * @file Tests for quota utility functions.
+ */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {

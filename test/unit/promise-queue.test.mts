@@ -1,5 +1,5 @@
 /**
- * @fileoverview Tests for PromiseQueue utility class
+ * @file Tests for PromiseQueue utility class
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'

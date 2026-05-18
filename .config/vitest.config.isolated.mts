@@ -1,6 +1,6 @@
 /**
- * @fileoverview Vitest configuration for tests requiring full isolation.
- * Used for tests that need vi.doMock() or other module-level mocking.
+ * @file Vitest configuration for tests requiring full isolation. Used for tests
+ *   that need vi.doMock() or other module-level mocking.
  */
 import { readFileSync } from 'node:fs'
 import path from 'node:path'

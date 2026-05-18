@@ -1,13 +1,11 @@
 #!/usr/bin/env node
 /**
- * @fileoverview SDK generation script.
- * Orchestrates the complete SDK generation process:
- * 1. Fetches and formats OpenAPI JSON
- * 2. Generates TypeScript types from OpenAPI
- * 3. Generates strict types from OpenAPI
+ * @file SDK generation script. Orchestrates the complete SDK generation
+ *   process:
  *
- * Usage:
- *   node scripts/generate-sdk.mts
+ *   1. Fetches and formats OpenAPI JSON
+ *   2. Generates TypeScript types from OpenAPI
+ *   3. Generates strict types from OpenAPI Usage: node scripts/generate-sdk.mts
  */
 
 import { promises as fs } from 'node:fs'
@@ -94,9 +92,8 @@ export async function fetchOpenApi(): Promise<void> {
 }
 
 /**
- * Fixes array syntax to comply with ESLint array-simple rules.
- * Simple types (string, number, boolean) use T[] syntax.
- * Complex types use Array<T> syntax.
+ * Fixes array syntax to comply with ESLint array-simple rules. Simple types
+ * (string, number, boolean) use T[] syntax. Complex types use Array<T> syntax.
  */
 export async function fixArraySyntax(filePath: string): Promise<void> {
   const content = await fs.readFile(filePath, 'utf8')

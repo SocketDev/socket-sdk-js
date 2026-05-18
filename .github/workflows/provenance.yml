@@ -28,7 +28,6 @@ concurrency:
   group: publish-${{ inputs.dist-tag }}
   cancel-in-progress: false
 
-
 jobs:
   publish:
     permissions:

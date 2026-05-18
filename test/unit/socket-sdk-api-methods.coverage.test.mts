@@ -1,10 +1,9 @@
 /* max-file-lines: legitimate — method-by-method coverage, 1:1 mapping */
 /**
- * @fileoverview Coverage tests for Socket SDK API methods using local HTTP server.
- *
- * APPROACH: Instead of nock (which bleeds state in coverage mode), we use a real
- * HTTP server that starts/stops cleanly. This works in coverage mode because we're
- * using actual HTTP, not module patching.
+ * @file Coverage tests for Socket SDK API methods using local HTTP server.
+ *   APPROACH: Instead of nock (which bleeds state in coverage mode), we use a
+ *   real HTTP server that starts/stops cleanly. This works in coverage mode
+ *   because we're using actual HTTP, not module patching.
  */
 
 import {

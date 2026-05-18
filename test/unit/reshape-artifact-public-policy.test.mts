@@ -1,4 +1,6 @@
-/** @fileoverview Tests for reshapeArtifactForPublicPolicy function edge cases. */
+/**
+ * @file Tests for reshapeArtifactForPublicPolicy function edge cases.
+ */
 
 import { describe, expect, it } from 'vitest'
 

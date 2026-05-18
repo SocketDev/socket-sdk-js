@@ -1,4 +1,6 @@
-/** @fileoverview Tests for SocketSdk configuration validation and edge cases. */
+/**
+ * @file Tests for SocketSdk configuration validation and edge cases.
+ */
 import { describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../../src/index'

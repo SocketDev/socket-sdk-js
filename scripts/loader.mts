@@ -1,6 +1,7 @@
 /**
- * @fileoverview Node.js loader to alias @socketsecurity/lib-stable to local socket-lib build when available.
- * This allows scripts to use the latest local version during development.
+ * @file Node.js loader to alias @socketsecurity/lib-stable to local socket-lib
+ *   build when available. This allows scripts to use the latest local version
+ *   during development.
  */
 
 import { existsSync } from 'node:fs'

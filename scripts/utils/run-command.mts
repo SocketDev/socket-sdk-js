@@ -1,4 +1,6 @@
-/** @fileoverview Utility for running shell commands with proper error handling. */
+/**
+ * @file Utility for running shell commands with proper error handling.
+ */
 
 import process from 'node:process'
 

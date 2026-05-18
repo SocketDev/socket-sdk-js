@@ -1,20 +1,17 @@
 #!/usr/bin/env node
 /**
- * @fileoverview Validates that markdown files follow naming conventions.
+ * @file Validates that markdown files follow naming conventions. Special files
+ *   (allowed anywhere):
  *
- * Special files (allowed anywhere):
- * - README.md, LICENSE
- *
- * Allowed SCREAMING_CASE (all caps) files (root, docs/, or .claude/ only):
- * - AUTHORS.md, CHANGELOG.md, CITATION.md, CLAUDE.md
- * - CODE_OF_CONDUCT.md, CONTRIBUTORS.md, CONTRIBUTING.md
- * - COPYING, CREDITS.md, GOVERNANCE.md, MAINTAINERS.md
- * - NOTICE.md, SECURITY.md, SUPPORT.md, TRADEMARK.md
- *
- * All other .md files must:
- * - Be lowercase-with-hyphens
- * - Be located within docs/ or .claude/ directories (any depth)
- * - NOT be at root level
+ *   - README.md, LICENSE Allowed SCREAMING_CASE (all caps) files (root, docs/, or
+ *     .claude/ only):
+ *   - AUTHORS.md, CHANGELOG.md, CITATION.md, CLAUDE.md
+ *   - CODE_OF_CONDUCT.md, CONTRIBUTORS.md, CONTRIBUTING.md
+ *   - COPYING, CREDITS.md, GOVERNANCE.md, MAINTAINERS.md
+ *   - NOTICE.md, SECURITY.md, SUPPORT.md, TRADEMARK.md All other .md files must:
+ *   - Be lowercase-with-hyphens
+ *   - Be located within docs/ or .claude/ directories (any depth)
+ *   - NOT be at root level
  */
 
 import { promises as fs } from 'node:fs'
@@ -148,8 +145,8 @@ export async function findMarkdownFiles(
 }
 
 /**
- * Check if file is in an allowed location for regular markdown files.
- * Regular .md files must be within docs/ or .claude/ directories.
+ * Check if file is in an allowed location for regular markdown files. Regular
+ * .md files must be within docs/ or .claude/ directories.
  */
 export function isInAllowedLocationForRegularMd(filePath: string): boolean {
   const relativePath = path.relative(rootPath, filePath)
@@ -177,7 +174,8 @@ interface FilenameViolation {
 
 /**
  * Check if file is in an allowed location for SCREAMING_CASE files.
- * SCREAMING_CASE files can only be at: root, docs/, or .claude/ (top level only).
+ * SCREAMING_CASE files can only be at: root, docs/, or .claude/ (top level
+ * only).
  */
 export function isInAllowedLocationForScreamingCase(filePath: string): boolean {
   const relativePath = path.relative(rootPath, filePath)
@@ -213,7 +211,8 @@ export function isLowercaseHyphenated(filename: string): boolean {
 }
 
 /**
- * Check if a filename is in SCREAMING_CASE (all uppercase with optional underscores).
+ * Check if a filename is in SCREAMING_CASE (all uppercase with optional
+ * underscores).
  */
 export function isScreamingCase(filename: string): boolean {
   // Remove extension for checking

@@ -1,6 +1,6 @@
 /**
- * @fileoverview Utility functions for Socket SDK operations.
- * Provides URL normalization, query parameter handling, and path resolution utilities.
+ * @file Utility functions for Socket SDK operations. Provides URL
+ *   normalization, query parameter handling, and path resolution utilities.
  */
 import path from 'node:path'
 import process from 'node:process'
@@ -19,21 +19,22 @@ import {
 import type { QueryParams } from './types'
 
 /**
- * Calculate Jaccard similarity coefficient between two strings based on word sets.
- * Returns a value between 0 (no overlap) and 1 (identical word sets).
+ * Calculate Jaccard similarity coefficient between two strings based on word
+ * sets. Returns a value between 0 (no overlap) and 1 (identical word sets).
  *
  * Formula: |A ∩ B| / |A ∪ B|
  *
- * @param str1 - First string to compare
- * @param str2 - Second string to compare
- * @returns Similarity coefficient (0-1)
- *
  * @example
- * ```typescript
- * calculateWordSetSimilarity('hello world', 'world hello') // 1.0 (same words)
- * calculateWordSetSimilarity('hello world', 'goodbye world') // 0.33 (1/3 overlap)
- * calculateWordSetSimilarity('hello', 'goodbye') // 0 (no overlap)
- * ```
+ *   ```typescript
+ *   calculateWordSetSimilarity('hello world', 'world hello') // 1.0 (same words)
+ *   calculateWordSetSimilarity('hello world', 'goodbye world') // 0.33 (1/3 overlap)
+ *   calculateWordSetSimilarity('hello', 'goodbye') // 0 (no overlap)
+ *   ```
+ *
+ * @param str1 - First string to compare.
+ * @param str2 - Second string to compare.
+ *
+ * @returns Similarity coefficient (0-1)
  */
 export function calculateWordSetSimilarity(str1: string, str2: string): number {
   const set1 = normalizeToWordSet(str1)
@@ -66,30 +67,32 @@ export function calculateWordSetSimilarity(str1: string, str2: string): number {
 }
 
 /**
- * Filter error cause based on similarity to error message.
- * Returns undefined if the cause should be omitted due to redundancy.
+ * Filter error cause based on similarity to error message. Returns undefined if
+ * the cause should be omitted due to redundancy.
  *
- * Intelligently handles common error message patterns by:
- * - Comparing full messages
- * - Splitting on colons and comparing each part
- * - Finding the highest similarity among all parts
+ * Intelligently handles common error message patterns by: - Comparing full
+ * messages - Splitting on colons and comparing each part - Finding the highest
+ * similarity among all parts.
  *
- * Examples:
- * - "Socket API Request failed (400): Bad Request" vs "Bad Request"
- * - "Error: Authentication: Token expired" vs "Token expired"
- *
- * @param errorMessage - Main error message
- * @param errorCause - Detailed error cause/reason
- * @param threshold - Similarity threshold (0-1), defaults to 0.6
- * @returns The error cause if it should be kept, undefined otherwise
+ * Examples: - "Socket API Request failed (400): Bad Request" vs "Bad Request" -
+ * "Error: Authentication: Token expired" vs "Token expired"
  *
  * @example
- * ```typescript
- * filterRedundantCause('Invalid token', 'The token is invalid') // undefined
- * filterRedundantCause('Request failed', 'Rate limit exceeded') // 'Rate limit exceeded'
- * filterRedundantCause('API Request failed (400): Bad Request', 'Bad Request') // undefined
- * filterRedundantCause('Error: Auth: Token expired', 'Token expired') // undefined
- * ```
+ *   ```typescript
+ *   filterRedundantCause('Invalid token', 'The token is invalid') // undefined
+ *   filterRedundantCause('Request failed', 'Rate limit exceeded') // 'Rate limit exceeded'
+ *   filterRedundantCause(
+ *     'API Request failed (400): Bad Request',
+ *     'Bad Request',
+ *   ) // undefined
+ *   filterRedundantCause('Error: Auth: Token expired', 'Token expired') // undefined
+ *   ```
+ *
+ * @param errorMessage - Main error message.
+ * @param errorCause - Detailed error cause/reason.
+ * @param threshold - Similarity threshold (0-1), defaults to 0.6.
+ *
+ * @returns The error cause if it should be kept, undefined otherwise
  */
 export function filterRedundantCause(
   errorMessage: string,
@@ -118,9 +121,9 @@ export function filterRedundantCause(
 }
 
 /**
- * Normalize base URL by ensuring it ends with a trailing slash.
- * Required for proper URL joining with relative paths.
- * Memoized for performance since base URLs are typically reused.
+ * Normalize base URL by ensuring it ends with a trailing slash. Required for
+ * proper URL joining with relative paths. Memoized for performance since base
+ * URLs are typically reused.
  */
 export const normalizeBaseUrl = memoize(
   (baseUrl: string): string => {
@@ -133,7 +136,8 @@ export const normalizeBaseUrl = memoize(
  * Normalize a string to a set of lowercase words (alphanumeric sequences).
  * Extracts word characters and creates a deduplicated set.
  *
- * @param s - String to normalize
+ * @param s - String to normalize.
+ *
  * @returns Set of normalized words
  */
 export function normalizeToWordSet(s: string): Set<string> {
@@ -163,8 +167,9 @@ export function promiseWithResolvers<T>(): ReturnType<
 }
 
 /**
- * Convert query parameters to URLSearchParams with API-compatible key normalization.
- * Transforms camelCase keys to snake_case and filters out empty values.
+ * Convert query parameters to URLSearchParams with API-compatible key
+ * normalization. Transforms camelCase keys to snake_case and filters out empty
+ * values.
  */
 export function queryToSearchParams(
   init?:
@@ -219,8 +224,8 @@ export function queryToSearchParams(
 }
 
 /**
- * Convert relative file paths to absolute paths.
- * Resolves paths relative to specified base directory or current working directory.
+ * Convert relative file paths to absolute paths. Resolves paths relative to
+ * specified base directory or current working directory.
  */
 export function resolveAbsPaths(
   filepaths: string[],
@@ -235,8 +240,8 @@ export function resolveAbsPaths(
 }
 
 /**
- * Resolve base path to an absolute directory path.
- * Converts relative paths to absolute using current working directory as reference.
+ * Resolve base path to an absolute directory path. Converts relative paths to
+ * absolute using current working directory as reference.
  */
 export function resolveBasePath(pathsRelativeTo = '.'): string {
   // Node's path.resolve will process path segments from right to left until
@@ -247,19 +252,20 @@ export function resolveBasePath(pathsRelativeTo = '.'): string {
 }
 
 /**
- * Determine if a "reason" string should be omitted due to high similarity with error message.
- * Uses Jaccard similarity to detect redundant phrasing.
- *
- * @param errorMessage - Main error message
- * @param reason - Detailed reason/cause string
- * @param threshold - Similarity threshold (0-1), defaults to 0.6
- * @returns true if reason should be omitted (too similar)
+ * Determine if a "reason" string should be omitted due to high similarity with
+ * error message. Uses Jaccard similarity to detect redundant phrasing.
  *
  * @example
- * ```typescript
- * shouldOmitReason('Invalid token', 'The token is invalid') // true (high overlap)
- * shouldOmitReason('Request failed', 'Rate limit exceeded') // false (low overlap)
- * ```
+ *   ```typescript
+ *   shouldOmitReason('Invalid token', 'The token is invalid') // true (high overlap)
+ *   shouldOmitReason('Request failed', 'Rate limit exceeded') // false (low overlap)
+ *   ```
+ *
+ * @param errorMessage - Main error message.
+ * @param reason - Detailed reason/cause string.
+ * @param threshold - Similarity threshold (0-1), defaults to 0.6.
+ *
+ * @returns True if reason should be omitted (too similar)
  */
 export function shouldOmitReason(
   errorMessage: string,

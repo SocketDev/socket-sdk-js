@@ -1,4 +1,6 @@
-/** @fileoverview Tests for SDK logging hooks functionality. */
+/**
+ * @file Tests for SDK logging hooks functionality.
+ */
 
 import nock from 'nock'
 import { describe, expect, it, vi } from 'vitest'

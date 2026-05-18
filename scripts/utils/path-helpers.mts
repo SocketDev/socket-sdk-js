@@ -1,4 +1,6 @@
-/** @fileoverview Path utility helpers for script operations. */
+/**
+ * @file Path utility helpers for script operations.
+ */
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 

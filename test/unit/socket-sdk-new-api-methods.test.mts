@@ -1,4 +1,6 @@
-/** @fileoverview Tests for new Socket SDK API methods added in v3.3.0. */
+/**
+ * @file Tests for new Socket SDK API methods added in v3.3.0.
+ */
 
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'

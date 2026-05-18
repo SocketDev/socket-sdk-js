@@ -1,4 +1,6 @@
-/** @fileoverview Tests for SDK method success paths to increase coverage. */
+/**
+ * @file Tests for SDK method success paths to increase coverage.
+ */
 
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'

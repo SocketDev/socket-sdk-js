@@ -1,7 +1,7 @@
 /**
- * @fileoverview Publish runner for Socket SDK.
- * Validates build artifacts exist, then publishes to npm.
- * Build and checks should be run separately (e.g., via ci:validate).
+ * @file Publish runner for Socket SDK. Validates build artifacts exist, then
+ *   publishes to npm. Build and checks should be run separately (e.g., via
+ *   ci:validate).
  */
 
 // oxlint-disable-next-line socket/prefer-async-spawn -- needs ChildProcess stream API (.on('exit'), .stdout/.stderr) for live npm publish output forwarding; lib/spawn returns a Promise.
@@ -265,8 +265,8 @@ interface PushTagOptions {
 }
 
 /**
- * Push existing git tag if it exists locally but not remotely.
- * Tags should be created with version bump commits, not by this script.
+ * Push existing git tag if it exists locally but not remotely. Tags should be
+ * created with version bump commits, not by this script.
  */
 export async function pushExistingTag(
   version: string,

@@ -1,5 +1,7 @@
 /* max-file-lines: legitimate — tests for the getApi/sendApi pair, colocated */
-/** @fileoverview Tests for generic getApi and sendApi method functionality. */
+/**
+ * @file Tests for generic getApi and sendApi method functionality.
+ */
 
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'

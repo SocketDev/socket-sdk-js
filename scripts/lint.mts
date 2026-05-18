@@ -1,7 +1,7 @@
 /* max-file-lines: legitimate — lint orchestration (flag parse, file selection, oxlint+oxfmt drivers, staged plumbing) */
 /**
- * @fileoverview Unified lint runner with flag-based configuration.
- * Provides smart linting that can target affected files or lint everything.
+ * @file Unified lint runner with flag-based configuration. Provides smart
+ *   linting that can target affected files or lint everything.
  */
 
 import { existsSync, readFileSync } from 'node:fs'
@@ -292,9 +292,9 @@ export function getOxlintExcludePatterns(): string[] {
  *
  * Handles directory patterns (`**\/dist` → matches `dist` and any file inside
  * it) and file-glob patterns (`**\/*.d.ts` → matches any `.d.ts` file). The
- * substitution order is deliberate: regex metacharacters in the literal
- * pattern are escaped first, then `**\/` and `*` are translated in a single
- * pass via a callback so later substitutions can't corrupt earlier ones.
+ * substitution order is deliberate: regex metacharacters in the literal pattern
+ * are escaped first, then `**\/` and `*` are translated in a single pass via a
+ * callback so later substitutions can't corrupt earlier ones.
  */
 export function isExcludedByOxlint(
   file: string,

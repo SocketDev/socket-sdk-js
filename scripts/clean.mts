@@ -1,6 +1,6 @@
 /**
- * @fileoverview Unified clean runner with flag-based configuration.
- * Removes build artifacts, caches, and other generated files.
+ * @file Unified clean runner with flag-based configuration. Removes build
+ *   artifacts, caches, and other generated files.
  */
 
 import path from 'node:path'

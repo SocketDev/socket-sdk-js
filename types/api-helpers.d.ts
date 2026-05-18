@@ -1,10 +1,10 @@
 /**
- * @fileoverview Helper types for working with generated OpenAPI types.
+ * @file Helper types for working with generated OpenAPI types.
  */
 
 /**
- * Extract the successful response type from an operation.
- * Maps to the data property of the success result.
+ * Extract the successful response type from an operation. Maps to the data
+ * property of the success result.
  */
 export type OpReturnType<T> = T extends {
   responses: {
@@ -27,8 +27,8 @@ export type OpReturnType<T> = T extends {
       : unknown
 
 /**
- * Extract the error response type from an operation.
- * Maps to the error structure of the error result.
+ * Extract the error response type from an operation. Maps to the error
+ * structure of the error result.
  */
 export type OpErrorType<T> = T extends {
   responses: infer R

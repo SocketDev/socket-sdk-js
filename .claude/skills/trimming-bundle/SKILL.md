@@ -68,6 +68,7 @@ pnpm test
 ```
 
 Record:
+
 - Current bundle size (sum of `dist/*.js`).
 - Current test pass count.
 - Any pre-existing test failures (do NOT proceed if tests were already failing — fix first).
@@ -87,6 +88,7 @@ How to identify, in priority order:
 3. **Plugin echo**: temporarily set `verbose: true` (if added) on `createLibStubPlugin` to log every resolved module. The list of resolved paths NOT under your repo's src/ is the candidate set.
 
 For each candidate, record:
+
 - The absolute resolved path or path-pattern (`/.../@socketsecurity/lib/dist/globs.js`).
 - The size impact (run `du -b` on the file).
 - The reason the runtime can't reach it.

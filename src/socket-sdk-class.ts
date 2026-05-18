@@ -1,7 +1,8 @@
 /* max-file-lines: legitimate — SDK surface class, one method per API endpoint */
 /**
- * @fileoverview SocketSdk class implementation for Socket security API client.
- * Provides complete API functionality for vulnerability scanning, analysis, and reporting.
+ * @file SocketSdk class implementation for Socket security API client. Provides
+ *   complete API functionality for vulnerability scanning, analysis, and
+ *   reporting.
  */
 import path from 'node:path'
 import process from 'node:process'
@@ -130,7 +131,8 @@ import type { HttpResponse } from '@socketsecurity/lib/http-request'
 
 /**
  * Socket SDK for programmatic access to Socket.dev security analysis APIs.
- * Provides methods for package scanning, organization management, and security analysis.
+ * Provides methods for package scanning, organization management, and security
+ * analysis.
  */
 export class SocketSdk {
   readonly #apiToken: string
@@ -146,8 +148,9 @@ export class SocketSdk {
   readonly #retryDelay: number
 
   /**
-   * Initialize Socket SDK with API token and configuration options.
-   * Sets up authentication, base URL, HTTP client options, retry behavior, and caching.
+   * Initialize Socket SDK with API token and configuration options. Sets up
+   * authentication, base URL, HTTP client options, retry behavior, and
+   * caching.
    */
   constructor(apiToken: string, options?: SocketSdkOptions | undefined) {
     // Input validation for API token.
@@ -241,8 +244,8 @@ export class SocketSdk {
   }
 
   /**
-   * Create async generator for streaming batch package URL processing.
-   * Internal method for handling chunked PURL responses with error handling.
+   * Create async generator for streaming batch package URL processing. Internal
+   * method for handling chunked PURL responses with error handling.
    */
   async *#createBatchPurlGenerator(
     componentsObj: { components: Array<{ purl: string }> },
@@ -294,8 +297,8 @@ export class SocketSdk {
   }
 
   /**
-   * Create HTTP request for batch package URL processing.
-   * Internal method for handling PURL batch API calls with retry logic.
+   * Create HTTP request for batch package URL processing. Internal method for
+   * handling PURL batch API calls with retry logic.
    */
   async #createBatchPurlRequest(
     componentsObj: { components: Array<{ purl: string }> },
@@ -320,8 +323,8 @@ export class SocketSdk {
   }
 
   /**
-   * Create standardized error result from query operation exceptions.
-   * Internal error handling for non-throwing query API methods.
+   * Create standardized error result from query operation exceptions. Internal
+   * error handling for non-throwing query API methods.
    */
   #createQueryErrorResult<T>(e: unknown): SocketSdkGenericResult<T> {
     if (e instanceof SyntaxError) {
@@ -358,8 +361,8 @@ export class SocketSdk {
   }
 
   /**
-   * Execute an HTTP request with retry logic.
-   * Internal method for wrapping HTTP operations with exponential backoff.
+   * Execute an HTTP request with retry logic. Internal method for wrapping HTTP
+   * operations with exponential backoff.
    */
   async #executeWithRetry<T>(operation: () => Promise<T>): Promise<T> {
     const result = await pRetry(operation, {
@@ -401,8 +404,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get the TTL for a specific endpoint.
-   * Returns endpoint-specific TTL if configured, otherwise returns default TTL.
+   * Get the TTL for a specific endpoint. Returns endpoint-specific TTL if
+   * configured, otherwise returns default TTL.
    */
   #getTtlForEndpoint(endpoint: string): number | undefined {
     const cacheTtl = this.#cacheTtlConfig
@@ -422,8 +425,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get or create a cache instance with the specified TTL.
-   * Reuses existing cache instances to avoid creating duplicates.
+   * Get or create a cache instance with the specified TTL. Reuses existing
+   * cache instances to avoid creating duplicates.
    */
   #getCacheForTtl(ttl: number): TtlCache {
     let cache = this.#cacheByTtl.get(ttl)
@@ -439,9 +442,9 @@ export class SocketSdk {
   }
 
   /**
-   * Execute a GET request with optional caching.
-   * Internal method for handling cached GET requests with retry logic.
-   * Supports per-endpoint TTL configuration.
+   * Execute a GET request with optional caching. Internal method for handling
+   * cached GET requests with retry logic. Supports per-endpoint TTL
+   * configuration.
    */
   async #getCached<T>(
     cacheKey: string,
@@ -630,8 +633,8 @@ export class SocketSdk {
   }
 
   /**
-   * Handle query API response data based on requested response type.
-   * Internal method for processing different response formats (json, text, response).
+   * Handle query API response data based on requested response type. Internal
+   * method for processing different response formats (json, text, response).
    */
   async #handleQueryResponseData<T>(
     response: HttpResponse,
@@ -654,8 +657,8 @@ export class SocketSdk {
   }
 
   /**
-   * Parse Retry-After header value and return delay in milliseconds.
-   * Supports both delay-seconds (integer) and HTTP-date formats.
+   * Parse Retry-After header value and return delay in milliseconds. Supports
+   * both delay-seconds (integer) and HTTP-date formats.
    */
   #parseRetryAfter(
     retryAfterValue: string | string[] | undefined,
@@ -696,38 +699,47 @@ export class SocketSdk {
   }
 
   /**
-   * Get package metadata and alerts by PURL strings for a specific organization.
-   * Organization-scoped version of batchPackageFetch with security policy label support.
-   *
-   * @param orgSlug - Organization identifier
-   * @param componentsObj - Object containing array of components with PURL strings
-   * @param queryParams - Optional query parameters including labels, alerts, compact, etc.
-   * @returns Package metadata and alerts for the requested PURLs
+   * Get package metadata and alerts by PURL strings for a specific
+   * organization. Organization-scoped version of batchPackageFetch with
+   * security policy label support.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.batchOrgPackageFetch('my-org',
-   *   {
-   *     components: [
-   *       { purl: 'pkg:npm/express@4.19.2' },
-   *       { purl: 'pkg:pypi/django@5.0.6' }
-   *     ]
-   *   },
-   *   { labels: ['production'], alerts: true }
-   * )
+   *   ```typescript
+   *   const result = await sdk.batchOrgPackageFetch(
+   *     'my-org',
+   *     {
+   *       components: [
+   *         { purl: 'pkg:npm/express@4.19.2' },
+   *         { purl: 'pkg:pypi/django@5.0.6' },
+   *       ],
+   *     },
+   *     { labels: ['production'], alerts: true },
+   *   )
    *
-   * if (result.success) {
-   *   for (const artifact of result.data) {
-   *     console.log(`${artifact.name}@${artifact.version}`)
+   *   if (result.success) {
+   *     for (const artifact of result.data) {
+   *       console.log(`${artifact.name}@${artifact.version}`)
+   *     }
    *   }
-   * }
-   * ```
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param componentsObj - Object containing array of components with PURL
+   *   strings.
+   * @param queryParams - Optional query parameters including labels, alerts,
+   *   compact, etc.
+   *
+   * @returns Package metadata and alerts for the requested PURLs
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/purl
+   *
+   * @quota 100 units
+   *
+   * @scopes packages:list
    *
    * @see https://docs.socket.dev/reference/batchpackagefetchbyorg
-   * @apiEndpoint POST /orgs/{org_slug}/purl
-   * @quota 100 units
-   * @scopes packages:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async batchOrgPackageFetch(
     orgSlug: string,
@@ -787,8 +799,8 @@ export class SocketSdk {
   }
 
   /**
-   * Fetch package analysis data for multiple packages in a single batch request.
-   * Returns all results at once after processing is complete.
+   * Fetch package analysis data for multiple packages in a single batch
+   * request. Returns all results at once after processing is complete.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -845,12 +857,15 @@ export class SocketSdk {
   }
 
   /**
-   * Stream package analysis data for multiple packages with chunked processing and concurrency control.
-   * Returns results as they become available via async generator.
+   * Stream package analysis data for multiple packages with chunked processing
+   * and concurrency control. Returns results as they become available via async
+   * generator.
+   *
+   * @throws {Error} When server returns 5xx status codes
    *
    * @operationId batchPackageStream
+   *
    * @quota 100 units
-   * @throws {Error} When server returns 5xx status codes
    */
   async *batchPackageStream(
     componentsObj: { components: Array<{ purl: string }> },
@@ -1056,16 +1071,19 @@ export class SocketSdk {
    * Check packages for malware and security alerts.
    *
    * For small sets (≤ MAX_FIREWALL_COMPONENTS), uses parallel firewall API
-   * requests which return full artifact data including score and alert details.
+   * requests which return full artifact data including score and alert
+   * details.
    *
    * For larger sets, uses the batch PURL API for efficiency.
    *
    * Both paths normalize alerts through publicPolicy and only return
    * malware-relevant results.
    *
-   * @operationId none
-   * @param components - Array of package URLs to check
+   * @param components - Array of package URLs to check.
+   *
    * @returns Normalized results with policy-filtered alerts per package
+   *
+   * @operationId none
    */
   async checkMalware(
     components: Array<{ purl: string }>,
@@ -1311,35 +1329,43 @@ export class SocketSdk {
    * Uploads project manifest files and initiates full security analysis.
    * Returns scan metadata with guaranteed required fields.
    *
-   * @param orgSlug - Organization identifier
-   * @param filepaths - Array of file paths to upload (package.json, package-lock.json, etc.)
-   * @param options - Scan configuration including repository, branch, and commit details
+   * @example
+   *   ```typescript
+   *   const result = await sdk.createFullScan(
+   *     'my-org',
+   *     ['package.json', 'package-lock.json'],
+   *     {
+   *       repo: 'my-repo',
+   *       branch: 'main',
+   *       commit_message: 'Update dependencies',
+   *       commit_hash: 'abc123',
+   *       pathsRelativeTo: './my-project',
+   *     },
+   *   )
+   *
+   *   if (result.success) {
+   *     console.log('Scan ID:', result.data.id)
+   *     console.log('Report URL:', result.data.html_report_url)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param filepaths - Array of file paths to upload (package.json,
+   *   package-lock.json, etc.)
+   * @param options - Scan configuration including repository, branch, and
+   *   commit details.
+   *
    * @returns Full scan metadata including ID and URLs
    *
-   * @example
-   * ```typescript
-   * const result = await sdk.createFullScan('my-org',
-   *   ['package.json', 'package-lock.json'],
-   *   {
-   *     repo: 'my-repo',
-   *     branch: 'main',
-   *     commit_message: 'Update dependencies',
-   *     commit_hash: 'abc123',
-   *     pathsRelativeTo: './my-project'
-   *   }
-   * )
+   * @throws {Error} When server returns 5xx status codes
    *
-   * if (result.success) {
-   *   console.log('Scan ID:', result.data.id)
-   *   console.log('Report URL:', result.data.html_report_url)
-   * }
-   * ```
+   * @apiEndpoint POST /orgs/{org_slug}/full-scans
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:create
    *
    * @see https://docs.socket.dev/reference/createorgfullscan
-   * @apiEndpoint POST /orgs/{org_slug}/full-scans
-   * @quota 0 units
-   * @scopes full-scans:create
-   * @throws {Error} When server returns 5xx status codes
    */
   async createFullScan(
     orgSlug: string,
@@ -1453,37 +1479,42 @@ export class SocketSdk {
   }
 
   /**
-   * Create a diff scan from two full scan IDs.
-   * Compares two existing full scans to identify changes.
-   *
-   * @param orgSlug - Organization identifier
-   * @param options - Diff scan creation options
-   * @param options.after - ID of the after/head full scan (newer)
-   * @param options.before - ID of the before/base full scan (older)
-   * @param options.description - Description of the diff scan
-   * @param options.external_href - External URL to associate with the diff scan
-   * @param options.merge - Set true for merged commits, false for open PR diffs
-   * @returns Diff scan details
+   * Create a diff scan from two full scan IDs. Compares two existing full scans
+   * to identify changes.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.createOrgDiffScanFromIds('my-org', {
-   *   before: 'scan-id-1',
-   *   after: 'scan-id-2',
-   *   description: 'Compare versions',
-   *   merge: false
-   * })
+   *   ```typescript
+   *   const result = await sdk.createOrgDiffScanFromIds('my-org', {
+   *     before: 'scan-id-1',
+   *     after: 'scan-id-2',
+   *     description: 'Compare versions',
+   *     merge: false,
+   *   })
    *
-   * if (result.success) {
-   *   console.log('Diff scan created:', result.data.diff_scan.id)
-   * }
-   * ```
+   *   if (result.success) {
+   *     console.log('Diff scan created:', result.data.diff_scan.id)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Diff scan creation options.
+   * @param options.after - ID of the after/head full scan (newer)
+   * @param options.before - ID of the before/base full scan (older)
+   * @param options.description - Description of the diff scan.
+   * @param options.external_href - External URL to associate with the diff scan.
+   * @param options.merge - Set true for merged commits, false for open PR diffs.
+   *
+   * @returns Diff scan details
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/diff-scans/from-ids
+   *
+   * @quota 0 units
+   *
+   * @scopes diff-scans:create, full-scans:list
    *
    * @see https://docs.socket.dev/reference/createorgdiffscanfromids
-   * @apiEndpoint POST /orgs/{org_slug}/diff-scans/from-ids
-   * @quota 0 units
-   * @scopes diff-scans:create, full-scans:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async createOrgDiffScanFromIds(
     orgSlug: string,
@@ -1518,9 +1549,11 @@ export class SocketSdk {
    * Create a full scan from an archive file (.tar, .tar.gz/.tgz, or .zip).
    * Uploads and scans a compressed archive of project files.
    *
-   * @param orgSlug - Organization identifier
-   * @param archivePath - Path to the archive file to upload
-   * @param options - Scan configuration options including repo, branch, and metadata
+   * @param orgSlug - Organization identifier.
+   * @param archivePath - Path to the archive file to upload.
+   * @param options - Scan configuration options including repo, branch, and
+   *   metadata.
+   *
    * @returns Created full scan details with scan ID and status
    *
    * @throws {Error} When server returns 5xx status codes or file cannot be read
@@ -1571,11 +1604,13 @@ export class SocketSdk {
   }
 
   /**
-   * Create a new webhook for an organization.
-   * Webhooks allow you to receive HTTP POST notifications when specific events occur.
+   * Create a new webhook for an organization. Webhooks allow you to receive
+   * HTTP POST notifications when specific events occur.
    *
-   * @param orgSlug - Organization identifier
-   * @param webhookData - Webhook configuration including name, URL, secret, and events
+   * @param orgSlug - Organization identifier.
+   * @param webhookData - Webhook configuration including name, URL, secret, and
+   *   events.
+   *
    * @returns Created webhook details including webhook ID
    *
    * @throws {Error} When server returns 5xx status codes
@@ -1616,35 +1651,40 @@ export class SocketSdk {
    *
    * Registers a repository for monitoring and security scanning.
    *
-   * @param orgSlug - Organization identifier
-   * @param repoSlug - Repository name/slug
-   * @param params - Additional repository configuration
-   * @param params.archived - Whether the repository is archived
-   * @param params.default_branch - Default branch of the repository
-   * @param params.description - Description of the repository
-   * @param params.homepage - Homepage URL of the repository
+   * @example
+   *   ```typescript
+   *   const result = await sdk.createRepository('my-org', 'my-repo', {
+   *     description: 'My project repository',
+   *     homepage: 'https://example.com',
+   *     visibility: 'private',
+   *   })
+   *
+   *   if (result.success) {
+   *     console.log('Repository created:', result.data.id)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param repoSlug - Repository name/slug.
+   * @param params - Additional repository configuration.
+   * @param params.archived - Whether the repository is archived.
+   * @param params.default_branch - Default branch of the repository.
+   * @param params.description - Description of the repository.
+   * @param params.homepage - Homepage URL of the repository.
    * @param params.visibility - Visibility setting ('public' or 'private')
-   * @param params.workspace - Workspace of the repository
+   * @param params.workspace - Workspace of the repository.
+   *
    * @returns Created repository details
    *
-   * @example
-   * ```typescript
-   * const result = await sdk.createRepository('my-org', 'my-repo', {
-   *   description: 'My project repository',
-   *   homepage: 'https://example.com',
-   *   visibility: 'private'
-   * })
+   * @throws {Error} When server returns 5xx status codes
    *
-   * if (result.success) {
-   *   console.log('Repository created:', result.data.id)
-   * }
-   * ```
+   * @apiEndpoint POST /orgs/{org_slug}/repos
+   *
+   * @quota 0 units
+   *
+   * @scopes repo:write
    *
    * @see https://docs.socket.dev/reference/createorgrepo
-   * @apiEndpoint POST /orgs/{org_slug}/repos
-   * @quota 0 units
-   * @scopes repo:write
-   * @throws {Error} When server returns 5xx status codes
    */
   async createRepository(
     orgSlug: string,
@@ -1695,27 +1735,35 @@ export class SocketSdk {
   /**
    * Create a new repository label for an organization.
    *
-   * Labels can be used to group and organize repositories and apply security/license policies.
-   *
-   * @param orgSlug - Organization identifier
-   * @param labelData - Label configuration (must include name property)
-   * @returns Created label with guaranteed id and name fields
+   * Labels can be used to group and organize repositories and apply
+   * security/license policies.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.createRepositoryLabel('my-org', { name: 'production' })
+   *   ```typescript
+   *   const result = await sdk.createRepositoryLabel('my-org', {
+   *     name: 'production',
+   *   })
    *
-   * if (result.success) {
-   *   console.log('Label created:', result.data.id)
-   *   console.log('Label name:', result.data.name)
-   * }
-   * ```
+   *   if (result.success) {
+   *     console.log('Label created:', result.data.id)
+   *     console.log('Label name:', result.data.name)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelData - Label configuration (must include name property)
+   *
+   * @returns Created label with guaranteed id and name fields
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/repos/labels
+   *
+   * @quota 0 units
+   *
+   * @scopes repo-label:create
    *
    * @see https://docs.socket.dev/reference/createorgrepolabel
-   * @apiEndpoint POST /orgs/{org_slug}/repos/labels
-   * @quota 0 units
-   * @scopes repo-label:create
-   * @throws {Error} When server returns 5xx status codes
    */
   async createRepositoryLabel(
     orgSlug: string,
@@ -1758,24 +1806,29 @@ export class SocketSdk {
    *
    * Permanently removes scan data and results.
    *
-   * @param orgSlug - Organization identifier
-   * @param scanId - Full scan identifier to delete
+   * @example
+   *   ```typescript
+   *   const result = await sdk.deleteFullScan('my-org', 'scan_123')
+   *
+   *   if (result.success) {
+   *     console.log('Scan deleted successfully')
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param scanId - Full scan identifier to delete.
+   *
    * @returns Success confirmation
    *
-   * @example
-   * ```typescript
-   * const result = await sdk.deleteFullScan('my-org', 'scan_123')
+   * @throws {Error} When server returns 5xx status codes
    *
-   * if (result.success) {
-   *   console.log('Scan deleted successfully')
-   * }
-   * ```
+   * @apiEndpoint DELETE /orgs/{org_slug}/full-scans/{full_scan_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:delete
    *
    * @see https://docs.socket.dev/reference/deleteorgfullscan
-   * @apiEndpoint DELETE /orgs/{org_slug}/full-scans/{full_scan_id}
-   * @quota 0 units
-   * @scopes full-scans:delete
-   * @throws {Error} When server returns 5xx status codes
    */
   async deleteFullScan(
     orgSlug: string,
@@ -1812,8 +1865,8 @@ export class SocketSdk {
   }
 
   /**
-   * Delete a diff scan from an organization.
-   * Permanently removes diff scan data and results.
+   * Delete a diff scan from an organization. Permanently removes diff scan data
+   * and results.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -1839,11 +1892,12 @@ export class SocketSdk {
   }
 
   /**
-   * Delete a webhook from an organization.
-   * This will stop all future webhook deliveries to the webhook URL.
+   * Delete a webhook from an organization. This will stop all future webhook
+   * deliveries to the webhook URL.
    *
-   * @param orgSlug - Organization identifier
-   * @param webhookId - Webhook ID to delete
+   * @param orgSlug - Organization identifier.
+   * @param webhookId - Webhook ID to delete.
+   *
    * @returns Success status
    *
    * @throws {Error} When server returns 5xx status codes
@@ -1874,25 +1928,30 @@ export class SocketSdk {
    *
    * Removes repository monitoring and associated scan data.
    *
-   * @param orgSlug - Organization identifier
-   * @param repoSlug - Repository slug/name to delete
-   * @param options - Optional parameters including workspace
+   * @example
+   *   ```typescript
+   *   const result = await sdk.deleteRepository('my-org', 'old-repo')
+   *
+   *   if (result.success) {
+   *     console.log('Repository deleted')
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param repoSlug - Repository slug/name to delete.
+   * @param options - Optional parameters including workspace.
+   *
    * @returns Success confirmation
    *
-   * @example
-   * ```typescript
-   * const result = await sdk.deleteRepository('my-org', 'old-repo')
+   * @throws {Error} When server returns 5xx status codes
    *
-   * if (result.success) {
-   *   console.log('Repository deleted')
-   * }
-   * ```
+   * @apiEndpoint DELETE /orgs/{org_slug}/repos/{repo_slug}
+   *
+   * @quota 0 units
+   *
+   * @scopes repo:write
    *
    * @see https://docs.socket.dev/reference/deleteorgrepo
-   * @apiEndpoint DELETE /orgs/{org_slug}/repos/{repo_slug}
-   * @quota 0 units
-   * @scopes repo:write
-   * @throws {Error} When server returns 5xx status codes
    */
   async deleteRepository(
     orgSlug: string,
@@ -1939,26 +1998,32 @@ export class SocketSdk {
   /**
    * Delete a repository label from an organization.
    *
-   * Removes label and all its associations (repositories, security policy, license policy, etc.).
-   *
-   * @param orgSlug - Organization identifier
-   * @param labelId - Label identifier
-   * @returns Deletion confirmation
+   * Removes label and all its associations (repositories, security policy,
+   * license policy, etc.).
    *
    * @example
-   * ```typescript
-   * const result = await sdk.deleteRepositoryLabel('my-org', 'label-id-123')
+   *   ```typescript
+   *   const result = await sdk.deleteRepositoryLabel('my-org', 'label-id-123')
    *
-   * if (result.success) {
-   *   console.log('Label deleted:', result.data.status)
-   * }
-   * ```
+   *   if (result.success) {
+   *     console.log('Label deleted:', result.data.status)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   *
+   * @returns Deletion confirmation
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint DELETE /orgs/{org_slug}/repos/labels/{label_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes repo-label:delete
    *
    * @see https://docs.socket.dev/reference/deleteorgrepolabel
-   * @apiEndpoint DELETE /orgs/{org_slug}/repos/labels/{label_id}
-   * @quota 0 units
-   * @scopes repo-label:delete
-   * @throws {Error} When server returns 5xx status codes
    */
   async deleteRepositoryLabel(
     orgSlug: string,
@@ -1997,13 +2062,15 @@ export class SocketSdk {
   /**
    * Download full scan files as a tar archive.
    *
-   * Streams the full scan file contents to the specified output path as a tar file.
-   * Includes size limit enforcement to prevent excessive disk usage.
+   * Streams the full scan file contents to the specified output path as a tar
+   * file. Includes size limit enforcement to prevent excessive disk usage.
    *
-   * @param orgSlug - Organization identifier
-   * @param fullScanId - Full scan identifier
-   * @param outputPath - Local file path to write the tar archive
+   * @param orgSlug - Organization identifier.
+   * @param fullScanId - Full scan identifier.
+   * @param outputPath - Local file path to write the tar archive.
+   *
    * @returns Download result with success/error status
+   *
    * @throws {Error} When server returns 5xx status codes
    */
   async downloadOrgFullScanFilesAsTar(
@@ -2042,26 +2109,31 @@ export class SocketSdk {
   }
 
   /**
-   * Download patch file content from Socket blob storage.
-   * Retrieves patched file contents using SSRI hash or hex hash.
+   * Download patch file content from Socket blob storage. Retrieves patched
+   * file contents using SSRI hash or hex hash.
    *
-   * This is a low-level utility method - you'll typically use this after calling
-   * `viewPatch()` to get patch metadata, then download individual patched files.
-   *
-   * @param hash - The blob hash in SSRI (sha256-base64) or hex format
-   * @param options - Optional configuration
-   * @param options.baseUrl - Override blob store URL (for testing)
-   * @returns Promise<string> - The patch file content as UTF-8 string
-   * @throws Error if blob not found (404) or download fails
+   * This is a low-level utility method - you'll typically use this after
+   * calling `viewPatch()` to get patch metadata, then download individual
+   * patched files.
    *
    * @example
-   * ```typescript
-   * const sdk = new SocketSdk('your-api-token')
-   * // First get patch metadata
-   * const patch = await sdk.viewPatch('my-org', 'patch-uuid')
-   * // Then download the actual patched file
-   * const fileContent = await sdk.downloadPatch(patch.files['index.js'].socketBlob)
-   * ```
+   *   ```typescript
+   *   const sdk = new SocketSdk('your-api-token')
+   *   // First get patch metadata
+   *   const patch = await sdk.viewPatch('my-org', 'patch-uuid')
+   *   // Then download the actual patched file
+   *   const fileContent = await sdk.downloadPatch(
+   *     patch.files['index.js'].socketBlob,
+   *   )
+   *   ```
+   *
+   * @param hash - The blob hash in SSRI (sha256-base64) or hex format.
+   * @param options - Optional configuration.
+   * @param options.baseUrl - Override blob store URL (for testing)
+   *
+   * @returns Promise<string> - The patch file content as UTF-8 string
+   *
+   * @throws Error if blob not found (404) or download fails
    *
    * @operationId none
    */
@@ -2106,8 +2178,8 @@ export class SocketSdk {
   }
 
   /**
-   * Export scan results in CycloneDX SBOM format.
-   * Returns Software Bill of Materials compliant with CycloneDX standard.
+   * Export scan results in CycloneDX SBOM format. Returns Software Bill of
+   * Materials compliant with CycloneDX standard.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2134,31 +2206,38 @@ export class SocketSdk {
 
   /**
    * Export vulnerability exploitability data as an OpenVEX v0.2.0 document.
-   * Includes patch data and reachability analysis for vulnerability assessment.
-   *
-   * @param orgSlug - Organization identifier
-   * @param id - Full scan or SBOM report ID
-   * @param options - Optional parameters including author, role, and document_id
-   * @returns OpenVEX document with vulnerability exploitability information
+   * Includes patch data and reachability analysis for vulnerability
+   * assessment.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.exportOpenVEX('my-org', 'scan-id', {
-   *   author: 'Security Team',
-   *   role: 'VEX Generator'
-   * })
+   *   ```typescript
+   *   const result = await sdk.exportOpenVEX('my-org', 'scan-id', {
+   *     author: 'Security Team',
+   *     role: 'VEX Generator',
+   *   })
    *
-   * if (result.success) {
-   *   console.log('VEX Version:', result.data.version)
-   *   console.log('Statements:', result.data.statements.length)
-   * }
-   * ```
+   *   if (result.success) {
+   *     console.log('VEX Version:', result.data.version)
+   *     console.log('Statements:', result.data.statements.length)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param id - Full scan or SBOM report ID.
+   * @param options - Optional parameters including author, role, and
+   *   document_id.
+   *
+   * @returns OpenVEX document with vulnerability exploitability information
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/export/openvex/{id}
+   *
+   * @quota 0 units
+   *
+   * @scopes report:read
    *
    * @see https://docs.socket.dev/reference/exportopenvex
-   * @apiEndpoint GET /orgs/{org_slug}/export/openvex/{id}
-   * @quota 0 units
-   * @scopes report:read
-   * @throws {Error} When server returns 5xx status codes
    */
   async exportOpenVEX(
     orgSlug: string,
@@ -2192,8 +2271,8 @@ export class SocketSdk {
   }
 
   /**
-   * Export scan results in SPDX SBOM format.
-   * Returns Software Bill of Materials compliant with SPDX standard.
+   * Export scan results in SPDX SBOM format. Returns Software Bill of Materials
+   * compliant with SPDX standard.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2219,13 +2298,18 @@ export class SocketSdk {
   }
 
   /**
-   * Execute a raw GET request to any API endpoint with configurable response type.
-   * Supports both throwing (default) and non-throwing modes.
-   * @operationId getApi
-   * @quota 0 units
+   * Execute a raw GET request to any API endpoint with configurable response
+   * type. Supports both throwing (default) and non-throwing modes.
+   *
    * @param urlPath - API endpoint path (e.g., 'organizations')
-   * @param options - Request options including responseType and throws behavior
-   * @returns Raw response, parsed data, or SocketSdkGenericResult based on options
+   * @param options - Request options including responseType and throws behavior.
+   *
+   * @returns Raw response, parsed data, or SocketSdkGenericResult based on
+   *   options.
+   *
+   * @operationId getApi
+   *
+   * @quota 0 units
    */
   async getApi<T = HttpResponse>(
     urlPath: string,
@@ -2290,8 +2374,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get list of API tokens for an organization.
-   * Returns organization API tokens with metadata and permissions.
+   * Get list of API tokens for an organization. Returns organization API tokens
+   * with metadata and permissions.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2316,8 +2400,8 @@ export class SocketSdk {
   }
 
   /**
-   * Retrieve audit log events for an organization.
-   * Returns chronological log of security and administrative actions.
+   * Retrieve audit log events for an organization. Returns chronological log of
+   * security and administrative actions.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2343,8 +2427,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get details for a specific diff scan.
-   * Returns comparison between two full scans with artifact changes.
+   * Get details for a specific diff scan. Returns comparison between two full
+   * scans with artifact changes.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2370,30 +2454,35 @@ export class SocketSdk {
   }
 
   /**
-   * Get GitHub-flavored markdown comments for a diff scan.
-   * Returns dependency overview and alert comments suitable for pull requests.
-   *
-   * @param orgSlug - Organization identifier
-   * @param diffScanId - Diff scan identifier
-   * @param options - Optional query parameters
-   * @param options.github_installation_id - GitHub installation ID for settings
-   * @returns Diff scan metadata with formatted markdown comments
+   * Get GitHub-flavored markdown comments for a diff scan. Returns dependency
+   * overview and alert comments suitable for pull requests.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.getDiffScanGfm('my-org', 'diff-scan-id')
+   *   ```typescript
+   *   const result = await sdk.getDiffScanGfm('my-org', 'diff-scan-id')
    *
-   * if (result.success) {
-   *   console.log(result.data.dependency_overview_comment)
-   *   console.log(result.data.dependency_alert_comment)
-   * }
-   * ```
+   *   if (result.success) {
+   *     console.log(result.data.dependency_overview_comment)
+   *     console.log(result.data.dependency_alert_comment)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param diffScanId - Diff scan identifier.
+   * @param options - Optional query parameters.
+   * @param options.github_installation_id - GitHub installation ID for settings.
+   *
+   * @returns Diff scan metadata with formatted markdown comments
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/diff-scans/{diff_scan_id}/gfm
+   *
+   * @quota 0 units
+   *
+   * @scopes diff-scans:list
    *
    * @see https://docs.socket.dev/reference/getdiffscangfm
-   * @apiEndpoint GET /orgs/{org_slug}/diff-scans/{diff_scan_id}/gfm
-   * @quota 0 units
-   * @scopes diff-scans:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async getDiffScanGfm(
     orgSlug: string,
@@ -2420,10 +2509,12 @@ export class SocketSdk {
   /**
    * Retrieve the enabled entitlements for an organization.
    *
-   * This method fetches the organization's entitlements and filters for only the enabled ones, returning their keys. Entitlements represent Socket
+   * This method fetches the organization's entitlements and filters for only
+   * the enabled ones, returning their keys. Entitlements represent Socket
    * Products that the organization has access to use.
    *
    * @operationId getEnabledEntitlements
+   *
    * @quota 0 units
    */
   async getEnabledEntitlements(orgSlug: string): Promise<string[]> {
@@ -2448,10 +2539,11 @@ export class SocketSdk {
   /**
    * Retrieve all entitlements for an organization.
    *
-   * This method fetches all entitlements (both enabled and disabled) for
-   * an organization, returning the complete list with their status.
+   * This method fetches all entitlements (both enabled and disabled) for an
+   * organization, returning the complete list with their status.
    *
    * @operationId getEntitlements
+   *
    * @quota 0 units
    */
   async getEntitlements(orgSlug: string): Promise<Entitlement[]> {
@@ -2472,28 +2564,33 @@ export class SocketSdk {
   /**
    * Get complete full scan results buffered in memory.
    *
-   * Returns entire scan data as JSON for programmatic processing.
-   * For large scans, consider using streamFullScan() instead.
-   *
-   * @param orgSlug - Organization identifier
-   * @param scanId - Full scan identifier
-   * @returns Complete full scan data including all artifacts
+   * Returns entire scan data as JSON for programmatic processing. For large
+   * scans, consider using streamFullScan() instead.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.getFullScan('my-org', 'scan_123')
+   *   ```typescript
+   *   const result = await sdk.getFullScan('my-org', 'scan_123')
    *
-   * if (result.success) {
-   *   console.log('Scan status:', result.data.scan_state)
-   *   console.log('Repository:', result.data.repository_slug)
-   * }
-   * ```
+   *   if (result.success) {
+   *     console.log('Scan status:', result.data.scan_state)
+   *     console.log('Repository:', result.data.repository_slug)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param scanId - Full scan identifier.
+   *
+   * @returns Complete full scan data including all artifacts
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:list
    *
    * @see https://docs.socket.dev/reference/getorgfullscan
-   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
-   * @quota 0 units
-   * @scopes full-scans:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async getFullScan(
     orgSlug: string,
@@ -2532,28 +2629,34 @@ export class SocketSdk {
   /**
    * Get metadata for a specific full scan.
    *
-   * Returns scan configuration, status, and summary information without full artifact data.
-   * Useful for checking scan status without downloading complete results.
-   *
-   * @param orgSlug - Organization identifier
-   * @param scanId - Full scan identifier
-   * @returns Scan metadata including status and configuration
+   * Returns scan configuration, status, and summary information without full
+   * artifact data. Useful for checking scan status without downloading complete
+   * results.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.getFullScanMetadata('my-org', 'scan_123')
+   *   ```typescript
+   *   const result = await sdk.getFullScanMetadata('my-org', 'scan_123')
    *
-   * if (result.success) {
-   *   console.log('Scan state:', result.data.scan_state)
-   *   console.log('Branch:', result.data.branch)
-   * }
-   * ```
+   *   if (result.success) {
+   *     console.log('Scan state:', result.data.scan_state)
+   *     console.log('Branch:', result.data.branch)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param scanId - Full scan identifier.
+   *
+   * @returns Scan metadata including status and configuration
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}/metadata
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:list
    *
    * @see https://docs.socket.dev/reference/getorgfullscanmetadata
-   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}/metadata
-   * @quota 0 units
-   * @scopes full-scans:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async getFullScanMetadata(
     orgSlug: string,
@@ -2591,8 +2694,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get security issues for a specific npm package and version.
-   * Returns detailed vulnerability and security alert information.
+   * Get security issues for a specific npm package and version. Returns
+   * detailed vulnerability and security alert information.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2618,33 +2721,38 @@ export class SocketSdk {
   }
 
   /**
-   * List full scans associated with a specific alert.
-   * Returns paginated full scan references for alert investigation.
-   *
-   * @param orgSlug - Organization identifier
-   * @param options - Query parameters including alertKey, range, pagination
-   * @returns Paginated array of full scans associated with the alert
+   * List full scans associated with a specific alert. Returns paginated full
+   * scan references for alert investigation.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.getOrgAlertFullScans('my-org', {
-   *   alertKey: 'npm/lodash/cve-2021-23337',
-   *   range: '-7d',
-   *   per_page: 50
-   * })
+   *   ```typescript
+   *   const result = await sdk.getOrgAlertFullScans('my-org', {
+   *     alertKey: 'npm/lodash/cve-2021-23337',
+   *     range: '-7d',
+   *     per_page: 50,
+   *   })
    *
-   * if (result.success) {
-   *   for (const item of result.data.items) {
-   *     console.log('Full Scan ID:', item.fullScanId)
+   *   if (result.success) {
+   *     for (const item of result.data.items) {
+   *       console.log('Full Scan ID:', item.fullScanId)
+   *     }
    *   }
-   * }
-   * ```
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Query parameters including alertKey, range, pagination.
+   *
+   * @returns Paginated array of full scans associated with the alert
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/alert-full-scan-search
+   *
+   * @quota 10 units
+   *
+   * @scopes alerts:list
    *
    * @see https://docs.socket.dev/reference/alertfullscans
-   * @apiEndpoint GET /orgs/{org_slug}/alert-full-scan-search
-   * @quota 10 units
-   * @scopes alerts:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async getOrgAlertFullScans(
     orgSlug: string,
@@ -2673,11 +2781,12 @@ export class SocketSdk {
   }
 
   /**
-   * List latest alerts for an organization (Beta).
-   * Returns paginated alerts with comprehensive filtering options.
+   * List latest alerts for an organization (Beta). Returns paginated alerts
+   * with comprehensive filtering options.
    *
-   * @param orgSlug - Organization identifier
-   * @param options - Optional query parameters for pagination and filtering
+   * @param orgSlug - Organization identifier.
+   * @param options - Optional query parameters for pagination and filtering.
+   *
    * @returns Paginated list of alerts with cursor-based pagination
    *
    * @throws {Error} When server returns 5xx status codes
@@ -2774,15 +2883,19 @@ export class SocketSdk {
   }
 
   /**
-   * Fetch available fixes for vulnerabilities in a repository or scan.
-   * Returns fix recommendations including version upgrades and update types.
+   * Fetch available fixes for vulnerabilities in a repository or scan. Returns
+   * fix recommendations including version upgrades and update types.
    *
-   * @operationId none
-   * @param orgSlug - Organization identifier
-   * @param options - Fix query options including repo_slug or full_scan_id, vulnerability IDs, and preferences
-   * @returns Fix details for requested vulnerabilities with upgrade recommendations
+   * @param orgSlug - Organization identifier.
+   * @param options - Fix query options including repo_slug or full_scan_id,
+   *   vulnerability IDs, and preferences.
+   *
+   * @returns Fix details for requested vulnerabilities with upgrade
+   *   recommendations.
    *
    * @throws {Error} When server returns 5xx status codes
+   *
+   * @operationId none
    */
   async getOrgFixes(
     orgSlug: string,
@@ -2814,8 +2927,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get organization's license policy configuration.
-   * Returns allowed, restricted, and monitored license types.
+   * Get organization's license policy configuration. Returns allowed,
+   * restricted, and monitored license types.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2840,8 +2953,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get organization's security policy configuration.
-   * Returns alert rules, severity thresholds, and enforcement settings.
+   * Get organization's security policy configuration. Returns alert rules,
+   * severity thresholds, and enforcement settings.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2866,10 +2979,11 @@ export class SocketSdk {
   }
 
   /**
-   * Get organization's telemetry configuration.
-   * Returns whether telemetry is enabled for the organization.
+   * Get organization's telemetry configuration. Returns whether telemetry is
+   * enabled for the organization.
    *
-   * @param orgSlug - Organization identifier
+   * @param orgSlug - Organization identifier.
+   *
    * @returns Telemetry configuration with enabled status
    *
    * @throws {Error} When server returns 5xx status codes
@@ -2895,8 +3009,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get organization triage settings and status.
-   * Returns alert triage configuration and current state.
+   * Get organization triage settings and status. Returns alert triage
+   * configuration and current state.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2921,11 +3035,12 @@ export class SocketSdk {
   }
 
   /**
-   * Get details of a specific webhook.
-   * Returns webhook configuration including events, URL, and filters.
+   * Get details of a specific webhook. Returns webhook configuration including
+   * events, URL, and filters.
    *
-   * @param orgSlug - Organization identifier
-   * @param webhookId - Webhook ID to retrieve
+   * @param orgSlug - Organization identifier.
+   * @param webhookId - Webhook ID to retrieve.
+   *
    * @returns Webhook details
    *
    * @throws {Error} When server returns 5xx status codes
@@ -2952,11 +3067,12 @@ export class SocketSdk {
   }
 
   /**
-   * List all webhooks for an organization.
-   * Supports pagination and sorting options.
+   * List all webhooks for an organization. Supports pagination and sorting
+   * options.
    *
-   * @param orgSlug - Organization identifier
-   * @param options - Optional query parameters for pagination and sorting
+   * @param orgSlug - Organization identifier.
+   * @param options - Optional query parameters for pagination and sorting.
+   *
    * @returns List of webhooks with pagination info
    *
    * @throws {Error} When server returns 5xx status codes
@@ -2990,8 +3106,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get current API quota usage and limits.
-   * Returns remaining requests, rate limits, and quota reset times.
+   * Get current API quota usage and limits. Returns remaining requests, rate
+   * limits, and quota reset times.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3016,8 +3132,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get analytics data for a specific repository.
-   * Returns security metrics, dependency trends, and vulnerability statistics.
+   * Get analytics data for a specific repository. Returns security metrics,
+   * dependency trends, and vulnerability statistics.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3047,27 +3163,32 @@ export class SocketSdk {
    *
    * Returns repository configuration, monitoring status, and metadata.
    *
-   * @param orgSlug - Organization identifier
-   * @param repoSlug - Repository slug/name
-   * @param options - Optional parameters including workspace
+   * @example
+   *   ```typescript
+   *   const result = await sdk.getRepository('my-org', 'my-repo')
+   *
+   *   if (result.success) {
+   *     console.log('Repository:', result.data.name)
+   *     console.log('Visibility:', result.data.visibility)
+   *     console.log('Default branch:', result.data.default_branch)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param repoSlug - Repository slug/name.
+   * @param options - Optional parameters including workspace.
+   *
    * @returns Repository details with configuration
    *
-   * @example
-   * ```typescript
-   * const result = await sdk.getRepository('my-org', 'my-repo')
+   * @throws {Error} When server returns 5xx status codes
    *
-   * if (result.success) {
-   *   console.log('Repository:', result.data.name)
-   *   console.log('Visibility:', result.data.visibility)
-   *   console.log('Default branch:', result.data.default_branch)
-   * }
-   * ```
+   * @apiEndpoint GET /orgs/{org_slug}/repos/{repo_slug}
+   *
+   * @quota 0 units
+   *
+   * @scopes repo:read
    *
    * @see https://docs.socket.dev/reference/getorgrepo
-   * @apiEndpoint GET /orgs/{org_slug}/repos/{repo_slug}
-   * @quota 0 units
-   * @scopes repo:read
-   * @throws {Error} When server returns 5xx status codes
    */
   async getRepository(
     orgSlug: string,
@@ -3119,26 +3240,31 @@ export class SocketSdk {
    *
    * Returns label configuration, associated repositories, and policy settings.
    *
-   * @param orgSlug - Organization identifier
-   * @param labelId - Label identifier
+   * @example
+   *   ```typescript
+   *   const result = await sdk.getRepositoryLabel('my-org', 'label-id-123')
+   *
+   *   if (result.success) {
+   *     console.log('Label name:', result.data.name)
+   *     console.log('Associated repos:', result.data.repository_ids)
+   *     console.log('Has security policy:', result.data.has_security_policy)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   *
    * @returns Label details with guaranteed id and name fields
    *
-   * @example
-   * ```typescript
-   * const result = await sdk.getRepositoryLabel('my-org', 'label-id-123')
+   * @throws {Error} When server returns 5xx status codes
    *
-   * if (result.success) {
-   *   console.log('Label name:', result.data.name)
-   *   console.log('Associated repos:', result.data.repository_ids)
-   *   console.log('Has security policy:', result.data.has_security_policy)
-   * }
-   * ```
+   * @apiEndpoint GET /orgs/{org_slug}/repos/labels/{label_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes repo-label:list
    *
    * @see https://docs.socket.dev/reference/getorgrepolabel
-   * @apiEndpoint GET /orgs/{org_slug}/repos/labels/{label_id}
-   * @quota 0 units
-   * @scopes repo-label:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async getRepositoryLabel(
     orgSlug: string,
@@ -3175,8 +3301,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get security score for a specific npm package and version.
-   * Returns numerical security rating and scoring breakdown.
+   * Get security score for a specific npm package and version. Returns
+   * numerical security rating and scoring breakdown.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3202,30 +3328,37 @@ export class SocketSdk {
   }
 
   /**
-   * Get list of supported file types for full scan generation.
-   * Returns glob patterns for supported manifest files, lockfiles, and configuration formats.
+   * Get list of supported file types for full scan generation. Returns glob
+   * patterns for supported manifest files, lockfiles, and configuration
+   * formats.
    *
-   * Files whose names match the patterns returned by this endpoint can be uploaded
-   * for report generation. Examples include `package.json`, `package-lock.json`, and `yarn.lock`.
-   *
-   * @param orgSlug - Organization identifier
-   * @returns Nested object with environment and file type patterns
+   * Files whose names match the patterns returned by this endpoint can be
+   * uploaded for report generation. Examples include `package.json`,
+   * `package-lock.json`, and `yarn.lock`.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.getSupportedFiles('my-org')
+   *   ```typescript
+   *   const result = await sdk.getSupportedFiles('my-org')
    *
-   * if (result.success) {
-   *   console.log('NPM patterns:', result.data.NPM)
-   *   console.log('PyPI patterns:', result.data.PyPI)
-   * }
-   * ```
+   *   if (result.success) {
+   *     console.log('NPM patterns:', result.data.NPM)
+   *     console.log('PyPI patterns:', result.data.PyPI)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   *
+   * @returns Nested object with environment and file type patterns
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/supported-files
+   *
+   * @quota 0 units
+   *
+   * @scopes No scopes required, but authentication is required
    *
    * @see https://docs.socket.dev/reference/getsupportedfiles
-   * @apiEndpoint GET /orgs/{org_slug}/supported-files
-   * @quota 0 units
-   * @scopes No scopes required, but authentication is required
-   * @throws {Error} When server returns 5xx status codes
    */
   async getSupportedFiles(
     orgSlug: string,
@@ -3250,33 +3383,38 @@ export class SocketSdk {
   /**
    * List all full scans for an organization.
    *
-   * Returns paginated list of full scan metadata with guaranteed required fields
-   * for improved TypeScript autocomplete.
-   *
-   * @param orgSlug - Organization identifier
-   * @param options - Filtering and pagination options
-   * @returns List of full scans with metadata
+   * Returns paginated list of full scan metadata with guaranteed required
+   * fields for improved TypeScript autocomplete.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.listFullScans('my-org', {
-   *   branch: 'main',
-   *   per_page: 50,
-   *   use_cursor: true
-   * })
-   *
-   * if (result.success) {
-   *   result.data.results.forEach(scan => {
-   *     console.log(scan.id, scan.created_at)  // Guaranteed fields
+   *   ```typescript
+   *   const result = await sdk.listFullScans('my-org', {
+   *     branch: 'main',
+   *     per_page: 50,
+   *     use_cursor: true,
    *   })
-   * }
-   * ```
+   *
+   *   if (result.success) {
+   *     result.data.results.forEach(scan => {
+   *       console.log(scan.id, scan.created_at) // Guaranteed fields
+   *     })
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Filtering and pagination options.
+   *
+   * @returns List of full scans with metadata
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:list
    *
    * @see https://docs.socket.dev/reference/getorgfullscanlist
-   * @apiEndpoint GET /orgs/{org_slug}/full-scans
-   * @quota 0 units
-   * @scopes full-scans:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async listFullScans(
     orgSlug: string,
@@ -3315,25 +3453,29 @@ export class SocketSdk {
   /**
    * List all organizations accessible to the current user.
    *
-   * Returns organization details and access permissions with guaranteed required fields.
+   * Returns organization details and access permissions with guaranteed
+   * required fields.
+   *
+   * @example
+   *   ```typescript
+   *   const result = await sdk.listOrganizations()
+   *
+   *   if (result.success) {
+   *     result.data.organizations.forEach(org => {
+   *       console.log(org.name, org.slug) // Guaranteed fields
+   *     })
+   *   }
+   *   ```
    *
    * @returns List of organizations with metadata
    *
-   * @example
-   * ```typescript
-   * const result = await sdk.listOrganizations()
+   * @throws {Error} When server returns 5xx status codes
    *
-   * if (result.success) {
-   *   result.data.organizations.forEach(org => {
-   *     console.log(org.name, org.slug)  // Guaranteed fields
-   *   })
-   * }
-   * ```
+   * @apiEndpoint GET /organizations
+   *
+   * @quota 0 units
    *
    * @see https://docs.socket.dev/reference/getorganizations
-   * @apiEndpoint GET /organizations
-   * @quota 0 units
-   * @throws {Error} When server returns 5xx status codes
    */
   async listOrganizations(): Promise<OrganizationsResult | StrictErrorResult> {
     try {
@@ -3369,8 +3511,8 @@ export class SocketSdk {
   }
 
   /**
-   * List all diff scans for an organization.
-   * Returns paginated list of diff scan metadata and status.
+   * List all diff scans for an organization. Returns paginated list of diff
+   * scan metadata and status.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3397,32 +3539,38 @@ export class SocketSdk {
   /**
    * List all repositories in an organization.
    *
-   * Returns paginated list of repository metadata with guaranteed required fields.
-   *
-   * @param orgSlug - Organization identifier
-   * @param options - Pagination and filtering options
-   * @returns List of repositories with metadata
+   * Returns paginated list of repository metadata with guaranteed required
+   * fields.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.listRepositories('my-org', {
-   *   per_page: 50,
-   *   sort: 'name',
-   *   direction: 'asc'
-   * })
-   *
-   * if (result.success) {
-   *   result.data.results.forEach(repo => {
-   *     console.log(repo.name, repo.visibility)
+   *   ```typescript
+   *   const result = await sdk.listRepositories('my-org', {
+   *     per_page: 50,
+   *     sort: 'name',
+   *     direction: 'asc',
    *   })
-   * }
-   * ```
+   *
+   *   if (result.success) {
+   *     result.data.results.forEach(repo => {
+   *       console.log(repo.name, repo.visibility)
+   *     })
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Pagination and filtering options.
+   *
+   * @returns List of repositories with metadata
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/repos
+   *
+   * @quota 0 units
+   *
+   * @scopes repo:list
    *
    * @see https://docs.socket.dev/reference/getorgrepolist
-   * @apiEndpoint GET /orgs/{org_slug}/repos
-   * @quota 0 units
-   * @scopes repo:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async listRepositories(
     orgSlug: string,
@@ -3461,29 +3609,38 @@ export class SocketSdk {
   /**
    * List all repository labels for an organization.
    *
-   * Returns paginated list of labels configured for repository organization and policy management.
-   *
-   * @param orgSlug - Organization identifier
-   * @param options - Pagination options
-   * @returns List of labels with guaranteed id and name fields
+   * Returns paginated list of labels configured for repository organization and
+   * policy management.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.listRepositoryLabels('my-org', { per_page: 50, page: 1 })
-   *
-   * if (result.success) {
-   *   result.data.results.forEach(label => {
-   *     console.log('Label:', label.name)
-   *     console.log('Associated repos:', label.repository_ids?.length || 0)
+   *   ```typescript
+   *   const result = await sdk.listRepositoryLabels('my-org', {
+   *     per_page: 50,
+   *     page: 1,
    *   })
-   * }
-   * ```
+   *
+   *   if (result.success) {
+   *     result.data.results.forEach(label => {
+   *       console.log('Label:', label.name)
+   *       console.log('Associated repos:', label.repository_ids?.length || 0)
+   *     })
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Pagination options.
+   *
+   * @returns List of labels with guaranteed id and name fields
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/repos/labels
+   *
+   * @quota 0 units
+   *
+   * @scopes repo-label:list
    *
    * @see https://docs.socket.dev/reference/getorgrepolabellist
-   * @apiEndpoint GET /orgs/{org_slug}/repos/labels
-   * @quota 0 units
-   * @scopes repo-label:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async listRepositoryLabels(
     orgSlug: string,
@@ -3520,8 +3677,8 @@ export class SocketSdk {
   }
 
   /**
-   * Create a new API token for an organization.
-   * Generates API token with specified scopes and metadata.
+   * Create a new API token for an organization. Generates API token with
+   * specified scopes and metadata.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3549,8 +3706,8 @@ export class SocketSdk {
   }
 
   /**
-   * Revoke an API token for an organization.
-   * Permanently disables the token and removes access.
+   * Revoke an API token for an organization. Permanently disables the token and
+   * removes access.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3578,8 +3735,8 @@ export class SocketSdk {
   }
 
   /**
-   * Rotate an API token for an organization.
-   * Generates new token value while preserving token metadata.
+   * Rotate an API token for an organization. Generates new token value while
+   * preserving token metadata.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3607,8 +3764,8 @@ export class SocketSdk {
   }
 
   /**
-   * Update an existing API token for an organization.
-   * Modifies token metadata, scopes, or other properties.
+   * Update an existing API token for an organization. Modifies token metadata,
+   * scopes, or other properties.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3637,15 +3794,17 @@ export class SocketSdk {
   }
 
   /**
-   * Post telemetry data for an organization.
-   * Sends telemetry events and analytics data for monitoring and analysis.
+   * Post telemetry data for an organization. Sends telemetry events and
+   * analytics data for monitoring and analysis.
    *
-   * @operationId none
-   * @param orgSlug - Organization identifier
-   * @param telemetryData - Telemetry payload containing events and metrics
+   * @param orgSlug - Organization identifier.
+   * @param telemetryData - Telemetry payload containing events and metrics.
+   *
    * @returns Empty object on successful submission
    *
    * @throws {Error} When server returns 5xx status codes
+   *
+   * @operationId none
    */
   async postOrgTelemetry(
     orgSlug: string,
@@ -3677,8 +3836,8 @@ export class SocketSdk {
   }
 
   /**
-   * Update user or organization settings.
-   * Configures preferences, notifications, and security policies.
+   * Update user or organization settings. Configures preferences,
+   * notifications, and security policies.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3705,37 +3864,42 @@ export class SocketSdk {
   }
 
   /**
-   * Create a new full scan by rescanning an existing scan.
-   * Supports shallow (policy reapplication) and deep (dependency resolution rerun) modes.
-   *
-   * @param orgSlug - Organization identifier
-   * @param fullScanId - Full scan ID to rescan
-   * @param options - Rescan options including mode (shallow or deep)
-   * @returns New scan ID and status
+   * Create a new full scan by rescanning an existing scan. Supports shallow
+   * (policy reapplication) and deep (dependency resolution rerun) modes.
    *
    * @example
-   * ```typescript
-   * // Shallow rescan (reapply policies to cached data)
-   * const result = await sdk.rescanFullScan('my-org', 'scan_123', {
-   *   mode: 'shallow'
-   * })
+   *   ```typescript
+   *   // Shallow rescan (reapply policies to cached data)
+   *   const result = await sdk.rescanFullScan('my-org', 'scan_123', {
+   *     mode: 'shallow',
+   *   })
    *
-   * if (result.success) {
-   *   console.log('New Scan ID:', result.data.id)
-   *   console.log('Status:', result.data.status)
-   * }
+   *   if (result.success) {
+   *     console.log('New Scan ID:', result.data.id)
+   *     console.log('Status:', result.data.status)
+   *   }
    *
-   * // Deep rescan (rerun dependency resolution)
-   * const deepResult = await sdk.rescanFullScan('my-org', 'scan_123', {
-   *   mode: 'deep'
-   * })
-   * ```
+   *   // Deep rescan (rerun dependency resolution)
+   *   const deepResult = await sdk.rescanFullScan('my-org', 'scan_123', {
+   *     mode: 'deep',
+   *   })
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param fullScanId - Full scan ID to rescan.
+   * @param options - Rescan options including mode (shallow or deep)
+   *
+   * @returns New scan ID and status
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/full-scans/{full_scan_id}/rescan
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:create
    *
    * @see https://docs.socket.dev/reference/rescanorgfullscan
-   * @apiEndpoint POST /orgs/{org_slug}/full-scans/{full_scan_id}/rescan
-   * @quota 0 units
-   * @scopes full-scans:create
-   * @throws {Error} When server returns 5xx status codes
    */
   async rescanFullScan(
     orgSlug: string,
@@ -3769,8 +3933,8 @@ export class SocketSdk {
   }
 
   /**
-   * Search for dependencies across monitored projects.
-   * Returns matching packages with security information and usage patterns.
+   * Search for dependencies across monitored projects. Returns matching
+   * packages with security information and usage patterns.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3799,11 +3963,16 @@ export class SocketSdk {
   /**
    * Send POST or PUT request with JSON body and return parsed JSON response.
    * Supports both throwing (default) and non-throwing modes.
-   * @operationId sendApi
-   * @quota 0 units
+   *
    * @param urlPath - API endpoint path (e.g., 'organizations')
-   * @param options - Request options including method, body, and throws behavior
+   * @param options - Request options including method, body, and throws
+   *   behavior.
+   *
    * @returns Parsed JSON response or SocketSdkGenericResult based on options
+   *
+   * @operationId sendApi
+   *
+   * @quota 0 units
    */
   async sendApi<T>(
     urlPath: string,
@@ -3870,35 +4039,40 @@ export class SocketSdk {
   /**
    * Stream a full scan's results to file or stdout.
    *
-   * Provides efficient streaming for large scan datasets without loading
-   * entire response into memory. Useful for processing large SBOMs.
-   *
-   * @param orgSlug - Organization identifier
-   * @param scanId - Full scan identifier
-   * @param options - Streaming options (output file path, stdout, or buffered)
-   * @returns Scan result with streaming response
+   * Provides efficient streaming for large scan datasets without loading entire
+   * response into memory. Useful for processing large SBOMs.
    *
    * @example
-   * ```typescript
-   * // Stream to file
-   * await sdk.streamFullScan('my-org', 'scan_123', {
-   *   output: './scan-results.json'
-   * })
+   *   ```typescript
+   *   // Stream to file
+   *   await sdk.streamFullScan('my-org', 'scan_123', {
+   *     output: './scan-results.json',
+   *   })
    *
-   * // Stream to stdout
-   * await sdk.streamFullScan('my-org', 'scan_123', {
-   *   output: true
-   * })
+   *   // Stream to stdout
+   *   await sdk.streamFullScan('my-org', 'scan_123', {
+   *     output: true,
+   *   })
    *
-   * // Get buffered response
-   * const result = await sdk.streamFullScan('my-org', 'scan_123')
-   * ```
+   *   // Get buffered response
+   *   const result = await sdk.streamFullScan('my-org', 'scan_123')
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param scanId - Full scan identifier.
+   * @param options - Streaming options (output file path, stdout, or buffered)
+   *
+   * @returns Scan result with streaming response
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:list
    *
    * @see https://docs.socket.dev/reference/getorgfullscan
-   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
-   * @quota 0 units
-   * @scopes full-scans:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async streamFullScan(
     orgSlug: string,
@@ -3946,12 +4120,13 @@ export class SocketSdk {
   /**
    * Stream patches for artifacts in a scan report.
    *
-   * This method streams all available patches for artifacts in a scan.
-   * Free tier users will only receive free patches.
+   * This method streams all available patches for artifacts in a scan. Free
+   * tier users will only receive free patches.
    *
    * Note: This method returns a ReadableStream for processing large datasets.
    *
    * @operationId streamPatchesFromScan
+   *
    * @quota 0 units
    */
   async streamPatchesFromScan(
@@ -3999,8 +4174,8 @@ export class SocketSdk {
   }
 
   /**
-   * Update alert triage status for an organization.
-   * Modifies alert resolution status and triage decisions.
+   * Update alert triage status for an organization. Modifies alert resolution
+   * status and triage decisions.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -4029,8 +4204,8 @@ export class SocketSdk {
   }
 
   /**
-   * Update organization's license policy configuration.
-   * Modifies allowed, restricted, and monitored license types.
+   * Update organization's license policy configuration. Modifies allowed,
+   * restricted, and monitored license types.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -4059,8 +4234,8 @@ export class SocketSdk {
   }
 
   /**
-   * Update organization's security policy configuration.
-   * Modifies alert rules, severity thresholds, and enforcement settings.
+   * Update organization's security policy configuration. Modifies alert rules,
+   * severity thresholds, and enforcement settings.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -4088,11 +4263,12 @@ export class SocketSdk {
   }
 
   /**
-   * Update organization's telemetry configuration.
-   * Enables or disables telemetry for the organization.
+   * Update organization's telemetry configuration. Enables or disables
+   * telemetry for the organization.
    *
-   * @param orgSlug - Organization identifier
-   * @param telemetryData - Telemetry configuration with enabled flag
+   * @param orgSlug - Organization identifier.
+   * @param telemetryData - Telemetry configuration with enabled flag.
+   *
    * @returns Updated telemetry configuration
    *
    * @throws {Error} When server returns 5xx status codes
@@ -4121,12 +4297,13 @@ export class SocketSdk {
   }
 
   /**
-   * Update an existing webhook's configuration.
-   * All fields are optional - only provided fields will be updated.
+   * Update an existing webhook's configuration. All fields are optional - only
+   * provided fields will be updated.
    *
-   * @param orgSlug - Organization identifier
-   * @param webhookId - Webhook ID to update
-   * @param webhookData - Updated webhook configuration
+   * @param orgSlug - Organization identifier.
+   * @param webhookId - Webhook ID to update.
+   * @param webhookData - Updated webhook configuration.
+   *
    * @returns Updated webhook details
    *
    * @throws {Error} When server returns 5xx status codes
@@ -4168,29 +4345,35 @@ export class SocketSdk {
    *
    * Modifies monitoring settings, branch configuration, and scan preferences.
    *
-   * @param orgSlug - Organization identifier
-   * @param repoSlug - Repository slug/name
-   * @param params - Configuration updates (description, homepage, default_branch, etc.)
-   * @param options - Optional parameters including workspace
+   * @example
+   *   ```typescript
+   *   const result = await sdk.updateRepository('my-org', 'my-repo', {
+   *     description: 'Updated description',
+   *     default_branch: 'develop',
+   *   })
+   *
+   *   if (result.success) {
+   *     console.log('Repository updated:', result.data.name)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param repoSlug - Repository slug/name.
+   * @param params - Configuration updates (description, homepage,
+   *   default_branch, etc.)
+   * @param options - Optional parameters including workspace.
+   *
    * @returns Updated repository details
    *
-   * @example
-   * ```typescript
-   * const result = await sdk.updateRepository('my-org', 'my-repo', {
-   *   description: 'Updated description',
-   *   default_branch: 'develop'
-   * })
+   * @throws {Error} When server returns 5xx status codes
    *
-   * if (result.success) {
-   *   console.log('Repository updated:', result.data.name)
-   * }
-   * ```
+   * @apiEndpoint POST /orgs/{org_slug}/repos/{repo_slug}
+   *
+   * @quota 0 units
+   *
+   * @scopes repo:write
    *
    * @see https://docs.socket.dev/reference/updateorgrepo
-   * @apiEndpoint POST /orgs/{org_slug}/repos/{repo_slug}
-   * @quota 0 units
-   * @scopes repo:write
-   * @throws {Error} When server returns 5xx status codes
    */
   async updateRepository(
     orgSlug: string,
@@ -4240,28 +4423,38 @@ export class SocketSdk {
   /**
    * Update a repository label for an organization.
    *
-   * Modifies label properties like name. Label names must be non-empty and less than 1000 characters.
-   *
-   * @param orgSlug - Organization identifier
-   * @param labelId - Label identifier
-   * @param labelData - Label updates (typically name property)
-   * @returns Updated label with guaranteed id and name fields
+   * Modifies label properties like name. Label names must be non-empty and less
+   * than 1000 characters.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.updateRepositoryLabel('my-org', 'label-id-123', { name: 'staging' })
+   *   ```typescript
+   *   const result = await sdk.updateRepositoryLabel(
+   *     'my-org',
+   *     'label-id-123',
+   *     { name: 'staging' },
+   *   )
    *
-   * if (result.success) {
-   *   console.log('Label updated:', result.data.name)
-   *   console.log('Label ID:', result.data.id)
-   * }
-   * ```
+   *   if (result.success) {
+   *     console.log('Label updated:', result.data.name)
+   *     console.log('Label ID:', result.data.id)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   * @param labelData - Label updates (typically name property)
+   *
+   * @returns Updated label with guaranteed id and name fields
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint PUT /orgs/{org_slug}/repos/labels/{label_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes repo-label:update
    *
    * @see https://docs.socket.dev/reference/updateorgrepolabel
-   * @apiEndpoint PUT /orgs/{org_slug}/repos/labels/{label_id}
-   * @quota 0 units
-   * @scopes repo-label:update
-   * @throws {Error} When server returns 5xx status codes
    */
   async updateRepositoryLabel(
     orgSlug: string,
@@ -4301,12 +4494,14 @@ export class SocketSdk {
   }
 
   /**
-   * Upload manifest files for dependency analysis.
-   * Processes package files to create dependency snapshots and security analysis.
+   * Upload manifest files for dependency analysis. Processes package files to
+   * create dependency snapshots and security analysis.
+   *
+   * @throws {Error} When server returns 5xx status codes
    *
    * @operationId uploadManifestFiles
+   *
    * @quota 100 units
-   * @throws {Error} When server returns 5xx status codes
    */
   async uploadManifestFiles(
     orgSlug: string,
@@ -4418,6 +4613,7 @@ export class SocketSdk {
    * vulnerabilities, description, license, and tier information.
    *
    * @operationId viewPatch
+   *
    * @quota 0 units
    */
   async viewPatch(orgSlug: string, uuid: string): Promise<PatchViewResponse> {

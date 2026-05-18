@@ -1,6 +1,6 @@
 /**
- * @fileoverview Testing utilities for Socket SDK.
- * Provides mock factories, response builders, and test helpers for easier SDK testing.
+ * @file Testing utilities for Socket SDK. Provides mock factories, response
+ *   builders, and test helpers for easier SDK testing.
  */
 
 import type {
@@ -14,16 +14,17 @@ import type {
 /**
  * Type guard to check if SDK result is an error.
  *
- * @param result - SDK result to check
- * @returns True if result is an error
- *
  * @example
- * ```ts
- * const result = await sdk.getRepo('org', 'repo')
- * if (isErrorResult(result)) {
- *   console.error(result.error) // Type-safe access
- * }
- * ```
+ *   ```ts
+ *   const result = await sdk.getRepo('org', 'repo')
+ *   if (isErrorResult(result)) {
+ *     console.error(result.error) // Type-safe access
+ *   }
+ *   ```
+ *
+ * @param result - SDK result to check.
+ *
+ * @returns True if result is an error
  */
 export function isErrorResult<T>(
   result: SocketSdkGenericResult<T>,
@@ -34,16 +35,17 @@ export function isErrorResult<T>(
 /**
  * Type guard to check if SDK result is successful.
  *
- * @param result - SDK result to check
- * @returns True if result is successful
- *
  * @example
- * ```ts
- * const result = await sdk.getRepo('org', 'repo')
- * if (isSuccessResult(result)) {
- *   console.log(result.data.name) // Type-safe access
- * }
- * ```
+ *   ```ts
+ *   const result = await sdk.getRepo('org', 'repo')
+ *   if (isSuccessResult(result)) {
+ *     console.log(result.data.name) // Type-safe access
+ *   }
+ *   ```
+ *
+ * @param result - SDK result to check.
+ *
+ * @returns True if result is successful
  */
 export function isSuccessResult<T>(
   result: SocketSdkGenericResult<T>,
@@ -54,16 +56,17 @@ export function isSuccessResult<T>(
 /**
  * Create a mock Socket API error response body.
  *
- * @param message - Error message
- * @param details - Optional error details
- * @returns Socket API error response structure
- *
  * @example
- * ```ts
- * nock('https://api.socket.dev')
- *   .get('/v0/repo/org/repo')
- *   .reply(404, mockApiErrorBody('Repository not found'))
- * ```
+ *   ```ts
+ *   nock('https://api.socket.dev')
+ *     .get('/v0/repo/org/repo')
+ *     .reply(404, mockApiErrorBody('Repository not found'))
+ *   ```
+ *
+ * @param message - Error message.
+ * @param details - Optional error details.
+ *
+ * @returns Socket API error response structure
  */
 export function mockApiErrorBody(
   message: string,
@@ -265,17 +268,19 @@ export const fixtures = {
 /**
  * Create an error SDK response.
  *
- * @template T - The data type (unused in error responses)
- * @param error - The error message
- * @param status - HTTP status code (default: 500)
- * @param cause - Optional error cause
- * @returns An error SDK result
- *
  * @example
- * ```ts
- * const response = mockErrorResponse('Not found', 404)
- * expect(response.success).toBe(false)
- * ```
+ *   ```ts
+ *   const response = mockErrorResponse('Not found', 404)
+ *   expect(response.success).toBe(false)
+ *   ```
+ *
+ * @template T - The data type (unused in error responses)
+ *
+ * @param error - The error message.
+ * @param status - HTTP status code (default: 500)
+ * @param cause - Optional error cause.
+ *
+ * @returns An error SDK result
  */
 export function mockErrorResponse<T>(
   error: string,
@@ -294,16 +299,22 @@ export function mockErrorResponse<T>(
 /**
  * Create a mock SDK error with proper structure.
  *
- * @param type - Error type ('NOT_FOUND', 'UNAUTHORIZED', etc.)
- * @param options - Error options
- * @returns Error response matching SDK structure
- *
  * @example
- * ```ts
- * const mockMethod = vi.fn().mockRejectedValue(
- *   mockSdkError('NOT_FOUND', { status: 404, message: 'Repository not found' })
- * )
- * ```
+ *   ```ts
+ *   const mockMethod = vi
+ *     .fn()
+ *     .mockRejectedValue(
+ *       mockSdkError('NOT_FOUND', {
+ *         status: 404,
+ *         message: 'Repository not found',
+ *       }),
+ *     )
+ *   ```
+ *
+ * @param type - Error type ('NOT_FOUND', 'UNAUTHORIZED', etc.)
+ * @param options - Error options.
+ *
+ * @returns Error response matching SDK structure
  */
 export function mockSdkError(
   type: 'NOT_FOUND' | 'UNAUTHORIZED' | 'FORBIDDEN' | 'SERVER_ERROR' | 'TIMEOUT',
@@ -347,17 +358,21 @@ export function mockSdkError(
 /**
  * Mock SDK method result with proper typing.
  *
- * @template T - The operation type
- * @param success - Whether the operation succeeded
- * @param data - Success data or error details
- * @returns Properly typed SDK result
- *
  * @example
- * ```ts
- * const mockGet = vi.fn().mockResolvedValue(
- *   mockSdkResult<'getRepo'>(true, { id: '123', name: 'repo' })
- * )
- * ```
+ *   ```ts
+ *   const mockGet = vi
+ *     .fn()
+ *     .mockResolvedValue(
+ *       mockSdkResult<'getRepo'>(true, { id: '123', name: 'repo' }),
+ *     )
+ *   ```
+ *
+ * @template T - The operation type.
+ *
+ * @param success - Whether the operation succeeded.
+ * @param data - Success data or error details.
+ *
+ * @returns Properly typed SDK result
  */
 export function mockSdkResult<T extends SocketSdkOperations>(
   success: true,
@@ -399,16 +414,18 @@ export function mockSdkResult<T extends SocketSdkOperations>(
 /**
  * Create a successful SDK response.
  *
- * @template T - The data type
- * @param data - The response data
- * @param status - HTTP status code (default: 200)
- * @returns A successful SDK result
- *
  * @example
- * ```ts
- * const response = mockSuccessResponse({ id: '123', name: 'test' })
- * expect(response.success).toBe(true)
- * ```
+ *   ```ts
+ *   const response = mockSuccessResponse({ id: '123', name: 'test' })
+ *   expect(response.success).toBe(true)
+ *   ```
+ *
+ * @template T - The data type.
+ *
+ * @param data - The response data.
+ * @param status - HTTP status code (default: 200)
+ *
+ * @returns A successful SDK result
  */
 export function mockSuccessResponse<T>(
   data: T,

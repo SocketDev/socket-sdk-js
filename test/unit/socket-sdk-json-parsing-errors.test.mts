@@ -1,4 +1,6 @@
-/** @fileoverview Tests for JSON parsing and syntax error handling in HTTP client. */
+/**
+ * @file Tests for JSON parsing and syntax error handling in HTTP client.
+ */
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 

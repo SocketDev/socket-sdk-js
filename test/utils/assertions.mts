@@ -1,6 +1,6 @@
 /**
- * @fileoverview Reusable assertion helpers for SDK test suites.
- * Reduces duplication in test assertions for success/error responses.
+ * @file Reusable assertion helpers for SDK test suites. Reduces duplication in
+ *   test assertions for success/error responses.
  */
 
 import { expect } from 'vitest'
@@ -10,14 +10,14 @@ import type { SocketSdkGenericResult } from '../../src/index'
 /**
  * Assert that an SDK result is an error with Socket API format.
  *
- * @param result - The SDK result to check
- * @param statusCode - Expected HTTP status code
- *
  * @example
- * ```ts
- * const res = await client.getRepo('org', 'invalid')
- * assertApiError(res, 404)
- * ```
+ *   ```ts
+ *   const res = await client.getRepo('org', 'invalid')
+ *   assertApiError(res, 404)
+ *   ```
+ *
+ * @param result - The SDK result to check.
+ * @param statusCode - Expected HTTP status code.
  */
 export function assertApiError<T>(
   result: SocketSdkGenericResult<T>,
@@ -29,15 +29,15 @@ export function assertApiError<T>(
 /**
  * Assert that an SDK result is an error response.
  *
- * @param result - The SDK result to check
- * @param statusCode - Expected HTTP status code
- * @param errorSubstring - Optional substring expected in error message
- *
  * @example
- * ```ts
- * const res = await client.getRepo('org', 'invalid')
- * assertError(res, 404, 'not found')
- * ```
+ *   ```ts
+ *   const res = await client.getRepo('org', 'invalid')
+ *   assertError(res, 404, 'not found')
+ *   ```
+ *
+ * @param result - The SDK result to check.
+ * @param statusCode - Expected HTTP status code.
+ * @param errorSubstring - Optional substring expected in error message.
  */
 export function assertError<T>(
   result: SocketSdkGenericResult<T>,
@@ -57,14 +57,14 @@ export function assertError<T>(
 /**
  * Assert that an SDK result is a successful response.
  *
- * @param result - The SDK result to check
- * @param statusCode - Expected HTTP status code (default: 200)
- *
  * @example
- * ```ts
- * const res = await client.getRepo('org', 'repo')
- * assertSuccess(res)
- * ```
+ *   ```ts
+ *   const res = await client.getRepo('org', 'repo')
+ *   assertSuccess(res)
+ *   ```
+ *
+ * @param result - The SDK result to check.
+ * @param statusCode - Expected HTTP status code (default: 200)
  */
 export function assertSuccess<T>(
   result: SocketSdkGenericResult<T>,

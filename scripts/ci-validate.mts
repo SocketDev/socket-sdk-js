@@ -1,6 +1,6 @@
 /**
- * @fileoverview CI validation script for publishing workflow.
- * Runs test, check, and build steps in sequence.
+ * @file CI validation script for publishing workflow. Runs test, check, and
+ *   build steps in sequence.
  */
 
 import path from 'node:path'

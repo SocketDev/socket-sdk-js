@@ -1,16 +1,15 @@
 /* max-file-lines: legitimate — failure-path coverage suite */
 /**
- * @fileoverview Failure path tests for SocketSdk class methods.
+ * @file Failure path tests for SocketSdk class methods. Covers remaining
+ *   uncovered error and edge-case branches in socket-sdk-class.ts:
  *
- * Covers remaining uncovered error and edge-case branches in socket-sdk-class.ts:
- * - #handleApiError: SyntaxError, 5xx, 429, 413, error.details, non-JSON body,
- *   statusMessage edge case
- * - #createQueryErrorResult: non-SyntaxError branch
- * - downloadPatch: ENOTFOUND, ECONNREFUSED, MAX_PATCH_SIZE
- * - streamPatchesFromScan: empty lines, JSON parse error, stream error
- * - writeStream error handler for downloadOrgFullScanFilesAsTar
- *
- * Uses setupLocalHttpServer for real HTTP interactions.
+ *   - #handleApiError: SyntaxError, 5xx, 429, 413, error.details, non-JSON body,
+ *     statusMessage edge case
+ *   - #createQueryErrorResult: non-SyntaxError branch
+ *   - downloadPatch: ENOTFOUND, ECONNREFUSED, MAX_PATCH_SIZE
+ *   - streamPatchesFromScan: empty lines, JSON parse error, stream error
+ *   - writeStream error handler for downloadOrgFullScanFilesAsTar Uses
+ *     setupLocalHttpServer for real HTTP interactions.
  */
 
 import os from 'node:os'

@@ -1,14 +1,12 @@
 /* max-file-lines: legitimate — error-path coverage suite */
 /**
- * @fileoverview Error path tests for SocketSdk class methods.
- *
- * Covers ~58 catch blocks in socket-sdk-class.ts that call #handleApiError.
- * Each test triggers a 400 error response from a local HTTP server and asserts
- * the method returns { success: false }.
- *
- * Uses setupLocalHttpServer from test/utils/local-server-helpers.mts with a
- * handler that returns 400 for all requests, so every SDK method hits its
- * catch block and exercises #handleApiError with a client error.
+ * @file Error path tests for SocketSdk class methods. Covers ~58 catch blocks
+ *   in socket-sdk-class.ts that call #handleApiError. Each test triggers a 400
+ *   error response from a local HTTP server and asserts the method returns {
+ *   success: false }. Uses setupLocalHttpServer from
+ *   test/utils/local-server-helpers.mts with a handler that returns 400 for all
+ *   requests, so every SDK method hits its catch block and exercises
+ *   #handleApiError with a client error.
  */
 
 import os from 'node:os'

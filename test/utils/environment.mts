@@ -1,4 +1,6 @@
-/** @fileoverview Test environment setup and cleanup utilities. */
+/**
+ * @file Test environment setup and cleanup utilities.
+ */
 import process from 'node:process'
 
 import nock from 'nock'
@@ -14,17 +16,20 @@ export const isCoverageMode = process.env['COVERAGE'] === 'true'
 /**
  * Create a test client with a standard token.
  *
- * @param token - Optional API token (default: 'test-api-token')
- * @param options - Optional SDK configuration
- * @returns SocketSdk instance for testing
- *
  * @example
- * ```ts
- * describe('My tests', () => {
- *   let client: SocketSdk
- *   beforeEach(() => { client = createTestClient() })
- * })
- * ```
+ *   ```ts
+ *   describe('My tests', () => {
+ *     let client: SocketSdk
+ *     beforeEach(() => {
+ *       client = createTestClient()
+ *     })
+ *   })
+ *   ```
+ *
+ * @param token - Optional API token (default: 'test-api-token')
+ * @param options - Optional SDK configuration.
+ *
+ * @returns SocketSdk instance for testing
  */
 export function createTestClient(
   token = 'test-api-token',
@@ -34,8 +39,8 @@ export function createTestClient(
 }
 
 /**
- * Setup nock environment with standard beforeEach/afterEach hooks.
- * Handles nock activation, cleanup, and pending mock detection.
+ * Setup nock environment with standard beforeEach/afterEach hooks. Handles nock
+ * activation, cleanup, and pending mock detection.
  */
 export function setupNockEnvironment() {
   beforeEach(() => {
@@ -67,24 +72,25 @@ export function setupNockEnvironment() {
 }
 
 /**
- * Setup test environment with nock and create a test client.
- * This is a convenience function that combines setupTestEnvironment and client creation.
- *
- * @param token - Optional API token (default: 'test-api-token')
- * @param options - Optional SDK configuration
- * @returns Function that returns the current test client
+ * Setup test environment with nock and create a test client. This is a
+ * convenience function that combines setupTestEnvironment and client creation.
  *
  * @example
- * ```ts
- * describe('My tests', () => {
- *   const getClient = setupTestClient({ retries: 0 })
+ *   ```ts
+ *   describe('My tests', () => {
+ *     const getClient = setupTestClient({ retries: 0 })
  *
- *   it('should work', async () => {
- *     const client = getClient()
- *     // ... test code
+ *     it('should work', async () => {
+ *       const client = getClient()
+ *       // ... test code
+ *     })
  *   })
- * })
- * ```
+ *   ```
+ *
+ * @param token - Optional API token (default: 'test-api-token')
+ * @param options - Optional SDK configuration.
+ *
+ * @returns Function that returns the current test client
  */
 export function setupTestClient(
   token = 'test-api-token',

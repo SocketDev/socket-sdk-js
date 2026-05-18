@@ -1,7 +1,10 @@
-/** @fileoverview Test data fixtures and configurations. */
+/**
+ * @file Test data fixtures and configurations.
+ */
 
 /**
- * Common test package.json configurations to reduce duplication across test files.
+ * Common test package.json configurations to reduce duplication across test
+ * files.
  */
 export const TEST_PACKAGE_CONFIGS = {
   expressBasic: {

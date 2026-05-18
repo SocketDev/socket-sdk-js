@@ -1,19 +1,18 @@
 #!/usr/bin/env node
 /* max-file-lines: legitimate — single-pass docs generator (extract, group, render) */
 /**
- * @fileoverview Generates docs/api.md from src/socket-sdk-class.ts and
- * data/api-method-quota-and-permissions.json. The doc is a one-line-per-method
- * reference grouped by domain. Quota costs come from the SDK's own quota API.
+ * @file Generates docs/api.md from src/socket-sdk-class.ts and
+ *   data/api-method-quota-and-permissions.json. The doc is a
+ *   one-line-per-method reference grouped by domain. Quota costs come from the
+ *   SDK's own quota API. Resolution rules for the OpenAPI operation ID (used to
+ *   look up quota):
  *
- * Resolution rules for the OpenAPI operation ID (used to look up quota):
  *   1. JSDoc `@operationId <id>` tag — explicit override. `none` means skip.
  *   2. First `<'opId'>` type generic in the method body (e.g.,
  *      `#handleApiError<'createOrgRepo'>`).
- *   3. The method name itself, if it appears as a key in the data file.
- *
- * Usage:
- *   node scripts/gen-api-docs.mts          # write the file
- *   node scripts/gen-api-docs.mts --check  # diff only, exit 1 on drift
+ *   3. The method name itself, if it appears as a key in the data file. Usage:
+ *      node scripts/gen-api-docs.mts # write the file node
+ *      scripts/gen-api-docs.mts --check # diff only, exit 1 on drift
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
@@ -256,9 +255,9 @@ main()
 // ---------------------------------------------------------------------------
 
 /**
- * Extract public method records from the SDK class source.
- * Looks for top-level `async name(...)` / `async *name(...)` / `async name<T>(...)`
- * with a JSDoc block immediately above.
+ * Extract public method records from the SDK class source. Looks for top-level
+ * `async name(...)` / `async *name(...)` / `async name<T>(...)` with a JSDoc
+ * block immediately above.
  */
 export function extractMethods(): MethodInfo[] {
   const src = readFileSync(classPath, 'utf8')

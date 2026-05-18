@@ -1,18 +1,16 @@
 #!/usr/bin/env node
 /**
- * @fileoverview Validates that quota information is consistent across the three
- * sources of truth:
+ * @file Validates that quota information is consistent across the three sources
+ *   of truth:
  *
  *   1. The `@quota N units` JSDoc tag on each public method in
  *      `src/socket-sdk-class.ts`.
  *   2. The `data/api-method-quota-and-permissions.json` data file.
  *   3. The OpenAPI operation ID referenced from the method (via `@operationId`
  *      JSDoc tag, the first `<'opId'>` type generic in the body, or the method
- *      name itself).
- *
- * Usage:
- *   node scripts/validate-quota-sync.mts            # report + exit non-zero
- *   node scripts/validate-quota-sync.mts --warn     # report only, exit 0
+ *      name itself). Usage: node scripts/validate-quota-sync.mts # report +
+ *      exit non-zero node scripts/validate-quota-sync.mts --warn # report only,
+ *      exit 0
  */
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
@@ -250,7 +248,8 @@ export function extractMethods(): MethodInfo[] {
 }
 
 /**
- * Resolve an op-id against the data file (exact match first, case-insensitive fallback).
+ * Resolve an op-id against the data file (exact match first, case-insensitive
+ * fallback).
  */
 export function resolveDataEntry(
   data: QuotaData,
