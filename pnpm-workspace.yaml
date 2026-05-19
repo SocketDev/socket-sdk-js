@@ -63,6 +63,7 @@ catalog:
   'ecc-agentshield': 1.4.0
   'mdast-util-from-markdown': 2.0.3
   'micromark': 4.0.2
+  'npm-run-all2': 9.0.0
   'oxfmt': 0.48.0
   'oxlint': 1.63.0
   'taze': 19.11.0
@@ -79,6 +80,7 @@ minimumReleaseAgeExclude:
   # Network-mocking lib used in fleet test suites. v15 betas pre-date
   # npm's `time` field for the major; allow pinned beta until v15 GA.
   - 'nock@15.0.0-beta.11'
+  - 'npm-run-all2@9.0.0'
 
 # Refuse transitive dependencies declared via git/tarball/local-tarball
 # specs — an npm package shouldn't be allowed to drag in a git URL we

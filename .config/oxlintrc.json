@@ -1,13 +1,22 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": ["typescript", "unicorn", "import"],
-  "jsPlugins": ["./oxlint-plugin/index.mts"],
+  "plugins": [
+    "typescript",
+    "unicorn",
+    "import"
+  ],
+  "jsPlugins": [
+    "./oxlint-plugin/index.mts"
+  ],
   "categories": {
     "correctness": "error",
     "suspicious": "error"
   },
   "rules": {
-    "eslint/curly": ["error", "all"],
+    "eslint/curly": [
+      "error",
+      "all"
+    ],
     "eslint/no-await-in-loop": "off",
     "eslint/no-console": "off",
     "eslint/no-control-regex": "off",
@@ -64,6 +73,7 @@
     "socket/prefer-static-type-import": "error",
     "socket/prefer-undefined-over-null": "error",
     "socket/socket-api-token-env": "error",
+    "socket/sort-boolean-chains": "error",
     "socket/sort-equality-disjunctions": "error",
     "socket/sort-named-imports": "error",
     "socket/sort-regex-alternations": "error",
@@ -148,6 +158,7 @@
     "**/scripts/check-paths/types.mts",
     "**/scripts/check-paths/walk.mts",
     "**/scripts/check-prompt-less-setup.mts",
+    "**/scripts/check-soak-exclude-dates.mts",
     "**/scripts/fix.mts",
     "**/scripts/install-claude-plugins.mts",
     "**/scripts/install-git-hooks.mts",
