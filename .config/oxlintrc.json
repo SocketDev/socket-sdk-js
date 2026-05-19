@@ -1,22 +1,13 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": [
-    "typescript",
-    "unicorn",
-    "import"
-  ],
-  "jsPlugins": [
-    "./oxlint-plugin/index.mts"
-  ],
+  "plugins": ["typescript", "unicorn", "import"],
+  "jsPlugins": ["./oxlint-plugin/index.mts"],
   "categories": {
     "correctness": "error",
     "suspicious": "error"
   },
   "rules": {
-    "eslint/curly": [
-      "error",
-      "all"
-    ],
+    "eslint/curly": ["error", "all"],
     "eslint/no-await-in-loop": "off",
     "eslint/no-console": "off",
     "eslint/no-control-regex": "off",
@@ -59,6 +50,7 @@
     "socket/no-promise-race": "error",
     "socket/no-promise-race-in-loop": "error",
     "socket/no-status-emoji": "error",
+    "socket/no-underscore-identifier": "error",
     "socket/optional-explicit-undefined": "error",
     "socket/personal-path-placeholders": "error",
     "socket/prefer-async-spawn": "error",
@@ -160,7 +152,7 @@
     "**/scripts/install-claude-plugins.mts",
     "**/scripts/install-git-hooks.mts",
     "**/scripts/install-sfw.mts",
-    "**/scripts/install-token-minifier.mts",
+    "**/scripts/janus.mts",
     "**/scripts/lint-github-settings.mts",
     "**/scripts/lockstep-emit-schema.mts",
     "**/scripts/lockstep-schema.mts",
