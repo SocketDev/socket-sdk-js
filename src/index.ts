@@ -156,6 +156,14 @@ export interface SocketSdkOptions {
   agent?: Agent | GotOptions | undefined
   baseUrl?: string | undefined
   timeout?: number | undefined
+  /**
+   * Additional user agent token appended to the SDK's base user agent string.
+   * The SDK base already includes the SDK name/version, Node.js version, and
+   * OS platform/arch. Use `createUserAgentFromPkgJson` to build a well-formed
+   * token from your package.json.
+   *
+   * Example output: `socketsecurity-sdk/1.4.96 node/v22.0.0 linux/arm64 socket/1.1.96 (https://github.com/SocketDev/socket-cli)`
+   */
   userAgent?: string | undefined
   /** Request/response logging hooks */
   hooks?:
@@ -184,7 +192,7 @@ export type UploadManifestFilesError = {
   cause: string | undefined
 }
 
-const DEFAULT_USER_AGENT = createUserAgentFromPkgJson(rootPkgJson)
+const DEFAULT_USER_AGENT = buildSdkBaseUserAgent(rootPkgJson)
 
 // Public security policy.
 const publicPolicy = new Map<ALERT_TYPE, ALERT_ACTION>([
@@ -942,7 +950,27 @@ function resolveBasePath(pathsRelativeTo = '.'): string {
 }
 
 /**
- * Package.json data to base the User-Agent on
+ * Builds the SDK's base user agent string, including the SDK name/version,
+ * the running Node.js version, and the OS platform and architecture.
+ * Internal use only — callers should use `createUserAgentFromPkgJson` to
+ * build their own token and pass it via `SocketSdkOptions.userAgent`.
+ */
+function buildSdkBaseUserAgent(pkgData: {
+  name: string
+  version: string
+}): string {
+  const name = pkgData.name.replace('@', '').replace('/', '-')
+  return [
+    `${name}/${pkgData.version}`,
+    `node/${process.version}`,
+    `${process.platform}/${process.arch}`,
+  ].join(' ')
+}
+
+/**
+ * Builds a user agent token from a package.json object. Pass the result as
+ * `userAgent` in `SocketSdkOptions` to identify your application in requests.
+ * The token is appended to the SDK's own base user agent string.
  */
 export function createUserAgentFromPkgJson(pkgData: {
   name: string
@@ -987,7 +1015,9 @@ export class SocketSdk {
       ...(agent ? { agent } : {}),
       headers: {
         Authorization: `Basic ${btoa(`${apiToken}:`)}`,
-        'User-Agent': userAgent ?? DEFAULT_USER_AGENT
+        'User-Agent': userAgent
+          ? `${DEFAULT_USER_AGENT} ${userAgent}`
+          : DEFAULT_USER_AGENT
       },
       signal: abortSignal,
       ...(timeout ? { timeout } : {})
