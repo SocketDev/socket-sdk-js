@@ -101,9 +101,7 @@ export async function bootstrapPackage(pkgName: string): Promise<void> {
   // basename is the unscoped portion. Use the alias target (fetchPkg)
   // when the catalog pins `npm:@scope/realpkg@version` — that's the
   // package that has a published tarball.
-  const unscoped = fetchPkg.startsWith('@')
-    ? fetchPkg.split('/')[1]!
-    : fetchPkg
+  const unscoped = fetchPkg.startsWith('@') ? fetchPkg.split('/')[1]! : fetchPkg
   const tarballUrl = `https://registry.npmjs.org/${fetchPkg}/-/${unscoped}-${version}.tgz`
 
   log(`Fetching ${tarballUrl}`)
