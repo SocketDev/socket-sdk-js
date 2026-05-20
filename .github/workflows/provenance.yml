@@ -1,5 +1,10 @@
 name: 📦 Publish
 
+# Standalone (inlined) publish workflow for the v1.4.x release branch.
+# Intentionally does NOT use SocketDev/socket-registry/.github/workflows/provenance.yml
+# so this branch's release path is decoupled from the reusable workflow's
+# evolution. The main branch on this repo uses the reusable workflow.
+
 on:
   workflow_dispatch:
     inputs:
@@ -8,26 +13,136 @@ on:
         required: false
         default: 'latest'
         type: string
+      dry-run:
+        description: 'Stage everything but pass --dry-run to npm publish; nothing reaches the registry.'
+        required: false
+        default: true
+        type: boolean
       debug:
         description: 'Enable debug output'
         required: false
         default: '0'
         type: string
-        options:
-          - '0'
-          - '1'
 
-permissions:
-  contents: write
-  id-token: write
+permissions: {}
+
+# Serialize publishes per dist-tag. Two concurrent dispatches with the
+# same tag would race on `npm publish` (one wins, the other 409s).
+# Don't cancel an in-flight publish.
+concurrency:
+  group: publish-${{ inputs.dist-tag }}
+  cancel-in-progress: false
 
 jobs:
   publish:
-    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@4d04d84280123c9feb94b44a5b0c6637df27f49e # main
-    with:
-      debug: ${{ inputs.debug }}
-      dist-tag: ${{ inputs.dist-tag }}
-      package-name: '@socketsecurity/sdk'
-      publish-script: 'publish:ci'
-      setup-script: 'pnpm run build'
-      use-trusted-publishing: true
+    name: Build and Publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      # `contents: write` is needed for the inline tag-release step (uses
+      # gh api so GITHUB_TOKEN stays in that step's env, never written to
+      # `.git/config`).
+      contents: write
+      # npm trusted publishing via OIDC.
+      id-token: write
+    outputs:
+      # Empty when the publish step doesn't run (dry-run, or publish step
+      # failed). The tag-release step checks for non-empty before tagging.
+      published_sha: ${{ steps.capture_sha.outputs.published_sha }}
+      published_version: ${{ steps.capture_sha.outputs.published_version }}
+
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1 (2026-05-20)
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0 (2026-05-20)
+        with:
+          version: 10.18.0
+          run_install: false
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0 (2026-05-20)
+        with:
+          node-version: 24.10.0
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+          scope: '@socketsecurity'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Publish
+        id: publish
+        if: ${{ inputs.dry-run == false }}
+        env:
+          DIST_TAG: ${{ inputs.dist-tag }}
+          DEBUG: ${{ inputs.debug }}
+        run: pnpm run publish:ci -- --tag "$DIST_TAG"
+
+      # Capture the commit SHA the publish ran against. Only records
+      # outputs when the publish step actually executed and succeeded; the
+      # tag-release step skips on empty outputs.
+      - name: Capture published SHA
+        id: capture_sha
+        if: ${{ inputs.dry-run == false && steps.publish.outcome == 'success' }}
+        run: |
+          PUBLISHED_SHA=$(git rev-parse HEAD)
+          PUBLISHED_VERSION=$(node -p "require('./package.json').version")
+          echo "published_sha=$PUBLISHED_SHA" >> "$GITHUB_OUTPUT"
+          echo "published_version=$PUBLISHED_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Captured published SHA: $PUBLISHED_SHA for @socketsecurity/sdk@$PUBLISHED_VERSION"
+
+  # Create v<version> git tag at the published commit SHA after a successful
+  # publish, idempotently. GitHub Release Immutability ("Disallow assets and
+  # tags from being modified once a release is published") freezes tags once
+  # bound to a Release, so:
+  #   - existing tag at same SHA → no-op
+  #   - existing tag at different SHA → hard-fail (operator recovery required)
+  # Inlined here (not via socket-registry workflow_call) per v1.4.x's
+  # decoupling stance.
+  tag-release:
+    name: Verify and tag release
+    needs: publish
+    if: ${{ needs.publish.result == 'success' && needs.publish.outputs.published_sha != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      # Needed for `gh api` POST to create the tag ref.
+      contents: write
+    steps:
+      # Uses gh api (not `git push`) so GITHUB_TOKEN only lives in this
+      # step's env, never written to `.git/config`. No checkout needed —
+      # tag creation goes straight against the published SHA via API.
+      - name: Tag release (idempotent)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PUBLISHED_SHA: ${{ needs.publish.outputs.published_sha }}
+          PUBLISHED_VERSION: ${{ needs.publish.outputs.published_version }}
+        run: |
+          TAG="v$PUBLISHED_VERSION"
+
+          # Look up any existing tag via the API. 200 → exists; 404 → absent.
+          EXISTING_JSON=$(gh api "repos/$REPO/git/ref/tags/$TAG" 2>/dev/null || echo "")
+          if [ -n "$EXISTING_JSON" ]; then
+            EXISTING_SHA=$(echo "$EXISTING_JSON" | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).object.sha")
+            if [ "$EXISTING_SHA" = "$PUBLISHED_SHA" ]; then
+              echo "Tag $TAG already exists at $PUBLISHED_SHA — no-op."
+              exit 0
+            fi
+            echo "::error::Tag $TAG exists at $EXISTING_SHA but publish SHA is $PUBLISHED_SHA."
+            echo "::error::Release immutability is enabled; this requires manual recovery:"
+            echo "::error::  1. Delete any GitHub Release tied to $TAG"
+            echo "::error::  2. Delete the tag via the API"
+            echo "::error::  3. Re-run this workflow"
+            exit 1
+          fi
+
+          gh api "repos/$REPO/git/refs" \
+            -X POST \
+            -f "ref=refs/tags/$TAG" \
+            -f "sha=$PUBLISHED_SHA"
+          echo "Created tag $TAG at $PUBLISHED_SHA"
