@@ -47,7 +47,7 @@
     "**/test/fixtures",
     "**/test/packages",
     "#fleet-canonical-begin (managed by socket-wheelhouse sync)",
-    "**/.claude/worktrees/**",
+    "**/.claude/**",
     "**/.config/oxlint-plugin/**",
     "**/.config/rolldown/**",
     "**/.git-hooks/**",
