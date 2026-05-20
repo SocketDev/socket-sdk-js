@@ -75,11 +75,7 @@ async function main(): Promise<void> {
 
   // Read the most-recent commit subject from HEAD.
   const opts = payload.cwd ? { cwd: payload.cwd } : {}
-  const subjectResult = spawnSync(
-    'git',
-    ['log', '-1', '--pretty=%s'],
-    opts,
-  )
+  const subjectResult = spawnSync('git', ['log', '-1', '--pretty=%s'], opts)
   if (subjectResult.status !== 0) {
     // Not a git repo or git unavailable — fail open.
     process.exit(0)
