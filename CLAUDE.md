@@ -255,18 +255,18 @@ Socket SDK for JavaScript/TypeScript — programmatic access to Socket.dev secur
 
 Configs live under `.config/`:
 
-| File | Purpose |
-| --- | --- |
-| `tsconfig.json` | Main TS config (extends base) |
-| `.config/tsconfig.base.json` | Base TS settings |
-| `.config/tsconfig.check.json` | Type checking for `type` command |
-| `.config/tsconfig.dts.json` | Declaration generation |
-| `.config/esbuild.config.mts` | Build orchestration (ESM, node18+) |
-| `.config/vitest.config.mts` | Main test config |
+| File                                 | Purpose                            |
+| ------------------------------------ | ---------------------------------- |
+| `tsconfig.json`                      | Main TS config (extends base)      |
+| `.config/tsconfig.base.json`         | Base TS settings                   |
+| `.config/tsconfig.check.json`        | Type checking for `type` command   |
+| `.config/tsconfig.dts.json`          | Declaration generation             |
+| `.config/esbuild.config.mts`         | Build orchestration (ESM, node18+) |
+| `.config/vitest.config.mts`          | Main test config                   |
 | `.config/vitest.config.isolated.mts` | Isolated tests (for `vi.doMock()`) |
-| `.config/vitest.coverage.config.mts` | Shared coverage thresholds (≥99%) |
-| `.config/isolated-tests.json` | List of tests requiring isolation |
-| `.config/taze.config.mts` | Dependency-update policies |
+| `.config/vitest.coverage.config.mts` | Shared coverage thresholds (≥99%)  |
+| `.config/isolated-tests.json`        | List of tests requiring isolation  |
+| `.config/taze.config.mts`            | Dependency-update policies         |
 
 ### SDK-local conventions
 
