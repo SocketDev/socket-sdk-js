@@ -25,7 +25,7 @@ import type { QueryParams } from './types'
  * Formula: |A ∩ B| / |A ∪ B|
  *
  * @example
- *   ```typescript
+ *   ;```typescript
  *   calculateWordSetSimilarity('hello world', 'world hello') // 1.0 (same words)
  *   calculateWordSetSimilarity('hello world', 'goodbye world') // 0.33 (1/3 overlap)
  *   calculateWordSetSimilarity('hello', 'goodbye') // 0 (no overlap)
@@ -78,7 +78,7 @@ export function calculateWordSetSimilarity(str1: string, str2: string): number {
  * "Error: Authentication: Token expired" vs "Token expired"
  *
  * @example
- *   ```typescript
+ *   ;```typescript
  *   filterRedundantCause('Invalid token', 'The token is invalid') // undefined
  *   filterRedundantCause('Request failed', 'Rate limit exceeded') // 'Rate limit exceeded'
  *   filterRedundantCause(
@@ -256,7 +256,7 @@ export function resolveBasePath(pathsRelativeTo = '.'): string {
  * error message. Uses Jaccard similarity to detect redundant phrasing.
  *
  * @example
- *   ```typescript
+ *   ;```typescript
  *   shouldOmitReason('Invalid token', 'The token is invalid') // true (high overlap)
  *   shouldOmitReason('Request failed', 'Rate limit exceeded') // false (low overlap)
  *   ```

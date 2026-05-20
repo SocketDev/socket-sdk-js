@@ -32,9 +32,9 @@ describe('SocketSdk - #handleApiError branches', () => {
       const url = req.url || ''
 
       // Consume request body before responding.
-      let _body = ''
+      let body = ''
       req.on('data', (chunk: Buffer) => {
-        _body += chunk.toString()
+        body += chunk.toString()
       })
       req.on('end', () => {
         if (url.includes('/rate-limited-no-retry')) {
@@ -478,9 +478,9 @@ describe('SocketSdk - #createQueryErrorResult non-SyntaxError', () => {
 describe('SocketSdk - writeStream error handler', () => {
   const getBaseUrl = setupLocalHttpServer(
     (req: IncomingMessage, res: ServerResponse) => {
-      let _body = ''
+      let body = ''
       req.on('data', (chunk: Buffer) => {
-        _body += chunk.toString()
+        body += chunk.toString()
       })
       req.on('end', () => {
         res.writeHead(200, { 'Content-Type': 'application/octet-stream' })
@@ -522,9 +522,9 @@ describe('SocketSdk - #handleApiError statusMessage edge case', () => {
   const getBaseUrl = setupLocalHttpServer(
     (req: IncomingMessage, res: ServerResponse) => {
       // Consume request body
-      let _body = ''
+      let body = ''
       req.on('data', (chunk: Buffer) => {
-        _body += chunk.toString()
+        body += chunk.toString()
       })
       req.on('end', () => {
         // Return 418 (I'm a Teapot) — non-standard status code

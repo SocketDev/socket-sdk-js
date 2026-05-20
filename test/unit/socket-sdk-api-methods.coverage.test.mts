@@ -41,9 +41,9 @@ describe('SocketSdk - API Methods Coverage', () => {
         req.method === 'POST' ||
         req.method === 'PUT'
       ) {
-        let _body = ''
+        let body = ''
         req.on('data', chunk => {
-          _body += chunk.toString()
+          body += chunk.toString()
         })
         req.on('end', () => {
           // Body consumed, now respond

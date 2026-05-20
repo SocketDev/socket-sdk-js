@@ -15,7 +15,7 @@ import type {
  * Type guard to check if SDK result is an error.
  *
  * @example
- *   ```ts
+ *   ;```ts
  *   const result = await sdk.getRepo('org', 'repo')
  *   if (isErrorResult(result)) {
  *     console.error(result.error) // Type-safe access
@@ -36,7 +36,7 @@ export function isErrorResult<T>(
  * Type guard to check if SDK result is successful.
  *
  * @example
- *   ```ts
+ *   ;```ts
  *   const result = await sdk.getRepo('org', 'repo')
  *   if (isSuccessResult(result)) {
  *     console.log(result.data.name) // Type-safe access
@@ -57,7 +57,7 @@ export function isSuccessResult<T>(
  * Create a mock Socket API error response body.
  *
  * @example
- *   ```ts
+ *   ;```ts
  *   nock('https://api.socket.dev')
  *     .get('/v0/repo/org/repo')
  *     .reply(404, mockApiErrorBody('Repository not found'))
@@ -269,7 +269,7 @@ export const fixtures = {
  * Create an error SDK response.
  *
  * @example
- *   ```ts
+ *   ;```ts
  *   const response = mockErrorResponse('Not found', 404)
  *   expect(response.success).toBe(false)
  *   ```
@@ -300,7 +300,7 @@ export function mockErrorResponse<T>(
  * Create a mock SDK error with proper structure.
  *
  * @example
- *   ```ts
+ *   ;```ts
  *   const mockMethod = vi
  *     .fn()
  *     .mockRejectedValue(
@@ -359,7 +359,7 @@ export function mockSdkError(
  * Mock SDK method result with proper typing.
  *
  * @example
- *   ```ts
+ *   ;```ts
  *   const mockGet = vi
  *     .fn()
  *     .mockResolvedValue(
@@ -415,7 +415,7 @@ export function mockSdkResult<T extends SocketSdkOperations>(
  * Create a successful SDK response.
  *
  * @example
- *   ```ts
+ *   ;```ts
  *   const response = mockSuccessResponse({ id: '123', name: 'test' })
  *   expect(response.success).toBe(true)
  *   ```

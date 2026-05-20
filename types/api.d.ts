@@ -2411,7 +2411,8 @@ export interface components {
        */
       supplyChain: number
       /**
-       * Score from 0.0 to 1.0 based on known vulnerabilities and their severity.
+       * Score from 0.0 to 1.0 based on known vulnerabilities and their
+       * severity.
        *
        * @default 0
        */
@@ -8085,7 +8086,8 @@ export interface operations {
    * Delete full scan.
    *
    * Delete an existing full scan. This endpoint consumes 1 unit of your quota.
-   * This endpoint requires the following org token scopes: - full-scans:delete.
+   * This endpoint requires the following org token scopes: -
+   * full-scans:delete.
    */
   deleteOrgFullScan: {
     parameters: {
@@ -9644,7 +9646,8 @@ export interface operations {
    * Delete diff scan.
    *
    * Delete an existing diff scan. This endpoint consumes 1 unit of your quota.
-   * This endpoint requires the following org token scopes: - diff-scans:delete.
+   * This endpoint requires the following org token scopes: -
+   * diff-scans:delete.
    */
   deleteOrgDiffScan: {
     parameters: {
@@ -18742,7 +18745,8 @@ export interface operations {
    * List historical alerts (Beta)
    *
    * List historical alerts. This endpoint consumes 10 units of your quota. This
-   * endpoint requires the following org token scopes: - historical:alerts-list.
+   * endpoint requires the following org token scopes: -
+   * historical:alerts-list.
    */
   historicalAlertsList: {
     parameters: {
@@ -20930,7 +20934,8 @@ export interface operations {
    *
    * Create an API Token. The API Token created must use a subset of permissions
    * the API token creating them. This endpoint consumes 10 units of your quota.
-   * This endpoint requires the following org token scopes: - api-tokens:create.
+   * This endpoint requires the following org token scopes: -
+   * api-tokens:create.
    */
   postAPIToken: {
     parameters: {
@@ -21163,7 +21168,8 @@ export interface operations {
    *
    * Update an API Token. The API Token created must use a subset of permissions
    * the API token creating them. This endpoint consumes 10 units of your quota.
-   * This endpoint requires the following org token scopes: - api-tokens:create.
+   * This endpoint requires the following org token scopes: -
+   * api-tokens:create.
    */
   postAPITokenUpdate: {
     parameters: {
@@ -22221,7 +22227,8 @@ export interface operations {
     }
   }
   /**
-   * Fetch fixes for vulnerabilities in a repository, scan, or uploaded manifest.
+   * Fetch fixes for vulnerabilities in a repository, scan, or uploaded
+   * manifest.
    *
    * Fetches available fixes for vulnerabilities in a repository, scan, or
    * uploaded manifest. Requires exactly one of repo_slug, full_scan_id, or

@@ -19,7 +19,7 @@ import type {
  * Creates a simple request handler that routes based on URL patterns.
  *
  * @example
- *   ```typescript
+ *   ;```typescript
  *   const getBaseUrl = setupLocalHttpServer(
  *     createRouteHandler({
  *       '/test': (req, res) => {
@@ -72,7 +72,7 @@ export function createRouteHandler(
  * Creates a JSON response handler.
  *
  * @example
- *   ```typescript
+ *   ;```typescript
  *   const getBaseUrl = setupLocalHttpServer(
  *     createRouteHandler({
  *       '/success': jsonResponse(200, { data: 'test' }),
@@ -103,7 +103,7 @@ export function jsonResponse(
  * automatically cleaned up after all tests complete.
  *
  * @example
- *   ```typescript
+ *   ;```typescript
  *   const getBaseUrl = setupLocalHttpServer((req, res) => {
  *     if (req.url === '/test') {
  *       res.writeHead(200, { 'Content-Type': 'application/json' })

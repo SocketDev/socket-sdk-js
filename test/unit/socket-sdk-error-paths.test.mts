@@ -29,9 +29,9 @@ const thisFile = fileURLToPath(import.meta.url)
 const getBaseUrl = setupLocalHttpServer(
   (req: IncomingMessage, res: ServerResponse) => {
     // Consume request body for POST/PUT/DELETE before responding.
-    let _body = ''
+    let body = ''
     req.on('data', (chunk: Buffer) => {
-      _body += chunk.toString()
+      body += chunk.toString()
     })
     req.on('end', () => {
       res.writeHead(400, { 'Content-Type': 'application/json' })

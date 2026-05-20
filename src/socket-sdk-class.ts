@@ -706,20 +706,20 @@ export class SocketSdk {
    * @example
    *   ```typescript
    *   const result = await sdk.batchOrgPackageFetch(
-   *     'my-org',
-   *     {
-   *       components: [
-   *         { purl: 'pkg:npm/express@4.19.2' },
-   *         { purl: 'pkg:pypi/django@5.0.6' },
-   *       ],
-   *     },
-   *     { labels: ['production'], alerts: true },
+   *   'my-org',
+   *   {
+   *   components: [
+   *   { purl: 'pkg:npm/express@4.19.2' },
+   *   { purl: 'pkg:pypi/django@5.0.6' },
+   *   ],
+   *   },
+   *   { labels: ['production'], alerts: true },
    *   )
    *
    *   if (result.success) {
-   *     for (const artifact of result.data) {
-   *       console.log(`${artifact.name}@${artifact.version}`)
-   *     }
+   *   for (const artifact of result.data) {
+   *   console.log(`${artifact.name}@${artifact.version}`)
+   *   }
    *   }
    *   ```
    *
@@ -1330,7 +1330,7 @@ export class SocketSdk {
    * Returns scan metadata with guaranteed required fields.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.createFullScan(
    *     'my-org',
    *     ['package.json', 'package-lock.json'],
@@ -1483,7 +1483,7 @@ export class SocketSdk {
    * to identify changes.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.createOrgDiffScanFromIds('my-org', {
    *     before: 'scan-id-1',
    *     after: 'scan-id-2',
@@ -1501,8 +1501,10 @@ export class SocketSdk {
    * @param options.after - ID of the after/head full scan (newer)
    * @param options.before - ID of the before/base full scan (older)
    * @param options.description - Description of the diff scan.
-   * @param options.external_href - External URL to associate with the diff scan.
-   * @param options.merge - Set true for merged commits, false for open PR diffs.
+   * @param options.external_href - External URL to associate with the diff
+   *   scan.
+   * @param options.merge - Set true for merged commits, false for open PR
+   *   diffs.
    *
    * @returns Diff scan details
    *
@@ -1652,7 +1654,7 @@ export class SocketSdk {
    * Registers a repository for monitoring and security scanning.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.createRepository('my-org', 'my-repo', {
    *     description: 'My project repository',
    *     homepage: 'https://example.com',
@@ -1739,7 +1741,7 @@ export class SocketSdk {
    * security/license policies.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.createRepositoryLabel('my-org', {
    *     name: 'production',
    *   })
@@ -1807,7 +1809,7 @@ export class SocketSdk {
    * Permanently removes scan data and results.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.deleteFullScan('my-org', 'scan_123')
    *
    *   if (result.success) {
@@ -1929,7 +1931,7 @@ export class SocketSdk {
    * Removes repository monitoring and associated scan data.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.deleteRepository('my-org', 'old-repo')
    *
    *   if (result.success) {
@@ -2002,7 +2004,7 @@ export class SocketSdk {
    * license policy, etc.).
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.deleteRepositoryLabel('my-org', 'label-id-123')
    *
    *   if (result.success) {
@@ -2117,7 +2119,7 @@ export class SocketSdk {
    * patched files.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const sdk = new SocketSdk('your-api-token')
    *   // First get patch metadata
    *   const patch = await sdk.viewPatch('my-org', 'patch-uuid')
@@ -2210,7 +2212,7 @@ export class SocketSdk {
    * assessment.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.exportOpenVEX('my-org', 'scan-id', {
    *     author: 'Security Team',
    *     role: 'VEX Generator',
@@ -2302,7 +2304,8 @@ export class SocketSdk {
    * type. Supports both throwing (default) and non-throwing modes.
    *
    * @param urlPath - API endpoint path (e.g., 'organizations')
-   * @param options - Request options including responseType and throws behavior.
+   * @param options - Request options including responseType and throws
+   *   behavior.
    *
    * @returns Raw response, parsed data, or SocketSdkGenericResult based on
    *   options.
@@ -2458,7 +2461,7 @@ export class SocketSdk {
    * overview and alert comments suitable for pull requests.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.getDiffScanGfm('my-org', 'diff-scan-id')
    *
    *   if (result.success) {
@@ -2470,7 +2473,8 @@ export class SocketSdk {
    * @param orgSlug - Organization identifier.
    * @param diffScanId - Diff scan identifier.
    * @param options - Optional query parameters.
-   * @param options.github_installation_id - GitHub installation ID for settings.
+   * @param options.github_installation_id - GitHub installation ID for
+   *   settings.
    *
    * @returns Diff scan metadata with formatted markdown comments
    *
@@ -2568,7 +2572,7 @@ export class SocketSdk {
    * scans, consider using streamFullScan() instead.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.getFullScan('my-org', 'scan_123')
    *
    *   if (result.success) {
@@ -2634,7 +2638,7 @@ export class SocketSdk {
    * results.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.getFullScanMetadata('my-org', 'scan_123')
    *
    *   if (result.success) {
@@ -2725,7 +2729,7 @@ export class SocketSdk {
    * scan references for alert investigation.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.getOrgAlertFullScans('my-org', {
    *     alertKey: 'npm/lodash/cve-2021-23337',
    *     range: '-7d',
@@ -3164,7 +3168,7 @@ export class SocketSdk {
    * Returns repository configuration, monitoring status, and metadata.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.getRepository('my-org', 'my-repo')
    *
    *   if (result.success) {
@@ -3241,7 +3245,7 @@ export class SocketSdk {
    * Returns label configuration, associated repositories, and policy settings.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.getRepositoryLabel('my-org', 'label-id-123')
    *
    *   if (result.success) {
@@ -3337,7 +3341,7 @@ export class SocketSdk {
    * `package-lock.json`, and `yarn.lock`.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.getSupportedFiles('my-org')
    *
    *   if (result.success) {
@@ -3387,7 +3391,7 @@ export class SocketSdk {
    * fields for improved TypeScript autocomplete.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.listFullScans('my-org', {
    *     branch: 'main',
    *     per_page: 50,
@@ -3457,7 +3461,7 @@ export class SocketSdk {
    * required fields.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.listOrganizations()
    *
    *   if (result.success) {
@@ -3543,7 +3547,7 @@ export class SocketSdk {
    * fields.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.listRepositories('my-org', {
    *     per_page: 50,
    *     sort: 'name',
@@ -3613,7 +3617,7 @@ export class SocketSdk {
    * policy management.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.listRepositoryLabels('my-org', {
    *     per_page: 50,
    *     page: 1,
@@ -3868,7 +3872,7 @@ export class SocketSdk {
    * (policy reapplication) and deep (dependency resolution rerun) modes.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   // Shallow rescan (reapply policies to cached data)
    *   const result = await sdk.rescanFullScan('my-org', 'scan_123', {
    *     mode: 'shallow',
@@ -4043,7 +4047,7 @@ export class SocketSdk {
    * response into memory. Useful for processing large SBOMs.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   // Stream to file
    *   await sdk.streamFullScan('my-org', 'scan_123', {
    *     output: './scan-results.json',
@@ -4346,7 +4350,7 @@ export class SocketSdk {
    * Modifies monitoring settings, branch configuration, and scan preferences.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.updateRepository('my-org', 'my-repo', {
    *     description: 'Updated description',
    *     default_branch: 'develop',
@@ -4427,7 +4431,7 @@ export class SocketSdk {
    * than 1000 characters.
    *
    * @example
-   *   ```typescript
+   *   ;```typescript
    *   const result = await sdk.updateRepositoryLabel(
    *     'my-org',
    *     'label-id-123',

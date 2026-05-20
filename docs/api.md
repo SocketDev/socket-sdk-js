@@ -152,7 +152,7 @@ async downloadOrgFullScanFilesAsTar(
 
 ### `rescanFullScan`
 
-Create a new full scan by rescanning an existing scan.
+Create a new full scan by rescanning an existing scan. Supports shallow
 
 ```typescript
 async rescanFullScan(
@@ -187,7 +187,7 @@ Compare two scans and inspect the diff.
 
 ### `createOrgDiffScanFromIds`
 
-Create a diff scan from two full scan IDs.
+Create a diff scan from two full scan IDs. Compares two existing full scans
 
 ```typescript
 async createOrgDiffScanFromIds(
@@ -206,7 +206,7 @@ async createOrgDiffScanFromIds(
 
 ### `getDiffScanById`
 
-Get details for a specific diff scan.
+Get details for a specific diff scan. Returns comparison between two full
 
 ```typescript
 async getDiffScanById(
@@ -219,7 +219,7 @@ async getDiffScanById(
 
 ### `getDiffScanGfm`
 
-Get GitHub-flavored markdown comments for a diff scan.
+Get GitHub-flavored markdown comments for a diff scan. Returns dependency
 
 ```typescript
 async getDiffScanGfm(
@@ -233,7 +233,7 @@ async getDiffScanGfm(
 
 ### `listOrgDiffScans`
 
-List all diff scans for an organization.
+List all diff scans for an organization. Returns paginated list of diff
 
 ```typescript
 async listOrgDiffScans(
@@ -245,7 +245,7 @@ async listOrgDiffScans(
 
 ### `deleteOrgDiffScan`
 
-Delete a diff scan from an organization.
+Delete a diff scan from an organization. Permanently removes diff scan data
 
 ```typescript
 async deleteOrgDiffScan(
@@ -437,7 +437,7 @@ async getOrgAnalytics(
 
 ### `getRepoAnalytics`
 
-Get analytics data for a specific repository.
+Get analytics data for a specific repository. Returns security metrics,
 
 ```typescript
 async getRepoAnalytics(
@@ -474,7 +474,7 @@ Surface and triage alerts across an organization.
 
 ### `getOrgAlertsList`
 
-List latest alerts for an organization (Beta).
+List latest alerts for an organization (Beta). Returns paginated alerts
 
 ```typescript
 async getOrgAlertsList(
@@ -531,7 +531,7 @@ async getOrgAlertsList(
 
 ### `getOrgAlertFullScans`
 
-List full scans associated with a specific alert.
+List full scans associated with a specific alert. Returns paginated full
 
 ```typescript
 async getOrgAlertFullScans(
@@ -549,7 +549,7 @@ async getOrgAlertFullScans(
 
 ### `getOrgTriage`
 
-Get organization triage settings and status.
+Get organization triage settings and status. Returns alert triage
 
 ```typescript
 async getOrgTriage(
@@ -561,7 +561,7 @@ async getOrgTriage(
 
 ### `updateOrgAlertTriage`
 
-Update alert triage status for an organization.
+Update alert triage status for an organization. Modifies alert resolution
 
 ```typescript
 async updateOrgAlertTriage(
@@ -575,7 +575,7 @@ async updateOrgAlertTriage(
 
 ### `getOrgFixes`
 
-Fetch available fixes for vulnerabilities in a repository or scan.
+Fetch available fixes for vulnerabilities in a repository or scan. Returns
 
 ```typescript
 async getOrgFixes(
@@ -600,7 +600,7 @@ Manage outbound webhooks for organization events.
 
 ### `createOrgWebhook`
 
-Create a new webhook for an organization.
+Create a new webhook for an organization. Webhooks allow you to receive
 
 ```typescript
 async createOrgWebhook(
@@ -621,7 +621,7 @@ async createOrgWebhook(
 
 ### `getOrgWebhook`
 
-Get details of a specific webhook.
+Get details of a specific webhook. Returns webhook configuration including
 
 ```typescript
 async getOrgWebhook(
@@ -634,7 +634,7 @@ async getOrgWebhook(
 
 ### `getOrgWebhooksList`
 
-List all webhooks for an organization.
+List all webhooks for an organization. Supports pagination and sorting
 
 ```typescript
 async getOrgWebhooksList(
@@ -654,7 +654,7 @@ async getOrgWebhooksList(
 
 ### `updateOrgWebhook`
 
-Update an existing webhook's configuration.
+Update an existing webhook's configuration. All fields are optional - only
 
 ```typescript
 async updateOrgWebhook(
@@ -676,7 +676,7 @@ async updateOrgWebhook(
 
 ### `deleteOrgWebhook`
 
-Delete a webhook from an organization.
+Delete a webhook from an organization. This will stop all future webhook
 
 ```typescript
 async deleteOrgWebhook(
@@ -703,7 +703,7 @@ async viewPatch(orgSlug: string, uuid: string): Promise<PatchViewResponse>
 
 ### `downloadPatch`
 
-Download patch file content from Socket blob storage.
+Download patch file content from Socket blob storage. Retrieves patched
 
 ```typescript
 async downloadPatch(
@@ -733,7 +733,7 @@ Provision, rotate, and revoke API tokens for the organization.
 
 ### `getAPITokens`
 
-Get list of API tokens for an organization.
+Get list of API tokens for an organization. Returns organization API tokens
 
 ```typescript
 async getAPITokens(
@@ -745,7 +745,7 @@ async getAPITokens(
 
 ### `postAPIToken`
 
-Create a new API token for an organization.
+Create a new API token for an organization. Generates API token with
 
 ```typescript
 async postAPIToken(
@@ -758,7 +758,7 @@ async postAPIToken(
 
 ### `postAPITokenUpdate`
 
-Update an existing API token for an organization.
+Update an existing API token for an organization. Modifies token metadata,
 
 ```typescript
 async postAPITokenUpdate(
@@ -772,7 +772,7 @@ async postAPITokenUpdate(
 
 ### `postAPITokensRotate`
 
-Rotate an API token for an organization.
+Rotate an API token for an organization. Generates new token value while
 
 ```typescript
 async postAPITokensRotate(
@@ -785,7 +785,7 @@ async postAPITokensRotate(
 
 ### `postAPITokensRevoke`
 
-Revoke an API token for an organization.
+Revoke an API token for an organization. Permanently disables the token and
 
 ```typescript
 async postAPITokensRevoke(
@@ -802,7 +802,7 @@ Read and update license + security policy settings.
 
 ### `getOrgLicensePolicy`
 
-Get organization's license policy configuration.
+Get organization's license policy configuration. Returns allowed,
 
 ```typescript
 async getOrgLicensePolicy(
@@ -814,7 +814,7 @@ async getOrgLicensePolicy(
 
 ### `updateOrgLicensePolicy`
 
-Update organization's license policy configuration.
+Update organization's license policy configuration. Modifies allowed,
 
 ```typescript
 async updateOrgLicensePolicy(
@@ -828,7 +828,7 @@ async updateOrgLicensePolicy(
 
 ### `getOrgSecurityPolicy`
 
-Get organization's security policy configuration.
+Get organization's security policy configuration. Returns alert rules,
 
 ```typescript
 async getOrgSecurityPolicy(
@@ -840,7 +840,7 @@ async getOrgSecurityPolicy(
 
 ### `updateOrgSecurityPolicy`
 
-Update organization's security policy configuration.
+Update organization's security policy configuration. Modifies alert rules,
 
 ```typescript
 async updateOrgSecurityPolicy(
@@ -853,7 +853,7 @@ async updateOrgSecurityPolicy(
 
 ### `postSettings`
 
-Update user or organization settings.
+Update user or organization settings. Configures preferences,
 
 ```typescript
 async postSettings(
@@ -869,7 +869,7 @@ Inspect and configure organization telemetry.
 
 ### `getOrgTelemetryConfig`
 
-Get organization's telemetry configuration.
+Get organization's telemetry configuration. Returns whether telemetry is
 
 ```typescript
 async getOrgTelemetryConfig(
@@ -881,7 +881,7 @@ async getOrgTelemetryConfig(
 
 ### `updateOrgTelemetryConfig`
 
-Update organization's telemetry configuration.
+Update organization's telemetry configuration. Enables or disables
 
 ```typescript
 async updateOrgTelemetryConfig(
@@ -894,7 +894,7 @@ async updateOrgTelemetryConfig(
 
 ### `postOrgTelemetry`
 
-Post telemetry data for an organization.
+Post telemetry data for an organization. Sends telemetry events and
 
 ```typescript
 async postOrgTelemetry(
@@ -911,7 +911,7 @@ Fetch organization audit log events.
 
 ### `getAuditLogEvents`
 
-Retrieve audit log events for an organization.
+Retrieve audit log events for an organization. Returns chronological log of
 
 ```typescript
 async getAuditLogEvents(
@@ -928,7 +928,7 @@ Per-package and batch package analysis.
 
 ### `getScoreByNpmPackage`
 
-Get security score for a specific npm package and version.
+Get security score for a specific npm package and version. Returns
 
 ```typescript
 async getScoreByNpmPackage(
@@ -941,7 +941,7 @@ async getScoreByNpmPackage(
 
 ### `getIssuesByNpmPackage`
 
-Get security issues for a specific npm package and version.
+Get security issues for a specific npm package and version. Returns
 
 ```typescript
 async getIssuesByNpmPackage(
@@ -954,7 +954,7 @@ async getIssuesByNpmPackage(
 
 ### `batchPackageFetch`
 
-Fetch package analysis data for multiple packages in a single batch request.
+Fetch package analysis data for multiple packages in a single batch
 
 ```typescript
 async batchPackageFetch(
@@ -967,7 +967,7 @@ async batchPackageFetch(
 
 ### `batchOrgPackageFetch`
 
-Get package metadata and alerts by PURL strings for a specific organization.
+Get package metadata and alerts by PURL strings for a specific
 
 ```typescript
 async batchOrgPackageFetch(
@@ -981,7 +981,7 @@ async batchOrgPackageFetch(
 
 ### `batchPackageStream`
 
-Stream package analysis data for multiple packages with chunked processing and concurrency control.
+Stream package analysis data for multiple packages with chunked processing
 
 ```typescript
 async *batchPackageStream(
@@ -1006,7 +1006,7 @@ async checkMalware(
 
 ### `searchDependencies`
 
-Search for dependencies across monitored projects.
+Search for dependencies across monitored projects. Returns matching
 
 ```typescript
 async searchDependencies(
@@ -1022,7 +1022,7 @@ Upload manifests and snapshot dependency graphs.
 
 ### `uploadManifestFiles`
 
-Upload manifest files for dependency analysis.
+Upload manifest files for dependency analysis. Processes package files to
 
 ```typescript
 async uploadManifestFiles(
@@ -1049,7 +1049,7 @@ async createDependenciesSnapshot(
 
 ### `getSupportedFiles`
 
-Get list of supported file types for full scan generation.
+Get list of supported file types for full scan generation. Returns glob
 
 ```typescript
 async getSupportedFiles(
@@ -1065,7 +1065,7 @@ Export full scans in industry-standard formats.
 
 ### `exportCDX`
 
-Export scan results in CycloneDX SBOM format.
+Export scan results in CycloneDX SBOM format. Returns Software Bill of
 
 ```typescript
 async exportCDX(
@@ -1078,7 +1078,7 @@ async exportCDX(
 
 ### `exportSPDX`
 
-Export scan results in SPDX SBOM format.
+Export scan results in SPDX SBOM format. Returns Software Bill of Materials
 
 ```typescript
 async exportSPDX(
@@ -1115,7 +1115,7 @@ Inspect current API quota.
 
 ### `getQuota`
 
-Get current API quota usage and limits.
+Get current API quota usage and limits. Returns remaining requests, rate
 
 ```typescript
 async getQuota(): Promise<SocketSdkResult<'getQuota'>>
@@ -1129,7 +1129,7 @@ Raw HTTP access for endpoints the SDK does not wrap.
 
 ### `getApi`
 
-Execute a raw GET request to any API endpoint with configurable response type.
+Execute a raw GET request to any API endpoint with configurable response
 
 ```typescript
 async getApi<T = HttpResponse>(

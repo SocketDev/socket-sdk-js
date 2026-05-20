@@ -17,7 +17,7 @@ export const isCoverageMode = process.env['COVERAGE'] === 'true'
  * Create a test client with a standard token.
  *
  * @example
- *   ```ts
+ *   ;```ts
  *   describe('My tests', () => {
  *     let client: SocketSdk
  *     beforeEach(() => {
@@ -76,7 +76,7 @@ export function setupNockEnvironment() {
  * convenience function that combines setupTestEnvironment and client creation.
  *
  * @example
- *   ```ts
+ *   ;```ts
  *   describe('My tests', () => {
  *     const getClient = setupTestClient({ retries: 0 })
  *

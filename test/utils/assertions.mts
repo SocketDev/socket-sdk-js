@@ -11,7 +11,7 @@ import type { SocketSdkGenericResult } from '../../src/index'
  * Assert that an SDK result is an error with Socket API format.
  *
  * @example
- *   ```ts
+ *   ;```ts
  *   const res = await client.getRepo('org', 'invalid')
  *   assertApiError(res, 404)
  *   ```
@@ -30,7 +30,7 @@ export function assertApiError<T>(
  * Assert that an SDK result is an error response.
  *
  * @example
- *   ```ts
+ *   ;```ts
  *   const res = await client.getRepo('org', 'invalid')
  *   assertError(res, 404, 'not found')
  *   ```
@@ -58,7 +58,7 @@ export function assertError<T>(
  * Assert that an SDK result is a successful response.
  *
  * @example
- *   ```ts
+ *   ;```ts
  *   const res = await client.getRepo('org', 'repo')
  *   assertSuccess(res)
  *   ```
