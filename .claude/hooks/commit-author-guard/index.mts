@@ -148,7 +148,11 @@ export function readAllowedAuthors(): AllowedAuthors {
   // Source (b): global git config
   let email: string | undefined
   let name: string | undefined
-  const emailResult = spawnSync('git', ['config', '--global', 'user.email'])
+  const emailResult = spawnSync('git', [
+    'config',
+    '--global',
+    'user.email',
+  ])
   if (emailResult.status === 0) {
     email = String(emailResult.stdout).trim() || undefined
   }

@@ -253,9 +253,7 @@ export async function installGitHubReleaseTool(
     return true
   }
 
-  const extractDir = await fs.mkdtemp(
-    path.join(os.tmpdir(), `${name}-extract-`),
-  )
+  const extractDir = await fs.mkdtemp(path.join(os.tmpdir(), `${name}-extract-`))
   try {
     if (isZip) {
       if (process.platform === 'win32') {
@@ -352,9 +350,7 @@ export async function installGitHubReleaseToolWithTag(
   }
 
   const isZip = asset.endsWith('.zip')
-  const extractDir = await fs.mkdtemp(
-    path.join(os.tmpdir(), `${name}-extract-`),
-  )
+  const extractDir = await fs.mkdtemp(path.join(os.tmpdir(), `${name}-extract-`))
   try {
     if (isZip) {
       if (process.platform === 'win32') {
