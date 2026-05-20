@@ -58,7 +58,15 @@ interface FirewallAlert {
  * firewall returned any alerts.
  */
 export async function bootstrapPackage(pkgName: string): Promise<void> {
-  const version = readPinnedVersion(pkgName)
+  const pinned = readPinnedVersion(pkgName)
+  // pnpm `npm:` alias form: `npm:@scope/realpkg@version`. The catalog
+  // can pin `@socketsecurity/lib-stable: npm:@socketsecurity/lib@5.28.0`
+  // to alias one name onto another's published tarball. Resolve to
+  // the alias TARGET's tarball — the alias name has no tarball on
+  // the registry (e.g. lib-stable has never been published).
+  const aliasMatch = pinned.match(/^npm:(@?[^@]+)@(.+)$/)
+  const fetchPkg = aliasMatch ? aliasMatch[1]! : pkgName
+  const version = aliasMatch ? aliasMatch[2]! : pinned
   const dest = path.join(REPO_ROOT, 'node_modules', pkgName)
   const destPkgJson = path.join(dest, 'package.json')
 
@@ -79,19 +87,24 @@ export async function bootstrapPackage(pkgName: string): Promise<void> {
 
   // Firewall check — refuses install if the package is flagged as
   // malware. Network errors are non-fatal so a network blip doesn't
-  // block a fresh clone.
-  const cleared = await checkFirewall(pkgName, version)
+  // block a fresh clone. Check against the alias TARGET when a `npm:`
+  // alias is in play (lib-stable → lib).
+  const cleared = await checkFirewall(fetchPkg, version)
   if (!cleared) {
     throw new Error(
-      `Socket Firewall blocked ${pkgName}@${version}; refusing to install.`,
+      `Socket Firewall blocked ${fetchPkg}@${version}; refusing to install.`,
     )
   }
 
   // Build the registry tarball URL. The npm registry redirects
   // /<pkg>/-/<basename>-<version>.tgz, but for scoped packages the
-  // basename is the unscoped portion.
-  const unscoped = pkgName.startsWith('@') ? pkgName.split('/')[1]! : pkgName
-  const tarballUrl = `https://registry.npmjs.org/${pkgName}/-/${unscoped}-${version}.tgz`
+  // basename is the unscoped portion. Use the alias target (fetchPkg)
+  // when the catalog pins `npm:@scope/realpkg@version` — that's the
+  // package that has a published tarball.
+  const unscoped = fetchPkg.startsWith('@')
+    ? fetchPkg.split('/')[1]!
+    : fetchPkg
+  const tarballUrl = `https://registry.npmjs.org/${fetchPkg}/-/${unscoped}-${version}.tgz`
 
   log(`Fetching ${tarballUrl}`)
   const tarballPath = path.join(
