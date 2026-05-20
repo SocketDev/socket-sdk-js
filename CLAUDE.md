@@ -233,7 +233,7 @@ Hooks that gate specific external tools — they only fire when those tools appe
 
 ## 🏗️ SDK-Specific
 
-### Architecture
+### Layout
 
 Socket SDK for JavaScript/TypeScript — programmatic access to Socket.dev security analysis.
 
@@ -244,127 +244,57 @@ Socket SDK for JavaScript/TypeScript — programmatic access to Socket.dev secur
 - `src/utils.ts` — shared utilities
 - `src/constants.ts` — constants
 
-Features: TypeScript support, API client, package analysis, security scanning, org/repo management, SBOM, batch operations, file uploads.
-
 ### Commands
 
-- **Build**: `pnpm build` (`pnpm build --watch` for dev — 68% faster rebuilds)
-- **Test**: `pnpm test`
-- **Type check**: `pnpm run type`
-- **Lint**: `pnpm run lint`
-- **Check all**: `pnpm check`
-- **Coverage**: `pnpm run cover`
+- Build: `pnpm run build` (`pnpm run build --watch` for dev — 68% faster rebuilds)
+- Test: `pnpm test`
+- Type check: `pnpm run type` ; Lint: `pnpm run lint` ; Check: `pnpm run check`
+- Coverage: `pnpm run cover`
 
-### Configuration Files
+### Config locations
 
-Configs live in `.config/`:
+Configs live under `.config/`:
 
-| File                                 | Purpose                            |
-| ------------------------------------ | ---------------------------------- |
-| `tsconfig.json`                      | Main TS config (extends base)      |
-| `.config/tsconfig.base.json`         | Base TS settings                   |
-| `.config/tsconfig.check.json`        | Type checking for `type` command   |
-| `.config/tsconfig.dts.json`          | Declaration file generation        |
-| `.config/esbuild.config.mts`         | Build orchestration (ESM, node18+) |
-| `.oxlintrc.json`                     | oxlint rules                       |
-| `.oxfmtrc.json`                      | oxfmt formatting                   |
-| `.config/vitest.config.mts`          | Main test config                   |
+| File | Purpose |
+| --- | --- |
+| `tsconfig.json` | Main TS config (extends base) |
+| `.config/tsconfig.base.json` | Base TS settings |
+| `.config/tsconfig.check.json` | Type checking for `type` command |
+| `.config/tsconfig.dts.json` | Declaration generation |
+| `.config/esbuild.config.mts` | Build orchestration (ESM, node18+) |
+| `.config/vitest.config.mts` | Main test config |
 | `.config/vitest.config.isolated.mts` | Isolated tests (for `vi.doMock()`) |
-| `.config/vitest.coverage.config.mts` | Shared coverage thresholds (≥99%)  |
-| `.config/isolated-tests.json`        | List of tests requiring isolation  |
-| `.config/taze.config.mts`            | Dependency update policies         |
+| `.config/vitest.coverage.config.mts` | Shared coverage thresholds (≥99%) |
+| `.config/isolated-tests.json` | List of tests requiring isolation |
+| `.config/taze.config.mts` | Dependency-update policies |
 
-### SDK-Specific Patterns
+### SDK-local conventions
 
-**Logger calls**: `logger.error()`/`logger.log()` must include empty string: `logger.error('')`, `logger.log('')`.
-
-**File structure**:
-
-- Extensions: `.mts` for TypeScript modules
-- 🚨 MANDATORY `@fileoverview` headers
-- ❌ FORBIDDEN `"use strict"` in `.mjs`/`.mts` (ES modules are strict)
-
-**TypeScript**:
-
-- Semicolons: Use them (unlike other Socket projects)
-- ❌ FORBIDDEN `any`; use `unknown` or specific types
-- Type imports: Always `import type` (separate statements, never inline `type` in value imports)
-- Prefer `undefined` over `null`
-
-**HTTP requests in SDK**:
-
-- 🚨 NEVER use `fetch()` — use `createGetRequest`/`createRequestWithJson` from `src/http-client.ts`
-  - `fetch()` bypasses the SDK's HTTP stack (retries, timeouts, hooks, agent config)
-  - `fetch()` cannot be intercepted by nock in tests, forcing c8 ignore blocks
-  - For external URLs (e.g., firewall API), pass a different `baseUrl` to `createGetRequest`
-
-**Working directory**:
-
-- 🚨 NEVER use `process.chdir()` — pass `{ cwd }` options with absolute paths instead
-
-**Sorting (MANDATORY)**:
-
-- Type properties: required first, then optional; alphabetical within groups
-- Class members: 1) private properties, 2) private methods, 3) public methods (alphabetical)
-- Object properties & destructuring: alphabetical (except semantic ordering)
-- `Set` constructor arguments: `new Set([...])` literals are alphanumeric (runtime is order-insensitive)
+- File extensions: `.mts` for TypeScript modules. **Mandatory** `@fileoverview` headers. **Forbidden**: `"use strict"` in `.mjs`/`.mts` (ES modules are strict).
+- Semicolons: use them (this is the one Socket project that does).
+- No `any`; use `unknown` or specific types.
+- HTTP: 🚨 never `fetch()` — use `createGetRequest` / `createRequestWithJson` from `src/http-client.ts`. `fetch()` bypasses the SDK's HTTP stack (retries, timeouts, hooks, agent config) and isn't interceptable by nock. For external URLs (e.g. firewall API) pass a different `baseUrl` to `createGetRequest`.
+- Logger calls: `logger.error('')` / `logger.log('')` must include the empty string.
+- Sorting: type properties — required first then optional, alphabetical within groups. Class members: 1) private properties, 2) private methods, 3) public methods, alphabetical. Object properties + destructuring: alphabetical (except semantic ordering). `new Set([…])` literals: alphanumeric.
 
 ### Testing
 
-Two vitest configs:
+- Two vitest configs: `.config/vitest.config.mts` (default), `.config/vitest.config.isolated.mts` (full process isolation for `vi.doMock()`).
+- Structure: `test/` for tests, `test/utils/` for shared helpers. Descriptive names like `socket-sdk-upload-manifest.test.mts`.
+- Recommended helper: `setupTestClient('test-api-token', { retries: 0 })` returns a getter; combine with `getClient()` per test. Also: `setupTestEnvironment()` (nock only), `createTestClient()` (client only), `isCoverageMode` flag. See `test/utils/environment.mts`.
+- Mock HTTP with nock (auto-cleaned in beforeEach/afterEach). Test success + error paths, cross-platform path handling.
+- Run all: `pnpm test`. Specific: `pnpm test <file>` (glob support). 🚨 **never** `--` before test paths — that runs ALL tests.
+- Test style: functional over source-scanning. Never read source files and assert on contents.
 
-- `.config/vitest.config.mts` — default
-- `.config/vitest.config.isolated.mts` — full process isolation for `vi.doMock()`
+### CI
 
-**Structure**: `test/` for tests, `test/utils/` for shared helpers. Use descriptive names like `socket-sdk-upload-manifest.test.mts`.
+- 🚨 Mandatory: `SocketDev/socket-registry/.github/workflows/ci.yml@<full-sha> # main`.
+- Custom runner: `scripts/test.mts` with glob expansion.
+- Memory: auto heap (CI 8 GB, local 4 GB).
+- CI uses published npm packages, not local.
 
-**Helpers** (`test/utils/environment.mts`):
+### SDK notes
 
-```typescript
-// Recommended: combined nock setup + client creation
-import { setupTestClient } from './utils/environment.mts'
-
-describe('My tests', () => {
-  const getClient = setupTestClient('test-api-token', { retries: 0 })
-  it('should work', async () => {
-    const client = getClient()
-  })
-})
-```
-
-Also available: `setupTestEnvironment()` (nock only), `createTestClient()` (client only), `isCoverageMode` (flag).
-
-**Running**:
-
-- All: `pnpm test`
-- Specific: `pnpm test <file>` (glob support)
-- 🚨 **NEVER use `--` before test paths** — runs ALL tests
-- Coverage: `pnpm run cover`
-
-**Best practices**:
-
-- Use `setupTestClient()` + `getClient()` pattern
-- Mock HTTP with nock (cleaned automatically in beforeEach/afterEach)
-- Test success + error paths
-- Test cross-platform path handling
-- See `test/unit/getapi-sendapi-methods.test.mts` for examples
-
-**Test style — functional over source scanning**: NEVER read source files and assert on their contents (`.toContain('pattern')`). Write functional behavior tests.
-
-### CI Testing
-
-- 🚨 MANDATORY: `SocketDev/socket-registry/.github/workflows/ci.yml@<full-sha> # main`
-- Custom runner: `scripts/test.mts` with glob expansion
-- Memory: auto heap (CI 8GB, local 4GB)
-
-### Debugging
-
-- CI uses published npm packages, not local
-- Package detection: use `existsSync()` not `fs.access()`
-- Test failures: check unused nock mocks and cleanup
-
-### SDK Notes
-
-- Windows compatibility matters — test path handling
-- Use utilities from `@socketsecurity/registry` where available
-- Maintain consistency with surrounding code
+- Windows compatibility matters — test path handling.
+- Reuse utilities from `@socketsecurity/registry` where available.
+- Package detection: use `existsSync()` not `fs.access()`.
