@@ -140,7 +140,7 @@ export const normalizeBaseUrl = memoize(
  *
  * @returns Set of normalized words
  */
-export function normalizeToWordSet(s: string): Set<string> {
+function normalizeToWordSet(s: string): Set<string> {
   const words = StringPrototypeToLowerCase(s).match(/\w+/g)
   return new SetCtor(words ?? [])
 }

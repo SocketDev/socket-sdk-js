@@ -32,14 +32,6 @@ export const DEFAULT_RETRY_DELAY = 1000
 // Default cache TTL (5 minutes)
 export const DEFAULT_CACHE_TTL = 5 * 60 * 1000
 
-// Recommended cache TTL for organizations endpoint (30 minutes)
-// Organizations list rarely changes - only when joining/leaving orgs.
-export const RECOMMENDED_CACHE_TTL_ORGANIZATIONS = 30 * 60 * 1000
-
-// Recommended cache TTL for quota endpoint (10 minutes)
-// Quota changes incrementally and doesn't need real-time accuracy.
-export const RECOMMENDED_CACHE_TTL_QUOTA = 10 * 60 * 1000
-
 // Maximum timeout for HTTP requests (5 minutes)
 export const MAX_HTTP_TIMEOUT = 5 * 60 * 1000
 
@@ -48,9 +40,6 @@ export const MIN_HTTP_TIMEOUT = 5000
 
 // Maximum response body size (10MB)
 export const MAX_RESPONSE_SIZE = 10 * 1024 * 1024
-
-// Maximum response body size for streaming (100MB)
-export const MAX_STREAM_SIZE = 100 * 1024 * 1024
 
 // Public blob store URL for patch downloads
 export const SOCKET_PUBLIC_BLOB_STORE_URL = 'https://socketusercontent.com'
