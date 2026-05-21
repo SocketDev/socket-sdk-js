@@ -19,7 +19,7 @@ import { MAX_FIREWALL_COMPONENTS } from '../../src/constants.js'
 import { SocketSdk } from '../../src/index'
 import { setupLocalHttpServer } from '../utils/local-server-helpers.mts'
 
-import type { HttpResponse } from '@socketsecurity/lib/http-request'
+import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 import type { SocketSdkGenericResult } from '../../src/index'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 

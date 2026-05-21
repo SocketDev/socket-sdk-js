@@ -4,7 +4,7 @@
  *   interactions.
  */
 
-import { MapCtor, SetCtor } from '@socketsecurity/lib/primordials'
+import { MapCtor, SetCtor } from '@socketsecurity/lib/primordials/map-set'
 
 import rootPkgJson from '../package.json' with { type: 'json' }
 import { createUserAgentFromPkgJson } from './user-agent'

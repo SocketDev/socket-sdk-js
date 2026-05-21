@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url'
 
 import type { BuildResult, Metafile, PluginBuild } from 'esbuild'
 
-import { envAsBoolean } from '@socketsecurity/lib-stable/env/helpers'
+import { envAsBoolean } from '@socketsecurity/lib-stable/env/boolean'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 
 import { createNodeProtocolPlugin } from './esbuild/node-protocol.mts'

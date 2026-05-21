@@ -7,29 +7,31 @@
 import path from 'node:path'
 import process from 'node:process'
 
-import { createTtlCache } from '@socketsecurity/lib/cache-with-ttl'
-import { UNKNOWN_ERROR } from '@socketsecurity/lib/constants/core'
-import { getAbortSignal } from '@socketsecurity/lib/constants/process'
+import { createTtlCache } from '@socketsecurity/lib/ttl-cache/cache'
+import { UNKNOWN_ERROR } from '@socketsecurity/lib/constants/sentinels'
+import { getAbortSignal } from '@socketsecurity/lib/process/abort'
 import { SOCKET_PUBLIC_API_TOKEN } from '@socketsecurity/lib/constants/socket'
-import { debugLog, isDebugNs } from '@socketsecurity/lib/debug'
-import { validateFiles } from '@socketsecurity/lib/fs'
-import { jsonParse } from '@socketsecurity/lib/json/parse'
+import { isDebugNs } from '@socketsecurity/lib/debug/namespace'
+import { debugLog } from '@socketsecurity/lib/debug/output'
+import { validateFiles } from '@socketsecurity/lib/fs/validate'
+import { parseJson } from '@socketsecurity/lib/json/parse'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { getOwn, isObjectObject } from '@socketsecurity/lib/objects'
+import { getOwn } from '@socketsecurity/lib/objects/inspect'
+import { isObject } from '@socketsecurity/lib/objects/predicates'
+import { ArrayIsArray } from '@socketsecurity/lib/primordials/array'
 import {
-  ArrayIsArray,
   ErrorCtor,
-  StringPrototypeTrim,
   TypeErrorCtor,
-} from '@socketsecurity/lib/primordials'
-import { pRetry } from '@socketsecurity/lib/promises'
-import { setMaxEventTargetListeners } from '@socketsecurity/lib/suppress-warnings'
-import { urlSearchParamAsBoolean } from '@socketsecurity/lib/url'
+} from '@socketsecurity/lib/primordials/error'
+import { StringPrototypeTrim } from '@socketsecurity/lib/primordials/string'
+import { pRetry } from '@socketsecurity/lib/promises/retry'
+import { setMaxEventTargetListeners } from '@socketsecurity/lib/warnings/event-target'
+import { urlSearchParamsAsBoolean } from '@socketsecurity/lib/url/search-params'
 
 const abortSignal = getAbortSignal()
 const logger = getDefaultLogger()
 
-import { httpRequest } from '@socketsecurity/lib/http-request'
+import { httpRequest } from '@socketsecurity/lib/http-request/request'
 
 import {
   DEFAULT_CACHE_TTL,
@@ -126,8 +128,8 @@ import type {
   RepositoryResult,
   StrictErrorResult,
 } from './types-strict'
-import type { TtlCache } from '@socketsecurity/lib/cache-with-ttl'
-import type { HttpResponse } from '@socketsecurity/lib/http-request'
+import type { TtlCache } from '@socketsecurity/lib/ttl-cache/types'
+import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 
 /**
  * Socket SDK for programmatic access to Socket.dev security analysis APIs.
@@ -274,10 +276,10 @@ export class SocketSdk {
       if (i === text.length || text.charCodeAt(i) === 10) {
         if (i > start) {
           const line = text.slice(start, i)
-          const artifact = jsonParse(line, {
+          const artifact = parseJson(line, {
             throws: false,
           }) as SocketArtifact | null
-          if (isObjectObject(artifact)) {
+          if (isObject(artifact)) {
             yield this.#handleApiSuccess<'batchPackageFetch'>(
               /* c8 ignore next 8 - Public token artifact reshaping branch for policy compliance. */
               isPublicToken
@@ -669,9 +671,9 @@ export class SocketSdk {
     }
 
     // Handle array of values (take first).
-    const value = ArrayIsArray(retryAfterValue)
-      ? retryAfterValue[0]
-      : retryAfterValue
+    const value: string | undefined = ArrayIsArray(retryAfterValue)
+      ? (retryAfterValue[0] as string | undefined)
+      : (retryAfterValue as string | undefined)
 
     /* c8 ignore next 3 - c8 ignored: because HTTP headers are always strings; empty array[0] returns undefined which is guarded here for safety */
     // Return if value is empty after extracting from array.
@@ -780,17 +782,17 @@ export class SocketSdk {
       if (i === text.length || text.charCodeAt(i) === 10) {
         if (i > start) {
           const line = text.slice(start, i)
-          const artifact = jsonParse(line, {
+          const artifact = parseJson(line, {
             throws: false,
           }) as SocketArtifact | null
-          if (isObjectObject(artifact)) {
+          if (isObject(artifact)) {
             results.push(artifact!)
           }
         }
         start = i + 1
       }
     }
-    const compact = urlSearchParamAsBoolean(
+    const compact = urlSearchParamsAsBoolean(
       getOwn(queryParams, 'compact') as string | null | undefined,
     )
     return this.#handleApiSuccess<'batchPackageFetchByOrg'>(
@@ -828,10 +830,10 @@ export class SocketSdk {
       if (i === text.length || text.charCodeAt(i) === 10) {
         if (i > start) {
           const line = text.slice(start, i)
-          const artifact = jsonParse(line, {
+          const artifact = parseJson(line, {
             throws: false,
           }) as SocketArtifact | null
-          if (isObjectObject(artifact)) {
+          if (isObject(artifact)) {
             results.push(
               /* c8 ignore next 8 - Public token artifact reshaping for policy compliance. */
               isPublicToken
@@ -848,7 +850,7 @@ export class SocketSdk {
         start = i + 1
       }
     }
-    const compact = urlSearchParamAsBoolean(
+    const compact = urlSearchParamsAsBoolean(
       getOwn(queryParams, 'compact') as string | null | undefined,
     )
     return this.#handleApiSuccess<'batchPackageFetch'>(

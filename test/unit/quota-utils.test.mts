@@ -272,7 +272,7 @@ describe('Quota Utils', () => {
         }),
       }))
 
-      vi.doMock('@socketsecurity/lib/memoization', () => ({
+      vi.doMock('@socketsecurity/lib/memo/memoize', () => ({
         memoize: (fn: unknown) => fn,
         once: (fn: unknown) => fn,
       }))
@@ -292,7 +292,7 @@ describe('Quota Utils', () => {
         readFileSync: vi.fn(() => 'invalid json content {'),
       }))
 
-      vi.doMock('@socketsecurity/lib/memoization', () => ({
+      vi.doMock('@socketsecurity/lib/memo/memoize', () => ({
         memoize: (fn: unknown) => fn,
         once: (fn: unknown) => fn,
       }))
@@ -312,7 +312,7 @@ describe('Quota Utils', () => {
         readFileSync: vi.fn(),
       }))
 
-      vi.doMock('@socketsecurity/lib/memoization', () => ({
+      vi.doMock('@socketsecurity/lib/memo/memoize', () => ({
         memoize: (fn: unknown) => fn,
         once: (fn: unknown) => fn,
       }))

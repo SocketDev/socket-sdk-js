@@ -5,16 +5,16 @@
 import path from 'node:path'
 import process from 'node:process'
 
-import { memoize } from '@socketsecurity/lib/memoization'
+import { memoize } from '@socketsecurity/lib/memo/memoize'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+import { SetCtor } from '@socketsecurity/lib/primordials/map-set'
+import { PromiseWithResolvers } from '@socketsecurity/lib/primordials/promise'
 import {
-  PromiseWithResolvers,
-  SetCtor,
   StringPrototypeEndsWith,
   StringPrototypeToLowerCase,
   StringPrototypeTrim,
-  URLSearchParamsCtor,
-} from '@socketsecurity/lib/primordials'
+} from '@socketsecurity/lib/primordials/string'
+import { URLSearchParamsCtor } from '@socketsecurity/lib/primordials/url'
 
 import type { QueryParams } from './types'
 

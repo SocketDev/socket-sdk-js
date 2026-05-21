@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url'
 
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
-import { spawn } from '@socketsecurity/lib-stable/spawn'
+import { spawn } from '@socketsecurity/lib-stable/spawn/spawn'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import { runCommandQuiet } from './utils/run-command.mts'

@@ -13,9 +13,9 @@ import {
   reshapeArtifactForPublicPolicy,
 } from '../../src/http-client.js'
 
-import { isError } from '@socketsecurity/lib/errors'
+import { isError } from '@socketsecurity/lib/errors/predicates'
 
-import type { HttpResponse } from '@socketsecurity/lib/http-request'
+import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 import type { Server } from 'node:http'
 
 export function mockHttpResponse(

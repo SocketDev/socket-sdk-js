@@ -10,7 +10,7 @@ import { SocketSdk } from '../../src/index'
 import { setupTestClient } from '../utils/environment.mts'
 
 import type { SocketSdkGenericResult } from '../../src/index'
-import type { HttpResponse } from '@socketsecurity/lib/http-request'
+import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 import type { IncomingHttpHeaders } from 'node:http'
 
 describe('getApi and sendApi Methods', () => {

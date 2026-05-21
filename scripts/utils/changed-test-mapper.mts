@@ -7,10 +7,8 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import {
-  getChangedFilesSync,
-  getStagedFilesSync,
-} from '@socketsecurity/lib-stable/git'
+import { getChangedFilesSync } from '@socketsecurity/lib-stable/git/changed'
+import { getStagedFilesSync } from '@socketsecurity/lib-stable/git/staged'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { getRootPath } from './path-helpers.mts'

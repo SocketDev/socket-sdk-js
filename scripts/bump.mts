@@ -20,8 +20,8 @@ import semver from 'semver'
 
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
-import { spawn } from '@socketsecurity/lib-stable/spawn'
-import { safeDelete } from '@socketsecurity/lib-stable/fs'
+import { spawn } from '@socketsecurity/lib-stable/spawn/spawn'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 const logger = getDefaultLogger()
 
@@ -965,14 +965,8 @@ export async function runCommandWithInput(
     const result = await handle
     return {
       exitCode: result.code,
-      stdout:
-        typeof result.stdout === 'string'
-          ? result.stdout
-          : result.stdout.toString(),
-      stderr:
-        typeof result.stderr === 'string'
-          ? result.stderr
-          : result.stderr.toString(),
+      stdout: String(result.stdout),
+      stderr: String(result.stderr),
     }
   } catch (e) {
     const err = e as {

@@ -1,13 +1,11 @@
-import { debugLog } from '@socketsecurity/lib/debug'
-import { isError } from '@socketsecurity/lib/errors'
-import { httpRequest } from '@socketsecurity/lib/http-request'
-import { jsonParse } from '@socketsecurity/lib/json/parse'
-import { perfTimer } from '@socketsecurity/lib/performance'
-import {
-  DateNow,
-  SetCtor,
-  StringPrototypeTrim,
-} from '@socketsecurity/lib/primordials'
+import { debugLog } from '@socketsecurity/lib/debug/output'
+import { isError } from '@socketsecurity/lib/errors/predicates'
+import { httpRequest } from '@socketsecurity/lib/http-request/request'
+import { parseJson } from '@socketsecurity/lib/json/parse'
+import { perfTimer } from '@socketsecurity/lib/perf/timer'
+import { DateNow } from '@socketsecurity/lib/primordials/date'
+import { SetCtor } from '@socketsecurity/lib/primordials/map-set'
+import { StringPrototypeTrim } from '@socketsecurity/lib/primordials/string'
 
 import {
   MAX_RESPONSE_SIZE,
@@ -22,7 +20,7 @@ import type {
   SocketArtifactAlert,
   SocketArtifactWithExtras,
 } from './types'
-import type { HttpResponse } from '@socketsecurity/lib/http-request'
+import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 import type { JsonValue } from '@socketsecurity/lib/json/types'
 
 export class ResponseError extends Error {
@@ -255,7 +253,7 @@ export async function getResponseJson(
     }
 
     try {
-      const responseJson = jsonParse(responseBody)
+      const responseJson = parseJson(responseBody)
       debugLog('API response:', responseJson)
       stopTimer({ success: true })
       return responseJson

@@ -14,8 +14,8 @@ import { fileURLToPath } from 'node:url'
 
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
-import { onExit } from '@socketsecurity/lib-stable/signal-exit'
-import { getDefaultSpinner } from '@socketsecurity/lib-stable/spinner'
+import { onExit } from '@socketsecurity/lib-stable/signal-exit/register'
+import { getDefaultSpinner } from '@socketsecurity/lib-stable/spinner/registry'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import { getTestsToRun } from './utils/changed-test-mapper.mts'

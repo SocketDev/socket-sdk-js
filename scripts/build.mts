@@ -11,7 +11,7 @@ import type { BuildResult, PluginBuild } from 'esbuild'
 
 import { build, context } from 'esbuild'
 
-import { isQuiet } from '@socketsecurity/lib-stable/argv/flags'
+import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'

@@ -4,7 +4,7 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { PromiseQueue } from '@socketsecurity/lib/promise-queue'
+import { PromiseQueue } from '@socketsecurity/lib/promise-queue/queue'
 
 describe('PromiseQueue', () => {
   let queue: PromiseQueue
