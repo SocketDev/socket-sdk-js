@@ -19,10 +19,7 @@ import { getDefaultLogger } from '@socketsecurity/lib/logger'
 import { getOwn } from '@socketsecurity/lib/objects/inspect'
 import { isObject } from '@socketsecurity/lib/objects/predicates'
 import { ArrayIsArray } from '@socketsecurity/lib/primordials/array'
-import {
-  ErrorCtor,
-  TypeErrorCtor,
-} from '@socketsecurity/lib/primordials/error'
+import { ErrorCtor, TypeErrorCtor } from '@socketsecurity/lib/primordials/error'
 import { StringPrototypeTrim } from '@socketsecurity/lib/primordials/string'
 import { pRetry } from '@socketsecurity/lib/promises/retry'
 import { setMaxEventTargetListeners } from '@socketsecurity/lib/warnings/event-target'
