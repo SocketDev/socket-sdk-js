@@ -70,6 +70,10 @@ async function main(): Promise<void> {
           default: false,
           type: 'boolean',
         },
+        stage: {
+          default: false,
+          type: 'boolean',
+        },
         tag: {
           default: 'latest',
           type: 'string',
@@ -89,14 +93,21 @@ async function main(): Promise<void> {
       logger.log('  --dry-run      Perform a dry-run without publishing')
       logger.log('  --force        Force publish even with warnings')
       logger.log('  --skip-tag     Skip git tag push')
+      logger.log(
+        '  --stage        Upload to npm staging via `pnpm stage publish`',
+      )
+      logger.log(
+        '                 (run `pnpm run publish:approve` next, with 2FA)',
+      )
       logger.log('  --tag <tag>    npm dist-tag (default: latest)')
       logger.log('  --access <access>  Package access level (default: public)')
       logger.log('  --otp <otp>    npm one-time password')
       logger.log('')
       logger.log('Examples:')
       logger.log('  pnpm publish              # Validate artifacts and publish')
+      logger.log('  pnpm publish --stage      # Upload to staging (CI; OIDC)')
       logger.log('  pnpm publish --dry-run    # Dry-run to test')
-      logger.log('  pnpm publish --otp 123456 # Publish with OTP')
+      logger.log('  pnpm publish --otp 123456 # Publish with OTP (no staging)')
       process.exitCode = 0
       return
     }
@@ -119,6 +130,7 @@ async function main(): Promise<void> {
     const publishOptions: PublishOptions = {
       dryRun: !!values['dry-run'],
       force: !!values['force'],
+      stage: !!values['stage'],
     }
     if (typeof values['access'] === 'string') {
       publishOptions.access = values['access']
@@ -203,13 +215,19 @@ export function printHeader(title: string): void {
 export async function publishPackage(
   options: PublishOptions = {},
 ): Promise<boolean> {
-  const { access = 'public', dryRun = false, otp, tag = 'latest' } = options
+  const {
+    access = 'public',
+    dryRun = false,
+    otp,
+    stage = false,
+    tag = 'latest',
+  } = options
 
   const pkgJson = await readPackageJson()
   const packageName = pkgJson.name
   const version = pkgJson.version
 
-  log.step(`Publishing ${packageName}@${version}`)
+  log.step(`${stage ? 'Staging' : 'Publishing'} ${packageName}@${version}`)
 
   // Check if version already exists.
   log.progress('Checking npm registry')
@@ -222,14 +240,22 @@ export async function publishPackage(
   }
   log.done('Version check complete')
 
-  // Prepare publish args.
-  const publishArgs = ['publish', '--access', access, '--tag', tag]
+  // Two modes:
+  // - default: `npm publish` — goes live immediately.
+  // - --stage: `pnpm stage publish` — goes to npm staging; the registry
+  //   holds the tarball until `pnpm stage approve <id>` (run separately
+  //   by a human with 2FA via `pnpm run publish:approve`).
+  const command = stage ? 'pnpm' : 'npm'
+  const publishArgs = stage
+    ? ['stage', 'publish', '--access', access, '--tag', tag]
+    : ['publish', '--access', access, '--tag', tag]
 
-  // Add provenance attestation in CI only. `npm publish --provenance`
-  // requires the GitHub Actions OIDC id-token endpoint; running locally
-  // fails with "Provenance generation in GitHub Actions requires
-  // 'id-token: write' permission". Gated so local non-dry-run publishes
-  // (emergency cases) still work.
+  // Add provenance attestation in CI only. `--provenance` requires the
+  // GitHub Actions OIDC id-token endpoint; running locally fails with
+  // "Provenance generation in GitHub Actions requires 'id-token: write'
+  // permission". Gated so local non-dry-run publishes (emergency cases)
+  // still work. `pnpm stage publish` proxies through `pnpm publish`, so
+  // it accepts --provenance the same way.
   if (!dryRun && process.env['GITHUB_ACTIONS'] === 'true') {
     publishArgs.push('--provenance')
   }
@@ -238,21 +264,30 @@ export async function publishPackage(
     publishArgs.push('--dry-run')
   }
 
-  if (otp) {
+  // pnpm stage publish does not take OTP (the OTP gate is on `stage
+  // approve`, not on `stage publish`). Pass --otp only in non-stage mode.
+  if (otp && !stage) {
     publishArgs.push('--otp', otp)
   }
 
-  // Publish.
-  log.progress(dryRun ? 'Running dry-run publish' : 'Publishing to npm')
-  const publishCode = await runCommand('npm', publishArgs)
+  log.progress(
+    dryRun
+      ? `Running dry-run ${stage ? 'stage-publish' : 'publish'}`
+      : `${stage ? 'Staging to' : 'Publishing to'} npm`,
+  )
+  const publishCode = await runCommand(command, publishArgs)
 
   if (publishCode !== 0) {
-    log.failed('Publish failed')
+    log.failed(`${stage ? 'Stage publish' : 'Publish'} failed`)
     return false
   }
 
   if (dryRun) {
-    log.done('Dry-run publish complete')
+    log.done(`Dry-run ${stage ? 'stage-publish' : 'publish'} complete`)
+  } else if (stage) {
+    log.done(
+      `Staged ${packageName}@${version} — run 'pnpm run publish:approve' to promote`,
+    )
   } else {
     log.done(`Published ${packageName}@${version} to npm`)
   }
@@ -478,6 +513,9 @@ interface PublishOptions {
   dryRun?: boolean | undefined
   force?: boolean | undefined
   otp?: string | undefined
+  // When true, upload to npm staging via `pnpm stage publish` instead of
+  // immediate publish. Promotion is gated on `pnpm run publish:approve`.
+  stage?: boolean | undefined
   tag?: string | undefined
 }
 
