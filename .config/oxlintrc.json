@@ -60,6 +60,7 @@
     "socket/prefer-function-declaration": "error",
     "socket/prefer-node-builtin-imports": "error",
     "socket/prefer-node-modules-dot-cache": "error",
+    "socket/prefer-non-capturing-group": "error",
     "socket/prefer-safe-delete": "error",
     "socket/prefer-separate-type-import": "error",
     "socket/prefer-spawn-over-execsync": "error",
