@@ -10,6 +10,26 @@ The CLAUDE.md `### Tooling` section is the short list; this file is the full set
 
 NEVER use `npx`, `pnpm dlx`, or `yarn dlx` — use `pnpm exec <package>` or `pnpm run <script>` # socket-hook: allow npx
 
+## Docs lead with pnpm
+
+User-facing install commands in fenced code blocks must show the pnpm form first (`pnpm install <pkg>`, `pnpm add <pkg>`). npm / yarn fallbacks are fine but come after — or in a separate block introduced as a fallback. The pre-commit `scanDocsPnpmFirst` scanner emits a warning (not a hard fail) for `.md` / `.mdx` blocks that lead with npm or yarn without a pnpm leader. Suppress per-block with `socket-hook: allow pnpm-first` (HTML comment above the fence or any line inside it).
+
+## New dependencies + soak
+
+Every new dep added to `package.json` runs a Socket-score check at edit time; low-scoring deps block (enforced by `.claude/hooks/check-new-deps/`). The 7-day `minimumReleaseAge` soak is intentional malware protection; never add to `pnpm-workspace.yaml` `minimumReleaseAge.exclude[]` (bypass `Allow minimumReleaseAge bypass` for emergency CVE patches; enforced by `.claude/hooks/minimum-release-age-guard/`).
+
+Every per-package soak-bypass entry (the `'pkg@1.2.3'` exact-pin form) MUST carry a `# published: YYYY-MM-DD | removable: YYYY-MM-DD` annotation as the LAST comment line above the bullet — `published` is the version's npm publish date, `removable` is `published + 7d` so a periodic cleanup can drop entries that no longer need the bypass (enforced by `.claude/hooks/soak-exclude-date-annotation-guard/` at edit time + `scripts/check-soak-exclude-dates.mts` at commit time).
+
+Vitest `include` globs must not match `node:test` files — mismatched runners produce confusing "no test suite found" errors (enforced by `.claude/hooks/vitest-include-vs-node-test-guard/`).
+
+## Bundler
+
+`rolldown`, NOT `esbuild`. The fleet standardizes on rolldown for direct bundling (see `template/.config/rolldown/`). Transitive esbuild deps (e.g. via vitest) are unavoidable today — the rule is no _new direct_ esbuild use anywhere in the fleet.
+
+## Backward compatibility
+
+FORBIDDEN to maintain. Actively remove when encountered.
+
 ## `packageManager` field
 
 Bare `pnpm@<version>` is correct for pnpm 11+. pnpm 11 stores the integrity hash in `pnpm-lock.yaml` (separate YAML document) instead of inlining it in `packageManager`; on install pnpm rewrites the field to its bare form and migrates legacy inline hashes automatically. Don't fight the strip. Older repos may still ship `pnpm@<version>+sha512.<hex>` — leave it; pnpm migrates on first install. The lockfile is the integrity source of truth.

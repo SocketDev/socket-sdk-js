@@ -263,6 +263,15 @@
             "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/extension-build-current-guard/index.mts"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/enterprise-push-property-reminder/index.mts"
+          }
+        ]
       }
     ],
     "Stop": [
