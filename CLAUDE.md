@@ -29,15 +29,13 @@ Apply in: worktree creation, base-ref resolution for `git diff`/`git rev-list`, 
 
 ### Public-surface hygiene
 
-🚨 The rules apply even when hooks are not installed (enforced by `.claude/hooks/{private-name-guard,public-surface-reminder,release-workflow-guard}/`):
+🚨 Never write a real customer / company name, private repo / internal project name, or Linear ref (`SOC-123`, `ENG-456`, Linear URLs) into a commit, PR, issue, comment, or release note. No denylist — a denylist is itself a leak (enforced by `.claude/hooks/{private-name-guard,public-surface-reminder}/`).
 
-- **Real customer / company names** — never write one into a commit, PR, issue, comment, or release note. Replace with `Acme Inc` or rewrite the sentence to not need the reference. (No enumerated denylist exists — a denylist is itself a leak.)
-- **Private repos / internal project names** — never mention. Omit the reference entirely; don't substitute "an internal tool" — the placeholder is a tell.
-- **Linear refs** — never put `SOC-123`/`ENG-456`/Linear URLs in code, comments, or PR text. Linear lives in Linear.
-- **Publish / release / build-release workflows** — never `gh workflow run|dispatch`. The user runs them manually. Bypass: either `gh workflow run -f dry-run=true` (workflow must declare `dry-run:` input, no force-prod override set) OR `Allow workflow-dispatch bypass: <workflow>` typed verbatim — one phrase authorizes one dispatch. `workflow_dispatch.inputs` keys are kebab-case (`dry-run`, `build-mode`); snake_case silently fails the bypass.
-- **Workflow YAML rules** — `uses: <action>@<40-char-sha>` lines need a trailing `# <tag> (YYYY-MM-DD)` comment (enforced by `.claude/hooks/workflow-uses-comment-guard/`). Workflow `run:` blocks with `gh ... --body "..."` break YAML on multi-line markdown; always `--body-file <path>` (enforced by `.claude/hooks/workflow-yaml-multiline-body-guard/`; bypass: `Allow workflow-yaml-multiline-body bypass`). Edits to `.github/workflows/*.y*ml` auto-lint via local `actionlint` (enforced by `.claude/hooks/actionlint-on-workflow-edit/`).
-- **`pull_request_target` is privileged** — runs in BASE-repo context with secrets. Never combine it with `actions/checkout` of fork head + a step that executes the checked-out code (enforced by `.claude/hooks/pull-request-target-guard/`). Full threat model + safer patterns in [`docs/claude.md/fleet/pull-request-target.md`](docs/claude.md/fleet/pull-request-target.md).
-- **No external issue/PR refs in commit messages or PR bodies.** GitHub auto-links `<owner>/<repo>#<num>` and `https://github.com/<owner>/<repo>/(issues|pull)/<num>` mentions back to the target issue, spamming the maintainer with `added N commits that reference this issue` events. Only SocketDev-owned refs are allowed (`SocketDev/<repo>#<num>` is fine). For upstream maintainer issues, link them in _the PR description prose_ (which doesn't trigger backrefs from commits) or use `[#1203](https://npmx.dev/...)` link form that omits the `owner/repo#` token. Bypass: `Allow external-issue-ref bypass` (enforced by `.claude/hooks/no-external-issue-ref-guard/`).
+🚨 Never `gh workflow run|dispatch` against publish / release / build-release workflows (enforced by `.claude/hooks/release-workflow-guard/`). Bypass: `gh workflow run -f dry-run=true` (workflow declares `dry-run:` input) OR `Allow workflow-dispatch bypass: <workflow>` typed verbatim. `workflow_dispatch.inputs` keys are kebab-case.
+
+🚨 **Workflow YAML invariants:** SHA-pinned `uses:` lines need a `# <tag> (YYYY-MM-DD)` comment; `run:` blocks with multi-line `gh ... --body "..."` break YAML — always `--body-file <path>`; `pull_request_target` is privileged and never combines with fork-head checkout + execute. External-issue refs (`<owner>/<repo>#<num>`) in commits / PR bodies spam upstream maintainers — only `SocketDev/<repo>#<num>` is allowed inline; link upstream refs in PR _description prose_ instead. Bypass: `Allow external-issue-ref bypass`.
+
+Full ruleset + threat model + bypass surface in [`docs/claude.md/fleet/public-surface-hygiene.md`](docs/claude.md/fleet/public-surface-hygiene.md) and [`docs/claude.md/fleet/pull-request-target.md`](docs/claude.md/fleet/pull-request-target.md).
 
 ### Canonical README
 
@@ -45,14 +43,9 @@ Apply in: worktree creation, base-ref resolution for `git diff`/`git rev-list`, 
 
 ### Commits & PRs
 
-- Conventional Commits `<type>(<scope>): <description>` — NO AI attribution.
-- **When adding commits to an OPEN PR**, update the PR title and description to match the new scope. Use `gh pr edit <num> --title … --body …`. The reviewer should know what's in the PR without scrolling commits.
-- **Replying to Cursor Bugbot** — reply on the inline review-comment thread, not as a detached PR comment: `gh api repos/{owner}/{repo}/pulls/{pr}/comments/{comment_id}/replies -X POST -f body=…`.
-- **Backing out an unpushed commit** — prefer `git reset --soft HEAD~1` (or `git rebase -i HEAD~N`) over `git revert`. Revert commits are for changes already on origin; for local-only commits they just pollute history (enforced by `.claude/hooks/prefer-rebase-over-revert-guard/`).
-- **No empty commits.** Never use `git commit --allow-empty`, and never use `git cherry-pick --allow-empty` / `--keep-redundant-commits` to replay a no-content commit forward. Empty commits exist almost exclusively as "anchor" tags for releases, but the right place to anchor a release is on the actual commit that bumped `package.json` + `CHANGELOG.md` — moving the tag forward (`git tag -f vX.Y.Z`) is the correct mechanism. Empty commits pollute `git log` and break tooling that expects commits to have content (CHANGELOG generators, `git log -p`, blame). Bypass: `Allow empty-commit bypass` (enforced by `.claude/hooks/no-empty-commit-guard/`).
-- **Commit author** — every commit must use the user's canonical GitHub identity, not a work email or a substituted name. Canonical lives in `~/.claude/git-authors.json` (or global git config); aliases in `aliases[]` are also accepted (enforced by `.claude/hooks/commit-author-guard/`).
-- **No AI attribution in drafts either** — when drafting a commit body or PR description, omit "Generated with Claude", "Co-Authored-By: Claude", and robot-emoji-tagged lines (enforced by `.claude/hooks/commit-pr-reminder/`).
-- **Push policy: push, fall back to PR.** Default to `git push origin <branch>` on the current branch (typically `main`). If the push is rejected — branch protection requires a PR, conflicts, signature/identity rejection — open a PR via `gh pr create` against the default base. Don't pre-open PRs "to be safe"; the direct-push happy path is faster for the operator. Don't force-push to recover; resolve the actual cause (rebase to fix conflicts, fix the commit identity, etc.). Reminder fires when `gh pr create` is invoked without an explicit user directive ("PR this", "open a PR") (enforced by `.claude/hooks/pr-vs-push-default-reminder/`).
+🚨 Conventional Commits `<type>(<scope>): <description>`, lowercase type, NO AI attribution (enforced by `.claude/hooks/commit-message-format-guard/` + draft-time reminder `.claude/hooks/commit-pr-reminder/`; bypasses `Allow commit-format bypass` / `Allow ai-attribution bypass`). Push policy: push direct → fall back to PR only on rejection (no pre-emptive PRs, no force-pushes). When adding commits to an OPEN PR, update the title + description via `gh pr edit` to match the new scope.
+
+Full ruleset — open-PR edits, Bugbot inline replies, rebase-over-revert for unpushed commits, no-empty-commits, commit-author canonical identity, scan-label scrubbing, enterprise-ruleset bypass — in [`docs/claude.md/fleet/commit-cadence-format.md`](docs/claude.md/fleet/commit-cadence-format.md).
 
 ### Squash-history opt-in
 
@@ -68,14 +61,13 @@ Some fleet repos squash the default branch on a cadence — currently socket-add
 
 ### Tooling
 
-- **Package manager**: `pnpm`. Run scripts via `pnpm run foo --flag`, never `foo:bar`. After `package.json` edits, `pnpm install`.
-- **Docs lead with pnpm.** User-facing install commands in fenced code blocks must show the pnpm form first (`pnpm install <pkg>`, `pnpm add <pkg>`). npm / yarn fallbacks are fine but come after — or in a separate block introduced as a fallback. The pre-commit `scanDocsPnpmFirst` scanner emits a warning (not a hard fail) for `.md` / `.mdx` blocks that lead with npm or yarn without a pnpm leader. Suppress per-block with `socket-hook: allow pnpm-first` (HTML comment above the fence or any line inside it).
-- 🚨 NEVER use `npx`, `pnpm dlx`, or `yarn dlx` — use `pnpm exec <package>` or `pnpm run <script>` # socket-hook: allow npx
-- 🚨 NEVER pass `--experimental-strip-types` to Node (enforced by `.claude/hooks/no-experimental-strip-types-guard/`).
-- **New dependencies** — every new dep added to `package.json` runs a Socket-score check at edit time; low-scoring deps block (enforced by `.claude/hooks/check-new-deps/`). The 7-day `minimumReleaseAge` soak is intentional malware protection; never add to `pnpm-workspace.yaml` `minimumReleaseAge.exclude[]` (bypass `Allow minimumReleaseAge bypass` for emergency CVE patches; enforced by `.claude/hooks/minimum-release-age-guard/`). Every per-package soak-bypass entry (the `'pkg@1.2.3'` exact-pin form) MUST carry a `# published: YYYY-MM-DD | removable: YYYY-MM-DD` annotation as the LAST comment line above the bullet — `published` is the version's npm publish date, `removable` is `published + 7d` so a periodic cleanup can drop entries that no longer need the bypass (enforced by `.claude/hooks/soak-exclude-date-annotation-guard/` at edit time + `scripts/check-soak-exclude-dates.mts` at commit time). Vitest `include` globs must not match `node:test` files — mismatched runners produce confusing "no test suite found" errors (enforced by `.claude/hooks/vitest-include-vs-node-test-guard/`).
-- **Bundler**: `rolldown`, NOT `esbuild`. The fleet standardizes on rolldown for direct bundling (see `template/.config/rolldown/`). Transitive esbuild deps (e.g. via vitest) are unavoidable today — the rule is no _new direct_ esbuild use anywhere in the fleet.
-- **Backward compatibility** — FORBIDDEN to maintain. Actively remove when encountered.
-- Full ruleset (packageManager field, `.config/` placement, `.mts` runners, soak time, shallow submodules, monorepo `engines.node`, `npm-run-all2` + `node --run` opt-in) in [`docs/claude.md/fleet/tooling.md`](docs/claude.md/fleet/tooling.md).
+🚨 **Package manager: `pnpm`** — scripts via `pnpm run foo --flag` (never `foo:bar`); after `package.json` edits, `pnpm install`. NEVER `npx` / `pnpm dlx` / `yarn dlx` — use `pnpm exec` or `pnpm run` # socket-hook: allow npx. NEVER `--experimental-strip-types` to Node (enforced by `.claude/hooks/no-experimental-strip-types-guard/`).
+
+🚨 **Bundler: rolldown, not esbuild.** Backward compatibility is FORBIDDEN — actively remove when encountered.
+
+🚨 **New deps Socket-scored at edit time** (enforced by `.claude/hooks/check-new-deps/`); the 7-day `minimumReleaseAge` soak is malware protection (bypass `Allow minimumReleaseAge bypass`; enforced by `.claude/hooks/minimum-release-age-guard/`). Soak-bypass entries need `# published: YYYY-MM-DD | removable: YYYY-MM-DD` annotations (enforced by `.claude/hooks/soak-exclude-date-annotation-guard/`).
+
+Full ruleset — docs lead with pnpm, `packageManager` field, `.config/` placement, `.mts` runners, monorepo `engines.node`, vitest/node-test runner separation, `npm-run-all2` + `node --run` opt-in — in [`docs/claude.md/fleet/tooling.md`](docs/claude.md/fleet/tooling.md).
 
 ### Claude Code plugin pins
 
@@ -112,6 +104,18 @@ The principle: the working tree at end-of-turn should match the user's mental mo
 ### Smallest chunks, land ASAP
 
 🚨 Smallest possible chunks; land ASAP via direct-push-to-main. Don't accumulate work across worktrees or long-lived branches — each unmerged branch is in-flight state that has to be rebased and reconciled later. Same instinct that flags _Drift watch_ across fleet repos applies to in-flight branches in one repo. Past incident: 4 sibling wheelhouse worktrees (2 dead, 2 needing rebase) burned a turn on consolidation. **How to apply:** finish a branch the session it's opened; consolidate any pile-up at session start before resuming the queue.
+
+### Commit cadence & message format
+
+🚨 Commit early, commit often. Every commit follows [Conventional Commits 1.0](https://www.conventionalcommits.org/en/v1.0.0/): lowercase `<type>[(scope)][!]: <description>` with type ∈ { feat, fix, chore, docs, style, refactor, perf, test, build, ci, revert }. No AI attribution anywhere. Bypass: `Allow commit-format bypass` or `Allow ai-attribution bypass`. Full rationale + examples + edge cases in [`docs/claude.md/fleet/commit-cadence-format.md`](docs/claude.md/fleet/commit-cadence-format.md) (enforced by `.claude/hooks/commit-message-format-guard/` at commit time + `.claude/hooks/commit-pr-reminder/` at draft time).
+
+### Don't disable lint rules
+
+🚨 Adding `"rule-name": "off"` (or `"warn"`) to any oxlint/eslint config weakens the gate for every file matching that selector. Fix the underlying code instead. For genuine single-call-site exemptions, use `oxlint-disable-next-line <rule> -- <reason>` on the specific line. Bypass: `Allow disable-lint-rule bypass`. Full rationale + recipes in [`docs/claude.md/fleet/no-disable-lint-rule.md`](docs/claude.md/fleet/no-disable-lint-rule.md) (enforced by `.claude/hooks/no-disable-lint-rule-guard/`).
+
+### Extension build hygiene
+
+🚨 The trusted-publisher Chrome extension at `tools/trusted-publisher-extension/` is bundled via rolldown. Commits that touch `tools/trusted-publisher-extension/src/**` MUST be paired with a successful `pnpm --filter @socketsecurity/trusted-publisher-extension build` so the bundled output stays loadable. Bypass: `Allow extension-build-current bypass`. (Enforced by `.claude/hooks/extension-build-current-guard/`.)
 
 ### Untracked-by-default for vendored / build-copied trees
 
@@ -178,6 +182,10 @@ Soft cap **500 lines**, hard cap **1000 lines** per source file. Past those, spl
 
 Full rationale + cascade behavior in [`docs/claude.md/fleet/lint-rules.md`](docs/claude.md/fleet/lint-rules.md).
 
+### c8 / v8 coverage ignore directives
+
+🚨 `/* c8 ignore next N */` is broken for multi-line bodies — the c8/v8 reporter counts physical lines, not statements, so a `catch { logger.warn(...); return undefined }` body is partly ignored and partly reported as uncovered. Always use `/* c8 ignore start - <reason> */` ... `/* c8 ignore stop */` brackets around the construct. Single-line uses (`/* c8 ignore next */ return undefined`) are fine. **Why:** Past incident, 2026-05-24 — socket-lib coverage jumped 98.9% → 99.15% just by rewriting nine files' worth of `next N` directives to start/stop blocks; the defensive arms had been correctly marked all along, the reporter just wasn't honoring the directive form. Full pattern catalog + diagnosis in [`docs/claude.md/fleet/c8-ignore-directives.md`](docs/claude.md/fleet/c8-ignore-directives.md).
+
 ### 1 path, 1 reference
 
 A path is constructed exactly once. Everywhere else references the constructed value.
@@ -198,6 +206,8 @@ When a regex matches against a path string, **normalize the path first** with `n
 ### Background Bash
 
 Never use `Bash(run_in_background: true)` for test / build commands (`vitest`, `pnpm test`, `pnpm build`, `tsgo`). Backgrounded runs you don't poll get abandoned and leak Node workers. Background mode is for dev servers and long migrations whose results you'll consume. If a run hangs, kill it: `pkill -f "vitest/dist/workers"`. The `.claude/hooks/stale-process-sweeper/` `Stop` hook reaps true orphans as a safety net.
+
+`.DS_Store` files created by Finder mid-session are swept at turn-end by `.claude/hooks/sweep-ds-store/` (excludes `.git/` and `node_modules/`). Silent on the happy path; logs sweep count when files are found. No bypass — `.DS_Store` is never wanted in a repo (enforced by `.claude/hooks/sweep-ds-store/`).
 
 When writing or extending a Bash-allowlist hook, prefer **AST-based parsing** over regex matchers when the rule needs to reason about command structure (chains, subshells, redirects, command substitution). Regex matchers approve `git $(echo rm) foo.txt` because the surface looks like `git`; an AST parser sees the substitution and blocks. Pure-syntactic rules (binary name only) can stay regex; structure-sensitive rules (no writes to `.env*`, no destructive chains, no `$(…)` containing destructive verbs) need a parser. Pattern reference: https://github.com/ldayton/Dippy.
 
@@ -224,15 +234,13 @@ Use `isError` / `isErrnoException` / `errorMessage` / `errorStack` from `@socket
 
 ### Token hygiene
 
-🚨 Never emit the raw value of any secret to tool output, commits, comments, or replies; when blocked, rewrite — don't bypass. Redact `token` / `jwt` / `api_key` / `secret` / `password` / `authorization` fields when citing API responses (enforced by `.claude/hooks/token-guard/`). Long-lived CLI logins are auto-rotated to limit stale-token exposure (enforced by `.claude/hooks/auth-rotation-reminder/`).
+🚨 Never emit a raw secret to tool output, commits, comments, or replies; when blocked, rewrite — don't bypass. Redact `token` / `jwt` / `api_key` / `secret` / `password` / `authorization` fields when citing API responses (enforced by `.claude/hooks/token-guard/`). Long-lived CLI logins auto-rotate (enforced by `.claude/hooks/auth-rotation-reminder/`).
 
-**Tokens belong in env vars (CI) or the OS keychain (dev local) — nowhere else.** Never in `.env` / `.env.local` / `.envrc` / `~/.sfw.config` / `~/.config/socket/*` / any dotfile. Dotfiles leak via accidental commits, file-indexers, backup clients, shell-history dumps. Initial setup: `node .claude/hooks/setup-security-tools/install.mts` (prompts + persists via macOS Keychain / Linux libsecret / Windows CredentialManager). **Rotation: `node .claude/hooks/setup-security-tools/install.mts --rotate`** — TTY-muted prompt, overwrites the keychain entry unconditionally, ignores stale dotfile / env-var lookup. This is the ONLY correct rotator. Suggesting any other path (`socket login`, hand-editing `~/.sfw.config`, `export SOCKET_API_TOKEN=…` in a shell rc) is a token-hygiene violation. The Stop-hook flags broken sfw shims, free-vs-enterprise edition drift, and 401-rejection patterns from the last assistant turn (enforced by `.claude/hooks/setup-security-tools/`, `.claude/hooks/no-token-in-dotenv-guard/`).
+🚨 **Tokens live in env vars (CI) or the OS keychain (dev local) — never in `.env*` / `.envrc` / `~/.sfw.config` / `~/.config/socket/*` / any dotfile** (enforced by `.claude/hooks/no-token-in-dotenv-guard/`). Setup + rotation is `node .claude/hooks/setup-security-tools/install.mts [--rotate]` — the ONLY correct rotator. `socket login`, hand-editing `~/.sfw.config`, or `export SOCKET_API_TOKEN=…` in a shell-rc are token-hygiene violations.
 
-🚨 **Never call platform keychain CLIs directly from Bash to read a token.** `security find-generic-password` (macOS), `secret-tool lookup` (Linux), `Get-StoredCredential` (Windows PowerShell), `keyring get` (cross-platform) all surface a UI auth prompt on the user's screen — and that prompt fires _per call_, so a hook chain that reads the keychain three times costs three prompts. The token is already cached in process memory after the first resolution (see [`api-token.mts`](.claude/hooks/setup-security-tools/lib/api-token.mts) module-scope cache); read it from `findApiToken()` or `process.env.SOCKET_API_KEY` / `SOCKET_API_TOKEN` instead. Writes (`security add-generic-password`, `secret-tool store`, `New-StoredCredential`) and deletes are allowed — they happen during operator-driven setup / rotation, never on hot paths. Bypass: `Allow blind-keychain-read bypass` (enforced by `.claude/hooks/no-blind-keychain-read-guard/`).
+🚨 **Never call platform keychain CLIs from Bash to read** (`security find-generic-password`, `secret-tool lookup`, `Get-StoredCredential`, `keyring get`). They surface a UI prompt per call and the token is already cached in-process — read `findApiToken()` or `process.env.SOCKET_API_KEY` / `SOCKET_API_TOKEN` instead. Writes/deletes are allowed (operator-driven setup/rotation). Bypass: `Allow blind-keychain-read bypass` (enforced by `.claude/hooks/no-blind-keychain-read-guard/`).
 
-**Socket API token env var** — fleet docs / workflow inputs / `.env.example` use the forward-canonical name `SOCKET_API_TOKEN`. For local-dev (keychain + `~/.zshenv`) the install hook stores under and exports `SOCKET_API_KEY` because it's universally supported across every Socket tool (CLI, SDK, sfw, fleet scripts) — one env var, no fallback chain. `SOCKET_API_TOKEN` is accepted as a secondary read; `SOCKET_SECURITY_API_TOKEN` / `SOCKET_SECURITY_API_KEY` remain accepted aliases for one cycle. Don't confuse any of these with `SOCKET_CLI_API_TOKEN` (socket-cli's separate setting).
-
-Full spec (hook details, personal-path placeholders, cross-repo path references) in [`docs/claude.md/fleet/token-hygiene.md`](docs/claude.md/fleet/token-hygiene.md).
+**Socket API token env var:** fleet docs / workflow inputs / `.env.example` use the forward-canonical `SOCKET_API_TOKEN`; local-dev (keychain + `~/.zshenv`) uses `SOCKET_API_KEY` (universal across all Socket tools, one slot, no fallback chain). Don't confuse with `SOCKET_CLI_API_TOKEN` (socket-cli's separate setting). Full spec — scoped install entrypoints, personal-path placeholders, cross-repo path rules — in [`docs/claude.md/fleet/token-hygiene.md`](docs/claude.md/fleet/token-hygiene.md).
 
 ### Agents & skills
 
@@ -253,68 +261,10 @@ Hooks that gate specific external tools — they only fire when those tools appe
 
 ## 🏗️ SDK-Specific
 
-### Layout
+Socket SDK for JavaScript/TypeScript — programmatic access to Socket.dev security analysis. Layout: `src/socket-sdk-class.ts` (API methods), `src/http-client.ts` (request/response), `src/types.ts`, `src/utils.ts`, `src/constants.ts`. Build: `pnpm run build` (esbuild → ESM, node18+); test: `pnpm test`; coverage: `pnpm run cover` (thresholds ≥99%).
 
-Socket SDK for JavaScript/TypeScript — programmatic access to Socket.dev security analysis.
+🚨 **HTTP: never `fetch()` — use `createGetRequest` / `createRequestWithJson` from `src/http-client.ts`.** `fetch()` bypasses the SDK's HTTP stack (retries, timeouts, hooks, agent config) and isn't interceptable by nock. For external URLs (e.g. firewall API), pass a different `baseUrl` to `createGetRequest`.
 
-- `src/index.ts` — entry
-- `src/socket-sdk-class.ts` — SDK class with all API methods
-- `src/http-client.ts` — request/response handling
-- `src/types.ts` — TypeScript definitions
-- `src/utils.ts` — shared utilities
-- `src/constants.ts` — constants
+🚨 **Conventions:** `.mts` extension, mandatory `@fileoverview` headers, FORBIDDEN `"use strict"` in `.mjs`/`.mts` (ES modules are strict). Semicolons (this is the one Socket project that uses them). No `any` — `unknown` or specific types. `logger.error('')` / `logger.log('')` need the empty string. 🚨 **never** `--` before vitest test paths — runs ALL tests.
 
-### Commands
-
-- Build: `pnpm run build` (`pnpm run build --watch` for dev — 68% faster rebuilds)
-- Test: `pnpm test`
-- Type check: `pnpm run type` ; Lint: `pnpm run lint` ; Check: `pnpm run check`
-- Coverage: `pnpm run cover`
-
-### Config locations
-
-Configs live under `.config/`:
-
-| File                                 | Purpose                            |
-| ------------------------------------ | ---------------------------------- |
-| `tsconfig.json`                      | Main TS config (extends base)      |
-| `.config/tsconfig.base.json`         | Base TS settings                   |
-| `.config/tsconfig.check.json`        | Type checking for `type` command   |
-| `.config/tsconfig.dts.json`          | Declaration generation             |
-| `.config/esbuild.config.mts`         | Build orchestration (ESM, node18+) |
-| `.config/vitest.config.mts`          | Main test config                   |
-| `.config/vitest.config.isolated.mts` | Isolated tests (for `vi.doMock()`) |
-| `.config/vitest.coverage.config.mts` | Shared coverage thresholds (≥99%)  |
-| `.config/isolated-tests.json`        | List of tests requiring isolation  |
-| `.config/taze.config.mts`            | Dependency-update policies         |
-
-### SDK-local conventions
-
-- File extensions: `.mts` for TypeScript modules. **Mandatory** `@fileoverview` headers. **Forbidden**: `"use strict"` in `.mjs`/`.mts` (ES modules are strict).
-- Semicolons: use them (this is the one Socket project that does).
-- No `any`; use `unknown` or specific types.
-- HTTP: 🚨 never `fetch()` — use `createGetRequest` / `createRequestWithJson` from `src/http-client.ts`. `fetch()` bypasses the SDK's HTTP stack (retries, timeouts, hooks, agent config) and isn't interceptable by nock. For external URLs (e.g. firewall API) pass a different `baseUrl` to `createGetRequest`.
-- Logger calls: `logger.error('')` / `logger.log('')` must include the empty string.
-- Sorting: type properties — required first then optional, alphabetical within groups. Class members: 1) private properties, 2) private methods, 3) public methods, alphabetical. Object properties + destructuring: alphabetical (except semantic ordering). `new Set([…])` literals: alphanumeric.
-
-### Testing
-
-- Two vitest configs: `.config/vitest.config.mts` (default), `.config/vitest.config.isolated.mts` (full process isolation for `vi.doMock()`).
-- Structure: `test/` for tests, `test/utils/` for shared helpers. Descriptive names like `socket-sdk-upload-manifest.test.mts`.
-- Recommended helper: `setupTestClient('test-api-token', { retries: 0 })` returns a getter; combine with `getClient()` per test. Also: `setupTestEnvironment()` (nock only), `createTestClient()` (client only), `isCoverageMode` flag. See `test/utils/environment.mts`.
-- Mock HTTP with nock (auto-cleaned in beforeEach/afterEach). Test success + error paths, cross-platform path handling.
-- Run all: `pnpm test`. Specific: `pnpm test <file>` (glob support). 🚨 **never** `--` before test paths — that runs ALL tests.
-- Test style: functional over source-scanning. Never read source files and assert on contents.
-
-### CI
-
-- 🚨 Mandatory: `SocketDev/socket-registry/.github/workflows/ci.yml@<full-sha> # main`.
-- Custom runner: `scripts/test.mts` with glob expansion.
-- Memory: auto heap (CI 8 GB, local 4 GB).
-- CI uses published npm packages, not local.
-
-### SDK notes
-
-- Windows compatibility matters — test path handling.
-- Reuse utilities from `@socketsecurity/registry` where available.
-- Package detection: use `existsSync()` not `fs.access()`.
+Full layout, command catalog, config-file table, sorting rules, testing helpers, CI mandate, SDK notes in [`docs/claude.md/repo/architecture.md`](docs/claude.md/repo/architecture.md).
