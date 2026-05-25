@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       dist-tag:
-        description: 'npm dist-tag (latest, next, beta, canary, backport, etc.)'
+        description: 'Dist-tag (latest, next, beta, canary, backport, etc.)'
         required: false
         default: 'latest'
         type: string
