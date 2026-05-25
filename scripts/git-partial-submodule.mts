@@ -2,22 +2,17 @@
 // max-file-lines: legitimate -- single-purpose CLI port; argparse + 4 subcommands; splitting fractures the flow
 
 /**
- * @fileoverview Add / clone / save-sparse / restore-sparse partial submodules.
- *
- * Ported from Reedbeta/git-partial-submodule (Apache-2.0):
- * https://github.com/Reedbeta/git-partial-submodule
- *
- * Lets the fleet declare a `sparse-checkout` field in `.gitmodules` and have
- * partial clones (`--filter=blob:none --sparse`) honor it on init/clone.
- * Vanilla `git submodule update` ignores the field; this script reads it.
- *
- * Usage:
- *   node scripts/git-partial-submodule.mts add [--branch B] [--name N] [--sparse] <url> <path>
- *   node scripts/git-partial-submodule.mts clone [path...]
- *   node scripts/git-partial-submodule.mts save-sparse [path...]
- *   node scripts/git-partial-submodule.mts restore-sparse [path...]
- *
- * Requires git >= 2.27 (--filter + --sparse on git clone).
+ * @file Add / clone / save-sparse / restore-sparse partial submodules. Ported
+ *   from Reedbeta/git-partial-submodule (Apache-2.0):
+ *   https://github.com/Reedbeta/git-partial-submodule Lets the fleet declare a
+ *   `sparse-checkout` field in `.gitmodules` and have partial clones
+ *   (`--filter=blob:none --sparse`) honor it on init/clone. Vanilla `git
+ *   submodule update` ignores the field; this script reads it. Usage: node
+ *   scripts/git-partial-submodule.mts add [--branch B] [--name N] [--sparse]
+ *   <url> <path> node scripts/git-partial-submodule.mts clone [path...] node
+ *   scripts/git-partial-submodule.mts save-sparse [path...] node
+ *   scripts/git-partial-submodule.mts restore-sparse [path...] Requires git >=
+ *   2.27 (--filter + --sparse on git clone).
  */
 
 import { existsSync, mkdirSync, promises as fs, readdirSync } from 'node:fs'
@@ -80,8 +75,8 @@ Commands:
 `
 
 /**
- * Run git, exit non-zero on failure unless code is in `okReturnCodes`.
- * Returns the spawn result, or undefined on dry-run.
+ * Run git, exit non-zero on failure unless code is in `okReturnCodes`. Returns
+ * the spawn result, or undefined on dry-run.
  */
 async function runGit(
   opts: CommonOpts,
@@ -105,15 +100,17 @@ async function runGit(
 }
 
 /**
- * Run git, capture stdout. Ignores verbose / dry-run (query-only).
- * Returns trimmed stdout, or exits on non-OK return code.
+ * Run git, capture stdout. Ignores verbose / dry-run (query-only). Returns
+ * trimmed stdout, or exits on non-OK return code.
  */
 async function readGitOutput(
   gitArgs: string[],
   options: { okReturnCodes?: number[] } = {},
 ): Promise<string> {
   const okReturnCodes = options.okReturnCodes ?? [0]
-  const result = await spawn('git', gitArgs, { stdio: ['inherit', 'pipe', 'inherit'] })
+  const result = await spawn('git', gitArgs, {
+    stdio: ['inherit', 'pipe', 'inherit'],
+  })
   const code = result.code ?? 0
   if (!okReturnCodes.includes(code)) {
     logger.error(`Git command failed: git ${gitArgs.join(' ')}`)
@@ -149,12 +146,8 @@ async function checkGitVersion(min: [number, number, number]): Promise<void> {
 /**
  * Parse the .gitmodules file at <worktreeRoot>/.gitmodules.
  *
- * Format reminder:
- *   [submodule "<name>"]
- *       path = <path>
- *       url  = <url>
- *       branch = <branch>          (optional)
- *       sparse-checkout = a b c    (our extension; space-separated)
+ * Format reminder: [submodule "<name>"] path = <path> url = <url> branch =
+ * <branch> (optional) sparse-checkout = a b c (our extension; space-separated)
  */
 async function readGitmodules(
   opts: CommonOpts,
@@ -205,8 +198,8 @@ async function readGitmodules(
 }
 
 /**
- * Resolve a user-supplied subpath into a worktree-relative posix path.
- * Git always uses forward slashes in submodule paths.
+ * Resolve a user-supplied subpath into a worktree-relative posix path. Git
+ * always uses forward slashes in submodule paths.
  */
 function toWorktreeRelative(worktreeRoot: string, input: string): string {
   const abs = path.resolve(input)
@@ -224,20 +217,15 @@ async function getRoots(): Promise<{ repoRoot: string; worktreeRoot: string }> {
 }
 
 /**
- * Apply sparse-checkout patterns within a submodule worktree.
- * Patterns are split on whitespace (TODO: support quoted paths).
+ * Apply sparse-checkout patterns within a submodule worktree. Patterns are
+ * split on whitespace (TODO: support quoted paths).
  */
 async function applySparsePatterns(
   opts: CommonOpts,
   submoduleWorktreeRoot: string,
   patterns: string,
 ): Promise<void> {
-  await runGit(opts, [
-    '-C',
-    submoduleWorktreeRoot,
-    'sparse-checkout',
-    'init',
-  ])
+  await runGit(opts, ['-C', submoduleWorktreeRoot, 'sparse-checkout', 'init'])
   await runGit(opts, [
     '-C',
     submoduleWorktreeRoot,
@@ -474,12 +462,7 @@ async function cmdSaveSparse(opts: SaveOrRestoreOpts): Promise<void> {
     }
     const sparseEnabled = (
       await readGitOutput(
-        [
-          '-C',
-          submoduleWorktreeRoot,
-          'config',
-          'core.sparseCheckout',
-        ],
+        ['-C', submoduleWorktreeRoot, 'config', 'core.sparseCheckout'],
         { okReturnCodes: [0, 1] },
       )
     ).trim()

@@ -26,11 +26,13 @@ Annotation lives in each repo's `.gitmodules` with the pattern `# test262-YYYY.M
 **An allowlist entry is ONLY for non-parser test fails.** Anything a parser should handle MUST NOT be allowlisted — it must be fixed in the parser. This is strict; the runners enforce it via design choices below.
 
 What counts as "non-parser":
+
 - **Unimplemented TC39 feature** — the proposal is at Stage 3+ but we haven't ported the grammar yet (decorators, source-phase imports). Goes in `test262-config/test262.unsupported-features` keyed on the TC39 feature name (NOT a test path).
 - **Runner / harness bug** — the test runner itself produces a false signal (e.g. async-throws semantics, error-name matching). Fix the runner, don't allow-list the symptom.
 - **Runtime-only test** — the test exercises a runtime API (`Reflect.*`, `Temporal.*`) that the parser-conformance run can't evaluate. The runners skip these by classification, not per-path allowlist.
 
 What does NOT count and must be fixed in the parser:
+
 - "Parser rejects valid input." Fix the parser.
 - "Parser accepts invalid input." Fix the parser.
 - "Parser produces wrong AST shape." Fix the parser.
@@ -40,11 +42,11 @@ If you feel tempted to add a per-test-path allowlist entry, the answer is almost
 
 ## Canonical runners per repo
 
-| Repo                                          | Runner                                     | Skip config                                   |
-| --------------------------------------------- | ------------------------------------------ | --------------------------------------------- |
-| ultrathink/packages/acorn (multi-lane driver) | `test/test262-compare.mts`                 | per-lane runner config (inherits unsupported-features) |
-| ultrathink/packages/acorn (per-lane)          | `lang/<lane>/scripts/test262.mts`          | `test262-config/test262.unsupported-features` (feature-name-keyed) |
-| ultrathink/packages/test262-parser-runner     | `bin/test262-parser-runner.mts`            | passed via flags                              |
+| Repo                                          | Runner                                     | Skip config                                                                                                            |
+| --------------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| ultrathink/packages/acorn (multi-lane driver) | `test/test262-compare.mts`                 | per-lane runner config (inherits unsupported-features)                                                                 |
+| ultrathink/packages/acorn (per-lane)          | `lang/<lane>/scripts/test262.mts`          | `test262-config/test262.unsupported-features` (feature-name-keyed)                                                     |
+| ultrathink/packages/test262-parser-runner     | `bin/test262-parser-runner.mts`            | passed via flags                                                                                                       |
 | socket-btm/packages/temporal-infra            | `test/scripts/test262-temporal-runner.mts` | `test262-config/test262.allowlist` (Temporal-only path allowlist; reviewed manually for non-parser-fail justification) |
 
 ## Invocation patterns

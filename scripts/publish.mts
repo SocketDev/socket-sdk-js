@@ -1,48 +1,32 @@
 /**
- * @file Fleet-canonical publish runner. Two modes, no others.
+ * @file Fleet-canonical publish runner. Two modes, no others. --staged Upload
+ *   this package's tarball to npm staging via `pnpm stage publish`. Designed to
+ *   run in CI under the OIDC trusted-publisher token. Nothing publicly visible
+ *   until --approve runs. Add `--provenance` automatically when GITHUB_ACTIONS
+ *   is set. --approve Interactive multi-select over the user's currently-
+ *   staged packages, then batch `pnpm stage approve <id>` with a single shared
+ *   2FA OTP. Designed to run locally. OTP resolution order:
  *
- *   --staged   Upload this package's tarball to npm staging via
- *              `pnpm stage publish`. Designed to run in CI under the
- *              OIDC trusted-publisher token. Nothing publicly visible
- *              until --approve runs. Add `--provenance` automatically
- *              when GITHUB_ACTIONS is set.
- *
- *   --approve  Interactive multi-select over the user's currently-
- *              staged packages, then batch `pnpm stage approve <id>`
- *              with a single shared 2FA OTP. Designed to run locally.
- *              OTP resolution order:
- *                1. `--otp <code>` flag (CI / scripted use).
- *                2. Interactive `password` prompt (lib/stdio/prompts).
- *                3. Empty prompt input → pnpm's per-call web-OTP flow
- *                   (registry challenge opens a browser window to
- *                   npmjs.com per approve call).
- *
- *   --dry-run  Forwarded to `pnpm stage publish --dry-run` (staged)
- *              or used to preview the approve selection without
- *              calling stage approve (--approve).
- *
- *   The split is a hard requirement of npm's staged-publish flow:
- *   the stage upload uses an OIDC token from CI; the approve step
- *   requires human 2FA. Combining them in one mode would either
- *   leak the OTP into CI logs or require a human at the CI keyboard.
- *
- *   There is **no direct-publish path**. Every release goes through
- *   staging so a botched upload (wrong file, wrong checksum, wrong
- *   version) can be `pnpm stage reject`'d server-side before anything
- *   becomes publicly visible.
- *
- *   Repos with bespoke publish pipelines (socket-addon's 9-package
- *   OIDC + .node verification, socket-registry's monorepo
- *   package-npm-publish delegation, etc.) keep their own publish.mts
- *   and don't adopt this canonical version. Repos with simple
- *   single-package publishing consume this one byte-identical via
- *   the sync-scaffolding cascade.
+ *   1. `--otp <code>` flag (CI / scripted use).
+ *   2. Interactive `password` prompt (lib/stdio/prompts).
+ *   3. Empty prompt input → pnpm's per-call web-OTP flow (registry challenge opens
+ *      a browser window to npmjs.com per approve call). --dry-run Forwarded to
+ *      `pnpm stage publish --dry-run` (staged) or used to preview the approve
+ *      selection without calling stage approve (--approve). The split is a hard
+ *      requirement of npm's staged-publish flow: the stage upload uses an OIDC
+ *      token from CI; the approve step requires human 2FA. Combining them in
+ *      one mode would either leak the OTP into CI logs or require a human at
+ *      the CI keyboard. There is **no direct-publish path**. Every release goes
+ *      through staging so a botched upload (wrong file, wrong checksum, wrong
+ *      version) can be `pnpm stage reject`'d server-side before anything
+ *      becomes publicly visible. Repos with bespoke publish pipelines
+ *      (socket-addon's 9-package OIDC + .node verification, socket-registry's
+ *      monorepo package-npm-publish delegation, etc.) keep their own
+ *      publish.mts and don't adopt this canonical version. Repos with simple
+ *      single-package publishing consume this one byte-identical via the
+ *      sync-scaffolding cascade.
  */
 
-// oxlint-disable-next-line socket/prefer-async-spawn -- streaming stdio
-// required to forward `pnpm stage publish` (OIDC token exchange) +
-// `pnpm stage approve` (2FA prompt) live output.
-import { spawn } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
@@ -52,11 +36,17 @@ import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
 import { checkbox, password } from '@socketsecurity/lib/stdio/prompts'
 
+import {
+  extractFirstJson,
+  fetchVersionTrustInfo,
+  isAlreadyPublished,
+  runCapture,
+  runInherit,
+} from './publish-shared.mts'
+
 const logger = getDefaultLogger()
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
-const WIN32 = process.platform === 'win32'
-
 interface StageListEntry {
   name?: string
   version?: string
@@ -78,12 +68,16 @@ async function main(): Promise<void> {
   })
 
   if (values['help'] || (!values['staged'] && !values['approve'])) {
-    logger.log('Usage: pnpm publish --staged | --approve [--dry-run] [--otp <code>]')
+    logger.log(
+      'Usage: pnpm publish --staged | --approve [--dry-run] [--otp <code>]',
+    )
     logger.log('')
     logger.log('  --staged             CI: upload to npm staging via OIDC')
     logger.log('  --approve            local: multi-select + 2FA promote')
     logger.log('  --dry-run            simulate; no registry writes')
-    logger.log('  --otp <code>         pre-supply 2FA (skips OTP prompt on --approve)')
+    logger.log(
+      '  --otp <code>         pre-supply 2FA (skips OTP prompt on --approve)',
+    )
     logger.log('  --tag <tag>          dist-tag for --staged (default: latest)')
     process.exitCode = values['help'] ? 0 : 1
     return
@@ -108,11 +102,11 @@ async function main(): Promise<void> {
 /**
  * `--staged` mode: stage this package's tarball.
  *
- * Reads the local package.json for name + version, refuses to stage
- * an already-published version (npm rejects republishes outright; we
- * surface the error before the network call). Runs `pnpm stage publish`
- * with --provenance when GITHUB_ACTIONS is set so the OIDC token gets
- * embedded into the provenance attestation.
+ * Reads the local package.json for name + version, refuses to stage an
+ * already-published version (npm rejects republishes outright; we surface the
+ * error before the network call). Runs `pnpm stage publish` with --provenance
+ * when GITHUB_ACTIONS is set so the OIDC token gets embedded into the
+ * provenance attestation.
  */
 async function runStaged(tag: string, dryRun: boolean): Promise<void> {
   const pkg = readPackageJson()
@@ -120,7 +114,7 @@ async function runStaged(tag: string, dryRun: boolean): Promise<void> {
     `Staging ${pkg.name}@${pkg.version} (tag=${tag})${dryRun ? ' [dry-run]' : ''}`,
   )
 
-  if (await isAlreadyPublished(pkg.name, pkg.version)) {
+  if (await isAlreadyPublished(pkg.name, pkg.version, rootPath)) {
     logger.fail(
       `${pkg.name}@${pkg.version} is already published. Bump the version and try again.`,
     )
@@ -147,7 +141,7 @@ async function runStaged(tag: string, dryRun: boolean): Promise<void> {
     // touching the registry.
     args.push('--dry-run')
   }
-  const code = await runInherit('pnpm', args)
+  const code = await runInherit('pnpm', args, rootPath)
   if (code !== 0) {
     logger.fail(`pnpm stage publish exited ${code}`)
     process.exitCode = code
@@ -165,14 +159,14 @@ async function runStaged(tag: string, dryRun: boolean): Promise<void> {
 }
 
 /**
- * `--approve` mode: list the user's staged packages, multi-select,
- * batch approve with one OTP.
+ * `--approve` mode: list the user's staged packages, multi-select, batch
+ * approve with one OTP.
  *
- * Filters out any staged entries whose name@version is already public
- * (e.g. a re-stage after a partial approve). Empty selection is a
- * no-op. The OTP is read via a hidden-character prompt; a single OTP
- * value is reused across all approve calls in the same batch — npm
- * accepts the same TOTP within its ~30s validity window.
+ * Filters out any staged entries whose name@version is already public (e.g. a
+ * re-stage after a partial approve). Empty selection is a no-op. The OTP is
+ * read via a hidden-character prompt; a single OTP value is reused across all
+ * approve calls in the same batch — npm accepts the same TOTP within its ~30s
+ * validity window.
  */
 async function runApprove(
   dryRun: boolean,
@@ -193,20 +187,26 @@ async function runApprove(
     if (
       entry.name &&
       entry.version &&
-      !(await isAlreadyPublished(entry.name, entry.version))
+      !(await isAlreadyPublished(entry.name, entry.version, rootPath))
     ) {
       eligible.push(entry)
     }
   }
   if (eligible.length === 0) {
-    logger.log(
-      'All staged entries are already published; nothing to approve.',
-    )
+    logger.log('All staged entries are already published; nothing to approve.')
     return
   }
 
+  // Fetch prior-version provenance for each unique package name so the
+  // approver can spot regressions (last public version had provenance
+  // but the staged one's parent name has lost trust metadata between
+  // versions — a workflow drift signal). Cheap: one fetch per unique
+  // name, abbreviated packument (no _npmUser needed; we only check
+  // attestations presence as a proxy for "this name is OIDC-published").
+  const priorProvenance = await fetchPriorProvenanceMap(eligible)
+
   const choices = eligible.map(e => ({
-    name: `${e.name}@${e.version}`,
+    name: `${e.name}@${e.version}${formatPriorProvenance(priorProvenance.get(e.name!))}`,
     value: e.stageId!,
     checked: true,
   }))
@@ -259,7 +259,7 @@ async function runApprove(
       args.push('--otp', otp)
     }
     // eslint-disable-next-line no-await-in-loop
-    const code = await runInherit('pnpm', args)
+    const code = await runInherit('pnpm', args, rootPath)
     if (code === 0) {
       approved += 1
     } else {
@@ -281,13 +281,16 @@ function readPackageJson(): { name: string; version: string } {
 }
 
 /**
- * Resolve all currently-staged packages by parsing `pnpm stage list
- * --json`. The output's first balanced JSON object is the keyed map
- * `<name>@<version>` → entry; we flatten the values and drop entries
- * without a stageId (defensive).
+ * Resolve all currently-staged packages by parsing `pnpm stage list --json`.
+ * The output's first balanced JSON object is the keyed map `<name>@<version>` →
+ * entry; we flatten the values and drop entries without a stageId (defensive).
  */
 async function listStagedPackages(): Promise<StageListEntry[]> {
-  const { stdout } = await runCapture('pnpm', ['stage', 'list', '--json'])
+  const { stdout } = await runCapture(
+    'pnpm',
+    ['stage', 'list', '--json'],
+    rootPath,
+  )
   const json = extractFirstJson(stdout)
   if (!json) {
     return []
@@ -309,84 +312,47 @@ async function listStagedPackages(): Promise<StageListEntry[]> {
   }
 }
 
-async function isAlreadyPublished(
-  name: string,
-  version: string,
-): Promise<boolean> {
-  const { code } = await runCapture('npm', ['view', `${name}@${version}`, 'version'])
-  return code === 0
-}
-
-function extractFirstJson(text: string): string | undefined {
-  const startIdx = text.indexOf('{')
-  if (startIdx === -1) {
-    return undefined
-  }
-  let depth = 0
-  let inString = false
-  let escape = false
-  for (let i = startIdx, { length } = text; i < length; i += 1) {
-    const ch = text[i]!
-    if (escape) {
-      escape = false
-      continue
-    }
-    if (ch === '\\') {
-      escape = true
-      continue
-    }
-    if (ch === '"') {
-      inString = !inString
-      continue
-    }
-    if (inString) {
-      continue
-    }
-    if (ch === '{') {
-      depth += 1
-    } else if (ch === '}') {
-      depth -= 1
-      if (depth === 0) {
-        return text.slice(startIdx, i + 1)
-      }
+/**
+ * For each unique package name in `entries`, fetch the latest version's trust
+ * info from the registry. Used to annotate the approve multi- select with a
+ * "this package's last public version had provenance" hint — helps the approver
+ * spot if their staged upload is a regression (parent name has provenance
+ * history; staged version's workflow may have lost OIDC).
+ *
+ * One registry GET per unique name; abbreviated packument (saves ~80KB per
+ * popular package, omits `_npmUser` which we don't need here).
+ */
+async function fetchPriorProvenanceMap(
+  entries: StageListEntry[],
+): Promise<Map<string, boolean>> {
+  const uniqueNames = new Set<string>()
+  for (const e of entries) {
+    if (e.name) {
+      uniqueNames.add(e.name)
     }
   }
-  return undefined
+  const result = new Map<string, boolean>()
+  await Promise.all(
+    [...uniqueNames].map(async name => {
+      const versions = await fetchVersionTrustInfo(name, 'abbreviated')
+      const hasAnyAttestation = Object.values(versions).some(
+        v => !!v.attestations,
+      )
+      result.set(name, hasAnyAttestation)
+    }),
+  )
+  return result
 }
 
-function runInherit(cmd: string, args: string[]): Promise<number> {
-  return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, {
-      cwd: rootPath,
-      shell: WIN32,
-      stdio: 'inherit',
-    })
-    child.on('error', reject)
-    child.on('exit', code => {
-      resolve(code ?? 0)
-    })
-  })
-}
-
-function runCapture(
-  cmd: string,
-  args: string[],
-): Promise<{ stdout: string; code: number }> {
-  return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, {
-      cwd: rootPath,
-      shell: WIN32,
-      stdio: ['ignore', 'pipe', 'pipe'],
-    })
-    let stdout = ''
-    child.stdout?.on('data', chunk => {
-      stdout += chunk.toString('utf8')
-    })
-    child.on('error', reject)
-    child.on('exit', code => {
-      resolve({ stdout, code: code ?? 0 })
-    })
-  })
+function formatPriorProvenance(
+  hasPriorProvenance: boolean | undefined,
+): string {
+  if (hasPriorProvenance === undefined) {
+    return ''
+  }
+  return hasPriorProvenance
+    ? '  [prior: ✓ provenance]'
+    : '  [prior: ✗ no provenance]'
 }
 
 main().catch((e: unknown) => {

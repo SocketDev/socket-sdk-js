@@ -105,8 +105,7 @@ export function emitBlock(
 
 export function getCap(): number {
   const env =
-    process.env['CLAUDE_MD_BYTES'] ??
-    process.env['CLAUDE_MD_FLEET_BLOCK_BYTES']
+    process.env['CLAUDE_MD_BYTES'] ?? process.env['CLAUDE_MD_FLEET_BLOCK_BYTES']
   if (!env) {
     return DEFAULT_CAP_BYTES
   }

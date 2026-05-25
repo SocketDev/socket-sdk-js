@@ -34,6 +34,39 @@ FORBIDDEN to maintain. Actively remove when encountered.
 
 Bare `pnpm@<version>` is correct for pnpm 11+. pnpm 11 stores the integrity hash in `pnpm-lock.yaml` (separate YAML document) instead of inlining it in `packageManager`; on install pnpm rewrites the field to its bare form and migrates legacy inline hashes automatically. Don't fight the strip. Older repos may still ship `pnpm@<version>+sha512.<hex>` — leave it; pnpm migrates on first install. The lockfile is the integrity source of truth.
 
+## Bumping a versioned tool fleet-wide (pnpm, zizmor, sfw)
+
+🚨 **Single entry point: `socket-wheelhouse/scripts/fleet/cascade-fleet.mts`.** Run from the wheelhouse repo:
+
+```bash
+node socket-wheelhouse/scripts/fleet/cascade-fleet.mts \
+  --pnpm 11.3.0 \
+  [--skip-ci-wait] \
+  [--dry-run]
+```
+
+This is a **four-stage orchestrator** — don't reach for any of the lower-level scripts directly unless one of the stages bailed and you're recovering:
+
+| Stage | Does                                                                                                                                                                                                                                                                                                                                                                                                                       | Driven by                                                    |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| A     | Bumps `socket-registry/external-tools.json`: downloads every platform binary from upstream, recomputes sha256 ourselves (integrity model is binary-download + own-checksum, not trust in upstream-published values), writes the file. Commits to registry.                                                                                                                                                                 | `tools/pnpm.mts#applyToRegistry` (+ `zizmor.mts`, `sfw.mts`) |
+| B     | Delegates to `socket-registry/scripts/cascade-internal.mts`: recursively bumps every SHA pin in registry's own workflows (`setup-and-install` → `setup` → `checkout`), converging to a fixed point. Commits to registry.                                                                                                                                                                                                   | `pipeline.mts#stageB`                                        |
+| C     | Pushes registry main; polls GitHub Actions for the cascade SHA's CI to land green. Aborts the whole cascade if registry CI fails — fleet repos must not pin to a broken registry. Skipped via `--skip-ci-wait`.                                                                                                                                                                                                            | `pipeline.mts#stageC`                                        |
+| D     | For every primary fleet checkout: runs `cleanup-stranded.mts --against <stageBSha>` (no-layering rule discards prior unpushed cascade commits), rewrites every `setup-and-install@<old-sha>` reference to the new registry SHA via diff-based pin matching, optionally runs the tool's per-fleet step (pnpm bumps `packageManager` + `engines.pnpm`), runs `pnpm run format` to fold pre-existing drift, commits + pushes. | `pipeline.mts#stageD`                                        |
+
+### Soak gate
+
+Stage A honors the 7-day `minimumReleaseAge` cooldown via `--soak-days <n>` (default 7). Pulling a same-day release requires explicit bypass — see `bypass-phrases.md` row `Allow minimumReleaseAge bypass`.
+
+### Recovery from an interrupted cascade
+
+If Stage A+B+C landed (registry has a new tip) but Stage D didn't run, pass `--force-fanout` to skip Stages A+B+C and use the current registry HEAD as the propagation SHA. This is the only sanctioned way to "resume" a cascade — manually invoking `cascade-internal.mts` then `cascade-fleet.mts` without the resume flag would re-run Stages A+B+C and produce a no-op commit / extra runner minutes.
+
+### What this does NOT do
+
+- It does NOT bump `socket-wheelhouse/external-tools.json` (the wheelhouse's own at-repo-root copy, consumed by `scripts/install-sfw.mts`). The live source of truth for cascade purposes is `socket-registry/external-tools.json`; the wheelhouse file uses a different schema (tools nested under `.tools.<name>` with `sha256` field — registry uses top-level keys with `integrity` field) and a different consumer (the local SFW installer + zizmor setup). When SFW or zizmor bumps, the wheelhouse file's checksums go stale; today refreshing them is manual (run `node scripts/update-external-tools.mts` from the wheelhouse repo). Wiring this into the cascade orchestrator is a known gap — for now, treat wheelhouse's external-tools.json as a "sibling source of truth" that needs its own update step after a tool bump.
+- It does NOT bump `.node-version`. Node bumps follow a different cadence (the Node ecosystem doesn't ship the same per-platform binary model; `.node-version` is just a string).
+
 ## Monorepo internal `engines.node`
 
 Only the workspace root needs `engines.node`. Private (`"private": true`) sub-packages in `packages/*` don't need their own `engines.node` field; the field is dead, drift-prone, and removing it is the cleaner play. Public-published sub-packages (the npm-published ones with no `"private": true`) keep their `engines.node` because external consumers see it.

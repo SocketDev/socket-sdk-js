@@ -78,9 +78,7 @@ const CANONICAL_PREFIXES = [
 // analog of `docs/claude.md/fleet/` — host repos drop architecture /
 // commands / build-pipeline detail here to keep CLAUDE.md under the
 // whole-file size cap.
-const PER_REPO_PREFIXES = [
-  'docs/claude.md/repo/',
-]
+const PER_REPO_PREFIXES = ['docs/claude.md/repo/']
 
 // Fleet-canonical individual files (not under one of the prefix
 // dirs). Matches relative-to-repo-root.
