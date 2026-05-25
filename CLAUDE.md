@@ -51,9 +51,9 @@ Full ruleset — open-PR edits, Bugbot inline replies, rebase-over-revert for un
 
 Some fleet repos squash the default branch on a cadence — currently socket-addon, socket-bin, socket-btm, sdxgen, stuie (declared via `optIns: ['squash-history']` in `template/.claude/skills/cascading-fleet/lib/fleet-repos.json`). When working in an opted-in repo, prefer one consolidated commit per logical change over a long fan of tiny WIP commits; the `squashing-history` skill is the documented way to collapse history when it grows long. Threshold reminder + bypass `Allow squash-history-reminder bypass` (enforced by `.claude/hooks/squash-history-reminder/`).
 
-### Version bumps
+### Version bumps & immutable releases
 
-🚨 When the user asks for a version bump (`bump to vX.Y.Z`, `tag X.Y.Z`, `release X`, etc.), the sequence is exactly: (1) pre-bump prep wave `pnpm run update` → `pnpm i` → `pnpm run fix --all` → `pnpm run check --all` (each must finish clean); (2) CHANGELOG entry, **public-facing only** — new exports / signature changes / migration recipes, NOT internal refactors or `chore(sync)` cascades; (3) `chore: bump version to X.Y.Z` is the LAST commit on the release; (4) `git tag vX.Y.Z` at that commit (enforced by `.claude/hooks/version-bump-order-guard/`); (5) do NOT dispatch the publish workflow — user-triggered. Full sequence + rationale in [`docs/claude.md/fleet/version-bumps.md`](docs/claude.md/fleet/version-bumps.md).
+🚨 Bump: (1) `pnpm run update` → `pnpm i` → `pnpm run fix --all` → `pnpm run check --all`; (2) CHANGELOG public-facing only; (3) `chore: bump version to X.Y.Z` LAST; (4) `git tag vX.Y.Z` (`version-bump-order-guard`); (5) user dispatches publish. Stop reminder verifies provenance + trustedPublisher. GH Releases ship **immutable** (Sigstore attestation, GA 2025-10-28). Release workflows use 3-step `gh release create --draft` → `gh release upload` → `gh release edit --draft=false`; single-call form is forbidden (enforced by `.claude/hooks/immutable-release-pattern-guard/`; bypass: `Allow immutable-release-pattern bypass`). Verify: `gh release verify <tag>`. Detail: [`docs/claude.md/fleet/version-bumps.md`](docs/claude.md/fleet/version-bumps.md), [`docs/claude.md/fleet/immutable-releases.md`](docs/claude.md/fleet/immutable-releases.md).
 
 ### Programmatic Claude calls
 
@@ -62,6 +62,8 @@ Some fleet repos squash the default branch on a cadence — currently socket-add
 ### Tooling
 
 🚨 **Package manager: `pnpm`** — scripts via `pnpm run foo --flag` (never `foo:bar`); after `package.json` edits, `pnpm install`. NEVER `npx` / `pnpm dlx` / `yarn dlx` — use `pnpm exec` or `pnpm run` # socket-hook: allow npx. NEVER `--experimental-strip-types` to Node (enforced by `.claude/hooks/no-experimental-strip-types-guard/`).
+
+🚨 **Engine floors are pinned fleet-wide:** `engines.pnpm: ">=11.3.0"` (matches the canonical `packageManager` pin) and `engines.npm: ">=11.15.0"` (the version that introduced `npm stage publish`). The wheelhouse `package.json` is the single source of truth — both floors cascade to fleet repos via the sync-scaffolding `engines_pnpm_drift` + `engines_npm_drift` categories.
 
 🚨 **Bundler: rolldown, not esbuild.** Backward compatibility is FORBIDDEN — actively remove when encountered.
 
@@ -89,17 +91,7 @@ Exceptions (state the trade-off and ask): genuinely large refactor on a small bu
 
 ### Don't leave the worktree dirty
 
-🚨 When you finish a code change, **commit it**. Don't end a turn with uncommitted edits, untracked new files, or staged-but-uncommitted hunks lingering in the working tree. A dirty worktree is a half-finished job: another session, another agent, or a future `git checkout` will trip over it, and the user has to clean up after you.
-
-Rules:
-
-- **After finishing a logical unit of work, commit it.** Use a Conventional Commits message per the _Commits & PRs_ rule. Never leave the working tree dirty between turns.
-- **Surgical staging only** — `git add <specific-file>`, never `-A` / `.` (per the _Parallel Claude sessions_ rule). The dirty-worktree rule is no excuse to sweep in files you didn't touch. `git add -f` is forbidden for paths containing `/node_modules/` or `package-lock.json` under `.claude/hooks/*/` or `.claude/skills/*/` — past incident: cascading agent ran `git add -f` of node_modules into 6 fleet repos, force-push-only to recover (enforced by `.claude/hooks/node-modules-staging-guard/`; bypass: `Allow node-modules-staging bypass`).
-- **Stage only when you're about to commit.** `git add` and `git commit` belong on the same line (chained with `&&`) OR in the same Bash call. Don't stage as a side-effect of "preparing" — staging is a commit-time action. A turn that ends with staged-but-uncommitted hunks is the failure mode the previous bullet warns against (enforced by `.claude/hooks/no-orphaned-staging/`).
-- **If you genuinely can't commit yet** (the change is mid-refactor, tests are failing, you're waiting on user input), say so explicitly in the turn summary so the user knows the dirty state is intentional. Silent dirty worktrees are the failure mode.
-- **Worktrees from `git worktree add`** — same rule, sharper: a transient task-worktree must be left clean (committed + pushed) before `git worktree remove`, or the removal refuses and you've stranded the work.
-
-The principle: the working tree at end-of-turn should match the user's mental model of where the work is. "Done" means committed; anything else is paused, and pause states need to be announced.
+🚨 Finish a code change → **commit it**. Never end a turn with uncommitted edits, untracked files, or staged-but-uncommitted hunks. Surgical staging only (`git add <specific-file>`, never `-A` / `.`); stage and commit in the same Bash call. If you can't commit yet (mid-refactor, failing tests, waiting on user), announce it in the turn summary — silent dirty worktrees are the failure mode. Worktrees from `git worktree add` must be left clean (committed + pushed) before `git worktree remove`. Enforced by `.claude/hooks/no-orphaned-staging/` + `.claude/hooks/node-modules-staging-guard/` (bypass: `Allow node-modules-staging bypass`); end-of-turn dirty-worktree scan (enforced by `.claude/hooks/dirty-worktree-on-stop-reminder/`). Full rules + parallel-session rationale in [`docs/claude.md/fleet/worktree-hygiene.md`](docs/claude.md/fleet/worktree-hygiene.md).
 
 ### Smallest chunks, land ASAP
 
@@ -125,13 +117,13 @@ The principle: the working tree at end-of-turn should match the user's mental mo
 
 🚨 Reverting tracked changes or bypassing a hook (--no-verify, DISABLE*PRECOMMIT*\*, --no-gpg-sign, force-push) requires the user to type **`Allow <X> bypass`** verbatim in a recent user turn (e.g. `Allow revert bypass`, `Allow no-verify bypass`). Paraphrases don't count (enforced by `.claude/hooks/no-revert-guard/`). Full phrase table: [`docs/claude.md/fleet/bypass-phrases.md`](docs/claude.md/fleet/bypass-phrases.md).
 
-**Exception — fleet-sync cascade.** Mechanical `chore(sync): cascade fleet template@<sha>` operations across the fleet would otherwise need a fresh bypass phrase per repo. Prefix cascade Bash commands with `FLEET_SYNC=1` to opt in: the sentinel allowlists exactly three operations — (1) `git commit --no-verify` whose message starts with `chore(sync): cascade fleet template@`; (2) `git push --no-verify`; (3) broad-stage `git add -A` / `git add -u` / `git add .` (safe inside a fresh worktree off `origin/main`, which is how cascade scripts work). Everything else with `FLEET_SYNC=1` still falls through to the normal checks — `git stash`, `git reset --hard`, `git checkout/restore`, non-cascade commits all still need the canonical phrase. The sentinel is opt-in per command; no global env-var poisoning. (Enforced by `.claude/hooks/no-revert-guard/` + `.claude/hooks/overeager-staging-guard/`.)
+**Exception — wheelhouse cascade.** Mechanical `chore(wheelhouse): cascade template@<sha>` operations across the fleet would otherwise need a fresh bypass phrase per repo. Prefix cascade Bash commands with `FLEET_SYNC=1` to opt in: the sentinel allowlists exactly three operations — (1) `git commit --no-verify` whose message starts with `chore(wheelhouse): cascade template@`; (2) `git push --no-verify`; (3) broad-stage `git add -A` / `git add -u` / `git add .` (safe inside a fresh worktree off `origin/main`, which is how cascade scripts work). Everything else with `FLEET_SYNC=1` still falls through to the normal checks — `git stash`, `git reset --hard`, `git checkout/restore`, non-cascade commits all still need the canonical phrase. The sentinel is opt-in per command; no global env-var poisoning. (Enforced by `.claude/hooks/no-revert-guard/` + `.claude/hooks/overeager-staging-guard/`.)
 
 ### Variant analysis on every High/Critical finding
 
 🚨 When a finding lands at severity High or Critical, **search the rest of the repo for the same shape** before closing it. Bugs cluster — same mental model, same antipattern. Three searches: same file (read the whole thing, not just the hunk), sibling files (`rg` the shape, not the names), cross-package (parallel implementations love to drift).
 
-Skip for style nits. Full taxonomy in [`.claude/skills/_shared/variant-analysis.md`](.claude/skills/_shared/variant-analysis.md). Cross-fleet variants become a _Drift watch_ task — open `chore(sync): cascade <fix>` (enforced by `.claude/hooks/variant-analysis-reminder/`).
+Skip for style nits. Full taxonomy in [`.claude/skills/_shared/variant-analysis.md`](.claude/skills/_shared/variant-analysis.md). Cross-fleet variants become a _Drift watch_ task — open `chore(wheelhouse): cascade <fix>` (enforced by `.claude/hooks/variant-analysis-reminder/`).
 
 ### Compound lessons into rules
 
@@ -153,11 +145,11 @@ For non-trivial work (multi-file refactor, new feature, migration), the plan its
 
 ### Drift watch
 
-🚨 **Drift across fleet repos is a defect, not a feature.** When two socket-\* repos pin different versions of the same shared resource (a tool in `external-tools.json`, a workflow SHA, a CLAUDE.md fleet block, a hook in `.claude/hooks/`, an upstream submodule, `.gitmodules` `# name-version` annotations enforced by `.claude/hooks/gitmodules-comment-guard/`, pnpm/Node `packageManager`/`engines`), **opt for the latest**. Canonical sources: `socket-registry`'s `setup-and-install` action for tool SHAs; `socket-wheelhouse`'s `template/` tree for `.claude/`, CLAUDE.md fleet block, hooks. Either reconcile in the same PR or open `chore(sync): cascade <thing> from <newer-repo>` and link it (enforced by `.claude/hooks/drift-check-reminder/`). Full drift-surface list + cascade-PR convention in [`docs/claude.md/fleet/drift-watch.md`](docs/claude.md/fleet/drift-watch.md).
+🚨 **Drift across fleet repos is a defect, not a feature.** When two socket-\* repos pin different versions of the same shared resource (a tool in `external-tools.json`, a workflow SHA, a CLAUDE.md fleet block, a hook in `.claude/hooks/`, an upstream submodule, `.gitmodules` `# name-version` annotations enforced by `.claude/hooks/gitmodules-comment-guard/`, pnpm/Node `packageManager`/`engines`), **opt for the latest**. Canonical sources: `socket-registry`'s `setup-and-install` action for tool SHAs; `socket-wheelhouse`'s `template/` tree for `.claude/`, CLAUDE.md fleet block, hooks. Either reconcile in the same PR or open `chore(wheelhouse): cascade <thing> from <newer-repo>` and link it (enforced by `.claude/hooks/drift-check-reminder/`). Full drift-surface list + cascade-PR convention in [`docs/claude.md/fleet/drift-watch.md`](docs/claude.md/fleet/drift-watch.md).
 
 ### Stranded cascades
 
-🚨 Local-only `chore(sync): cascade fleet template@<sha>` commits + `chore/sync-<sha>` worktrees whose template SHA has been superseded on origin accumulate from interrupted cascade waves and silently block future pushes. The wheelhouse cascade auto-runs `socket-wheelhouse/scripts/cascade-tooling/cleanup-stranded.mts --target <repo>` at the start of every wave (default = fix; pass `--dry-run` to report only). Safety rails: cascade-subject regex match + trusted commit author + strict-ancestor proof of supersession + cascade-allowlist file check. Any ambiguity → bail the whole repo. Full algorithm + recovery instructions in [`docs/claude.md/fleet/stranded-cascades.md`](docs/claude.md/fleet/stranded-cascades.md).
+🚨 Local-only `chore(wheelhouse): cascade template@<sha>` commits + `chore/wheelhouse-<sha>` worktrees whose template SHA has been superseded on origin accumulate from interrupted cascade waves and silently block future pushes. The wheelhouse cascade auto-runs `socket-wheelhouse/scripts/fleet/cleanup-stranded.mts --target <repo>` at the start of every wave (default = fix; pass `--dry-run` to report only). Safety rails: cascade-subject regex match + trusted commit author + strict-ancestor proof of supersession + cascade-allowlist file check. Any ambiguity → bail the whole repo. Full algorithm + recovery instructions in [`docs/claude.md/fleet/stranded-cascades.md`](docs/claude.md/fleet/stranded-cascades.md).
 
 ### Never fork fleet-canonical files locally
 
@@ -183,6 +175,7 @@ Soft cap **500 lines**, hard cap **1000 lines** per source file. Past those, spl
 - **Tooling: oxlint + oxfmt only.** No ESLint, no Prettier. Fleet socket-\* oxlint plugin lives in `template/.config/oxlint-plugin/`.
 - **Invoke oxfmt / oxlint with `-c .config/...rc.json` explicitly.** Both tools accept a `-c PATH` (oxfmt) / `--config PATH` (oxlint). The fleet keeps both configs under `.config/`, not at repo root. Without the flag, the tools fall through to their built-in defaults — oxfmt's default is double-quotes + semis, the opposite of the fleet style, and would silently rewrite ~200 files on `pnpm run format`. Canonical script bodies in `manifest.mts` already encode the flag; the sync-scaffolding gate rewrites drifted scripts back to the canonical form.
 - **No file-scope `oxlint-disable`.** Always use `oxlint-disable-next-line <rule> -- <reason>` per call site so each exemption is independently justified in `git blame`. File-scope blocks silently exempt future edits the author never thought about (enforced by `socket/no-file-scope-oxlint-disable` lint rule + `.claude/hooks/no-file-scope-oxlint-disable-guard/` edit-time guard).
+- **Don't repeat the same `oxlint-disable-next-line` comment on adjacent lines.** Byte-identical disables on consecutive lines is a smell — refactor: lift the repeated call into a helper, or extract the disabled value into a single named constant that carries the exemption once. Per-call-site exemptions remain correct when reasons genuinely differ. Recipes in [`docs/claude.md/fleet/lint-rules.md`](docs/claude.md/fleet/lint-rules.md).
 
 Full rationale + cascade behavior in [`docs/claude.md/fleet/lint-rules.md`](docs/claude.md/fleet/lint-rules.md).
 
@@ -192,16 +185,11 @@ Full rationale + cascade behavior in [`docs/claude.md/fleet/lint-rules.md`](docs
 
 ### 1 path, 1 reference
 
-A path is constructed exactly once. Everywhere else references the constructed value.
+🚨 A path is constructed exactly once; everywhere else references the constructed value. Per-package `scripts/paths.mts` is the canonical owner; sub-packages inherit via `export *`. Build outputs live at `<package-root>/build/<mode>/<platform-arch>/out/Final/<artifact>`. Enforced at three levels: `.claude/hooks/path-guard/` (edit-time, build-path construction outside `paths.mts`), `.claude/hooks/paths-mts-inherit-guard/` (edit-time, sub-package inheritance), `scripts/check-paths.mts` (commit-time, whole-repo). `/guarding-paths` is the audit-and-fix skill. Full ruleset + canonical layout + common mistakes in [`docs/claude.md/fleet/path-hygiene.md`](docs/claude.md/fleet/path-hygiene.md).
 
-- **Within a package**: every script imports its own `scripts/paths.mts`. No `path.join('build', mode, …)` outside that module. `paths.mts` is per-package (like `package.json`) — every package that has a `scripts/` dir has its own.
-- **Across packages**: package B imports package A's `paths.mts` via the workspace `exports` field. Never `path.join(PKG, '..', '<sibling>', 'build', …)`.
-- **Sub-packages inherit**: a sub-package's `paths.mts` `export * from '<rel>/paths.mts'` from the nearest ancestor and adds local overrides below the re-export. Don't re-derive `REPO_ROOT` / `CONFIG_DIR` / `NODE_MODULES_CACHE_DIR` (enforced by `.claude/hooks/paths-mts-inherit-guard/`).
-- **Not just build paths**: `paths.mts` is for _every_ path the package constructs — config files (`socket-wheelhouse.json`), lockfiles, cache dirs, manifest files. The fleet ships a starter `template/scripts/paths.mts` that exports the common constants + `loadSocketWheelhouseConfig()`.
-- **Workflows / Dockerfiles / shell** can't `import` TS — construct once, reference by output / `ENV` / variable.
-- **Canonical layout**: build outputs live at `<package-root>/build/<mode>/<platform-arch>/out/Final/<artifact>`, where `mode ∈ {dev, prod}` and `platform-arch` is the Node-style `<process.platform>-<process.arch>` (e.g. `darwin-arm64`, `linux-x64`). socket-btm is the worked example; ultrathink follows it; smaller TS-only repos that don't fork by platform may use `'any'` as the platform-arch sentinel but keep the same nesting. Each package's `scripts/paths.mts` exports `PACKAGE_ROOT`, `BUILD_ROOT`, and `getBuildPaths(mode, platformArch)` returning at minimum `outputFinalDir` + `outputFinalFile`/`outputFinalBinary`.
+### Conformance runners
 
-Three-level enforcement: `.claude/hooks/path-guard/` blocks build-path construction outside `paths.mts` at edit time; `.claude/hooks/paths-mts-inherit-guard/` blocks sub-package `paths.mts` files that don't inherit from the nearest ancestor; `scripts/check-paths.mts` is the whole-repo gate run by `pnpm check`; `/guarding-paths` is the audit-and-fix skill. Find the canonical owner and import from it.
+External-spec-conformance runners (test262, WPT, future suites) use a canonical 4-tier layout: sparse-checkout submodule at `<pkg>/test/fixtures/<corpus>/`, thin runner CLI at `<pkg>/test/scripts/<corpus>-<scope>-runner.mts` with modular guts under `<corpus>/`, vitest integration wrapper at `<pkg>/test/integration/<corpus>-<scope>.test.mts` that spawns the runner + checks exit code (auto-runs via `pnpm test`), vitest unit tests at `<pkg>/test/unit/<corpus>-<scope>.test.mts` covering the pure classifier. Allowlist lives in a separate file under `<corpus>-config/`, never inline. Build-time submodules go under `upstream/`; test-time corpora go under `test/fixtures/`. Use `scripts/git-partial-submodule.mts` to honor `sparse-checkout = <patterns>` declared in `.gitmodules`. Full layout + authoring checklist in [`docs/claude.md/fleet/conformance-runners.md`](docs/claude.md/fleet/conformance-runners.md).
 
 ### Cross-platform path matching
 
@@ -238,13 +226,7 @@ Use `isError` / `isErrnoException` / `errorMessage` / `errorStack` from `@socket
 
 ### Token hygiene
 
-🚨 Never emit a raw secret to tool output, commits, comments, or replies; when blocked, rewrite — don't bypass. Redact `token` / `jwt` / `api_key` / `secret` / `password` / `authorization` fields when citing API responses (enforced by `.claude/hooks/token-guard/`). Long-lived CLI logins auto-rotate (enforced by `.claude/hooks/auth-rotation-reminder/`).
-
-🚨 **Tokens live in env vars (CI) or the OS keychain (dev local) — never in `.env*` / `.envrc` / `~/.sfw.config` / `~/.config/socket/*` / any dotfile** (enforced by `.claude/hooks/no-token-in-dotenv-guard/`). Setup + rotation is `node .claude/hooks/setup-security-tools/install.mts [--rotate]` — the ONLY correct rotator. `socket login`, hand-editing `~/.sfw.config`, or `export SOCKET_API_TOKEN=…` in a shell-rc are token-hygiene violations.
-
-🚨 **Never call platform keychain CLIs from Bash to read** (`security find-generic-password`, `secret-tool lookup`, `Get-StoredCredential`, `keyring get`). They surface a UI prompt per call and the token is already cached in-process — read `findApiToken()` or `process.env.SOCKET_API_KEY` / `SOCKET_API_TOKEN` instead. Writes/deletes are allowed (operator-driven setup/rotation). Bypass: `Allow blind-keychain-read bypass` (enforced by `.claude/hooks/no-blind-keychain-read-guard/`).
-
-**Socket API token env var:** fleet docs / workflow inputs / `.env.example` use the forward-canonical `SOCKET_API_TOKEN`; local-dev (keychain + `~/.zshenv`) uses `SOCKET_API_KEY` (universal across all Socket tools, one slot, no fallback chain). Don't confuse with `SOCKET_CLI_API_TOKEN` (socket-cli's separate setting). Full spec — scoped install entrypoints, personal-path placeholders, cross-repo path rules — in [`docs/claude.md/fleet/token-hygiene.md`](docs/claude.md/fleet/token-hygiene.md).
+🚨 Never emit a raw secret to tool output, commits, comments, or replies; when blocked, rewrite — don't bypass. Redact `token` / `jwt` / `api_key` / `secret` / `password` / `authorization` fields when citing API responses (`.claude/hooks/token-guard/`). Tokens live in env vars (CI) or the OS keychain (dev local) — never in `.env*` / `.envrc` / `~/.sfw.config` / dotfiles (`.claude/hooks/no-token-in-dotenv-guard/`). Setup + rotation: `node .claude/hooks/setup-security-tools/install.mts [--rotate]` — the ONLY correct rotator. Never call platform keychain CLIs from Bash to read (token is already in-process — use `findApiToken()` or `process.env.SOCKET_API_KEY` / `SOCKET_API_TOKEN`); writes/deletes are allowed. Bypass: `Allow blind-keychain-read bypass` (`.claude/hooks/no-blind-keychain-read-guard/`). Canonical env var: `SOCKET_API_TOKEN` in docs / workflow inputs / `.env.example`; local-dev keychain stores as `SOCKET_API_KEY`. Full spec: [`docs/claude.md/fleet/token-hygiene.md`](docs/claude.md/fleet/token-hygiene.md).
 
 ### Agents & skills
 
