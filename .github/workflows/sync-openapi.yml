@@ -57,7 +57,7 @@ jobs:
           echo "Sleeping for $delay seconds..."
           sleep $delay
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@29100ff292fefdae4eba0ab2a40697fea06b1ad2 # main (2026-05-15)
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@c291a14196d088970c0453e905b40969b11bf193 # main (2026-05-15)
       - name: Configure push credentials
         env:
           GH_TOKEN: ${{ github.token }}
