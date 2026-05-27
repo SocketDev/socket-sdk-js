@@ -24,10 +24,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
 
 // Node.js builtins to ignore (including node: prefix variants).
-// node:smol-* are Socket SEA-bundled optional builtins (smol-util, smol-primordial);
-// they appear in dist behind `mod.isBuiltin('node:smol-util')` guards and are only
-// resolvable in SEA binaries, so they should never be expected in dependencies.
-const SOCKET_SEA_BUILTINS = ['node:smol-util', 'node:smol-primordial']
+// node:smol-* are Socket SEA-bundled optional builtins (smol-util, smol-primordial,
+// smol-path); they appear in dist behind `mod.isBuiltin('node:smol-*')` guards and are
+// only resolvable in SEA binaries, so they should never be expected in dependencies.
+const SOCKET_SEA_BUILTINS = [
+  'node:smol-path',
+  'node:smol-primordial',
+  'node:smol-util',
+]
 const BUILTIN_MODULES = new Set([
   ...builtinModules,
   ...builtinModules.map(m => `node:${m}`),
