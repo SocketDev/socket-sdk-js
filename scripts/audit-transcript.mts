@@ -42,77 +42,7 @@ interface ToolUseEvent {
   line: number
 }
 
-interface Args {
-  json: boolean
-  transcript: string | undefined
-  recent: boolean
-}
-
-export function findRecentTranscript(): string | undefined {
-  // ~/.claude/projects/<encoded-cwd>/<session-id>.jsonl
-  // encoded-cwd is the cwd with every `/` replaced by `-`. The leading
-  // `/` becomes the leading `-` automatically since the replace
-  // operates on the whole path. (So `/Users/foo` → `-Users-foo`, not
-  // `--Users-foo`.)
-  // oxlint-disable-next-line socket/no-process-cwd-in-scripts-hooks -- --recent intentionally targets the invocation cwd's transcript dir
-  const encoded = process.cwd().replace(/\//g, '-')
-  const dir = path.join(os.homedir(), '.claude', 'projects', encoded)
-  if (!existsSync(dir)) {
-    return undefined
-  }
-  // TOCTOU: another Claude session may rotate/delete a .jsonl between
-  // readdir and stat. Tolerate missing entries instead of crashing.
-  const entries = readdirSync(dir)
-    .filter(f => f.endsWith('.jsonl'))
-    .map(f => {
-      const full = path.join(dir, f)
-      try {
-        return { full, mtime: statSync(full).mtimeMs }
-      } catch {
-        return undefined
-      }
-    })
-    .filter((x): x is { full: string; mtime: number } => x !== undefined)
-    .toSorted((a, b) => b.mtime - a.mtime)
-  return entries[0]?.full
-}
-
-export function parseArgs(argv: readonly string[]): Args {
-  let json = false
-  let recent = false
-  let transcript: string | undefined
-  for (let i = 0; i < argv.length; i += 1) {
-    const a = argv[i]
-    if (a === '--json') {
-      json = true
-    } else if (a === '--recent') {
-      recent = true
-    } else if (a === '--help' || a === '-h') {
-      printHelp()
-      process.exit(0)
-    } else if (a && !a.startsWith('--')) {
-      transcript = a
-    }
-  }
-  return { json, recent, transcript }
-}
-
-export function printHelp(): void {
-  logger.log(
-    'audit-transcript — read-only forensic scan of a Claude Code transcript',
-  )
-  logger.log('')
-  logger.log('Usage:')
-  logger.log('  node scripts/audit-transcript.mts <transcript-path>')
-  logger.log(
-    '  node scripts/audit-transcript.mts --recent           # auto-pick most recent',
-  )
-  logger.log(
-    '  node scripts/audit-transcript.mts --json <path>      # JSON output for tooling',
-  )
-}
-
-export function readToolUses(transcriptPath: string): ToolUseEvent[] {
+function readToolUses(transcriptPath: string): ToolUseEvent[] {
   if (!existsSync(transcriptPath)) {
     throw new Error(`transcript not found: ${transcriptPath}`)
   }
@@ -178,7 +108,7 @@ const PATTERNS: ReadonlyArray<{
     tool: 'Bash',
     matches: c =>
       /\bgh\s+auth\s+refresh\b/.test(c) &&
-      /(?:^|\s)(?:--scopes|-s)\b[^|;&]*\bworkflow\b/.test(c), // socket-hook: allow regex-alternation-order
+      /(?:^|\s)(?:--scopes|-s)\b[^|;&]*\bworkflow\b/.test(c),
   },
   {
     severity: 'critical',
@@ -210,7 +140,7 @@ const PATTERNS: ReadonlyArray<{
     category: 'sudo invocation (non-cached)',
     tool: 'Bash',
     matches: c =>
-      /(?:^|\s|;|&&|\|\|)sudo\s+/.test(c) && !/\bsudo\s+-k\b/.test(c), // socket-hook: allow regex-alternation-order
+      /(?:^|\s|;|&&|\|\|)sudo\s+/.test(c) && !/\bsudo\s+-k\b/.test(c),
   },
   // WARN — unusual surfaces that should be checked.
   {
@@ -251,7 +181,7 @@ const PATTERNS: ReadonlyArray<{
   },
 ]
 
-export function scanToolUse(evt: ToolUseEvent): Finding[] {
+function scanToolUse(evt: ToolUseEvent): Finding[] {
   const findings: Finding[] = []
   // Most patterns target Bash commands; some target file paths (Edit/Write).
   const command =
@@ -285,6 +215,75 @@ export function scanToolUse(evt: ToolUseEvent): Finding[] {
     })
   }
   return findings
+}
+
+function findRecentTranscript(): string | undefined {
+  // ~/.claude/projects/<encoded-cwd>/<session-id>.jsonl
+  // encoded-cwd is the cwd with every `/` replaced by `-`. The leading
+  // `/` becomes the leading `-` automatically since the replace
+  // operates on the whole path. (So `/Users/foo` → `-Users-foo`, not
+  // `--Users-foo`.)
+  const encoded = process.cwd().replace(/\//g, '-')
+  const dir = path.join(os.homedir(), '.claude', 'projects', encoded)
+  if (!existsSync(dir)) {
+    return undefined
+  }
+  // TOCTOU: another Claude session may rotate/delete a .jsonl between
+  // readdir and stat. Tolerate missing entries instead of crashing.
+  const entries = readdirSync(dir)
+    .filter(f => f.endsWith('.jsonl'))
+    .map(f => {
+      const full = path.join(dir, f)
+      try {
+        return { full, mtime: statSync(full).mtimeMs }
+      } catch {
+        return undefined
+      }
+    })
+    .filter((x): x is { full: string; mtime: number } => x !== undefined)
+    .toSorted((a, b) => b.mtime - a.mtime)
+  return entries[0]?.full
+}
+
+interface Args {
+  json: boolean
+  transcript: string | undefined
+  recent: boolean
+}
+
+function parseArgs(argv: readonly string[]): Args {
+  let json = false
+  let recent = false
+  let transcript: string | undefined
+  for (let i = 0; i < argv.length; i += 1) {
+    const a = argv[i]
+    if (a === '--json') {
+      json = true
+    } else if (a === '--recent') {
+      recent = true
+    } else if (a === '--help' || a === '-h') {
+      printHelp()
+      process.exit(0)
+    } else if (a && !a.startsWith('--')) {
+      transcript = a
+    }
+  }
+  return { json, recent, transcript }
+}
+
+function printHelp(): void {
+  logger.log(
+    'audit-transcript — read-only forensic scan of a Claude Code transcript',
+  )
+  logger.log('')
+  logger.log('Usage:')
+  logger.log('  node scripts/audit-transcript.mts <transcript-path>')
+  logger.log(
+    '  node scripts/audit-transcript.mts --recent           # auto-pick most recent',
+  )
+  logger.log(
+    '  node scripts/audit-transcript.mts --json <path>      # JSON output for tooling',
+  )
 }
 
 async function main(): Promise<void> {

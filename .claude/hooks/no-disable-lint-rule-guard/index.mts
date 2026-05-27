@@ -63,8 +63,8 @@ export function isLintConfigPath(filePath: string): boolean {
 }
 
 /**
- * Returns the set of rules disabled in `content` (any rule mapped to
- * "off" or "warn").
+ * Returns the set of rules disabled in `content` (any rule mapped to "off" or
+ * "warn").
  */
 export function extractDisabledRules(content: string): Set<string> {
   const out = new Set<string>()
@@ -83,9 +83,9 @@ interface BlockReason {
 }
 
 /**
- * Given the old and new file content, returns the rules newly mapped
- * to "off"/"warn" in new that weren't in old. Empty array means no
- * weakening was added.
+ * Given the old and new file content, returns the rules newly mapped to
+ * "off"/"warn" in new that weren't in old. Empty array means no weakening was
+ * added.
  */
 export function newlyDisabledRules(
   oldContent: string,
@@ -99,7 +99,7 @@ export function newlyDisabledRules(
       added.push(rule)
     }
   }
-  return added.sort()
+  return added.toSorted()
 }
 
 function getOldNewContent(
