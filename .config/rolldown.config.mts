@@ -41,8 +41,16 @@ const externalDependencies = Object.keys(packageJson.dependencies || {})
 // breaks the eager-evaluation chain cleanly. (esbuild's cross-module DCE
 // dropped these; rolldown evaluates each required CJS module's whole body,
 // so they need explicit stubs.)
+// `external/@socketregistry/yocto-spinner` + `external/yoctocolors-cjs` pull
+// the whole inquirer-core / signal-exit / supports-color subgraph (~1MB). They
+// arrive transitively via `debug/output` → `spinner/default` → spinner backend.
+// The SDK is a library — it never starts a spinner, so `getDefaultSpinner()`'s
+// pause/resume calls in debug/output are no-ops at runtime. Stubbing the two
+// leaf modules with empty exports keeps `spinner/spinner.js` loadable while
+// dropping the interactive-prompt subgraph rolldown would otherwise bundle
+// (esbuild's cross-module DCE dropped it; rolldown evaluates full CJS bodies).
 const LIB_STUB_PATTERN =
-  /@socketsecurity\/lib\/dist\/(?:constants\/package-default-node-range|external\/(?:cacache|del|npm-pack|pico-pack)|globs|sorts)\.js$/
+  /@socketsecurity\/lib\/dist\/(?:constants\/package-default-node-range|external\/(?:@socketregistry\/yocto-spinner|cacache|del|npm-pack|pico-pack|yoctocolors-cjs)|globs|sorts)\.js$/
 
 // `packages/operations` is required only for the pure `pkgNameToSlug` helper
 // (http-request/user-agent builds the UA string from it). Its module body
