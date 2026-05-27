@@ -75,7 +75,7 @@ async function main(): Promise<void> {
         command: 'node',
       },
       {
-        args: ['scripts/validate-esbuild-minify.mts'],
+        args: ['scripts/validate-rolldown-minify.mts'],
         command: 'node',
       },
       {
