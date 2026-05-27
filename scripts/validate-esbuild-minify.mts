@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 /**
- * @file Validates that esbuild configuration has minify: false. Minification
- *   breaks ESM/CJS interop and makes debugging harder.
+ * @file Validates that the bundler configuration keeps minification off.
+ *   Minification breaks ESM/CJS interop and makes debugging harder. The SDK
+ *   migrated from esbuild to rolldown; this gate now reads the rolldown config
+ *   and asserts `buildConfig.output.minify === false`. (Filename kept for the
+ *   fleet-canonical check wiring; the rule it enforces is unchanged.)
  */
 
 import path from 'node:path'
@@ -23,45 +26,31 @@ interface MinifyViolation {
 }
 
 /**
- * Validate esbuild configuration has minify: false.
+ * Validate the rolldown build config has `output.minify: false`.
  */
-async function validateEsbuildMinify(): Promise<MinifyViolation[]> {
-  const configPath = path.join(rootPath, '.config/esbuild.config.mts')
+async function validateMinify(): Promise<MinifyViolation[]> {
+  const configPath = path.join(rootPath, '.config/rolldown.config.mts')
 
   try {
-    // Dynamic import of the esbuild config
+    // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- config path is computed at runtime.
     const config = await import(configPath)
 
     const violations: MinifyViolation[] = []
 
-    // Check buildConfig
-    if (config.buildConfig) {
-      if (config.buildConfig.minify !== false) {
-        violations.push({
-          config: 'buildConfig',
-          value: config.buildConfig.minify,
-          message: 'buildConfig.minify must be false',
-          location: `${configPath}:212`,
-        })
-      }
-    }
-
-    // Check watchConfig
-    if (config.watchConfig) {
-      if (config.watchConfig.minify !== false) {
-        violations.push({
-          config: 'watchConfig',
-          value: config.watchConfig.minify,
-          message: 'watchConfig.minify must be false',
-          location: `${configPath}:248`,
-        })
-      }
+    const output = config.buildConfig?.output
+    if (output && output.minify !== false) {
+      violations.push({
+        config: 'buildConfig.output',
+        value: output.minify,
+        message: 'buildConfig.output.minify must be false',
+        location: configPath,
+      })
     }
 
     return violations
   } catch (e) {
     logger.error(
-      `Failed to load esbuild config: ${e instanceof Error ? e.message : String(e)}`,
+      `Failed to load rolldown config: ${e instanceof Error ? e.message : String(e)}`,
     )
     process.exitCode = 1
     return []
@@ -69,15 +58,15 @@ async function validateEsbuildMinify(): Promise<MinifyViolation[]> {
 }
 
 async function main(): Promise<void> {
-  const violations = await validateEsbuildMinify()
+  const violations = await validateMinify()
 
   if (violations.length === 0) {
-    logger.success('esbuild minify validation passed')
+    logger.success('bundler minify validation passed')
     process.exitCode = 0
     return
   }
 
-  logger.fail('esbuild minify validation failed')
+  logger.fail('bundler minify validation failed')
   logger.error('')
 
   for (let i = 0, { length } = violations; i < length; i += 1) {
