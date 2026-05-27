@@ -1,5 +1,5 @@
 /**
- * @file Fast build runner using esbuild for smaller bundles and faster builds.
+ * @file Build runner: rolldown for the bundle, tsgo for declarations.
  */
 
 import { existsSync } from 'node:fs'
@@ -7,21 +7,15 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import type { BuildResult, PluginBuild } from 'esbuild'
-
-import { build, context } from 'esbuild'
+import { rolldown, watch } from 'rolldown'
 
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
-import {
-  analyzeMetafile,
-  buildConfig,
-  watchConfig,
-} from '../.config/esbuild.config.mts'
+import { buildConfig } from '../.config/rolldown.config.mts'
 import { runSequence } from './utils/run-command.mts'
 
 const rootPath = path.resolve(
@@ -42,17 +36,16 @@ interface BuildOptions {
 interface BuildSourceResult {
   exitCode: number
   buildTime: number
-  result: BuildResult | undefined
 }
 
 /**
- * Build source code with esbuild. Returns { exitCode, buildTime, result } for
- * external logging.
+ * Build source code with rolldown. Returns { exitCode, buildTime } for external
+ * logging.
  */
 export async function buildSource(
   options: BuildOptions = {},
 ): Promise<BuildSourceResult> {
-  const { quiet = false, skipClean = false, verbose = false } = options
+  const { quiet = false, skipClean = false } = options
 
   // Clean dist directory if needed
   if (!skipClean) {
@@ -66,26 +59,28 @@ export async function buildSource(
       if (!quiet) {
         logger.error('Clean failed')
       }
-      return { exitCode, buildTime: 0, result: undefined }
+      return { exitCode, buildTime: 0 }
     }
   }
 
   try {
     const startTime = Date.now()
-    // Determine log level based on verbosity
-    const logLevel = quiet ? 'silent' : verbose ? 'info' : 'warning'
-    const result = await build({
-      ...buildConfig,
-      logLevel,
-    })
+    const { output, ...inputOptions } = buildConfig
+    const bundle = await rolldown(inputOptions)
+    try {
+      await bundle.write(output)
+    } finally {
+      await bundle.close()
+    }
     const buildTime = Date.now() - startTime
 
-    return { exitCode: 0, buildTime, result }
-  } catch {
+    return { exitCode: 0, buildTime }
+  } catch (e) {
     if (!quiet) {
       logger.error('Source build failed')
+      logger.error(e)
     }
-    return { exitCode: 1, buildTime: 0, result: undefined }
+    return { exitCode: 1, buildTime: 0 }
   }
 }
 
@@ -145,7 +140,7 @@ export function isBuildNeeded(): boolean {
  * Watch mode for development with incremental builds (68% faster rebuilds).
  */
 export async function watchBuild(options: BuildOptions = {}): Promise<number> {
-  const { quiet = false, verbose = false } = options
+  const { quiet = false } = options
 
   if (!quiet) {
     logger.step('Starting watch mode with incremental builds')
@@ -153,51 +148,30 @@ export async function watchBuild(options: BuildOptions = {}): Promise<number> {
   }
 
   try {
-    // Determine log level based on verbosity
-    const logLevel = quiet ? 'silent' : verbose ? 'debug' : 'warning'
+    const { output, ...inputOptions } = buildConfig
+    const watcher = watch({ ...inputOptions, output })
 
-    // Use context API for incremental builds (68% faster rebuilds)
-    // Extract watch option from watchConfig as it's not valid for context()
-    const { watch: _watchOpts, ...contextConfig } = watchConfig
-    const ctx = await context({
-      ...contextConfig,
-      logLevel,
-      plugins: [
-        ...(contextConfig.plugins || []),
-        {
-          name: 'rebuild-logger',
-          setup(pluginBuild: PluginBuild) {
-            pluginBuild.onEnd(result => {
-              if (result.errors.length > 0) {
-                if (!quiet) {
-                  logger.error('Rebuild failed')
-                }
-              } else {
-                if (!quiet) {
-                  logger.success('Rebuild succeeded')
-                  if (result?.metafile && verbose) {
-                    const analysis = analyzeMetafile(result.metafile)
-                    logger.info(`Bundle size: ${analysis.totalSize}`)
-                  }
-                }
-              }
-            })
-          },
-        },
-      ],
+    // rolldown requires closing each build's result on BUNDLE_END to avoid
+    // leaking native handles; ERROR surfaces a failed rebuild.
+    watcher.on('event', event => {
+      if (event.code === 'BUNDLE_END') {
+        if (!quiet) {
+          logger.success('Rebuild succeeded')
+        }
+        event.result.close()
+      } else if (event.code === 'ERROR') {
+        if (!quiet) {
+          logger.error('Rebuild failed')
+          logger.error(event.error)
+        }
+      }
     })
 
-    // Enable watch mode
-    await ctx.watch()
-
-    // Keep the process alive
-    process.on('SIGINT', async () => {
-      await ctx.dispose()
-      process.exitCode = 0
-      throw new Error('Watch mode interrupted')
+    process.on('SIGINT', () => {
+      watcher.close().finally(() => process.exit(0))
     })
 
-    // Wait indefinitely
+    // Wait indefinitely — SIGINT is the only exit path.
     await new Promise<never>(() => {})
   } catch (e) {
     if (!quiet) {
@@ -292,9 +266,7 @@ async function main(): Promise<void> {
       )
       logger.log('  pnpm build --analyze    # Build with size analysis')
       logger.log('')
-      logger.log(
-        'Note: Watch mode uses esbuild context API for 68% faster rebuilds',
-      )
+      logger.log('Note: Watch mode uses rolldown for incremental rebuilds')
       process.exitCode = 0
       return
     }
@@ -335,25 +307,14 @@ async function main(): Promise<void> {
       if (!quiet) {
         printHeader('Building Source')
       }
-      const {
-        buildTime,
-        exitCode: srcExitCode,
-        result,
-      } = await buildSource({ quiet, verbose, analyze: values.analyze })
+      const { buildTime, exitCode: srcExitCode } = await buildSource({
+        quiet,
+        verbose,
+        analyze: values.analyze,
+      })
       exitCode = srcExitCode
       if (exitCode === 0 && !quiet) {
         logger.success(`Source Bundle (${buildTime}ms)`)
-
-        if (values.analyze && result?.metafile) {
-          const analysis = analyzeMetafile(result.metafile)
-          logger.info('Build output:')
-          const analysisFiles = analysis.files
-          for (let i = 0, { length } = analysisFiles; i < length; i += 1) {
-            const file = analysisFiles[i]!
-            logger.substep(`${file.name}: ${file.size}`)
-          }
-          logger.step(`Total bundle size: ${analysis.totalSize}`)
-        }
       }
     }
     // Build everything (default)
@@ -394,7 +355,7 @@ async function main(): Promise<void> {
       const srcResult: BuildSourceResult =
         results[0].status === 'fulfilled'
           ? results[0].value
-          : { exitCode: 1, buildTime: 0, result: undefined }
+          : { exitCode: 1, buildTime: 0 }
       const typesExitCode =
         results[1].status === 'fulfilled' ? results[1].value : 1
 
@@ -402,17 +363,6 @@ async function main(): Promise<void> {
       if (!quiet) {
         if (srcResult.exitCode === 0) {
           logger.success(`Source Bundle (${srcResult.buildTime}ms)`)
-
-          if (values.analyze && srcResult.result?.metafile) {
-            const analysis = analyzeMetafile(srcResult.result.metafile)
-            logger.info('Build output:')
-            const analysisFiles = analysis.files
-            for (let i = 0, { length } = analysisFiles; i < length; i += 1) {
-              const file = analysisFiles[i]!
-              logger.substep(`${file.name}: ${file.size}`)
-            }
-            logger.step(`Total bundle size: ${analysis.totalSize}`)
-          }
         }
 
         if (typesExitCode === 0) {

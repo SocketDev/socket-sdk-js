@@ -11,7 +11,7 @@ packages:
   - .claude/hooks/*
 
 allowBuilds:
-  esbuild: true
+  rolldown: true
 
 # Auto-install missing peer deps (pnpm default). Declared explicitly
 # so a future default flip can't silently change install behavior.
@@ -35,7 +35,7 @@ overrides:
   'defu': '>=6.1.7'
   # advisories #51 / #54 (medium) — bump to latest 6.x patch
   'undici': '6.25.0'
-  'vite': '7.3.2'
+  'vite': 'catalog:'
 
 # Refuse to run if the pnpm version on PATH differs from the packageManager
 # field in package.json. Our setup action pins pnpm via external-tools.json;
@@ -68,7 +68,13 @@ catalog:
   'npm-run-all2': 9.0.0
   'oxfmt': 0.48.0
   'oxlint': 1.63.0
+  # Fleet bundler (replaces esbuild). Single-sourced to match the
+  # wheelhouse catalog pin + the rolldown vite 8.0.14 bundles natively.
+  'rolldown': 1.0.3
   'taze': 19.11.0
+  # vite 8.0.14 swaps esbuild → rolldown natively (bundles rolldown
+  # 1.0.2), so the override below removes esbuild from the install tree.
+  'vite': 8.0.14
   'vitest': 4.1.6
 
 # Wait 7 days (10080 minutes) before installing newly published packages.
@@ -83,6 +89,51 @@ minimumReleaseAgeExclude:
   # npm's `time` field for the major; allow pinned beta until v15 GA.
   - 'nock@15.0.0-beta.11'
   - 'npm-run-all2@9.0.0'
+  # vite 8.0.14 ships rolldown 1.0.2 natively (no esbuild transitive).
+  # Scoped to the exact tag so a future vite 8.0.15 still soaks.
+  # published: 2026-05-21 | removable: 2026-05-28
+  - 'vite@8.0.14'
+  # rolldown 1.0.2 is vite 8.0.14's bundled native rolldown release; the
+  # per-platform bindings share its pin. `@rolldown/pluginutils` versions
+  # independently — rolldown 1.0.2 depends on `^1.0.0` → resolves to 1.0.1.
+  # Listed explicitly per the fleet "no scope globs in soak excludes" rule.
+  # published: 2026-05-27 | removable: 2026-06-03
+  - 'rolldown@1.0.3'
+  # published: 2026-05-13 | removable: 2026-05-20
+  - '@rolldown/pluginutils@1.0.1'
+  # published: 2026-05-27 | removable: 2026-06-03
+  - '@rolldown/binding-darwin-arm64@1.0.3'
+  # published: 2026-05-27 | removable: 2026-06-03
+  - '@rolldown/binding-darwin-x64@1.0.3'
+  # published: 2026-05-27 | removable: 2026-06-03
+  - '@rolldown/binding-linux-arm-gnueabihf@1.0.3'
+  # published: 2026-05-27 | removable: 2026-06-03
+  - '@rolldown/binding-linux-arm64-gnu@1.0.3'
+  # published: 2026-05-27 | removable: 2026-06-03
+  - '@rolldown/binding-linux-arm64-musl@1.0.3'
+  # published: 2026-05-27 | removable: 2026-06-03
+  - '@rolldown/binding-linux-x64-gnu@1.0.3'
+  # published: 2026-05-27 | removable: 2026-06-03
+  - '@rolldown/binding-linux-x64-musl@1.0.3'
+  # published: 2026-05-27 | removable: 2026-06-03
+  - '@rolldown/binding-win32-x64-msvc@1.0.3'
+  # published: 2026-05-27 | removable: 2026-06-03
+  - '@rolldown/binding-win32-arm64-msvc@1.0.3'
+  # published: 2026-05-27 | removable: 2026-06-03
+  - '@rolldown/binding-android-arm64@1.0.3'
+  # published: 2026-05-27 | removable: 2026-06-03
+  - '@rolldown/binding-freebsd-x64@1.0.3'
+  # published: 2026-05-27 | removable: 2026-06-03
+  - '@rolldown/binding-linux-ppc64-gnu@1.0.3'
+  # published: 2026-05-27 | removable: 2026-06-03
+  - '@rolldown/binding-linux-s390x-gnu@1.0.3'
+  # published: 2026-05-27 | removable: 2026-06-03
+  - '@rolldown/binding-openharmony-arm64@1.0.3'
+  # published: 2026-05-27 | removable: 2026-06-03
+  - '@rolldown/binding-wasm32-wasi@1.0.3'
+  # rolldown's AST/types layer. rolldown 1.0.3 pins `=0.133.0`.
+  # published: 2026-05-26 | removable: 2026-06-02
+  - '@oxc-project/types@0.133.0'
 
 # Refuse transitive dependencies declared via git/tarball/local-tarball
 # specs — an npm package shouldn't be allowed to drag in a git URL we
