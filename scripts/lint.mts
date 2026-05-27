@@ -12,7 +12,7 @@ import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
 import { getChangedFiles } from '@socketsecurity/lib-stable/git/changed'
 import { getStagedFiles } from '@socketsecurity/lib-stable/git/staged'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import { getRootPath } from './utils/path-helpers.mts'

@@ -15,7 +15,7 @@ import { tsPlugin } from '@sveltejs/acorn-typescript'
 import { Parser } from 'acorn'
 import openapiTS from 'openapi-typescript'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { getRootPath } from './utils/path-helpers.mts'
 

@@ -19,8 +19,8 @@ import type { ReleaseType } from 'semver'
 import semver from 'semver'
 
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
-import { spawn } from '@socketsecurity/lib-stable/spawn/spawn'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 const logger = getDefaultLogger()

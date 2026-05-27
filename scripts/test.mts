@@ -13,9 +13,9 @@ import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
-import { onExit } from '@socketsecurity/lib-stable/signal-exit/register'
-import { getDefaultSpinner } from '@socketsecurity/lib-stable/spinner/registry'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { onExit } from '@socketsecurity/lib-stable/events/exit/handler'
+import { getDefaultSpinner } from '@socketsecurity/lib-stable/spinner/default'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import { getTestsToRun } from './utils/changed-test-mapper.mts'
@@ -471,7 +471,8 @@ export async function runTests(
 
   const hasTestFailures =
     output.includes('FAIL') ||
-    (output.includes('Test Files') && output.match(/(\d+) failed/) !== null) ||
+    (output.includes('Test Files') &&
+      output.match(/(?:\d+) failed/) !== null) ||
     (output.includes('Tests') && output.match(/Tests\s+\d+ failed/) !== null)
 
   // Filter out worker termination errors from output if no real test failures

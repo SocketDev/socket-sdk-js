@@ -19,7 +19,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 const logger = getDefaultLogger()
 
@@ -207,7 +207,7 @@ export function isLowercaseHyphenated(filename: string): boolean {
   const nameWithoutExt = filename.replace(/\.md$/, '')
 
   // Must be lowercase letters, numbers, and hyphens only
-  return /^[a-z0-9]+(-[a-z0-9]+)*$/.test(nameWithoutExt)
+  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(nameWithoutExt)
 }
 
 /**
@@ -216,7 +216,7 @@ export function isLowercaseHyphenated(filename: string): boolean {
  */
 export function isScreamingCase(filename: string): boolean {
   // Remove extension for checking
-  const nameWithoutExt = filename.replace(/\.(MD|md)$/, '')
+  const nameWithoutExt = filename.replace(/\.(?:MD|md)$/, '')
 
   // Check if it contains any lowercase letters
   return /^[A-Z0-9_]+$/.test(nameWithoutExt) && /[A-Z]/.test(nameWithoutExt)
@@ -229,7 +229,7 @@ export function validateFilename(
   filePath: string,
 ): FilenameViolation | undefined {
   const filename = path.basename(filePath)
-  const nameWithoutExt = filename.replace(/\.(MD|md)$/, '')
+  const nameWithoutExt = filename.replace(/\.(?:MD|md)$/, '')
   const relativePath = path.relative(rootPath, filePath)
 
   // README.md and LICENSE are special - allowed anywhere

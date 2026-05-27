@@ -13,7 +13,7 @@
 
 import { describe, expect, it, vi } from 'vitest'
 
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
 import { MAX_FIREWALL_COMPONENTS } from '../../src/constants.js'
 import { SocketSdk } from '../../src/index'

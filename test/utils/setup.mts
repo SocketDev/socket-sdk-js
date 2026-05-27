@@ -7,7 +7,7 @@ import process from 'node:process'
 import nock from 'nock'
 
 import { getAbortSignal } from '@socketsecurity/lib/process/abort'
-import { setMaxEventTargetListeners } from '@socketsecurity/lib/warnings/event-target'
+import { setMaxEventTargetListeners } from '@socketsecurity/lib/events/warning/handler'
 
 const abortSignal = getAbortSignal()
 

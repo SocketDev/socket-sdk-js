@@ -7,10 +7,13 @@ import process from 'node:process'
 import type {
   SpawnOptions,
   SpawnSyncOptions,
-} from '@socketsecurity/lib-stable/spawn/types'
+} from '@socketsecurity/lib-stable/process/spawn/types'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
-import { spawn, spawnSync } from '@socketsecurity/lib-stable/spawn/spawn'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import {
+  spawn,
+  spawnSync,
+} from '@socketsecurity/lib-stable/process/spawn/child'
 
 // Initialize logger
 const logger = getDefaultLogger()

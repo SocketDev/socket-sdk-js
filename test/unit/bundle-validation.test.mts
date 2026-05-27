@@ -11,7 +11,7 @@ import { parse } from '@babel/parser'
 import _traverse from '@babel/traverse'
 import { describe, expect, it } from 'vitest'
 
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
 const logger = getDefaultLogger()
 

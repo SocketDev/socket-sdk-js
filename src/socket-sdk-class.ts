@@ -7,7 +7,7 @@
 import path from 'node:path'
 import process from 'node:process'
 
-import { createTtlCache } from '@socketsecurity/lib/ttl-cache/cache'
+import { createTtlCache } from '@socketsecurity/lib/cache/ttl/store'
 import { UNKNOWN_ERROR } from '@socketsecurity/lib/constants/sentinels'
 import { getAbortSignal } from '@socketsecurity/lib/process/abort'
 import { SOCKET_PUBLIC_API_TOKEN } from '@socketsecurity/lib/constants/socket'
@@ -15,14 +15,14 @@ import { isDebugNs } from '@socketsecurity/lib/debug/namespace'
 import { debugLog } from '@socketsecurity/lib/debug/output'
 import { validateFiles } from '@socketsecurity/lib/fs/validate'
 import { parseJson } from '@socketsecurity/lib/json/parse'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 import { getOwn } from '@socketsecurity/lib/objects/inspect'
 import { isObject } from '@socketsecurity/lib/objects/predicates'
 import { ArrayIsArray } from '@socketsecurity/lib/primordials/array'
 import { ErrorCtor, TypeErrorCtor } from '@socketsecurity/lib/primordials/error'
 import { StringPrototypeTrim } from '@socketsecurity/lib/primordials/string'
 import { pRetry } from '@socketsecurity/lib/promises/retry'
-import { setMaxEventTargetListeners } from '@socketsecurity/lib/warnings/event-target'
+import { setMaxEventTargetListeners } from '@socketsecurity/lib/events/warning/handler'
 import { urlSearchParamsAsBoolean } from '@socketsecurity/lib/url/search-params'
 
 const abortSignal = getAbortSignal()
@@ -125,7 +125,7 @@ import type {
   RepositoryResult,
   StrictErrorResult,
 } from './types-strict'
-import type { TtlCache } from '@socketsecurity/lib/ttl-cache/types'
+import type { TtlCache } from '@socketsecurity/lib/cache/ttl/types'
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 
 /**
