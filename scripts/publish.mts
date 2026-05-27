@@ -33,7 +33,7 @@ import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { checkbox, password } from '@socketsecurity/lib/stdio/prompts'
 
 import {
@@ -48,9 +48,9 @@ const logger = getDefaultLogger()
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
 interface StageListEntry {
-  name?: string
-  version?: string
-  stageId?: string
+  name?: string | undefined
+  version?: string | undefined
+  stageId?: string | undefined
 }
 
 async function main(): Promise<void> {
@@ -326,7 +326,8 @@ async function fetchPriorProvenanceMap(
   entries: StageListEntry[],
 ): Promise<Map<string, boolean>> {
   const uniqueNames = new Set<string>()
-  for (const e of entries) {
+  for (let i = 0, { length } = entries; i < length; i += 1) {
+    const e = entries[i]!
     if (e.name) {
       uniqueNames.add(e.name)
     }
