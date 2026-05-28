@@ -74,6 +74,10 @@
           },
           {
             "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/parallel-agent-edit-guard/index.mts"
+          },
+          {
+            "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/path-guard/index.mts"
           },
           {
@@ -131,6 +135,10 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/no-structured-clone-prefer-json-guard/index.mts"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/trust-downgrade-guard/index.mts"
           }
         ]
       },
@@ -221,6 +229,10 @@
           },
           {
             "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/parallel-agent-staging-guard/index.mts"
+          },
+          {
+            "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/prefer-rebase-over-revert-guard/index.mts"
           },
           {
@@ -242,6 +254,10 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/token-guard/index.mts"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/trust-downgrade-guard/index.mts"
           },
           {
             "type": "command",
@@ -352,6 +368,10 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/judgment-reminder/index.mts"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/parallel-agent-on-stop-reminder/index.mts"
           },
           {
             "type": "command",
