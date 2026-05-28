@@ -124,5 +124,8 @@
     "node": ">=18.20.8",
     "pnpm": ">=11.3.0"
   },
-  "packageManager": "pnpm@11.3.0"
+  "packageManager": "pnpm@11.3.0",
+  "allowScripts": {
+    "rolldown": true
+  }
 }
