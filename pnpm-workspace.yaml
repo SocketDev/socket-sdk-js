@@ -91,6 +91,12 @@ minimumReleaseAgeExclude:
   - '@socketbin/*'
   - '@socketregistry/*'
   - '@socketsecurity/*'
+  # compromise@14.15.1 is the attested re-publish that clears the
+  # trust-downgrade flag on 14.15.0. The catalog bump cascaded from the
+  # wheelhouse without its matching soak-exclude, leaving frozen installs
+  # broken; scoped to the exact tag so a future 14.15.2 still soaks.
+  # published: 2026-05-27 | removable: 2026-06-03
+  - 'compromise@14.15.1'
   # Network-mocking lib used in fleet test suites. v15 betas pre-date
   # npm's `time` field for the major; allow pinned beta until v15 GA.
   - 'nock@15.0.0-beta.11'

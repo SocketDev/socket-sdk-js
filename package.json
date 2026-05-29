@@ -106,6 +106,7 @@
     "oxlint": "1.63.0",
     "rolldown": "catalog:",
     "semver": "7.7.2",
+    "shell-quote": "1.8.4",
     "taze": "19.11.0",
     "type-coverage": "2.29.7",
     "vitest": "4.0.3"
