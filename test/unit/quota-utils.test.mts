@@ -192,7 +192,7 @@ describe('Quota Utils', () => {
       const methodsList = Object.values(summary)
       for (let i = 0, { length } = methodsList; i < length; i += 1) {
         const methods = methodsList[i]!
-        const sorted = [...methods].sort()
+        const sorted = [...methods].toSorted()
         expect(methods).toEqual(sorted)
       }
     })
