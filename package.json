@@ -71,7 +71,8 @@
     "update": "node scripts/update.mts",
     "lockstep": "node scripts/lockstep.mts",
     "lockstep:emit-schema": "node scripts/lockstep-emit-schema.mts",
-    "setup-security-tools": "node .claude/hooks/setup-security-tools/install.mts"
+    "setup-security-tools": "node .claude/hooks/setup-security-tools/install.mts",
+    "ci:local": "agent-ci run --all"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "2.1.92",
@@ -122,9 +123,9 @@
   },
   "engines": {
     "node": ">=18.20.8",
-    "pnpm": ">=11.3.0"
+    "pnpm": ">=11.4.0"
   },
-  "packageManager": "pnpm@11.3.0",
+  "packageManager": "pnpm@11.4.0",
   "allowScripts": {
     "rolldown": true
   }
