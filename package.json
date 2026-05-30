@@ -81,6 +81,7 @@
     "@babel/traverse": "7.26.4",
     "@babel/types": "7.26.3",
     "@oxlint/migrate": "1.52.0",
+    "@redwoodjs/agent-ci": "catalog:",
     "@sinclair/typebox": "0.34.49",
     "@socketregistry/packageurl-js-stable": "catalog:",
     "@socketsecurity/lib": "catalog:",
@@ -128,6 +129,9 @@
   },
   "packageManager": "pnpm@11.4.0",
   "allowScripts": {
-    "rolldown": true
+    "cpu-features": false,
+    "protobufjs": false,
+    "rolldown": true,
+    "ssh2": false
   }
 }
