@@ -130,10 +130,10 @@ async function main(): Promise<void> {
  * Detect whether this package has previously been published via the staged
  * path. Returns true when ANY published version of `pkg.name` carries the
  * registry packument's `_npmUser.approver` field — the signal pnpm uses for its
- * `stagedPublish` trust-evidence tier (see github.com/pnpm/pnpm pull 12056). A package with an
- * approver in its history has chosen the strongest trust path available;
- * downgrading to --direct for a new version would erase that signal in the
- * package's trust chain.
+ * `stagedPublish` trust-evidence tier (see github.com/pnpm/pnpm pull 12056). A
+ * package with an approver in its history has chosen the strongest trust path
+ * available; downgrading to --direct for a new version would erase that signal
+ * in the package's trust chain.
  *
  * Used by --direct to refuse running when the package's prior versions used
  * staging: we want that trade-off to be a deliberate choice, not an accident.
