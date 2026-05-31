@@ -38,6 +38,7 @@ overrides:
   'defu': '>=6.1.7'
   # advisories #51 / #54 (medium) — bump to latest 6.x patch
   'undici': '6.25.0'
+  'uuid': '11.1.1'
   'vite': 'catalog:'
 
 # Refuse to run if the pnpm version on PATH differs from the packageManager
