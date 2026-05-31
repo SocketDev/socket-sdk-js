@@ -274,10 +274,9 @@ test('bypass phrase variants do NOT count', async () => {
   const repo = makeFakeFleetRepo()
   try {
     const file = makeCanonicalFile(repo, '.git-hooks/pre-push.mts')
-    // Each of these should NOT bypass. Case matters (no toLowerCase in the
-    // normalizer) and every word of the phrase must be present.
+    // Each of these should NOT bypass: a word of the phrase is missing.
+    // (Case + dash/space variants DO count — see the next test.)
     for (const variant of [
-      'allow fleet-fork bypass', // lowercase Allow
       'Allow fleet-fork', // no "bypass"
       'fleet-fork bypass', // no "Allow"
     ]) {
@@ -299,14 +298,17 @@ test('bypass phrase variants do NOT count', async () => {
   }
 })
 
-test('hyphen / space / dash variants of the phrase all count', async () => {
+test('case / hyphen / space / dash variants of the phrase all count', async () => {
   const repo = makeFakeFleetRepo()
   try {
     const file = makeCanonicalFile(repo, '.git-hooks/pre-push.mts')
-    // The normalizer folds dash variants + whitespace, so a human typing
-    // spaces or an em-dash instead of the canonical hyphen still bypasses.
+    // The normalizer lowercases + folds dash variants + whitespace, so a
+    // human typing lowercase, spaces, or an em-dash instead of the canonical
+    // mixed-case hyphenated phrase still bypasses. Only the words + order matter.
     for (const variant of [
       'Allow fleet-fork bypass', // canonical
+      'allow fleet-fork bypass', // lowercase
+      'ALLOW FLEET-FORK BYPASS', // uppercase
       'Allow fleet fork bypass', // spaces instead of hyphen
       'Allow fleet—fork bypass', // em-dash
     ]) {
