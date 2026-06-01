@@ -11,11 +11,12 @@ import { rolldown, watch } from 'rolldown'
 
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
+import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
-import { buildConfig } from '../.config/rolldown.config.mts'
+import { buildConfig } from '../.config/repo/rolldown.config.mts'
 import { runSequence } from './utils/run-command.mts'
 
 const rootPath = path.resolve(
@@ -387,9 +388,7 @@ async function main(): Promise<void> {
       process.exitCode = exitCode
     }
   } catch (e) {
-    logger.error(
-      `Build runner failed: ${e instanceof Error ? e.message : String(e)}`,
-    )
+    logger.error(`Build runner failed: ${errorMessage(e)}`)
     process.exitCode = 1
   }
 }

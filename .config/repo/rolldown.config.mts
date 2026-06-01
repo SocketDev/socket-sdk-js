@@ -7,7 +7,7 @@
  *   prefixed + externalized via a resolveId hook.
  */
 
-import { promises as fs } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import Module from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
@@ -20,12 +20,13 @@ import { createLibStubPlugin } from './rolldown/lib-stub.mts'
 import type { OutputOptions, Plugin, RolldownOptions } from 'rolldown'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.join(__dirname, '..')
+// This config lives at .config/repo/, so the repo root is two levels up.
+const rootPath = path.join(__dirname, '..', '..')
 const srcPath = path.join(rootPath, 'src')
 const distPath = path.join(rootPath, 'dist')
 
 const packageJson = JSON.parse(
-  await fs.readFile(path.join(rootPath, 'package.json'), 'utf8'),
+  readFileSync(path.join(rootPath, 'package.json'), 'utf8'),
 ) as { dependencies?: Record<string, string> | undefined }
 const externalDependencies = Object.keys(packageJson.dependencies || {})
 
@@ -121,21 +122,22 @@ export function createNodeProtocolPlugin(): Plugin {
 }
 
 export const buildConfig: RolldownOptions & { output: OutputOptions } = {
+  // Runtime deps stay external (consumers install them); node: builtins are
+  // externalized by the node-protocol plugin.
+  external: externalDependencies,
   input: {
     index: path.join(srcPath, 'index.ts'),
     testing: path.join(srcPath, 'testing.ts'),
   },
-  platform: 'node',
-  // Runtime deps stay external (consumers install them); node: builtins are
-  // externalized by the node-protocol plugin.
-  external: externalDependencies,
-  transform: {
-    define: {
-      'process.env.NODE_ENV': JSON.stringify(
-        process.env['NODE_ENV'] || 'production',
-      ),
-    },
+  output: {
+    dir: distPath,
+    format: 'cjs',
+    entryFileNames: '[name].js',
+    minify: false,
+    sourcemap: envAsBoolean(process.env['COVERAGE']),
+    banner: '"use strict";',
   },
+  platform: 'node',
   plugins: [
     createLibStubPlugin({ stubPattern: LIB_STUB_PATTERN }),
     createCodeStubPlugin([
@@ -144,12 +146,11 @@ export const buildConfig: RolldownOptions & { output: OutputOptions } = {
     ]),
     createNodeProtocolPlugin(),
   ],
-  output: {
-    dir: distPath,
-    format: 'cjs',
-    entryFileNames: '[name].js',
-    minify: false,
-    sourcemap: envAsBoolean(process.env['COVERAGE']),
-    banner: '"use strict";',
+  transform: {
+    define: {
+      'process.env.NODE_ENV': JSON.stringify(
+        process.env['NODE_ENV'] || 'production',
+      ),
+    },
   },
 }
