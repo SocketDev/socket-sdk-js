@@ -34,25 +34,22 @@
 // dir, or the remote): better to under-block than to wedge a
 // legitimate fleet PR/issue when the shape is unfamiliar.
 
-import path from 'node:path'
 import process from 'node:process'
-import { spawnSync } from 'node:child_process'
+
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { isFleetRepo, slugFromRemoteUrl } from '../_shared/fleet-repos.mts'
+import { extractGitCwd } from '../_shared/git-cwd.mts'
+import { withBashGuard } from '../_shared/payload.mts'
 import { commandsFor } from '../_shared/shell-command.mts'
-import { bypassPhrasePresent, readStdin } from '../_shared/transcript.mts'
+import { bypassPhrasePresent } from '../_shared/transcript.mts'
 
-interface ToolInput {
-  readonly tool_name?: string | undefined
-  readonly tool_input?: { readonly command?: string | undefined } | undefined
-  readonly transcript_path?: string | undefined
-}
+const logger = getDefaultLogger()
 
 const BYPASS_PHRASE = 'Allow non-fleet-publish bypass'
 
 const GH_DASH_REPO_RE = /--repo[\s=]+("([^"]+)"|'([^']+)'|(\S+))/
-const GIT_DASH_C_RE = /\bgit\s+-C\s+("([^"]+)"|'([^']+)'|(\S+))/
-const LEADING_CD_RE = /(?:^|[;&|]|&&)\s*cd\s+("([^"]+)"|'([^']+)'|(\S+))/
 
 // gh subcommands that publish public-facing content. `release create`
 // is also in the harness deny list, but the hook layer here catches
@@ -70,21 +67,6 @@ export function extractGhTargetRepo(command: string): string | undefined {
     return m[2] ?? m[3] ?? m[4]
   }
   return undefined
-}
-
-export function extractGitCwd(command: string): string {
-  const dashC = GIT_DASH_C_RE.exec(command)
-  if (dashC) {
-    return dashC[2] ?? dashC[3] ?? dashC[4] ?? process.cwd()
-  }
-  const cd = LEADING_CD_RE.exec(command)
-  if (cd) {
-    const dir = cd[2] ?? cd[3] ?? cd[4]
-    if (dir) {
-      return path.resolve(process.cwd(), dir)
-    }
-  }
-  return process.cwd()
 }
 
 function originSlugFromCwd(dir: string): string | undefined {
@@ -121,24 +103,15 @@ export function findPublicGhInvocation(
   return undefined
 }
 
-async function main(): Promise<void> {
-  const raw = await readStdin()
-  let payload: ToolInput
-  try {
-    payload = raw ? JSON.parse(raw) : {}
-  } catch {
-    process.exit(0)
-  }
-  if (payload.tool_name !== 'Bash') {
-    process.exit(0)
-  }
-  const command = payload.tool_input?.command ?? ''
-  if (!command || !/\bgh\b/.test(command)) {
-    process.exit(0)
+// withBashGuard handles the stdin drain, tool_name gate, command narrow,
+// and fail-open on any throw.
+await withBashGuard((command, payload) => {
+  if (!/\bgh\b/.test(command)) {
+    return
   }
   const subcommand = findPublicGhInvocation(command)
   if (!subcommand) {
-    process.exit(0)
+    return
   }
 
   // Resolve target slug. `--repo` carries owner/repo (shown
@@ -155,7 +128,7 @@ async function main(): Promise<void> {
   if (!slug) {
     // Fail open — can't determine target. The user gets the gh
     // command's own error if it's malformed.
-    process.exit(0)
+    return
   }
   const slashIdx = slug.indexOf('/')
   const bareSlug = slashIdx === -1 ? slug : slug.slice(slashIdx + 1)
@@ -163,7 +136,7 @@ async function main(): Promise<void> {
   if (isFleetRepo(bareSlug)) {
     // Fleet repo — fall through. The action is authorized by being
     // inside the fleet.
-    process.exit(0)
+    return
   }
 
   // Non-fleet target. Check bypass phrase.
@@ -171,10 +144,10 @@ async function main(): Promise<void> {
     payload.transcript_path &&
     bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)
   ) {
-    process.exit(0)
+    return
   }
 
-  process.stderr.write(
+  logger.error(
     [
       'non-fleet-pr-issue-ask-guard: blocked',
       '',

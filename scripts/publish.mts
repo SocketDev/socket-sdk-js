@@ -140,12 +140,11 @@ async function main(): Promise<void> {
  * First-publish packages (no prior versions) get a pass — they have no staged
  * history to preserve.
  */
-async function isStagingExpected(pkgName: string): Promise<boolean> {
+export async function isStagingExpected(pkgName: string): Promise<boolean> {
   try {
     const versions = await fetchVersionTrustInfo(pkgName, 'full')
     for (const v of Object.values(versions)) {
-      const npmUser = (v as { _npmUser?: { approver?: unknown } })._npmUser
-      if (npmUser && npmUser.approver !== undefined) {
+      if (v.approver !== undefined) {
         return true
       }
     }
@@ -485,7 +484,9 @@ function formatPriorProvenance(
     : '  [prior: ✗ no provenance]'
 }
 
-main().catch((e: unknown) => {
-  logger.error(e)
-  process.exitCode = 1
-})
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((e: unknown) => {
+    logger.error(e)
+    process.exitCode = 1
+  })
+}

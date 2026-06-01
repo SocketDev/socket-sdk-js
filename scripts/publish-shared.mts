@@ -170,6 +170,13 @@ export interface RegistryVersionInfo {
         provenance: { predicateType: string }
       }
     | undefined
+  /**
+   * `_npmUser.approver` — set when the version landed through pnpm's staged-
+   * publish flow (a human approver clicked through 2FA). Used by
+   * `publish.mts:isStagingExpected` to refuse a --direct downgrade when any
+   * prior version of the package chose the staged path.
+   */
+  approver?: string | undefined
 }
 
 /**
@@ -215,6 +222,7 @@ export async function fetchVersionTrustInfo(
               | undefined
             _npmUser?:
               | {
+                  approver?: string | undefined
                   trustedPublisher?:
                     | { id: string; oidcConfigId?: string | undefined }
                     | undefined
@@ -241,6 +249,9 @@ export async function fetchVersionTrustInfo(
   const result: Record<string, RegistryVersionInfo> = {}
   for (const [version, info] of Object.entries(json.versions ?? {})) {
     result[version] = {
+      ...(info._npmUser?.approver !== undefined
+        ? { approver: info._npmUser.approver }
+        : {}),
       ...(info._npmUser?.trustedPublisher
         ? { trustedPublisher: info._npmUser.trustedPublisher }
         : {}),
