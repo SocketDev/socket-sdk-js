@@ -70,11 +70,12 @@
 .claude/skills/fleet/updating/SKILL.md linguist-generated=true
 .claude/skills/fleet/updating/reference.md linguist-generated=true
 .claude/skills/fleet/worktree-management/SKILL.md linguist-generated=true
-.config/.prettierignore linguist-generated=true
 .config/fleet/.markdownlint-cli2.jsonc linguist-generated=true
 .config/fleet/.prettierignore linguist-generated=true
 .config/fleet/markdownlint-rules linguist-generated=true
+.config/fleet/oxfmtrc.json linguist-generated=true
 .config/fleet/oxlint-plugin linguist-generated=true
+.config/fleet/oxlintrc.json linguist-generated=true
 .config/fleet/sfw-bypass-list.txt linguist-generated=true
 .config/fleet/taze.config.mts linguist-generated=true
 .config/fleet/tsconfig.base.json linguist-generated=true
