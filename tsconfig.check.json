@@ -1,13 +1,6 @@
 {
-  "extends": "./.config/tsconfig.base.json",
+  "extends": "./.config/fleet/tsconfig.check.base.json",
   "compilerOptions": {
-    "allowImportingTsExtensions": true,
-    "declarationMap": false,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "noEmit": true,
-    "skipLibCheck": true,
-    "sourceMap": false,
     "types": ["vitest/globals", "node"],
     "verbatimModuleSyntax": false
   },
