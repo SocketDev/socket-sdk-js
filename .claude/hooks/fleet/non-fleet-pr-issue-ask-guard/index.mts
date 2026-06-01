@@ -167,12 +167,5 @@ await withBashGuard((command, payload) => {
       '  yes/no before re-attempting.',
     ].join('\n') + '\n',
   )
-  process.exit(2)
-}
-
-main().catch(err => {
-  process.stderr.write(
-    `non-fleet-pr-issue-ask-guard: hook crashed, failing open: ${err instanceof Error ? err.message : String(err)}\n`,
-  )
-  process.exit(0)
+  process.exitCode = 2
 })

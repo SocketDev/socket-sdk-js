@@ -52,11 +52,19 @@ export function runCapture(
   cwd: string,
 ): Promise<{ stdout: string; code: number }> {
   return new Promise((resolve, reject) => {
-    const { process: child } = spawn(cmd, args, {
+    const childPromise = spawn(cmd, args, {
       cwd,
       shell: WIN32,
       stdio: ['ignore', 'pipe', 'inherit'],
     })
+    // v6 lib-stable spawn returns an enriched Promise that rejects on
+    // non-zero exit. We resolve on exit-code below regardless, so swallow
+    // the Promise rejection to avoid a process-killing unhandled rejection
+    // when the spawned binary exits non-zero (e.g. `npm view <unpublished>`
+    // returning 404 → exit 1, which is the documented signal for
+    // `isAlreadyPublished` to return false).
+    void childPromise.catch(() => undefined)
+    const child = childPromise.process
     let stdout = ''
     child.stdout?.on('data', (chunk: Buffer) => {
       stdout += chunk.toString('utf8')
