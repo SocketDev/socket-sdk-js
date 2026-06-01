@@ -49,9 +49,10 @@ describe('Socket SDK - New API Methods (v3.3.0)', () => {
       if (result.success) {
         expect(result.data).toHaveLength(2)
 
-        expect((result.data as any[])[0].name).toBe('express')
+        const rows = result.data as unknown as Array<{ name: string }>
+        expect(rows[0]?.name).toBe('express')
 
-        expect((result.data as any[])[1].name).toBe('django')
+        expect(rows[1]?.name).toBe('django')
       }
     })
 
@@ -184,11 +185,15 @@ describe('Socket SDK - New API Methods (v3.3.0)', () => {
 
       expect(result.success).toBe(true)
       if (result.success) {
-        expect((result.data as any).version).toBe(1)
+        const vex = result.data as unknown as {
+          version: number
+          statements?: Array<{ status: string }> | undefined
+        }
+        expect(vex.version).toBe(1)
 
-        expect((result.data as any).statements).toHaveLength(1)
+        expect(vex.statements).toHaveLength(1)
 
-        expect((result.data as any).statements?.[0].status).toBe('affected')
+        expect(vex.statements?.[0]?.status).toBe('affected')
       }
     })
 
@@ -216,9 +221,13 @@ describe('Socket SDK - New API Methods (v3.3.0)', () => {
 
       expect(result.success).toBe(true)
       if (result.success) {
-        expect((result.data as any).author).toBe('Security Team')
+        const doc = result.data as unknown as {
+          author: string
+          role: string
+        }
+        expect(doc.author).toBe('Security Team')
 
-        expect((result.data as any).role).toBe('VEX Generator')
+        expect(doc.role).toBe('VEX Generator')
       }
     })
 
@@ -267,25 +276,32 @@ describe('Socket SDK - New API Methods (v3.3.0)', () => {
 
       expect(result.success).toBe(true)
       if (result.success) {
-        expect((result.data as any).items).toHaveLength(2)
+        const page = result.data as unknown as {
+          items?: Array<{ fullScanId: string }> | undefined
+          endCursor: string | null
+        }
+        expect(page.items).toHaveLength(2)
 
-        expect((result.data as any).items?.[0].fullScanId).toBe('scan_abc')
+        expect(page.items?.[0]?.fullScanId).toBe('scan_abc')
 
-        expect((result.data as any).endCursor).toBe('cursor-123')
+        expect(page.endCursor).toBe('cursor-123')
       }
     })
 
     it('should list full scans with date range filter', async () => {
-      const mockResponse = {
-        endCursor: undefined,
-        items: [
+      // Emitted as a raw JSON string so `endCursor` stays JSON null on the wire
+      // (the API sends null for "no next page"); a JS `undefined` would be
+      // dropped by JSON.stringify and arrive as a missing key.
+      const mockResponse = `{
+        "endCursor": null,
+        "items": [
           {
-            fullScanId: 'scan_xyz',
-            branchName: 'main',
-            repoFullName: 'my-org/my-repo',
-          },
-        ],
-      }
+            "fullScanId": "scan_xyz",
+            "branchName": "main",
+            "repoFullName": "my-org/my-repo"
+          }
+        ]
+      }`
 
       nock('https://api.socket.dev')
         .get(
@@ -300,9 +316,13 @@ describe('Socket SDK - New API Methods (v3.3.0)', () => {
 
       expect(result.success).toBe(true)
       if (result.success) {
-        expect((result.data as any).items).toHaveLength(1)
+        const page = result.data as unknown as {
+          items?: unknown[] | undefined
+          endCursor: string | null
+        }
+        expect(page.items).toHaveLength(1)
 
-        expect((result.data as any).endCursor).toBeNull()
+        expect(page.endCursor).toBeNull()
       }
     })
 
@@ -331,7 +351,8 @@ describe('Socket SDK - New API Methods (v3.3.0)', () => {
 
       expect(result.success).toBe(true)
       if (result.success) {
-        expect((result.data as any).endCursor).toBe('cursor-456')
+        const page = result.data as unknown as { endCursor: string | null }
+        expect(page.endCursor).toBe('cursor-456')
       }
     })
 

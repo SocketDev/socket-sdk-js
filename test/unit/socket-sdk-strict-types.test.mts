@@ -41,7 +41,8 @@ describe.sequential('Strict Types - v3.0', () => {
             branch: 'main',
             commit_message: 'Test commit',
             commit_hash: 'abc123',
-            pull_request: undefined,
+            // oxlint-disable-next-line socket/prefer-undefined-over-null -- wire data: the API returns null for a scan with no associated pull request.
+            pull_request: null,
             committers: [],
             html_url: undefined,
             integration_branch_url: undefined,
@@ -50,8 +51,12 @@ describe.sequential('Strict Types - v3.0', () => {
             scan_state: 'pending',
           },
         ],
-        nextPageCursor: undefined,
-        nextPage: undefined,
+        // Wire data: the API returns JSON null (not undefined) for absent
+        // pagination cursors, and JSON.stringify would drop undefined keys.
+        // oxlint-disable-next-line socket/prefer-undefined-over-null -- API returns null for absent pagination cursors.
+        nextPage: null as number | null,
+        // oxlint-disable-next-line socket/prefer-undefined-over-null -- API returns null for absent pagination cursors.
+        nextPageCursor: null as string | null,
       }
 
       nock('https://api.socket.dev')
