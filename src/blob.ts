@@ -36,6 +36,13 @@ export interface FetchBlobOptions {
   extraHeaders?: Record<string, string> | undefined
   // Hard cap on bytes returned. Larger blobs are truncated and flagged.
   maxBytes?: number | undefined
+  // Hard cap on the bytes any single request may buffer, enforced at the
+  // socket layer (httpRequest's maxResponseSize) so an oversized body is
+  // rejected before it is read into memory — `maxBytes` only trims what was
+  // already buffered, so this is what actually bounds peak memory. Defaults to
+  // `maxBytes` (or DEFAULT_MAX_BYTES), floored at MIN_MAX_RESPONSE_BYTES so a
+  // chunked manifest still fits.
+  maxResponseBytes?: number | undefined
   // Called with the resolved URL right before each request is dispatched
   // (chunked blobs fire this once per chunk).
   onRequest?: ((url: string) => void) | undefined
@@ -55,6 +62,11 @@ interface ChunkedManifest {
 }
 
 const DEFAULT_MAX_BYTES = 1024 * 1024 // 1 MB
+
+// Floor for the per-request socket-layer cap so a chunked manifest (a small
+// JSON document listing chunk hashes) still fits even when a caller passes a
+// tiny maxBytes.
+const MIN_MAX_RESPONSE_BYTES = 1024 * 1024 // 1 MB
 
 /**
  * Fetch a content-addressed blob by hash. Single-blob (`Q`) hashes resolve to
@@ -130,20 +142,24 @@ export async function fetchChunkedBytes(
   }
   const chunks = manifest.chunks as string[]
   const totalSize = typeof manifest.size === 'number' ? manifest.size : -1
-  // Offsets are usable only when every entry is a number AND there is one per
-  // chunk. Check both together so a single non-numeric entry yields undefined
-  // (skip the optimization) rather than a short, mismatched array.
+  // Offsets enable the early-stop optimization, but only when `size` is also
+  // present (totalSize >= 0). Without `size`, stopping early would force the
+  // fallback `totalSize = total` (the sum of only the FETCHED chunks), which
+  // understates the true blob size and makes fetchBlob report wrong
+  // `bytes`/`truncated`. Require all three: numeric size, one offset per chunk,
+  // every offset numeric.
   const rawOffset = manifest.offset
   const offsets =
+    totalSize >= 0 &&
     Array.isArray(rawOffset) &&
     rawOffset.length === chunks.length &&
     rawOffset.every(n => typeof n === 'number')
       ? (rawOffset as number[])
       : undefined
 
-  // Decide how many chunks we actually need. With offsets we can stop at the
-  // first chunk whose start is at or past maxBytes; without, we fetch
-  // everything and truncate after concatenation.
+  // Decide how many chunks we actually need. With offsets (and a known size)
+  // we can stop at the first chunk whose start is at or past maxBytes; without,
+  // we fetch everything and truncate after concatenation.
   let needed = chunks.length
   if (offsets) {
     needed = 0
@@ -196,10 +212,18 @@ export async function fetchRawBytes(
     Object.assign(headers, options.extraHeaders)
   }
 
+  // Cap the response at the socket layer so an oversized body is rejected
+  // before it is buffered into memory (the lone path in this SDK that would
+  // otherwise read an unbounded body — see downloadPatch / http-client.ts).
+  const maxResponseSize = Math.max(
+    options.maxResponseBytes ?? options.maxBytes ?? DEFAULT_MAX_BYTES,
+    MIN_MAX_RESPONSE_BYTES,
+  )
+
   options.onRequest?.(url)
   let res
   try {
-    res = await httpRequest(url, { headers })
+    res = await httpRequest(url, { headers, maxResponseSize })
   } catch (e) {
     throw new Error(`blob request to ${url} failed: ${errorMessage(e)}`)
   }

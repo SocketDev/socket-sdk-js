@@ -108,4 +108,30 @@ describe('fetchBlob chunked blob', () => {
       /missing a valid 'chunks' array/,
     )
   })
+
+  it('fetches all chunks (no early-stop) when offset is present but size is absent', async () => {
+    // With offsets but no `size`, the early-stop optimization must NOT fire:
+    // stopping early would report the partial sum as the total and mislabel
+    // truncation. The manifest has 3 chunks (3 bytes each = 9 total) with
+    // offsets, no size, and maxBytes below the total — all 3 must still be
+    // fetched and `bytes` must reflect the full 9, with truncated=true.
+    nock(HOST)
+      .get('/blob/Qmanifest')
+      .reply(
+        200,
+        JSON.stringify({ chunks: ['Qa', 'Qb', 'Qc'], offset: [0, 3, 6] }),
+        { 'content-type': 'application/json' },
+      )
+    nock(HOST).get('/blob/Qa').reply(200, 'aaa')
+    nock(HOST).get('/blob/Qb').reply(200, 'bbb')
+    nock(HOST).get('/blob/Qc').reply(200, 'ccc')
+
+    const result = await fetchBlob('Smanifest', { baseUrl: HOST, maxBytes: 4 })
+    // All 3 chunks fetched → true total 9 is known; bytes reports 9, not a
+    // partial sum, and truncated is correctly true (9 > 4). Returned text is
+    // the first 4 bytes of the concatenated 'aaabbbccc'.
+    expect(result.bytes).toBe(9)
+    expect(result.truncated).toBe(true)
+    expect(result.text).toBe('aaab')
+  })
 })
