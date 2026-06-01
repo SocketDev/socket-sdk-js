@@ -782,10 +782,10 @@ export async function updateIndexExports(): Promise<void> {
  */
 async function main(): Promise<void> {
   try {
-    logger.log('Generating strict types from OpenAPI schema using AST...')
+    logger.log('Generating strict types from OpenAPI schema using AST…')
 
     // Step 1: Generate TypeScript using openapi-typescript
-    logger.log('  Running openapi-typescript...')
+    logger.log('  Running openapi-typescript…')
     const generatedTS = await openapiTS(openApiPath, {
       transform(schemaObject) {
         if ('format' in schemaObject && schemaObject['format'] === 'binary') {
@@ -796,7 +796,7 @@ async function main(): Promise<void> {
     })
 
     // Step 2: Parse the generated TypeScript with acorn
-    logger.log('  Parsing generated TypeScript with acorn...')
+    logger.log('  Parsing generated TypeScript with acorn…')
     const ast = parseTypeScript(generatedTS)
 
     // Step 3: Find the operations interface
@@ -903,7 +903,7 @@ ${generateWrapperTypes()}
 
     // Step 8: Format generated files with Biome.
     // Use `pnpm exec` (CLAUDE.md forbids `npx` / `pnpm dlx`).
-    logger.log('  Formatting generated files...')
+    logger.log('  Formatting generated files…')
     const formatResult = spawnSync(
       'pnpm',
       ['exec', 'biome', 'format', '--write', strictTypesPath],

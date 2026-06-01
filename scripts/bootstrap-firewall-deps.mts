@@ -276,7 +276,7 @@ export function readPinnedVersion(pkgName: string): string {
 
 export async function main(): Promise<number> {
   log(
-    `Bootstrapping ${BOOTSTRAP_PACKAGES.length} package(s) from npm registry...`,
+    `Bootstrapping ${BOOTSTRAP_PACKAGES.length} package(s) from npm registry…`,
   )
   for (let i = 0, { length } = BOOTSTRAP_PACKAGES; i < length; i += 1) {
     const pkg = BOOTSTRAP_PACKAGES[i]!

@@ -144,7 +144,7 @@ export async function watchBuild(options: BuildOptions = {}): Promise<number> {
 
   if (!quiet) {
     logger.step('Starting watch mode with incremental builds')
-    logger.substep('Watching for file changes...')
+    logger.substep('Watching for file changes…')
   }
 
   try {

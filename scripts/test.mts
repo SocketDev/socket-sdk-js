@@ -74,7 +74,7 @@ const removeExitHandler = onExit(
 
     if (signal) {
       logger.log('')
-      logger.log(`Received ${signal}, cleaning up...`)
+      logger.log(`Received ${signal}, cleaning up…`)
       // Let onExit handle the exit with proper code
       process.exitCode = 128 + (signal === 'SIGINT' ? 2 : 15)
     }
@@ -267,7 +267,7 @@ export async function runCheck(): Promise<number> {
   logger.step('Running checks')
 
   // Run fix (auto-format) quietly since it has its own output
-  spinner.start('Formatting code...')
+  spinner.start('Formatting code…')
   let exitCode = await runCommand('pnpm', ['run', 'fix'], {
     stdio: 'pipe',
   })
@@ -282,7 +282,7 @@ export async function runCheck(): Promise<number> {
   logger.success('Code formatted')
 
   // Run oxlint to check for remaining issues
-  spinner.start('Running oxlint...')
+  spinner.start('Running oxlint…')
   exitCode = await runCommand(
     'oxlint',
     ['--config', '.config/oxlintrc.json', '.'],
@@ -301,7 +301,7 @@ export async function runCheck(): Promise<number> {
   logger.success('oxlint passed')
 
   // Run TypeScript check
-  spinner.start('Checking TypeScript...')
+  spinner.start('Checking TypeScript…')
   exitCode = await runCommand('tsgo', ['--noEmit', '-p', tsConfigPath], {
     stdio: 'pipe',
   })

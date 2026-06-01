@@ -124,7 +124,7 @@ export const getMethodsByPermissions = memoize(
         )
       })
       .map(([methodName]) => methodName)
-      .sort()
+      .toSorted()
   },
   { name: 'getMethodsByPermissions' },
 )
@@ -141,7 +141,7 @@ export const getMethodsByQuotaCost = memoize(
     return Object.entries(reqs.api)
       .filter(([, requirement]) => requirement.quota === quotaCost)
       .map(([methodName]) => methodName)
-      .sort()
+      .toSorted()
   },
   { name: 'getMethodsByQuotaCost' },
 )
