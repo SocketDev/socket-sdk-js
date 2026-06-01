@@ -99,10 +99,10 @@ The cascade's `extractFleetBlock` + `spliceFleetBlock` only touches the content 
 
 ### What the cascade does and doesn't replace
 
-| Section | Cascade behavior |
-|---|---|
-| Preamble (before `BEGIN FLEET-CANONICAL`) | Passes through untouched |
-| Canonical block | Replaced with wheelhouse template's canonical block |
-| Postamble (after `END FLEET-CANONICAL`) | Passes through untouched |
+| Section                                   | Cascade behavior                                    |
+| ----------------------------------------- | --------------------------------------------------- |
+| Preamble (before `BEGIN FLEET-CANONICAL`) | Passes through untouched                            |
+| Canonical block                           | Replaced with wheelhouse template's canonical block |
+| Postamble (after `END FLEET-CANONICAL`)   | Passes through untouched                            |
 
 So if the cascade pushes a downstream CLAUDE.md back over 40 KB, the fix is to trim the downstream's preamble or postamble — never the canonical block. The cascade preserves what you've trimmed there.

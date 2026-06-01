@@ -5,7 +5,7 @@ import { getResponseJson } from '../../src/http-client.js'
 
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 
-vi.mock('@socketsecurity/lib/json/parse', () => ({
+vi.mock(import('@socketsecurity/lib/json/parse'), () => ({
   parseJson: vi.fn(),
 }))
 

@@ -62,7 +62,7 @@ describe('HTTP Client - Response Body Reading', () => {
   })
 
   it('should read large response body', () => {
-    const largeBody = 'x'.repeat(10000)
+    const largeBody = 'x'.repeat(10_000)
     const response = mockHttpResponse({ body: largeBody })
     expect(response.text()).toBe(largeBody)
   })

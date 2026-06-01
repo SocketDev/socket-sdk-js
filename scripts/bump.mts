@@ -87,23 +87,23 @@ if (hasInteractivePrompts) {
 
 // Simple inline logger.
 const log = {
-  info: (msg: string) => logger.log(msg),
+  done: (msg: string) => {
+    logger.clearLine()
+    logger.substep(msg)
+  },
   error: (msg: string) => logger.fail(msg),
-  success: (msg: string) => logger.success(msg),
+  failed: (msg: string) => {
+    logger.clearLine()
+    logger.substep(msg)
+  },
+  info: (msg: string) => logger.log(msg),
+  progress: (msg: string) => logger.progress(msg),
   step: (msg: string) => {
     logger.log('')
     logger.log(msg)
   },
   substep: (msg: string) => logger.substep(msg),
-  progress: (msg: string) => logger.progress(msg),
-  done: (msg: string) => {
-    logger.clearLine()
-    logger.substep(msg)
-  },
-  failed: (msg: string) => {
-    logger.clearLine()
-    logger.substep(msg)
-  },
+  success: (msg: string) => logger.success(msg),
   warn: (msg: string) => logger.warn(msg),
 }
 

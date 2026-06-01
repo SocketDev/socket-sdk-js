@@ -265,14 +265,14 @@ describe('Quota Utils', () => {
     })
 
     it('should throw error when requirements.json file cannot be read', async () => {
-      vi.doMock('node:fs', () => ({
+      vi.doMock(import('node:fs'), () => ({
         existsSync: vi.fn(() => true),
         readFileSync: vi.fn(() => {
           throw new Error('ENOENT: no such file or directory')
         }),
       }))
 
-      vi.doMock('@socketsecurity/lib/memo/memoize', () => ({
+      vi.doMock(import('@socketsecurity/lib/memo/memoize'), () => ({
         memoize: (fn: unknown) => fn,
         once: (fn: unknown) => fn,
       }))
@@ -287,12 +287,12 @@ describe('Quota Utils', () => {
     })
 
     it('should throw error when requirements.json contains invalid JSON', async () => {
-      vi.doMock('node:fs', () => ({
+      vi.doMock(import('node:fs'), () => ({
         existsSync: vi.fn(() => true),
         readFileSync: vi.fn(() => 'invalid json content {'),
       }))
 
-      vi.doMock('@socketsecurity/lib/memo/memoize', () => ({
+      vi.doMock(import('@socketsecurity/lib/memo/memoize'), () => ({
         memoize: (fn: unknown) => fn,
         once: (fn: unknown) => fn,
       }))
@@ -307,12 +307,12 @@ describe('Quota Utils', () => {
     })
 
     it('should throw error when requirements.json file does not exist', async () => {
-      vi.doMock('node:fs', () => ({
+      vi.doMock(import('node:fs'), () => ({
         existsSync: vi.fn(() => false),
         readFileSync: vi.fn(),
       }))
 
-      vi.doMock('@socketsecurity/lib/memo/memoize', () => ({
+      vi.doMock(import('@socketsecurity/lib/memo/memoize'), () => ({
         memoize: (fn: unknown) => fn,
         once: (fn: unknown) => fn,
       }))

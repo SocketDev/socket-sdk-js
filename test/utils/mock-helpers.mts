@@ -6,7 +6,7 @@ import { Readable } from 'node:stream'
 import { vi } from 'vitest'
 
 // Mock fs.createReadStream to prevent test-package.json from being created.
-vi.mock('node:fs', async () => {
+vi.mock(import('node:fs'), async () => {
   const actual = await vi.importActual<typeof import('node:fs')>('node:fs')
   return {
     ...actual,
