@@ -110,7 +110,7 @@
     "shell-quote": "1.8.4",
     "taze": "19.11.0",
     "type-coverage": "2.29.7",
-    "vitest": "4.0.3"
+    "vitest": "4.1.0"
   },
   "typeCoverage": {
     "atLeast": 99,
