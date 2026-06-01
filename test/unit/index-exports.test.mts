@@ -51,6 +51,12 @@ describe('index.ts exports', () => {
 
       // User agent function
       'createUserAgentFromPkgJson',
+
+      // Blob helpers
+      'fetchBlob',
+      'fetchChunkedBytes',
+      'fetchRawBytes',
+      'tryDecodeText',
     ]
 
     for (let i = 0, { length } = expectedExports; i < length; i += 1) {
@@ -66,6 +72,9 @@ describe('index.ts exports', () => {
       'SocketSdk',
       'calculateTotalQuotaCost',
       'createUserAgentFromPkgJson',
+      'fetchBlob',
+      'fetchChunkedBytes',
+      'fetchRawBytes',
       'getAllMethodRequirements',
       'getMethodRequirements',
       'getMethodsByPermissions',
@@ -74,6 +83,7 @@ describe('index.ts exports', () => {
       'getQuotaUsageSummary',
       'getRequiredPermissions',
       'hasQuotaForMethods',
+      'tryDecodeText',
     ])
 
     // Check that we don't have unexpected exports (CommonJS build adds 'default')

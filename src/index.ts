@@ -4,6 +4,19 @@
  */
 
 /* c8 ignore start - Re-export module, no testable logic */
+// Re-export the content-addressed blob helpers (socketusercontent.com).
+export {
+  fetchBlob,
+  fetchChunkedBytes,
+  fetchRawBytes,
+  tryDecodeText,
+} from './blob'
+export type {
+  BlobResult,
+  ChunkedFetchResult,
+  FetchBlobOptions,
+  RawFetchResult,
+} from './blob'
 // Re-export HTTP client classes.
 export { ResponseError } from './http-client'
 // Re-export quota utility functions.
