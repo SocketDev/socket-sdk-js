@@ -211,6 +211,33 @@ describe('SocketSdk - API Methods Coverage', () => {
           } else {
             res.end(JSON.stringify({}))
           }
+        } else if (url.includes('/threat-feed')) {
+          // Threat-feed endpoint (org-scoped + top-level share a shape).
+          // Mirrors the depscan api-v0 threatFeedResults schema: id +
+          // threatInstanceId are integers, and publishedAt / removedAt /
+          // nextPageCursor are JSON null on the wire (SNullable in the source).
+          // Emitted as a raw JSON string so the wire `null`s stay verbatim.
+          res.end(
+            `{
+              "nextPageCursor": null,
+              "results": [
+                {
+                  "createdAt": "2024-01-01T00:00:00Z",
+                  "description": "Known malware in the postinstall script.",
+                  "id": 1,
+                  "locationHtmlUrl": "https://socket.dev/threat/1",
+                  "needsHumanReview": false,
+                  "packageHtmlUrl": "https://socket.dev/npm/package/evil",
+                  "publishedAt": null,
+                  "purl": "pkg:npm/evil@1.0.0",
+                  "removedAt": null,
+                  "threatInstanceId": 42,
+                  "threatType": "malware",
+                  "updatedAt": "2024-01-02T00:00:00Z"
+                }
+              ]
+            }`,
+          )
         } else if (url.includes('/alerts')) {
           // Alerts endpoint
           res.end(
@@ -796,6 +823,40 @@ describe('SocketSdk - API Methods Coverage', () => {
             expect(result.data.items[0].vulnerability.cvssScore).toBe(7.5)
           }
         }
+      }
+    })
+  })
+
+  describe('Threat Feed Methods', () => {
+    it('covers getOrgThreatFeedItems without query params', async () => {
+      const result = await client.getOrgThreatFeedItems('test-org')
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.results).toBeInstanceOf(Array)
+        expect(result.data.results[0]?.id).toBe(1)
+        expect(result.data.results[0]?.threatType).toBe('malware')
+        expect(result.data.results[0]?.needsHumanReview).toBe(false)
+        expect(result.data.nextPageCursor).toBeNull()
+      }
+    })
+
+    it('covers getOrgThreatFeedItems with query params', async () => {
+      const result = await client.getOrgThreatFeedItems('test-org', {
+        ecosystem: 'npm',
+        per_page: 50,
+      })
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.results).toBeInstanceOf(Array)
+      }
+    })
+
+    it('covers getThreatFeedItems (top-level)', async () => {
+      const result = await client.getThreatFeedItems({ per_page: 10 })
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.results).toBeInstanceOf(Array)
+        expect(result.data.results[0]?.purl).toBe('pkg:npm/evil@1.0.0')
       }
     })
   })

@@ -8,7 +8,7 @@
 
 Every public method on `SocketSdk`, grouped by domain. For the runtime model (result shape, pagination, file uploads, escape hatches), see [SDK Concepts](./concepts.md). For quota planning, see [Quota Management](./quota-management.md).
 
-There are **72** public methods.
+There are **74** public methods.
 
 ## Contents
 
@@ -29,6 +29,7 @@ There are **72** public methods.
 - [Exports](#exports)
 - [Quota](#quota)
 - [Escape hatches](#escape-hatches)
+- [Other](#other)
 
 ## Full scans
 
@@ -1152,3 +1153,32 @@ async sendApi<T>(
 ```
 
 **Quota:** `0` (Free) · **OpenAPI:** `sendApi`
+
+## Other
+
+Methods not yet placed into a domain group. Add them to `GROUPS` in `scripts/gen-api-docs.mts`.
+
+### `getOrgThreatFeedItems`
+
+List threat-feed items for an organization. Returns recently observed
+
+```typescript
+async getOrgThreatFeedItems(
+  orgSlug: string,
+  queryParams?: QueryParams | undefined,
+): Promise<SocketSdkResult<'getOrgThreatFeedItems'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `getOrgThreatFeedItems` · **Permissions:** `threat-feed:list`
+
+### `getThreatFeedItems`
+
+List threat-feed items across all organizations the token can see. Returns
+
+```typescript
+async getThreatFeedItems(
+  queryParams?: QueryParams | undefined,
+): Promise<SocketSdkResult<'getThreatFeedItems'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `getThreatFeedItems` · **Permissions:** `threat-feed:list`

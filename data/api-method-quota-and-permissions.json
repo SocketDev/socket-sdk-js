@@ -96,6 +96,10 @@
       "quota": 0,
       "permissions": ["settings:read"]
     },
+    "getOrgThreatFeedItems": {
+      "quota": 1,
+      "permissions": ["threat-feed:list"]
+    },
     "getQuota": {
       "quota": 0,
       "permissions": []
@@ -119,6 +123,10 @@
     "getScoreByNpmPackage": {
       "quota": 10,
       "permissions": []
+    },
+    "getThreatFeedItems": {
+      "quota": 1,
+      "permissions": ["threat-feed:list"]
     },
     "postSettings": {
       "quota": 0,

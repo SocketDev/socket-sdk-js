@@ -413,7 +413,9 @@ export class SocketSdk {
     }
     if (cacheTtl && typeof cacheTtl === 'object') {
       // Check for endpoint-specific TTL first.
-      const endpointTtl = (cacheTtl as any)[endpoint]
+      const endpointTtl = (cacheTtl as Record<string, number | undefined>)[
+        endpoint
+      ]
       if (typeof endpointTtl === 'number') {
         return endpointTtl
       }
@@ -3012,6 +3014,37 @@ export class SocketSdk {
   }
 
   /**
+   * List threat-feed items for an organization. Returns recently observed
+   * malicious / suspicious packages, paginated and filterable by ecosystem,
+   * name, version, and review state. Requires an Enterprise plan with the
+   * Threat Feed add-on and the `threat-feed:list` scope.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @quota 1 units
+   */
+  async getOrgThreatFeedItems(
+    orgSlug: string,
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'getOrgThreatFeedItems'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/threat-feed?${queryToSearchParams(queryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgThreatFeedItems'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgThreatFeedItems'>(e)
+    }
+  }
+
+  /**
    * Get organization triage settings and status. Returns alert triage
    * configuration and current state.
    *
@@ -3380,6 +3413,38 @@ export class SocketSdk {
       return this.#handleApiSuccess<'getSupportedFiles'>(data)
     } catch (e) {
       return await this.#handleApiError<'getSupportedFiles'>(e)
+    }
+  }
+
+  /**
+   * List threat-feed items across all organizations the token can see. Returns
+   * recently observed malicious / suspicious packages, paginated and filterable
+   * by ecosystem, name, version, and review state.
+   *
+   * @deprecated The backend marks the top-level `/threat-feed` route as the
+   *   deprecated form; prefer the org-scoped {@link getOrgThreatFeedItems}.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @quota 1 units
+   */
+  async getThreatFeedItems(
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'getThreatFeedItems'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `threat-feed?${queryToSearchParams(queryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getThreatFeedItems'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getThreatFeedItems'>(e)
     }
   }
 
