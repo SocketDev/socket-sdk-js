@@ -60,8 +60,8 @@ catalog:
   # self-reference. Build / hook / script / config code uses the
   # -stable name. See socket-wheelhouse@92cd3e3 for full rationale.
   '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.4.2'
-  '@socketsecurity/lib': 6.0.5
-  '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.0.5'
+  '@socketsecurity/lib': 6.0.6
+  '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.0.6'
   '@socketsecurity/registry': 2.0.2
   '@socketsecurity/registry-stable': 'npm:@socketsecurity/registry@2.0.2'
   '@socketsecurity/sdk': 4.0.1
