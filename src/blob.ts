@@ -9,6 +9,8 @@
  *   callers can refuse to forward it to a model.
  */
 
+import crypto from 'node:crypto'
+
 import { errorMessage } from '@socketsecurity/lib/errors/message'
 import { httpRequest } from '@socketsecurity/lib/http-request/request'
 
@@ -47,6 +49,10 @@ export interface FetchBlobOptions {
   // (chunked blobs fire this once per chunk).
   onRequest?: ((url: string) => void) | undefined
   userAgent?: string | undefined
+  // Verify that fetched bytes content-address to the requested hash (the whole
+  // point of a content-addressed store). On by default; throws on mismatch.
+  // Set false only to read from a store that does not use Socket's hash scheme.
+  verifyHash?: boolean | undefined
 }
 
 export interface RawFetchResult {
@@ -67,6 +73,25 @@ const DEFAULT_MAX_BYTES = 1024 * 1024 // 1 MB
 // JSON document listing chunk hashes) still fits even when a caller passes a
 // tiny maxBytes.
 const MIN_MAX_RESPONSE_BYTES = 1024 * 1024 // 1 MB
+
+// Socket's content-addressed blob hash: 'Q' + base64url(sha256(bytes)). The
+// 'S' (file-stream / chunked-manifest) prefix shares the same digest body, just
+// a different discriminator — its content is stored at the 'Q'-swapped hash.
+//
+// TEMPORARY LOCAL COPY: the canonical helpers are blobHashOf / verifyBlobHash in
+// @socketsecurity/lib's crypto/hash.ts (which itself mirrors depscan
+// workspaces/lib/src/storage/hash.ts). Swap this module to import them once a
+// lib version exposing them is published and pinned here. Lock-step: if the
+// upstream hash scheme changes, update all three.
+const BLOB_HASH_PREFIX = 'Q'
+
+/**
+ * Compute the content-address of `bytes` under Socket's blob hash scheme: `Q` +
+ * base64url(sha256(bytes)).
+ */
+export function blobHashOf(bytes: Uint8Array): string {
+  return BLOB_HASH_PREFIX + crypto.hash('sha256', bytes, 'base64url')
+}
 
 /**
  * Fetch a content-addressed blob by hash. Single-blob (`Q`) hashes resolve to
@@ -231,9 +256,18 @@ export async function fetchRawBytes(
     throw new Error(`blob fetch ${res.status} for ${url}: ${res.text()}`)
   }
 
+  const bytes = new Uint8Array(res.arrayBuffer())
+
+  // Content-addressed integrity check: the bytes must hash to the hash we asked
+  // for. httpRequest rejects (throws) past maxResponseSize rather than
+  // truncating, so `bytes` is always the complete body and this is sound.
+  if (options.verifyHash !== false) {
+    verifyBlobHash(hash, bytes)
+  }
+
   const contentTypeHeader = res.headers['content-type']
   return {
-    bytes: new Uint8Array(res.arrayBuffer()),
+    bytes,
     contentType:
       typeof contentTypeHeader === 'string' ? contentTypeHeader : undefined,
   }
@@ -256,5 +290,21 @@ export function tryDecodeText(bytes: Uint8Array): string | undefined {
     return new TextDecoder('utf-8', { fatal: true }).decode(bytes)
   } catch {
     return undefined
+  }
+}
+
+/**
+ * Throw if `bytes` does not content-address to `hash`. `S`-prefixed (file-
+ * stream) hashes share the digest body with their `Q` form, so both verify
+ * against the same sha256; any other prefix is treated as a `Q`-style hash.
+ */
+export function verifyBlobHash(hash: string, bytes: Uint8Array): void {
+  const expectedDigest = hash.slice(1)
+  const actualDigest = crypto.hash('sha256', bytes, 'base64url')
+  if (actualDigest !== expectedDigest) {
+    throw new Error(
+      `blob integrity check failed for ${hash}: content hashes to ` +
+        `${BLOB_HASH_PREFIX}${actualDigest}`,
+    )
   }
 }

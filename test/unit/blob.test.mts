@@ -1,16 +1,31 @@
 /**
  * @file Tests for the content-addressed blob helpers (src/blob.ts). Covers
  *   single-blob fetch + decode, binary detection, truncation, chunked manifest
- *   reconstruction, and manifest error paths. The blob host is mocked with nock
- *   so no network is touched.
+ *   reconstruction, manifest error paths, and content-hash verification. The
+ *   blob host is mocked with nock so no network is touched. Hashes are derived
+ *   from bodies via `blobHashOf` so the requested hash and the served bytes
+ *   stay consistent — `verifyHash` is on by default, so a mismatched (fake)
+ *   hash would make every fetch throw.
  */
 
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { fetchBlob, tryDecodeText } from '../../src/blob'
+import { blobHashOf, fetchBlob, tryDecodeText } from '../../src/blob'
 
 const HOST = 'https://socketusercontent.com'
+
+// Serve `body` at its own content-address and return that Q-hash, so fetches
+// pass the default integrity check. `sPrefix` returns the S-discriminated form
+// (same digest body) for chunked-manifest entry points.
+function serve(body: string | Uint8Array, sPrefix = false): string {
+  const bytes = typeof body === 'string' ? new TextEncoder().encode(body) : body
+  const qHash = blobHashOf(bytes)
+  nock(HOST)
+    .get(`/blob/${encodeURIComponent(qHash)}`)
+    .reply(200, Buffer.from(bytes))
+  return sPrefix ? `S${qHash.slice(1)}` : qHash
+}
 
 beforeEach(() => {
   nock.disableNetConnect()
@@ -35,13 +50,22 @@ describe('tryDecodeText', () => {
   })
 })
 
+describe('blobHashOf', () => {
+  it('computes the canonical Q + base64url(sha256) address', () => {
+    expect(blobHashOf(new TextEncoder().encode('hello'))).toBe(
+      'QLPJNul-wow4m6DsqxbninhsWHlwfp0JecwQzYpOLmCQ',
+    )
+  })
+})
+
 describe('fetchBlob single blob', () => {
   it('fetches and decodes a Q-prefixed text blob', async () => {
+    const hash = blobHashOf(new TextEncoder().encode('console.log(1)'))
     nock(HOST)
-      .get('/blob/Qabc')
+      .get(`/blob/${encodeURIComponent(hash)}`)
       .reply(200, 'console.log(1)', { 'content-type': 'text/plain' })
 
-    const result = await fetchBlob('Qabc', { baseUrl: HOST })
+    const result = await fetchBlob(hash, { baseUrl: HOST })
     expect(result.binary).toBe(false)
     expect(result.text).toBe('console.log(1)')
     expect(result.truncated).toBe(false)
@@ -50,19 +74,17 @@ describe('fetchBlob single blob', () => {
   })
 
   it('flags binary content (NUL byte) without text', async () => {
-    nock(HOST)
-      .get('/blob/Qbin')
-      .reply(200, Buffer.from([0x00, 0x01, 0x02]))
+    const hash = serve(new Uint8Array([0x00, 0x01, 0x02]))
 
-    const result = await fetchBlob('Qbin', { baseUrl: HOST })
+    const result = await fetchBlob(hash, { baseUrl: HOST })
     expect(result.binary).toBe(true)
     expect(result.text).toBe('')
   })
 
   it('truncates beyond maxBytes', async () => {
-    nock(HOST).get('/blob/Qbig').reply(200, 'abcdefghij')
+    const hash = serve('abcdefghij')
 
-    const result = await fetchBlob('Qbig', { baseUrl: HOST, maxBytes: 4 })
+    const result = await fetchBlob(hash, { baseUrl: HOST, maxBytes: 4 })
     expect(result.truncated).toBe(true)
     expect(result.text).toBe('abcd')
     expect(result.bytes).toBe(10)
@@ -76,35 +98,57 @@ describe('fetchBlob single blob', () => {
   })
 })
 
+describe('fetchBlob integrity verification', () => {
+  it('throws when fetched bytes do not match the requested hash', async () => {
+    // Serve mismatched content at a real-looking Q hash.
+    const wrongHash = blobHashOf(new TextEncoder().encode('expected'))
+    nock(HOST)
+      .get(`/blob/${encodeURIComponent(wrongHash)}`)
+      .reply(200, 'tampered')
+    await expect(fetchBlob(wrongHash, { baseUrl: HOST })).rejects.toThrow(
+      /blob integrity check failed/,
+    )
+  })
+
+  it('skips verification when verifyHash is false', async () => {
+    const wrongHash = blobHashOf(new TextEncoder().encode('expected'))
+    nock(HOST)
+      .get(`/blob/${encodeURIComponent(wrongHash)}`)
+      .reply(200, 'tampered')
+    const result = await fetchBlob(wrongHash, {
+      baseUrl: HOST,
+      verifyHash: false,
+    })
+    expect(result.text).toBe('tampered')
+  })
+})
+
 describe('fetchBlob chunked blob', () => {
   it('reconstructs an S-prefixed blob from its manifest', async () => {
-    // S-hash manifest lives at the Q-swapped hash.
-    nock(HOST)
-      .get('/blob/Qhash')
-      .reply(200, JSON.stringify({ chunks: ['Qc1', 'Qc2'], size: 6 }), {
-        'content-type': 'application/json',
-      })
-    nock(HOST).get('/blob/Qc1').reply(200, 'abc')
-    nock(HOST).get('/blob/Qc2').reply(200, 'def')
+    const c1 = serve('abc')
+    const c2 = serve('def')
+    // Manifest body lives at the Q-swapped hash of the S-hash entry point.
+    const sHash = serve(
+      JSON.stringify({ chunks: [c1, c2], size: 6 }),
+      /* sPrefix */ true,
+    )
 
-    const result = await fetchBlob('Shash', { baseUrl: HOST })
+    const result = await fetchBlob(sHash, { baseUrl: HOST })
     expect(result.text).toBe('abcdef')
     expect(result.bytes).toBe(6)
     expect(result.binary).toBe(false)
   })
 
   it('throws when the manifest is not valid JSON', async () => {
-    nock(HOST).get('/blob/Qbad').reply(200, '{ not json')
-    await expect(fetchBlob('Sbad', { baseUrl: HOST })).rejects.toThrow(
+    const sHash = serve('{ not json', true)
+    await expect(fetchBlob(sHash, { baseUrl: HOST })).rejects.toThrow(
       /not valid JSON/,
     )
   })
 
   it('throws when the manifest lacks a chunks array', async () => {
-    nock(HOST)
-      .get('/blob/Qnochunks')
-      .reply(200, JSON.stringify({ size: 1 }))
-    await expect(fetchBlob('Snochunks', { baseUrl: HOST })).rejects.toThrow(
+    const sHash = serve(JSON.stringify({ size: 1 }), true)
+    await expect(fetchBlob(sHash, { baseUrl: HOST })).rejects.toThrow(
       /missing a valid 'chunks' array/,
     )
   })
@@ -112,21 +156,18 @@ describe('fetchBlob chunked blob', () => {
   it('fetches all chunks (no early-stop) when offset is present but size is absent', async () => {
     // With offsets but no `size`, the early-stop optimization must NOT fire:
     // stopping early would report the partial sum as the total and mislabel
-    // truncation. The manifest has 3 chunks (3 bytes each = 9 total) with
-    // offsets, no size, and maxBytes below the total — all 3 must still be
-    // fetched and `bytes` must reflect the full 9, with truncated=true.
-    nock(HOST)
-      .get('/blob/Qmanifest')
-      .reply(
-        200,
-        JSON.stringify({ chunks: ['Qa', 'Qb', 'Qc'], offset: [0, 3, 6] }),
-        { 'content-type': 'application/json' },
-      )
-    nock(HOST).get('/blob/Qa').reply(200, 'aaa')
-    nock(HOST).get('/blob/Qb').reply(200, 'bbb')
-    nock(HOST).get('/blob/Qc').reply(200, 'ccc')
+    // truncation. 3 chunks (3 bytes each = 9 total) with offsets, no size, and
+    // maxBytes below the total — all 3 must still be fetched and `bytes` must
+    // reflect the full 9, with truncated=true.
+    const a = serve('aaa')
+    const b = serve('bbb')
+    const c = serve('ccc')
+    const sHash = serve(
+      JSON.stringify({ chunks: [a, b, c], offset: [0, 3, 6] }),
+      true,
+    )
 
-    const result = await fetchBlob('Smanifest', { baseUrl: HOST, maxBytes: 4 })
+    const result = await fetchBlob(sHash, { baseUrl: HOST, maxBytes: 4 })
     // All 3 chunks fetched → true total 9 is known; bytes reports 9, not a
     // partial sum, and truncated is correctly true (9 > 4). Returned text is
     // the first 4 bytes of the concatenated 'aaabbbccc'.
