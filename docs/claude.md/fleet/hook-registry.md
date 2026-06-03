@@ -28,6 +28,7 @@ The fleet hooks each cite their own trigger + bypass surface in their `README.md
 - `inline-script-defer-guard` — blocks `<script>` without `defer`/`async`/`module`
 - `judgment-reminder` — perfectionist / direct-imperative / queue-completion nudges
 - `no-blind-keychain-read-guard` — blocks Bash reads of platform keychain tokens
+- `no-cascade-on-transient-git-state-guard` — blocks cascade commits on a cherry-pick/detached/rebase HEAD
 - `no-empty-commit-guard` — blocks `--allow-empty` commits without bypass
 - `no-external-issue-ref-guard` — blocks `<owner>/<repo>#<num>` from non-SocketDev orgs
 - `no-orphaned-staging` — blocks ending a turn with staged-but-uncommitted hunks

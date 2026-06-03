@@ -33,8 +33,9 @@ const steps: Array<() => boolean> = [
   // Path-hygiene check (1 path, 1 reference). Mantra-driven gate;
   // see .claude/skills/path-guard/ + .claude/hooks/fleet/path-guard/.
   () => run('node', ['scripts/fleet/check-paths.mts', '--quiet']),
-  // Lock-step reference hygiene. Opt-in gate that exits clean when
-  // .config/lock-step-refs.json is absent; for repos that ship
+  // Lock-step reference hygiene. Opt-in gate that exits clean when the
+  // repo-owned .config/repo/lock-step-refs.json (legacy top-level
+  // .config/lock-step-refs.json) is absent; for repos that ship
   // cross-language ports (acorn quadruplet, socket-btm mcp/*.cpp),
   // it validates every `Lock-step with <Lang>: <path>` comment resolves
   // to an existing file. Forms documented in

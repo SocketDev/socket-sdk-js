@@ -152,9 +152,6 @@ test('exported patterns match their target shapes', () => {
   assert.match('a — b — c', byLabel.get('em-dash chain')!)
   assert.doesNotMatch('a — b', byLabel.get('em-dash chain')!)
   assert.match('Let me explain', byLabel.get('throat-clearing opener')!)
-  assert.match(
-    "not fast, it's slow",
-    byLabel.get('"not X, it\'s Y" contrast')!,
-  )
+  assert.match("not fast, it's slow", byLabel.get('"not X, it\'s Y" contrast')!)
   assert.match('essentially done', byLabel.get('hedging adverb')!)
 })

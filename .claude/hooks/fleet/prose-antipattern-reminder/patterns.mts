@@ -17,7 +17,8 @@ export const PROSE_PATTERNS: readonly RuleViolation[] = [
   },
   {
     label: 'throat-clearing opener',
-    regex: /^\s*(?:Here's the thing|Let me|It's worth noting|I should note)\b/im,
+    regex:
+      /^\s*(?:Here's the thing|Let me|It's worth noting|I should note)\b/im,
     why: 'Throat-clearing preamble. Open on the substance, drop the warm-up.',
   },
   {

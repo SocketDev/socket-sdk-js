@@ -80,7 +80,8 @@ const IDENTIFYING_USERS: ReminderGroup = {
     },
     {
       label: 'someone (singular human reference)',
-      regex: /^Someone\s+(?:asked|needs|prefers|requested|said|wants|wrote)\b/im,
+      regex:
+        /^Someone\s+(?:asked|needs|prefers|requested|said|wants|wrote)\b/im,
       why: '"Someone" hedges around naming. If you have access to git config, use the name.',
     },
     {

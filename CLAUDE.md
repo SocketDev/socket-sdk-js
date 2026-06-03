@@ -242,8 +242,9 @@ Use `isError` / `isErrnoException` / `errorMessage` / `errorStack` from `@socket
 
 ### Agents & skills
 
-- `/scanning-security` — AgentShield + zizmor audit
-- `/scanning-quality` — quality analysis
+- `/fleet:scanning-security` — AgentShield + SkillSpector + Zizmor audit
+- `/fleet:scanning-quality` — single-pass quality scan → report
+- `/fleet:looping-quality` — loops scanning-quality, fixing until clean
 - Shared subskills in `.claude/skills/fleet/_shared/`
 - Skill telemetry (enforced by `.claude/hooks/fleet/skill-usage-logger/`)
 - **Handing off to another agent** — see [`docs/claude.md/fleet/agent-delegation.md`](docs/claude.md/fleet/agent-delegation.md).

@@ -49,7 +49,7 @@
     "check:config-paths": "node scripts/fleet/validate-config-paths.mts",
     "check:quota-sync": "node scripts/validate-quota-sync.mts",
     "clean": "node scripts/clean.mts",
-    "cover": "node scripts/cover.mts",
+    "cover": "node scripts/fleet/cover.mts",
     "docs:api": "node scripts/gen-api-docs.mts",
     "docs:api:check": "node scripts/gen-api-docs.mts --check",
     "fix": "node scripts/fleet/fix.mts",

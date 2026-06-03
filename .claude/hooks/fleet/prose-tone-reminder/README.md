@@ -11,7 +11,7 @@ drain + one transcript read for the same turn instead of three.
 Each group keeps its original disable env var, so existing muting still works:
 
 - `comment-tone-reminder` — teacher-tone phrases (`note that`, `as you can
-  see`, …). Disable: `SOCKET_COMMENT_TONE_REMINDER_DISABLED`.
+see`, …). Disable: `SOCKET_COMMENT_TONE_REMINDER_DISABLED`.
 - `identifying-users-reminder` — "the user wants" / "this user" instead of a
   name or "you". Disable: `SOCKET_IDENTIFYING_USERS_REMINDER_DISABLED`.
 - `perfectionist-reminder` — speed-vs-depth choice menus. Disable:
